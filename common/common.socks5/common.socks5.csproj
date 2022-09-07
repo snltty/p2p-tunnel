@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TieredCompilation>true</TieredCompilation>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(VisualStudioVersion)'&gt;='17.0'">
+		<TargetFramework>net6.0</TargetFramework>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(VisualStudioVersion)'&lt;'17.0'">
+		<TargetFramework>net5.0</TargetFramework>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Optimize>True</Optimize>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DefineConstants>TRACE;RELEASE</DefineConstants>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<Optimize>True</Optimize>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="socks-custom.pac" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="socks-custom.pac">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="socks.pac">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="socks5-appsettings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\common.libs\common.libs.csproj" />
+	  <ProjectReference Include="..\common.server\common.server.csproj" />
+	</ItemGroup>
+
+</Project>

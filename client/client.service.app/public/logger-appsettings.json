@@ -1,0 +1,4 @@
+﻿{
+  "Enable": true,//开启
+  "MaxLength": 100//最大显示条数
+}

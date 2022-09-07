@@ -1,0 +1,15 @@
+﻿{
+  "Tunnels": [
+    /*
+    {
+      "ID": 2,
+      "Port": 111,
+      "TargetIp": "127.0.0.1",
+      "TargetPort": 5051,
+      "Name": "B客户端", //目标客户端名
+      "Listening": true,
+      "TunnelType": 8 //2只tcp 4只udp 8优先tcp 16优先udp
+    }
+  */
+  ]
+}

@@ -1,0 +1,36 @@
+{
+    "name": "client.service.ui.web",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build"
+    },
+    "dependencies": {
+        "@element-plus/icons": "0.0.11",
+        "axios": "^0.21.4",
+        "core-js": "^3.6.5",
+        "element-plus": "^2.1.11",
+        "jsoneditor": "^9.5.6",
+        "vconsole": "^3.14.6",
+        "vue": "^3.2.4",
+        "vue-router": "^4.0.0-0"
+    },
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "~4.5.0",
+        "@vue/cli-plugin-router": "~4.5.0",
+        "@vue/cli-plugin-vuex": "~4.5.0",
+        "@vue/cli-service": "~4.5.0",
+        "@vue/compiler-sfc": "^3.0.0",
+        "markdown-loader": "^6.0.0",
+        "raw-loader": "^4.0.2",
+        "stylus": "^0.54.7",
+        "stylus-loader": "^3.0.2",
+        "vue-md-loader": "^2.0.0"
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not dead"
+    ]
+}

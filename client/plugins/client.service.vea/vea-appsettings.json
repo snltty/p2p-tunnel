@@ -1,0 +1,12 @@
+﻿{
+  "Enable": false,
+  "ProxyAll": false, //是否由虚拟网卡代理所有，这种方式可以利用目标端上网，不代理所有，则只能通过目标ip访问其内网服务
+  "TargetName": "", //当遇到不存在的ip时，目标端应该选择谁，为空服务器，不为空则为某个客户端
+  "IP": "192.168.54.1", //当前客户端的虚拟网卡ip，各个客户端之间设置不一样的ip，相同网段即可
+  "SocksPort": 5415, //代理端口，无所谓，填写一个未被占用的端口即可
+  "BufferSize": 8192,
+  "TunnelType": 8, //优先tcp
+  "NumConnections": 1000, //支持连接数
+  "ConnectEnable": false, //是否允许被连接
+  "LanConnectEnable": false //是否允许连接本机内网地址，比如作为服务端时，只想代理到外网，不想本机服务被访问
+}

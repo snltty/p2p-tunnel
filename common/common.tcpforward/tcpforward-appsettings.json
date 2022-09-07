@@ -1,0 +1,19 @@
+﻿{
+  "PortWhiteList": [], //白名单，只允许此列表内的端口被访问
+  "PortBlackList": [], //黑名单，此列表内的端口不可被访问
+  "NumConnections": 1000, //支持连接数
+  "BufferSize": 8192, //每个请求的 buffer size
+  //是否允许被连接（包括tcp转发和http1.1代理)
+  "ConnectEnable": false, //是否开启tcp转发转发和http1.1代理
+  //http1.1代理时
+  "LanConnectEnable": false, //是否允许访问此客户端内网地址
+
+
+  //当作为服务端部署时服务端配置，
+  "WebListens": [ /*8000*/ ], //监听哪些端口，短连接端口，客户端注册转发时需要指定注册到哪个端口下
+  //提供给客户端动态注册长连接监听，允许注册的端口范围
+  "TunnelListenRange": {
+    "Min": 10000,
+    "Max": 60000
+  }
+}

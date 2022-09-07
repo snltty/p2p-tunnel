@@ -1,0 +1,17 @@
+﻿{
+  //启用web
+  "EnableWeb": true,
+  //启用命令行
+  "EnableCommand": true,
+  //启用api  使用web或者使用命令行，就得启用api
+  "EnableApi": true,
+  "web": {
+    "Port": 5411,
+    "Root": "./public/web",
+    "BindIp": "127.0.0.1"
+  },
+  "websocket": {
+    "Port": 59411,
+    "BindIp": "0.0.0.0"
+  }
+}

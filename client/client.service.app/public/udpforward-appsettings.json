@@ -1,0 +1,14 @@
+﻿{
+  "PortWhiteList": [], //白名单，只允许此列表内的端口被访问
+  "PortBlackList": [], //黑名单，此列表内的端口不可被访问
+  //是否允许被连接
+  "ConnectEnable": false,
+  //是否允许链接本地地址
+  "LanConnectEnable": false,
+  //当作为服务端部署时服务端配置
+  //提供给客户端动态注册长连接监听，允许注册的端口范围
+  "TunnelListenRange": {
+    "Min": 10000,
+    "Max": 60000
+  }
+}

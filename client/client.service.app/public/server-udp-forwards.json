@@ -1,0 +1,13 @@
+﻿{
+  "Tunnels": [
+    /*
+    {
+      "ServerPort": 1935,
+      "LocalIp": "127.0.0.1",
+      "LocalPort": 3389,
+     "Listening": true,
+      "TunnelType": 8 //2只tcp 4只udp 8优先tcp 16优先udp
+    }
+  */
+  ]
+}

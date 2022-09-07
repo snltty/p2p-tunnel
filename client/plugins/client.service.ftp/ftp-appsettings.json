@@ -1,0 +1,8 @@
+﻿{
+  "ServerRoot": "", //根目录  为空则自动选择程序所在目录
+  "Password": "000000",
+  "Enable": false,//是否启用，也就是是否可以被连接
+  "UploadNum": 10,//同时上传数量
+  "ReadWriteBufferSize": 1048576, //读写文件块大小
+  "SendPacketSize": 32768 //分包大小
+}

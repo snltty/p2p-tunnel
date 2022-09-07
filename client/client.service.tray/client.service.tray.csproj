@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ApplicationIcon>logo.ico</ApplicationIcon>
+		<TieredCompilation>true</TieredCompilation>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(VisualStudioVersion)'&gt;='17.0'">
+		<TargetFramework>net6.0-windows</TargetFramework>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(VisualStudioVersion)'&lt;'17.0'">
+		<TargetFramework>net5.0-windows</TargetFramework>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Optimize>True</Optimize>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Content Include="logo.ico" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Include="logo.ico" />
+	</ItemGroup>
+
+
+</Project>

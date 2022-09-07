@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "client.service": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "env": ".debug",
+        "DOTNET_TC_QuickJitForLoops": "1",
+        "DOTNET_TieredPGO": "1",
+        "DOTNET_ReadyToRun": "0"
+      },
+      "nativeDebugging": false
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

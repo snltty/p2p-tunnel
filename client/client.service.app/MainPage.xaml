@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:client.service.app"
+             x:Class="client.service.app.MainPage"
+             BackgroundColor="#08743d">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+        <HorizontalStackLayout Grid.Row="1" Grid.Column="1" HorizontalOptions="Fill"    >
+            <Image  WidthRequest="50" HeightRequest="50"  Margin="0,0,10,0"  Source="appiconfg.svg" ></Image>
+            <Label Text="p2p-tunnel app" HeightRequest="20"></Label>
+        </HorizontalStackLayout>
+        <Frame CornerRadius="4" Grid.Row="2" Grid.Column="1">
+            <ScrollView>
+                <VerticalStackLayout  BackgroundColor="#fff" x:Name="loggerBox">
+                </VerticalStackLayout>
+            </ScrollView>
+        </Frame>
+        <HorizontalStackLayout Grid.Row="3" Grid.Column="1" HorizontalOptions="Center">
+            <Button WidthRequest="110" FontSize="12" Text="打开操作界面" BackgroundColor="White" TextColor="#333" Clicked="Button_Clicked" VerticalOptions="Center"></Button>
+        </HorizontalStackLayout>
+
+    </Grid>
+</ContentPage>

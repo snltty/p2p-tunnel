@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TieredCompilation>true</TieredCompilation>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(VisualStudioVersion)'&gt;='17.0'">
+		<TargetFramework>net6.0</TargetFramework>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(VisualStudioVersion)'&lt;'17.0'">
+		<TargetFramework>net5.0</TargetFramework>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Optimize>True</Optimize>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DefineConstants>TRACE;RELEASE</DefineConstants>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<Optimize>True</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup>
+	  <ApplicationIcon>logo.ico</ApplicationIcon>
+	  <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	  <DockerfileContext>..\..</DockerfileContext>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<Content Include="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="logo.ico" />
+		<Content Include="public\nssm.exe">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="public\nssm安装服务.bat">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="public\查看服务.bat">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\common\common.libs\common.libs.csproj" />
+	  <ProjectReference Include="..\..\common\common.server\common.server.csproj" />
+	  <ProjectReference Include="..\plugins\server.service.manager\server.service.manager.csproj" />
+	  <ProjectReference Include="..\plugins\server.service.socks5\server.service.socks5.csproj" />
+	  <ProjectReference Include="..\plugins\server.service.tcpforward\server.service.tcpforward.csproj" />
+	  <ProjectReference Include="..\plugins\server.service.udpforward\server.service.udpforward.csproj" />
+	  <ProjectReference Include="..\server\server.csproj" />
+	</ItemGroup>
+
+</Project>
