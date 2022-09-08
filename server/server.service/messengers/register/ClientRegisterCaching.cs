@@ -27,9 +27,14 @@ namespace server.service.messengers.register
 
             tcpServer.OnDisconnect.Sub(Disconnected);
             udpServer.OnDisconnect.Sub(Disconnected);
-            tcpServer.OnConnected = AddTimeout;
-            udpServer.OnConnected = AddTimeout;
+            //tcpServer.OnConnected = AddTimeout;
+            //udpServer.OnConnected = AddTimeout;
         }
+
+        /// <summary>
+        /// 超时未注册
+        /// </summary>
+        /// <param name="connection"></param>
         private void AddConnectedTimeout(IConnection connection)
         {
             wheelTimer.NewTimeout(new WheelTimerTimeoutTask<IConnection>
@@ -47,6 +52,10 @@ namespace server.service.messengers.register
             }
         }
 
+        /// <summary>
+        /// 掉线
+        /// </summary>
+        /// <param name="connection"></param>
         private void Disconnected(IConnection connection)
         {
             if (connection.ConnectId > 0)
@@ -54,6 +63,11 @@ namespace server.service.messengers.register
                 Remove(connection.ConnectId);
             }
         }
+
+        /// <summary>
+        /// 连接超时
+        /// </summary>
+        /// <param name="connection"></param>
         private void AddTimeout(IConnection connection)
         {
             wheelTimer.NewTimeout(new WheelTimerTimeoutTask<IConnection> { Callback = TimeoutCallback, }, 1000, true);

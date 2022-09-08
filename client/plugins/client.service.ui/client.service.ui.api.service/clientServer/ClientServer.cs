@@ -66,8 +66,11 @@ namespace client.service.ui.api.service.clientServer
             server.OnMessage = (connection, frame, message) =>
             {
                 var req = message.DeJson<ClientServiceRequestInfo>();
-                var resp = OnMessage(req).Result.ToJson().ToBytes();
-                connection.SendFrameText(resp);
+                OnMessage(req).ContinueWith((result) =>
+                {
+                    var resp = result.Result.ToJson().ToBytes();
+                    connection.SendFrameText(resp);
+                });
             };
         }
 

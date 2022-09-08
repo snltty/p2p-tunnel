@@ -228,7 +228,7 @@ namespace common.server
             {
                 if (NetPeer.ConnectionState == ConnectionState.Connected)
                 {
-                    //NetPeer.Disconnect();
+                    NetPeer.Disconnect();
                 }
                 NetPeer = null;
             }

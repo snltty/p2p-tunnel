@@ -8,6 +8,7 @@ using common.server.model;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.register
@@ -21,13 +22,13 @@ namespace client.realize.messengers.register
         private readonly RegisterStateInfo registerState;
         private readonly HeartMessengerSender heartMessengerSender;
         private readonly CryptoSwap cryptoSwap;
-        private readonly object lockObject = new();
+        private int lockObject = 0;
 
         public RegisterTransfer(
             RegisterMessengerSender registerMessageHelper, HeartMessengerSender heartMessengerSender,
             ITcpServer tcpServer, IUdpServer udpServer,
             Config config, RegisterStateInfo registerState,
-            CryptoSwap cryptoSwap//, WheelTimer<object> wheelTimer
+            CryptoSwap cryptoSwap
         )
         {
             this.registerMessageHelper = registerMessageHelper;
@@ -37,7 +38,6 @@ namespace client.realize.messengers.register
             this.registerState = registerState;
             this.heartMessengerSender = heartMessengerSender;
             this.cryptoSwap = cryptoSwap;
-            //wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = Heart }, 1000, true);
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
             //安卓注释
@@ -48,18 +48,21 @@ namespace client.realize.messengers.register
         }
         private void Disconnect(IConnection connection, IConnection regConnection)
         {
-            Logger.Instance.Warning($"掉线:{connection.ServerType},{regConnection == connection}");
-            lock (lockObject)
+            if (regConnection != connection)
             {
-                if (regConnection != connection)
+                return;
+            }
+            if (registerState.LocalInfo.IsConnecting)
+            {
+                return;
+            }
+
+            if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
+            {
+                Register(true).ContinueWith((result) =>
                 {
-                    return;
-                }
-                if (registerState.LocalInfo.IsConnecting)
-                {
-                    return;
-                }
-                _ = Register(true).Result;
+                    Interlocked.Exchange(ref lockObject, 0);
+                });
             }
         }
 
@@ -93,7 +96,6 @@ namespace client.realize.messengers.register
 
             return await Task.Run(async () =>
             {
-
                 int interval = autoReg ? config.Client.AutoRegDelay : 0;
 
                 for (int i = 0; i < config.Client.AutoRegTimes; i++)
@@ -103,6 +105,7 @@ namespace client.realize.messengers.register
                         if (registerState.LocalInfo.IsConnecting)
                         {
                             success.ErrorMsg = "注册操作中...";
+                            Logger.Instance.Error(success.ErrorMsg);
                             break;
                         }
 
@@ -111,7 +114,6 @@ namespace client.realize.messengers.register
                         Logger.Instance.Info($"开始注册");
 
                         registerState.LocalInfo.IsConnecting = true;
-
                         if (interval > 0)
                         {
                             await Task.Delay(interval);
@@ -130,6 +132,7 @@ namespace client.realize.messengers.register
                             {
                                 registerState.LocalInfo.IsConnecting = false;
                                 success.ErrorMsg = "udp连接失败";
+                                Logger.Instance.Error(success.ErrorMsg);
                                 continue;
                             }
                         }
@@ -157,6 +160,7 @@ namespace client.realize.messengers.register
 
                         success.ErrorMsg = "注册成功~";
                         success.Data = true;
+
                         Logger.Instance.Debug(success.ErrorMsg);
                         break;
                     }
@@ -166,7 +170,6 @@ namespace client.realize.messengers.register
                         success.ErrorMsg = ex.Message;
                     }
 
-                    Logger.Instance.Error(success.ErrorMsg);
                     registerState.LocalInfo.IsConnecting = false;
                     if (config.Client.AutoReg || autoReg)
                     {
@@ -244,38 +247,5 @@ namespace client.realize.messengers.register
             return result;
         }
 
-        private void Heart(object state)
-        {
-            lock (lockObject)
-            {
-                if (!registerState.LocalInfo.IsConnecting)
-                {
-                    long time = DateTimeHelper.GetTimeStamp();
-                    if (registerState.UdpOnline)
-                    {
-                        if (registerState.UdpConnection.IsTimeout(time, registerState.RemoteInfo.TimeoutDelay))
-                        {
-                            Exit();
-                            return;
-                        }
-                        else if (registerState.UdpConnection.IsNeedHeart(time, registerState.RemoteInfo.TimeoutDelay))
-                        {
-                            _ = heartMessengerSender.Heart(registerState.UdpConnection);
-                        }
-                    }
-                    if (registerState.TcpOnline)
-                    {
-                        if (registerState.TcpConnection.IsTimeout(time, registerState.RemoteInfo.TimeoutDelay))
-                        {
-                            Exit();
-                        }
-                        else if (registerState.TcpConnection.IsNeedHeart(time, registerState.RemoteInfo.TimeoutDelay))
-                        {
-                            _ = heartMessengerSender.Heart(registerState.TcpConnection);
-                        }
-                    }
-                }
-            }
-        }
     }
 }
