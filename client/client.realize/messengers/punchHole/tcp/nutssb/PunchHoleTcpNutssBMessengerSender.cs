@@ -181,7 +181,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     Socket targetSocket = new Socket(targetEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
-                        targetSocket.KeepAlive(time: config.Client.TimeoutDelay);
+                        targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 5 / 1000);
                         targetSocket.ReuseBind(new IPEndPoint(config.Client.BindIp, ClientTcpPort));
                         IAsyncResult result = targetSocket.BeginConnect(targetEndpoint, null, null);
                         result.AsyncWaitHandle.WaitOne(2000, false);

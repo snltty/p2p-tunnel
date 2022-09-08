@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-08 16:58:11
+ * @LastEditTime: 2022-09-08 20:29:50
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -163,6 +163,13 @@
                                     <el-form-item label="使用tcp" prop="UseTcp" label-width="60">
                                         <el-tooltip class="box-item" effect="dark" content="是否使用tcp" placement="top-start">
                                             <el-switch v-model="model.UseTcp" />
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                    <el-form-item label="掉线超时" prop="TimeoutDelay">
+                                        <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top-start">
+                                            <el-input v-model="model.TimeoutDelay" placeholder="掉线超时"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>

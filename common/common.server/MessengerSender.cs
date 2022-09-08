@@ -82,10 +82,10 @@ namespace common.server
                 bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
                 msg.Return(bytes);
 
-                if (res)
-                {
-                    msg.Connection.UpdateTime(DateTimeHelper.GetTimeStamp());
-                }
+                //if (res)
+                //{
+                //    msg.Connection.UpdateTime(DateTimeHelper.GetTimeStamp());
+                //}
                 return res;
             }
             catch (Exception ex)
@@ -113,10 +113,10 @@ namespace common.server
                 bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
                 msg.Return(bytes);
 
-                if (res)
-                {
-                    msg.Connection.UpdateTime(DateTimeHelper.GetTimeStamp());
-                }
+                //if (res)
+                //{
+                //    msg.Connection.UpdateTime(DateTimeHelper.GetTimeStamp());
+                //}
             }
             catch (Exception ex)
             {

@@ -153,7 +153,7 @@ namespace client.realize.messengers.register
             {
                 IPEndPoint endpoint = new IPEndPoint(serverAddress, config.Server.TcpPort);
                 Socket tcpSocket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                tcpSocket.KeepAlive();
+                tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 5);
                 tcpSocket.Connect(endpoint);
                 return tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
             }
