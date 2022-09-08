@@ -19,13 +19,26 @@ namespace common.libs.rateLimit
         void SetRate(TKey key, int num);
 
         /// <summary>
-        /// 检查一下是否可通行
+        /// 检查一下是否可通行,失败不计入
         /// </summary>
         /// <param name="key">对象key</param>
         /// <param name="num">本次输入的值</param>
-        /// <param name="wait">不可通行时是否等待</param>
         /// <returns>true可通行，false不可通行</returns>
-        Task<bool> TryGet(TKey key, int num, bool wait);
+        bool Try(TKey key, int num);
+
+        /// <summary>
+        /// 检查一下是否可通行，一直等待成功为止
+        /// </summary>
+        /// <param name="key">对象key</param>
+        /// <param name="num">本次输入的值</param>
+        /// <returns>true可通行，false不可通行</returns>
+        Task<bool> TryWait(TKey key, int num);
+
+        /// <summary>
+        /// 移除
+        /// </summary>
+        /// <param name="key"></param>
+        void Remove(TKey key);
 
         /// <summary>
         /// 清理，清理后需init后才能再次使用
