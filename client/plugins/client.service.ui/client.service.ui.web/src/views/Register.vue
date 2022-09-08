@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-30 20:53:46
+ * @LastEditTime: 2022-09-08 16:58:11
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -233,6 +233,7 @@ export default {
                 ServerEncode: false,
                 ServerEncodePassword: "",
                 AutoPunchHole: false,
+                TimeoutDelay: 20000,
                 UseUdp: false,
                 UseTcp: false,
             },
@@ -256,6 +257,14 @@ export default {
                     }
                 ],
                 AutoRegDelay: [
+                    { required: true, message: '必填', trigger: 'blur' },
+                    {
+                        type: 'number', min: 1, max: 2147483647, message: '数字 1-2147483647', trigger: 'blur', transform (value) {
+                            return Number(value)
+                        }
+                    }
+                ],
+                TimeoutDelay: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
                         type: 'number', min: 1, max: 2147483647, message: '数字 1-2147483647', trigger: 'blur', transform (value) {
@@ -294,6 +303,8 @@ export default {
             state.model.ClientEncode = registerState.ClientConfig.Encode = json.ClientConfig.Encode;
             state.model.ClientEncodePassword = registerState.ClientConfig.ClientEncodePassword = json.ClientConfig.EncodePassword;
             state.model.AutoPunchHole = registerState.ClientConfig.AutoPunchHole = json.ClientConfig.AutoPunchHole;
+            state.model.TimeoutDelay = registerState.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
+
             state.model.UseUdp = registerState.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
             state.model.UseTcp = registerState.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
 
@@ -326,6 +337,7 @@ export default {
                         Encode: state.model.ClientEncode,
                         EncodePassword: state.model.ClientEncodePassword,
                         AutoPunchHole: state.model.AutoPunchHole,
+                        TimeoutDelay: +state.model.TimeoutDelay,
                         UseUdp: state.model.UseUdp,
                         UseTcp: state.model.UseTcp,
                     },

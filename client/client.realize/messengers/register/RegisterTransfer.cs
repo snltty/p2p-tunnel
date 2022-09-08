@@ -27,7 +27,7 @@ namespace client.realize.messengers.register
             RegisterMessengerSender registerMessageHelper, HeartMessengerSender heartMessengerSender,
             ITcpServer tcpServer, IUdpServer udpServer,
             Config config, RegisterStateInfo registerState,
-            CryptoSwap cryptoSwap, WheelTimer<object> wheelTimer
+            CryptoSwap cryptoSwap//, WheelTimer<object> wheelTimer
         )
         {
             this.registerMessageHelper = registerMessageHelper;
@@ -37,7 +37,7 @@ namespace client.realize.messengers.register
             this.registerState = registerState;
             this.heartMessengerSender = heartMessengerSender;
             this.cryptoSwap = cryptoSwap;
-            wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = Heart }, 1000, true);
+            //wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = Heart }, 1000, true);
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
             //安卓注释
@@ -48,6 +48,7 @@ namespace client.realize.messengers.register
         }
         private void Disconnect(IConnection connection, IConnection regConnection)
         {
+            Logger.Instance.Warning($"掉线:{connection.ServerType},{regConnection == connection}");
             lock (lockObject)
             {
                 if (regConnection != connection)
@@ -127,6 +128,7 @@ namespace client.realize.messengers.register
                             await UdpBind(serverAddress);
                             if (registerState.UdpConnection == null)
                             {
+                                registerState.LocalInfo.IsConnecting = false;
                                 success.ErrorMsg = "udp连接失败";
                                 continue;
                             }
@@ -181,7 +183,7 @@ namespace client.realize.messengers.register
         private async Task UdpBind(IPAddress serverAddress)
         {
             //UDP 开始监听
-            udpServer.Start(registerState.LocalInfo.UdpPort, config.Client.BindIp);
+            udpServer.Start(registerState.LocalInfo.UdpPort, config.Client.BindIp, config.Client.TimeoutDelay);
             registerState.UdpConnection = await udpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
         }
         private void TcpBind(IPAddress serverAddress)
@@ -192,7 +194,7 @@ namespace client.realize.messengers.register
             //TCP 连接服务器
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.TcpPort);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            tcpSocket.KeepAlive();
+            tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000);
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             registerState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;

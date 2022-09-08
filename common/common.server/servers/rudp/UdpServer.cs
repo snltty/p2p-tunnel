@@ -21,12 +21,16 @@ namespace common.server.servers.rudp
 
         public void Start(int port, IPAddress ip = null)
         {
+            Start(port, ip, 20000);
+        }
+        public void Start(int port, IPAddress ip = null, int timeout = 20000)
+        {
             listener = new EventBasedNetListener();
             server = new NetManager(listener);
             server.NatPunchEnabled = true;
             server.UnsyncedEvents = true;
-            server.PingInterval = 20000;
-            server.DisconnectTimeout = 60000;
+            server.PingInterval = timeout / 4;
+            server.DisconnectTimeout = timeout;
             server.MaxConnectAttempts = 1;
             server.Start(port);
 
@@ -100,10 +104,7 @@ namespace common.server.servers.rudp
                     {
                         return peer.Tag as RudpConnection;
                     }
-                    else
-                    {
-                        return null;
-                    }
+                    return null;
                 }
                 catch (Exception)
                 {

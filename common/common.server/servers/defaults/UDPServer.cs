@@ -27,6 +27,10 @@ namespace common.server.servers.defaults
 
         public void Start(int port, IPAddress ip = null)
         {
+            Start(port, ip, 20000);
+        }
+        public void Start(int port, IPAddress ip = null, int timeout = 20000)
+        {
             if (UdpClient != null)
             {
                 return;

@@ -50,7 +50,7 @@ namespace server.service
             server.Start(config.Tcp, ip: IPAddress.Any);
             Logger.Instance.Info("TCP服务已开启");
 
-            services.GetService<IUdpServer>().Start(services.GetService<Config>().Udp);
+            services.GetService<IUdpServer>().Start(services.GetService<Config>().Udp, timeout: config.TimeoutDelay);
             Logger.Instance.Info("UDP服务已开启");
 
 

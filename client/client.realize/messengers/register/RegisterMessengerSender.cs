@@ -123,7 +123,8 @@ namespace client.realize.messengers.register
             {
                 Connection = registerState.OnlineConnection,
                 Memory = Helper.EmptyArray,
-                Path = "exit/execute"
+                Path = "exit/execute",
+                Timeout = 2000
             }).ConfigureAwait(false);
         }
 

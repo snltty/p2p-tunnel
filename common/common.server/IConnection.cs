@@ -226,7 +226,10 @@ namespace common.server
             base.Disponse();
             if (NetPeer != null)
             {
-                NetPeer.Disconnect();
+                if (NetPeer.ConnectionState == ConnectionState.Connected)
+                {
+                    //NetPeer.Disconnect();
+                }
                 NetPeer = null;
             }
         }

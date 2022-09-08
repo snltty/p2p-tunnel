@@ -1,5 +1,6 @@
 ﻿using common.libs;
 using common.server;
+using System;
 using System.Net;
 
 namespace client.messengers.register
@@ -69,21 +70,18 @@ namespace client.messengers.register
             RemoteInfo.TcpPort = 0;
 
             ConnectId = 0;
-
             var tcp = TcpConnection;
             TcpConnection = null;
             if (tcp != null)
             {
                 tcp.Disponse();
             }
-
             var udp = UdpConnection;
             UdpConnection = null;
             if (udp != null)
             {
                 udp.Disponse();
             }
-
             if (online != TcpOnline)
             {
                 OnRegisterStateChange.Push(false);

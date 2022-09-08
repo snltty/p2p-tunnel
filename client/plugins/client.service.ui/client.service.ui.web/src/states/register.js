@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:39:45
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-01 17:12:27
+ * @LastEditTime: 2022-09-08 16:57:00
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\register.js
@@ -27,6 +27,7 @@ export const provideRegister = () => {
             Encode: false,
             EncodePassword: "",
             AutoPunchHole: false,
+            TimeoutDelay: 20000,
             UseUdp: false,
             UseTcp: false,
         },
@@ -70,6 +71,8 @@ export const provideRegister = () => {
 
                 state.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
+                state.ClientConfig.AutoPunchHole = json.ClientConfig.AutoPunchHole;
+                state.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
 
                 state.RemoteInfo.UdpPort = json.RemoteInfo.UdpPort;
                 state.RemoteInfo.TcpPort = json.RemoteInfo.TcpPort;
