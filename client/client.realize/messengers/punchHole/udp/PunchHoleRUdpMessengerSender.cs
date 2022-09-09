@@ -1,12 +1,15 @@
-﻿using client.messengers.punchHole;
+﻿using client.messengers.clients;
+using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using client.messengers.punchHole.udp;
 using client.messengers.register;
+using client.realize.messengers.clients;
 using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.servers.iocp;
+using common.server.servers.rudp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -20,19 +23,19 @@ namespace client.realize.messengers.punchHole.udp
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly RegisterStateInfo registerState;
-        private readonly IUdpServer udpServer;
         private readonly CryptoSwap cryptoSwap;
         private readonly Config config;
         private readonly WheelTimer<object> wheelTimer;
+        private readonly IClientInfoCaching clientInfoCaching;
 
-        public PunchHoleRUdpMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, RegisterStateInfo registerState, IUdpServer udpServer, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer)
+        public PunchHoleRUdpMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching)
         {
             this.punchHoleMessengerSender = punchHoleMessengerSender;
             this.registerState = registerState;
-            this.udpServer = udpServer;
             this.cryptoSwap = cryptoSwap;
             this.config = config;
             this.wheelTimer = wheelTimer;
+            this.clientInfoCaching = clientInfoCaching;
         }
         private IConnection connection => registerState.UdpConnection;
         private ulong ConnectId => registerState.ConnectId;
@@ -54,7 +57,8 @@ namespace client.realize.messengers.punchHole.udp
             {
                 Step1Timeout = timeout,
                 Tcs = tcs,
-                TryTimes = param.TryTimes
+                TryTimes = param.TryTimes,
+                LocalPort = param.LocalPort,
             });
 
             await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep1Info>
@@ -94,21 +98,22 @@ namespace client.realize.messengers.punchHole.udp
             {
                 OnStep1Handler.Push(arg);
             }
-
-            common.server.servers.rudp.UdpServer server = udpServer as common.server.servers.rudp.UdpServer;
-            foreach (var ip in arg.Data.LocalIps)
+            if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
             {
-                server.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                foreach (var ip in arg.Data.LocalIps)
+                {
+                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                }
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+
+                await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2Info>
+                {
+                    Connection = arg.Connection,
+                    TunnelName = arg.RawData.TunnelName,
+                    ToId = arg.RawData.FromId,
+                    Data = new PunchHoleStep2Info { Step = (byte)PunchHoleUdpSteps.STEP_2, PunchType = PunchHoleTypes.UDP }
+                }).ConfigureAwait(false);
             }
-            server.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
-
-            await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2Info>
-            {
-                Connection = arg.Connection,
-                TunnelName = arg.RawData.TunnelName,
-                ToId = arg.RawData.FromId,
-                Data = new PunchHoleStep2Info { Step = (byte)PunchHoleUdpSteps.STEP_2, PunchType = PunchHoleTypes.UDP }
-            }).ConfigureAwait(false);
         }
 
         public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; } = new SimpleSubPushHandler<OnStep2Params>();
@@ -118,6 +123,10 @@ namespace client.realize.messengers.punchHole.udp
             await Task.Run(async () =>
             {
                 if (!connectCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache))
+                {
+                    return;
+                }
+                if (!clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
                 {
                     return;
                 }
@@ -223,14 +232,14 @@ namespace client.realize.messengers.punchHole.udp
             {
                 OnStep21Handler.Push(arg);
             }
-
-            common.server.servers.rudp.UdpServer server = udpServer as common.server.servers.rudp.UdpServer;
-            foreach (var ip in arg.Data.LocalIps)
+            if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
             {
-                server.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                foreach (var ip in arg.Data.LocalIps)
+                {
+                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                }
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
             }
-            server.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
-
             await Task.CompletedTask;
         }
 

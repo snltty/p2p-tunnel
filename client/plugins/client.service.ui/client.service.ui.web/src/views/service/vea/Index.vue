@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-04 13:04:50
+ * @LastEditTime: 2022-09-10 01:49:52
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -85,13 +85,22 @@
                             </el-row>
                         </div>
                     </el-form-item>
-                    <el-form-item label="本机IP" prop="IP">
+                    <el-form-item label-width="0">
                         <div class="w-100">
                             <el-row :gutter="10">
                                 <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
-                                    <el-tooltip class="box-item" effect="dark" content="当前客户端的虚拟网卡ip，各个客户端之间设置不一样的ip，相同网段即可" placement="top-start">
-                                        <el-input :readonly="registerState.LocalInfo.connected" v-model="state.form.IP"></el-input>
-                                    </el-tooltip>
+                                    <el-form-item label="本机IP" prop="IP">
+                                        <el-tooltip class="box-item" effect="dark" content="当前客户端的虚拟网卡ip，各个客户端之间设置不一样的ip，相同网段即可" placement="top-start">
+                                            <el-input :readonly="registerState.LocalInfo.connected" v-model="state.form.IP"></el-input>
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
+                                    <el-form-item label="局域网段" prop="LanIP">
+                                        <el-tooltip class="box-item" effect="dark" content="当前客户端的局域网段，各个客户端之间设置不一样的网段即可，192.168.x.0酱紫，0.0.0.0则不启用" placement="top-start">
+                                            <el-input :readonly="registerState.LocalInfo.connected" v-model="state.form.LanIP"></el-input>
+                                        </el-tooltip>
+                                    </el-form-item>
                                 </el-col>
                             </el-row>
                         </div>
@@ -117,7 +126,12 @@
                             <span v-else>{{scope.row.Name}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="veaIp" label="虚拟ip" />
+                    <el-table-column prop="veaIp" label="虚拟ip">
+                        <template #default="scope">
+                            <p>{{scope.row.veaIp.IP}}</p>
+                            <p style="color:#666">{{scope.row.veaIp.LanIP}}</p>
+                        </template>
+                    </el-table-column>
                 </el-table>
             </div>
         </div>
@@ -153,6 +167,7 @@ export default {
                 ProxyAll: false,
                 TargetName: '',
                 IP: '',
+                LanIP: '0.0.0.0',
                 TunnelType: '8',
                 SocksPort: 5415,
                 BufferSize: 8 * 1024,
@@ -178,6 +193,9 @@ export default {
                 ],
                 IP: [
                     { required: true, message: '必填', trigger: 'blur' }
+                ],
+                LanIP: [
+                    { required: true, message: '必填', trigger: 'blur' }
                 ]
             },
             veaClients: {}
@@ -185,7 +203,7 @@ export default {
         const formDom = ref(null);
         const showClients = computed(() => {
             clientsState.clients.forEach(c => {
-                c.veaIp = state.veaClients[c.Id] || '';
+                c.veaIp = state.veaClients[c.Id] || { IP: '', LanIP: '' };
             });
             return clientsState.clients;
         });
@@ -196,6 +214,7 @@ export default {
                 state.form.ProxyAll = res.ProxyAll;
                 state.form.TargetName = res.TargetName;
                 state.form.IP = res.IP;
+                state.form.LanIP = res.LanIP;
                 state.form.TunnelType = res.TunnelType.toString();
                 state.form.SocksPort = res.SocksPort;
                 state.form.BufferSize = res.BufferSize;

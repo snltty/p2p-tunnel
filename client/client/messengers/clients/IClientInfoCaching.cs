@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
+using common.server.servers.rudp;
 using System.Collections.Generic;
 
 namespace client.messengers.clients
@@ -22,6 +23,15 @@ namespace client.messengers.clients
         public void Offline(ulong id,ServerType serverType);
         public void Online(ulong id, IConnection connection, ClientConnectTypes connectType);
         public void Remove(ulong id);
+
+        public void AddTunnelPort(ulong tunnelName, int port);
+        public bool GetTunnelPort(ulong tunnelName, out int port);
+        public void RemoveTunnelPort(ulong tunnelName);
+
+        public void AddUdpserver(ulong tunnelName, UdpServer server);
+        public bool GetUdpserver(ulong tunnelName, out UdpServer server);
+        public void RemoveUdpserver(ulong tunnelName);
+
         public void Clear();
     }
 }

@@ -20,6 +20,7 @@ namespace client.service.vea
             ProxyAll = config.ProxyAll;
             TargetName = config.TargetName;
             IP = config.IP;
+            LanIP = config.LanIP;
             SocksPort = config.SocksPort;
             TunnelType = config.TunnelType;
             BufferSize = config.BufferSize;
@@ -33,6 +34,8 @@ namespace client.service.vea
         public bool ProxyAll { get; set; } = false;
         public string TargetName { get; set; } = string.Empty;
         public IPAddress IP { get; set; } = IPAddress.Parse("192.168.54.1");
+        public IPAddress LanIP { get; set; } = IPAddress.Any;
+
         public int SocksPort { get; set; } = 5415;
         public int BufferSize { get; set; } = 8 * 1024;
         public TunnelTypes TunnelType { get; set; } = TunnelTypes.TCP_FIRST;
@@ -52,6 +55,7 @@ namespace client.service.vea
             config.ProxyAll = ProxyAll;
             config.TargetName = TargetName;
             config.IP = IP;
+            config.LanIP = LanIP;
             config.SocksPort = SocksPort;
             config.TunnelType = TunnelType;
             config.BufferSize = BufferSize;

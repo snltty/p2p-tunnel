@@ -1,8 +1,12 @@
 ﻿using client.messengers.clients;
 using client.messengers.register;
 using client.service.socks5;
+using common.libs;
+using common.libs.extends;
 using common.server;
 using common.socks5;
+using System;
+using System.Linq;
 using System.Net;
 
 namespace client.service.vea
@@ -35,12 +39,12 @@ namespace client.service.vea
         }
         protected override bool HandleCommand(Socks5Info data)
         {
-            if (!(data.Tag is TagInfo target))
+            if ((data.Tag is TagInfo target) == false)
             {
                 target = new TagInfo();
                 data.Tag = target;
             }
-            var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data);
+            var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
             target.TargetIp = targetEp.Address;
             if (targetEp.Port == 0)
             {
@@ -49,7 +53,7 @@ namespace client.service.vea
                 CommandResponseData(data);
                 return true;
             }
-            target.Connection = GetConnection(target.TargetIp);
+            target.Connection = GetConnection(target.TargetIp, ipMemory);
             return socks5MessengerSender.Request(data, target.Connection);
         }
         protected override bool HndleForward(Socks5Info data)
@@ -59,22 +63,31 @@ namespace client.service.vea
         }
         protected override bool HndleForwardUdp(Socks5Info data)
         {
-            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
-            IConnection connection = GetConnection(remoteEndPoint.Address);
+            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
+            IConnection connection = GetConnection(remoteEndPoint.Address, ipMemory);
             return socks5MessengerSender.Request(data, connection);
         }
         public override void Flush()
         {
         }
 
-        private IConnection GetConnection(IPAddress target)
+        private IConnection GetConnection(IPAddress target, Span<byte> ipMemory)
         {
-            if (virtualEthernetAdapterTransfer.IPList2.TryGetValue(target, out ClientInfo client))
+            if (virtualEthernetAdapterTransfer.IPList.TryGetValue(target, out IPAddressCacheInfo cache))
             {
-                return SelectConnection(client.TcpConnection, client.UdpConnection);
+                return SelectConnection(cache.Client.TcpConnection, cache.Client.UdpConnection);
             }
 
-            client = clientInfoCaching.GetByName(config.TargetName);
+            if (target.IsLan())
+            {
+                int mask = virtualEthernetAdapterTransfer.GetIpMask(ipMemory);
+                if (virtualEthernetAdapterTransfer.LanIPList.TryGetValue(mask, out cache))
+                {
+                    return SelectConnection(cache.Client.TcpConnection, cache.Client.UdpConnection);
+                }
+            }
+
+            var client = clientInfoCaching.GetByName(config.TargetName);
             if (client != null)
             {
                 return SelectConnection(client.TcpConnection, client.UdpConnection);

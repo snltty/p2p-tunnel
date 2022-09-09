@@ -2,6 +2,7 @@
 using common.libs;
 using common.server;
 using common.server.model;
+using common.server.servers.rudp;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,9 @@ namespace client.realize.messengers.clients
 {
     public class ClientInfoCaching : IClientInfoCaching
     {
-        private readonly static ConcurrentDictionary<ulong, ClientInfo> clients = new ConcurrentDictionary<ulong, ClientInfo>();
+        private readonly ConcurrentDictionary<ulong, ClientInfo> clients = new ConcurrentDictionary<ulong, ClientInfo>();
+        private readonly ConcurrentDictionary<ulong, int> tunnelPorts = new ConcurrentDictionary<ulong, int>();
+        private readonly ConcurrentDictionary<ulong, UdpServer> udpservers = new ConcurrentDictionary<ulong, UdpServer>();
 
         public SimpleSubPushHandler<ClientInfo> OnOffline { get; } = new SimpleSubPushHandler<ClientInfo>();
         public SimpleSubPushHandler<ClientInfo> OnOnline { get; } = new SimpleSubPushHandler<ClientInfo>();
@@ -81,6 +84,32 @@ namespace client.realize.messengers.clients
             }
         }
 
+        public void AddTunnelPort(ulong tunnelName, int port)
+        {
+            tunnelPorts.TryAdd(tunnelName, port);
+        }
+        public bool GetTunnelPort(ulong tunnelName,out int port)
+        {
+            return tunnelPorts.TryGetValue(tunnelName,out port);
+        }
+        public void RemoveTunnelPort(ulong tunnelName)
+        {
+            tunnelPorts.TryRemove(tunnelName, out _);
+        }
+
+        public void AddUdpserver(ulong tunnelName, UdpServer server)
+        {
+            udpservers.TryAdd(tunnelName, server);
+        }
+        public bool GetUdpserver(ulong tunnelName, out UdpServer server)
+        {
+            return udpservers.TryGetValue(tunnelName, out server);
+        }
+        public void RemoveUdpserver(ulong tunnelName)
+        {
+            udpservers.TryRemove(tunnelName, out _);
+        }
+
         public void Clear()
         {
             var _clients = clients.Values;
@@ -91,6 +120,7 @@ namespace client.realize.messengers.clients
                 OnOffline.Push(item);
                 clients.TryRemove(item.Id, out _);
             }
+            tunnelPorts.Clear();
         }
     }
 }

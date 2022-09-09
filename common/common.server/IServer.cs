@@ -9,6 +9,7 @@ namespace common.server
         public void Start(int port, IPAddress ip = null);
 
         public void Stop();
+        public void Disponse();
 
         public void InputData(IConnection connection);
 

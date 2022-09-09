@@ -1,12 +1,10 @@
 ﻿using client.service.ui.api.clientServer;
 using common.libs.extends;
-using System.Collections.Generic;
 using System.Net;
-using System.Threading.Tasks;
-using System.Linq;
 using System;
-using client.messengers.clients;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace client.service.vea
 {
@@ -35,6 +33,7 @@ namespace client.service.vea
             config.ProxyAll = conf.ProxyAll;
             config.TargetName = conf.TargetName;
             config.IP = conf.IP;
+            config.LanIP = conf.LanIP;
             config.TunnelType = conf.TunnelType;
             config.SocksPort = conf.SocksPort;
             config.BufferSize = conf.BufferSize;
@@ -55,9 +54,9 @@ namespace client.service.vea
             config.SaveConfig().Wait();
         }
 
-        public ConcurrentDictionary<ulong, IPAddress> Update(ClientServiceParamsInfo arg)
+        public Dictionary<ulong, IPAddressCacheInfo> Update(ClientServiceParamsInfo arg)
         {
-            return virtualEthernetAdapterTransfer.IPList;
+            return virtualEthernetAdapterTransfer.IPList.ToDictionary(c => c.Value.Client.Id, d => d.Value);
         }
     }
 }

@@ -42,10 +42,12 @@ namespace common.socks5
             return (username, password);
         }
 
-        public static IPEndPoint GetRemoteEndPoint(Memory<byte> data)
+        public static IPEndPoint GetRemoteEndPoint(Memory<byte> data,out Span<byte> ipMemory)
         {
-            if(data.Length < 3)
+            ipMemory = Helper.EmptyArray;
+            if (data.Length < 3)
             {
+                
                 return null;
             }
             //VERSION COMMAND RSV ATYPE  DST.ADDR  DST.PORT
@@ -57,10 +59,12 @@ namespace common.socks5
             switch ((Socks5EnumAddressType)span[0])
             {
                 case Socks5EnumAddressType.IPV4:
+                    ipMemory = span.Slice(1, 4);
                     ip = new IPAddress(span.Slice(1, 4));
                     index = 1 + 4;
                     break;
                 case Socks5EnumAddressType.IPV6:
+                    ipMemory = span.Slice(1, 16);
                     ip = new IPAddress(span.Slice(1, 16));
                     index = 1 + 16;
                     break;

@@ -1,4 +1,5 @@
-﻿using client.messengers.punchHole;
+﻿using client.messengers.clients;
+using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using client.messengers.register;
 using client.realize.messengers.crypto;
@@ -23,9 +24,10 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         private readonly CryptoSwap cryptoSwap;
         private readonly Config config;
         private readonly WheelTimer<object> wheelTimer;
+        private readonly IClientInfoCaching clientInfoCaching;
 
         public PunchHoleTcpNutssBMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, ITcpServer tcpServer,
-            RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer)
+            RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching)
         {
             this.punchHoleMessengerSender = punchHoleMessengerSender;
             this.tcpServer = tcpServer;
@@ -33,12 +35,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             this.cryptoSwap = cryptoSwap;
             this.config = config;
             this.wheelTimer = wheelTimer;
+            this.clientInfoCaching = clientInfoCaching;
         }
 
         private IConnection TcpServer => registerState.TcpConnection;
         private ulong ConnectId => registerState.ConnectId;
 
-        private int ClientTcpPort => registerState.LocalInfo.TcpPort;
         private int RouteLevel => registerState.LocalInfo.RouteLevel + 5;
 #if DEBUG
         private bool UseLocalPort = false;
@@ -59,6 +61,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 TryTimes = param.TryTimes,
                 Tcs = tcs,
                 TunnelName = param.TunnelName,
+                LocalPort = param.LocalPort
             };
             connectTcpCache.TryAdd(param.Id, ceche);
 
@@ -77,24 +80,27 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 OnStep1Handler.Push(arg);
             }
 
-            List<IPEndPoint> ips = arg.Data.LocalIps.Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
-            ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
-
-            foreach (IPEndPoint ip in ips)
+            if (clientInfoCaching.GetTunnelPort(arg.RawData.TunnelName, out int localPort))
             {
-                using Socket targetSocket = new(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                try
+                List<IPEndPoint> ips = arg.Data.LocalIps.Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
+                ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+
+                foreach (IPEndPoint ip in ips)
                 {
-                    targetSocket.Ttl = (short)(RouteLevel);
-                    targetSocket.ReuseBind(new IPEndPoint(config.Client.BindIp, ClientTcpPort));
-                    _ = targetSocket.ConnectAsync(ip);
+                    using Socket targetSocket = new(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    try
+                    {
+                        targetSocket.Ttl = (short)(RouteLevel);
+                        targetSocket.ReuseBind(new IPEndPoint(config.Client.BindIp, localPort));
+                        _ = targetSocket.ConnectAsync(ip);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    targetSocket.SafeClose();
                 }
-                catch (Exception)
-                {
-                }
-                targetSocket.SafeClose();
+                await SendStep2(arg);
             }
-            await SendStep2(arg);
         }
 
         public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; } = new SimpleSubPushHandler<OnStep2Params>();
@@ -143,7 +149,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     try
                     {
                         targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 5 / 1000);
-                        targetSocket.ReuseBind(new IPEndPoint(config.Client.BindIp, ClientTcpPort));
+                        targetSocket.ReuseBind(new IPEndPoint(config.Client.BindIp, cache.LocalPort));
                         IAsyncResult result = targetSocket.BeginConnect(targetEndpoint, null, null);
                         result.AsyncWaitHandle.WaitOne(2000, false);
 
@@ -243,39 +249,42 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         public SimpleSubPushHandler<OnStep2RetryParams> OnStep2RetryHandler { get; } = new SimpleSubPushHandler<OnStep2RetryParams>();
         public void OnStep2Retry(OnStep2RetryParams e)
         {
-            OnStep2RetryHandler.Push(e);
-            int startPort = e.Data.Port;
-            int endPort = e.Data.Port;
-            if (e.Data.GuessPort > 0)
+            if (clientInfoCaching.GetTunnelPort(e.RawData.TunnelName, out int localPort))
             {
-                startPort = e.Data.GuessPort;
-                endPort = startPort + 20;
-            }
-            if (endPort > 65535)
-            {
-                endPort = 65535;
-            }
-            for (int i = startPort; i <= endPort; i++)
-            {
+                OnStep2RetryHandler.Push(e);
+                int startPort = e.Data.Port;
+                int endPort = e.Data.Port;
+                if (e.Data.GuessPort > 0)
+                {
+                    startPort = e.Data.GuessPort;
+                    endPort = startPort + 20;
+                }
+                if (endPort > 65535)
+                {
+                    endPort = 65535;
+                }
+                for (int i = startPort; i <= endPort; i++)
+                {
 
-                Socket targetSocket = null;
-                try
-                {
-                    IPEndPoint target = new IPEndPoint(e.Data.Ip, i);
-                    targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    targetSocket.Ttl = (short)(RouteLevel);
-                    targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                    targetSocket.Bind(new IPEndPoint(config.Client.BindIp, ClientTcpPort));
-                    _ = targetSocket.ConnectAsync(target);
-                }
-                catch (Exception)
-                {
-                }
-                finally
-                {
-                    if (targetSocket != null)
+                    Socket targetSocket = null;
+                    try
                     {
-                        targetSocket.SafeClose();
+                        IPEndPoint target = new IPEndPoint(e.Data.Ip, i);
+                        targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                        targetSocket.Ttl = (short)(RouteLevel);
+                        targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                        targetSocket.Bind(new IPEndPoint(config.Client.BindIp, localPort));
+                        _ = targetSocket.ConnectAsync(target);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    finally
+                    {
+                        if (targetSocket != null)
+                        {
+                            targetSocket.SafeClose();
+                        }
                     }
                 }
             }
@@ -453,15 +462,17 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             Type = ConnectFailType.ERROR
                         }
                     });
+
+                    OnSendStep2FailHandler.Push(toid);
+                    punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2FailInfo>
+                    {
+                        TunnelName = cache.TunnelName,
+                        Connection = TcpServer,
+                        ToId = toid,
+                        Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL, PunchType = PunchHoleTypes.TCP_NUTSSB }
+                    }).ConfigureAwait(false);
                 }
-                OnSendStep2FailHandler.Push(toid);
-                punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2FailInfo>
-                {
-                    TunnelName = 0,
-                    Connection = TcpServer,
-                    ToId = toid,
-                    Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL, PunchType = PunchHoleTypes.TCP_NUTSSB }
-                }).ConfigureAwait(false);
+               
             }
             catch (Exception ex)
             {

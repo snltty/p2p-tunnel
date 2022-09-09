@@ -18,7 +18,7 @@ namespace client.service.vea
         /// 获取ip
         /// </summary>
         /// <param name="arg"></param>
-        public async Task<IPAddress> IP(IConnection connection)
+        public async Task<(IPAddress, IPAddress)> IP(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
@@ -31,10 +31,12 @@ namespace client.service.vea
             {
                 if (resp.Data.Length > 0)
                 {
-                    return new IPAddress(resp.Data.Span);
+                    IPAddress ip = new IPAddress(resp.Data.Span.Slice(1, resp.Data.Span[0]));
+                    IPAddress lanip = new IPAddress(resp.Data.Span.Slice(resp.Data.Span[0] + 1));
+                    return (ip, lanip);
                 }
             }
-            return IPAddress.Any;
+            return (IPAddress.Any, IPAddress.Any);
         }
     }
 }

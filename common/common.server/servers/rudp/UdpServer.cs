@@ -9,8 +9,8 @@ namespace common.server.servers.rudp
 {
     public class UdpServer : IUdpServer
     {
-        public SimpleSubPushHandler<IConnection> OnPacket { get; } = new SimpleSubPushHandler<IConnection>();
-        public SimpleSubPushHandler<IConnection> OnDisconnect { get; } = new SimpleSubPushHandler<IConnection>();
+        public SimpleSubPushHandler<IConnection> OnPacket { get; private set; } = new SimpleSubPushHandler<IConnection>();
+        public SimpleSubPushHandler<IConnection> OnDisconnect { get; private set; } = new SimpleSubPushHandler<IConnection>();
         public Action<IConnection> OnConnected { get; set; } = (IConnection connection) => { };
 
         Semaphore maxNumberConnectings = new Semaphore(1, 1);
@@ -86,6 +86,15 @@ namespace common.server.servers.rudp
             }
             Release();
         }
+        public void Disponse()
+        {
+            Stop();
+            OnPacket = null;
+            OnDisconnect = null;
+            OnConnected = null;
+            maxNumberConnectings.Dispose();
+            maxNumberConnectingNumberSpace = null;
+        }
 
         public void InputData(IConnection connection)
         {
@@ -136,5 +145,7 @@ namespace common.server.servers.rudp
                 maxNumberConnectings.Release();
             }
         }
+
+        
     }
 }

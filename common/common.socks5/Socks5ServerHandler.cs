@@ -103,7 +103,7 @@ namespace common.socks5
             {
                 Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
 
-                IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
+                IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
                 Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
 
                 ConnectionKeyUdp key = new ConnectionKeyUdp(connection.ConnectId, data.SourceEP);
@@ -178,7 +178,7 @@ namespace common.socks5
                 Socks5EnumRequestCommand command = (Socks5EnumRequestCommand)data.Data.Span[1];
                 if (command == Socks5EnumRequestCommand.Connect)
                 {
-                    IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
+                    IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
                     if (remoteEndPoint == null)
                     {
                         ConnectReponse(data, Socks5EnumResponseCommand.AddressNotAllow, connection);

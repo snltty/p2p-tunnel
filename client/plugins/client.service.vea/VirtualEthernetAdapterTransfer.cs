@@ -1,24 +1,27 @@
 ﻿using client.messengers.clients;
 using common.libs;
-using common.socks5;
+using common.libs.extends;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Threading.Tasks;
 
 namespace client.service.vea
 {
     public class VirtualEthernetAdapterTransfer
     {
         Process Tun2SocksProcess;
+        int interfaceNumber = 0;
         const string veaName = "p2p-tunnel";
-        private readonly ConcurrentDictionary<ulong, IPAddress> ips = new ConcurrentDictionary<ulong, IPAddress>();
-        private readonly ConcurrentDictionary<IPAddress, ClientInfo> ips2 = new ConcurrentDictionary<IPAddress, ClientInfo>();
-        public ConcurrentDictionary<ulong, IPAddress> IPList => ips;
-        public ConcurrentDictionary<IPAddress, ClientInfo> IPList2 => ips2;
+
+        private readonly ConcurrentDictionary<IPAddress, IPAddressCacheInfo> ips = new ConcurrentDictionary<IPAddress, IPAddressCacheInfo>();
+        private readonly ConcurrentDictionary<int, IPAddressCacheInfo> lanips = new ConcurrentDictionary<int, IPAddressCacheInfo>();
+        public ConcurrentDictionary<IPAddress, IPAddressCacheInfo> IPList => ips;
+        public ConcurrentDictionary<int, IPAddressCacheInfo> LanIPList => lanips;
 
         private readonly Config config;
         private readonly IVeaSocks5ClientListener socks5ClientListener;
@@ -30,18 +33,33 @@ namespace client.service.vea
 
             clientInfoCaching.OnOnline.Sub((client) =>
             {
-                Task.Run(async () =>
+                veaMessengerSender.IP(client.OnlineConnection).ContinueWith((result) =>
                 {
-                    IPAddress ip = await veaMessengerSender.IP(client.OnlineConnection);
-                    ips.AddOrUpdate(client.Id, ip, (a, b) => ip);
-                    ips2.AddOrUpdate(ip, client, (a, b) => client);
+                    IPAddress ip = result.Result.Item1;
+                    IPAddress lanip = result.Result.Item2;
+
+                    IPAddressCacheInfo cache = new IPAddressCacheInfo { Client = client, IP = ip, LanIP = lanip, Mask = 0 };
+
+                    ips.AddOrUpdate(ip, cache, (a, b) => cache);
+                    if (lanip.Equals(IPAddress.Any) == false)
+                    {
+                        int mask = GetIpMask(lanip);
+
+                        if (lanips.ContainsKey(mask) == false)
+                        {
+                            cache.Mask = mask;
+                            lanips.TryAdd(mask, cache);
+                            AddRoute(lanip);
+                        }
+                    }
                 });
             });
             clientInfoCaching.OnOffline.Sub((client) =>
             {
-                if (ips.TryRemove(client.Id, out IPAddress ip))
+                var value = ips.FirstOrDefault(c => c.Value.Client.Id == client.Id);
+                if (ips.TryRemove(value.Key, out IPAddressCacheInfo cache))
                 {
-                    ips2.TryRemove(ip, out _);
+                    lanips.TryRemove(cache.Mask, out _);
                 }
             });
 
@@ -85,6 +103,7 @@ namespace client.service.vea
 
         private void KillWindows()
         {
+            interfaceNumber = 0;
             if (Tun2SocksProcess != null)
             {
                 Tun2SocksProcess.Kill();
@@ -101,12 +120,13 @@ namespace client.service.vea
                 //分配ip
                 Command.Execute("cmd.exe", string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
                 //网卡编号
-                int num = GetWindowsInterfaceNum();
-                if (num > 0)
+                interfaceNumber = GetWindowsInterfaceNum();
+                if (interfaceNumber > 0)
                 {
+                    AddRoute();
                     if (config.ProxyAll) //代理所有
                     {
-                        // Command.Execute("cmd.exe", string.Empty, new string[] { $"route add 0.0.0.0 mask 0.0.0.0 {config.IP} metric 5 if {num}" });
+                        //AddRoute(IPAddress.Any);
                     }
                     break;
                 }
@@ -128,5 +148,52 @@ namespace client.service.vea
             }
             return 0;
         }
+
+        private void AddRoute()
+        {
+            foreach (var item in lanips)
+            {
+                AddRoute(item.Value.LanIP);
+            }
+        }
+        private void AddRoute(IPAddress ip)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                AddRouteWindows(ip);
+            }
+        }
+        private void AddRouteWindows(IPAddress ip)
+        {
+            if(interfaceNumber > 0)
+            {
+                Command.Execute("cmd.exe", string.Empty, new string[] { $"route add {ip} mask 0.0.0.0 {config.IP} metric 5 if {interfaceNumber}" });
+            }
+        }
+
+
+        byte[] mask = new byte[] { 255, 255, 255, 0 };
+        public int GetIpMask(IPAddress ip)
+        {
+            return GetIpMask(ip.GetAddressBytes());
+        }
+        public int GetIpMask(Span<byte> ip)
+        {
+            for (int i = 0; i < ip.Length; i++)
+            {
+                ip[i] &= mask[i];
+            }
+            return ip.ToInt32();
+        }
+    }
+
+    public class IPAddressCacheInfo
+    {
+        public int Mask { get; set; }
+        public IPAddress IP { get; set; }
+        public IPAddress LanIP { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public ClientInfo Client { get; set; }
     }
 }

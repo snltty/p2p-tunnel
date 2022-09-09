@@ -22,6 +22,7 @@ namespace client.messengers.punchHole
         public ulong Id { get; set; } = 0;
         public int TryTimes { get; set; } = 5;
         public ulong TunnelName { get; set; } = 0;
+        public int LocalPort { get; set; } = 0;
     }
 
     public class OnStepBaseParams
@@ -55,6 +56,8 @@ namespace client.messengers.punchHole
 
         public WheelTimerTimeout<object> Step1Timeout { get; set; }
         public WheelTimerTimeout<object> Step3Timeout { get; set; }
+
+        public int LocalPort { get; set; } = 0;
     }
     public class ConnectResultModel
     {

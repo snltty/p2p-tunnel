@@ -14,8 +14,8 @@ namespace common.server.servers.iocp
         private Socket socket;
         private CancellationTokenSource cancellationTokenSource;
 
-        public SimpleSubPushHandler<IConnection> OnPacket { get; } = new SimpleSubPushHandler<IConnection>();
-        public SimpleSubPushHandler<IConnection> OnDisconnect { get; } = new SimpleSubPushHandler<IConnection>();
+        public SimpleSubPushHandler<IConnection> OnPacket { get; private set; } = new SimpleSubPushHandler<IConnection>();
+        public SimpleSubPushHandler<IConnection> OnDisconnect { get; private set; } = new SimpleSubPushHandler<IConnection>();
         public Action<IConnection> OnConnected { get; set; } = (connection) => { };
 
         public TcpServer() { }
@@ -99,12 +99,18 @@ namespace common.server.servers.iocp
 
         public IConnection BindReceive(Socket socket, int bufferSize = 8 * 1024)
         {
+            if (OnConnected == null)
+            {
+                return null;
+            }
+
             this.bufferSize = bufferSize;
             AsyncUserToken userToken = new AsyncUserToken
             {
                 Socket = socket,
                 Connection = CreateConnection(socket),
             };
+
             OnConnected(userToken.Connection);
             SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
             {
@@ -122,9 +128,9 @@ namespace common.server.servers.iocp
         }
         private void ProcessReceive(SocketAsyncEventArgs e)
         {
-            AsyncUserToken token = (AsyncUserToken)e.UserToken;
             try
             {
+                AsyncUserToken token = (AsyncUserToken)e.UserToken;
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
                     int offset = e.Offset;
@@ -172,7 +178,7 @@ namespace common.server.servers.iocp
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
-                token.Connection.SocketError = SocketError.SocketError;
+                //token.Connection.SocketError = SocketError.SocketError;
                 CloseClientSocket(e);
             }
         }
@@ -242,6 +248,14 @@ namespace common.server.servers.iocp
             socket?.SafeClose();
             socket = null;
         }
+        public void Disponse()
+        {
+            Stop();
+            OnPacket = null;
+            OnDisconnect = null;
+            OnConnected = null;
+        }
+
         public void InputData(IConnection connection)
         {
             OnPacket.Push(connection);
