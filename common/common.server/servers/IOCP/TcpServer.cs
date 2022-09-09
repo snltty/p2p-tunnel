@@ -242,6 +242,10 @@ namespace common.server.servers.iocp
             socket?.SafeClose();
             socket = null;
         }
+        public void InputData(IConnection connection)
+        {
+            OnPacket.Push(connection);
+        }
     }
 
     public class AsyncUserToken

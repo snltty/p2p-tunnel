@@ -73,9 +73,25 @@ namespace client.realize.messengers.punchHole
                 }.ToBytes()
             }).ConfigureAwait(false);
         }
-        public async Task<int> GetGuessPort(ServerType serverType)
+        public async Task<MessageResponeInfo> SendReply<T>(SendPunchHoleArg<T> arg) where T : IPunchHoleStepInfo
         {
-            return await registerMessengerSender.GetGuessPort(serverType);
+            IPunchHoleStepInfo msg = arg.Data;
+            return await messengerSender.SendReply(new MessageRequestWrap
+            {
+                Connection = arg.Connection,
+                Path = "punchhole/Execute",
+                Memory = new PunchHoleParamsInfo
+                {
+                    Data = msg.ToBytes(),
+                    PunchForwardType = msg.ForwardType,
+                    FromId = 0,
+                    PunchStep = msg.Step,
+                    PunchType = (byte)msg.PunchType,
+                    ToId = arg.ToId,
+                    TunnelName = arg.TunnelName,
+                    GuessPort = arg.GuessPort,
+                }.ToBytes()
+            }).ConfigureAwait(false);
         }
 
         public SimpleSubPushHandler<OnPunchHoleArg> OnReverse { get; } = new SimpleSubPushHandler<OnPunchHoleArg>();
@@ -97,6 +113,17 @@ namespace client.realize.messengers.punchHole
                 Connection = registerState.OnlineConnection,
                 ToId = toid,
                 Data = new PunchHoleRelayInfo { ServerType = serverType }
+            }).ConfigureAwait(false);
+        }
+
+        public SimpleSubPushHandler<PunchHoleTunnelInfo> OnTunnel { get; } = new SimpleSubPushHandler<PunchHoleTunnelInfo>();
+        public async Task SendTunnel(ulong toid, ulong tunnelName, ServerType serverType)
+        {
+            await SendReply(new SendPunchHoleArg<PunchHoleTunnelInfo>
+            {
+                Connection = registerState.OnlineConnection,
+                ToId = toid,
+                Data = new PunchHoleTunnelInfo { TunnelName = tunnelName, ServerType = serverType }
             }).ConfigureAwait(false);
         }
 
@@ -124,7 +151,7 @@ namespace client.realize.messengers.punchHole
         public ulong ToId { get; set; }
         public int GuessPort { get; set; } = 0;
 
-        public string TunnelName { get; set; } = string.Empty;
+        public ulong TunnelName { get; set; } = 0;
 
         public T Data { get; set; }
     }

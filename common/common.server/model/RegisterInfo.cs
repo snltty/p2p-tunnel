@@ -243,7 +243,7 @@ namespace common.server.model
             Code = (RegisterResultInfoCodes)span[index];
             index += 1;
 
-            Relay = span[index] == 0 ? false : true;
+            Relay = span[index] != 0;
             index += 1;
 
             UdpPort = span.Slice(index, 2).ToUInt16();
@@ -278,6 +278,49 @@ namespace common.server.model
             KEY_VERIFY = 8,
             [Description("出错")]
             UNKNOW = 16
+        }
+    }
+
+
+    public class TunnelRegisterInfo
+    {
+        public TunnelRegisterInfo() { }
+
+        public ulong TunnelName { get; set; } = 0;
+        public int LocalPort { get; set; } = 0;
+        public int Port { get; set; } = 0;
+
+        public byte[] ToBytes()
+        {
+            var bytes = new byte[12];
+
+            var tunnelNameBytes = TunnelName.ToBytes();
+            var localPortBytes = LocalPort.ToBytes();
+            var portBytes = LocalPort.ToBytes();
+
+            int index = 0;
+            Array.Copy(tunnelNameBytes, 0, bytes, 0, tunnelNameBytes.Length);
+            index+=8;
+
+            bytes[index] = localPortBytes[0];
+            bytes[index+1] = localPortBytes[1];
+            index += 2;
+
+            bytes[index] = portBytes[0];
+            bytes[index+1] = portBytes[1];
+
+            return bytes;
+        }
+        public void DeBytes(ReadOnlyMemory<byte> data)
+        {
+            int index = 0;
+            TunnelName = data.Span.Slice(index, 8).ToUInt64();
+            index += 8;
+
+            LocalPort = data.Span.Slice(index, 2).ToUInt16();
+            index += 2;
+
+            Port = data.Span.Slice(index, 2).ToUInt16();
         }
     }
 }

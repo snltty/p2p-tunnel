@@ -16,21 +16,23 @@ namespace common.socks5
 
         public bool Request(Socks5Info data, IConnection connection)
         {
+            var bytes = data.ToBytes();
             return messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = $"{Target}/request",
                 Connection = connection,
-                Memory = data.ToBytes()
+                Memory = bytes
             }).Result;
         }
         public void Response(Socks5Info data, IConnection connection)
         {
+            var bytes = data.ToBytes();
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = $"{Target}/response",
                 Connection = connection.FromConnection,
-                Memory = data.ToBytes()
-            }).ConfigureAwait(false);
+                Memory = bytes
+            });
         }
         public void ResponseClose(ulong id, IConnection connection)
         {

@@ -76,7 +76,7 @@ namespace client.realize.messengers.register
         }
 
         /// <summary>
-        /// 
+        /// 注册
         /// </summary>
         /// <param name="autoReg">强行自动注册</param>
         /// <returns></returns>
@@ -97,7 +97,6 @@ namespace client.realize.messengers.register
             return await Task.Run(async () =>
             {
                 int interval = autoReg ? config.Client.AutoRegDelay : 0;
-
                 for (int i = 0; i < config.Client.AutoRegTimes; i++)
                 {
                     try
@@ -121,7 +120,6 @@ namespace client.realize.messengers.register
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
                         registerState.LocalInfo.UdpPort = registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort();
-                        // registerState.LocalInfo.UdpPort = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<int> { registerState.LocalInfo.TcpPort });
                         registerState.LocalInfo.Mac = string.Empty;
 
                         if (config.Client.UseUdp)

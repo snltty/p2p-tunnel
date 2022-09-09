@@ -54,12 +54,15 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         public async Task<ConnectResultModel> Send(ConnectParams param)
         {
             TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
-            connectTcpCache.TryAdd(param.Id, new ConnectCacheModel
+            var ceche = new ConnectCacheModel
             {
                 TryTimes = param.TryTimes,
                 Tcs = tcs,
                 TunnelName = param.TunnelName,
-            });
+            };
+            connectTcpCache.TryAdd(param.Id, ceche);
+
+            ceche.Step1Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 2000);
 
             await SendStep1(param);
 
@@ -91,49 +94,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 }
                 targetSocket.SafeClose();
             }
-
-            if (arg.Data.GuessPort > 0)
-            {
-                int bindPort = NetworkHelper.GetRandomPort();
-                int startPort = arg.Data.Port;
-                int endPort = arg.Data.Port;
-                if (arg.Data.GuessPort > 0)
-                {
-                    startPort = arg.Data.GuessPort;
-                    endPort = startPort + 20;
-                }
-                if (endPort > 65535)
-                {
-                    endPort = 65535;
-                }
-                for (int i = startPort; i <= endPort; i++)
-                {
-                    IPEndPoint localEndPoint = new IPEndPoint(config.Client.BindIp, ClientTcpPort);
-
-                    /*
-                    var socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    socket.ReuseBind(localEndPoint);
-                    socket.Listen(int.MaxValue);
-                    _ = Task.Run(() =>
-                    {
-                        while (true)
-                        {
-                            var client = socket.Accept();
-                            Console.WriteLine($"收到连接：{client.RemoteEndPoint}");
-                        }
-                    });
-                    */
-
-                    IPEndPoint target = new IPEndPoint(arg.Data.Ip, i);
-                    using Socket targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    targetSocket.Ttl = (short)(RouteLevel);
-                    targetSocket.ReuseBind(localEndPoint);
-                    _ = targetSocket.ConnectAsync(target);
-
-                    targetSocket.SafeClose();
-                }
-            }
-
             await SendStep2(arg);
         }
 
@@ -155,6 +115,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 {
                     return;
                 }
+                cache.Step1Timeout.Cancel();
 
 
                 bool success = false;
@@ -237,7 +198,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         else if (ex.SocketErrorCode == SocketError.AddressNotAvailable)
                         {
                             interval = 1000;
-                            Logger.Instance.Error($"{ex.SocketErrorCode}:{targetEndpoint}");
+                            Logger.Instance.DebugError($"{ex.SocketErrorCode}:{targetEndpoint}");
                         }
                         else
                         {
@@ -251,7 +212,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.Error($"{targetEndpoint}--------{ex}");
+                        Logger.Instance.DebugError($"{targetEndpoint}--------{ex}");
                     }
                 }
 
@@ -370,56 +331,59 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         public async Task SendStep1(ConnectParams param)
         {
-            int port = 0;
-            if (UseGuesstPort)
-            {
-                port = await punchHoleMessengerSender.GetGuessPort(common.server.model.ServerType.TCP);
-            }
-
             Logger.Instance.DebugDebug($"before Send Step1, toid:{param.Id},fromid:{ConnectId}");
             await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep1Info>
             {
                 TunnelName = param.TunnelName,
                 Connection = TcpServer,
                 ToId = param.Id,
-                GuessPort = port,
+                GuessPort = 0,
                 Data = new PunchHoleStep1Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_1, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
             Logger.Instance.DebugDebug($"after Send Step1, toid:{param.Id},fromid:{ConnectId}");
         }
-        public async Task SendStep2(OnStep1Params arg)
+        private void SendStep1Timeout(WheelTimerTimeout<object> timeout)
         {
-            int port = 0;
-            if (UseGuesstPort)
+            try
             {
-                port = await punchHoleMessengerSender.GetGuessPort(common.server.model.ServerType.TCP);
+                ulong toid = (ulong)timeout.Task.State;
+                timeout.Cancel();
+                if (connectTcpCache.TryRemove(toid, out ConnectCacheModel cache))
+                {
+                    cache.Canceled = true;
+                    cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "tcp打洞超时" } });
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
             }
 
+        }
+
+        public async Task SendStep2(OnStep1Params arg)
+        {
             Logger.Instance.DebugDebug($"before Send Step2, toid:{arg.RawData.FromId},fromid:{ConnectId}");
             await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2Info>
             {
                 TunnelName = arg.RawData.TunnelName,
                 Connection = TcpServer,
                 ToId = arg.RawData.FromId,
-                GuessPort = port,
+                GuessPort = 0,
                 Data = new PunchHoleStep2Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
             Logger.Instance.DebugDebug($"after Send Step2, toid:{arg.RawData.FromId},fromid:{ConnectId}");
         }
         private async Task SendStep2Retry(OnStep2Params arg)
         {
-            int port = 0;
-            if (UseGuesstPort)
-            {
-                port = await punchHoleMessengerSender.GetGuessPort(common.server.model.ServerType.TCP);
-            }
             Logger.Instance.DebugDebug($"before Send Step2Retry");
             await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2TryInfo>
             {
                 TunnelName = arg.RawData.TunnelName,
                 Connection = TcpServer,
                 ToId = arg.RawData.FromId,
-                GuessPort = port,
+                GuessPort = 0,
                 Data = new PunchHoleStep2TryInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_TRY, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
             Logger.Instance.DebugDebug($"after Send Step2Retry");
@@ -493,7 +457,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 OnSendStep2FailHandler.Push(toid);
                 punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2FailInfo>
                 {
-                    TunnelName = string.Empty,
+                    TunnelName = 0,
                     Connection = TcpServer,
                     ToId = toid,
                     Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL, PunchType = PunchHoleTypes.TCP_NUTSSB }
@@ -505,7 +469,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
 
         }
-        private async Task SendStep3(IConnection connection, string tunnelName, ulong toid)
+        private async Task SendStep3(IConnection connection, ulong tunnelName, ulong toid)
         {
             WheelTimerTimeout<object> step3Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object>
             {

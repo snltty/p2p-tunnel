@@ -18,6 +18,12 @@ dotnet publish ./server/server.service -c release -f net6.0 -o ./public/publish/
 dotnet publish ./client/client.service -c release -f net6.0 -o ./public/publish/osx-arm64-single/client	-r osx-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true 
 dotnet publish ./server/server.service -c release -f net6.0 -o ./public/publish/osx-arm64-single/server	-r osx-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true 
 
+xcopy "client/plugins/client.service.ui/client.service.ui.api.service/public/web" "public/publish/win-x64-single/client/public/web" /s /f /h /y
+xcopy "client/plugins/client.service.ui/client.service.ui.api.service/public/web" "public/publish/win-arm64-single/client/public/web" /s /f /h /y
+xcopy "client/plugins/client.service.ui/client.service.ui.api.service/public/web" "public/publish/linux-x64-single/client/public/web" /s /f /h /y
+xcopy "client/plugins/client.service.ui/client.service.ui.api.service/public/web" "public/publish/linux-arm64-single/client/public/web" /s /f /h /y
+xcopy "client/plugins/client.service.ui/client.service.ui.api.service/public/web" "public/publish/osx-x64-single/client/public/web" /s /f /h /y
+xcopy "client/plugins/client.service.ui/client.service.ui.api.service/public/web" "public/publish/osx-arm64-single/client/public/web" /s /f /h /y
 
 mkdir public\\publish-zip
 cd public/publish

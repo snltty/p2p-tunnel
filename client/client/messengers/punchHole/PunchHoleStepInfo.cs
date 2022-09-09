@@ -20,6 +20,8 @@ namespace client.messengers.punchHole
         RESET,
         [Description("中继")]
         Relay,
+        [Description("创建通道")]
+        Tunnel,
     }
 
 
@@ -246,6 +248,43 @@ namespace client.messengers.punchHole
             ForwardType = (PunchForwardTypes)span[1];
             Step = span[2];
             ServerType = (ServerType)span[3];
+        }
+    }
+
+    public class PunchHoleTunnelInfo : IPunchHoleStepInfo
+    {
+        public PunchHoleTypes PunchType { get; private set; } = PunchHoleTypes.Tunnel;
+
+        public PunchForwardTypes ForwardType { get; private set; } = PunchForwardTypes.FORWARD;
+
+        public byte Step { get; set; } = 0;
+
+        public ServerType ServerType { get; set; } = ServerType.TCP;
+
+        public ulong TunnelName { get; set; } = 0;
+
+        public byte[] ToBytes()
+        {
+            var tunnelNameBytes = TunnelName.ToBytes();
+            var bytes = new byte[12];
+            bytes[0] = (byte)PunchType;
+            bytes[1] = (byte)ForwardType;
+            bytes[2] = Step;
+            bytes[3] = (byte)ServerType;
+
+            Array.Copy(tunnelNameBytes,0, bytes,4, tunnelNameBytes.Length);
+
+            return bytes;
+        }
+        public void DeBytes(ReadOnlyMemory<byte> data)
+        {
+            var span = data.Span;
+            PunchType = (PunchHoleTypes)span[0];
+            ForwardType = (PunchForwardTypes)span[1];
+            Step = span[2];
+            ServerType = (ServerType)span[3];
+
+            TunnelName = span.Slice(4, 8).ToUInt64();
         }
     }
 }

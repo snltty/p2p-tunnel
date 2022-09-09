@@ -27,7 +27,7 @@ namespace common.server.servers.rudp
         {
             listener = new EventBasedNetListener();
             server = new NetManager(listener);
-            server.NatPunchEnabled = true;
+            server.NatPunchEnabled = false;
             server.UnsyncedEvents = true;
             server.PingInterval = timeout / 5;
             server.DisconnectTimeout = timeout;
@@ -87,6 +87,11 @@ namespace common.server.servers.rudp
             Release();
         }
 
+        public void InputData(IConnection connection)
+        {
+            OnPacket.Push(connection);
+        }
+
         public async Task<IConnection> CreateConnection(IPEndPoint address)
         {
             return await Task.Run(async () =>
@@ -130,25 +135,6 @@ namespace common.server.servers.rudp
                 maxNumberConnectingNumberSpace.Decrement();
                 maxNumberConnectings.Release();
             }
-        }
-    }
-
-    class WaitPeer
-    {
-        public IPEndPoint InternalAddr { get; }
-        public IPEndPoint ExternalAddr { get; }
-        public DateTime RefreshTime { get; private set; }
-
-        public void Refresh()
-        {
-            RefreshTime = DateTime.UtcNow;
-        }
-
-        public WaitPeer(IPEndPoint internalAddr, IPEndPoint externalAddr)
-        {
-            Refresh();
-            InternalAddr = internalAddr;
-            ExternalAddr = externalAddr;
         }
     }
 }

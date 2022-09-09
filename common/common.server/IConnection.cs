@@ -123,60 +123,6 @@ namespace common.server
         public abstract IConnection Clone();
     }
 
-    public class UdpConnection : Connection
-    {
-        public UdpConnection(UdpClient udpcRecv, IPEndPoint address)
-        {
-            UdpcRecv = udpcRecv;
-            Address = address;
-        }
-
-        public override bool Connected => UdpcRecv != null;
-
-        public UdpClient UdpcRecv { get; private set; }
-        public override ServerType ServerType => ServerType.UDP;
-
-        public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
-        {
-            if (Connected)
-            {
-                try
-                {
-#if NET5_0
-                    await UdpcRecv.SendAsync(data.ToArray(), data.Length, Address).ConfigureAwait(false);
-#else
-                    await UdpcRecv.SendAsync(data, Address).ConfigureAwait(false);
-#endif
-                    SendBytes += data.Length;
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.DebugError(ex);
-                }
-            }
-            return false;
-        }
-        public override ValueTask<bool> Send(byte[] data, int length)
-        {
-            return Send(data.AsMemory(0, length));
-        }
-
-        public override void Disponse()
-        {
-            base.Disponse();
-            UdpcRecv = null;
-        }
-
-        public override IConnection Clone()
-        {
-            UdpConnection clone = new UdpConnection(UdpcRecv, Address);
-            clone.EncodeEnable(Crypto);
-            return clone;
-        }
-
-
-    }
     public class RudpConnection : Connection
     {
         public RudpConnection(NetPeer peer, IPEndPoint address)

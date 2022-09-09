@@ -5,7 +5,6 @@ using common.server;
 using common.server.model;
 using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using static common.server.model.RegisterResultInfo;
 
@@ -116,7 +115,6 @@ namespace client.realize.messengers.register
                 Path = "register/notify"
             }).ConfigureAwait(false);
         }
-
         public async Task Exit()
         {
             await messengerSender.SendOnly(new MessageRequestWrap
@@ -128,49 +126,45 @@ namespace client.realize.messengers.register
             }).ConfigureAwait(false);
         }
 
-        public async Task<int> GetGuessPort(ServerType serverType)
+        public async Task<int> GetTunnelPort(IConnection connection)
         {
-            var connection = await GetConnection(serverType);
-
-            MessageResponeInfo result = await messengerSender.SendReply(new MessageRequestWrap
+            var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Path = "register/port",
                 Memory = Helper.EmptyArray,
+                Path = "register/port",
+                Timeout = 2000
             }).ConfigureAwait(false);
 
-            //connection.Disponse();
-            if (result.Code != MessageResponeCodes.OK)
+            if (resp.Code == MessageResponeCodes.OK)
             {
-                return 0;
+                return resp.Data.Span.ToInt32();
             }
-            return result.Data.Span.ToInt32();
+            return 0;
         }
-        private async Task<IConnection> GetConnection(ServerType serverType)
+        public async Task<ulong> AddTunnel(IConnection connection, ulong tunnelName, int port, int localPort)
         {
-            IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
-            if (serverType == ServerType.TCP)
+            var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
-                IPEndPoint endpoint = new IPEndPoint(serverAddress, config.Server.TcpPort);
-                Socket tcpSocket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 5);
-                tcpSocket.Connect(endpoint);
-                return tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
-            }
-            else
-            {
-                IPEndPoint endpoint = new IPEndPoint(serverAddress, config.Server.UdpPort);
-                return await udpServer.CreateConnection(endpoint);
-            }
-        }
+                Connection = connection,
+                Memory = new TunnelRegisterInfo { LocalPort = localPort, Port = port, TunnelName = tunnelName }.ToBytes(),
+                Path = "register/addtunnel",
+                Timeout = 2000
+            }).ConfigureAwait(false);
 
+            if (resp.Code == MessageResponeCodes.OK)
+            {
+                return resp.Data.Span.ToUInt64();
+            }
+            return 0;
+        }
     }
 
     public class TunnelRegisterParams
     {
         public TunnelRegisterParams() { }
 
-        public string TunnelName { get; set; } = string.Empty;
+        public int TunnelName { get; set; } = -1;
         public int LocalPort { get; set; } = 0;
         public int Port { get; set; } = 0;
         public IConnection Connection { get; set; }

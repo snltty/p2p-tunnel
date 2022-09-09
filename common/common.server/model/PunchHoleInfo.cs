@@ -39,7 +39,7 @@ namespace common.server.model
         /// <summary>
         /// 通道名，可能会有多个通道
         /// </summary>
-        public string TunnelName { get; set; } = string.Empty;
+        public ulong TunnelName { get; set; } = 0;
 
         /// <summary>
         /// 携带的数
@@ -57,7 +57,7 @@ namespace common.server.model
                 1 + 1 + 1
                 + 2
                 + 8 + 8
-                + 1 + nameBytes.Length + Data.Length
+                + nameBytes.Length + Data.Length
                 ];
             int index = 0;
 
@@ -77,9 +77,8 @@ namespace common.server.model
             Array.Copy(toidBytes, 0, bytes, index, toidBytes.Length);
             index += 8;
 
-            bytes[index] = (byte)nameBytes.Length;
-            Array.Copy(nameBytes, 0, bytes, index + 1, nameBytes.Length);
-            index += 1 + nameBytes.Length;
+            Array.Copy(nameBytes, 0, bytes, index, nameBytes.Length);
+            index += nameBytes.Length;
 
             Data.CopyTo(bytes.AsMemory(index));
 
@@ -107,8 +106,8 @@ namespace common.server.model
             ToId = span.Slice(index, 8).ToUInt64();
             index += 8;
 
-            TunnelName = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
+            TunnelName = span.Slice(index, 8).ToUInt64();
+            index += 8;
 
             Data = data.Slice(index);
 

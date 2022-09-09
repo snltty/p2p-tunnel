@@ -46,18 +46,18 @@ namespace common.libs.rateLimit
             }
         }
 
-        public void SetRate(TKey key, int num)
+        public void SetRate(TKey key, int rate)
         {
             if (disponsed == false)
             {
                 if (limits.TryGetValue(key, out SlidingRateInfo info) == false)
                 {
-                    info = new SlidingRateInfo { Rate = num, Items = new SlidingRateItemInfo[windowLength], CurrentRate = 0 };
+                    info = new SlidingRateInfo { Rate = rate, Items = new SlidingRateItemInfo[windowLength], CurrentRate = 0 };
                     limits.TryAdd(key, info);
                 }
                 else
                 {
-                    info.Rate = num;
+                    info.Rate = rate;
                 }
             }
         }
@@ -89,9 +89,9 @@ namespace common.libs.rateLimit
             return false;
         }
 
-        public async Task<bool> TryWait(TKey key, int num)
+        public async Task TryWait(TKey key, int num)
         {
-            if (disponsed) return false;
+            if (disponsed) return;
 
             int last = num;
             do
@@ -124,7 +124,6 @@ namespace common.libs.rateLimit
                     Monitor.Exit(this);
                 }
             } while (last > 0);
-            return true;
         }
 
         private void Move(SlidingRateInfo info)

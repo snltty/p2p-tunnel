@@ -218,7 +218,7 @@ namespace common.tcpforward
         private void Receive(TcpForwardInfo arg, byte[] data, int offset, int length)
         {
             arg.Buffer = data.AsMemory(offset, length);
-            tcpForwardMessengerSender.SendResponse(arg).ConfigureAwait(false).GetAwaiter().GetResult();
+            _ = tcpForwardMessengerSender.SendResponse(arg);
         }
 
     }

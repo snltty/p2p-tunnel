@@ -10,6 +10,8 @@ namespace common.server
 
         public void Stop();
 
+        public void InputData(IConnection connection);
+
         public SimpleSubPushHandler<IConnection> OnPacket { get; }
         public SimpleSubPushHandler<IConnection> OnDisconnect { get; }
         public Action<IConnection> OnConnected { get; set; }

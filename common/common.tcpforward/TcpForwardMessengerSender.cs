@@ -32,11 +32,12 @@ namespace common.tcpforward
         public SimpleSubPushHandler<TcpForwardInfo> OnResponseHandler { get; } = new SimpleSubPushHandler<TcpForwardInfo>();
         public async Task SendResponse(TcpForwardInfo arg)
         {
+            var bytes = arg.ToBytes();
             var res = messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = "TcpForward/Response",
                 Connection = arg.Connection.FromConnection,
-                Memory = arg.ToBytes()
+                Memory = bytes
             }).ConfigureAwait(false);
             await res;
         }

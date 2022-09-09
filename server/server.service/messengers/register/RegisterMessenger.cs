@@ -15,6 +15,7 @@ namespace server.service.messengers.register
         private readonly Config config;
         private readonly IRegisterKeyValidator registerKeyValidator;
         private readonly MessengerSender messengerSender;
+        private readonly NumberSpace numberSpaceTunnelName = new NumberSpace(2);
 
         public RegisterMessenger(IClientRegisterCaching clientRegisterCache, Config config, IRegisterKeyValidator registerKeyValidator, MessengerSender messengerSender)
         {
@@ -55,7 +56,7 @@ namespace server.service.messengers.register
                 Port = connection.Address.Port,
                 LocalPort = model.LocalUdpPort,
                 Servertype = ServerType.UDP,
-                TunnelName = "udp",
+                TunnelName = 0,
                 IsDefault = true,
             });
 
@@ -84,7 +85,7 @@ namespace server.service.messengers.register
                 Port = connection.Address.Port,
                 LocalPort = model.LocalTcpPort,
                 Servertype = ServerType.TCP,
-                TunnelName = "tcp",
+                TunnelName = 1,
                 IsDefault = true,
             });
 
@@ -153,16 +154,34 @@ namespace server.service.messengers.register
         {
             return connection.Address.Port.ToBytes();
         }
-        public byte[] Address(IConnection connection)
+
+        public byte[] AddTunnel(IConnection connection)
         {
-            return connection.Address.GetAddressBytes();
+            TunnelRegisterInfo model = new TunnelRegisterInfo();
+            model.DeBytes(connection.ReceiveRequestWrap.Memory);
+            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+            {
+                if (model.TunnelName == 0)
+                {
+                    model.TunnelName = numberSpaceTunnelName.Increment();
+                }
+
+                source.AddTunnel(new TunnelRegisterCacheInfo
+                {
+                    IsDefault = true,
+                    LocalPort = model.LocalPort,
+                    Port = model.Port,
+                    Servertype = connection.ServerType,
+                    TunnelName = model.TunnelName,
+                });
+            }
+            return model.TunnelName.ToBytes();
         }
 
         public void Notify(IConnection connection)
         {
             clientRegisterCache.Notify(connection);
         }
-
         private async Task<bool> GetAlive(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap

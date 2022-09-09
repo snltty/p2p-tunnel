@@ -41,16 +41,16 @@ namespace server.messengers.register
             TcpConnection.ConnectId = Id;
         }
 
-        private ConcurrentDictionary<string, TunnelRegisterCacheInfo> tunnels = new ConcurrentDictionary<string, TunnelRegisterCacheInfo>();
+        private ConcurrentDictionary<ulong, TunnelRegisterCacheInfo> tunnels = new ConcurrentDictionary<ulong, TunnelRegisterCacheInfo>();
         public void AddTunnel(TunnelRegisterCacheInfo model)
         {
             tunnels.AddOrUpdate(model.TunnelName, model, (a, b) => model);
         }
-        public bool TunnelExists(string tunnelName)
+        public bool TunnelExists(ulong tunnelName)
         {
             return tunnels.ContainsKey(tunnelName);
         }
-        public bool GetTunnel(string tunnelName, out TunnelRegisterCacheInfo model)
+        public bool GetTunnel(ulong tunnelName, out TunnelRegisterCacheInfo model)
         {
             return tunnels.TryGetValue(tunnelName, out model);
         }
@@ -58,7 +58,7 @@ namespace server.messengers.register
 
     public class TunnelRegisterCacheInfo
     {
-        public string TunnelName { get; set; } = string.Empty;
+        public ulong TunnelName { get; set; } = 0;
         public int Port { get; set; } = 0;
         public int LocalPort { get; set; } = 0;
         public ServerType Servertype { get; set; }

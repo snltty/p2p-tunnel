@@ -16,7 +16,7 @@ namespace common.libs.rateLimit
         /// </summary>
         /// <param name="key"></param>
         /// <param name="num"></param>
-        void SetRate(TKey key, int num);
+        void SetRate(TKey key, int rate);
 
         /// <summary>
         /// 检查一下是否可通行,失败不计入
@@ -31,8 +31,8 @@ namespace common.libs.rateLimit
         /// </summary>
         /// <param name="key">对象key</param>
         /// <param name="num">本次输入的值</param>
-        /// <returns>true可通行，false不可通行</returns>
-        Task<bool> TryWait(TKey key, int num);
+        /// <returns></returns>
+        Task TryWait(TKey key, int num);
 
         /// <summary>
         /// 移除
