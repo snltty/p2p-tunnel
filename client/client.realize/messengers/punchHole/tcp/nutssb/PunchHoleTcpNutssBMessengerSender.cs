@@ -41,7 +41,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         private IConnection TcpServer => registerState.TcpConnection;
         private ulong ConnectId => registerState.ConnectId;
 
-        private int RouteLevel => registerState.LocalInfo.RouteLevel + 5;
+        private int RouteLevel => registerState.LocalInfo.RouteLevel + 1;
 #if DEBUG
         private bool UseLocalPort = false;
 #else
@@ -126,7 +126,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
                 bool success = false;
                 int interval = 0, port = 0;
-                for (int i = 0; i < cache.TryTimes; i++)
+                for (byte i = 0; i < cache.TryTimes; i++)
                 {
                     if (cache.Canceled)
                     {
@@ -183,7 +183,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             targetSocket.SafeClose();
                             targetSocket = null;
                             interval = 100;
-                            await SendStep2Retry(arg).ConfigureAwait(false);
+                            await SendStep2Retry(arg, i).ConfigureAwait(false);
                             if (arg.Data.GuessPort > 0)
                             {
                                 interval = 0;
@@ -208,7 +208,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         }
                         else
                         {
-                            await SendStep2Retry(arg).ConfigureAwait(false);
+                            await SendStep2Retry(arg, i).ConfigureAwait(false);
                             if (arg.Data.GuessPort > 0)
                             {
                                 interval = 0;
@@ -252,41 +252,28 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             if (clientInfoCaching.GetTunnelPort(e.RawData.TunnelName, out int localPort))
             {
                 OnStep2RetryHandler.Push(e);
-                int startPort = e.Data.Port;
-                int endPort = e.Data.Port;
-                if (e.Data.GuessPort > 0)
-                {
-                    startPort = e.Data.GuessPort;
-                    endPort = startPort + 20;
-                }
-                if (endPort > 65535)
-                {
-                    endPort = 65535;
-                }
-                for (int i = startPort; i <= endPort; i++)
-                {
 
-                    Socket targetSocket = null;
-                    try
+                Socket targetSocket = null;
+                try
+                {
+                    IPEndPoint target = new IPEndPoint(e.Data.Ip, e.Data.Port);
+                    targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    targetSocket.Ttl = (short)(RouteLevel + e.RawData.Index);
+                    targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    targetSocket.Bind(new IPEndPoint(config.Client.BindIp, localPort));
+                    _ = targetSocket.ConnectAsync(target);
+                }
+                catch (Exception)
+                {
+                }
+                finally
+                {
+                    if (targetSocket != null)
                     {
-                        IPEndPoint target = new IPEndPoint(e.Data.Ip, i);
-                        targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                        targetSocket.Ttl = (short)(RouteLevel);
-                        targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                        targetSocket.Bind(new IPEndPoint(config.Client.BindIp, localPort));
-                        _ = targetSocket.ConnectAsync(target);
-                    }
-                    catch (Exception)
-                    {
-                    }
-                    finally
-                    {
-                        if (targetSocket != null)
-                        {
-                            targetSocket.SafeClose();
-                        }
+                        targetSocket.SafeClose();
                     }
                 }
+
             }
         }
 
@@ -384,7 +371,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }).ConfigureAwait(false);
             Logger.Instance.DebugDebug($"after Send Step2, toid:{arg.RawData.FromId},fromid:{ConnectId}");
         }
-        private async Task SendStep2Retry(OnStep2Params arg)
+        private async Task SendStep2Retry(OnStep2Params arg, byte index)
         {
             Logger.Instance.DebugDebug($"before Send Step2Retry");
             await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2TryInfo>
@@ -393,6 +380,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 Connection = TcpServer,
                 ToId = arg.RawData.FromId,
                 GuessPort = 0,
+                Index = index,
                 Data = new PunchHoleStep2TryInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_TRY, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
             Logger.Instance.DebugDebug($"after Send Step2Retry");
@@ -472,7 +460,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL, PunchType = PunchHoleTypes.TCP_NUTSSB }
                     }).ConfigureAwait(false);
                 }
-               
+
             }
             catch (Exception ex)
             {

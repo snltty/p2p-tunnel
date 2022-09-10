@@ -34,14 +34,16 @@ namespace client.messengers.punchHole.tcp
     }
 
 
-    public class OnStep2RetryParams : OnStepBaseParams { }
+    public class OnStep2RetryParams : OnStepBaseParams
+    {
+    }
     public class OnStep2StopParams : OnStepBaseParams { }
 
     public class PunchHoleStep2TryInfo : IPunchHoleStepInfo
     {
         public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
 
-        public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.NOTIFY;
+        public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.FORWARD;
 
         public byte Step { get; set; } = (byte)PunchHoleTcpNutssBSteps.STEP_2_TRY;
 
@@ -50,7 +52,7 @@ namespace client.messengers.punchHole.tcp
             return new byte[] {
                 (byte)PunchType,
                 (byte)ForwardType,
-                Step,
+                Step
             };
         }
         public void DeBytes(ReadOnlyMemory<byte> data)

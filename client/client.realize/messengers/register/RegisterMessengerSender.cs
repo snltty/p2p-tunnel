@@ -15,17 +15,13 @@ namespace client.realize.messengers.register
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerState;
         private readonly Config config;
-        private readonly ITcpServer tcpServer;
-        private readonly IUdpServer udpServer;
 
 
-        public RegisterMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerState, Config config, ITcpServer tcpServer, IUdpServer udpServer)
+        public RegisterMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerState, Config config)
         {
             this.messengerSender = messengerSender;
             this.registerState = registerState;
             this.config = config;
-            this.tcpServer = tcpServer;
-            this.udpServer = udpServer;
         }
 
         public async Task<RegisterResult> Register(RegisterParams param)
@@ -126,38 +122,7 @@ namespace client.realize.messengers.register
             }).ConfigureAwait(false);
         }
 
-        public async Task<int> GetTunnelPort(IConnection connection)
-        {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
-            {
-                Connection = connection,
-                Memory = Helper.EmptyArray,
-                Path = "register/port",
-                Timeout = 2000
-            }).ConfigureAwait(false);
-
-            if (resp.Code == MessageResponeCodes.OK)
-            {
-                return resp.Data.Span.ToInt32();
-            }
-            return 0;
-        }
-        public async Task<ulong> AddTunnel(IConnection connection, ulong tunnelName, int port, int localPort)
-        {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
-            {
-                Connection = connection,
-                Memory = new TunnelRegisterInfo { LocalPort = localPort, Port = port, TunnelName = tunnelName }.ToBytes(),
-                Path = "register/addtunnel",
-                Timeout = 2000
-            }).ConfigureAwait(false);
-
-            if (resp.Code == MessageResponeCodes.OK)
-            {
-                return resp.Data.Span.ToUInt64();
-            }
-            return 0;
-        }
+       
     }
 
     public class TunnelRegisterParams

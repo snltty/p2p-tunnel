@@ -20,14 +20,12 @@ namespace client.realize.messengers.punchHole
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerState;
         private readonly ServiceProvider serviceProvider;
-        private readonly RegisterMessengerSender registerMessengerSender;
 
-        public PunchHoleMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerState, ServiceProvider serviceProvider, RegisterMessengerSender registerMessengerSender)
+        public PunchHoleMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerState, ServiceProvider serviceProvider)
         {
             this.messengerSender = messengerSender;
             this.registerState = registerState;
             this.serviceProvider = serviceProvider;
-            this.registerMessengerSender = registerMessengerSender;
         }
 
         public void LoadPlugins(Assembly[] assemblys)
@@ -70,6 +68,7 @@ namespace client.realize.messengers.punchHole
                     ToId = arg.ToId,
                     TunnelName = arg.TunnelName,
                     GuessPort = arg.GuessPort,
+                    Index = arg.Index,
                 }.ToBytes()
             }).ConfigureAwait(false);
         }
@@ -90,11 +89,18 @@ namespace client.realize.messengers.punchHole
                     ToId = arg.ToId,
                     TunnelName = arg.TunnelName,
                     GuessPort = arg.GuessPort,
+                    Index = arg.Index,
                 }.ToBytes()
             }).ConfigureAwait(false);
         }
 
         public SimpleSubPushHandler<OnPunchHoleArg> OnReverse { get; } = new SimpleSubPushHandler<OnPunchHoleArg>();
+        /// <summary>
+        /// 通知其反向连接
+        /// </summary>
+        /// <param name="toid"></param>
+        /// <param name="tryreverse"></param>
+        /// <returns></returns>
         public async Task SendReverse(ulong toid, byte tryreverse = 0)
         {
             await Send(new SendPunchHoleArg<PunchHoleReverseInfo>
@@ -106,6 +112,12 @@ namespace client.realize.messengers.punchHole
         }
 
         public SimpleSubPushHandler<OnRelayParam> OnRelay { get; } = new SimpleSubPushHandler<OnRelayParam>();
+        /// <summary>
+        /// 通知其要使用中继
+        /// </summary>
+        /// <param name="toid"></param>
+        /// <param name="serverType"></param>
+        /// <returns></returns>
         public async Task SendRelay(ulong toid, ServerType serverType)
         {
             await Send(new SendPunchHoleArg<PunchHoleRelayInfo>
@@ -117,6 +129,13 @@ namespace client.realize.messengers.punchHole
         }
 
         public SimpleSubPushHandler<PunchHoleTunnelInfo> OnTunnel { get; } = new SimpleSubPushHandler<PunchHoleTunnelInfo>();
+        /// <summary>
+        /// 通知其开启新通道
+        /// </summary>
+        /// <param name="toid"></param>
+        /// <param name="tunnelName"></param>
+        /// <param name="serverType"></param>
+        /// <returns></returns>
         public async Task SendTunnel(ulong toid, ulong tunnelName, ServerType serverType)
         {
             await SendReply(new SendPunchHoleArg<PunchHoleTunnelInfo>
@@ -127,6 +146,11 @@ namespace client.realize.messengers.punchHole
             }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// 通知其重置注册
+        /// </summary>
+        /// <param name="toid"></param>
+        /// <returns></returns>
         public async Task SendReset(ulong toid)
         {
             await Send(new SendPunchHoleArg<PunchHoleResetInfo>
@@ -149,9 +173,11 @@ namespace client.realize.messengers.punchHole
         public IConnection Connection { get; set; }
 
         public ulong ToId { get; set; }
+
         public int GuessPort { get; set; } = 0;
 
         public ulong TunnelName { get; set; } = 0;
+        public byte Index { get; set; } = 0;
 
         public T Data { get; set; }
     }

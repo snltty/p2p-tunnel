@@ -24,6 +24,7 @@ namespace common.server.model
         /// 打洞类别，tcp udp 或者其它
         /// </summary>
         public byte PunchType { get; set; } = 0;
+        public byte Index { get; set; } = 0;
         /// <summary>
         /// 猜测的端口
         /// </summary>
@@ -41,6 +42,7 @@ namespace common.server.model
         /// </summary>
         public ulong TunnelName { get; set; } = 0;
 
+
         /// <summary>
         /// 携带的数
         /// </summary>
@@ -54,7 +56,7 @@ namespace common.server.model
             var nameBytes = TunnelName.ToBytes();
 
             var bytes = new byte[
-                1 + 1 + 1
+                1 + 1 + 1 + 1
                 + 2
                 + 8 + 8
                 + nameBytes.Length + Data.Length
@@ -66,6 +68,8 @@ namespace common.server.model
             bytes[index] = PunchStep;
             index += 1;
             bytes[index] = PunchType;
+            index += 1;
+            bytes[index] = Index;
             index += 1;
 
             bytes[index] = guessPortBytes[0];
@@ -95,6 +99,8 @@ namespace common.server.model
             PunchStep = span[index];
             index += 1;
             PunchType = span[index];
+            index += 1;
+            Index = span[index];
             index += 1;
 
             GuessPort = span.Slice(index, 2).ToUInt16();
@@ -205,7 +211,7 @@ namespace common.server.model
                 index += 1 + span[index];
             }
 
-            IsDefault = span[index] == 1 ? true : false;
+            IsDefault = span[index] == 1;
             index += 1;
 
             Ip = new IPAddress(span.Slice(index + 1, span[index]));

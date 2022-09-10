@@ -20,7 +20,7 @@ namespace client.messengers.punchHole
     public class ConnectParams
     {
         public ulong Id { get; set; } = 0;
-        public int TryTimes { get; set; } = 5;
+        public byte TryTimes { get; set; } = 5;
         public ulong TunnelName { get; set; } = 0;
         public int LocalPort { get; set; } = 0;
     }
@@ -49,7 +49,7 @@ namespace client.messengers.punchHole
 
     public class ConnectCacheModel
     {
-        public int TryTimes { get; set; } = 5;
+        public byte TryTimes { get; set; } = 5;
         public bool Canceled { get; set; } = false;
         public TaskCompletionSource<ConnectResultModel> Tcs { get; set; }
         public ulong TunnelName { get; set; }

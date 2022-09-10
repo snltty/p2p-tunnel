@@ -15,11 +15,12 @@ namespace client.service.vea
         {
             var ip = config.IP.GetAddressBytes();
             var lanip = config.LanIP.GetAddressBytes();
+
             var bytes = new byte[1 + ip.Length + lanip.Length];
 
             bytes[0] = (byte)ip.Length;
-            Array.Copy(ip, 0, bytes, 1, bytes.Length);
-            Array.Copy(ip, 0, lanip, bytes.Length + 1, lanip.Length);
+            Array.Copy(ip, 0, bytes, 1, ip.Length);
+            Array.Copy(lanip, 0, bytes, ip.Length + 1, lanip.Length);
 
             return bytes;
         }

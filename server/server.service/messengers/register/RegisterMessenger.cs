@@ -1,5 +1,4 @@
 ﻿using common.libs;
-using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.register;
@@ -15,7 +14,6 @@ namespace server.service.messengers.register
         private readonly Config config;
         private readonly IRegisterKeyValidator registerKeyValidator;
         private readonly MessengerSender messengerSender;
-        private readonly NumberSpace numberSpaceTunnelName = new NumberSpace(2);
 
         public RegisterMessenger(IClientRegisterCaching clientRegisterCache, Config config, IRegisterKeyValidator registerKeyValidator, MessengerSender messengerSender)
         {
@@ -56,7 +54,7 @@ namespace server.service.messengers.register
                 Port = connection.Address.Port,
                 LocalPort = model.LocalUdpPort,
                 Servertype = ServerType.UDP,
-                TunnelName = 0,
+                TunnelName = (ulong)TunnelDefaults.UDP,
                 IsDefault = true,
             });
 
@@ -85,7 +83,7 @@ namespace server.service.messengers.register
                 Port = connection.Address.Port,
                 LocalPort = model.LocalTcpPort,
                 Servertype = ServerType.TCP,
-                TunnelName = 1,
+                TunnelName = (ulong)TunnelDefaults.TCP,
                 IsDefault = true,
             });
 
@@ -144,38 +142,6 @@ namespace server.service.messengers.register
                 }
             }
             return (verify, client);
-        }
-
-        public byte[] Ip(IConnection connection)
-        {
-            return connection.Address.Address.GetAddressBytes();
-        }
-        public byte[] Port(IConnection connection)
-        {
-            return connection.Address.Port.ToBytes();
-        }
-
-        public byte[] AddTunnel(IConnection connection)
-        {
-            TunnelRegisterInfo model = new TunnelRegisterInfo();
-            model.DeBytes(connection.ReceiveRequestWrap.Memory);
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
-            {
-                if (model.TunnelName == 0)
-                {
-                    model.TunnelName = numberSpaceTunnelName.Increment();
-                }
-
-                source.AddTunnel(new TunnelRegisterCacheInfo
-                {
-                    IsDefault = true,
-                    LocalPort = model.LocalPort,
-                    Port = model.Port,
-                    Servertype = connection.ServerType,
-                    TunnelName = model.TunnelName,
-                });
-            }
-            return model.TunnelName.ToBytes();
         }
 
         public void Notify(IConnection connection)

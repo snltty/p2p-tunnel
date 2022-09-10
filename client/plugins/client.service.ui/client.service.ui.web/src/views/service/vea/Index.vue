@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-10 01:49:52
+ * @LastEditTime: 2022-09-10 11:21:18
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -119,7 +119,7 @@
         <div class="inner">
             <h3 class="title t-c">组网列表</h3>
             <div>
-                <el-table border :data="showClients" style="width: 100%">
+                <el-table size="small" border :data="showClients" style="width: 100%">
                     <el-table-column prop="Name" label="客户端">
                         <template #default="scope">
                             <strong v-if="scope.row.online" style="color:green">{{scope.row.Name}}</strong>
@@ -128,8 +128,8 @@
                     </el-table-column>
                     <el-table-column prop="veaIp" label="虚拟ip">
                         <template #default="scope">
-                            <p>{{scope.row.veaIp.IP}}</p>
-                            <p style="color:#666">{{scope.row.veaIp.LanIP}}</p>
+                            <p><strong>{{scope.row.veaIp.IP}}</strong></p>
+                            <p style="color:#999">{{scope.row.veaIp.LanIP}}</p>
                         </template>
                     </el-table-column>
                 </el-table>

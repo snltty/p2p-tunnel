@@ -33,6 +33,7 @@ namespace client.realize.messengers.clients
         private readonly IUdpServer udpServer;
         private readonly ITcpServer tcpServer;
         private readonly RegisterMessengerSender registerMessengerSender;
+        private readonly ClientsMessengerSender clientsMessengerSender;
 
         private const byte TryReverseMinValue = 1;
         private const byte TryReverseMaxValue = 2;
@@ -43,6 +44,7 @@ namespace client.realize.messengers.clients
             IUdpServer udpServer, ITcpServer tcpServer, RegisterMessengerSender registerMessengerSender
         )
         {
+            this.clientsMessengerSender = clientsMessengerSender;
             this.punchHoleUdp = punchHoleUdp;
             this.punchHoleTcp = punchHoleTcp;
             this.registerState = registerState;
@@ -156,27 +158,25 @@ namespace client.realize.messengers.clients
                 bool udp = false, tcp = false;
                 if (config.Client.UseUdp && info.Udp && info.UdpConnecting == false && info.UdpConnected == false)
                 {
-                    udp = false;// await ConnectUdp(info,localPort: registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+                    //默认通道连一下，不成功的话，开一个新通道再次尝试连接
+                    udp = await ConnectUdp(info,(ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
                     if (udp == false)
                     {
-                        (ulong tunnelName, int localPort) = await NewBind(ServerType.UDP);
-                        await punchHoleMessengerSender.SendTunnel(info.Id, tunnelName, ServerType.UDP);
-                        await Task.Delay(1000);
+                        (ulong tunnelName, int localPort) = await NewTunnel(info.Id, ServerType.UDP);
                         udp = await ConnectUdp(info, tunnelName, localPort).ConfigureAwait(false);
                     }
                 }
                 if (config.Client.UseTcp && info.Tcp && info.TcpConnecting == false && info.TcpConnected == false)
                 {
-                    tcp = false; //await ConnectTcp(info,localPort: registerState.LocalInfo.TcpPort).ConfigureAwait(false);
+                    tcp = await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
                     if (tcp == false)
                     {
-                        (ulong tunnelName, int localPort) = await NewBind(ServerType.TCP);
-                        await punchHoleMessengerSender.SendTunnel(info.Id, tunnelName, ServerType.TCP);
-                        await Task.Delay(1000);
+                        (ulong tunnelName, int localPort) = await NewTunnel(info.Id, ServerType.TCP);
                         tcp = await ConnectTcp(info, tunnelName, localPort).ConfigureAwait(false);
                     }
                 }
 
+                //有未成功的，并且尝试次数没达到限制，就通知对方反向连接
                 if ((udp == false || tcp == false) && tryreverse < TryReverseMaxValue)
                 {
                     ConnectReverse(info.Id, tryreverse);
@@ -212,7 +212,7 @@ namespace client.realize.messengers.clients
             punchHoleTcp.SendStep2Stop(id);
         }
 
-        private async Task<bool> ConnectUdp(ClientInfo info, ulong tunnelName = 0, int localPort = 0)
+        private async Task<bool> ConnectUdp(ClientInfo info, ulong tunnelName, int localPort)
         {
             clientInfoCaching.Connecting(info.Id, true, ServerType.UDP);
             var result = await punchHoleUdp.Send(new ConnectParams
@@ -241,7 +241,7 @@ namespace client.realize.messengers.clients
             }
             return false;
         }
-        private async Task<bool> ConnectTcp(ClientInfo info, ulong tunnelName = 1, int localPort = 0)
+        private async Task<bool> ConnectTcp(ClientInfo info, ulong tunnelName, int localPort)
         {
             clientInfoCaching.Connecting(info.Id, true, ServerType.TCP);
             var result = await punchHoleTcp.Send(new ConnectParams
@@ -316,7 +316,7 @@ namespace client.realize.messengers.clients
                         }
                         else
                         {
-                            ConnectReverse(client.Id, TryReverseMinValue);
+                            ConnectReverse(client.Id);
                         }
                     }
                 }
@@ -329,18 +329,54 @@ namespace client.realize.messengers.clients
             }
         }
 
-        private async Task<(ulong, int)> NewBind(ServerType serverType, ulong tunnelName = 0)
+        /// <summary>
+        /// 新通道
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="serverType"></param>
+        /// <returns></returns>
+        private async Task<(ulong, int)> NewTunnel(ulong id, ServerType serverType)
+        {
+            (ulong tunnelName, int localPort) = await NewBind(serverType, (ulong)TunnelDefaults.UDP);
+            await punchHoleMessengerSender.SendTunnel(id, tunnelName, serverType);
+            await Task.Delay(1000);
+            return (tunnelName, localPort);
+        }
+        /// <summary>
+        /// 新绑定
+        /// </summary>
+        /// <param name="serverType"></param>
+        /// <param name="tunnelName"></param>
+        /// <returns></returns>
+        private async Task<(ulong, int)> NewBind(ServerType serverType, ulong tunnelName)
         {
             IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
-            int port = NetworkHelper.GetRandomPort();
-
-            return serverType switch
+            while (true)
             {
-                ServerType.TCP => (await NewBindTcp(port, serverAddress, tunnelName), port),
-                ServerType.UDP => (await NewBindUdp(port, serverAddress, tunnelName), port),
-                _ => (0, port),
-            };
+                try
+                {
+                    int port = NetworkHelper.GetRandomPort();
+
+                    return serverType switch
+                    {
+                        ServerType.TCP => (await NewBindTcp(port, serverAddress, tunnelName), port),
+                        ServerType.UDP => (await NewBindUdp(port, serverAddress, tunnelName), port),
+                        _ => (0, port),
+                    };
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.DebugError(ex);
+                }
+            }
         }
+        /// <summary>
+        /// 新绑定一个udp
+        /// </summary>
+        /// <param name="localport"></param>
+        /// <param name="serverAddress"></param>
+        /// <param name="tunnelName"></param>
+        /// <returns></returns>
         private async Task<ulong> NewBindUdp(int localport, IPAddress serverAddress, ulong tunnelName)
         {
             UdpServer tempUdpServer = new UdpServer();
@@ -349,14 +385,21 @@ namespace client.realize.messengers.clients
             tempUdpServer.Start(localport, config.Client.BindIp, config.Client.TimeoutDelay);
             IConnection connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
 
-            int port = await registerMessengerSender.GetTunnelPort(connection);
-            tunnelName = await registerMessengerSender.AddTunnel(registerState.UdpConnection, tunnelName, port, localport);
+            int port = await clientsMessengerSender.GetTunnelPort(connection);
+            tunnelName = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, tunnelName, port, localport);
 
             clientInfoCaching.AddTunnelPort(tunnelName, port);
             clientInfoCaching.AddUdpserver(tunnelName, tempUdpServer);
 
             return tunnelName;
         }
+        /// <summary>
+        /// 新绑定一个tcp
+        /// </summary>
+        /// <param name="localport"></param>
+        /// <param name="serverAddress"></param>
+        /// <param name="tunnelName"></param>
+        /// <returns></returns>
         private async Task<ulong> NewBindTcp(int localport, IPAddress serverAddress, ulong tunnelName)
         {
             TcpServer tempTcpServer = new TcpServer();
@@ -376,8 +419,8 @@ namespace client.realize.messengers.clients
 
             IConnection connection = tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
 
-            int port = await registerMessengerSender.GetTunnelPort(connection);
-            tunnelName = await registerMessengerSender.AddTunnel(registerState.TcpConnection, tunnelName, port, localport);
+            int port = await clientsMessengerSender.GetTunnelPort(connection);
+            tunnelName = await clientsMessengerSender.AddTunnel(registerState.TcpConnection, tunnelName, port, localport);
 
             clientInfoCaching.AddTunnelPort(tunnelName, port);
 

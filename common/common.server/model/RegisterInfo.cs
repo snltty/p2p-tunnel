@@ -300,14 +300,14 @@ namespace common.server.model
 
             int index = 0;
             Array.Copy(tunnelNameBytes, 0, bytes, 0, tunnelNameBytes.Length);
-            index+=8;
+            index += 8;
 
             bytes[index] = localPortBytes[0];
-            bytes[index+1] = localPortBytes[1];
+            bytes[index + 1] = localPortBytes[1];
             index += 2;
 
             bytes[index] = portBytes[0];
-            bytes[index+1] = portBytes[1];
+            bytes[index + 1] = portBytes[1];
 
             return bytes;
         }
@@ -322,5 +322,11 @@ namespace common.server.model
 
             Port = data.Span.Slice(index, 2).ToUInt16();
         }
+    }
+
+    public enum TunnelDefaults : ulong
+    {
+        UDP = 0,
+        TCP = 1,
     }
 }
