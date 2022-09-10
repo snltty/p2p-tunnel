@@ -17,10 +17,15 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         dotnet-version: 6.0.x
-        
+
+    - name: install maui
+      run: 
+        dotnet workload install maui
+
     - name: restore
       run: 
-        dotnet restore ./client/client.service & 
+        dotnet restore ./client/client.service &&
+        dotnet restore ./client/client.service.app &&
         dotnet restore ./server/server.service
         
     - name: publish
@@ -40,14 +45,30 @@ jobs:
         dotnet publish ./server/server.service -c release -f net6.0 -o ./publish/osx-x64-single/server	-r osx-x64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
         dotnet publish ./client/client.service -c release -f net6.0 -o ./publish/osx-arm64-single/client	-r osx-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
         dotnet publish ./server/server.service -c release -f net6.0 -o ./publish/osx-arm64-single/server	-r osx-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        tar -cvf any.tgz -C ./publish/any * &&
-        tar -cvf win-x64-single.tgz -C ./publish/win-x64-single * &&
-        tar -cvf win-arm64-single.tgz -C ./publish/win-arm64-single * &&
-        tar -cvf linux-x64-single.tgz -C ./publish/linux-x64-single * &&
-        tar -cvf linux-arm64-single.tgz -C ./publish/linux-arm64-single * &&
-        tar -cvf osx-x64-single.tgz -C ./publish/osx-x64-single * &&
-        tar -cvf osx-arm64-single.tgz -C ./publish/osx-arm64-single * 
-    
+        
+        dotnet publish ./client/client.service.app -c:Release -f:net6.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSigningStorePass=123321  /p:AndroidSdkDirectory=C:\\Android\\android-sdk &&
+        echo F|xcopy ".\\client\\client.service.app\\bin\\Release\\net6.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" ".\\p2p-tunnel.apk"  /s /f /h /y &&
+        
+        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\win-x64-single\\client\\public\\web\\" /s /f /h /y &&
+        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\win-arm64-single\\client\\public\\web\\" /s /f /h /y &&
+        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\linux-x64-single\\client\\public\\web\\" /s /f /h /y &&
+        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\linux-arm64-single\\client\\public\\web\\" /s /f /h /y &&
+        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\osx-x64-single\\client\\public\\web\\" /s /f /h /y &&
+        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\osx-arm64-single\\client\\public\\web\\" /s /f /h /y &&
+
+        echo F|xcopy ".\\client\\plugins\\client.service.vea\\tun2socks.exe" ".\\publish\\win-x64-single\\client\\"  /f /h /y &&
+        echo F|xcopy ".\\client\\plugins\\client.service.vea\\wintun.dll" ".\\publish\\win-x64-single\\client\\"  /f /h /y &&
+        echo F|xcopy ".\\client\\plugins\\client.service.vea\\tun2socks.exe" ".\\publish\\win-arm64-single\\client\\"  /f /h /y &&
+        echo F|xcopy ".\\client\\plugins\\client.service.vea\\wintun.dll" ".\\publish\\win-arm64-single\\client\\"  /f /h /y &&
+
+        7z a -tzip  any.zip  ./publish/any/* &&
+        7z a -tzip  win-x64-single.zip ./publish/win-x64-single/* &&
+        7z a -tzip  win-arm64-single.zip ./publish/win-arm64-single/* &&
+        7z a -tzip  linux-x64-single.zip ./publish/linux-x64-single/* &&
+        7z a -tzip  linux-arm64-single.zip ./publish/linux-arm64-single/* &&
+        7z a -tzip  osx-x64-single.zip ./publish/osx-x64-single/* &&
+        7z a -tzip  osx-arm64-single.zip ./publish/osx-arm64-single/*
+      
     - name: get current date
       id: date
       run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
@@ -70,9 +91,9 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./any.tgz
-        asset_name: any.tgz
-        asset_content_type: application/x-tgz
+        asset_path: ./any.zip
+        asset_name: any.zip
+        asset_content_type: application/zip
     
     - name: upload win x64 single
       id: upload-win-x64
@@ -81,9 +102,9 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./win-x64-single.tgz
-        asset_name: win-x64-single.tgz
-        asset_content_type: application/x-tgz
+        asset_path: ./win-x64-single.zip
+        asset_name: win-x64-single.zip
+        asset_content_type: application/zip
     
     - name: upload win arm64 single
       id: upload-win-arm64
@@ -92,9 +113,9 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./win-arm64-single.tgz
-        asset_name: win-arm64-single.tgz
-        asset_content_type: application/x-tgz
+        asset_path: ./win-arm64-single.zip
+        asset_name: win-arm64-single.zip
+        asset_content_type: application/zip
 
     - name: upload linux x64 single
       id: upload-linux-x64
@@ -103,9 +124,9 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./linux-x64-single.tgz
-        asset_name: linux-x64-single.tgz
-        asset_content_type: application/x-tgz
+        asset_path: ./linux-x64-single.zip
+        asset_name: linux-x64-single.zip
+        asset_content_type: application/zip
     
     - name: upload linux arm64 single
       id: upload-linux-arm64
@@ -114,9 +135,9 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./linux-arm64-single.tgz
-        asset_name: linux-arm64-single.tgz
-        asset_content_type: application/x-tgz
+        asset_path: ./linux-arm64-single.zip
+        asset_name: linux-arm64-single.zip
+        asset_content_type: application/zip
     
     - name: upload osx x64 single
       id: upload-osx-x64
@@ -125,9 +146,9 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./osx-x64-single.tgz
-        asset_name: osx-x64-single.tgz
-        asset_content_type: application/x-tgz
+        asset_path: ./osx-x64-single.zip
+        asset_name: osx-x64-single.zip
+        asset_content_type: application/zip
     
     - name: upload osx arm64 single
       id: upload-osx-arm64
@@ -136,7 +157,18 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./osx-arm64-single.tgz
-        asset_name: osx-arm64-single.tgz
-        asset_content_type: application/x-tgz
+        asset_path: ./osx-arm64-single.zip
+        asset_name: osx-arm64-single.zip
+        asset_content_type: application/zip
+
+    - name: upload apk
+      id: upload-apk
+      uses: actions/upload-release-asset@master
+      env:
+          GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./p2p-tunnel.apk
+        asset_name: p2p-tunnel.apk
+        asset_content_type: application/vnd.android.package-archive
         
