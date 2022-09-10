@@ -280,6 +280,7 @@ namespace common.socks5
                     {
                         command = Socks5EnumResponseCommand.ServerError;
                     }
+                    ConnectReponse(token, command);
                     CloseClientSocket(token);
                 }
             }
@@ -287,9 +288,9 @@ namespace common.socks5
             {
                 Logger.Instance.DebugError(ex);
                 command = Socks5EnumResponseCommand.ServerError;
+                ConnectReponse(token, command);
                 CloseClientSocket(token);
             }
-            ConnectReponse(token, command);
         }
         private void ConnectReponse(AsyncServerUserToken token, Socks5EnumResponseCommand command)
         {

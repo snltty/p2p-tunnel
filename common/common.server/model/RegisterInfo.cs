@@ -328,5 +328,6 @@ namespace common.server.model
     {
         UDP = 0,
         TCP = 1,
+        MAX = 1,
     }
 }

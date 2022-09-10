@@ -1,10 +1,12 @@
-﻿using client.messengers.register;
+﻿using client.messengers.clients;
+using client.messengers.register;
 using client.realize.messengers.crypto;
 using client.realize.messengers.heart;
 using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
+using common.server.servers.rudp;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -20,12 +22,12 @@ namespace client.realize.messengers.register
         private readonly IUdpServer udpServer;
         private readonly Config config;
         private readonly RegisterStateInfo registerState;
-        private readonly HeartMessengerSender heartMessengerSender;
+        private readonly IClientInfoCaching clientInfoCaching;
         private readonly CryptoSwap cryptoSwap;
         private int lockObject = 0;
 
         public RegisterTransfer(
-            RegisterMessengerSender registerMessageHelper, HeartMessengerSender heartMessengerSender,
+            RegisterMessengerSender registerMessageHelper, IClientInfoCaching clientInfoCaching,
             ITcpServer tcpServer, IUdpServer udpServer,
             Config config, RegisterStateInfo registerState,
             CryptoSwap cryptoSwap
@@ -36,7 +38,7 @@ namespace client.realize.messengers.register
             this.udpServer = udpServer;
             this.config = config;
             this.registerState = registerState;
-            this.heartMessengerSender = heartMessengerSender;
+            this.clientInfoCaching = clientInfoCaching;
             this.cryptoSwap = cryptoSwap;
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
@@ -121,6 +123,7 @@ namespace client.realize.messengers.register
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
                         registerState.LocalInfo.UdpPort = registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort();
                         registerState.LocalInfo.Mac = string.Empty;
+                        registerState.OnRegisterBind.Push(true);
 
                         if (config.Client.UseUdp)
                         {

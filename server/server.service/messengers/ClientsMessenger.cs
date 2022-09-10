@@ -9,7 +9,7 @@ namespace server.service.messengers
     public class ClientsMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
-        private readonly NumberSpace numberSpaceTunnelName = new NumberSpace((ulong)TunnelDefaults.TCP + 1);
+        private readonly NumberSpace numberSpaceTunnelName = new NumberSpace((ulong)TunnelDefaults.MAX + 1);
         public ClientsMessenger(IClientRegisterCaching clientRegisterCache)
         {
             this.clientRegisterCache = clientRegisterCache;

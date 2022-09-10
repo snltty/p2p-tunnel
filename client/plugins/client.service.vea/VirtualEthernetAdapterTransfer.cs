@@ -44,7 +44,6 @@ namespace client.service.vea
                     if (lanip.Equals(IPAddress.Any) == false)
                     {
                         int mask = GetIpMask(lanip);
-
                         if (lanips.ContainsKey(mask) == false)
                         {
                             cache.Mask = mask;
@@ -57,9 +56,12 @@ namespace client.service.vea
             clientInfoCaching.OnOffline.Sub((client) =>
             {
                 var value = ips.FirstOrDefault(c => c.Value.Client.Id == client.Id);
-                if (ips.TryRemove(value.Key, out IPAddressCacheInfo cache))
+                if (value.Key != null)
                 {
-                    lanips.TryRemove(cache.Mask, out _);
+                    if (ips.TryRemove(value.Key, out IPAddressCacheInfo cache))
+                    {
+                        lanips.TryRemove(cache.Mask, out _);
+                    }
                 }
             });
 
@@ -165,25 +167,20 @@ namespace client.service.vea
         }
         private void AddRouteWindows(IPAddress ip)
         {
-            if(interfaceNumber > 0)
+            if (interfaceNumber > 0)
             {
-                Command.Execute("cmd.exe", string.Empty, new string[] { $"route add {ip} mask 0.0.0.0 {config.IP} metric 5 if {interfaceNumber}" });
+                Command.Execute("cmd.exe", string.Empty, new string[] { $"route add {ip} mask 255.255.255.0 {config.IP} metric 5 if {interfaceNumber}" });
             }
         }
 
 
-        byte[] mask = new byte[] { 255, 255, 255, 0 };
         public int GetIpMask(IPAddress ip)
         {
             return GetIpMask(ip.GetAddressBytes());
         }
         public int GetIpMask(Span<byte> ip)
         {
-            for (int i = 0; i < ip.Length; i++)
-            {
-                ip[i] &= mask[i];
-            }
-            return ip.ToInt32();
+            return ip.ToInt32() & 0xffffff;
         }
     }
 

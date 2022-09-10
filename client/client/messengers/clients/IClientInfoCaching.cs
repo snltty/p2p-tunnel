@@ -27,6 +27,7 @@ namespace client.messengers.clients
         public void AddTunnelPort(ulong tunnelName, int port);
         public bool GetTunnelPort(ulong tunnelName, out int port);
         public void RemoveTunnelPort(ulong tunnelName);
+        public string TunnelPorts();
 
         public void AddUdpserver(ulong tunnelName, UdpServer server);
         public bool GetUdpserver(ulong tunnelName, out UdpServer server);

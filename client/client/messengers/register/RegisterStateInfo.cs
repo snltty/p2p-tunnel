@@ -34,6 +34,7 @@ namespace client.messengers.register
         public LocalInfo LocalInfo { get; set; } = new LocalInfo();
 
         public SimpleSubPushHandler<bool> OnRegisterStateChange { get; } = new SimpleSubPushHandler<bool>();
+        public SimpleSubPushHandler<bool> OnRegisterBind { get; } = new SimpleSubPushHandler<bool>();
 
         private ulong connectid = 0;
         public ulong ConnectId
@@ -82,10 +83,13 @@ namespace client.messengers.register
             {
                 udp.Disponse();
             }
+
+            OnRegisterBind.Push(false);
             if (online != TcpOnline)
             {
                 OnRegisterStateChange.Push(false);
             }
+            
         }
         public void Online(ulong id, IPAddress ip, int udpPort, int tcpPort)
         {

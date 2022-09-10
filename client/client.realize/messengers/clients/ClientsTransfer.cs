@@ -32,7 +32,6 @@ namespace client.realize.messengers.clients
         private readonly Config config;
         private readonly IUdpServer udpServer;
         private readonly ITcpServer tcpServer;
-        private readonly RegisterMessengerSender registerMessengerSender;
         private readonly ClientsMessengerSender clientsMessengerSender;
 
         private const byte TryReverseMinValue = 1;
@@ -41,7 +40,7 @@ namespace client.realize.messengers.clients
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
-            IUdpServer udpServer, ITcpServer tcpServer, RegisterMessengerSender registerMessengerSender
+            IUdpServer udpServer, ITcpServer tcpServer
         )
         {
             this.clientsMessengerSender = clientsMessengerSender;
@@ -53,43 +52,61 @@ namespace client.realize.messengers.clients
             this.udpServer = udpServer;
             this.tcpServer = tcpServer;
 
-            this.registerMessengerSender = registerMessengerSender;
 
             punchHoleUdp.OnStep1Handler.Sub((e) => { clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.UDP); });
             punchHoleUdp.OnStep2FailHandler.Sub((e) =>
             {
                 clientInfoCaching.Connecting(e.RawData.FromId, false, ServerType.UDP);
-                clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                {
+                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                    clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
+                }
             });
             punchHoleUdp.OnStep3Handler.Sub((e) =>
             {
                 clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P);
-                clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                {
+                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                    clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
+                }
             });
             punchHoleUdp.OnStep4Handler.Sub((e) =>
             {
                 clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P);
-                clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                {
+                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                    clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
+                }  
             });
 
             punchHoleTcp.OnStep1Handler.Sub((e) => clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.TCP));
             punchHoleTcp.OnStep2FailHandler.Sub((e) =>
             {
                 clientInfoCaching.Connecting(e.RawData.FromId, false, ServerType.TCP);
-                clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
+                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                {
+                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                }
             });
             punchHoleTcp.OnStep3Handler.Sub((e) =>
             {
                 clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P);
-                clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
+                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                {
+                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                   
+                }
             });
             punchHoleTcp.OnStep4Handler.Sub((e) =>
             {
                 clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P);
-                clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
+                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                {
+                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                }
             });
 
             //新通道
@@ -128,6 +145,7 @@ namespace client.realize.messengers.clients
             punchHoleMessengerSender.OnReverse.Sub(OnReverse);
             //本客户端注册状态
             registerState.OnRegisterStateChange.Sub(OnRegisterStateChange);
+            registerState.OnRegisterBind.Sub(OnRegisterBind);
             //收到来自服务器的 在线客户端 数据
             clientsMessengerSender.OnServerClientsData.Sub(OnServerSendClients);
 
@@ -159,7 +177,7 @@ namespace client.realize.messengers.clients
                 if (config.Client.UseUdp && info.Udp && info.UdpConnecting == false && info.UdpConnected == false)
                 {
                     //默认通道连一下，不成功的话，开一个新通道再次尝试连接
-                    udp = await ConnectUdp(info,(ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+                    udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
                     if (udp == false)
                     {
                         (ulong tunnelName, int localPort) = await NewTunnel(info.Id, ServerType.UDP);
@@ -273,9 +291,27 @@ namespace client.realize.messengers.clients
 
         private void OnRegisterStateChange(bool state)
         {
+            
+        }
+        private void OnRegisterBind(bool state)
+        {
             firstClients.Reset();
             clientInfoCaching.Clear();
+            if (state)
+            {
+                clientInfoCaching.AddTunnelPort((ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort);
+                clientInfoCaching.AddUdpserver((ulong)TunnelDefaults.UDP, udpServer as UdpServer);
+                clientInfoCaching.AddTunnelPort((ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort);
+            }
+            else
+            {
+                clientInfoCaching.RemoveTunnelPort((ulong)TunnelDefaults.UDP);
+                clientInfoCaching.RemoveUdpserver((ulong)TunnelDefaults.UDP);
+                clientInfoCaching.RemoveTunnelPort((ulong)TunnelDefaults.TCP);
+            }
         }
+        
+
         private void OnServerSendClients(ClientsInfo clients)
         {
             try
@@ -339,7 +375,7 @@ namespace client.realize.messengers.clients
         {
             (ulong tunnelName, int localPort) = await NewBind(serverType, (ulong)TunnelDefaults.UDP);
             await punchHoleMessengerSender.SendTunnel(id, tunnelName, serverType);
-            await Task.Delay(1000);
+            await Task.Delay(2000);
             return (tunnelName, localPort);
         }
         /// <summary>

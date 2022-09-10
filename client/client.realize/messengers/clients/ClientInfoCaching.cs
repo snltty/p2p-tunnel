@@ -1,5 +1,6 @@
 ﻿using client.messengers.clients;
 using common.libs;
+using common.libs.extends;
 using common.server;
 using common.server.model;
 using common.server.servers.rudp;
@@ -88,14 +89,19 @@ namespace client.realize.messengers.clients
         {
             tunnelPorts.TryAdd(tunnelName, port);
         }
-        public bool GetTunnelPort(ulong tunnelName,out int port)
+        public bool GetTunnelPort(ulong tunnelName, out int port)
         {
-            return tunnelPorts.TryGetValue(tunnelName,out port);
+            return tunnelPorts.TryGetValue(tunnelName, out port);
         }
         public void RemoveTunnelPort(ulong tunnelName)
         {
             tunnelPorts.TryRemove(tunnelName, out _);
         }
+        public string TunnelPorts()
+        {
+            return tunnelPorts.ToJson();
+        }
+
 
         public void AddUdpserver(ulong tunnelName, UdpServer server)
         {

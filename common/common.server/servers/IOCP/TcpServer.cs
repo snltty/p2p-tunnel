@@ -84,7 +84,7 @@ namespace common.server.servers.iocp
                     ProcessSend(e);
                     break;
                 default:
-                    Logger.Instance.DebugError(e.LastOperation.ToString());
+                    // Logger.Instance.DebugError(e.LastOperation.ToString());
                     break;
             }
         }
@@ -99,32 +99,45 @@ namespace common.server.servers.iocp
 
         public IConnection BindReceive(Socket socket, int bufferSize = 8 * 1024)
         {
-            if (OnConnected == null)
+            try
             {
-                return null;
-            }
+                if (socket == null)
+                {
+                    return null;
+                }
 
-            this.bufferSize = bufferSize;
-            AsyncUserToken userToken = new AsyncUserToken
-            {
-                Socket = socket,
-                Connection = CreateConnection(socket),
-            };
 
-            OnConnected(userToken.Connection);
-            SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
-            {
-                UserToken = userToken,
-                SocketFlags = SocketFlags.None,
-            };
-            userToken.PoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-            readEventArgs.SetBuffer(userToken.PoolBuffer, 0, bufferSize);
-            readEventArgs.Completed += IO_Completed;
-            if (!socket.ReceiveAsync(readEventArgs))
-            {
-                ProcessReceive(readEventArgs);
+                this.bufferSize = bufferSize;
+                AsyncUserToken userToken = new AsyncUserToken
+                {
+                    Socket = socket,
+                    Connection = CreateConnection(socket),
+                };
+
+                if (OnConnected == null)
+                {
+                    return null;
+                }
+                OnConnected(userToken.Connection);
+                SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
+                {
+                    UserToken = userToken,
+                    SocketFlags = SocketFlags.None,
+                };
+                userToken.PoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+                readEventArgs.SetBuffer(userToken.PoolBuffer, 0, bufferSize);
+                readEventArgs.Completed += IO_Completed;
+                if (!socket.ReceiveAsync(readEventArgs))
+                {
+                    ProcessReceive(readEventArgs);
+                }
+                return userToken.Connection;
             }
-            return userToken.Connection;
+            catch (Exception ex)
+            {
+                Logger.Instance.DebugError(ex);
+            }
+            return null;
         }
         private void ProcessReceive(SocketAsyncEventArgs e)
         {
@@ -191,7 +204,10 @@ namespace common.server.servers.iocp
                 if (packageLen == length - 4)
                 {
                     token.Connection.ReceiveData = data.AsMemory(offset + 4, packageLen);
-                    OnPacket.Push(token.Connection);
+                    if (OnPacket != null)
+                    {
+                        OnPacket.Push(token.Connection);
+                    }
                     return;
                 }
             }
@@ -205,7 +221,10 @@ namespace common.server.servers.iocp
                     break;
                 }
                 token.Connection.ReceiveData = token.DataBuffer.Data.Slice(4, packageLen);
-                OnPacket.Push(token.Connection);
+                if (OnPacket != null)
+                {
+                    OnPacket.Push(token.Connection);
+                }
 
                 token.DataBuffer.RemoveRange(0, packageLen + 4);
             } while (token.DataBuffer.Size > 4);
@@ -233,7 +252,10 @@ namespace common.server.servers.iocp
             {
                 token.Clear();
                 e.Dispose();
-                OnDisconnect.Push(token.Connection);
+                if (OnDisconnect != null)
+                {
+                    OnDisconnect.Push(token.Connection);
+                }
             }
         }
 
@@ -258,7 +280,10 @@ namespace common.server.servers.iocp
 
         public void InputData(IConnection connection)
         {
-            OnPacket.Push(connection);
+            if (OnPacket != null)
+            {
+                OnPacket.Push(connection);
+            }
         }
     }
 

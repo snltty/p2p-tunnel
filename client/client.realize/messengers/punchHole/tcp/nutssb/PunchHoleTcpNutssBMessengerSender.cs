@@ -6,6 +6,7 @@ using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;
 using common.server;
+using common.server.model;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
