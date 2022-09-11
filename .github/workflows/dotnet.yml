@@ -56,10 +56,27 @@ jobs:
         echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\osx-x64-single\\client\\public\\web\\" /s /f /h /y &&
         echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\osx-arm64-single\\client\\public\\web\\" /s /f /h /y &&
 
-        echo F|xcopy ".\\client\\plugins\\client.service.vea\\tun2socks.exe" ".\\publish\\win-x64-single\\client\\"  /f /h /y &&
-        echo F|xcopy ".\\client\\plugins\\client.service.vea\\wintun.dll" ".\\publish\\win-x64-single\\client\\"  /f /h /y &&
-        echo F|xcopy ".\\client\\plugins\\client.service.vea\\tun2socks.exe" ".\\publish\\win-arm64-single\\client\\"  /f /h /y &&
-        echo F|xcopy ".\\client\\plugins\\client.service.vea\\wintun.dll" ".\\publish\\win-arm64-single\\client\\"  /f /h /y &&
+        echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-windows.exe" ".\\publish\\win-x64-single\\client\\"  /f /h /y
+        echo F|xcopy "client\\plugins\\client.service.vea\\wintun.dll" ".\\publish\\win-x64-single\\client\\"  /f /h /y
+        echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-windows.exe" ".\\publish\\win-arm64-single\\client\\"  /f /h /y
+        echo F|xcopy "client\\plugins\\client.service.vea\\wintun.dll" ".\\publish\\win-arm64-single\\client\\"  /f /h /y
+
+        echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-linux" ".\\publish\\linux-x64-single\\client\\"  /f /h /y
+        echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-linux" ".\\publish\\linux-arm64-single\\client\\"  /f /h /y
+
+        echo F|del  ".\\publish\\win-x64-single\\client\\tun2socks-linux"
+        echo F|del  ".\\publish\\win-arm64-single\\client\\tun2socks-linux"
+        echo F|del  ".\\publish\\linux-x64-single\\client\\tun2socks-windows.exe"
+        echo F|del  ".\\publish\\linux-arm64-single\\client\\tun2socks-windows.exe"
+        echo F|del  ".\\publish\\linux-x64-single\\client\\wintun.dll"
+        echo F|del  ".\\publish\\linux-arm64-single\\client\\wintun.dll"
+
+        echo F|del  ".\\publish\\osx-x64-single\\client\\tun2socks-linux"
+        echo F|del  ".\\publish\\osx-arm64-single\\client\\tun2socks-linux"
+        echo F|del  ".\\publish\\osx-x64-single\\client\\tun2socks-windows.exe"
+        echo F|del  ".\\publish\\osx-arm64-single\\client\\tun2socks-windows.exe"
+        echo F|del  ".\\publish\\osx-x64-single\\client\\wintun.dll"
+        echo F|del  ".\\publish\\osx-arm64-single\\client\\wintun.dll"
 
         7z a -tzip  any.zip  ./publish/any/* &&
         7z a -tzip  win-x64-single.zip ./publish/win-x64-single/* &&

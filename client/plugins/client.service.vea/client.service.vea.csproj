@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
@@ -41,12 +41,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="tun2socks.exe">
+	  <None Include="tun2socks-windows.exe">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="wintun.dll">
+	  <None Include="wintun.dll">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+		<None Include="tun2socks-linux">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
-
 </Project>
