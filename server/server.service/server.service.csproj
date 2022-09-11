@@ -41,12 +41,6 @@
 		<Content Include="public\nssm.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
-		<Content Include="public\nssm安装服务.bat">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="public\查看服务.bat">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
 	</ItemGroup>
 	
 	<ItemGroup>

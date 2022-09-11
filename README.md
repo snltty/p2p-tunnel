@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-22 14:09:03
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-11 15:34:58
+ * @LastEditTime: 2022-09-12 01:00:43
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \undefinedd:\Desktop\p2p-tunnel\README.md
@@ -46,44 +46,6 @@
 - <a href="https://www.bilibili.com/video/BV1Pa411R79U/">https://www.bilibili.com/video/BV1Pa411R79U/</a>
 
 
-## linux docker服务端
-```
-// 拉取运行
-docker pull snltty/p2p-tunnel-server
-docker run -it -d --name="p2p-tunnel-server" -p 5410:5410/udp -p 59410:59410/tcp snltty/p2p-tunnel-server
-
-// 创建本地目录用来保存临时配置文件，用于修改配置信息
-cd /usr/local
-mkdir p2p-tunnel-server
-cd p2p-tunnel-server
-
-// 把配置文件从容器里复制出来
-docker cp p2p-tunnel-server:/app/appsettings.json /usr/local/p2p-tunnel-server/appsettings.json
-docker cp p2p-tunnel-server:/app/socks5-appsettings.json /usr/local/p2p-tunnel-server/socks5-appsettings.json
-docker cp p2p-tunnel-server:/app/tcpforward-appsettings.json /usr/local/p2p-tunnel-server/tcpforward-appsettings.json
-docker cp p2p-tunnel-server:/app/udpforward-appsettings.json /usr/local/p2p-tunnel-server/udpforward-appsettings.json
-
-// 修改配置
-// vim  
-// i 进入编辑修改
-// esc 退出编辑
-// :wq 保存退出
-
-// 把修改后配置文件复制进去
-docker cp /usr/local/p2p-tunnel-server/appsettings.json  p2p-tunnel-server:/app/appsettings.json
-docker cp /usr/local/p2p-tunnel-server/socks5-appsettings.json  p2p-tunnel-server:/app/socks5-appsettings.json
-docker cp /usr/local/p2p-tunnel-server/tcpforward-appsettings.json  p2p-tunnel-server:/app/tcpforward-appsettings.json
-docker cp /usr/local/p2p-tunnel-server/udpforward-appsettings.json  p2p-tunnel-server:/app/udpforward-appsettings.json
-
-// 重启容器
-docker restart p2p-tunnel-server
-```
-
-## 自己打包docker镜像
-```
-//进入项目根目录
-//power shell 下
-./docker-server.bat 你的镜像名(比如snltty/p2p-tunnel-server)
-//cmd 下
-docker-server.bat 你的镜像名(比如snltty/p2p-tunnel-server)
-```
+## 部署和运行说明
+- <a href="server-linux.md">服务端 linux docker托管</a>
+- <a href="client-linux.md">客户端 linux supervisor托管</a>

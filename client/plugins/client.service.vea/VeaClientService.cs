@@ -11,10 +11,10 @@ namespace client.service.vea
     public class VeaClientService : IClientService
     {
         private readonly Config config;
-        private readonly VirtualEthernetAdapterTransfer virtualEthernetAdapterTransfer;
+        private readonly VeaTransfer virtualEthernetAdapterTransfer;
         private IVeaSocks5ServerHandler veaSocks5ServerHandler;
 
-        public VeaClientService(Config config, VirtualEthernetAdapterTransfer virtualEthernetAdapterTransfer, IVeaSocks5ServerHandler veaSocks5ServerHandler)
+        public VeaClientService(Config config, VeaTransfer virtualEthernetAdapterTransfer, IVeaSocks5ServerHandler veaSocks5ServerHandler)
         {
             this.config = config;
             this.virtualEthernetAdapterTransfer = virtualEthernetAdapterTransfer;

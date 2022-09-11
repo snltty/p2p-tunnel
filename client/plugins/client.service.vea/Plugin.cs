@@ -9,7 +9,7 @@ namespace client.service.vea
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
-            var transfer = services.GetService<VirtualEthernetAdapterTransfer>();
+            var transfer = services.GetService<VeaTransfer>();
             services.GetService<IVeaSocks5ClientHandler>();
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
@@ -23,7 +23,7 @@ namespace client.service.vea
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<Config>();
-            services.AddSingleton<VirtualEthernetAdapterTransfer>();
+            services.AddSingleton<VeaTransfer>();
             services.AddSingleton<VeaMessengerSender>();
             services.AddSingleton<IVeaSocks5ClientHandler, VeaSocks5ClientHandler>();
             services.AddSingleton<IVeaSocks5ServerHandler, VeaSocks5ServerHandler>();

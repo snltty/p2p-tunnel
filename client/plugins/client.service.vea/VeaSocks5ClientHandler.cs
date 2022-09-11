@@ -20,9 +20,9 @@ namespace client.service.vea
         private readonly IVeaSocks5MessengerSender socks5MessengerSender;
         private readonly Config config;
         private readonly IClientInfoCaching clientInfoCaching;
-        private readonly VirtualEthernetAdapterTransfer virtualEthernetAdapterTransfer;
+        private readonly VeaTransfer virtualEthernetAdapterTransfer;
 
-        public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, RegisterStateInfo registerStateInfo, common.socks5.Config socks5Config, Config config, IClientInfoCaching clientInfoCaching, IVeaSocks5ClientListener socks5ClientListener, VirtualEthernetAdapterTransfer virtualEthernetAdapterTransfer)
+        public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, RegisterStateInfo registerStateInfo, common.socks5.Config socks5Config, Config config, IClientInfoCaching clientInfoCaching, IVeaSocks5ClientListener socks5ClientListener, VeaTransfer virtualEthernetAdapterTransfer)
             : base(socks5MessengerSender, registerStateInfo, socks5Config, clientInfoCaching, socks5ClientListener)
         {
             this.socks5MessengerSender = socks5MessengerSender;

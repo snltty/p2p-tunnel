@@ -24,35 +24,30 @@ dotnet publish ./server/server.service -c release -f net6.0 -o ./public/publish/
 dotnet publish ./client/client.service.app -c:Release -f:net6.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSigningStorePass=123321  /p:AndroidSdkDirectory=D:\\Android\\android-sdk
 echo F|xcopy "client\\client.service.app\\bin\\Release\\net6.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" "public\\publish-zip\\p2p-tunnel.apk"  /s /f /h /y
 
-echo D|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" "public\\publish\\win-x64-single\\client\\public\\web\\" /s /f /h /y
-echo D|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" "public\\publish\\win-arm64-single\\client\\public\\web\\" /s /f /h /y
-echo D|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" "public\\publish\\linux-x64-single\\client\\public\\web\\" /s /f /h /y
-echo D|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" "public\\publish\\linux-arm64-single\\client\\public\\web\\" /s /f /h /y
-echo D|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" "public\\publish\\osx-x64-single\\client\\public\\web\\" /s /f /h /y
-echo D|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" "public\\publish\\osx-arm64-single\\client\\public\\web\\" /s /f /h /y
 
-echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-windows.exe" "public\\publish\\win-x64-single\\client\\"  /f /h /y
-echo F|xcopy "client\\plugins\\client.service.vea\\wintun.dll" "public\\publish\\win-x64-single\\client\\"  /f /h /y
-echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-windows.exe" "public\\publish\\win-arm64-single\\client\\"  /f /h /y
-echo F|xcopy "client\\plugins\\client.service.vea\\wintun.dll" "public\\publish\\win-arm64-single\\client\\"  /f /h /y
-
-echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-linux" "public\\publish\\linux-x64-single\\client\\"  /f /h /y
-echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-linux" "public\\publish\\linux-arm64-single\\client\\"  /f /h /y
-
-echo F|del  "public\\publish\\win-x64-single\\client\\tun2socks-linux"
-echo F|del  "public\\publish\\win-arm64-single\\client\\tun2socks-linux"
-echo F|del  "public\\publish\\linux-x64-single\\client\\tun2socks-windows.exe"
-echo F|del  "public\\publish\\linux-arm64-single\\client\\tun2socks-windows.exe"
-echo F|del  "public\\publish\\linux-x64-single\\client\\wintun.dll"
-echo F|del  "public\\publish\\linux-arm64-single\\client\\wintun.dll"
-
-echo F|del  "public\\publish\\osx-x64-single\\client\\tun2socks-linux"
-echo F|del  "public\\publish\\osx-arm64-single\\client\\tun2socks-linux"
-echo F|del  "public\\publish\\osx-x64-single\\client\\tun2socks-windows.exe"
-echo F|del  "public\\publish\\osx-arm64-single\\client\\tun2socks-windows.exe"
-echo F|del  "public\\publish\\osx-x64-single\\client\\wintun.dll"
-echo F|del  "public\\publish\\osx-arm64-single\\client\\wintun.dll"
-
+for %%r in (x64,arm64) do (
+	for %%f in (tun2socks-linux) do (
+		echo F|xcopy "client\\plugins\\client.service.vea\\%%f" "public\\publish\\linux-%%r-single\\client\\"  /f /h /y
+		del  "public\\publish\\win-%%r-single\\client\\%%f"
+		del  "public\\publish\\osx-%%r-single\\client\\%%f"
+	)	
+	for %%f in (tun2socks-windows.exe,wintun.dll) do (
+		echo F|xcopy "client\\plugins\\client.service.vea\\%%f" "public\\publish\\win-%%r-single\\client\\"  /f /h /y
+		del  "public\\publish\\linux-%%r-single\\client\\%%f"
+		del  "public\\publish\\osx-%%r-single\\client\\%%f"
+	)
+	for %%f in (nssm.exe) do (
+		echo F|xcopy "client\\client.realize\\public\\%%f" "public\\publish\\win-%%r-single\\client\\public\\"  /f /h /y
+		echo F|xcopy "client\\client.realize\\public\\%%f" "public\\publish\\win-%%r-single\\server\\public\\"  /f /h /y
+		del  "public\\publish\\linux-%%r-single\\client\\public\\%%f"
+		del  "public\\publish\\linux-%%r-single\\server\\public\\%%f"
+		del  "public\\publish\\osx-%%r-single\\client\\public\\%%f"
+		del  "public\\publish\\osx-%%r-single\\server\\public\\%%f"
+	)
+	for %%p in (win,linux,osx) do (
+		echo D|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" "public\\publish\\%%p-%%r-single\\client\\public\\web\\" /s /f /h /y
+	)
+)
 
 7z a -tzip ./public/publish-zip/any.zip ./public/publish/any/*
 7z a -tzip ./public/publish-zip/win-x64-single.zip ./public/publish/win-x64-single/*

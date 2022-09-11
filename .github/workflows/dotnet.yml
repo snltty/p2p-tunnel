@@ -29,62 +29,7 @@ jobs:
         dotnet restore ./server/server.service
         
     - name: publish
-      run: 
-        mkdir publish &&
-        dotnet publish ./client/client.service -c release -f net6.0 -o ./publish/any/client &&
-        dotnet publish ./server/server.service -c release -f net6.0 -o ./publish/any/server &&
-        dotnet publish ./client/client.service -c release -f net6.0 -o ./publish/win-x64-single/client	-r win-x64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./server/server.service -c release -f net6.0 -o ./publish/win-x64-single/server	-r win-x64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./client/client.service -c release -f net6.0 -o ./publish/win-arm64-single/client	-r win-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./server/server.service -c release -f net6.0 -o ./publish/win-arm64-single/server	-r win-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./client/client.service -c release -f net6.0 -o ./publish/linux-x64-single/client	-r linux-x64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./server/server.service -c release -f net6.0 -o ./publish/linux-x64-single/server	-r linux-x64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./client/client.service -c release -f net6.0 -o ./publish/linux-arm64-single/client	-r linux-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./server/server.service -c release -f net6.0 -o ./publish/linux-arm64-single/server	-r linux-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./client/client.service -c release -f net6.0 -o ./publish/osx-x64-single/client	-r osx-x64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./server/server.service -c release -f net6.0 -o ./publish/osx-x64-single/server	-r osx-x64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./client/client.service -c release -f net6.0 -o ./publish/osx-arm64-single/client	-r osx-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        dotnet publish ./server/server.service -c release -f net6.0 -o ./publish/osx-arm64-single/server	-r osx-arm64		--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true &&
-        
-        dotnet publish ./client/client.service.app -c:Release -f:net6.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSigningStorePass=123321  /p:AndroidSdkDirectory=C:\\Android\\android-sdk &&
-        echo F|xcopy ".\\client\\client.service.app\\bin\\Release\\net6.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" ".\\p2p-tunnel.apk"  /s /f /h /y &&
-        
-        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\win-x64-single\\client\\public\\web\\" /s /f /h /y &&
-        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\win-arm64-single\\client\\public\\web\\" /s /f /h /y &&
-        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\linux-x64-single\\client\\public\\web\\" /s /f /h /y &&
-        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\linux-arm64-single\\client\\public\\web\\" /s /f /h /y &&
-        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\osx-x64-single\\client\\public\\web\\" /s /f /h /y &&
-        echo D|xcopy ".\\client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" ".\\publish\\osx-arm64-single\\client\\public\\web\\" /s /f /h /y &&
-
-        echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-windows.exe" ".\\publish\\win-x64-single\\client\\"  /f /h /y
-        echo F|xcopy "client\\plugins\\client.service.vea\\wintun.dll" ".\\publish\\win-x64-single\\client\\"  /f /h /y
-        echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-windows.exe" ".\\publish\\win-arm64-single\\client\\"  /f /h /y
-        echo F|xcopy "client\\plugins\\client.service.vea\\wintun.dll" ".\\publish\\win-arm64-single\\client\\"  /f /h /y
-
-        echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-linux" ".\\publish\\linux-x64-single\\client\\"  /f /h /y
-        echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-linux" ".\\publish\\linux-arm64-single\\client\\"  /f /h /y
-
-        echo F|del  ".\\publish\\win-x64-single\\client\\tun2socks-linux"
-        echo F|del  ".\\publish\\win-arm64-single\\client\\tun2socks-linux"
-        echo F|del  ".\\publish\\linux-x64-single\\client\\tun2socks-windows.exe"
-        echo F|del  ".\\publish\\linux-arm64-single\\client\\tun2socks-windows.exe"
-        echo F|del  ".\\publish\\linux-x64-single\\client\\wintun.dll"
-        echo F|del  ".\\publish\\linux-arm64-single\\client\\wintun.dll"
-
-        echo F|del  ".\\publish\\osx-x64-single\\client\\tun2socks-linux"
-        echo F|del  ".\\publish\\osx-arm64-single\\client\\tun2socks-linux"
-        echo F|del  ".\\publish\\osx-x64-single\\client\\tun2socks-windows.exe"
-        echo F|del  ".\\publish\\osx-arm64-single\\client\\tun2socks-windows.exe"
-        echo F|del  ".\\publish\\osx-x64-single\\client\\wintun.dll"
-        echo F|del  ".\\publish\\osx-arm64-single\\client\\wintun.dll"
-
-        7z a -tzip  any.zip  ./publish/any/* &&
-        7z a -tzip  win-x64-single.zip ./publish/win-x64-single/* &&
-        7z a -tzip  win-arm64-single.zip ./publish/win-arm64-single/* &&
-        7z a -tzip  linux-x64-single.zip ./publish/linux-x64-single/* &&
-        7z a -tzip  linux-arm64-single.zip ./publish/linux-arm64-single/* &&
-        7z a -tzip  osx-x64-single.zip ./publish/osx-x64-single/* &&
-        7z a -tzip  osx-arm64-single.zip ./publish/osx-arm64-single/*
+      run: ./publish.bat
       
     - name: get current date
       id: date
@@ -108,7 +53,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./any.zip
+        asset_path: ./public/publish-zip/any.zip
         asset_name: any.zip
         asset_content_type: application/zip
     
@@ -119,7 +64,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./win-x64-single.zip
+        asset_path: ./public/publish-zip/win-x64-single.zip
         asset_name: win-x64-single.zip
         asset_content_type: application/zip
     
@@ -130,7 +75,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./win-arm64-single.zip
+        asset_path: ./public/publish-zip/win-arm64-single.zip
         asset_name: win-arm64-single.zip
         asset_content_type: application/zip
 
@@ -141,7 +86,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./linux-x64-single.zip
+        asset_path: ./public/publish-zip/linux-x64-single.zip
         asset_name: linux-x64-single.zip
         asset_content_type: application/zip
     
@@ -152,7 +97,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./linux-arm64-single.zip
+        asset_path: ./public/publish-zip/linux-arm64-single.zip
         asset_name: linux-arm64-single.zip
         asset_content_type: application/zip
     
@@ -163,7 +108,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./osx-x64-single.zip
+        asset_path: ./public/publish-zip/osx-x64-single.zip
         asset_name: osx-x64-single.zip
         asset_content_type: application/zip
     
@@ -174,7 +119,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./osx-arm64-single.zip
+        asset_path: ./public/publish-zip/osx-arm64-single.zip
         asset_name: osx-arm64-single.zip
         asset_content_type: application/zip
 
@@ -185,7 +130,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./p2p-tunnel.apk
+        asset_path: ./public/publish-zip/p2p-tunnel.apk
         asset_name: p2p-tunnel.apk
         asset_content_type: application/vnd.android.package-archive
         

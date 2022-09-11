@@ -3,7 +3,6 @@ using common.libs;
 using common.libs.extends;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -12,7 +11,7 @@ using System.Security.Principal;
 
 namespace client.service.vea
 {
-    public class VirtualEthernetAdapterTransfer
+    public class VeaTransfer
     {
         Process Tun2SocksProcess;
         int interfaceNumber = 0;
@@ -26,7 +25,7 @@ namespace client.service.vea
         private readonly Config config;
         private readonly IVeaSocks5ClientListener socks5ClientListener;
 
-        public VirtualEthernetAdapterTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener)
+        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener)
         {
             this.config = config;
             this.socks5ClientListener = socks5ClientListener;
@@ -65,7 +64,7 @@ namespace client.service.vea
                 }
             });
 
-            AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) => KillWindows();
+            AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) => Stop();
         }
 
         public void Run()
@@ -84,6 +83,10 @@ namespace client.service.vea
             {
                 KillWindows();
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                KillLinux();
+            }
         }
 
         private void RunTun2Socks()
@@ -101,6 +104,10 @@ namespace client.service.vea
                     throw new Exception($"需要管理员权限");
                 }
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                RunLinux();
+            }
         }
 
         private void KillWindows()
@@ -114,6 +121,19 @@ namespace client.service.vea
                 Tun2SocksProcess = null;
             }
         }
+        private void KillLinux()
+        {
+            if (Tun2SocksProcess != null)
+            {
+                Tun2SocksProcess.Kill();
+                Tun2SocksProcess.Close();
+                Tun2SocksProcess.Dispose();
+                Tun2SocksProcess = null;
+            }
+
+            Command.Execute("bash", string.Empty, new string[] { $"ip tuntap del mode tun dev {veaName}" });
+        }
+
         private void RunWindows()
         {
             Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
@@ -137,6 +157,15 @@ namespace client.service.vea
                     System.Threading.Thread.Sleep(1000);
                 }
             }
+        }
+        private void RunLinux()
+        {
+            Command.Execute("bash", string.Empty, new string[] {
+                $"ip tuntap add mode tun dev {veaName}",
+                $"ip addr add {config.IP}/24 dev {veaName}",
+                $"ip link set dev {veaName} up"
+            });
+            Tun2SocksProcess = Command.Execute("bash", $" tun2socks-linux -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
         }
         private int GetWindowsInterfaceNum()
         {
@@ -164,6 +193,10 @@ namespace client.service.vea
             {
                 AddRouteWindows(ip);
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                AddRouteLinux(ip);
+            }
         }
         private void AddRouteWindows(IPAddress ip)
         {
@@ -172,7 +205,10 @@ namespace client.service.vea
                 Command.Execute("cmd.exe", string.Empty, new string[] { $"route add {ip} mask 255.255.255.0 {config.IP} metric 5 if {interfaceNumber}" });
             }
         }
-
+        private void AddRouteLinux(IPAddress ip)
+        {
+            Command.Execute("bash", string.Empty, new string[] { $"ip route add {ip} via {config.IP} dev {veaName} metric 1 " });
+        }
 
         public int GetIpMask(IPAddress ip)
         {
