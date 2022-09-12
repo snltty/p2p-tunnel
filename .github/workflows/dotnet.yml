@@ -11,14 +11,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: setup
+    - name: setup dotnet
       uses: actions/setup-dotnet@v2
       env:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         dotnet-version: 6.0.x
 
-    - name: install maui
+    - name: install dotnet maui
       run: 
         dotnet workload install maui
 
@@ -28,7 +28,7 @@ jobs:
         dotnet restore ./client/client.service.app &&
         dotnet restore ./server/server.service
         
-    - name: publish
+    - name: publish projects
       run: ./publish.bat
       
     - name: get current date
