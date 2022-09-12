@@ -32,34 +32,16 @@
 # ÖØÆôÈÝÆ÷
 # docker restart p2p-tunnel-server
 
-FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine AS base
-WORKDIR /app
+FROM alpine:latest
+ENV TZ=Asia/Shanghai DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+RUN echo "http://mirrors.aliyun.com/alpine/latest-stable/main/" > /etc/apk/repositories \
+    && apk add --no-cache libstdc++ libintl tzdata zeromq \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone
 
 EXPOSE 5410/udp
 EXPOSE 59410/tcp
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
-WORKDIR /src
-COPY ["server/server.service/server.service.csproj", "server/server.service/"]
-COPY ["common/common.libs/common.libs.csproj", "common/common.libs/"]
-COPY ["common/common.server/common.server.csproj", "common/common.server/"]
-COPY ["server/plugins/server.service.manager/server.service.manager.csproj", "server/plugins/server.service.manager/"]
-COPY ["server/server/server.csproj", "server/server/"]
-COPY ["server/plugins/server.service.manager.models/server.service.manager.models.csproj", "server/plugins/server.service.manager.models/"]
-COPY ["server/plugins/server.service.socks5/server.service.socks5.csproj", "server/plugins/server.service.socks5/"]
-COPY ["common/common.socks5/common.socks5.csproj", "common/common.socks5/"]
-COPY ["server/plugins/server.service.tcpforward/server.service.tcpforward.csproj", "server/plugins/server.service.tcpforward/"]
-COPY ["common/common.tcpforward/common.tcpforward.csproj", "common/common.tcpforward/"]
-COPY ["server/plugins/server.service.udpforward/server.service.udpforward.csproj", "server/plugins/server.service.udpforward/"]
-COPY ["common/common.udpforward/common.udpforward.csproj", "common/common.udpforward/"]
-RUN dotnet restore "server/server.service/server.service.csproj"
-COPY . .
-WORKDIR "/src/server/server.service"
-FROM build AS publish
-RUN dotnet publish "server.service.csproj" -c release -o /app/publish 
-
-FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-
-ENTRYPOINT ["dotnet","/app/server.service.dll"]
+COPY . .
+ENTRYPOINT ["./server.service"]
