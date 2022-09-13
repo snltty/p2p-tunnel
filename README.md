@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-22 14:09:03
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-12 01:00:43
+ * @LastEditTime: 2022-09-13 14:09:36
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \undefinedd:\Desktop\p2p-tunnel\README.md
@@ -11,7 +11,10 @@
 
 # p2p-tunnel
 ## Visual Studio 2022 LTSC 17.3.0
-### 正在高速迭代中
+![GitHub Repo stars](https://img.shields.io/github/stars/snltty/p2p-tunnel?style=social)
+![GitHub Repo forks](https://img.shields.io/github/forks/snltty/p2p-tunnel?style=social)
+[![star](https://gitee.com/snltty/p2p-tunnel/badge/star.svg?theme=dark)](https://gitee.com/snltty/p2p-tunnel/stargazers)
+[![fork](https://gitee.com/snltty/p2p-tunnel/badge/fork.svg?theme=dark)](https://gitee.com/snltty/p2p-tunnel/members)
 
 </div>
 
