@@ -32,7 +32,7 @@
 - [x] udp转发
 - [x] http代理
 - [x] socks5代理(支持tcp，udp，不实现bind)
-- [x] <a href="https://github.com/xjasonlyu/tun2socks" target="_blank">tun2socks</a>虚拟网卡组网，让你的多个不同内网客户端组成一个网络，方便访问(通过其ip访问其内网服务)，及网络共享(利用其网络进行网上冲浪)
+- [x] <a href="https://github.com/xjasonlyu/tun2socks" target="_blank">tun2socks</a>虚拟网卡组网，让你的多个不同内网客户端组成一个网络，通过其ip访问，更有局域网网段绑定，访问目标局域网任意设备
 
 ## 其它内容
 - [x] .NET6 跨平台，小尺寸，小内存
