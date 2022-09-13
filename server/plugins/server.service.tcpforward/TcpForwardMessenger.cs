@@ -42,20 +42,20 @@ namespace server.service.tcpforward
             tcpForwardMessengerSender.OnResponse(data);
         }
 
-        public int[] GetPorts(IConnection connection)
+        public byte[] GetPorts(IConnection connection)
         {
             return config.WebListens
                 .Concat(new int[] {
                     config.TunnelListenRange.Min,
                     config.TunnelListenRange.Max
-                }).ToArray();
+                }).ToArray().ToBytes();
         }
 
-        public TcpForwardRegisterResult UnRegister(IConnection connection)
+        public byte[] UnRegister(IConnection connection)
         {
             if (!config.ConnectEnable)
             {
-                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED };
+                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes();
             }
 
             try
@@ -75,19 +75,19 @@ namespace server.service.tcpforward
                         tcpForwardServer.Stop(model.SourcePort);
                     }
                 }
-                return new TcpForwardRegisterResult { };
+                return new TcpForwardRegisterResult { }.ToBytes();
             }
             catch (Exception ex)
             {
-                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message };
+                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes();
             }
         }
 
-        public TcpForwardRegisterResult Register(IConnection connection)
+        public byte[] Register(IConnection connection)
         {
             if (!config.ConnectEnable)
             {
-                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED };
+                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes();
             }
 
             try
@@ -105,7 +105,7 @@ namespace server.service.tcpforward
                         //已存在相同的注册
                         if (target != null && target.Name != source.Name)
                         {
-                            return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS };
+                            return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes();
                         }
                         tcpForwardTargetCaching.AddOrUpdate(model.SourceIp, model.SourcePort, new TcpForwardTargetCacheInfo
                         {
@@ -122,14 +122,14 @@ namespace server.service.tcpforward
                         //限制的端口范围
                         if (model.SourcePort < config.TunnelListenRange.Min || model.SourcePort > config.TunnelListenRange.Max)
                         {
-                            return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.OUT_RANGE, Msg = $"{config.TunnelListenRange.Min}-{config.TunnelListenRange.Max}" };
+                            return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.OUT_RANGE, Msg = $"{config.TunnelListenRange.Min}-{config.TunnelListenRange.Max}" }.ToBytes();
                         }
 
                         TcpForwardTargetCacheInfo target = tcpForwardTargetCaching.Get(model.SourcePort);
                         //已存在相同的注册
                         if (target != null && target.Name != source.Name)
                         {
-                            return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS };
+                            return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes();
                         }
                         tcpForwardTargetCaching.AddOrUpdate(model.SourcePort, new TcpForwardTargetCacheInfo
                         {
@@ -149,11 +149,11 @@ namespace server.service.tcpforward
                         }
                     }
                 }
-                return new TcpForwardRegisterResult { };
+                return new TcpForwardRegisterResult { }.ToBytes();
             }
             catch (Exception ex)
             {
-                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message };
+                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes();
             }
         }
     }
