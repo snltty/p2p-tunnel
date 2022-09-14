@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace common.libs
 {
@@ -7,6 +8,7 @@ namespace common.libs
         public static byte[] EmptyArray = Array.Empty<byte>();
         public static byte[] TrueArray = new byte[] { 1 };
         public static byte[] FalseArray = new byte[] { 0 };
+        public static byte[] AnyIpArray = IPAddress.Any.GetAddressBytes();
 
 
         public static string SeparatorString = ",";

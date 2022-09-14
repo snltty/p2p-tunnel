@@ -109,6 +109,7 @@ namespace common.socks5
                 ConnectionKeyUdp key = new ConnectionKeyUdp(connection.ConnectId, data.SourceEP);
                 if (!udpConnections.TryGetValue(key, out UdpToken token))
                 {
+                    data.TargetEP = remoteEndPoint;
                     Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     token = new UdpToken { Connection = connection, Data = data, TargetSocket = socket, };
                     token.PoolBuffer = ArrayPool<byte>.Shared.Rent(65535);

@@ -3,6 +3,7 @@ using common.libs.extends;
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -232,9 +233,8 @@ namespace common.socks5
                 }
                 else
                 {
-                    Socks5EnumStep step = token.DataWrap.Socks5Step;
                     token.DataWrap.Socks5Step = info.Socks5Step;
-                    if (step == Socks5EnumStep.ForwardUdp)
+                    if (info.Socks5Step == Socks5EnumStep.ForwardUdp)
                     {
                         udpClient.Send(info.Data.Span, info.SourceEP);
                     }
@@ -244,6 +244,10 @@ namespace common.socks5
                     }
 
                 }
+            }
+            else if (info.SourceEP != null)
+            {
+                udpClient.Send(info.Data.Span, info.SourceEP);
             }
         }
 

@@ -25,6 +25,7 @@ namespace common.socks5
         /// 来源地址，数据从目标端回来的时候回给谁
         /// </summary>
         public IPEndPoint SourceEP { get; set; }
+        public IPEndPoint TargetEP { get; set; }
 
         /// <summary>
         /// 携带的数据
@@ -37,7 +38,7 @@ namespace common.socks5
         public byte[] ToBytes()
         {
             byte[] idBytes = Id.ToBytes();
-            int length = 1 + idBytes.Length + 1 + Data.Length, index = 1;
+            int length = 1 + idBytes.Length + 1 + 1 + Data.Length, index = 1;
             byte[] ipBytes = Helper.EmptyArray;
             byte[] portBytes = Helper.EmptyArray;
             if (SourceEP != null)
@@ -45,6 +46,15 @@ namespace common.socks5
                 ipBytes = SourceEP.Address.GetAddressBytes();
                 portBytes = SourceEP.Port.ToBytes();
                 length += ipBytes.Length + 2;
+            }
+
+            byte[] targetipBytes = Helper.EmptyArray;
+            byte[] targetportBytes = Helper.EmptyArray;
+            if (TargetEP != null)
+            {
+                targetipBytes = TargetEP.Address.GetAddressBytes();
+                targetportBytes = TargetEP.Port.ToBytes();
+                length += targetipBytes.Length + 2;
             }
 
             byte[] bytes = new byte[length];
@@ -63,6 +73,19 @@ namespace common.socks5
 
                 bytes[index] = portBytes[0];
                 bytes[index + 1] = portBytes[1];
+                index += 2;
+            }
+
+            bytes[index] = 0;
+            index += 1;
+            if (targetipBytes.Length > 0)
+            {
+                bytes[index - 1] = (byte)(targetipBytes.Length + 2);
+                Array.Copy(targetipBytes, 0, bytes, index, targetipBytes.Length);
+                index += targetipBytes.Length;
+
+                bytes[index] = targetportBytes[0];
+                bytes[index + 1] = targetportBytes[1];
                 index += 2;
             }
 
@@ -91,6 +114,16 @@ namespace common.socks5
                 IPAddress ip = new IPAddress(span.Slice(index, epLength - 2));
                 index += epLength - 2;
                 SourceEP = new IPEndPoint(ip, span.Slice(index, 2).ToUInt16());
+                index += 2;
+            }
+
+            byte targetepLength = span[index];
+            index += 1;
+            if (targetepLength > 0)
+            {
+                IPAddress ip = new IPAddress(span.Slice(index, targetepLength - 2));
+                index += targetepLength - 2;
+                TargetEP = new IPEndPoint(ip, span.Slice(index, 2).ToUInt16());
                 index += 2;
             }
 

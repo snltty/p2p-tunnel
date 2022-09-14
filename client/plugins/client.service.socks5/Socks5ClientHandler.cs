@@ -4,7 +4,9 @@ using common.libs;
 using common.server;
 using common.socks5;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net;
 
 namespace client.service.socks5
 {
@@ -16,6 +18,8 @@ namespace client.service.socks5
         private readonly common.socks5.Config config;
         private IConnection connection;
         private IClientInfoCaching clientInfoCaching;
+        private NumberSpace numberSpace = new NumberSpace();
+
         protected Dictionary<Socks5EnumStep, Func<Socks5Info, bool>> handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, bool>>();
         protected Dictionary<Socks5EnumStep, Action<Socks5Info>> buildHandles = new Dictionary<Socks5EnumStep, Action<Socks5Info>>();
 
@@ -118,6 +122,7 @@ namespace client.service.socks5
                 info.Data = new byte[] { info.Version, (byte)type };
             }
         }
+
         protected void CommandResponseData(Socks5Info info)
         {
             Socks5EnumResponseCommand type = (Socks5EnumResponseCommand)info.Data.Span[0];
@@ -140,7 +145,7 @@ namespace client.service.socks5
         }
         protected void ForwardUdpResponseData(Socks5Info info)
         {
-            info.Data = Socks5Parser.MakeUdpResponse(socks5ClientListener.DistEndpoint, info.Data);
+            info.Data = Socks5Parser.MakeUdpResponse(info.TargetEP, info.Data);
         }
 
 
@@ -169,13 +174,12 @@ namespace client.service.socks5
         {
             var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
 
-            Logger.Instance.Info($"origin step:{string.Join(",", data.Data.Span.ToArray())}");
-            Logger.Instance.Info($"origin command:{data.Data.Span[1]}, vea target:{targetEp}");
-            if (targetEp.Port == 0)
+            if (targetEp.Port == 0 || ipMemory.SequenceEqual(Helper.AnyIpArray))
             {
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
                 data.Data = data.Response;
                 CommandResponseData(data);
+                socks5ClientListener.Response(data);
                 return true;
             }
 
@@ -187,6 +191,7 @@ namespace client.service.socks5
             GetConnection();
             return socks5MessengerSender.Request(data, connection);
         }
+
         protected virtual bool HndleForwardUdp(Socks5Info data)
         {
             GetConnection();

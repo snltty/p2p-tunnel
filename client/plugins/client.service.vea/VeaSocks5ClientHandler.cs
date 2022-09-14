@@ -6,6 +6,7 @@ using common.libs.extends;
 using common.server;
 using common.socks5;
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
 
@@ -21,6 +22,8 @@ namespace client.service.vea
         private readonly Config config;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaTransfer virtualEthernetAdapterTransfer;
+        IVeaSocks5ClientListener socks5ClientListener;
+
 
         public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, RegisterStateInfo registerStateInfo, common.socks5.Config socks5Config, Config config, IClientInfoCaching clientInfoCaching, IVeaSocks5ClientListener socks5ClientListener, VeaTransfer virtualEthernetAdapterTransfer)
             : base(socks5MessengerSender, registerStateInfo, socks5Config, clientInfoCaching, socks5ClientListener)
@@ -28,6 +31,7 @@ namespace client.service.vea
             this.socks5MessengerSender = socks5MessengerSender;
             this.config = config;
             this.clientInfoCaching = clientInfoCaching;
+            this.socks5ClientListener = socks5ClientListener;
             this.virtualEthernetAdapterTransfer = virtualEthernetAdapterTransfer;
         }
         protected override void OnClose(Socks5Info info)
@@ -47,13 +51,13 @@ namespace client.service.vea
             var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
 
             target.TargetIp = targetEp.Address;
-            Logger.Instance.Info($"step:{string.Join(",",data.Data.Span.ToArray())}");
-            Logger.Instance.Info($"command:{data.Data.Span[1]}, vea target:{targetEp}");
-            if (targetEp.Port == 0)
+            if (targetEp.Port == 0 || ipMemory.SequenceEqual(Helper.AnyIpArray))
             {
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
                 data.Data = data.Response;
+
                 CommandResponseData(data);
+                socks5ClientListener.Response(data);
                 return true;
             }
             target.Connection = GetConnection(target.TargetIp, ipMemory);
@@ -64,12 +68,11 @@ namespace client.service.vea
             TagInfo target = data.Tag as TagInfo;
             return socks5MessengerSender.Request(data, target.Connection);
         }
+
+
         protected override bool HndleForwardUdp(Socks5Info data)
         {
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
-
-            Logger.Instance.Warning($"forward vea target:{remoteEndPoint}");
-
             IConnection connection = GetConnection(remoteEndPoint.Address, ipMemory);
             return socks5MessengerSender.Request(data, connection);
         }

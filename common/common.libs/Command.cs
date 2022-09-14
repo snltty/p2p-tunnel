@@ -27,6 +27,8 @@ namespace common.libs
             proc.StartInfo.Arguments = arg;
             proc.StartInfo.Verb = "runas";
             proc.Start();
+
+            //Process proc = Process.Start(fileName, arg);
             return proc;
         }
 
