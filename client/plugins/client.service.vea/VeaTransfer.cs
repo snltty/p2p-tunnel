@@ -136,7 +136,7 @@ namespace client.service.vea
 
         private void RunWindows()
         {
-            Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
+            Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} ");
             for (int i = 0; i < 60; i++)
             {
                 //分配ip

@@ -167,6 +167,18 @@ namespace client.service.socks5
         }
         protected virtual bool HandleCommand(Socks5Info data)
         {
+            var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
+
+            Logger.Instance.Info($"origin step:{string.Join(",", data.Data.Span.ToArray())}");
+            Logger.Instance.Info($"origin command:{data.Data.Span[1]}, vea target:{targetEp}");
+            if (targetEp.Port == 0)
+            {
+                data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
+                data.Data = data.Response;
+                CommandResponseData(data);
+                return true;
+            }
+
             GetConnection();
             return socks5MessengerSender.Request(data, connection);
         }
