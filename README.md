@@ -2,10 +2,10 @@
  * @Author: snltty
  * @Date: 2021-08-22 14:09:03
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-13 14:09:36
+ * @LastEditTime: 2022-09-15 15:08:47
  * @version: v1.0.0
  * @Descripttion: 功能说明
- * @FilePath: \undefinedd:\Desktop\p2p-tunnel\README.md
+ * @FilePath: \qbcode.vclass.client.vued:\desktop\p2p-tunnel\README.md
 -->
 <div align="center">
 
@@ -46,9 +46,10 @@
 - [x] 高效的打包解包，作死的全手写序列化
 
 ## 介绍视频
-- <a href="https://www.bilibili.com/video/BV1Pa411R79U/">https://www.bilibili.com/video/BV1Pa411R79U/</a>
+- 基础介绍 <a href="https://www.bilibili.com/video/BV1Pa411R79U/">https://www.bilibili.com/video/BV1Pa411R79U/</a>
+- 联机cs1.6 <a href="https://www.bilibili.com/video/BV1hB4y1n738/">https://www.bilibili.com/video/BV1hB4y1n738/</a>
 
 
-## 部署和运行说明
+## 部署说明
 - <a href="server-linux.md">服务端 linux docker托管</a>
 - <a href="client-linux.md">客户端 linux supervisor托管</a>
