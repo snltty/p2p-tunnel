@@ -41,7 +41,7 @@ jobs:
       env:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
-        tag_name: ${{ github.ref }}
+        tag_name: v1.0.0.0
         release_name: Release ${{ steps.date.outputs.today }}
         draft: false
         prerelease: false
