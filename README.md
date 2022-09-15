@@ -47,7 +47,7 @@
 
 ## 介绍视频
 - 基础介绍 <a href="https://www.bilibili.com/video/BV1Pa411R79U/">https://www.bilibili.com/video/BV1Pa411R79U/</a>
-- 联机cs1.6 <a href="https://www.bilibili.com/video/BV1hB4y1n738/">https://www.bilibili.com/video/BV1hB4y1n738/</a>
+- 联机cs1.6 <a href="https://www.bilibili.com/video/BV18d4y1u7DN/">https://www.bilibili.com/video/BV18d4y1u7DN/</a>
 
 
 ## 部署说明
