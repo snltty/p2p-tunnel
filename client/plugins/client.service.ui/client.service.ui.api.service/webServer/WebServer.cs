@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.webServer
 {
@@ -16,7 +15,7 @@ namespace client.service.ui.api.service.webServer
         public WebServer(Config config, IWebServerFileReader webServerFileReader)
         {
             this.config = config;
-            this.webServerFileReader = webServerFileReader; 
+            this.webServerFileReader = webServerFileReader;
         }
 
         public void Start()
@@ -24,45 +23,44 @@ namespace client.service.ui.api.service.webServer
             HttpListener http = new HttpListener();
             http.Prefixes.Add($"http://{config.Web.BindIp}:{config.Web.Port}/");
             http.Start();
+            http.BeginGetContext(Callback, http);
+        }
+        private void Callback(IAsyncResult result)
+        {
+            HttpListener http = result.AsyncState as HttpListener;
+            HttpListenerContext context = http.EndGetContext(result);
 
-            _ = Task.Factory.StartNew(async () =>
+            HttpListenerRequest request = context.Request;
+            using HttpListenerResponse response = context.Response;
+            using Stream stream = response.OutputStream;
+            try
             {
-                while (true)
+                response.Headers["Server"] = "snltty";
+
+                string path = request.Url.AbsolutePath;
+                //默认页面
+                if (path == "/") path = "index.html";
+
+                byte[] bytes = webServerFileReader.Read(path);
+                if (bytes.Length > 0)
                 {
-                    HttpListenerContext context = await http.GetContextAsync();
-                    HttpListenerRequest request = context.Request;
-                    HttpListenerResponse response = context.Response;
-                    Stream stream = response.OutputStream;
-                    try
-                    {
-                        response.Headers["Server"] = "snltty";
-
-                        string path = request.Url.AbsolutePath;
-                        //默认页面
-                        if (path == "/") path = "index.html";
-
-                        byte[] bytes = webServerFileReader.Read(path);
-                        if (bytes.Length > 0)
-                        {
-                            response.ContentLength64 = bytes.Length;
-                            response.ContentType = GetContentType(path);
-                            stream.Write(bytes, 0, bytes.Length);
-                        }
-                        else
-                        {
-                            response.StatusCode = (int)HttpStatusCode.NotFound;
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    }
-                    stream.Close();
-                    stream.Dispose();
+                    response.ContentLength64 = bytes.Length;
+                    response.ContentType = GetContentType(path);
+                    stream.Write(bytes, 0, bytes.Length);
                 }
+                else
+                {
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                }
+            }
+            catch (Exception)
+            {
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+            }
+            stream.Close();
+            stream.Dispose();
 
-            }, TaskCreationOptions.LongRunning);
-
+            http.BeginGetContext(Callback, http);
         }
 
 
