@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-10 11:21:18
+ * @LastEditTime: 2022-09-16 16:16:48
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -91,14 +91,14 @@
                                 <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
                                     <el-form-item label="本机IP" prop="IP">
                                         <el-tooltip class="box-item" effect="dark" content="当前客户端的虚拟网卡ip，各个客户端之间设置不一样的ip，相同网段即可" placement="top-start">
-                                            <el-input :readonly="registerState.LocalInfo.connected" v-model="state.form.IP"></el-input>
+                                            <el-input v-model="state.form.IP"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
                                     <el-form-item label="局域网段" prop="LanIP">
                                         <el-tooltip class="box-item" effect="dark" content="当前客户端的局域网段，各个客户端之间设置不一样的网段即可，192.168.x.0酱紫，0.0.0.0则不启用" placement="top-start">
-                                            <el-input :readonly="registerState.LocalInfo.connected" v-model="state.form.LanIP"></el-input>
+                                            <el-input v-model="state.form.LanIP"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>

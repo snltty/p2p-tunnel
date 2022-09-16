@@ -35,7 +35,7 @@ namespace common.udpforward
         {
             if (config.ConnectEnable)
             {
-                ConnectionKeyUdp key = new ConnectionKeyUdp(arg.Connection.ConnectId, arg.SourceEndpoint);
+                ConnectionKeyUdp key = new ConnectionKeyUdp(arg.Connection.FromConnection.ConnectId, arg.SourceEndpoint);
                 if (!connections.TryGetValue(key, out UdpToken token))
                 {
                     IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);

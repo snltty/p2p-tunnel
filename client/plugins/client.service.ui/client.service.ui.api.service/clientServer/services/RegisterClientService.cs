@@ -27,7 +27,7 @@ namespace client.service.ui.api.service.clientServer.services
             return result.Data;
         }
 
-        public void Stop(ClientServiceParamsInfo arg)
+        public void Exit(ClientServiceParamsInfo arg)
         {
             registerTransfer.Exit();
         }

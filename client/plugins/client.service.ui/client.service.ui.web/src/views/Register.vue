@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-08 20:29:50
+ * @LastEditTime: 2022-09-16 15:54:47
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -205,6 +205,7 @@
                 <el-form-item label="" label-width="0" class="t-c">
                     <div class="t-c w-100">
                         <el-button type="primary" size="large" :loading="registerState.LocalInfo.IsConnecting" @click="handleSubmit">注册</el-button>
+                        <el-button v-if="registerState.LocalInfo.UdpConnected || registerState.LocalInfo.TcpConnected" type="info" size="large" :loading="registerState.LocalInfo.IsConnecting" @click="handleExit">退出</el-button>
                     </div>
                 </el-form-item>
             </el-form>
@@ -215,7 +216,7 @@
 <script>
 import { ref, toRefs, reactive } from '@vue/reactivity';
 import { injectRegister } from '../states/register'
-import { sendRegisterMsg, getRegisterInfo, updateConfig } from '../apis/register'
+import { sendRegisterMsg, getRegisterInfo, updateConfig, sendExit } from '../apis/register'
 
 import { ElMessage } from 'element-plus'
 import { watch } from '@vue/runtime-core';
@@ -367,9 +368,12 @@ export default {
                 })
             });
         }
+        const handleExit = () => {
+            sendExit();
+        }
 
         return {
-            ...toRefs(state), registerState, formDom, handleSubmit
+            ...toRefs(state), registerState, formDom, handleSubmit, handleExit
         }
     }
 }

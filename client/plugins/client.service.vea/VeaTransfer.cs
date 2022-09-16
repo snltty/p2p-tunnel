@@ -1,6 +1,7 @@
 ﻿using client.messengers.clients;
 using common.libs;
 using common.libs.extends;
+using common.server;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -24,32 +25,21 @@ namespace client.service.vea
 
         private readonly Config config;
         private readonly IVeaSocks5ClientListener socks5ClientListener;
+        private readonly IClientInfoCaching clientInfoCaching;
+        private readonly VeaMessengerSender veaMessengerSender;
 
         public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener)
         {
             this.config = config;
             this.socks5ClientListener = socks5ClientListener;
+            this.clientInfoCaching = clientInfoCaching;
+            this.veaMessengerSender = veaMessengerSender;
 
             clientInfoCaching.OnOnline.Sub((client) =>
             {
                 veaMessengerSender.IP(client.OnlineConnection).ContinueWith((result) =>
                 {
-                    IPAddress ip = result.Result.Item1;
-                    IPAddress lanip = result.Result.Item2;
-
-                    IPAddressCacheInfo cache = new IPAddressCacheInfo { Client = client, IP = ip, LanIP = lanip, Mask = 0 };
-
-                    ips.AddOrUpdate(ip, cache, (a, b) => cache);
-                    if (lanip.Equals(IPAddress.Any) == false)
-                    {
-                        int mask = GetIpMask(lanip);
-                        if (lanips.ContainsKey(mask) == false)
-                        {
-                            cache.Mask = mask;
-                            lanips.TryAdd(mask, cache);
-                            AddRoute(lanip);
-                        }
-                    }
+                    UpdateIp(client, result.Result);
                 });
             });
             clientInfoCaching.OnOffline.Sub((client) =>
@@ -67,6 +57,41 @@ namespace client.service.vea
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) => Stop();
         }
 
+        public void OnNotify(IConnection connection)
+        {
+            if (clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
+            {
+                IPAddressInfo ips = new IPAddressInfo();
+                ips.DeBytes(connection.ReceiveRequestWrap.Memory);
+                UpdateIp(client, ips);
+            }
+        }
+        private void UpdateIp(ClientInfo client, IPAddressInfo _ips)
+        {
+            if (client == null || _ips == null) return;
+
+            lock (this)
+            {
+                var cache = ips.Values.FirstOrDefault(c => c.Client.Id == client.Id);
+                if (cache != null)
+                {
+                    ips.TryRemove(cache.IP, out _);
+                    lanips.TryRemove(GetIpMask(_ips.LanIP), out _);
+                }
+
+                cache = new IPAddressCacheInfo { Client = client, IP = _ips.IP, LanIP = _ips.LanIP, Mask = 0 };
+
+                ips.AddOrUpdate(_ips.IP, cache, (a, b) => cache);
+                if (_ips.LanIP.Equals(IPAddress.Any) == false)
+                {
+                    int mask = GetIpMask(_ips.LanIP);
+                    cache.Mask = mask;
+                    lanips.AddOrUpdate(mask, cache, (a, b) => cache);
+                    AddRoute(_ips.LanIP);
+                }
+            }
+        }
+
         public void Run()
         {
             Stop();
@@ -74,6 +99,18 @@ namespace client.service.vea
             {
                 RunTun2Socks();
                 socks5ClientListener.Start(config.SocksPort, config.BufferSize);
+            }
+            foreach (var item in clientInfoCaching.All())
+            {
+                var connection = item.OnlineConnection;
+                var client = item;
+                if (connection != null)
+                {
+                    _ = veaMessengerSender.IP(connection).ContinueWith((result) =>
+                    {
+                        UpdateIp(client, result.Result);
+                    });
+                }
             }
         }
         public void Stop()
@@ -218,6 +255,7 @@ namespace client.service.vea
         {
             return ip.ToInt32() & 0xffffff;
         }
+
     }
 
     public class IPAddressCacheInfo
@@ -228,5 +266,32 @@ namespace client.service.vea
 
         [System.Text.Json.Serialization.JsonIgnore]
         public ClientInfo Client { get; set; }
+    }
+
+    public class IPAddressInfo
+    {
+        public IPAddress IP { get; set; }
+        public IPAddress LanIP { get; set; }
+
+        public byte[] ToBytes()
+        {
+            var ip = IP.GetAddressBytes();
+            var lanip = LanIP.GetAddressBytes();
+
+            var bytes = new byte[1 + ip.Length + lanip.Length];
+
+            bytes[0] = (byte)ip.Length;
+            Array.Copy(ip, 0, bytes, 1, ip.Length);
+            Array.Copy(lanip, 0, bytes, ip.Length + 1, lanip.Length);
+
+            return bytes;
+        }
+
+        public void DeBytes(ReadOnlyMemory<byte> memory)
+        {
+            var span = memory.Span;
+            IP = new IPAddress(span.Slice(1, span[0]));
+            LanIP = new IPAddress(span.Slice(span[0] + 1));
+        }
     }
 }

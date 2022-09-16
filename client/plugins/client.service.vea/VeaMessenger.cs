@@ -5,24 +5,18 @@ namespace client.service.vea
 {
     public class VeaMessenger : IMessenger
     {
+        private readonly VeaTransfer veaTransfer;
         private readonly Config config;
-        public VeaMessenger(Config config)
+        public VeaMessenger(VeaTransfer veaTransfer, Config config)
         {
+            this.veaTransfer = veaTransfer;
             this.config = config;
         }
 
         public byte[] IP(IConnection connection)
         {
-            var ip = config.IP.GetAddressBytes();
-            var lanip = config.LanIP.GetAddressBytes();
-
-            var bytes = new byte[1 + ip.Length + lanip.Length];
-
-            bytes[0] = (byte)ip.Length;
-            Array.Copy(ip, 0, bytes, 1, ip.Length);
-            Array.Copy(lanip, 0, bytes, ip.Length + 1, lanip.Length);
-
-            return bytes;
+            veaTransfer.OnNotify(connection);
+            return new IPAddressInfo { IP = config.IP, LanIP = config.LanIP }.ToBytes();
         }
     }
 }

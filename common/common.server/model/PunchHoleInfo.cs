@@ -135,6 +135,7 @@ namespace common.server.model
 
         public IPAddress[] LocalIps { get; set; } = Array.Empty<IPAddress>();
         public bool IsDefault { get; set; } = false;
+        public byte Index { get; set; } = 0;
         public IPAddress Ip { get; set; } = IPAddress.Any;
         public int Port { get; set; } = 0;
         public int LocalPort { get; set; } = 0;
@@ -153,6 +154,7 @@ namespace common.server.model
             length += 1;
 
             length += 1; //IsDefault
+            length += 1; //Index
 
             var ipBytes = Ip.GetAddressBytes();
             length += 1 + ipBytes.Length;
@@ -177,6 +179,8 @@ namespace common.server.model
             }
 
             bytes[index] = (byte)(IsDefault ? 1 : 0);
+            index += 1;
+            bytes[index] = Index;
             index += 1;
 
             bytes[index] = (byte)ipBytes.Length;
@@ -212,6 +216,9 @@ namespace common.server.model
             }
 
             IsDefault = span[index] == 1;
+            index += 1;
+
+            Index = span[index];
             index += 1;
 
             Ip = new IPAddress(span.Slice(index + 1, span[index]));

@@ -43,7 +43,7 @@ namespace client.messengers.punchHole.tcp
     {
         public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
 
-        public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.FORWARD;
+        public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.NOTIFY;
 
         public byte Step { get; set; } = (byte)PunchHoleTcpNutssBSteps.STEP_2_TRY;
 

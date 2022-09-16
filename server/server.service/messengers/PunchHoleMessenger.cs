@@ -44,7 +44,8 @@ namespace server.service.messengers
                                 LocalPort = tunnel.LocalPort,
                                 Port = tunnel.Port,
                                 IsDefault = tunnel.IsDefault,
-                                GuessPort = model.GuessPort
+                                GuessPort = model.GuessPort,
+                                Index = model.Index,
                             }.ToBytes();
                         }
 

@@ -32,7 +32,7 @@ namespace common.tcpforward
 
         private void OnRequest(TcpForwardInfo arg)
         {
-            ConnectionKey key = new ConnectionKey(arg.Connection.ConnectId, arg.RequestId);
+            ConnectionKey key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId);
             if (connections.TryGetValue(key, out ConnectUserToken token) && token.TargetSocket != null && token.TargetSocket.Connected)
             {
                 if (arg.Buffer.Length > 0)
@@ -75,7 +75,7 @@ namespace common.tcpforward
 
             saea.UserToken = new ConnectUserToken
             {
-                Key = new ConnectionKey(arg.Connection.ConnectId, arg.RequestId),
+                Key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId),
                 SendArg = arg
             };
 

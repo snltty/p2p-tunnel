@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-22 00:28:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-04-11 15:41:25
+ * @LastEditTime: 2022-09-16 16:38:26
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\vue.config.js
@@ -20,5 +20,8 @@ module.exports = {
                 loader: 'raw-loader',
             }]
         })
+    },
+    css: {
+        extract: false
     }
 }
