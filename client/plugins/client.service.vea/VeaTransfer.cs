@@ -1,4 +1,5 @@
 ﻿using client.messengers.clients;
+using client.messengers.register;
 using common.libs;
 using common.libs.extends;
 using common.server;
@@ -27,20 +28,19 @@ namespace client.service.vea
         private readonly IVeaSocks5ClientListener socks5ClientListener;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaMessengerSender veaMessengerSender;
+        private readonly RegisterStateInfo registerStateInfo;
 
-        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener)
+        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener, RegisterStateInfo registerStateInfo)
         {
             this.config = config;
             this.socks5ClientListener = socks5ClientListener;
             this.clientInfoCaching = clientInfoCaching;
             this.veaMessengerSender = veaMessengerSender;
+            this.registerStateInfo = registerStateInfo;
 
             clientInfoCaching.OnOnline.Sub((client) =>
             {
-                veaMessengerSender.IP(client.OnlineConnection).ContinueWith((result) =>
-                {
-                    UpdateIp(client, result.Result);
-                });
+                UpdateIp();
             });
             clientInfoCaching.OnOffline.Sub((client) =>
             {
@@ -91,15 +91,8 @@ namespace client.service.vea
                 }
             }
         }
-
-        public void Run()
+        private void UpdateIp()
         {
-            Stop();
-            if (config.Enable)
-            {
-                RunTun2Socks();
-                socks5ClientListener.Start(config.SocksPort, config.BufferSize);
-            }
             foreach (var item in clientInfoCaching.All())
             {
                 var connection = item.OnlineConnection;
@@ -112,6 +105,17 @@ namespace client.service.vea
                     });
                 }
             }
+        }
+
+        public void Run()
+        {
+            Stop();
+            if (config.Enable)
+            {
+                RunTun2Socks();
+                socks5ClientListener.Start(config.SocksPort, config.BufferSize);
+            }
+            UpdateIp();
         }
         public void Stop()
         {
@@ -157,6 +161,12 @@ namespace client.service.vea
                 Tun2SocksProcess.Dispose();
                 Tun2SocksProcess = null;
             }
+            foreach (var item in Process.GetProcesses().Where(c => c.ProcessName.Contains("tun2socks")))
+            {
+                item.Kill();
+                item.Close();
+                item.Dispose();
+            };
         }
         private void KillLinux()
         {

@@ -381,7 +381,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 Connection = TcpServer,
                 ToId = arg.RawData.FromId,
                 GuessPort = 0,
-                Index = index
+                Index = index,
                 Data = new PunchHoleStep2TryInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_TRY, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
             Logger.Instance.DebugDebug($"after Send Step2Retry");

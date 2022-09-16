@@ -13,6 +13,7 @@ namespace client.messengers.clients
     {
         public SimpleSubPushHandler<ClientInfo> OnOffline { get; }
         public SimpleSubPushHandler<ClientInfo> OnOnline { get; }
+        public SimpleSubPushHandler<ClientInfo> OnAdd { get; }
         public bool Add(ClientInfo client);
         public bool Get(ulong id, out ClientInfo client);
         public ClientInfo GetByName(string name);

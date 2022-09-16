@@ -18,10 +18,13 @@ namespace client.realize.messengers.clients
 
         public SimpleSubPushHandler<ClientInfo> OnOffline { get; } = new SimpleSubPushHandler<ClientInfo>();
         public SimpleSubPushHandler<ClientInfo> OnOnline { get; } = new SimpleSubPushHandler<ClientInfo>();
+        public SimpleSubPushHandler<ClientInfo> OnAdd { get; } = new SimpleSubPushHandler<ClientInfo>();
 
         public bool Add(ClientInfo client)
         {
-            return clients.TryAdd(client.Id, client);
+            bool result = clients.TryAdd(client.Id, client);
+            OnAdd.Push(client);
+            return result;
         }
 
         public bool Get(ulong id, out ClientInfo client)
