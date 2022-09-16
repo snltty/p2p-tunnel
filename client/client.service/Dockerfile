@@ -4,7 +4,7 @@
 
 # 拉取  运行
 # docker pull snltty/p2p-tunnel-client
-# docker run -it -d --name="p2p-tunnel-client" snltty/p2p-tunnel-client
+# docker run -it -d --name="p2p-tunnel-client" -p 5411:5411/tcp -p 59411:59411/tcp snltty/p2p-tunnel-client
 
 # 创建本地目录用来保存临时配置文件，用于修改配置信息
 # cd /usr/local
@@ -38,6 +38,9 @@ RUN echo "http://mirrors.aliyun.com/alpine/latest-stable/main/" > /etc/apk/repos
     && apk add --no-cache libstdc++ libintl tzdata zeromq \
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo $TZ > /etc/timezone
+
+EXPOSE 5411/tcp
+EXPOSE 59411/tcp
 
 WORKDIR /app
 COPY . .
