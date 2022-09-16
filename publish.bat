@@ -1,7 +1,7 @@
 @echo off
 
 SET sdkpath=%1
-if "%sdkpath%"=="" (SET image="D:\\Android\\android-sdk")
+if "%sdkpath%"=="" (SET sdkpath="D:\\Android\\android-sdk")
 
 rem 24行发布安卓那里，改为自己的Android sdk地址, 可以在 工具->选项->Xamarin->Android设置 里查看sdk地址
 

@@ -65,7 +65,7 @@ namespace client.service.ui.api
     {
         public int Port { get; set; } = 8098;
         public string Root { get; set; } = "./web";
-        public IPAddress BindIp { get; set; } = IPAddress.Loopback;
+        public string BindIp { get; set; } = "+";
 
     }
     public class WebsocketConfig
