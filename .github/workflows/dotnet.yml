@@ -37,7 +37,7 @@ jobs:
     
     - name: create release
       id: create_release
-      uses: actions/create-release@master
+      uses: GongT/actions-recreate-release@v1
       env:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
