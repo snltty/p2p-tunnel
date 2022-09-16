@@ -178,7 +178,7 @@ namespace client.service.vea
                 Tun2SocksProcess = null;
             }
 
-            Command.Execute("bash", string.Empty, new string[] { $"ip tuntap del mode tun dev {veaName}" });
+            Command.Execute("/bin/bash", string.Empty, new string[] { $"ip tuntap del mode tun dev {veaName}" });
         }
 
         private void RunWindows()
@@ -207,12 +207,12 @@ namespace client.service.vea
         }
         private void RunLinux()
         {
-            Command.Execute("bash", string.Empty, new string[] {
+            Command.Execute("/bin/bash", string.Empty, new string[] {
                 $"ip tuntap add mode tun dev {veaName}",
                 $"ip addr add {config.IP}/24 dev {veaName}",
                 $"ip link set dev {veaName} up"
             });
-            Tun2SocksProcess = Command.Execute("bash", $" tun2socks-linux -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
+            Tun2SocksProcess = Command.Execute("/bin/bash", $" tun2socks-linux -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
         }
         private int GetWindowsInterfaceNum()
         {
@@ -254,7 +254,7 @@ namespace client.service.vea
         }
         private void AddRouteLinux(IPAddress ip)
         {
-            Command.Execute("bash", string.Empty, new string[] { $"ip route add {ip} via {config.IP} dev {veaName} metric 1 " });
+            Command.Execute("/bin/bash", string.Empty, new string[] { $"ip route add {ip} via {config.IP} dev {veaName} metric 1 " });
         }
 
         public int GetIpMask(IPAddress ip)

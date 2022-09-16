@@ -35,8 +35,8 @@
 FROM alpine:latest
 ENV TZ=Asia/Shanghai DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 RUN echo "http://mirrors.aliyun.com/alpine/latest-stable/main/" > /etc/apk/repositories \
-    && apk add --no-cache libstdc++ libintl tzdata zeromq \
-    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && apk add --no-cache libstdc++ libintl tzdata zeromq bash \
+    && ln -snf /usr/share/zoneinfo/$clTZ /etc/localtime \
     && echo $TZ > /etc/timezone
 
 EXPOSE 5411/tcp
