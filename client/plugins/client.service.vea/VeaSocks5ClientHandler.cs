@@ -49,7 +49,6 @@ namespace client.service.vea
                 data.Tag = target;
             }
             var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
-
             target.TargetIp = targetEp.Address;
             if (targetEp.Port == 0 || ipMemory.SequenceEqual(Helper.AnyIpArray))
             {

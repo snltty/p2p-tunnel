@@ -17,6 +17,7 @@ namespace client.service.vea
     {
         Process Tun2SocksProcess;
         int interfaceNumber = 0;
+        string interfaceLinux = string.Empty;
         const string veaName = "p2p-tunnel";
 
         private readonly ConcurrentDictionary<IPAddress, IPAddressCacheInfo> ips = new ConcurrentDictionary<IPAddress, IPAddressCacheInfo>();
@@ -207,12 +208,13 @@ namespace client.service.vea
         }
         private void RunLinux()
         {
-            string result = Command.Execute("/bin/bash", string.Empty, new string[] {
+            Command.Execute("/bin/bash", string.Empty, new string[] {
                 $"ip tuntap add mode tun dev {veaName}",
                 $"ip addr add {config.IP}/24 dev {veaName}",
                 $"ip link set dev {veaName} up"
             });
-            Tun2SocksProcess = Command.Execute("/bin/bash", $" tun2socks-linux -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
+            interfaceLinux = GetLinuxInterfaceNum();
+            Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceLinux} -loglevel silent");
         }
         private int GetWindowsInterfaceNum()
         {
@@ -225,6 +227,25 @@ namespace client.service.vea
                 }
             }
             return 0;
+        }
+        private string GetLinuxInterfaceNum()
+        {
+            string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ip route" });
+            foreach (var item in output.Split("\r\n"))
+            {
+                if (item.StartsWith("default via"))
+                {
+                    var strs = item.Split(' ');
+                    for (int i = 0; i < strs.Length; i++)
+                    {
+                        if (strs[i] == "dev")
+                        {
+                            return strs[i + 1];
+                        }
+                    }
+                }
+            }
+            return string.Empty;
         }
 
         private void AddRoute()
