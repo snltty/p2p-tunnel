@@ -17,6 +17,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading.Tasks;
 using client.realize.messengers.register;
+using System.Data.Common;
 
 namespace client.realize.messengers.clients
 {
@@ -61,6 +62,7 @@ namespace client.realize.messengers.clients
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
                     clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
+                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
                 }
             });
             punchHoleUdp.OnStep3Handler.Sub((e) =>
@@ -70,6 +72,7 @@ namespace client.realize.messengers.clients
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
                     clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
+                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
                 }
             });
             punchHoleUdp.OnStep4Handler.Sub((e) =>
@@ -79,7 +82,8 @@ namespace client.realize.messengers.clients
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
                     clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
-                }  
+                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+                }
             });
 
             punchHoleTcp.OnStep1Handler.Sub((e) => clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.TCP));
@@ -89,6 +93,7 @@ namespace client.realize.messengers.clients
                 if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
                 }
             });
             punchHoleTcp.OnStep3Handler.Sub((e) =>
@@ -97,7 +102,8 @@ namespace client.realize.messengers.clients
                 if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                   
+                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+
                 }
             });
             punchHoleTcp.OnStep4Handler.Sub((e) =>
@@ -106,6 +112,7 @@ namespace client.realize.messengers.clients
                 if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
                 }
             });
 
@@ -180,6 +187,7 @@ namespace client.realize.messengers.clients
                     udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
                     if (udp == false)
                     {
+                        clientInfoCaching.Connecting(info.Id, true, ServerType.UDP);
                         (ulong tunnelName, int localPort) = await NewTunnel(info.Id, ServerType.UDP);
                         udp = await ConnectUdp(info, tunnelName, localPort).ConfigureAwait(false);
                     }
@@ -189,6 +197,7 @@ namespace client.realize.messengers.clients
                     tcp = await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
                     if (tcp == false)
                     {
+                        clientInfoCaching.Connecting(info.Id, true, ServerType.TCP);
                         (ulong tunnelName, int localPort) = await NewTunnel(info.Id, ServerType.TCP);
                         tcp = await ConnectTcp(info, tunnelName, localPort).ConfigureAwait(false);
                     }
@@ -291,7 +300,7 @@ namespace client.realize.messengers.clients
 
         private void OnRegisterStateChange(bool state)
         {
-            
+
         }
         private void OnRegisterBind(bool state)
         {
@@ -310,7 +319,7 @@ namespace client.realize.messengers.clients
                 clientInfoCaching.RemoveTunnelPort((ulong)TunnelDefaults.TCP);
             }
         }
-        
+
 
         private void OnServerSendClients(ClientsInfo clients)
         {
@@ -415,11 +424,12 @@ namespace client.realize.messengers.clients
         /// <returns></returns>
         private async Task<ulong> NewBindUdp(int localport, IPAddress serverAddress, ulong tunnelName)
         {
+            IConnection connection = null;
             UdpServer tempUdpServer = new UdpServer();
             tempUdpServer.OnPacket.Sub(udpServer.InputData);
-            tempUdpServer.OnDisconnect.Sub((IConnection connection) => tempUdpServer.Disponse());
+            tempUdpServer.OnDisconnect.Sub((IConnection _connection) => { if (connection != _connection) tempUdpServer.Disponse(); });
             tempUdpServer.Start(localport, config.Client.BindIp, config.Client.TimeoutDelay);
-            IConnection connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
+            connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
 
             int port = await clientsMessengerSender.GetTunnelPort(connection);
             tunnelName = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, tunnelName, port, localport);

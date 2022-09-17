@@ -46,6 +46,10 @@ namespace server.messengers.register
         {
             tunnels.AddOrUpdate(model.TunnelName, model, (a, b) => model);
         }
+        public void RemoveTunnel(ulong tunnameName)
+        {
+            tunnels.TryRemove(tunnameName,out _);
+        }
         public bool TunnelExists(ulong tunnelName)
         {
             return tunnels.ContainsKey(tunnelName);

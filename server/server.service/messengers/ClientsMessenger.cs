@@ -3,6 +3,7 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.register;
+using System;
 
 namespace server.service.messengers
 {
@@ -45,6 +46,15 @@ namespace server.service.messengers
                 });
             }
             return model.TunnelName.ToBytes();
+        }
+
+        public void RemoveTunnel(IConnection connection)
+        {
+            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+            {
+                ulong tunnelName = connection.ReceiveRequestWrap.Memory.Span.ToUInt64();
+                source.RemoveTunnel(tunnelName);
+            }
         }
     }
 }

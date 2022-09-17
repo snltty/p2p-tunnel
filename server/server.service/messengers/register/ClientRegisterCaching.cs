@@ -27,8 +27,8 @@ namespace server.service.messengers.register
 
             tcpServer.OnDisconnect.Sub(Disconnected);
             udpServer.OnDisconnect.Sub(Disconnected);
-            //tcpServer.OnConnected = AddTimeout;
-            //udpServer.OnConnected = AddTimeout;
+            tcpServer.OnConnected = AddConnectedTimeout;
+            udpServer.OnConnected = AddConnectedTimeout;
         }
 
         /// <summary>

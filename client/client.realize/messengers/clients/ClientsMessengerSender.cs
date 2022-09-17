@@ -48,5 +48,15 @@ namespace client.realize.messengers.clients
             }
             return 0;
         }
+        public async Task RemoveTunnel(IConnection connection, ulong tunnelName)
+        {
+            var resp = await messengerSender.SendOnly(new MessageRequestWrap
+            {
+                Connection = connection,
+                Memory = tunnelName.ToBytes(),
+                Path = "clients/removetunnel",
+                Timeout = 2000
+            }).ConfigureAwait(false);
+        }
     }
 }
