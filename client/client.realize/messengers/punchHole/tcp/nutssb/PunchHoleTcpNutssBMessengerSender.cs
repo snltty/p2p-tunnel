@@ -2,6 +2,7 @@
 using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using client.messengers.register;
+using client.realize.messengers.clients;
 using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;
@@ -26,9 +27,10 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         private readonly Config config;
         private readonly WheelTimer<object> wheelTimer;
         private readonly IClientInfoCaching clientInfoCaching;
+        private readonly IClientsTunnel clientsTunnel;
 
         public PunchHoleTcpNutssBMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, ITcpServer tcpServer,
-            RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching)
+            RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching, IClientsTunnel clientsTunnel)
         {
             this.punchHoleMessengerSender = punchHoleMessengerSender;
             this.tcpServer = tcpServer;
@@ -37,6 +39,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             this.config = config;
             this.wheelTimer = wheelTimer;
             this.clientInfoCaching = clientInfoCaching;
+            this.clientsTunnel = clientsTunnel;
         }
 
         private IConnection TcpServer => registerState.TcpConnection;
@@ -56,6 +59,13 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         public SimpleSubPushHandler<ConnectParams> OnSendHandler => new SimpleSubPushHandler<ConnectParams>();
         public async Task<ConnectResultModel> Send(ConnectParams param)
         {
+            if (param.TunnelName == (ulong)TunnelDefaults.MIN)
+            {
+                (ulong tunnelName, int localPort) = await clientsTunnel.NewBind(ServerType.TCP, (ulong)TunnelDefaults.MIN);
+                param.TunnelName = tunnelName;
+                param.LocalPort = localPort;
+            }
+
             TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
             var ceche = new ConnectCacheModel
             {
@@ -74,11 +84,16 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         }
 
         public SimpleSubPushHandler<OnStep1Params> OnStep1Handler { get; } = new SimpleSubPushHandler<OnStep1Params>();
-        public async Task OnStep1(OnStep1Params arg)
+        public async Task OnStep1(OnStep1Params arg)    
         {
             if (arg.Data.IsDefault)
             {
                 OnStep1Handler.Push(arg);
+            }
+
+            if (arg.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+            {
+                await clientsTunnel.NewBind(arg.Connection.ServerType, arg.RawData.TunnelName);
             }
 
             if (clientInfoCaching.GetTunnelPort(arg.RawData.TunnelName, out int localPort))

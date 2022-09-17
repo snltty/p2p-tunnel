@@ -16,8 +16,6 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading.Tasks;
-using client.realize.messengers.register;
-using System.Data.Common;
 
 namespace client.realize.messengers.clients
 {
@@ -32,8 +30,7 @@ namespace client.realize.messengers.clients
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly Config config;
         private readonly IUdpServer udpServer;
-        private readonly ITcpServer tcpServer;
-        private readonly ClientsMessengerSender clientsMessengerSender;
+        private readonly IClientsTunnel clientsTunnel;
 
         private const byte TryReverseMinValue = 1;
         private const byte TryReverseMaxValue = 2;
@@ -41,17 +38,16 @@ namespace client.realize.messengers.clients
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
-            IUdpServer udpServer, ITcpServer tcpServer
+            IUdpServer udpServer, IClientsTunnel clientsTunnel
         )
         {
-            this.clientsMessengerSender = clientsMessengerSender;
             this.punchHoleUdp = punchHoleUdp;
             this.punchHoleTcp = punchHoleTcp;
             this.registerState = registerState;
             this.clientInfoCaching = clientInfoCaching;
             this.config = config;
             this.udpServer = udpServer;
-            this.tcpServer = tcpServer;
+            this.clientsTunnel = clientsTunnel;
 
 
             punchHoleUdp.OnStep1Handler.Sub((e) => { clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.UDP); });
@@ -116,11 +112,6 @@ namespace client.realize.messengers.clients
                 }
             });
 
-            //新通道
-            punchHoleMessengerSender.OnTunnel.Sub((e) =>
-            {
-                _ = NewBind(e.ServerType, e.TunnelName);
-            });
 
             //中继连线
             punchHoleMessengerSender.OnRelay.Sub((param) =>
@@ -187,9 +178,7 @@ namespace client.realize.messengers.clients
                     udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
                     if (udp == false)
                     {
-                        clientInfoCaching.Connecting(info.Id, true, ServerType.UDP);
-                        (ulong tunnelName, int localPort) = await NewTunnel(info.Id, ServerType.UDP);
-                        udp = await ConnectUdp(info, tunnelName, localPort).ConfigureAwait(false);
+                        udp = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
                     }
                 }
                 if (config.Client.UseTcp && info.Tcp && info.TcpConnecting == false && info.TcpConnected == false)
@@ -197,9 +186,7 @@ namespace client.realize.messengers.clients
                     tcp = await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
                     if (tcp == false)
                     {
-                        clientInfoCaching.Connecting(info.Id, true, ServerType.TCP);
-                        (ulong tunnelName, int localPort) = await NewTunnel(info.Id, ServerType.TCP);
-                        tcp = await ConnectTcp(info, tunnelName, localPort).ConfigureAwait(false);
+                        tcp = await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
                     }
                 }
 
@@ -372,105 +359,6 @@ namespace client.realize.messengers.clients
             {
                 Logger.Instance.Error(ex);
             }
-        }
-
-        /// <summary>
-        /// 新通道
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="serverType"></param>
-        /// <returns></returns>
-        private async Task<(ulong, int)> NewTunnel(ulong id, ServerType serverType)
-        {
-            (ulong tunnelName, int localPort) = await NewBind(serverType, (ulong)TunnelDefaults.UDP);
-            await punchHoleMessengerSender.SendTunnel(id, tunnelName, serverType);
-            await Task.Delay(2000);
-            return (tunnelName, localPort);
-        }
-        /// <summary>
-        /// 新绑定
-        /// </summary>
-        /// <param name="serverType"></param>
-        /// <param name="tunnelName"></param>
-        /// <returns></returns>
-        private async Task<(ulong, int)> NewBind(ServerType serverType, ulong tunnelName)
-        {
-            IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
-            while (true)
-            {
-                try
-                {
-                    int port = NetworkHelper.GetRandomPort();
-
-                    return serverType switch
-                    {
-                        ServerType.TCP => (await NewBindTcp(port, serverAddress, tunnelName), port),
-                        ServerType.UDP => (await NewBindUdp(port, serverAddress, tunnelName), port),
-                        _ => (0, port),
-                    };
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.DebugError(ex);
-                }
-            }
-        }
-        /// <summary>
-        /// 新绑定一个udp
-        /// </summary>
-        /// <param name="localport"></param>
-        /// <param name="serverAddress"></param>
-        /// <param name="tunnelName"></param>
-        /// <returns></returns>
-        private async Task<ulong> NewBindUdp(int localport, IPAddress serverAddress, ulong tunnelName)
-        {
-            IConnection connection = null;
-            UdpServer tempUdpServer = new UdpServer();
-            tempUdpServer.OnPacket.Sub(udpServer.InputData);
-            tempUdpServer.OnDisconnect.Sub((IConnection _connection) => { if (connection != _connection) tempUdpServer.Disponse(); });
-            tempUdpServer.Start(localport, config.Client.BindIp, config.Client.TimeoutDelay);
-            connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
-
-            int port = await clientsMessengerSender.GetTunnelPort(connection);
-            tunnelName = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, tunnelName, port, localport);
-
-            clientInfoCaching.AddTunnelPort(tunnelName, port);
-            clientInfoCaching.AddUdpserver(tunnelName, tempUdpServer);
-
-            return tunnelName;
-        }
-        /// <summary>
-        /// 新绑定一个tcp
-        /// </summary>
-        /// <param name="localport"></param>
-        /// <param name="serverAddress"></param>
-        /// <param name="tunnelName"></param>
-        /// <returns></returns>
-        private async Task<ulong> NewBindTcp(int localport, IPAddress serverAddress, ulong tunnelName)
-        {
-            TcpServer tempTcpServer = new TcpServer();
-            tempTcpServer.SetBufferSize(config.Client.TcpBufferSize);
-            tempTcpServer.OnPacket.Sub(tcpServer.InputData);
-            tempTcpServer.OnDisconnect.Sub((IConnection connection) => tempTcpServer.Disponse());
-            tempTcpServer.Start(localport, config.Client.BindIp);
-
-            IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, localport);
-
-            Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 5 / 1000);
-            tcpSocket.ReuseBind(bindEndpoint);
-            tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
-
-            IPAddress localAddress = (tcpSocket.LocalEndPoint as IPEndPoint).Address;
-
-            IConnection connection = tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
-
-            int port = await clientsMessengerSender.GetTunnelPort(connection);
-            tunnelName = await clientsMessengerSender.AddTunnel(registerState.TcpConnection, tunnelName, port, localport);
-
-            clientInfoCaching.AddTunnelPort(tunnelName, port);
-
-            return tunnelName;
         }
     }
 }

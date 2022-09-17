@@ -8,6 +8,7 @@ using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;
 using common.server;
+using common.server.model;
 using common.server.servers.iocp;
 using common.server.servers.rudp;
 using System;
@@ -27,8 +28,9 @@ namespace client.realize.messengers.punchHole.udp
         private readonly Config config;
         private readonly WheelTimer<object> wheelTimer;
         private readonly IClientInfoCaching clientInfoCaching;
+        private readonly IClientsTunnel clientsTunnel;
 
-        public PunchHoleRUdpMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching)
+        public PunchHoleRUdpMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching, IClientsTunnel clientsTunnel)
         {
             this.punchHoleMessengerSender = punchHoleMessengerSender;
             this.registerState = registerState;
@@ -36,6 +38,7 @@ namespace client.realize.messengers.punchHole.udp
             this.config = config;
             this.wheelTimer = wheelTimer;
             this.clientInfoCaching = clientInfoCaching;
+            this.clientsTunnel = clientsTunnel;
         }
         private IConnection connection => registerState.UdpConnection;
         private ulong ConnectId => registerState.ConnectId;
@@ -50,6 +53,13 @@ namespace client.realize.messengers.punchHole.udp
         public SimpleSubPushHandler<ConnectParams> OnSendHandler => new SimpleSubPushHandler<ConnectParams>();
         public async Task<ConnectResultModel> Send(ConnectParams param)
         {
+            if (param.TunnelName == (ulong)TunnelDefaults.MIN)
+            {
+                (ulong tunnelName, int localPort) = await clientsTunnel.NewBind(ServerType.UDP, (ulong)TunnelDefaults.MIN);
+                param.TunnelName = tunnelName;
+                param.LocalPort = localPort;
+            }
+
             var timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 2000);
 
             TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
@@ -98,6 +108,11 @@ namespace client.realize.messengers.punchHole.udp
             {
                 OnStep1Handler.Push(arg);
             }
+            if (arg.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+            {
+                await clientsTunnel.NewBind(arg.Connection.ServerType, arg.RawData.TunnelName);
+            }
+
             if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
             {
                 foreach (var ip in arg.Data.LocalIps)

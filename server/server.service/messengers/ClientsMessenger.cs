@@ -31,7 +31,7 @@ namespace server.service.messengers
             model.DeBytes(connection.ReceiveRequestWrap.Memory);
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
-                if (model.TunnelName == 0)
+                if (model.TunnelName == (ulong)TunnelDefaults.MIN)
                 {
                     model.TunnelName = numberSpaceTunnelName.Increment();
                 }

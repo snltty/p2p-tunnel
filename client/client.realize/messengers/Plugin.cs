@@ -22,7 +22,7 @@ using common.server.servers.iocp;
 
 namespace client.realize.messengers
 {
-    public class Plugin:IPlugin
+    public class Plugin : IPlugin
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
@@ -58,6 +58,7 @@ namespace client.realize.messengers
             //客户端列表
             services.AddSingleton<IClientInfoCaching, ClientInfoCaching>();
             services.AddSingleton<IClientsTransfer, ClientsTransfer>();
+            services.AddSingleton<IClientsTunnel, ClientsTunnel>();
             services.AddSingleton<ClientsMessengerSender>();
 
             //注册

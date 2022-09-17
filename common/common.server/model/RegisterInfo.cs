@@ -326,8 +326,9 @@ namespace common.server.model
 
     public enum TunnelDefaults : ulong
     {
-        UDP = 0,
-        TCP = 1,
-        MAX = 1,
+        MIN = 0,
+        UDP = 1,
+        TCP = 2,
+        MAX = 2,
     }
 }
