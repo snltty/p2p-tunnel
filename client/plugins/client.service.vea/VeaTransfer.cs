@@ -145,7 +145,7 @@ namespace client.service.vea
                     throw new Exception($"需要管理员权限");
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 RunLinux();
             }
@@ -207,7 +207,7 @@ namespace client.service.vea
         }
         private void RunLinux()
         {
-            Command.Execute("/bin/bash", string.Empty, new string[] {
+            string result = Command.Execute("/bin/bash", string.Empty, new string[] {
                 $"ip tuntap add mode tun dev {veaName}",
                 $"ip addr add {config.IP}/24 dev {veaName}",
                 $"ip link set dev {veaName} up"

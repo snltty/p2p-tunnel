@@ -107,6 +107,8 @@ namespace common.socks5
         }
         private void BindReceive(Socket socket)
         {
+            if (socket == null) return;
+
             ulong id = numberSpace.Increment();
             AsyncUserToken token = new AsyncUserToken
             {

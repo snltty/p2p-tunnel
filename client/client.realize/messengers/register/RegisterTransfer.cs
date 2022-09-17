@@ -50,6 +50,8 @@ namespace client.realize.messengers.register
         }
         private void Disconnect(IConnection connection, IConnection regConnection)
         {
+            //Console.WriteLine($"{connection.ServerType} 掉线");
+
             if (regConnection != connection)
             {
                 return;
