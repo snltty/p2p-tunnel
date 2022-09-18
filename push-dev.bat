@@ -9,3 +9,4 @@ git add .
 git commit -m "%comment%"
 git tag -a v1.0.0.0 -m "v1.0"
 git push origin dev
+git push origin --tags
