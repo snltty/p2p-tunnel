@@ -187,12 +187,10 @@ namespace client.service.vea
             Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
             for (int i = 0; i < 60; i++)
             {
-                //分配ip
-                Command.Execute("cmd.exe", string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
-                //网卡编号
                 interfaceNumber = GetWindowsInterfaceNum();
                 if (interfaceNumber > 0)
                 {
+                    Command.Execute("cmd.exe", string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
                     AddRoute();
                     if (config.ProxyAll) //代理所有
                     {
@@ -215,6 +213,21 @@ namespace client.service.vea
             });
             interfaceLinux = GetLinuxInterfaceNum();
             Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceLinux} -loglevel silent");
+        }
+        private bool GetWindowsIp()
+        {
+            string output = Command.Execute("cmd.exe", string.Empty, new string[] { "ipconfig" });
+            string ip = config.IP.ToString();
+            foreach (var item in output.Split("\r\n"))
+            {
+                string[] arr = item.Split(':');
+                if (arr.Length > 1)
+                {
+                    if (arr[1].Trim() == ip)
+                        return true;
+                }
+            }
+            return false;
         }
         private int GetWindowsInterfaceNum()
         {
