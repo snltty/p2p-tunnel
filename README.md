@@ -32,10 +32,7 @@
 - [x] udp转发
 - [x] http代理
 - [x] socks5代理(支持tcp，udp，不实现bind)
-- [x] <a href="https://github.com/xjasonlyu/tun2socks" target="_blank">tun2socks</a>虚拟网卡组网，让你的多个不同内网客户端组成一个网络，通过其ip访问，更有局域网网段绑定，访问目标局域网任意设备(**暂时仅支持windows、linux**)
-    >Linux下，得先给程序根目录下tun2socks-linux文件授权，比如 chmod 0777 tun2socks-linux
-    
-    >linux下，是通过 **ip route** 命令获取默认的接口名称，用于绑定虚拟网卡，ip route 获得这样一条信息，default via x.x.x.x dev eth0，可以获得接口eth0，如果你的系统不一样，可能无法获得
+- [x] <a href="https://github.com/xjasonlyu/tun2socks" target="_blank">tun2socks</a>虚拟网卡组网，让你的多个不同内网客户端组成一个网络，通过其ip访问，更有局域网网段绑定，访问目标局域网任意设备(**暂时仅支持windows、linux、osx**)，如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
 
 ## 其它内容
 - [x] .NET6 跨平台，小尺寸，小内存

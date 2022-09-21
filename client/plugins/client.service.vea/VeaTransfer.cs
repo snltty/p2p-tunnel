@@ -18,7 +18,9 @@ namespace client.service.vea
         Process Tun2SocksProcess;
         int interfaceNumber = 0;
         string interfaceLinux = string.Empty;
+        string interfaceOsx = string.Empty;
         const string veaName = "p2p-tunnel";
+        const string veaNameOsx = "utun12138";
 
         private readonly ConcurrentDictionary<IPAddress, IPAddressCacheInfo> ips = new ConcurrentDictionary<IPAddress, IPAddressCacheInfo>();
         private readonly ConcurrentDictionary<int, IPAddressCacheInfo> lanips = new ConcurrentDictionary<int, IPAddressCacheInfo>();
@@ -29,15 +31,13 @@ namespace client.service.vea
         private readonly IVeaSocks5ClientListener socks5ClientListener;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaMessengerSender veaMessengerSender;
-        private readonly RegisterStateInfo registerStateInfo;
 
-        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener, RegisterStateInfo registerStateInfo)
+        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener)
         {
             this.config = config;
             this.socks5ClientListener = socks5ClientListener;
             this.clientInfoCaching = clientInfoCaching;
             this.veaMessengerSender = veaMessengerSender;
-            this.registerStateInfo = registerStateInfo;
 
             clientInfoCaching.OnOnline.Sub((client) =>
             {
@@ -129,6 +129,10 @@ namespace client.service.vea
             {
                 KillLinux();
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                KillOsx();
+            }
         }
 
         private void RunTun2Socks()
@@ -149,6 +153,10 @@ namespace client.service.vea
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 RunLinux();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                RunOsx();
             }
         }
 
@@ -181,6 +189,19 @@ namespace client.service.vea
 
             Command.Execute("/bin/bash", string.Empty, new string[] { $"ip tuntap del mode tun dev {veaName}" });
         }
+        private void KillOsx()
+        {
+            if (Tun2SocksProcess != null)
+            {
+                Tun2SocksProcess.Kill();
+                Tun2SocksProcess.Close();
+                Tun2SocksProcess.Dispose();
+                Tun2SocksProcess = null;
+            }
+            var ip = config.IP.GetAddressBytes();
+            ip[^1] = 0;
+            Command.Execute("/bin/bash", string.Empty, new string[] { $"route delete -net {new IPAddress(ip)}/24 ${config.IP}" });
+        }
 
         private void RunWindows()
         {
@@ -212,23 +233,16 @@ namespace client.service.vea
                 $"ip link set dev {veaName} up"
             });
             interfaceLinux = GetLinuxInterfaceNum();
-            Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceLinux} -loglevel silent");
+            Tun2SocksProcess = Command.Execute("./tun2socks-darwin", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceOsx} -loglevel silent");
         }
-        private bool GetWindowsIp()
+        private void RunOsx()
         {
-            string output = Command.Execute("cmd.exe", string.Empty, new string[] { "ipconfig" });
-            string ip = config.IP.ToString();
-            foreach (var item in output.Split("\r\n"))
-            {
-                string[] arr = item.Split(':');
-                if (arr.Length > 1)
-                {
-                    if (arr[1].Trim() == ip)
-                        return true;
-                }
-            }
-            return false;
+            interfaceOsx = GetOsxInterfaceNum();
+            Tun2SocksProcess = Command.Execute("./tun2socks-osx", $" -device {veaNameOsx} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceOsx} -loglevel silent");
+
+            Command.Execute("/bin/bash", string.Empty, new string[] { $"ifconfig {veaNameOsx} {config.IP} {config.IP} up" });
         }
+
         private int GetWindowsInterfaceNum()
         {
             string output = Command.Execute("cmd.exe", string.Empty, new string[] { "route print" });
@@ -260,6 +274,28 @@ namespace client.service.vea
             }
             return string.Empty;
         }
+        private string GetOsxInterfaceNum()
+        {
+            string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ifconfig" });
+            var arr = output.Split("\r\n");
+            for (int i = 0; i < arr.Length; i++)
+            {
+                var item = arr[i];
+                if (item.Contains("inet "))
+                {
+                    for (int k = i; k >= 0; k--)
+                    {
+                        var itemk = arr[k];
+                        if (itemk.Contains("flags=") && itemk.StartsWith("en"))
+                        {
+                            return itemk.Split(": ")[0];
+                        }
+                    }
+                }
+
+            }
+            return string.Empty;
+        }
 
         private void AddRoute()
         {
@@ -278,6 +314,10 @@ namespace client.service.vea
             {
                 AddRouteLinux(ip);
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                AddRouteOsx(ip);
+            }
         }
         private void AddRouteWindows(IPAddress ip)
         {
@@ -289,6 +329,10 @@ namespace client.service.vea
         private void AddRouteLinux(IPAddress ip)
         {
             Command.Execute("/bin/bash", string.Empty, new string[] { $"ip route add {ip} via {config.IP} dev {veaName} metric 1 " });
+        }
+        private void AddRouteOsx(IPAddress ip)
+        {
+            Command.Execute("/bin/bash", string.Empty, new string[] { $"route add -net {ip}/24 {config.IP}" });
         }
 
         public int GetIpMask(IPAddress ip)

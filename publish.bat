@@ -33,7 +33,12 @@ for %%r in (x64,arm64) do (
 		echo F|xcopy "client\\plugins\\client.service.vea\\%%f" "public\\publish\\linux-%%r-single\\client\\"  /f /h /y
 		del  "public\\publish\\win-%%r-single\\client\\%%f"
 		del  "public\\publish\\osx-%%r-single\\client\\%%f"
-	)	
+	)
+	for %%f in (tun2socks-osx) do (
+		echo F|xcopy "client\\plugins\\client.service.vea\\%%f" "public\\publish\\osx-%%r-single\\client\\"  /f /h /y
+		del  "public\\publish\\win-%%r-single\\client\\%%f"
+		del  "public\\publish\\linux-%%r-single\\client\\%%f"
+	)
 	for %%f in (tun2socks-windows.exe,wintun.dll) do (
 		echo F|xcopy "client\\plugins\\client.service.vea\\%%f" "public\\publish\\win-%%r-single\\client\\"  /f /h /y
 		del  "public\\publish\\linux-%%r-single\\client\\%%f"
