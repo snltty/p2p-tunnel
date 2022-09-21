@@ -239,14 +239,13 @@ namespace client.service.vea
         {
             interfaceOsx = GetOsxInterfaceNum();
             Tun2SocksProcess = Command.Execute("./tun2socks-osx", $" -device {veaNameOsx} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceOsx} -loglevel silent");
-
             Command.Execute("/bin/bash", string.Empty, new string[] { $"ifconfig {veaNameOsx} {config.IP} {config.IP} up" });
         }
 
         private int GetWindowsInterfaceNum()
         {
             string output = Command.Execute("cmd.exe", string.Empty, new string[] { "route print" });
-            foreach (var item in output.Split("\r\n"))
+            foreach (var item in output.Split(Environment.NewLine))
             {
                 if (item.Contains("WireGuard Tunnel"))
                 {
@@ -258,7 +257,7 @@ namespace client.service.vea
         private string GetLinuxInterfaceNum()
         {
             string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ip route" });
-            foreach (var item in output.Split("\r\n"))
+            foreach (var item in output.Split(Environment.NewLine))
             {
                 if (item.StartsWith("default via"))
                 {
@@ -277,7 +276,7 @@ namespace client.service.vea
         private string GetOsxInterfaceNum()
         {
             string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ifconfig" });
-            var arr = output.Split("\r\n");
+            var arr = output.Split(Environment.NewLine);
             for (int i = 0; i < arr.Length; i++)
             {
                 var item = arr[i];
