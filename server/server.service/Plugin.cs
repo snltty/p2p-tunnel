@@ -28,7 +28,9 @@ namespace server.service
 
             services.AddSingleton<IClientRegisterCaching, ClientRegisterCaching>();
             services.AddSingleton<ISourceConnectionSelector, SourceConnectionSelector>();
-            services.AddSingleton<IRegisterKeyValidator, DefaultRegisterKeyValidator>();
+            services.AddSingleton<IRegisterKeyValidator, RegisterKeyValidator>();
+            services.AddSingleton<RegisterKeys>();
+            
             services.AddSingleton<MessengerResolver>();
             services.AddSingleton<MessengerSender>();
             services.AddSingleton<ICryptoFactory, CryptoFactory>();
@@ -44,6 +46,7 @@ namespace server.service
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             var config = services.GetService<Config>();
+            services.GetService<IRegisterKeyValidator>();
 
             var server = services.GetService<ITcpServer>();
             server.SetBufferSize(config.TcpBufferSize);

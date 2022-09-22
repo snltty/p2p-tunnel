@@ -54,8 +54,10 @@ for %%r in (x64,arm64) do (
 	)
 	for %%p in (win,linux,osx) do (
 		echo D|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" "public\\publish\\%%p-%%r-single\\client\\public\\web\\" /s /f /h /y
+		del  "public\\publish\\%%p-%%r-single\\server\\*.pac"
 	)
 )
+del  "public\\publish\\any\\server\\*.pac"
 
 7z a -tzip ./public/publish-zip/any.zip ./public/publish/any/*
 7z a -tzip ./public/publish-zip/win-x64-single.zip ./public/publish/win-x64-single/*
