@@ -217,7 +217,7 @@ namespace client.service.socks5
                     var client = clientInfoCaching.GetByName(config.TargetName);
                     if (client != null)
                     {
-                        connection = SelectConnection(client.TcpConnection, client.UdpConnection);
+                        connection = SelectConnection(client);
                     }
                 }
             }
@@ -231,6 +231,18 @@ namespace client.service.socks5
                 TunnelTypes.TCP => tcpconnection,
                 TunnelTypes.UDP => udpconnection,
                 _ => tcpconnection,
+            };
+        }
+
+        private IConnection SelectConnection(ClientInfo client)
+        {
+            return config.TunnelType switch
+            {
+                TunnelTypes.TCP_FIRST => client.TcpConnected ? client.TcpConnection : client.UdpConnection,
+                TunnelTypes.UDP_FIRST => client.UdpConnected ? client.UdpConnection : client.TcpConnection,
+                TunnelTypes.TCP => client.TcpConnection,
+                TunnelTypes.UDP => client.UdpConnection,
+                _ => client.TcpConnection,
             };
         }
 

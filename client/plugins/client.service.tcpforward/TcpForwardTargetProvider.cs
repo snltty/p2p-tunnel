@@ -70,8 +70,8 @@ namespace client.service.tcpforward
 
             return cacheInfo.TunnelType switch
             {
-                TcpForwardTunnelTypes.TCP_FIRST => client.TcpConnection ?? client.UdpConnection,
-                TcpForwardTunnelTypes.UDP_FIRST => client.UdpConnection ?? client.TcpConnection,
+                TcpForwardTunnelTypes.TCP_FIRST => client.TcpConnected ? client.TcpConnection : client.UdpConnection,
+                TcpForwardTunnelTypes.UDP_FIRST => client.UdpConnected ? client.UdpConnection : client.TcpConnection,
                 TcpForwardTunnelTypes.TCP => client.TcpConnection,
                 TcpForwardTunnelTypes.UDP => client.UdpConnection,
                 _ => client.TcpConnection,

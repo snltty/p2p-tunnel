@@ -30,7 +30,6 @@ namespace client.realize.messengers.clients
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly Config config;
         private readonly IUdpServer udpServer;
-        private readonly IClientsTunnel clientsTunnel;
 
         private const byte TryReverseMinValue = 1;
         private const byte TryReverseMaxValue = 2;
@@ -38,7 +37,7 @@ namespace client.realize.messengers.clients
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
-            IUdpServer udpServer, IClientsTunnel clientsTunnel
+            IUdpServer udpServer, ITcpServer tcpServer
         )
         {
             this.punchHoleUdp = punchHoleUdp;
@@ -47,7 +46,6 @@ namespace client.realize.messengers.clients
             this.clientInfoCaching = clientInfoCaching;
             this.config = config;
             this.udpServer = udpServer;
-            this.clientsTunnel = clientsTunnel;
 
 
             punchHoleUdp.OnStep1Handler.Sub((e) => { clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.UDP); });
@@ -111,6 +109,9 @@ namespace client.realize.messengers.clients
                     _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
                 }
             });
+
+            tcpServer.OnDisconnect.Sub((connection) => clientInfoCaching.Offline(connection.ConnectId, connection.ServerType));
+            udpServer.OnDisconnect.Sub((connection) => clientInfoCaching.Offline(connection.ConnectId, connection.ServerType));
 
 
             //中继连线

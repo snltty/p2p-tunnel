@@ -83,7 +83,7 @@ namespace client.service.vea
         {
             if (virtualEthernetAdapterTransfer.IPList.TryGetValue(target, out IPAddressCacheInfo cache))
             {
-                return SelectConnection(cache.Client.TcpConnection, cache.Client.UdpConnection);
+                return SelectConnection(cache.Client);
             }
 
             if (target.IsLan())
@@ -91,26 +91,26 @@ namespace client.service.vea
                 int mask = virtualEthernetAdapterTransfer.GetIpMask(ipMemory);
                 if (virtualEthernetAdapterTransfer.LanIPList.TryGetValue(mask, out cache))
                 {
-                    return SelectConnection(cache.Client.TcpConnection, cache.Client.UdpConnection);
+                    return SelectConnection(cache.Client);
                 }
             }
 
             var client = clientInfoCaching.GetByName(config.TargetName);
             if (client != null)
             {
-                return SelectConnection(client.TcpConnection, client.UdpConnection);
+                return SelectConnection(client);
             }
             return null;
         }
-        private IConnection SelectConnection(IConnection tcpconnection, IConnection udpconnection)
+        private IConnection SelectConnection(ClientInfo client)
         {
             return config.TunnelType switch
             {
-                TunnelTypes.TCP_FIRST => tcpconnection != null ? tcpconnection : udpconnection,
-                TunnelTypes.UDP_FIRST => udpconnection != null ? udpconnection : tcpconnection,
-                TunnelTypes.TCP => tcpconnection,
-                TunnelTypes.UDP => udpconnection,
-                _ => tcpconnection,
+                TunnelTypes.TCP_FIRST => client.TcpConnected ? client.TcpConnection : client.UdpConnection,
+                TunnelTypes.UDP_FIRST => client.UdpConnected ? client.UdpConnection : client.TcpConnection,
+                TunnelTypes.TCP => client.TcpConnection,
+                TunnelTypes.UDP => client.UdpConnection,
+                _ => client.TcpConnection,
             };
         }
 
