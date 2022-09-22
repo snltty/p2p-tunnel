@@ -200,7 +200,7 @@ namespace client.service.vea
             }
             var ip = config.IP.GetAddressBytes();
             ip[^1] = 0;
-            Command.Execute("/bin/bash", string.Empty, new string[] { $"route delete -net {new IPAddress(ip)}/24 ${config.IP}" });
+            Command.Execute("/bin/bash", string.Empty, new string[] { $"route delete -net {new IPAddress(ip)}/24 {config.IP}" });
         }
 
         private void RunWindows()
@@ -239,7 +239,25 @@ namespace client.service.vea
         {
             interfaceOsx = GetOsxInterfaceNum();
             Tun2SocksProcess = Command.Execute("./tun2socks-osx", $" -device {veaNameOsx} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceOsx} -loglevel silent");
+
+            for (int i = 0; i < 60; i++)
+            {
+                string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ifconfig" });
+                if (output.Contains(veaNameOsx))
+                {
+                    break;
+                }
+                else
+                {
+                    System.Threading.Thread.Sleep(1000);
+                }
+            }
+
             Command.Execute("/bin/bash", string.Empty, new string[] { $"ifconfig {veaNameOsx} {config.IP} {config.IP} up" });
+
+            var ip = config.IP.GetAddressBytes();
+            ip[^1] = 0;
+            Command.Execute("/bin/bash", string.Empty, new string[] { $"route add -net {new IPAddress(ip)}/24 {config.IP}" });
         }
 
         private int GetWindowsInterfaceNum()
