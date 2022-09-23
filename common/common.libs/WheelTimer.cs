@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace common.libs
 {
@@ -28,7 +27,7 @@ namespace common.libs
 
         public WheelTimer()
         {
-            tickMs = (double)(Stopwatch.Frequency / 1000000 * 1000);
+            tickMs = (Stopwatch.Frequency / 1000000 * 1000);
             CreateBuckets();
             Worker();
         }

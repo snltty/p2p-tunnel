@@ -50,6 +50,7 @@ namespace common.libs.rateLimit
         {
             if (disponsed == false)
             {
+                Monitor.Enter(this);
                 if (limits.TryGetValue(key, out SlidingRateInfo info) == false)
                 {
                     info = new SlidingRateInfo { Rate = rate, Items = new SlidingRateItemInfo[windowLength], CurrentRate = 0 };
@@ -59,6 +60,7 @@ namespace common.libs.rateLimit
                 {
                     info.Rate = rate;
                 }
+                Monitor.Exit(this);
             }
         }
 
