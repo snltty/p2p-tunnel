@@ -32,6 +32,7 @@ namespace common.tcpforward
 
         private void OnRequest(TcpForwardInfo arg)
         {
+
             ConnectionKey key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId);
             if (connections.TryGetValue(key, out ConnectUserToken token) && token.TargetSocket != null && token.TargetSocket.Connected)
             {
@@ -49,10 +50,11 @@ namespace common.tcpforward
             {
                 Connect(arg);
             }
+
         }
         private void Connect(TcpForwardInfo arg)
         {
-           
+
             IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
             if (!config.LanConnectEnable && arg.ForwardType == TcpForwardTypes.PROXY && endpoint.IsLan())
             {
