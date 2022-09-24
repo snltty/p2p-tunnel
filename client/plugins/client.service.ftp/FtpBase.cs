@@ -16,6 +16,8 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using client.messengers.clients;
+using common.libs.rateLimit;
+using System.Net;
 
 namespace client.service.ftp
 {
@@ -35,6 +37,7 @@ namespace client.service.ftp
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly ServiceProvider serviceProvider;
         private readonly WheelTimer<FileSaveInfo> wheelTimer = new WheelTimer<FileSaveInfo>();
+        //private readonly IRateLimit<ulong> rateLimit = new TokenBucketRatelimit<ulong>();
 
         protected FtpBase(ServiceProvider serviceProvider, MessengerSender messengerSender, Config config, IClientInfoCaching clientInfoCaching)
         {
@@ -42,6 +45,8 @@ namespace client.service.ftp
             this.config = config;
             this.clientInfoCaching = clientInfoCaching;
             this.serviceProvider = serviceProvider;
+
+            //rateLimit.Init(500 * 1024, RateLimitTimeType.Second);
 
             clientInfoCaching.OnOffline.Sub((client) =>
             {
@@ -237,6 +242,19 @@ namespace client.service.ftp
         {
             try
             {
+                //int num = cmd.ReadData.Length;
+                //do
+                //{
+                //    int last = rateLimit.Try(wrap.Connection.FromConnection.ConnectId, num);
+                //    num -= last;
+                //    if(last == 0)
+                //    {
+                //        await Task.Delay(10);
+                //    }
+
+                //} while (num > 0);
+
+
                 FileSaveInfo fs = Downloads.Get(wrap.Client.Id, cmd.Md5);
                 if (fs == null)
                 {

@@ -35,7 +35,6 @@ namespace common.server
             });
             this.udpserver.OnPacket.Sub((IConnection connection) =>
             {
-                //connection.UpdateTime(DateTimeHelper.GetTimeStamp());
                 InputData(connection).Wait();
             });
             this.sourceConnectionSelector = sourceConnectionSelector;

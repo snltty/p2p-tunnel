@@ -11,7 +11,7 @@ namespace common.libs.rateLimit
     {
 
         int ms = 10;
-        int token = 0;
+        float token = 0;
         int rate = 0;
         int timeout = 0;
         RateLimitTimeType type = RateLimitTimeType.Second;
@@ -32,7 +32,7 @@ namespace common.libs.rateLimit
 
         public void SetRate(TKey key, int rate)
         {
-            (_, int token, int timeout) = GetMsAndToken(rate, type);
+            (_, float token, int timeout) = GetMsAndToken(rate, type);
 
             if (limits.TryGetValue(key, out TokenBucketRateInfo info) == false)
             {
@@ -57,7 +57,7 @@ namespace common.libs.rateLimit
             }
             AddToken(info);
             //消耗掉能消耗的
-            int canEat = Math.Min(num, info.CurrentRate);
+            int canEat = Math.Min(num, (int)info.CurrentRate);
             info.CurrentRate -= canEat;
             return canEat;
         }
@@ -108,9 +108,10 @@ namespace common.libs.rateLimit
 
             info.LastTime += info.Ms * times;
         }
-        private (int, int, int) GetMsAndToken(int rate, RateLimitTimeType type)
+        private (int, float, int) GetMsAndToken(int rate, RateLimitTimeType type)
         {
-            int token = 0, ms = 0, timeout = 0;
+            float token = 0;
+            int ms = 0, timeout = 0;
             switch (type)
             {
                 case RateLimitTimeType.Second:
@@ -120,17 +121,17 @@ namespace common.libs.rateLimit
                     break;
                 case RateLimitTimeType.Minute:
                     ms = 1000;
-                    token = rate / 60;
+                    token = rate / 60.0f;
                     timeout = 1000 * 60 * 2;
                     break;
                 case RateLimitTimeType.Hour:
                     ms = 1000 * 60;
-                    token = rate / 60;
+                    token = rate / 60.0f;
                     timeout = 1000 * 60 * 60 * 2;
                     break;
                 case RateLimitTimeType.Day:
                     ms = 1000 * 60 * 60;
-                    token = rate / 24;
+                    token = rate / 24.0f;
                     timeout = 1000 * 60 * 60 * 24 * 2;
                     break;
                 default:
@@ -142,11 +143,11 @@ namespace common.libs.rateLimit
 
         class TokenBucketRateInfo
         {
-            public int Rate { get; set; }
-            public int CurrentRate { get; set; }
-            public int Token { get; set; }
-            public int Ms { get; set; }
+            public float Rate { get; set; }
+            public float CurrentRate { get; set; }
+            public float Token { get; set; }
 
+            public int Ms { get; set; }
             public int TimeoutMs { get; set; }
             public WheelTimerTimeout<TKey> Timeout { get; set; }
             public long LastTime { get; set; }

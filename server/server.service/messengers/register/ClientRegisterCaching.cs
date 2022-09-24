@@ -21,7 +21,7 @@ namespace server.service.messengers.register
         public SimpleSubPushHandler<RegisterCacheInfo> OnOffline { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
         private readonly WheelTimer<IConnection> wheelTimer = new WheelTimer<IConnection>();
 
-        //private readonly IRateLimit<IPAddress> rateLimit = new TokenBucketRatelimit<IPAddress>();
+        private readonly IRateLimit<IPAddress> rateLimit;
 
         public int Count { get => cache.Count; }
 
@@ -29,8 +29,12 @@ namespace server.service.messengers.register
         {
             this.config = config;
 
-            //rateLimit.Init(5, RateLimitTimeType.Minute);
-
+            if(config.ConnectLimit > 0)
+            {
+                rateLimit = new TokenBucketRatelimit<IPAddress>();
+                rateLimit.Init(config.ConnectLimit, RateLimitTimeType.Minute);
+            }
+            
             tcpServer.OnDisconnect.Sub(Disconnected);
             udpServer.OnDisconnect.Sub(Disconnected);
             tcpServer.OnConnected = AddConnectedTimeout;
@@ -43,26 +47,19 @@ namespace server.service.messengers.register
         /// <param name="connection"></param>
         private void AddConnectedTimeout(IConnection connection)
         {
+            if (config.ConnectLimit > 0 && rateLimit.Try(connection.Address.Address, 1) == 0)
+            {
+                connection.Disponse();
+                return;
+            }
+
             wheelTimer.NewTimeout(new WheelTimerTimeoutTask<IConnection>
             {
-                Callback = ConnectionTimeoutCallback,
+                Callback = ConnectedTimeout,
                 State = connection
             }, config.RegisterTimeout, false);
-
-            //if (rateLimit.Try(connection.Address.Address, 1) == 0)
-            //{
-            //    connection.Disponse();
-            //}
-            //else
-            //{
-            //    wheelTimer.NewTimeout(new WheelTimerTimeoutTask<IConnection>
-            //    {
-            //        Callback = ConnectionTimeoutCallback,
-            //        State = connection
-            //    }, config.RegisterTimeout, false);
-            //}
         }
-        private void ConnectionTimeoutCallback(WheelTimerTimeout<IConnection> timeout)
+        private void ConnectedTimeout(WheelTimerTimeout<IConnection> timeout)
         {
             IConnection connection = timeout.Task.State;
             if (connection != null && connection.ConnectId == 0)
@@ -83,30 +80,6 @@ namespace server.service.messengers.register
             }
         }
 
-        /// <summary>
-        /// 连接超时
-        /// </summary>
-        /// <param name="connection"></param>
-        private void AddTimeout(IConnection connection)
-        {
-            wheelTimer.NewTimeout(new WheelTimerTimeoutTask<IConnection> { Callback = TimeoutCallback, }, 1000, true);
-        }
-        private void TimeoutCallback(WheelTimerTimeout<IConnection> timeout)
-        {
-            long time = DateTimeHelper.GetTimeStamp();
-            if (timeout.Task.State.IsTimeout(time, config.TimeoutDelay))
-            {
-                timeout.Cancel();
-                if (timeout.Task.State.ConnectId > 0)
-                {
-                    Remove(timeout.Task.State.ConnectId);
-                }
-                else
-                {
-                    timeout.Task.State.Disponse();
-                }
-            }
-        }
 
         public ulong Add(RegisterCacheInfo model)
         {

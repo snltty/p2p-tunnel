@@ -1,8 +1,5 @@
 ﻿using common.libs.database;
-using common.server;
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 
 namespace server
@@ -19,6 +16,7 @@ namespace server
             Config config = ReadConfig().Result;
             Udp = config.Udp;
             Tcp = config.Tcp;
+            ConnectLimit = config.ConnectLimit;
             TcpBufferSize = config.TcpBufferSize;
             TimeoutDelay = config.TimeoutDelay;
             RegisterTimeout = config.RegisterTimeout;
@@ -28,6 +26,7 @@ namespace server
 
         public int Udp { get; set; } = 0;
         public int Tcp { get; set; } = 0;
+        public int ConnectLimit { get; set; } = 0;
         public int TcpBufferSize { get; set; } = 8 * 1024;
         public int TimeoutDelay { get; set; } = 20 * 1000;
         public int RegisterTimeout { get; set; } = 5000;
@@ -47,6 +46,7 @@ namespace server
 
             config.Udp = Udp;
             config.Tcp = Tcp;
+            config.ConnectLimit = ConnectLimit;
             config.TcpBufferSize = TcpBufferSize;
             config.TimeoutDelay = TimeoutDelay;
             config.RegisterTimeout = RegisterTimeout;
