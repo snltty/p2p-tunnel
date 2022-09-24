@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-16 15:54:47
+ * @LastEditTime: 2022-09-24 11:08:54
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -173,6 +173,13 @@
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                    <el-form-item label="注册key" prop="Key">
+                                        <el-tooltip class="box-item" effect="dark" content="如果服务端需要验证key，则填写" placement="top-start">
+                                            <el-input v-model="model.Key" placeholder="注册key"></el-input>
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
                             </el-row>
                         </el-form-item>
                     </el-collapse-item>
@@ -236,6 +243,7 @@ export default {
                 AutoRegDelay: 5000,
                 UseMac: false,
                 GroupId: '',
+                Key: '',
                 ClientEncode: false,
                 ClientEncodePassword: "",
                 ServerEncode: false,
@@ -312,6 +320,7 @@ export default {
             state.model.ClientEncodePassword = registerState.ClientConfig.ClientEncodePassword = json.ClientConfig.EncodePassword;
             state.model.AutoPunchHole = registerState.ClientConfig.AutoPunchHole = json.ClientConfig.AutoPunchHole;
             state.model.TimeoutDelay = registerState.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
+            state.model.Key = registerState.ClientConfig.Key = json.ClientConfig.Key;
 
             state.model.UseUdp = registerState.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
             state.model.UseTcp = registerState.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
@@ -337,6 +346,7 @@ export default {
                     ClientConfig: {
                         Name: state.model.ClientName,
                         GroupId: state.model.GroupId,
+                        Key: state.model.Key,
                         AutoReg: state.model.AutoReg,
                         AutoRegTimes: +state.model.AutoRegTimes,
                         AutoRegInterval: +state.model.AutoRegInterval,

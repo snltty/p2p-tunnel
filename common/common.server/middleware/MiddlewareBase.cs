@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using System.Threading.Tasks;
 
 namespace common.server.middleware
 {
@@ -6,8 +7,9 @@ namespace common.server.middleware
     {
         public MiddlewareBase Next { get; set; }
 
-        public virtual (bool, byte[]) Execute(IConnection connection)
+        public virtual async Task<(bool, byte[])> Execute(IConnection connection)
         {
+            await Task.CompletedTask;
             return (true, Helper.EmptyArray);
         }
     }
@@ -29,14 +31,14 @@ namespace common.server.middleware
             }
             current = type;
         }
-        public (bool, byte[]) Execute(IConnection connection)
+        public async Task<(bool, byte[])> Execute(IConnection connection)
         {
             if (first != null)
             {
                 MiddlewareBase execute = first;
                 while (execute != null)
                 {
-                    var res = execute.Execute(connection);
+                    var res = await  execute.Execute(connection);
                     if (!res.Item1)
                     {
                         return res;

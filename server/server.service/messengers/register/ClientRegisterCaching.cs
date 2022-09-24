@@ -1,11 +1,13 @@
 ﻿using common.libs;
 using common.libs.extends;
+using common.libs.rateLimit;
 using common.server;
 using server.messengers.register;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace server.service.messengers.register
 {
@@ -17,13 +19,17 @@ namespace server.service.messengers.register
 
         public SimpleSubPushHandler<RegisterCacheInfo> OnChanged { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
         public SimpleSubPushHandler<RegisterCacheInfo> OnOffline { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
-        WheelTimer<IConnection> wheelTimer = new WheelTimer<IConnection>();
+        private readonly WheelTimer<IConnection> wheelTimer = new WheelTimer<IConnection>();
+
+        //private readonly IRateLimit<IPAddress> rateLimit = new TokenBucketRatelimit<IPAddress>();
 
         public int Count { get => cache.Count; }
 
         public ClientRegisterCaching(Config config, IUdpServer udpServer, ITcpServer tcpServer)
         {
             this.config = config;
+
+            //rateLimit.Init(5, RateLimitTimeType.Minute);
 
             tcpServer.OnDisconnect.Sub(Disconnected);
             udpServer.OnDisconnect.Sub(Disconnected);
@@ -42,6 +48,19 @@ namespace server.service.messengers.register
                 Callback = ConnectionTimeoutCallback,
                 State = connection
             }, config.RegisterTimeout, false);
+
+            //if (rateLimit.Try(connection.Address.Address, 1) == 0)
+            //{
+            //    connection.Disponse();
+            //}
+            //else
+            //{
+            //    wheelTimer.NewTimeout(new WheelTimerTimeoutTask<IConnection>
+            //    {
+            //        Callback = ConnectionTimeoutCallback,
+            //        State = connection
+            //    }, config.RegisterTimeout, false);
+            //}
         }
         private void ConnectionTimeoutCallback(WheelTimerTimeout<IConnection> timeout)
         {

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:39:45
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-08 16:57:00
+ * @LastEditTime: 2022-09-24 11:07:28
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\register.js
@@ -18,6 +18,7 @@ export const provideRegister = () => {
     const state = reactive({
         ClientConfig: {
             GroupId: '',
+            Key: '',
             Name: '',
             AutoReg: false,
             AutoRegTimes: 10,

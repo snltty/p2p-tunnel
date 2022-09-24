@@ -38,7 +38,7 @@ namespace common.server
                 //connection.UpdateTime(DateTimeHelper.GetTimeStamp());
                 InputData(connection).Wait();
             });
-            this.sourceConnectionSelector = sourceConnectionSelector;   
+            this.sourceConnectionSelector = sourceConnectionSelector;
         }
         public void LoadMessenger(Type type, object obj)
         {
@@ -108,7 +108,7 @@ namespace common.server
 
                 if (middlewareTransfer != null)
                 {
-                    var res = middlewareTransfer.Execute(connection);
+                    var res = await middlewareTransfer.Execute(connection);
                     if (!res.Item1)
                     {
                         await messengerSender.ReplyOnly(new MessageResponseWrap
@@ -129,7 +129,7 @@ namespace common.server
                     return;
                 }
 
-                byte[] resultObject = Helper.EmptyArray ;
+                byte[] resultObject = Helper.EmptyArray;
                 if (plugin.IsTask)
                 {
                     if (plugin.IsTaskResult)
@@ -143,7 +143,7 @@ namespace common.server
                         return;
                     }
                 }
-                else if(resultAsync != null)
+                else if (resultAsync != null)
                 {
                     resultObject = resultAsync as byte[];
                 }

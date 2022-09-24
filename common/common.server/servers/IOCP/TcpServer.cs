@@ -11,6 +11,7 @@ namespace common.server.servers.iocp
     public class TcpServer : ITcpServer
     {
         private int bufferSize = 8 * 1024;
+        private int port = 0;
         private Socket socket;
         private CancellationTokenSource cancellationTokenSource;
 
@@ -28,6 +29,7 @@ namespace common.server.servers.iocp
         {
             if (socket == null)
             {
+                this.port = port;
                 cancellationTokenSource = new CancellationTokenSource();
                 socket = BindAccept(port, ip ?? IPAddress.Any);
             }
@@ -46,6 +48,7 @@ namespace common.server.servers.iocp
                 UserToken = new AsyncUserToken
                 {
                     Socket = socket,
+                    Port = port
                 },
                 SocketFlags = SocketFlags.None,
             };
@@ -112,6 +115,7 @@ namespace common.server.servers.iocp
                 {
                     Socket = socket,
                     Connection = CreateConnection(socket),
+                    Port = this.port
                 };
 
                 if (OnConnected == null)
@@ -171,12 +175,13 @@ namespace common.server.servers.iocp
                         ArrayPool<byte>.Shared.Return(arr);
                     }
 
-                    if (!token.Socket.Connected)
+                    if (!token.Socket.Connected || token.Port != port)
                     {
                         token.Connection.SocketError = SocketError.SocketError;
                         CloseClientSocket(e);
                         return;
                     }
+
                     if (!token.Socket.ReceiveAsync(e))
                     {
                         ProcessReceive(e);
@@ -197,6 +202,8 @@ namespace common.server.servers.iocp
         }
         private void ReadPacket(AsyncUserToken token, byte[] data, int offset, int length)
         {
+            if (token.Port != port) return;
+
             if (token.DataBuffer.Size == 0 && length > 4)
             {
                 Span<byte> span = data.AsSpan(offset, length);
@@ -269,6 +276,7 @@ namespace common.server.servers.iocp
             cancellationTokenSource?.Cancel();
             socket?.SafeClose();
             socket = null;
+            port = 0;
         }
         public void Disponse()
         {
@@ -292,6 +300,7 @@ namespace common.server.servers.iocp
         public IConnection Connection { get; set; }
         public Socket Socket { get; set; }
         public ReceiveDataBuffer DataBuffer { get; set; } = new ReceiveDataBuffer();
+        public int Port { get; set; }
 
         public byte[] PoolBuffer { get; set; }
 

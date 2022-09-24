@@ -71,4 +71,11 @@
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="call prev.bat" />
 	</Target>
+	<!--
+	<Target Name="TempFixBeforeBuild" BeforeTargets="BeforeBuild">
+		<Copy SourceFiles="$(ProjectDir)obj\Release\net6.0-android\staticwebassets.build.json" DestinationFiles="$(ProjectDir)obj\Release\net6.0-android\android-arm\staticwebassets.build.json" />
+		<Copy SourceFiles="$(ProjectDir)obj\Release\net6.0-android\staticwebassets.build.json" DestinationFiles="$(ProjectDir)obj\Release\net6.0-android\android-arm64\staticwebassets.build.json" />
+		<Copy SourceFiles="$(ProjectDir)obj\Release\net6.0-android\staticwebassets.build.json" DestinationFiles="$(ProjectDir)obj\Release\net6.0-android\android-x64\staticwebassets.build.json" />
+		<Copy SourceFiles="$(ProjectDir)obj\Release\net6.0-android\staticwebassets.build.json" DestinationFiles="$(ProjectDir)obj\Release\net6.0-android\android-x86\staticwebassets.build.json" />
+	</Target>-->
 </Project>
