@@ -5,6 +5,7 @@ using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace common.server.servers.iocp
 {
@@ -15,7 +16,7 @@ namespace common.server.servers.iocp
         private Socket socket;
         private CancellationTokenSource cancellationTokenSource;
 
-        public SimpleSubPushHandler<IConnection> OnPacket { get; private set; } = new SimpleSubPushHandler<IConnection>();
+        public Func<IConnection, Task> OnPacket { get; set; } = async (connection) => { await Task.CompletedTask; };
         public SimpleSubPushHandler<IConnection> OnDisconnect { get; private set; } = new SimpleSubPushHandler<IConnection>();
         public Action<IConnection> OnConnected { get; set; } = (connection) => { };
 
@@ -143,7 +144,7 @@ namespace common.server.servers.iocp
             }
             return null;
         }
-        private void ProcessReceive(SocketAsyncEventArgs e)
+        private async void ProcessReceive(SocketAsyncEventArgs e)
         {
             try
             {
@@ -152,7 +153,7 @@ namespace common.server.servers.iocp
                 {
                     int offset = e.Offset;
                     int length = e.BytesTransferred;
-                    ReadPacket(token, e.Buffer, offset, length);
+                    await ReadPacket(token, e.Buffer, offset, length);
 
                     if (token.Socket.Available > 0)
                     {
@@ -162,7 +163,7 @@ namespace common.server.servers.iocp
                             length = token.Socket.Receive(arr);
                             if (length > 0)
                             {
-                                ReadPacket(token, arr, 0, length);
+                                await ReadPacket(token, arr, 0, length);
                             }
                             else
                             {
@@ -200,20 +201,20 @@ namespace common.server.servers.iocp
                 CloseClientSocket(e);
             }
         }
-        private void ReadPacket(AsyncUserToken token, byte[] data, int offset, int length)
+        private async Task ReadPacket(AsyncUserToken token, byte[] data, int offset, int length)
         {
             if (token.Port != port) return;
 
             if (token.DataBuffer.Size == 0 && length > 4)
             {
-                Span<byte> span = data.AsSpan(offset, length);
-                int packageLen = span.ToInt32();
+                Memory<byte> memory = data.AsMemory(offset, length);
+                int packageLen = memory.Span.ToInt32();
                 if (packageLen == length - 4)
                 {
                     token.Connection.ReceiveData = data.AsMemory(offset + 4, packageLen);
                     if (OnPacket != null)
                     {
-                        OnPacket.Push(token.Connection);
+                        await OnPacket(token.Connection);
                     }
                     return;
                 }
@@ -230,7 +231,7 @@ namespace common.server.servers.iocp
                 token.Connection.ReceiveData = token.DataBuffer.Data.Slice(4, packageLen);
                 if (OnPacket != null)
                 {
-                    OnPacket.Push(token.Connection);
+                    await OnPacket(token.Connection);
                 }
 
                 token.DataBuffer.RemoveRange(0, packageLen + 4);
@@ -286,11 +287,11 @@ namespace common.server.servers.iocp
             OnConnected = null;
         }
 
-        public void InputData(IConnection connection)
+        public async Task InputData(IConnection connection)
         {
             if (OnPacket != null)
             {
-                OnPacket.Push(connection);
+                await OnPacket(connection);
             }
         }
     }

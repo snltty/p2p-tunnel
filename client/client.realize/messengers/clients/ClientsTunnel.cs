@@ -70,7 +70,7 @@ namespace client.realize.messengers.clients
         {
             IConnection connection = null;
             UdpServer tempUdpServer = new UdpServer();
-            tempUdpServer.OnPacket.Sub(udpServer.InputData);
+            tempUdpServer.OnPacket = udpServer.InputData;
             tempUdpServer.OnDisconnect.Sub((IConnection _connection) => { if (connection != _connection) tempUdpServer.Disponse(); });
             tempUdpServer.Start(localport, config.Client.BindIp, config.Client.TimeoutDelay);
             connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
@@ -94,7 +94,7 @@ namespace client.realize.messengers.clients
         {
             TcpServer tempTcpServer = new TcpServer();
             tempTcpServer.SetBufferSize(config.Client.TcpBufferSize);
-            tempTcpServer.OnPacket.Sub(tcpServer.InputData);
+            tempTcpServer.OnPacket = tcpServer.InputData;
             tempTcpServer.OnDisconnect.Sub((IConnection connection) => tempTcpServer.Disponse());
             tempTcpServer.Start(localport, config.Client.BindIp);
 

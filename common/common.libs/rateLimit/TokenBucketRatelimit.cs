@@ -9,9 +9,7 @@ namespace common.libs.rateLimit
     /// <typeparam name="TKey"></typeparam>
     public class TokenBucketRatelimit<TKey> : IRateLimit<TKey>
     {
-
-        int ms = 10;
-        float token = 0;
+        double token = 0;
         int rate = 0;
         int timeout = 0;
         RateLimitTimeType type = RateLimitTimeType.Second;
@@ -20,23 +18,22 @@ namespace common.libs.rateLimit
 
         public TokenBucketRatelimit()
         {
-
         }
 
         public void Init(int rate, RateLimitTimeType type)
         {
             this.rate = rate;
             this.type = type;
-            (ms, token, timeout) = GetMsAndToken(rate, type);
+            (token, timeout) = GetMsAndToken(rate, type);
         }
 
         public void SetRate(TKey key, int rate)
         {
-            (_, float token, int timeout) = GetMsAndToken(rate, type);
+            (double token, int timeout) = GetMsAndToken(rate, type);
 
             if (limits.TryGetValue(key, out TokenBucketRateInfo info) == false)
             {
-                info = new TokenBucketRateInfo { Rate = rate, CurrentRate = rate, Token = rate, Ms = ms, LastTime = DateTimeHelper.GetTimeStamp(), TimeoutMs = timeout };
+                info = new TokenBucketRateInfo { Rate = rate, CurrentRate = rate, Token = rate, LastTime = DateTimeHelper.GetTimeStamp(), TimeoutMs = timeout };
                 limits.TryAdd(key, info);
             }
             else
@@ -80,7 +77,7 @@ namespace common.libs.rateLimit
         {
             if (limits.TryGetValue(key, out TokenBucketRateInfo info) == false)
             {
-                info = new TokenBucketRateInfo { Rate = rate, CurrentRate = rate, Token = token, Ms = ms, LastTime = DateTimeHelper.GetTimeStamp(), TimeoutMs = timeout };
+                info = new TokenBucketRateInfo { Rate = rate, CurrentRate = rate, Token = token, LastTime = DateTimeHelper.GetTimeStamp(), TimeoutMs = timeout };
                 limits.TryAdd(key, info);
                 info.Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<TKey> { State = key, Callback = Timeout }, 1000, true);
             }
@@ -102,52 +99,46 @@ namespace common.libs.rateLimit
         private void AddToken(TokenBucketRateInfo info)
         {
             long time = DateTimeHelper.GetTimeStamp();
-            int times = (int)(time - info.LastTime) / info.Ms;
+            int times = (int)(time - info.LastTime);
 
             info.CurrentRate = Math.Min(info.CurrentRate + times * info.Token, info.Rate);
 
-            info.LastTime += info.Ms * times;
+            info.LastTime = time;
         }
-        private (int, float, int) GetMsAndToken(int rate, RateLimitTimeType type)
+        private (double, int) GetMsAndToken(int rate, RateLimitTimeType type)
         {
-            float token = 0;
-            int ms = 0, timeout = 0;
+            double token = 0;
+            int timeout = 0;
             switch (type)
             {
                 case RateLimitTimeType.Second:
-                    ms = this.ms;
-                    token = rate / (1000 / this.ms);
+                    token = rate / 1000.0;
                     timeout = 1000 * 2;
                     break;
                 case RateLimitTimeType.Minute:
-                    ms = 1000;
-                    token = rate / 60.0f;
+                    token = rate / (1000 * 60.0);
                     timeout = 1000 * 60 * 2;
                     break;
                 case RateLimitTimeType.Hour:
-                    ms = 1000 * 60;
-                    token = rate / 60.0f;
+                    token = rate / (1000 * 60 * 60.0);
                     timeout = 1000 * 60 * 60 * 2;
                     break;
                 case RateLimitTimeType.Day:
-                    ms = 1000 * 60 * 60;
-                    token = rate / 24.0f;
+                    token = rate / (1000 * 60 * 60 * 24.0);
                     timeout = 1000 * 60 * 60 * 24 * 2;
                     break;
                 default:
                     break;
             }
-            return (ms, token, timeout);
+            return (token, timeout);
         }
 
 
         class TokenBucketRateInfo
         {
             public float Rate { get; set; }
-            public float CurrentRate { get; set; }
-            public float Token { get; set; }
-
-            public int Ms { get; set; }
+            public double CurrentRate { get; set; }
+            public double Token { get; set; }
             public int TimeoutMs { get; set; }
             public WheelTimerTimeout<TKey> Timeout { get; set; }
             public long LastTime { get; set; }

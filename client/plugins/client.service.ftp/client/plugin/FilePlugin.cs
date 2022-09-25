@@ -1,4 +1,5 @@
 ﻿using client.service.ftp.commands;
+using System;
 using System.Threading.Tasks;
 
 namespace client.service.ftp.client.plugin
@@ -32,7 +33,8 @@ namespace client.service.ftp.client.plugin
 
         public async Task<FtpResultInfo> Execute(FtpPluginParamWrap arg)
         {
-            await Task.Yield();
+            await Task.CompletedTask;
+
             FtpFileEndCommand cmd = new FtpFileEndCommand();
             cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Memory);
             ftpClient.OnFileEnd(cmd, arg);

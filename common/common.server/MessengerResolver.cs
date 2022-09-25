@@ -1,5 +1,6 @@
 ﻿using common.libs;
 using common.libs.extends;
+using common.libs.rateLimit;
 using common.server.middleware;
 using common.server.model;
 using System;
@@ -20,7 +21,7 @@ namespace common.server
         private readonly MessengerSender messengerSender;
         private readonly MiddlewareTransfer middlewareTransfer;
         private readonly ISourceConnectionSelector sourceConnectionSelector;
-
+        //IRateLimit<ulong> rateLimit = new TokenBucketRatelimit<ulong>();
 
         public MessengerResolver(IUdpServer udpserver, ITcpServer tcpserver, MessengerSender messengerSender, MiddlewareTransfer middlewareTransfer, ISourceConnectionSelector sourceConnectionSelector)
         {
@@ -29,15 +30,11 @@ namespace common.server
             this.messengerSender = messengerSender;
             this.middlewareTransfer = middlewareTransfer;
 
-            this.tcpserver.OnPacket.Sub((IConnection connection) =>
-            {
-                InputData(connection).Wait();
-            });
-            this.udpserver.OnPacket.Sub((IConnection connection) =>
-            {
-                InputData(connection).Wait();
-            });
+            this.tcpserver.OnPacket = InputData;
+            this.udpserver.OnPacket = InputData;
             this.sourceConnectionSelector = sourceConnectionSelector;
+
+            //rateLimit.Init(100 * 1024, RateLimitTimeType.Second);
         }
         public void LoadMessenger(Type type, object obj)
         {
@@ -81,8 +78,11 @@ namespace common.server
                 return;
             }
 
+
+
             requestWrap.FromArray(receive);
             connection.FromConnection = sourceConnectionSelector.Select(connection);
+
             if (connection.EncodeEnabled)
             {
                 requestWrap.Memory = connection.Crypto.Decode(requestWrap.Memory);

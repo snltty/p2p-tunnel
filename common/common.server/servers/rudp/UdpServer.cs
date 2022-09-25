@@ -9,7 +9,7 @@ namespace common.server.servers.rudp
 {
     public class UdpServer : IUdpServer
     {
-        public SimpleSubPushHandler<IConnection> OnPacket { get; private set; } = new SimpleSubPushHandler<IConnection>();
+        public Func<IConnection, Task> OnPacket { get; set; } = async (connection) => { await Task.CompletedTask; };
         public SimpleSubPushHandler<IConnection> OnDisconnect { get; private set; } = new SimpleSubPushHandler<IConnection>();
         public Action<IConnection> OnConnected { get; set; } = (IConnection connection) => { };
 
@@ -62,7 +62,7 @@ namespace common.server.servers.rudp
                 {
                     IConnection connection = peer.Tag as IConnection;
                     connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
-                    OnPacket.Push(connection);
+                    OnPacket(connection).Wait();
                 }
                 catch (Exception)
                 {
@@ -96,9 +96,10 @@ namespace common.server.servers.rudp
             maxNumberConnectingNumberSpace = null;
         }
 
-        public void InputData(IConnection connection)
+        public async Task InputData(IConnection connection)
         {
-            OnPacket.Push(connection);
+            if (OnPacket != null)
+                await OnPacket(connection);
         }
 
         public async Task<IConnection> CreateConnection(IPEndPoint address)
@@ -146,6 +147,6 @@ namespace common.server.servers.rudp
             }
         }
 
-        
+
     }
 }

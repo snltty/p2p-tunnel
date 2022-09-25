@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using System;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace common.server
 {
@@ -11,9 +12,9 @@ namespace common.server
         public void Stop();
         public void Disponse();
 
-        public void InputData(IConnection connection);
+        public Task InputData(IConnection connection);
 
-        public SimpleSubPushHandler<IConnection> OnPacket { get; }
+        public Func<IConnection, Task> OnPacket { get; set; }
         public SimpleSubPushHandler<IConnection> OnDisconnect { get; }
         public Action<IConnection> OnConnected { get; set; }
     }
