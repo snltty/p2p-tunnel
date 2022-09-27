@@ -41,6 +41,8 @@ namespace server.service.socks5
 
             services.AddSingleton<ISocks5ServerHandler, Socks5ServerHandler>();
             services.AddSingleton<ISocks5ClientHandler, Socks5ClientHandler>();
+
+            services.AddSingleton<ISocks5KeyValidator, DefaultSocks5KeyValidator>();
         }
     }
 

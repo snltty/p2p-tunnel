@@ -29,6 +29,8 @@ namespace client.service.vea
             services.AddSingleton<IVeaSocks5ServerHandler, VeaSocks5ServerHandler>();
             services.AddSingleton<IVeaSocks5ClientListener, VeaSocks5ClientListener>();
             services.AddSingleton<IVeaSocks5MessengerSender, VeaSocks5MessengerSender>();
+
+            services.AddSingleton<IVeaKeyValidator, DefaultVeaKeyValidator>();
         }
     }
 }

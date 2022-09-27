@@ -45,6 +45,8 @@ namespace server.service.tcpforward
             services.AddSingleton<ITcpForwardTargetProvider, TcpForwardTargetProvider>(); //目标提供器
             services.AddSingleton<ITcpForwardTargetCaching<TcpForwardTargetCacheInfo>, TcpForwardTargetCaching>(); //转发缓存器
             services.AddSingleton<TcpForwardResolver>();
+
+            services.AddSingleton<ITcpForwardKeyValidator, DefaultTcpForwardKeyValidator>();
         }
     }
 }

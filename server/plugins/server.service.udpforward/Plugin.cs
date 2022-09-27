@@ -37,6 +37,8 @@ namespace server.service.udpforward
             services.AddSingleton<IUdpForwardTargetProvider, UdpForwardTargetProvider>(); //目标提供器
             services.AddSingleton<IUdpForwardTargetCaching<UdpForwardTargetCacheInfo>, UdpForwardTargetCaching>(); //转发缓存器
             services.AddSingleton<UdpForwardResolver>();
+
+            services.AddSingleton<IUdpForwardKeyValidator, DefaultUdpForwardKeyValidator>();
         }
     }
 }

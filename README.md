@@ -2,10 +2,10 @@
  * @Author: snltty
  * @Date: 2021-08-22 14:09:03
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-15 15:08:47
+ * @LastEditTime: 2022-09-27 19:31:32
  * @version: v1.0.0
  * @Descripttion: 功能说明
- * @FilePath: \qbcode.vclass.client.vued:\desktop\p2p-tunnel\README.md
+ * @FilePath: \undefinedd:\Desktop\p2p-tunnel\README.md
 -->
 <div align="center">
 
@@ -21,6 +21,12 @@
 1. 有任何想法，皆可进群(**1121552990**)了解
 2. <a href="http://snltty.gitee.io/p2p-tunnel/" target="_blank">在线web管理端</a>，<a href="https://update7.simplix.info/UpdatePack7R2.exe" target="_blank">win7不能运行.NET6的补丁</a>
 3. 服务器 或 内网电脑，暴露服务在公网时，请做好安全防范
+4. 组网可以让你直接访问目标端所在局域网的任一设备
+
+## 为什么需要穿透
+1. A、B 任一设备在NAT后面，没有公网ipv4，没有ipv6，无法直接通信，这种情况当然需要穿透
+2. A、B 一台设备有公网ipv4，一台设备有ipv6（没有ipv4公网），这时候仍然需要穿透，因为只有ipv4的一方，无法访问ipv6
+3. A、B 两台设备都是ipv4，或者都是ipv6，可以直接通信（ipv4开启upnp映射，ipv6允许入栈，之类的），但是如此一来，任何人都可以访问你开放的端口，不安全，此时，如果使用打洞，则相对安全很多
 
 ## 穿透方式
 1. p2p打洞、A<---->B（网络环境支持打洞时，打洞连接效率最好）

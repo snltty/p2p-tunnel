@@ -18,8 +18,9 @@ namespace common.udpforward
 
         private readonly Config config;
         private readonly WheelTimer<object> wheelTimer;
+        private readonly IUdpForwardKeyValidator udpForwardKeyValidator;
 
-        public UdpForwardResolver(UdpForwardMessengerSender udpForwardMessengerSender, Config config, WheelTimer<object> wheelTimer)
+        public UdpForwardResolver(UdpForwardMessengerSender udpForwardMessengerSender, Config config, WheelTimer<object> wheelTimer, IUdpForwardKeyValidator udpForwardKeyValidator)
         {
             //B接收到A的请求
             this.udpForwardMessengerSender = udpForwardMessengerSender;
@@ -27,49 +28,52 @@ namespace common.udpforward
 
             this.config = config;
             this.wheelTimer = wheelTimer;
+            this.udpForwardKeyValidator = udpForwardKeyValidator;
 
             TimeoutUdp();
         }
 
         private void OnRequest(UdpForwardInfo arg)
         {
-            if (config.ConnectEnable)
+            if (config.ConnectEnable == false && udpForwardKeyValidator.Validate(arg) == false)
             {
-                ConnectionKeyUdp key = new ConnectionKeyUdp(arg.Connection.FromConnection.ConnectId, arg.SourceEndpoint);
-                if (!connections.TryGetValue(key, out UdpToken token))
-                {
-                    IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
-                    if (!config.LanConnectEnable && endpoint.IsLan())
-                    {
-                        return;
-                    }
-
-                    if (config.PortBlackList.Contains(endpoint.Port))
-                    {
-                        return;
-                    }
-                    if (config.PortWhiteList.Length > 0 && !config.PortBlackList.Contains(endpoint.Port))
-                    {
-                        return;
-                    }
-                    Socket socket = new Socket(endpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-                    token = new UdpToken { Connection = arg.Connection, Data = arg, TargetSocket = socket, };
-
-                    token.TargetEP = endpoint;
-                    token.PoolBuffer = ArrayPool<byte>.Shared.Rent(65535);
-                    connections.AddOrUpdate(key, token, (a, b) => token);
-
-                    _ = token.TargetSocket.SendTo(arg.Buffer.Span, endpoint);
-                    token.Data.Buffer = Helper.EmptyArray;
-                    IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
-                }
-                else
-                {
-                    _ = token.TargetSocket.SendTo(arg.Buffer.Span, token.TargetEP);
-                    token.Data.Buffer = Helper.EmptyArray;
-                }
-                token.Update();
+                return;
             }
+
+            ConnectionKeyUdp key = new ConnectionKeyUdp(arg.Connection.FromConnection.ConnectId, arg.SourceEndpoint);
+            if (!connections.TryGetValue(key, out UdpToken token))
+            {
+                IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
+                if (!config.LanConnectEnable && endpoint.IsLan())
+                {
+                    return;
+                }
+
+                if (config.PortBlackList.Contains(endpoint.Port))
+                {
+                    return;
+                }
+                if (config.PortWhiteList.Length > 0 && !config.PortBlackList.Contains(endpoint.Port))
+                {
+                    return;
+                }
+                Socket socket = new Socket(endpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                token = new UdpToken { Connection = arg.Connection, Data = arg, TargetSocket = socket, };
+
+                token.TargetEP = endpoint;
+                token.PoolBuffer = ArrayPool<byte>.Shared.Rent(65535);
+                connections.AddOrUpdate(key, token, (a, b) => token);
+
+                _ = token.TargetSocket.SendTo(arg.Buffer.Span, endpoint);
+                token.Data.Buffer = Helper.EmptyArray;
+                IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
+            }
+            else
+            {
+                _ = token.TargetSocket.SendTo(arg.Buffer.Span, token.TargetEP);
+                token.Data.Buffer = Helper.EmptyArray;
+            }
+            token.Update();
         }
         private void TimeoutUdp()
         {

@@ -1,6 +1,5 @@
 ﻿using common.server;
 using common.server.model;
-using System.IO;
 
 namespace server.messengers.register
 {

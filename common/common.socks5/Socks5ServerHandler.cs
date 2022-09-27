@@ -21,15 +21,17 @@ namespace common.socks5
         private readonly ISocks5MessengerSender socks5MessengerSender;
         protected Config Config { get; }
         private readonly WheelTimer<object> wheelTimer;
+        private readonly ISocks5KeyValidator socks5KeyValidator;
 
         Semaphore maxNumberAcceptedClients;
-        public Socks5ServerHandler(ISocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer)
+        public Socks5ServerHandler(ISocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, ISocks5KeyValidator socks5KeyValidator)
         {
             this.socks5MessengerSender = socks5MessengerSender;
             this.Config = config;
             maxNumberAcceptedClients = new Semaphore(config.NumConnections, config.NumConnections);
 
             this.wheelTimer = wheelTimer;
+            this.socks5KeyValidator = socks5KeyValidator;
             TimeoutUdp();
 
             handles = new Dictionary<Socks5EnumStep, Action<IConnection>> {
@@ -39,6 +41,7 @@ namespace common.socks5
                 {Socks5EnumStep.Forward, HndleForward},
                 {Socks5EnumStep.ForwardUdp, HndleForwardUdp},
             };
+           
         }
 
         public void InputData(IConnection connection)
@@ -53,7 +56,7 @@ namespace common.socks5
         private void HandleRequest(IConnection connection)
         {
             Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
-            if (!Config.ConnectEnable)
+            if (Config.ConnectEnable == false && socks5KeyValidator.Validate(connection,data))
             {
                 data.Response[0] = (byte)Socks5EnumAuthType.NotSupported;
             }

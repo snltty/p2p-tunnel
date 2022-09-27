@@ -15,11 +15,12 @@ namespace common.tcpforward
     {
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
         private readonly Config config;
+        private readonly ITcpForwardKeyValidator tcpForwardKeyValidator;
         private ConcurrentDictionary<ConnectionKey, ConnectUserToken> connections = new ConcurrentDictionary<ConnectionKey, ConnectUserToken>(new ConnectionComparer());
 
         Semaphore maxNumberAcceptedClients;
 
-        public TcpForwardResolver(TcpForwardMessengerSender tcpForwardMessengerSender, Config config)
+        public TcpForwardResolver(TcpForwardMessengerSender tcpForwardMessengerSender, Config config, ITcpForwardKeyValidator tcpForwardKeyValidator)
         {
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.config = config;
@@ -28,6 +29,7 @@ namespace common.tcpforward
             tcpForwardMessengerSender.OnRequestHandler.Sub(OnRequest);
 
             maxNumberAcceptedClients = new Semaphore(config.NumConnections, config.NumConnections);
+            this.tcpForwardKeyValidator = tcpForwardKeyValidator;   
         }
 
         private void OnRequest(TcpForwardInfo arg)
@@ -194,11 +196,11 @@ namespace common.tcpforward
 
         private bool Intercept(TcpForwardInfo arg, int port)
         {
-            if (!config.ConnectEnable)
+            if (config.ConnectEnable == false && tcpForwardKeyValidator.Validate(arg) == false)
             {
                 return false;
             }
-            if (config.PortWhiteList.Length > 0 && !config.PortWhiteList.Contains(port))
+            if (config.PortWhiteList.Length > 0 && config.PortWhiteList.Contains(port) == false)
             {
                 return false;
             }

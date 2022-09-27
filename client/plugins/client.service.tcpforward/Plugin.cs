@@ -48,6 +48,8 @@ namespace client.service.tcpforward
             services.AddSingleton<TcpForwardTransfer>();
             services.AddSingleton<TcpForwardResolver>();
             services.AddSingleton<TcpForwardMessengerSender>();
+
+            services.AddSingleton<ITcpForwardKeyValidator, DefaultTcpForwardKeyValidator>();
         }
     }
 }
