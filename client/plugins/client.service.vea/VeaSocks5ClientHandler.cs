@@ -100,7 +100,7 @@ namespace client.service.vea
                     return SelectConnection(cache.Client);
                 }
             }
-
+;
             var client = clientInfoCaching.GetByName(config.TargetName);
             if (client != null)
             {
@@ -110,7 +110,8 @@ namespace client.service.vea
         }
         private IConnection SelectConnection(ClientInfo client)
         {
-            return config.TunnelType switch
+            //Console.WriteLine($"SelectConnection:{config.TunnelType}");
+            var res = config.TunnelType switch
             {
                 TunnelTypes.TCP_FIRST => client.TcpConnected ? client.TcpConnection : client.UdpConnection,
                 TunnelTypes.UDP_FIRST => client.UdpConnected ? client.UdpConnection : client.TcpConnection,
@@ -118,6 +119,17 @@ namespace client.service.vea
                 TunnelTypes.UDP => client.UdpConnection,
                 _ => client.TcpConnection,
             };
+            /*
+            try
+            {
+                Console.WriteLine($"SelectConnection == null:{res == null}");
+                Console.WriteLine($"SelectConnection connecetd:{res.Connected}");
+            }
+            catch (Exception)
+            {
+            }*/
+
+            return res;
         }
 
         class TagInfo
