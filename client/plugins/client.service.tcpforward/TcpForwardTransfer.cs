@@ -669,7 +669,7 @@ namespace client.service.tcpforward
 
                 if (param.IsPac)
                 {
-                    SetPac($"http://{uiconfig.Web.BindIp}:{uiconfig.Web.Port}/{Path.GetFileName(file)}");
+                    SetPac($"http://{(uiconfig.Web.BindIp == "+" ? "127.0.0.1" : uiconfig.Web.BindIp)}:{uiconfig.Web.Port}/{Path.GetFileName(file)}");
                 }
                 else
                 {

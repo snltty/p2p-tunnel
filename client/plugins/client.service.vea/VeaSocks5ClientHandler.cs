@@ -65,6 +65,12 @@ namespace client.service.vea
         protected override bool HndleForward(Socks5Info data)
         {
             TagInfo target = data.Tag as TagInfo;
+
+            if (target.Connection == null || target.Connection.Connected == false)
+            {
+                return false;
+            }
+
             return socks5MessengerSender.Request(data, target.Connection);
         }
 
