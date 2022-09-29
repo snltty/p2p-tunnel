@@ -5,7 +5,7 @@ using System.Text;
 
 namespace client.service.app
 {
-    public class ConfigDataFileProvider<T> : IConfigDataProvider<T> where T : class
+    public class ConfigDataFileProvider<T> : IConfigDataProvider<T> where T : class,new()
     {
         public async Task<T> Load()
         {
