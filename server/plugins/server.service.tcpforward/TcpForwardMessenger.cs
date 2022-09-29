@@ -5,7 +5,6 @@ using common.tcpforward;
 using server.messengers.register;
 using System;
 using System.Linq;
-using System.Net;
 
 namespace server.service.tcpforward
 {
@@ -16,14 +15,16 @@ namespace server.service.tcpforward
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
         private readonly ITcpForwardServer tcpForwardServer;
+        private readonly ITcpForwardValidator tcpForwardValidator;
 
-        public TcpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.tcpforward.Config config, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, TcpForwardMessengerSender tcpForwardMessengerSender, ITcpForwardServer tcpForwardServer)
+        public TcpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.tcpforward.Config config, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, TcpForwardMessengerSender tcpForwardMessengerSender, ITcpForwardServer tcpForwardServer, ITcpForwardValidator tcpForwardValidator)
         {
             this.clientRegisterCache = clientRegisterCache;
             this.config = config;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.tcpForwardServer = tcpForwardServer;
+            this.tcpForwardValidator = tcpForwardValidator; 
         }
 
         public void Request(IConnection connection)
@@ -53,11 +54,6 @@ namespace server.service.tcpforward
 
         public byte[] UnRegister(IConnection connection)
         {
-            if (!config.ConnectEnable)
-            {
-                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes();
-            }
-
             try
             {
                 TcpForwardUnRegisterParamsInfo model = new TcpForwardUnRegisterParamsInfo();
@@ -65,14 +61,19 @@ namespace server.service.tcpforward
 
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
-                    if (model.AliveType == TcpForwardAliveTypes.WEB)
+                    TcpForwardTargetCacheInfo cache = model.AliveType == TcpForwardAliveTypes.WEB ? tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort) : tcpForwardTargetCaching.Get(model.SourcePort);
+
+                    if(cache!= null && cache.Name == source.Name)
                     {
-                        tcpForwardTargetCaching.Remove(model.SourceIp, model.SourcePort);
-                    }
-                    else
-                    {
-                        tcpForwardTargetCaching.Remove(model.SourcePort);
-                        tcpForwardServer.Stop(model.SourcePort);
+                        if (model.AliveType == TcpForwardAliveTypes.WEB)
+                        {
+                            tcpForwardTargetCaching.Remove(model.SourceIp, model.SourcePort);
+                        }
+                        else
+                        {
+                            tcpForwardTargetCaching.Remove(model.SourcePort);
+                            tcpForwardServer.Stop(model.SourcePort);
+                        }
                     }
                 }
                 return new TcpForwardRegisterResult { }.ToBytes();
@@ -85,7 +86,7 @@ namespace server.service.tcpforward
 
         public byte[] Register(IConnection connection)
         {
-            if (!config.ConnectEnable)
+            if (tcpForwardValidator.Validate(connection) == false)
             {
                 return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes();
             }

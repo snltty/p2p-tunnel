@@ -49,7 +49,7 @@ namespace client.service.tcpforward
             services.AddSingleton<TcpForwardResolver>();
             services.AddSingleton<TcpForwardMessengerSender>();
 
-            services.AddSingleton<ITcpForwardKeyValidator, DefaultTcpForwardKeyValidator>();
+            services.AddSingleton<ITcpForwardValidator, DefaultTcpForwardValidator>();
         }
     }
 }

@@ -19,9 +19,9 @@ namespace client.service.vea
 
         public void UpdateConfig()
         {
-            Config.BufferSize = config.BufferSize;
-            Config.ConnectEnable = config.ConnectEnable;
-            Config.LanConnectEnable = config.LanConnectEnable;
+            base.config.BufferSize = config.BufferSize;
+            base.config.ConnectEnable = config.ConnectEnable;
+            base.config.LanConnectEnable = config.LanConnectEnable;
         }
     }
 

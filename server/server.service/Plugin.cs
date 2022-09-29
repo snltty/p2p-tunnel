@@ -1,5 +1,4 @@
 ﻿using common.libs;
-using common.libs.extends;
 using Microsoft.Extensions.DependencyInjection;
 using common.server.model;
 using System;
@@ -30,7 +29,11 @@ namespace server.service
             services.AddSingleton<ISourceConnectionSelector, SourceConnectionSelector>();
             services.AddSingleton<IRegisterKeyValidator, RegisterKeyValidator>();
             services.AddSingleton<RegisterKeys>();
+
+            services.AddSingleton<IRelayValidator, DefaultRelayValidator>();
             
+
+
             services.AddSingleton<MessengerResolver>();
             services.AddSingleton<MessengerSender>();
             services.AddSingleton<ICryptoFactory, CryptoFactory>();

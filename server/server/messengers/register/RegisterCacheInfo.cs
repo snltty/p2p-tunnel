@@ -1,7 +1,5 @@
-﻿using common.libs;
-using common.server;
+﻿using common.server;
 using common.server.model;
-using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Text.Json.Serialization;
@@ -22,9 +20,8 @@ namespace server.messengers.register
         public string Name { get; set; }
         public string GroupId { get; set; }
 
-        /// <summary>
-        /// loopback 、LAN ip
-        /// </summary>
+        [JsonIgnore]
+        public string Key { get; set; }
         [JsonIgnore]
         public IPAddress[] LocalIps { get; set; }
         [JsonIgnore]

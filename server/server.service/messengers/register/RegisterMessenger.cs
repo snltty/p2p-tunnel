@@ -132,6 +132,7 @@ namespace server.service.messengers.register
                         GroupId = model.GroupId,
                         LocalIps = model.LocalIps,
                         Mac = model.Mac,
+                        Key = model.Key,
                         Id = 0
                     };
                     clientRegisterCache.Add(client);

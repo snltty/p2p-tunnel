@@ -15,12 +15,12 @@ namespace common.tcpforward
     {
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
         private readonly Config config;
-        private readonly ITcpForwardKeyValidator tcpForwardKeyValidator;
+        private readonly ITcpForwardValidator tcpForwardValidator;
         private ConcurrentDictionary<ConnectionKey, ConnectUserToken> connections = new ConcurrentDictionary<ConnectionKey, ConnectUserToken>(new ConnectionComparer());
 
         Semaphore maxNumberAcceptedClients;
 
-        public TcpForwardResolver(TcpForwardMessengerSender tcpForwardMessengerSender, Config config, ITcpForwardKeyValidator tcpForwardKeyValidator)
+        public TcpForwardResolver(TcpForwardMessengerSender tcpForwardMessengerSender, Config config, ITcpForwardValidator tcpForwardValidator)
         {
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.config = config;
@@ -29,12 +29,11 @@ namespace common.tcpforward
             tcpForwardMessengerSender.OnRequestHandler.Sub(OnRequest);
 
             maxNumberAcceptedClients = new Semaphore(config.NumConnections, config.NumConnections);
-            this.tcpForwardKeyValidator = tcpForwardKeyValidator;   
+            this.tcpForwardValidator = tcpForwardValidator;   
         }
 
         private void OnRequest(TcpForwardInfo arg)
         {
-
             ConnectionKey key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId);
             if (connections.TryGetValue(key, out ConnectUserToken token) && token.TargetSocket != null && token.TargetSocket.Connected)
             {
@@ -56,18 +55,13 @@ namespace common.tcpforward
         }
         private void Connect(TcpForwardInfo arg)
         {
+            if (tcpForwardValidator.Validate(arg) == false)
+            {
+                Receive(arg, Helper.EmptyArray, 0, 0);
+                return;
+            }
 
             IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
-            if (!config.LanConnectEnable && arg.ForwardType == TcpForwardTypes.PROXY && endpoint.IsLan())
-            {
-                Receive(arg, Helper.EmptyArray, 0, 0);
-                return;
-            }
-            if (!Intercept(arg, endpoint.Port))
-            {
-                Receive(arg, Helper.EmptyArray, 0, 0);
-                return;
-            }
 
             maxNumberAcceptedClients.WaitOne();
             Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -192,23 +186,6 @@ namespace common.tcpforward
             Receive(token, Helper.EmptyArray, 0, 0);
             token.Clear();
             connections.TryRemove(token.Key, out _);
-        }
-
-        private bool Intercept(TcpForwardInfo arg, int port)
-        {
-            if (config.ConnectEnable == false && tcpForwardKeyValidator.Validate(arg) == false)
-            {
-                return false;
-            }
-            if (config.PortWhiteList.Length > 0 && config.PortWhiteList.Contains(port) == false)
-            {
-                return false;
-            }
-            if (config.PortBlackList.Contains(port))
-            {
-                return false;
-            }
-            return true;
         }
 
         private void Receive(ConnectUserToken token, byte[] data)

@@ -2,11 +2,11 @@
 
 namespace client.service.vea
 {
-    public interface IVeaKeyValidator : ISocks5KeyValidator
+    public interface IVeaKeyValidator : ISocks5Validator
     {
     }
 
-    public class DefaultVeaKeyValidator : DefaultSocks5KeyValidator, IVeaKeyValidator
+    public class DefaultVeaKeyValidator : DefaultSocks5Validator, IVeaKeyValidator
     {
 
     }
