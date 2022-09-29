@@ -14,13 +14,15 @@ namespace server.service.messengers.register
         private readonly Config config;
         private readonly IRegisterKeyValidator registerKeyValidator;
         private readonly MessengerSender messengerSender;
+        private readonly IRelayValidator relayValidator;
 
-        public RegisterMessenger(IClientRegisterCaching clientRegisterCache, Config config, IRegisterKeyValidator registerKeyValidator, MessengerSender messengerSender)
+        public RegisterMessenger(IClientRegisterCaching clientRegisterCache, Config config, IRegisterKeyValidator registerKeyValidator, MessengerSender messengerSender, IRelayValidator relayValidator)
         {
             this.clientRegisterCache = clientRegisterCache;
             this.config = config;
             this.registerKeyValidator = registerKeyValidator;
             this.messengerSender = messengerSender;
+            this.relayValidator = relayValidator;
         }
 
         public async Task<byte[]> Execute(IConnection connection)
@@ -65,7 +67,7 @@ namespace server.service.messengers.register
                 UdpPort = connection.Address.Port,
                 TcpPort = client.TcpConnection?.Address.Port ?? 0,
                 GroupId = client.GroupId,
-                Relay = config.Relay,
+                Relay = relayValidator.Validate(connection, client),
                 TimeoutDelay = config.TimeoutDelay
             }.ToBytes();
         }
@@ -94,7 +96,7 @@ namespace server.service.messengers.register
                 UdpPort = client.UdpConnection?.Address.Port ?? 0,
                 TcpPort = connection.Address.Port,
                 GroupId = client.GroupId,
-                Relay = config.Relay,
+                Relay = relayValidator.Validate(connection, client),
                 TimeoutDelay = config.TimeoutDelay
             }.ToBytes();
         }

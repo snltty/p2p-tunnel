@@ -12,6 +12,7 @@ using System.Reflection;
 using server.service.messengers.register;
 using server.messengers.register;
 using common.libs.database;
+using server.service.messengers;
 
 namespace server.service
 {
@@ -28,10 +29,9 @@ namespace server.service
             services.AddSingleton<IClientRegisterCaching, ClientRegisterCaching>();
             services.AddSingleton<ISourceConnectionSelector, SourceConnectionSelector>();
             services.AddSingleton<IRegisterKeyValidator, RegisterKeyValidator>();
-            services.AddSingleton<RegisterKeys>();
+            services.AddSingleton<KeysConfig>();
 
-            services.AddSingleton<IRelayValidator, DefaultRelayValidator>();
-            
+            services.AddSingleton<IRelayValidator, RelayValidator>();
 
 
             services.AddSingleton<MessengerResolver>();

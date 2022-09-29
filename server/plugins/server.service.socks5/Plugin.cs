@@ -12,7 +12,7 @@ namespace server.service.socks5
         {
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Info("socks5已加载");
-            Config config = services.GetService<Config>();
+            common.socks5.Config config = services.GetService<common.socks5.Config>();
             if (config.ConnectEnable)
             {
                 Logger.Instance.Debug($"socks5已允许连接");
@@ -42,7 +42,7 @@ namespace server.service.socks5
             services.AddSingleton<ISocks5ServerHandler, Socks5ServerHandler>();
             services.AddSingleton<ISocks5ClientHandler, Socks5ClientHandler>();
 
-            services.AddSingleton<ISocks5Validator, DefaultSocks5Validator>();
+            services.AddSingleton<ISocks5Validator, Socks5Validator>();
         }
     }
 

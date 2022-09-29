@@ -1,12 +1,13 @@
 ﻿using System.Net;
 using System;
 using common.libs.extends;
+using common.server;
 
 namespace common.socks5
 {
     public interface ISocks5Validator
     {
-        public bool Validate(Socks5Info info, Config config);
+        public bool Validate(IConnection connection,Socks5Info info, Config config);
     }
 
     public class DefaultSocks5Validator : ISocks5Validator
@@ -16,7 +17,7 @@ namespace common.socks5
         {
 
         }
-        public bool Validate(Socks5Info info, Config config)
+        public bool Validate(IConnection connection,Socks5Info info, Config config)
         {
             if (config.ConnectEnable == false)
             {

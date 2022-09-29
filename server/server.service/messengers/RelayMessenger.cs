@@ -89,4 +89,20 @@ namespace server.service.messengers
             return Helper.EmptyArray;
         }
     }
+
+    public class RelayValidator : IRelayValidator
+    {
+
+        private readonly Config config;
+        private readonly KeysConfig keysConfig;
+        public RelayValidator(Config config, KeysConfig keysConfig)
+        {
+            this.config = config;
+            this.keysConfig = keysConfig;   
+        }
+        public bool Validate(IConnection connection, RegisterCacheInfo client)
+        {
+            return config.Relay;
+        }
+    }
 }

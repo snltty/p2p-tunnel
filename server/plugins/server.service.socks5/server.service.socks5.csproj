@@ -29,6 +29,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\common\common.socks5\common.socks5.csproj" />
+	  <ProjectReference Include="..\..\server\server.csproj" />
 	</ItemGroup>
 
 
