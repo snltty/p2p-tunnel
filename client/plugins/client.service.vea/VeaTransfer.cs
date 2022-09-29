@@ -45,12 +45,15 @@ namespace client.service.vea
             });
             clientInfoCaching.OnOffline.Sub((client) =>
             {
-                var value = ips.FirstOrDefault(c => c.Value.Client.Id == client.Id);
-                if (value.Key != null)
+                if(client.UdpConnected == false && client.TcpConnected == false)
                 {
-                    if (ips.TryRemove(value.Key, out IPAddressCacheInfo cache))
+                    var value = ips.FirstOrDefault(c => c.Value.Client.Id == client.Id);
+                    if (value.Key != null)
                     {
-                        lanips.TryRemove(cache.Mask, out _);
+                        if (ips.TryRemove(value.Key, out IPAddressCacheInfo cache))
+                        {
+                            lanips.TryRemove(cache.Mask, out _);
+                        }
                     }
                 }
             });

@@ -6,7 +6,6 @@ using common.libs.extends;
 using common.server;
 using common.socks5;
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
 
@@ -110,8 +109,7 @@ namespace client.service.vea
         }
         private IConnection SelectConnection(ClientInfo client)
         {
-            //Console.WriteLine($"SelectConnection:{config.TunnelType}");
-            var res = config.TunnelType switch
+            return config.TunnelType switch
             {
                 TunnelTypes.TCP_FIRST => client.TcpConnected ? client.TcpConnection : client.UdpConnection,
                 TunnelTypes.UDP_FIRST => client.UdpConnected ? client.UdpConnection : client.TcpConnection,
@@ -119,17 +117,6 @@ namespace client.service.vea
                 TunnelTypes.UDP => client.UdpConnection,
                 _ => client.TcpConnection,
             };
-            /*
-            try
-            {
-                Console.WriteLine($"SelectConnection == null:{res == null}");
-                Console.WriteLine($"SelectConnection connecetd:{res.Connected}");
-            }
-            catch (Exception)
-            {
-            }*/
-
-            return res;
         }
 
         class TagInfo
