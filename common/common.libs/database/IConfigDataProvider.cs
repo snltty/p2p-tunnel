@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace common.libs.database
 {
-    public interface IConfigDataProvider<T> where T : class
+    public interface IConfigDataProvider<T> where T : class, new()
     {
         Task<T> Load();
         Task Save(T model);
     }
 
-    public class ConfigDataFileProvider<T> : IConfigDataProvider<T> where T : class
+    public class ConfigDataFileProvider<T> : IConfigDataProvider<T> where T : class,new()
     {
         public async Task<T> Load()
         {
