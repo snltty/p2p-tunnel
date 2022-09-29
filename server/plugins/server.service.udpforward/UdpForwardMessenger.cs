@@ -15,14 +15,16 @@ namespace server.service.udpforward
         private readonly IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> tcpForwardTargetCaching;
         private readonly UdpForwardMessengerSender tcpForwardMessengerSender;
         private readonly IUdpForwardServer tcpForwardServer;
+        private readonly IUdpForwardValidator udpForwardValidator;
 
-        public UdpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.udpforward.Config config, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> tcpForwardTargetCaching, UdpForwardMessengerSender tcpForwardMessengerSender, IUdpForwardServer tcpForwardServer)
+        public UdpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.udpforward.Config config, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> tcpForwardTargetCaching, UdpForwardMessengerSender tcpForwardMessengerSender, IUdpForwardServer tcpForwardServer, IUdpForwardValidator udpForwardValidator)
         {
             this.clientRegisterCache = clientRegisterCache;
             this.config = config;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.tcpForwardServer = tcpForwardServer;
+            this.udpForwardValidator = udpForwardValidator; 
         }
 
         public void Request(IConnection connection)
@@ -51,7 +53,7 @@ namespace server.service.udpforward
 
         public byte[] UnRegister(IConnection connection)
         {
-            if (!config.ConnectEnable)
+            if (udpForwardValidator.Validate(connection) == false)
             {
                 return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
             }
@@ -62,8 +64,12 @@ namespace server.service.udpforward
 
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
-                    tcpForwardTargetCaching.Remove(port);
-                    tcpForwardServer.Stop(port);
+                    UdpForwardTargetCacheInfo cache = tcpForwardTargetCaching.Get(port);
+                    if(cache != null && cache.Name == source.Name)
+                    {
+                        tcpForwardTargetCaching.Remove(port);
+                        tcpForwardServer.Stop(port);
+                    }
                 }
                 return new UdpForwardRegisterResult { }.ToBytes();
             }
@@ -75,7 +81,7 @@ namespace server.service.udpforward
 
         public byte[] Register(IConnection connection)
         {
-            if (!config.ConnectEnable)
+            if (udpForwardValidator.Validate(connection) == false)
             {
                 return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
             }

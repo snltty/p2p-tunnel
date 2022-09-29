@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
@@ -54,6 +55,37 @@ namespace server
             config.EncodePassword = EncodePassword;
 
             await configDataProvider.Save(config).ConfigureAwait(false);
+        }
+    }
+
+
+    [Table("keys")]
+    public class KeysConfig
+    {
+        public KeysConfig() { }
+        private readonly IConfigDataProvider<KeysConfig> configDataProvider;
+        public KeysConfig(IConfigDataProvider<KeysConfig> configDataProvider)
+        {
+            this.configDataProvider = configDataProvider;
+
+            KeysConfig config = ReadConfig().Result;
+            if (config != null)
+            {
+                Keys = config.Keys;
+                UdpForward = config.UdpForward;
+                TcpForward = config.TcpForward;
+                Socks5 = config.Socks5;
+            }
+        }
+
+        public string[] Keys { get; set; } = Array.Empty<string>();
+        public string[] UdpForward { get; set; } = Array.Empty<string>();
+        public string[] TcpForward { get; set; } = Array.Empty<string>();
+        public string[] Socks5 { get; set; } = Array.Empty<string>();
+
+        private async Task<KeysConfig> ReadConfig()
+        {
+            return await configDataProvider.Load();
         }
     }
 }

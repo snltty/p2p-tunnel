@@ -52,7 +52,7 @@ namespace client.service.udpforward
             p2PConfigInfo = ReadP2PConfig();
             this.serverConfigDataProvider = serverConfigDataProvider;
             serverConfigInfo = ReadServerConfig();
-            
+
             this.clientConfig = clientConfig;
             this.registerStateInfo = registerStateInfo;
 
@@ -174,7 +174,7 @@ namespace client.service.udpforward
         {
             return p2PConfigInfo.Tunnels.FirstOrDefault(c => c.Port == port) ?? new P2PListenInfo { };
         }
-        
+
         public string StartP2P(P2PListenInfo listen)
         {
             return StartP2P(listen.Port);
@@ -259,7 +259,7 @@ namespace client.service.udpforward
             result.DeBytes(resp.Data);
             if (result.Code != UdpForwardRegisterResultCodes.OK)
             {
-                return $"{resp.Code.GetDesc((byte)resp.Code)},{result.Msg}";
+                return $"{result.Code.GetDesc((byte)result.Code)},{result.Msg}";
             }
 
             serverConfigInfo.Tunnels.Add(forward);

@@ -16,47 +16,33 @@ namespace common.udpforward
         private ConcurrentDictionary<ConnectionKeyUdp, UdpToken> connections = new(new ConnectionKeyUdpComparer());
         private readonly UdpForwardMessengerSender udpForwardMessengerSender;
 
-        private readonly Config config;
         private readonly WheelTimer<object> wheelTimer;
-        private readonly IUdpForwardKeyValidator udpForwardKeyValidator;
+        private readonly IUdpForwardValidator udpForwardValidator;
 
-        public UdpForwardResolver(UdpForwardMessengerSender udpForwardMessengerSender, Config config, WheelTimer<object> wheelTimer, IUdpForwardKeyValidator udpForwardKeyValidator)
+        public UdpForwardResolver(UdpForwardMessengerSender udpForwardMessengerSender, WheelTimer<object> wheelTimer, IUdpForwardValidator udpForwardValidator)
         {
             //B接收到A的请求
             this.udpForwardMessengerSender = udpForwardMessengerSender;
             udpForwardMessengerSender.OnRequestHandler.Sub(OnRequest);
 
-            this.config = config;
             this.wheelTimer = wheelTimer;
-            this.udpForwardKeyValidator = udpForwardKeyValidator;
+            this.udpForwardValidator = udpForwardValidator;
 
             TimeoutUdp();
         }
 
         private void OnRequest(UdpForwardInfo arg)
         {
-            if (config.ConnectEnable == false && udpForwardKeyValidator.Validate(arg) == false)
-            {
-                return;
-            }
-
             ConnectionKeyUdp key = new ConnectionKeyUdp(arg.Connection.FromConnection.ConnectId, arg.SourceEndpoint);
-            if (!connections.TryGetValue(key, out UdpToken token))
+            if (connections.TryGetValue(key, out UdpToken token) == false)
             {
-                IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
-                if (!config.LanConnectEnable && endpoint.IsLan())
+                if (udpForwardValidator.Validate(arg) == false)
                 {
                     return;
                 }
 
-                if (config.PortBlackList.Contains(endpoint.Port))
-                {
-                    return;
-                }
-                if (config.PortWhiteList.Length > 0 && !config.PortBlackList.Contains(endpoint.Port))
-                {
-                    return;
-                }
+                IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
+
                 Socket socket = new Socket(endpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                 token = new UdpToken { Connection = arg.Connection, Data = arg, TargetSocket = socket, };
 

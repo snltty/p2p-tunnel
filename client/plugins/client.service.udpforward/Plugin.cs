@@ -41,7 +41,7 @@ namespace client.service.udpforward
             services.AddSingleton<UdpForwardResolver>();
             services.AddSingleton<UdpForwardMessengerSender>();
 
-            services.AddSingleton<IUdpForwardKeyValidator, DefaultUdpForwardKeyValidator>();
+            services.AddSingleton<IUdpForwardValidator, DefaultUdpForwardValidator>();
         }
     }
 }
