@@ -34,7 +34,7 @@ namespace server.service.socks5
 
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
-            services.AddSingleton<Config>();
+            services.AddSingleton<common.socks5.Config>();
 
             services.AddSingleton<ISocks5ClientListener, Socks5ClientListener>();
             services.AddSingleton<ISocks5MessengerSender, Socks5MessengerSender>();

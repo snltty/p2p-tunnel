@@ -9,19 +9,19 @@ namespace client.service.vea
     }
     public class VeaSocks5ServerHandler : Socks5ServerHandler, IVeaSocks5ServerHandler
     {
-        private readonly Config config;
+        private readonly Config _config;
         public VeaSocks5ServerHandler(IVeaSocks5MessengerSender socks5MessengerSender, common.socks5.Config socks5Config, Config config, WheelTimer<object> wheelTimer, IVeaKeyValidator veaKeyValidator)
             : base(socks5MessengerSender, socks5Config, wheelTimer, veaKeyValidator)
         {
-            this.config = config;
+            this._config = config;
             UpdateConfig();
         }
 
         public void UpdateConfig()
         {
-            base.config.BufferSize = config.BufferSize;
-            base.config.ConnectEnable = config.ConnectEnable;
-            base.config.LanConnectEnable = config.LanConnectEnable;
+            config.BufferSize = _config.BufferSize;
+            config.ConnectEnable = _config.ConnectEnable;
+            config.LanConnectEnable = _config.LanConnectEnable;
         }
     }
 

@@ -81,7 +81,7 @@ namespace server.service.udpforward
 
         public byte[] Register(IConnection connection)
         {
-            if (!config.ConnectEnable)
+            if (udpForwardValidator.Validate(connection) == false)
             {
                 return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
             }
