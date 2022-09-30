@@ -1,12 +1,12 @@
-## linuxÏÂsupervisorÍĞ¹Ü¿Í»§¶Ë
+## linuxä¸‹supervisoræ‰˜ç®¡å®¢æˆ·ç«¯
 ```
 
-//1¡¢ÏÂÔØlinux°æ±¾³ÌĞò£¬·Åµ½ /usr/local/p2p-tunnel-client ÎÄ¼ş¼Ğ
+//1ã€ä¸‹è½½linuxç‰ˆæœ¬ç¨‹åºï¼Œæ”¾åˆ° /usr/local/p2p-tunnel-client æ–‡ä»¶å¤¹
 
-//2¡¢°²×°supervisor
+//2ã€å®‰è£…supervisor
 apt install -y supervisor
 
-//3¡¢Ğ´ÅäÖÃÎÄ¼ş
+//3ã€å†™é…ç½®æ–‡ä»¶
 vim /etc/supervisor/conf.d/p2p-tunnel-client.conf
 
 [program:p2p-tunnel-client]
@@ -23,9 +23,9 @@ stdout_logfile_backups = 20
 stdout_logfile = /usr/local/p2p-tunnel-client/log/log.log
 stderr_logfile = /usr/local/p2p-tunnel-client/log/log.err.log
 
-//4¡¢ÖØĞÂ¼ÓÔØÅäÖÃÎÄ¼ş
+//4ã€é‡æ–°åŠ è½½é…ç½®æ–‡ä»¶
 supervisorctl update
-//5¡¢Æô¶¯£¬»òÕßÖØĞÂÆô¶¯
+//5ã€å¯åŠ¨ï¼Œæˆ–è€…é‡æ–°å¯åŠ¨
 supervisorctl start p2p-tunnel-client
 supervisorctl restart p2p-tunnel-client
 ```

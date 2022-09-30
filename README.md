@@ -57,5 +57,5 @@
 
 
 ## 部署说明
-- <a href="server-linux.md">服务端 linux docker托管</a>
-- <a href="client-linux.md">客户端 linux supervisor托管</a>
+- <a href="./readme/server-linux.md">服务端 linux docker托管</a>
+- <a href="./readme/client-linux.md">客户端 linux supervisor托管</a>

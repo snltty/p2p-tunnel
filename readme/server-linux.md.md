@@ -1,38 +1,38 @@
 
-## linuxÏÂdockerÍĞ¹Ü·şÎñ¶Ë
+## linuxä¸‹dockeræ‰˜ç®¡æœåŠ¡ç«¯
 ```
-// À­È¡ÔËĞĞ
+// æ‹‰å–è¿è¡Œ
 docker pull snltty/p2p-tunnel-server
 docker run -it -d --name="p2p-tunnel-server" -p 5410:5410/udp -p 59410:59410/tcp snltty/p2p-tunnel-server
 
-// ´´½¨±¾µØÄ¿Â¼ÓÃÀ´±£´æÁÙÊ±ÅäÖÃÎÄ¼ş£¬ÓÃÓÚĞŞ¸ÄÅäÖÃĞÅÏ¢
+// åˆ›å»ºæœ¬åœ°ç›®å½•ç”¨æ¥ä¿å­˜ä¸´æ—¶é…ç½®æ–‡ä»¶ï¼Œç”¨äºä¿®æ”¹é…ç½®ä¿¡æ¯
 cd /usr/local
 mkdir p2p-tunnel-server
 cd p2p-tunnel-server
 
-// °ÑÅäÖÃÎÄ¼ş´ÓÈİÆ÷Àï¸´ÖÆ³öÀ´
+// æŠŠé…ç½®æ–‡ä»¶ä»å®¹å™¨é‡Œå¤åˆ¶å‡ºæ¥
 docker cp p2p-tunnel-server:/app/appsettings.json /usr/local/p2p-tunnel-server/appsettings.json
 docker cp p2p-tunnel-server:/app/socks5-appsettings.json /usr/local/p2p-tunnel-server/socks5-appsettings.json
 docker cp p2p-tunnel-server:/app/tcpforward-appsettings.json /usr/local/p2p-tunnel-server/tcpforward-appsettings.json
 docker cp p2p-tunnel-server:/app/udpforward-appsettings.json /usr/local/p2p-tunnel-server/udpforward-appsettings.json
 
-// ĞŞ¸ÄÅäÖÃ
+// ä¿®æ”¹é…ç½®
 
-// °ÑĞŞ¸ÄºóÅäÖÃÎÄ¼ş¸´ÖÆ½øÈ¥
+// æŠŠä¿®æ”¹åé…ç½®æ–‡ä»¶å¤åˆ¶è¿›å»
 docker cp /usr/local/p2p-tunnel-server/appsettings.json  p2p-tunnel-server:/app/appsettings.json
 docker cp /usr/local/p2p-tunnel-server/socks5-appsettings.json  p2p-tunnel-server:/app/socks5-appsettings.json
 docker cp /usr/local/p2p-tunnel-server/tcpforward-appsettings.json  p2p-tunnel-server:/app/tcpforward-appsettings.json
 docker cp /usr/local/p2p-tunnel-server/udpforward-appsettings.json  p2p-tunnel-server:/app/udpforward-appsettings.json
 
-// ÖØÆôÈİÆ÷
+// é‡å¯å®¹å™¨
 docker restart p2p-tunnel-server
 ```
 
-## ×Ô¼º´ò°üdocker·şÎñ¶Ë¾µÏñ
+## è‡ªå·±æ‰“åŒ…dockeræœåŠ¡ç«¯é•œåƒ
 ```
-//½øÈëÏîÄ¿¸ùÄ¿Â¼
-//power shell ÏÂ
-./server-docker ÄãµÄ¾µÏñÃû(±ÈÈçsnltty/p2p-tunnel-server)
-//cmd ÏÂ
-server-docker ÄãµÄ¾µÏñÃû(±ÈÈçsnltty/p2p-tunnel-server)
+//è¿›å…¥é¡¹ç›®æ ¹ç›®å½•
+//power shell ä¸‹
+./server-docker ä½ çš„é•œåƒå(æ¯”å¦‚snltty/p2p-tunnel-server)
+//cmd ä¸‹
+server-docker ä½ çš„é•œåƒå(æ¯”å¦‚snltty/p2p-tunnel-server)
 ```
