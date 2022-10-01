@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
@@ -26,10 +26,6 @@
 		<DebugSymbols>false</DebugSymbols>
 		<Optimize>True</Optimize>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <None Remove="wakeup-appsettings.json" />
-	</ItemGroup>
 
 	<ItemGroup>
 	  <Content Include="wakeup-appsettings.json">

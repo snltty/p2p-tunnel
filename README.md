@@ -22,6 +22,7 @@
 2. <a href="http://snltty.gitee.io/p2p-tunnel/" target="_blank">在线web管理端</a>，<a href="https://update7.simplix.info/UpdatePack7R2.exe" target="_blank">win7不能运行.NET6的补丁</a>
 3. 服务器 或 内网电脑，暴露服务在公网时，请做好安全防范
 4. 组网可以让你直接访问目标端所在局域网的任一设备
+5. 用一台垃圾手机作为客户端放家里，就可以远程开机了
 
 ## 为什么需要穿透
 1. A、B 任一设备在NAT后面，没有公网ipv4，没有ipv6，无法直接通信，这种情况当然需要穿透

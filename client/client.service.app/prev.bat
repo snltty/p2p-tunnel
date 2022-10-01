@@ -1,5 +1,6 @@
 xcopy "../client.realize/appsettings.json" "public" /f /y
 xcopy "../plugins/client.service.ftp/ftp-appsettings.json" "public" /f /y
+xcopy "../plugins/client.service.wakeup/wakeup-appsettings.json" "public" /f /y
 xcopy "../plugins/client.service.logger/logger-appsettings.json" "public" /f /y
 xcopy "../plugins/client.service.tcpforward/p2p-tcp-forwards.json" "public" /f /y
 xcopy "../plugins/client.service.tcpforward/server-tcp-forwards.json" "public" /f /y
