@@ -45,6 +45,7 @@
 		<ProjectReference Include="..\plugins\client.service.udpforward\client.service.udpforward.csproj" />
 		<ProjectReference Include="..\plugins\client.service.ui\client.service.ui.api.service\client.service.ui.api.service.csproj" />
 		<ProjectReference Include="..\plugins\client.service.vea\client.service.vea.csproj" />
+		<ProjectReference Include="..\plugins\client.service.wakeup\client.service.wakeup.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="./public/plugins/**">

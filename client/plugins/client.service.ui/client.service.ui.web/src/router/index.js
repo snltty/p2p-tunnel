@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-01 16:50:48
+ * @LastEditTime: 2022-10-01 17:19:16
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\router\index.js
@@ -60,6 +60,12 @@ const routes = [
                 name: 'ServiceFtp',
                 component: () => import('../views/service/ftp/Index.vue'),
                 meta: { name: '文件服务', service: 'FtpClientService' }
+            },
+            {
+                path: '/wakeup.html',
+                name: 'WakeUp',
+                component: () => import('../views/service/wakeup/Index.vue'),
+                meta: { name: '远程唤醒', service: 'WakeUpClientService' }
             },
             {
                 path: '/service-logger.html',

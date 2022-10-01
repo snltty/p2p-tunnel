@@ -1,5 +1,4 @@
 ﻿using client.messengers.register;
-using client.realize.messengers;
 using client.realize.messengers.punchHole;
 using client.service.ftp;
 using client.service.logger;
@@ -7,9 +6,9 @@ using client.service.socks5;
 using client.service.tcpforward;
 using client.service.udpforward;
 using client.service.ui.api.manager;
-using client.service.ui.api.service;
 using client.service.ui.api.service.clientServer;
 using client.service.vea;
+using client.service.wakeup;
 using common.libs;
 using common.server;
 using common.server.middleware;
@@ -52,6 +51,7 @@ namespace client.service
                 typeof(Socks5Messenger).Assembly,
                 typeof(PunchHoleMessenger).Assembly,
                 typeof(VeaSocks5Messenger).Assembly,
+                typeof(WakeUpMessenger).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();

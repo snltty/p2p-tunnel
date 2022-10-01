@@ -45,7 +45,7 @@ namespace client.service.vea
             });
             clientInfoCaching.OnOffline.Sub((client) =>
             {
-                if(client.UdpConnected == false && client.TcpConnected == false)
+                if (client.UdpConnected == false && client.TcpConnected == false)
                 {
                     var value = ips.FirstOrDefault(c => c.Value.Client.Id == client.Id);
                     if (value.Key != null)
@@ -103,7 +103,7 @@ namespace client.service.vea
                 var client = item;
                 if (connection != null)
                 {
-                    _ = veaMessengerSender.IP(connection).ContinueWith((result) =>
+                    veaMessengerSender.IP(connection).ContinueWith((result) =>
                     {
                         UpdateIp(client, result.Result);
                     });
@@ -236,7 +236,7 @@ namespace client.service.vea
                 $"ip link set dev {veaName} up"
             });
             interfaceLinux = GetLinuxInterfaceNum();
-            Tun2SocksProcess = Command.Execute("./tun2socks-darwin", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceOsx} -loglevel silent");
+            Tun2SocksProcess = Command.Execute("./tun2socks-darwin", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceLinux} -loglevel silent");
         }
         private void RunOsx()
         {

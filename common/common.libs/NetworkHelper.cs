@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace common.libs
@@ -236,5 +237,31 @@ namespace common.libs
             return new IPEndPoint(GetDomainIp(ip), port);
         }
 
+
+        public static byte[] Mac2Bytes(string mac)
+        {
+            mac = mac.Replace("-", "").Replace(":", "");
+            byte[] res = new byte[mac.Length / 2];
+            for (int i = 0; i < res.Length; i++)
+            {
+                res[i] = Convert.ToByte(mac.Substring(i * 2, 2), 16);
+            }
+            return res;
+        }
+        public static byte[] MagicPacket(string mac)
+        {
+            var macBytes = Mac2Bytes(mac);
+            var res = new byte[6 + 16 * macBytes.Length];
+            for (int i = 0; i < 6; i++)
+            {
+                res[i] = 0xff;
+            }
+            for (int i = 1; i <= 16; i++)
+            {
+                Array.Copy(macBytes, 0, res, i * 6, macBytes.Length);
+            }
+
+            return res;
+        }
     }
 }
