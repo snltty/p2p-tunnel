@@ -26,7 +26,6 @@ namespace client.service.vea
             BufferSize = config.BufferSize;
             NumConnections = config.NumConnections;
             ConnectEnable = config.ConnectEnable;
-            LanConnectEnable = config.LanConnectEnable;
         }
 
 
@@ -41,7 +40,6 @@ namespace client.service.vea
         public TunnelTypes TunnelType { get; set; } = TunnelTypes.TCP_FIRST;
         public int NumConnections { get; set; } = 1000;
         public bool ConnectEnable { get; set; } = false;
-        public bool LanConnectEnable { get; set; } = false;
 
         public async Task<Config> ReadConfig()
         {
@@ -61,7 +59,6 @@ namespace client.service.vea
             config.BufferSize = BufferSize;
             config.NumConnections = NumConnections;
             config.ConnectEnable = ConnectEnable;
-            config.LanConnectEnable = LanConnectEnable;
 
 
             await configDataProvider.Save(config).ConfigureAwait(false);

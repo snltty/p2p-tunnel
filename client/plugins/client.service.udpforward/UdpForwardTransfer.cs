@@ -335,25 +335,24 @@ namespace client.service.udpforward
 
         private void RegisterServerForward()
         {
-            Task.Run(async () =>
+            foreach (var item in serverConfigInfo.Tunnels.Where(c => c.Listening))
             {
-                foreach (var item in serverConfigInfo.Tunnels.Where(c => c.Listening))
-                {
-                    await SendRegister(item).ConfigureAwait(false);
-                }
-            });
+                SendRegister(item);
+            }
         }
-        private async Task SendRegister(ServerForwardItemInfo item)
+        private void SendRegister(ServerForwardItemInfo item)
         {
-            var resp = await udpForwardMessengerSender.Register(registerStateInfo.OnlineConnection, new UdpForwardRegisterParamsInfo
+            udpForwardMessengerSender.Register(registerStateInfo.OnlineConnection, new UdpForwardRegisterParamsInfo
             {
                 SourcePort = item.ServerPort,
                 TargetIp = item.LocalIp,
                 TargetPort = item.LocalPort,
                 TargetName = clientConfig.Client.Name,
                 TunnelType = item.TunnelType
-            }).ConfigureAwait(false);
-            PrintResult(item, resp);
+            }).ContinueWith((result) =>
+            {
+                PrintResult(item, result.Result);
+            });
         }
         private void PrintResult(ServerForwardItemInfo item, MessageResponeInfo resp)
         {

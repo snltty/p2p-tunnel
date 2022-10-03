@@ -13,6 +13,5 @@
   "BufferSize": 8192,
   "TunnelType": 8, //优先tcp
   "NumConnections": 1000, //支持连接数
-  "ConnectEnable": false, //是否允许被连接
-  "LanConnectEnable": false //是否允许连接本机内网地址，比如作为服务端时，只想代理到外网，不想本机服务被访问
+  "ConnectEnable": false //是否允许被连接
 }

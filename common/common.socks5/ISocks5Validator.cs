@@ -1,36 +1,26 @@
-﻿using System.Net;
-using System;
-using common.libs.extends;
-using common.server;
-
-namespace common.socks5
+﻿namespace common.socks5
 {
     public interface ISocks5Validator
     {
-        public bool Validate(IConnection connection,Socks5Info info, Config config);
+        public bool Validate(string key, Socks5Info info);
+        public bool Validate(string key, Socks5Info info, Config config);
     }
 
     public class DefaultSocks5Validator : ISocks5Validator
     {
-
-        public DefaultSocks5Validator()
+        private readonly Config config;
+        public DefaultSocks5Validator(Config config)
         {
-
+            this.config = config;
         }
-        public bool Validate(IConnection connection,Socks5Info info, Config config)
+        public bool Validate(string key, Socks5Info info)
         {
-            if (config.ConnectEnable == false)
-            {
-                return false;
-            }
+            return config.ConnectEnable;
+        }
 
-            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(info.Data, out Span<byte> ipMemory);
-            if (config.LanConnectEnable == false && remoteEndPoint.IsLan())
-            {
-                return false;
-            }
-
-            return true;
+        public bool Validate(string key, Socks5Info info, Config config)
+        {
+            return config.ConnectEnable;
         }
     }
 

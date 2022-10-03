@@ -2,40 +2,33 @@
 using System;
 using common.libs.extends;
 using common.socks5;
-using server.messengers.register;
-using System.Linq;
-using common.server;
+using server.messengers;
 
 namespace server.service.socks5
 {
     public class Socks5Validator : ISocks5Validator
     {
-        private readonly KeysConfig keysConfig;
-        private readonly IClientRegisterCaching clientRegisterCaching;
-        public Socks5Validator(KeysConfig keysConfig, IClientRegisterCaching clientRegisterCaching)
+        private readonly IServiceAccessValidator serviceAccessProvider;
+        private readonly common.socks5.Config config;
+        public Socks5Validator(IServiceAccessValidator serviceAccessProvider, common.socks5.Config config)
         {
-            this.keysConfig = keysConfig;
-            this.clientRegisterCaching = clientRegisterCaching;
+            this.serviceAccessProvider = serviceAccessProvider;
+            this.config = config;
         }
-        public bool Validate(IConnection connection, Socks5Info info, common.socks5.Config config)
+        public bool Validate(string key, Socks5Info info)
         {
-            if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
+            return Validate(key, info, config);
+        }
+
+        public bool Validate(string key, Socks5Info info, common.socks5.Config config)
+        {
+            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(info.Data, out Span<byte> ipMemory);
+            if (remoteEndPoint.IsLan())
             {
                 return false;
             }
 
-            if (config.ConnectEnable == false)
-            {
-                return keysConfig.Socks5.Contains(client.Key);
-            }
-
-            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(info.Data, out Span<byte> ipMemory);
-            if (config.LanConnectEnable == false && remoteEndPoint.IsLan())
-            {
-                return keysConfig.Socks5.Contains(client.Key);
-            }
-
-            return true;
+            return config.ConnectEnable || serviceAccessProvider.Validate(key, EnumService.Socks5);
         }
     }
 

@@ -24,7 +24,7 @@ namespace server.service.tcpforward
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.tcpForwardServer = tcpForwardServer;
-            this.tcpForwardValidator = tcpForwardValidator; 
+            this.tcpForwardValidator = tcpForwardValidator;
         }
 
         public void Request(IConnection connection)
@@ -63,7 +63,7 @@ namespace server.service.tcpforward
                 {
                     TcpForwardTargetCacheInfo cache = model.AliveType == TcpForwardAliveTypes.WEB ? tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort) : tcpForwardTargetCaching.Get(model.SourcePort);
 
-                    if(cache!= null && cache.Name == source.Name)
+                    if (cache != null && cache.Name == source.Name)
                     {
                         if (model.AliveType == TcpForwardAliveTypes.WEB)
                         {
@@ -86,10 +86,7 @@ namespace server.service.tcpforward
 
         public byte[] Register(IConnection connection)
         {
-            if (tcpForwardValidator.Validate(connection) == false)
-            {
-                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes();
-            }
+
 
             try
             {
@@ -99,6 +96,11 @@ namespace server.service.tcpforward
                 //取出注册缓存，没取出来就说明没注册
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
+                    if (tcpForwardValidator.Validate(source.Key) == false)
+                    {
+                        return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes();
+                    }
+
                     //短连接转发注册，一个 host:port组合只能注册一次，被占用时不可再次注册
                     if (model.AliveType == TcpForwardAliveTypes.WEB)
                     {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace common.libs
 {
@@ -17,9 +16,16 @@ namespace common.libs
         }
         public void Push(T data)
         {
-            for (int i = 0, len = actions.Count; i < len; i++)
+            if (actions.Count == 1)
             {
-                actions[i](data);
+                actions[0](data);
+            }
+            else
+            {
+                for (int i = 0, len = actions.Count; i < len; i++)
+                {
+                    actions[i](data);
+                }
             }
         }
         public void Remove(Action<T> action)

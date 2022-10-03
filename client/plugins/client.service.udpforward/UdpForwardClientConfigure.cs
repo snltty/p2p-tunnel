@@ -30,7 +30,6 @@ namespace client.service.udpforward
             var _config = jsonStr.DeJson<common.udpforward.Config>();
 
             config.ConnectEnable = _config.ConnectEnable;
-            config.LanConnectEnable = _config.LanConnectEnable;
             config.TunnelListenRange = _config.TunnelListenRange;
             config.PortWhiteList = _config.PortWhiteList;
             config.PortBlackList = _config.PortBlackList;

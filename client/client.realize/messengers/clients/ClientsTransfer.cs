@@ -119,18 +119,12 @@ namespace client.realize.messengers.clients
             {
                 if (clientInfoCaching.Get(param.Raw.Data.FromId, out ClientInfo client))
                 {
-                    IConnection connection = null;
-                    switch (param.Relay.ServerType)
+                    IConnection connection = param.Relay.ServerType switch
                     {
-                        case ServerType.TCP:
-                            connection = registerState.TcpConnection.Clone();
-                            break;
-                        case ServerType.UDP:
-                            connection = registerState.UdpConnection.Clone();
-                            break;
-                        default:
-                            break;
-                    }
+                        ServerType.TCP => registerState.TcpConnection.Clone(),
+                        ServerType.UDP => registerState.UdpConnection.Clone(),
+                        _ => throw new NotImplementedException(),
+                    };
                     if (connection != null)
                     {
                         connection.Relay = registerState.RemoteInfo.Relay;
@@ -142,8 +136,6 @@ namespace client.realize.messengers.clients
             this.punchHoleMessengerSender = punchHoleMessengerSender;
             //有人要求反向链接
             punchHoleMessengerSender.OnReverse.Sub(OnReverse);
-            //本客户端注册状态
-            registerState.OnRegisterStateChange.Sub(OnRegisterStateChange);
             registerState.OnRegisterBind.Sub(OnRegisterBind);
             //收到来自服务器的 在线客户端 数据
             clientsMessengerSender.OnServerClientsData.Sub(OnServerSendClients);
@@ -286,10 +278,6 @@ namespace client.realize.messengers.clients
             return false;
         }
 
-        private void OnRegisterStateChange(bool state)
-        {
-
-        }
         private void OnRegisterBind(bool state)
         {
             firstClients.Reset();

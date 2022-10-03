@@ -1,15 +1,12 @@
 ﻿using common.libs;
-using common.libs.extends;
-using common.server;
 using System.Linq;
-using System.Net;
 
 namespace common.tcpforward
 {
     public interface ITcpForwardValidator
     {
         public bool Validate(TcpForwardInfo arg);
-        public bool Validate(IConnection connection);
+        public bool Validate(string key);
     }
 
     public class DefaultTcpForwardValidator : ITcpForwardValidator
@@ -26,22 +23,18 @@ namespace common.tcpforward
                 return false;
             }
 
-            IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
-            if (config.LanConnectEnable == false && arg.ForwardType == TcpForwardTypes.PROXY && endpoint.IsLan())
+            int port = NetworkHelper.PortFromArray(arg.TargetEndpoint);
+            if (config.PortWhiteList.Length > 0 && config.PortWhiteList.Contains(port) == false)
             {
                 return false;
             }
-            if (config.PortWhiteList.Length > 0 && config.PortWhiteList.Contains(endpoint.Port) == false)
-            {
-                return false;
-            }
-            if (config.PortBlackList.Length > 0 && config.PortBlackList.Contains(endpoint.Port))
+            if (config.PortBlackList.Length > 0 && config.PortBlackList.Contains(port))
             {
                 return false;
             }
             return true;
         }
-        public bool Validate(IConnection connection)
+        public bool Validate(string key)
         {
             return true;
         }

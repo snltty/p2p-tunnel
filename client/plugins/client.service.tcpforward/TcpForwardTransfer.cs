@@ -575,21 +575,18 @@ namespace client.service.tcpforward
 
         private void RegisterServerForward()
         {
-            Task.Run(async () =>
+            foreach (var item in serverForwardConfigInfo.Webs)
             {
-                foreach (var item in serverForwardConfigInfo.Webs)
-                {
-                    await SendRegister(item, TcpForwardAliveTypes.WEB).ConfigureAwait(false);
-                }
-                foreach (var item in serverForwardConfigInfo.Tunnels.Where(c => c.Listening == true))
-                {
-                    await SendRegister(item, TcpForwardAliveTypes.TUNNEL).ConfigureAwait(false);
-                }
-            });
+                SendRegister(item, TcpForwardAliveTypes.WEB);
+            }
+            foreach (var item in serverForwardConfigInfo.Tunnels.Where(c => c.Listening == true))
+            {
+                SendRegister(item, TcpForwardAliveTypes.TUNNEL);
+            }
         }
-        private async Task SendRegister(ServerForwardItemInfo item, TcpForwardAliveTypes type)
+        private void SendRegister(ServerForwardItemInfo item, TcpForwardAliveTypes type)
         {
-            var resp = await tcpForwardMessengerSender.Register(registerStateInfo.OnlineConnection, new TcpForwardRegisterParamsInfo
+            tcpForwardMessengerSender.Register(registerStateInfo.OnlineConnection, new TcpForwardRegisterParamsInfo
             {
                 AliveType = type,
                 SourceIp = item.Domain,
@@ -598,8 +595,10 @@ namespace client.service.tcpforward
                 TargetPort = item.LocalPort,
                 TargetName = clientConfig.Client.Name,
                 TunnelType = item.TunnelType
-            }).ConfigureAwait(false);
-            PrintResult(item, resp, type);
+            }).ContinueWith((result) =>
+            {
+                PrintResult(item, result.Result, type);
+            });
         }
         private void PrintResult(ServerForwardItemInfo item, MessageResponeInfo resp, TcpForwardAliveTypes type)
         {

@@ -24,14 +24,6 @@ namespace server.service.tcpforward
             {
                 Logger.Instance.Info($"tcp转发和http1.1代理未允许注册");
             }
-            if (config.LanConnectEnable)
-            {
-                Logger.Instance.Debug($"tcp转发和http1.1代理已允许本地连接");
-            }
-            else
-            {
-                Logger.Instance.Info($"tcp转发和http1.1代理未允许未允许本地连接");
-            }
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 

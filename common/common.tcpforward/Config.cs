@@ -22,14 +22,12 @@ namespace common.tcpforward
             TunnelListenRange = config.TunnelListenRange;
             PortWhiteList = config.PortWhiteList;
             PortBlackList = config.PortBlackList;
-            LanConnectEnable = config.LanConnectEnable;
             
         }
 
         public int[] PortWhiteList { get; set; } = Array.Empty<int>();
         public int[] PortBlackList { get; set; } = Array.Empty<int>();
         
-        public bool LanConnectEnable { get; set; } = false;
         public bool ConnectEnable { get; set; } = false;
         public int NumConnections { get; set; } = 1000;
         public int BufferSize { get; set; } = 8 * 1024;
@@ -44,7 +42,6 @@ namespace common.tcpforward
         public async Task SaveConfig()
         {
             Config config = await ReadConfig().ConfigureAwait(false);
-            config.LanConnectEnable = LanConnectEnable;
             config.ConnectEnable = ConnectEnable;
             config.NumConnections = NumConnections;
             config.BufferSize = BufferSize;

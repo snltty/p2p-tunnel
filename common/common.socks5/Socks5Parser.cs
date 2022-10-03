@@ -3,6 +3,7 @@ using common.libs.extends;
 using System;
 using System.Buffers.Binary;
 using System.Net;
+using System.Reflection;
 using System.Text;
 
 namespace common.socks5
@@ -42,17 +43,35 @@ namespace common.socks5
             return (username, password);
         }
 
-        public static IPEndPoint GetRemoteEndPoint(Memory<byte> data,out Span<byte> ipMemory)
+        public static int GetRemotePort(Memory<byte> data)
+        {
+            ushort int16Port = 0;
+            if (data.Length < 3)
+            {
+                return int16Port;
+            }
+            Span<byte> span = data.Span.Slice(3);
+            int16Port = (Socks5EnumAddressType)span[0] switch
+            {
+                Socks5EnumAddressType.IPV4 => span.Slice(1 + 4, 2).ToUInt16(),
+                Socks5EnumAddressType.Domain => span.Slice(1 + 16, 2).ToUInt16(),
+                Socks5EnumAddressType.IPV6 => span.Slice(2 + span[1], 2).ToUInt16(),
+                _ => 0,
+            };
+            return BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(int16Port) : int16Port;
+        }
+
+        public static IPEndPoint GetRemoteEndPoint(Memory<byte> data, out Span<byte> ipMemory)
         {
             ipMemory = Helper.EmptyArray;
             if (data.Length < 3)
             {
-                
+
                 return null;
             }
             //VERSION COMMAND RSV ATYPE  DST.ADDR  DST.PORT
             //去掉 VERSION COMMAND RSV
-           var span = data.Span.Slice(3);
+            var span = data.Span.Slice(3);
 
             IPAddress ip = null;
             int index = 0;

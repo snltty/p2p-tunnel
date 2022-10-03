@@ -154,7 +154,7 @@ namespace common.socks5
         {
             Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
 
-            if (socks5Validator.Validate(connection, data, config) == false)
+            if (socks5Validator.Validate(string.Empty, data, config) == false)
             {
                 ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow, connection);
                 return;

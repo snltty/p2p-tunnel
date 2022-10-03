@@ -10,8 +10,14 @@ namespace client.service.vea
     public class VeaSocks5ServerHandler : Socks5ServerHandler, IVeaSocks5ServerHandler
     {
         private readonly Config _config;
-        public VeaSocks5ServerHandler(IVeaSocks5MessengerSender socks5MessengerSender, common.socks5.Config socks5Config, Config config, WheelTimer<object> wheelTimer, IVeaKeyValidator veaKeyValidator)
-            : base(socks5MessengerSender, socks5Config, wheelTimer, veaKeyValidator)
+        public VeaSocks5ServerHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, IVeaKeyValidator veaKeyValidator)
+            : base(socks5MessengerSender, new common.socks5.Config {
+                ConnectEnable = config.ConnectEnable,
+                NumConnections = config.NumConnections,
+                BufferSize = config.BufferSize,
+                TunnelType = config.TunnelType,
+                TargetName = config.TargetName,
+            }, wheelTimer, veaKeyValidator)
         {
             this._config = config;
             UpdateConfig();
@@ -21,7 +27,7 @@ namespace client.service.vea
         {
             config.BufferSize = _config.BufferSize;
             config.ConnectEnable = _config.ConnectEnable;
-            config.LanConnectEnable = _config.LanConnectEnable;
+            config.NumConnections = _config.NumConnections;
         }
     }
 

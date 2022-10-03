@@ -39,7 +39,6 @@ namespace client.service.vea
             config.SocksPort = _config.SocksPort;
             config.BufferSize = _config.BufferSize;
             config.ConnectEnable = _config.ConnectEnable;
-            config.LanConnectEnable = _config.LanConnectEnable;
 
             veaSocks5ServerHandler.UpdateConfig();
 

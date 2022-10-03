@@ -26,14 +26,6 @@ namespace client.service.tcpforward
             {
                 Logger.Instance.Info($"tcp转发未允许连接");
             }
-            if (config.LanConnectEnable)
-            {
-                Logger.Instance.Debug($"http1.1代理已允许本地连接");
-            }
-            else
-            {
-                Logger.Instance.Info($"http1.1代理未允许本地连接");
-            }
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 

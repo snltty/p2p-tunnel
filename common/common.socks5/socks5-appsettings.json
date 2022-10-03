@@ -7,6 +7,5 @@
   "IsPac": false, //是否设置pac
   "TargetName": "B客户端", //连接目标客户端名，为空表示代理到服务器
   "TunnelType": 8, //数据通道，2只tcp 4只udp 8优先tcp 16优先udp
-  "ConnectEnable": false, //是否允许被连接
-  "LanConnectEnable": false //是否允许连接本机内网地址，比如作为服务端时，只想代理到外网，不想本机服务被访问
+  "ConnectEnable": false //是否允许被连接
 }

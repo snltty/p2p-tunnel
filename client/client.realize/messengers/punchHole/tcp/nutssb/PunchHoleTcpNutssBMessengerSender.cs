@@ -51,8 +51,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 #else
         private bool UseLocalPort = true;
 #endif
-        private bool UseGuesstPort = false;
-
         private readonly ConcurrentDictionary<ulong, ConnectCacheModel> connectTcpCache = new();
 
 

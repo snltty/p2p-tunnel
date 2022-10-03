@@ -21,14 +21,6 @@ namespace server.service.socks5
             {
                 Logger.Instance.Info($"socks5未允许连接");
             }
-            if (config.LanConnectEnable)
-            {
-                Logger.Instance.Debug($"socks5已允许本地连接");
-            }
-            else
-            {
-                Logger.Instance.Info($"socks5未允许本地连接");
-            }
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 

@@ -1,8 +1,6 @@
 ﻿using client.service.ui.api.clientServer;
 using common.libs.extends;
-using System.Net;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -38,7 +36,6 @@ namespace client.service.vea
             config.SocksPort = conf.SocksPort;
             config.BufferSize = conf.BufferSize;
             config.ConnectEnable = conf.ConnectEnable;
-            config.LanConnectEnable = conf.LanConnectEnable;
 
             veaSocks5ServerHandler.UpdateConfig();
 

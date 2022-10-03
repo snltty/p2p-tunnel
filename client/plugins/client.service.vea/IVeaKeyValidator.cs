@@ -8,7 +8,15 @@ namespace client.service.vea
 
     public class DefaultVeaKeyValidator : DefaultSocks5Validator, IVeaKeyValidator
     {
+        public DefaultVeaKeyValidator(Config config) : base(new common.socks5.Config
+        {
+            BufferSize = config.BufferSize,
+            ConnectEnable = config.ConnectEnable,
+            NumConnections = config.NumConnections,
+        })
+        {
 
+        }
     }
 
 }

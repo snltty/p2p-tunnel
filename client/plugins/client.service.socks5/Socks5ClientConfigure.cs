@@ -37,7 +37,6 @@ namespace client.service.socks5
             config.IsCustomPac = _config.IsCustomPac;
             config.TargetName = _config.TargetName;
             config.TunnelType = _config.TunnelType;
-            config.LanConnectEnable = _config.LanConnectEnable;
 
             await config.SaveConfig().ConfigureAwait(false);
             return string.Empty;

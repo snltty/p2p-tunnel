@@ -24,8 +24,15 @@ namespace client.service.vea
         IVeaSocks5ClientListener socks5ClientListener;
 
 
-        public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, RegisterStateInfo registerStateInfo, common.socks5.Config socks5Config, Config config, IClientInfoCaching clientInfoCaching, IVeaSocks5ClientListener socks5ClientListener, VeaTransfer virtualEthernetAdapterTransfer)
-            : base(socks5MessengerSender, registerStateInfo, socks5Config, clientInfoCaching, socks5ClientListener)
+        public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, RegisterStateInfo registerStateInfo, Config config, IClientInfoCaching clientInfoCaching, IVeaSocks5ClientListener socks5ClientListener, VeaTransfer virtualEthernetAdapterTransfer)
+            : base(socks5MessengerSender, registerStateInfo, new common.socks5.Config
+            {
+                ConnectEnable = config.ConnectEnable,
+                NumConnections = config.NumConnections,
+                BufferSize = config.BufferSize,
+                TunnelType = config.TunnelType,
+                TargetName = config.TargetName,
+            }, clientInfoCaching, socks5ClientListener)
         {
             this.socks5MessengerSender = socks5MessengerSender;
             this.config = config;

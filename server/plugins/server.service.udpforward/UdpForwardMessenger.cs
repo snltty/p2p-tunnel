@@ -53,17 +53,16 @@ namespace server.service.udpforward
 
         public byte[] UnRegister(IConnection connection)
         {
-            if (udpForwardValidator.Validate(connection) == false)
-            {
-                return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
-            }
-
             try
             {
                 int port = connection.ReceiveRequestWrap.Memory.Span.ToUInt16();
-
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
+                    if (udpForwardValidator.Validate(source.Key) == false)
+                    {
+                        return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
+                    }
+
                     UdpForwardTargetCacheInfo cache = tcpForwardTargetCaching.Get(port);
                     if(cache != null && cache.Name == source.Name)
                     {
@@ -81,11 +80,6 @@ namespace server.service.udpforward
 
         public byte[] Register(IConnection connection)
         {
-            if (udpForwardValidator.Validate(connection) == false)
-            {
-                return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
-            }
-
             try
             {
                 UdpForwardRegisterParamsInfo model = new UdpForwardRegisterParamsInfo();
@@ -94,6 +88,11 @@ namespace server.service.udpforward
                 //取出注册缓存，没取出来就说明没注册
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
+                    if (udpForwardValidator.Validate(source.Key) == false)
+                    {
+                        return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
+                    }
+
                     //限制的端口范围
                     if (model.SourcePort < config.TunnelListenRange.Min || model.SourcePort > config.TunnelListenRange.Max)
                     {

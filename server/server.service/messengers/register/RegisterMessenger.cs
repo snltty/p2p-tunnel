@@ -30,7 +30,7 @@ namespace server.service.messengers.register
             RegisterParamsInfo model = new RegisterParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Memory);
             //验证key
-            if (!registerKeyValidator.Validate(connection, model))
+            if (registerKeyValidator.Validate(model.Key) == false)
             {
                 return new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.KEY_VERIFY }.ToBytes();
             }
@@ -67,7 +67,7 @@ namespace server.service.messengers.register
                 UdpPort = connection.Address.Port,
                 TcpPort = client.TcpConnection?.Address.Port ?? 0,
                 GroupId = client.GroupId,
-                Relay = relayValidator.Validate(connection, client),
+                Relay = relayValidator.Validate(client.Key),
                 TimeoutDelay = config.TimeoutDelay
             }.ToBytes();
         }
@@ -96,7 +96,7 @@ namespace server.service.messengers.register
                 UdpPort = client.UdpConnection?.Address.Port ?? 0,
                 TcpPort = connection.Address.Port,
                 GroupId = client.GroupId,
-                Relay = relayValidator.Validate(connection, client),
+                Relay = relayValidator.Validate(client.Key),
                 TimeoutDelay = config.TimeoutDelay
             }.ToBytes();
         }

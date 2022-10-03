@@ -9,7 +9,7 @@ namespace common.udpforward
     public interface IUdpForwardValidator
     {
         public bool Validate(UdpForwardInfo info);
-        public bool Validate(IConnection connection);
+        public bool Validate(string key);
     }
 
     public class DefaultUdpForwardValidator : IUdpForwardValidator
@@ -26,24 +26,19 @@ namespace common.udpforward
                 return false;
             }
 
-            IPEndPoint endpoint = NetworkHelper.EndpointFromArray(info.TargetEndpoint);
-            if (config.LanConnectEnable == false && endpoint.IsLan())
+            int port = NetworkHelper.PortFromArray(info.TargetEndpoint);
+            if (config.PortBlackList.Contains(port))
             {
                 return false;
             }
-
-            if (config.PortBlackList.Contains(endpoint.Port))
-            {
-                return false;
-            }
-            if (config.PortWhiteList.Length > 0 && !config.PortBlackList.Contains(endpoint.Port))
+            if (config.PortWhiteList.Length > 0 && config.PortBlackList.Contains(port) == false)
             {
                 return false;
             }
 
             return true;
         }
-        public bool Validate(IConnection connection)
+        public bool Validate(string key)
         {
             return true;
         }

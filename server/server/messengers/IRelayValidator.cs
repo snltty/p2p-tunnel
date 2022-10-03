@@ -4,20 +4,17 @@ namespace server.messengers.register
 {
     public interface IRelayValidator
     {
-        public bool Validate(IConnection connection, RegisterCacheInfo client);
+        public bool Validate(string key);
     }
 
     public class DefaultRelayValidator : IRelayValidator
     {
-
-        private readonly Config config;
-        public DefaultRelayValidator(Config config)
+        public DefaultRelayValidator()
         {
-            this.config = config;
         }
-        public bool Validate(IConnection connection, RegisterCacheInfo client)
+        public bool Validate(string key)
         {
-            return config.Relay;
+            return true;
         }
     }
 

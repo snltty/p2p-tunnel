@@ -24,7 +24,6 @@ namespace common.socks5
             IsPac = config.IsPac;
             TargetName = config.TargetName;
             TunnelType = config.TunnelType;
-            LanConnectEnable = config.LanConnectEnable;
             NumConnections = config.NumConnections;
         }
 
@@ -36,7 +35,6 @@ namespace common.socks5
         public bool IsPac { get; set; } = false;
         public string TargetName { get; set; } = string.Empty;
         public TunnelTypes TunnelType { get; set; } = TunnelTypes.TCP_FIRST;
-        public bool LanConnectEnable { get; set; } = false;
         public int NumConnections { get; set; } = 1000;
         
 
@@ -56,7 +54,6 @@ namespace common.socks5
             config.IsPac = IsPac;
             config.TargetName = TargetName;
             config.TunnelType = TunnelType;
-            config.LanConnectEnable = LanConnectEnable;
             config.NumConnections = NumConnections;
             
             await configDataProvider.Save(config).ConfigureAwait(false);

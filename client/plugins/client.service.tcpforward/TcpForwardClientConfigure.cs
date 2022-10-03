@@ -36,7 +36,6 @@ namespace client.service.tcpforward
             config.TunnelListenRange = _config.TunnelListenRange;
             config.PortWhiteList = _config.PortWhiteList;
             config.PortBlackList = _config.PortBlackList;
-            config.LanConnectEnable = _config.LanConnectEnable;
 
             await config.SaveConfig().ConfigureAwait(false);
             return string.Empty;

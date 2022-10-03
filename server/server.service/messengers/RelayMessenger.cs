@@ -1,7 +1,9 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
+using server.messengers;
 using server.messengers.register;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace server.service.messengers
@@ -27,7 +29,7 @@ namespace server.service.messengers
             //A已注册
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
-                if (relayValidator.Validate(connection, source) == false)
+                if (relayValidator.Validate(source.Key) == false)
                 {
                     return;
                 }
@@ -60,7 +62,7 @@ namespace server.service.messengers
             //A已注册
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
-                if (relayValidator.Validate(connection, source) == false)
+                if (relayValidator.Validate(source.Key) == false)
                 {
                     return Helper.EmptyArray;
                 }
@@ -87,22 +89,6 @@ namespace server.service.messengers
                 }
             }
             return Helper.EmptyArray;
-        }
-    }
-
-    public class RelayValidator : IRelayValidator
-    {
-
-        private readonly Config config;
-        private readonly KeysConfig keysConfig;
-        public RelayValidator(Config config, KeysConfig keysConfig)
-        {
-            this.config = config;
-            this.keysConfig = keysConfig;   
-        }
-        public bool Validate(IConnection connection, RegisterCacheInfo client)
-        {
-            return config.Relay;
         }
     }
 }

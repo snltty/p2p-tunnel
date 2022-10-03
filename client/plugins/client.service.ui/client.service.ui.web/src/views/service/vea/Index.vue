@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-16 16:16:48
+ * @LastEditTime: 2022-10-02 23:52:06
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -72,13 +72,6 @@
                                     <el-form-item label-width="0" prop="ConnectEnable">
                                         <el-tooltip class="box-item" effect="dark" content="作为被访问端时，是否允许访问" placement="top-start">
                                             <el-checkbox v-model="state.form.ConnectEnable" label="允许访问" />
-                                        </el-tooltip>
-                                    </el-form-item>
-                                </el-col>
-                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label-width="0" prop="LanConnectEnable">
-                                        <el-tooltip class="box-item" effect="dark" content="作为被访问端时，是否允许访问本地地址，虚拟IP为本地地址" placement="top-start">
-                                            <el-checkbox v-model="state.form.LanConnectEnable" label="允许访问本地" />
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
@@ -171,8 +164,7 @@ export default {
                 TunnelType: '8',
                 SocksPort: 5415,
                 BufferSize: 8 * 1024,
-                ConnectEnable: false,
-                LanConnectEnable: false,
+                ConnectEnable: false
             },
             rules: {
                 BufferSize: [
@@ -219,7 +211,6 @@ export default {
                 state.form.SocksPort = res.SocksPort;
                 state.form.BufferSize = res.BufferSize;
                 state.form.ConnectEnable = res.ConnectEnable;
-                state.form.LanConnectEnable = res.LanConnectEnable;
             });
         }
 

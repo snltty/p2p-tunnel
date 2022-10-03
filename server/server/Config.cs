@@ -1,5 +1,4 @@
 ﻿using common.libs.database;
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
@@ -21,7 +20,7 @@ namespace server
             TcpBufferSize = config.TcpBufferSize;
             TimeoutDelay = config.TimeoutDelay;
             RegisterTimeout = config.RegisterTimeout;
-            Relay = config.Relay;
+            RelayEnable = config.RelayEnable;
             EncodePassword = config.EncodePassword;
         }
 
@@ -31,8 +30,10 @@ namespace server
         public int TcpBufferSize { get; set; } = 8 * 1024;
         public int TimeoutDelay { get; set; } = 20 * 1000;
         public int RegisterTimeout { get; set; } = 5000;
+
         
-        public bool Relay { get; set; } = false;
+        public bool RegisterEnable { get; set; } = true;
+        public bool RelayEnable { get; set; } = false;
         public string EncodePassword { get; set; } = string.Empty;
 
 
@@ -51,41 +52,11 @@ namespace server
             config.TcpBufferSize = TcpBufferSize;
             config.TimeoutDelay = TimeoutDelay;
             config.RegisterTimeout = RegisterTimeout;
-            config.Relay = Relay;
+            config.RelayEnable = RelayEnable;
             config.EncodePassword = EncodePassword;
 
             await configDataProvider.Save(config).ConfigureAwait(false);
         }
     }
 
-
-    [Table("keys")]
-    public class KeysConfig
-    {
-        public KeysConfig() { }
-        private readonly IConfigDataProvider<KeysConfig> configDataProvider;
-        public KeysConfig(IConfigDataProvider<KeysConfig> configDataProvider)
-        {
-            this.configDataProvider = configDataProvider;
-
-            KeysConfig config = ReadConfig().Result;
-            if (config != null)
-            {
-                Keys = config.Keys;
-                UdpForward = config.UdpForward;
-                TcpForward = config.TcpForward;
-                Socks5 = config.Socks5;
-            }
-        }
-
-        public string[] Keys { get; set; } = Array.Empty<string>();
-        public string[] UdpForward { get; set; } = Array.Empty<string>();
-        public string[] TcpForward { get; set; } = Array.Empty<string>();
-        public string[] Socks5 { get; set; } = Array.Empty<string>();
-
-        private async Task<KeysConfig> ReadConfig()
-        {
-            return await configDataProvider.Load();
-        }
-    }
 }
