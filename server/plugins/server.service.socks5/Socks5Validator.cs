@@ -3,6 +3,8 @@ using System;
 using common.libs.extends;
 using common.socks5;
 using server.messengers;
+using common.server;
+using server.messengers.register;
 
 namespace server.service.socks5
 {
@@ -10,17 +12,20 @@ namespace server.service.socks5
     {
         private readonly IServiceAccessValidator serviceAccessProvider;
         private readonly common.socks5.Config config;
-        public Socks5Validator(IServiceAccessValidator serviceAccessProvider, common.socks5.Config config)
+        private readonly IClientRegisterCaching clientRegisterCaching;
+
+        public Socks5Validator(IServiceAccessValidator serviceAccessProvider, common.socks5.Config config, IClientRegisterCaching clientRegisterCaching)
         {
             this.serviceAccessProvider = serviceAccessProvider;
             this.config = config;
+            this.clientRegisterCaching = clientRegisterCaching;
         }
-        public bool Validate(string key, Socks5Info info)
+        public bool Validate(IConnection connection, Socks5Info info)
         {
-            return Validate(key, info, config);
+            return Validate(connection, info, config);
         }
 
-        public bool Validate(string key, Socks5Info info, common.socks5.Config config)
+        public bool Validate(IConnection connection, Socks5Info info, common.socks5.Config config)
         {
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(info.Data, out Span<byte> ipMemory);
             if (remoteEndPoint.IsLan())
@@ -28,7 +33,12 @@ namespace server.service.socks5
                 return false;
             }
 
-            return config.ConnectEnable || serviceAccessProvider.Validate(key, EnumService.Socks5);
+            if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client))
+            {
+                return config.ConnectEnable || serviceAccessProvider.Validate(client.GroupId, EnumService.Socks5);
+            }
+
+            return config.ConnectEnable;
         }
     }
 

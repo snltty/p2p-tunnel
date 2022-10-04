@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-24 11:08:54
+ * @LastEditTime: 2022-10-04 12:35:40
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -22,7 +22,7 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="分组" prop="GroupId">
                                 <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top-start">
-                                    <el-input v-model="model.GroupId" maxlength="32" show-word-limit placeholder="设置你的分组编号"></el-input>
+                                    <el-input type="password" show-password v-model="model.GroupId" maxlength="32" show-word-limit placeholder="设置你的分组编号"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -130,7 +130,7 @@
                                 <el-col :xs="18" :sm="9" :md="9" :lg="9" :xl="9">
                                     <el-form-item label="密钥" prop="ClientEncodePassword">
                                         <el-tooltip class="box-item" effect="dark" content="加密密钥32位，为空则每次加密随机密钥，如果填写，则各客户端都填写" placement="top-start">
-                                            <el-input v-model="model.ClientEncodePassword"></el-input>
+                                            <el-input type="password" show-password maxlength="32" show-word-limit v-model="model.ClientEncodePassword"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
@@ -144,7 +144,7 @@
                                 <el-col :xs="18" :sm="9" :md="9" :lg="9" :xl="9">
                                     <el-form-item label="密钥" prop="ServerEncodePassword">
                                         <el-tooltip class="box-item" effect="dark" content="加密密钥 32位，为空则每次加密随机密钥，使用p2p.snltty.com服务器则必须留空" placement="top-start">
-                                            <el-input v-model="model.ServerEncodePassword"></el-input>
+                                            <el-input type="password" show-password maxlength="32" show-word-limit v-model="model.ServerEncodePassword"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
@@ -170,13 +170,6 @@
                                     <el-form-item label="掉线超时" prop="TimeoutDelay">
                                         <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top-start">
                                             <el-input v-model="model.TimeoutDelay" placeholder="掉线超时"></el-input>
-                                        </el-tooltip>
-                                    </el-form-item>
-                                </el-col>
-                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="注册key" prop="Key">
-                                        <el-tooltip class="box-item" effect="dark" content="如果服务端需要验证key，则填写" placement="top-start">
-                                            <el-input v-model="model.Key" placeholder="注册key"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
@@ -243,7 +236,6 @@ export default {
                 AutoRegDelay: 5000,
                 UseMac: false,
                 GroupId: '',
-                Key: '',
                 ClientEncode: false,
                 ClientEncodePassword: "",
                 ServerEncode: false,
@@ -320,7 +312,6 @@ export default {
             state.model.ClientEncodePassword = registerState.ClientConfig.ClientEncodePassword = json.ClientConfig.EncodePassword;
             state.model.AutoPunchHole = registerState.ClientConfig.AutoPunchHole = json.ClientConfig.AutoPunchHole;
             state.model.TimeoutDelay = registerState.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
-            state.model.Key = registerState.ClientConfig.Key = json.ClientConfig.Key;
 
             state.model.UseUdp = registerState.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
             state.model.UseTcp = registerState.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
@@ -346,7 +337,6 @@ export default {
                     ClientConfig: {
                         Name: state.model.ClientName,
                         GroupId: state.model.GroupId,
-                        Key: state.model.Key,
                         AutoReg: state.model.AutoReg,
                         AutoRegTimes: +state.model.AutoRegTimes,
                         AutoRegInterval: +state.model.AutoRegInterval,

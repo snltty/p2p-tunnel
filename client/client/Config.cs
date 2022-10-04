@@ -83,8 +83,6 @@ namespace client
 
         public int TcpBufferSize { get; set; } = 128 * 1024;
 
-        public string Key { get; set; } = string.Empty;
-
         public bool Encode { get; set; } = false;
 
         public string EncodePassword { get; set; } = string.Empty;

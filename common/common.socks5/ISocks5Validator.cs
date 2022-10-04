@@ -1,9 +1,11 @@
-﻿namespace common.socks5
+﻿using common.server;
+
+namespace common.socks5
 {
     public interface ISocks5Validator
     {
-        public bool Validate(string key, Socks5Info info);
-        public bool Validate(string key, Socks5Info info, Config config);
+        public bool Validate(IConnection connection, Socks5Info info);
+        public bool Validate(IConnection connection, Socks5Info info, Config config);
     }
 
     public class DefaultSocks5Validator : ISocks5Validator
@@ -13,12 +15,12 @@
         {
             this.config = config;
         }
-        public bool Validate(string key, Socks5Info info)
+        public bool Validate(IConnection connection, Socks5Info info)
         {
             return config.ConnectEnable;
         }
 
-        public bool Validate(string key, Socks5Info info, Config config)
+        public bool Validate(IConnection connection, Socks5Info info, Config config)
         {
             return config.ConnectEnable;
         }

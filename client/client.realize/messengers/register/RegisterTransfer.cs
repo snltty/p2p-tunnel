@@ -236,7 +236,6 @@ namespace client.realize.messengers.register
                 LocalTcpPort = registerState.LocalInfo.TcpPort,
                 Mac = registerState.LocalInfo.Mac,
                 LocalIps = new IPAddress[] { config.Client.LoopbackIp, registerState.LocalInfo.LocalIp },
-                Key = config.Client.Key,
                 Timeout = 15 * 1000
             }).ConfigureAwait(false);
             if (result.NetState.Code != MessageResponeCodes.OK)

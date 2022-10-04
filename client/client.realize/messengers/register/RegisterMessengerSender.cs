@@ -43,7 +43,6 @@ namespace client.realize.messengers.register
                         Mac = param.Mac,
                         LocalTcpPort = param.LocalTcpPort,
                         LocalUdpPort = param.LocalUdpPort,
-                        Key = param.Key
                     }.ToBytes(),
                     Timeout = param.Timeout,
                 }).ConfigureAwait(false);
@@ -74,7 +73,6 @@ namespace client.realize.messengers.register
                         Mac = param.Mac,
                         LocalTcpPort = param.LocalTcpPort,
                         LocalUdpPort = param.LocalUdpPort,
-                        Key = param.Key,
                     }.ToBytes(),
                     Timeout = param.Timeout,
                 }).ConfigureAwait(false);
@@ -144,7 +142,6 @@ namespace client.realize.messengers.register
         public int Timeout { get; set; } = 15 * 1000;
         public int LocalUdpPort { get; set; } = 0;
         public int LocalTcpPort { get; set; } = 0;
-        public string Key { get; set; } = string.Empty;
 
     }
 

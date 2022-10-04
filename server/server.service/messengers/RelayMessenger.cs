@@ -29,7 +29,7 @@ namespace server.service.messengers
             //A已注册
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
-                if (relayValidator.Validate(source.Key) == false)
+                if (relayValidator.Validate(source.GroupId) == false)
                 {
                     return;
                 }
@@ -62,7 +62,7 @@ namespace server.service.messengers
             //A已注册
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
-                if (relayValidator.Validate(source.Key) == false)
+                if (relayValidator.Validate(source.GroupId) == false)
                 {
                     return Helper.EmptyArray;
                 }

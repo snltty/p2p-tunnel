@@ -33,10 +33,6 @@ namespace common.server.model
         /// </summary>
         public string Mac { get; set; } = string.Empty;
         /// <summary>
-        /// key，暂时没什么用
-        /// </summary>
-        public string Key { get; set; } = string.Empty;
-        /// <summary>
         /// 本机tcp端口
         /// </summary>
         public int LocalTcpPort { get; set; } = 0;
@@ -65,8 +61,6 @@ namespace common.server.model
             length += 1 + nameBytes.Length;
             var macBytes = Mac.ToBytes();
             length += 1 + macBytes.Length;
-            var keyBytes = Key.ToBytes();
-            length += 1 + keyBytes.Length;
             var localtcpPort = LocalTcpPort.ToBytes();
             length += 2;
             var localudpPort = LocalUdpPort.ToBytes();
@@ -100,11 +94,6 @@ namespace common.server.model
             index += 1;
             Array.Copy(macBytes, 0, bytes, index, macBytes.Length);
             index += macBytes.Length;
-
-            bytes[index] = (byte)keyBytes.Length;
-            index += 1;
-            Array.Copy(keyBytes, 0, bytes, index, keyBytes.Length);
-            index += keyBytes.Length;
 
             bytes[index] = localtcpPort[0];
             bytes[index + 1] = localtcpPort[1];
@@ -143,9 +132,6 @@ namespace common.server.model
             Mac = span.Slice(index + 1, span[index]).GetString();
             index += 1 + span[index];
 
-            Key = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
-
             LocalTcpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
             LocalUdpPort = span.Slice(index, 2).ToUInt16();
@@ -174,6 +160,7 @@ namespace common.server.model
         /// 服务器超时时间
         /// </summary>
         public int TimeoutDelay { get; set; } = 0;
+
         /// <summary>
         /// 连接id
         /// </summary>

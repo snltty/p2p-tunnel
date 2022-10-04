@@ -206,7 +206,7 @@ namespace client.service.socks5
 
         private void GetConnection()
         {
-            if (connection == null)
+            if (connection == null || connection.Connected == false)
             {
                 if (string.IsNullOrWhiteSpace(config.TargetName))
                 {

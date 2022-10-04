@@ -20,6 +20,7 @@ namespace server
             TcpBufferSize = config.TcpBufferSize;
             TimeoutDelay = config.TimeoutDelay;
             RegisterTimeout = config.RegisterTimeout;
+            RegisterEnable = config.RegisterEnable;
             RelayEnable = config.RelayEnable;
             EncodePassword = config.EncodePassword;
         }
@@ -52,6 +53,7 @@ namespace server
             config.TcpBufferSize = TcpBufferSize;
             config.TimeoutDelay = TimeoutDelay;
             config.RegisterTimeout = RegisterTimeout;
+            config.RegisterEnable = RegisterEnable;
             config.RelayEnable = RelayEnable;
             config.EncodePassword = EncodePassword;
 

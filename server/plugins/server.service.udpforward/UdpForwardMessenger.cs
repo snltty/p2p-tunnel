@@ -58,7 +58,7 @@ namespace server.service.udpforward
                 int port = connection.ReceiveRequestWrap.Memory.Span.ToUInt16();
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
-                    if (udpForwardValidator.Validate(source.Key) == false)
+                    if (udpForwardValidator.Validate(source.GroupId) == false)
                     {
                         return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
                     }
@@ -88,7 +88,7 @@ namespace server.service.udpforward
                 //取出注册缓存，没取出来就说明没注册
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
-                    if (udpForwardValidator.Validate(source.Key) == false)
+                    if (udpForwardValidator.Validate(source.GroupId) == false)
                     {
                         return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
                     }

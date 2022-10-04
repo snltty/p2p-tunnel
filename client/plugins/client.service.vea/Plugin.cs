@@ -16,8 +16,10 @@ namespace client.service.vea
             Logger.Instance.Debug("vea 虚拟网卡插件已加载");
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
-            transfer.Run();
-
+            if (services.GetService<Config>().Enable)
+            {
+                transfer.Run();
+            }
         }
 
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)

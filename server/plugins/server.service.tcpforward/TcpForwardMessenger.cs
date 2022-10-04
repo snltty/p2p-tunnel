@@ -96,7 +96,7 @@ namespace server.service.tcpforward
                 //取出注册缓存，没取出来就说明没注册
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
-                    if (tcpForwardValidator.Validate(source.Key) == false)
+                    if (tcpForwardValidator.Validate(source.GroupId) == false)
                     {
                         return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes();
                     }

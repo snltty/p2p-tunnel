@@ -19,9 +19,6 @@ namespace server.messengers.register
         public ulong Id { get; set; }
         public string Name { get; set; }
         public string GroupId { get; set; }
-
-        [JsonIgnore]
-        public string Key { get; set; }
         [JsonIgnore]
         public IPAddress[] LocalIps { get; set; }
         [JsonIgnore]
