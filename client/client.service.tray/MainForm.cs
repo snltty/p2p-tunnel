@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace client.service.tray
@@ -60,7 +59,7 @@ namespace client.service.tray
         {
             try
             {
-                string dir = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "../");
+                string dir = Path.Combine(System.IO.Directory.GetCurrentDirectory());
                 string file = Path.Combine(dir, "client.service.exe");
 
                 proc = new Process();

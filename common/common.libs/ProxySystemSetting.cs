@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 
 namespace common.libs
 {
@@ -10,41 +11,25 @@ namespace common.libs
     /// </summary>
     public class ProxySystemSetting
     {
-
-        [DllImport("wininet.dll")]
-        static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int dwBufferLength);
-        const int INTERNET_OPTION_SETTINGS_CHANGED = 39;
-        const int INTERNET_OPTION_REFRESH = 37;
-        private static void FlushOs()
-        {
-            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
-            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
-        }
-
-        private static RegistryKey OpenKey()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-            }
-            return null;
-        }
         private static void WindowsSet(string url)
         {
             try
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    RegistryKey registryKey = OpenKey();
-
-                    // registryKey.SetValue("ProxyEnable", 1);
-                    registryKey.SetValue("AutoConfigURL", url);
-
+                    string CurrentUserSID = string.Empty;
+                    if (GetCurrentUserSID(ref CurrentUserSID))
+                    {
+                        RegistryKey rsg = Registry.Users.OpenSubKey($"{CurrentUserSID}\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+                        rsg.SetValue("AutoConfigURL", url);
+                        rsg.Close();
+                    }
                     FlushOs();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.Instance.Error(ex);
             }
         }
         private static void WindowsClear()
@@ -53,10 +38,13 @@ namespace common.libs
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    RegistryKey registryKey = OpenKey();
-
-                    //registryKey.SetValue("ProxyEnable", 0);
-                    registryKey.DeleteValue("AutoConfigURL");
+                    string CurrentUserSID = string.Empty;
+                    if (GetCurrentUserSID(ref CurrentUserSID))
+                    {
+                        RegistryKey rsg = Registry.Users.OpenSubKey($"{CurrentUserSID}\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+                        rsg.DeleteValue("AutoConfigURL");
+                        rsg.Close();
+                    }
                     FlushOs();
                 }
             }
@@ -135,5 +123,69 @@ namespace common.libs
 
             }
         }
+
+
+        #region windows
+
+        [DllImport("wininet.dll")]
+        static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int dwBufferLength);
+        const int INTERNET_OPTION_SETTINGS_CHANGED = 39;
+        const int INTERNET_OPTION_REFRESH = 37;
+        private static void FlushOs()
+        {
+            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
+            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
+        }
+
+        public static bool GetCurrentUserToken(ref IntPtr hCurrentUserToken)
+        {
+            uint dwSessionId = WTSGetActiveConsoleSessionId();
+            if (!WTSQueryUserToken(dwSessionId, ref hCurrentUserToken))
+            {
+                return false;
+            }
+            return true;
+        }
+        public static bool GetCurrentUserSID(ref string CurrentUserSID)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                IntPtr hUserToken = IntPtr.Zero;
+                if (GetCurrentUserToken(ref hUserToken))
+                {
+                    if (!ImpersonateLoggedOnUser(hUserToken))//Impersonate Current User logon
+                    {
+                        return false;
+                    }
+                    CloseHandle(hUserToken);
+
+                    WindowsIdentity windowsIdentity = WindowsIdentity.GetCurrent();
+                    CurrentUserSID = windowsIdentity.User.ToString();
+
+                    if (!RevertToSelf())
+                    {
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+
+        [DllImport("Advapi32.dll", EntryPoint = "ImpersonateLoggedOnUser", SetLastError = true)]
+        private static extern bool ImpersonateLoggedOnUser(IntPtr hToken);
+
+        [DllImport("Advapi32.dll", EntryPoint = "RevertToSelf", SetLastError = true)]
+        private static extern bool RevertToSelf();
+
+        [DllImport("kernel32.dll", EntryPoint = "CloseHandle", SetLastError = true)]
+        public static extern bool CloseHandle(IntPtr hSnapshot);
+
+        [DllImport("kernel32.dll", EntryPoint = "WTSGetActiveConsoleSessionId")]
+        private static extern uint WTSGetActiveConsoleSessionId();
+
+        [DllImport("Wtsapi32.dll", EntryPoint = "WTSQueryUserToken", SetLastError = true)]
+        private static extern bool WTSQueryUserToken(uint SessionId, ref IntPtr hToken);
+        #endregion
     }
 }

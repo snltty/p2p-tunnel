@@ -4,7 +4,7 @@ namespace server.messengers
 {
     public interface IServiceAccessValidator
     {
-        public bool Validate(string key, EnumService service);
+        public bool Validate(string group, EnumService service);
     }
 
     [Flags]

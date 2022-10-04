@@ -1,6 +1,5 @@
 ﻿using common.libs.database;
 using server.messengers;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +8,8 @@ namespace server.service.validators
     [Table("service-auth-groups")]
     public class JsonFileServiceAccessValidator : IServiceAccessValidator
     {
-        private Dictionary<string, EnumService> Groups { get; set; } = new Dictionary<string, EnumService>();
+        public Dictionary<string, EnumService> Groups { get; init; } = new Dictionary<string, EnumService>();
+
         public JsonFileServiceAccessValidator() { }
         public JsonFileServiceAccessValidator(IConfigDataProvider<JsonFileServiceAccessValidator> configDataProvider)
         {
@@ -20,9 +20,9 @@ namespace server.service.validators
             }
         }
 
-        public bool Validate(string key, EnumService service)
+        public bool Validate(string group, EnumService service)
         {
-            if (Groups.TryGetValue(key, out EnumService value))
+            if (Groups.TryGetValue(group, out EnumService value))
             {
                 return (value & service) == service;
             }

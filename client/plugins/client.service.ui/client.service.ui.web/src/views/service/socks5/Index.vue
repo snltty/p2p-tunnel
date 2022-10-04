@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-02 23:51:12
+ * @LastEditTime: 2022-10-04 14:50:21
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\socks5\Index.vue
@@ -193,6 +193,8 @@ export default {
                 json.ListenPort = Number(json.ListenPort);
                 json.BufferSize = Number(json.BufferSize);
                 json.TunnelType = Number(json.TunnelType);
+
+                console.log(json);
                 set(json).then(() => {
                     state.loading = false;
                     if (json.IsPac) {
