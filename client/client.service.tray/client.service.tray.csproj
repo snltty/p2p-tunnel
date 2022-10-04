@@ -4,6 +4,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>logo.ico</ApplicationIcon>
 		<TieredCompilation>true</TieredCompilation>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(VisualStudioVersion)'&gt;='17.0'">

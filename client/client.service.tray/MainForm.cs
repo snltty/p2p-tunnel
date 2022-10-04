@@ -87,10 +87,13 @@ namespace client.service.tray
 
         private void OpenWeb()
         {
-            string jsonstr = File.ReadAllText("../ui-appsettings.json").ToLower();
-            System.Text.Json.JsonDocument jd = System.Text.Json.JsonDocument.Parse(jsonstr);
+            string jsonstr = File.ReadAllText("./ui-appsettings.json").ToLower();
+            System.Text.Json.JsonDocument jd = System.Text.Json.JsonDocument.Parse(jsonstr,new System.Text.Json.JsonDocumentOptions { 
+                  CommentHandling =  System.Text.Json.JsonCommentHandling.Skip,
+            });
+            string ip = jd.RootElement.GetProperty("web").GetProperty("bindIp").ToString();
             string port = jd.RootElement.GetProperty("web").GetProperty("port").ToString();
-            Process.Start("explorer.exe", $"http://127.0.0.1:{port}/");
+            Process.Start("explorer.exe", $"http://{(ip == "+"?"127.0.0.1": ip)}:{port}");
         }
 
         private new void Closing(object sender, FormClosingEventArgs e)
