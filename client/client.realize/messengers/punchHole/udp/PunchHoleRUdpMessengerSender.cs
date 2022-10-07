@@ -39,7 +39,7 @@ namespace client.realize.messengers.punchHole.udp
         private IConnection connection => registerState.UdpConnection;
         private ulong ConnectId => registerState.ConnectId;
 #if DEBUG
-        private bool UseLocalPort = true;
+        private bool UseLocalPort = false;
 #else
         private bool UseLocalPort = true;
 #endif

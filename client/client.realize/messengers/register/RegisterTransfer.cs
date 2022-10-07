@@ -59,6 +59,8 @@ namespace client.realize.messengers.register
             {
                 return;
             }
+
+            Console.WriteLine($"{connection.ServerType} 断开");
             if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
             {
                 Register(true).ContinueWith((result) =>

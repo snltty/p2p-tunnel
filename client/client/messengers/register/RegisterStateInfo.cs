@@ -75,13 +75,13 @@ namespace client.messengers.register
             TcpConnection = null;
             if (tcp != null)
             {
-                //tcp.Disponse();
+                tcp.Disponse();
             }
             var udp = UdpConnection;
             UdpConnection = null;
             if (udp != null)
             {
-                //udp.Disponse();
+                udp.Disponse();
             }
 
             OnRegisterBind.Push(false);
