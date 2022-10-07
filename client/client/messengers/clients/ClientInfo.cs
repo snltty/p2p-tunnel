@@ -23,6 +23,8 @@ namespace client.messengers.clients
         public ulong Id { get; set; } = 0;
         public bool Udp { get; set; } = false;
         public bool Tcp { get; set; } = false;
+        public bool AutoPunchHole { get; set; } = false;
+        
 
         public ClientConnectTypes UdpConnectType { get; set; } = ClientConnectTypes.P2P;
         public ClientConnectTypes TcpConnectType { get; set; } = ClientConnectTypes.P2P;
@@ -37,7 +39,7 @@ namespace client.messengers.clients
         public void OfflineUdp()
         {
             UdpConnecting = false;
-            if (UdpConnection != null)
+            if (UdpConnection != null && UdpConnection.Relay == false)
             {
                 UdpConnection.Disponse();
             }
@@ -46,7 +48,7 @@ namespace client.messengers.clients
         public void OfflineTcp()
         {
             TcpConnecting = false;
-            if (TcpConnection != null)
+            if (TcpConnection != null && TcpConnection.Relay == false)
             {
                 TcpConnection.Disponse();
             }

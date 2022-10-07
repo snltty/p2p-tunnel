@@ -141,7 +141,7 @@ namespace common.libs
             while (timeout != null)
             {
                 bool remove = false;
-                if (timeout.Value.Rounds <= 0)
+                if (timeout.Value.Rounds <= 0 && timeout.Value.IsCanceled == false)
                 {
                     remove = true;
                     try

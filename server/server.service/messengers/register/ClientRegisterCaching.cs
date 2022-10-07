@@ -29,12 +29,11 @@ namespace server.service.messengers.register
         {
             this.config = config;
 
-            if(config.ConnectLimit > 0)
+            if (config.ConnectLimit > 0)
             {
-                rateLimit = new TokenBucketRatelimit<IPAddress>();
-                rateLimit.Init(config.ConnectLimit, RateLimitTimeType.Minute);
+                rateLimit = new TokenBucketRatelimit<IPAddress>(config.ConnectLimit);
             }
-            
+
             tcpServer.OnDisconnect.Sub(Disconnected);
             udpServer.OnDisconnect.Sub(Disconnected);
             tcpServer.OnConnected = AddConnectedTimeout;

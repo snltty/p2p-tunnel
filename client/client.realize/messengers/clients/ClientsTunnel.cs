@@ -44,7 +44,7 @@ namespace client.realize.messengers.clients
             {
                 try
                 {
-                    int port = NetworkHelper.GetRandomPort();
+                    int port = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<int> { registerState.LocalInfo.UdpPort, registerState.LocalInfo.TcpPort });
 
                     return serverType switch
                     {
@@ -95,13 +95,16 @@ namespace client.realize.messengers.clients
             TcpServer tempTcpServer = new TcpServer();
             tempTcpServer.SetBufferSize(config.Client.TcpBufferSize);
             tempTcpServer.OnPacket = tcpServer.InputData;
-            tempTcpServer.OnDisconnect.Sub((IConnection connection) => tempTcpServer.Disponse());
+            tempTcpServer.OnDisconnect.Sub((IConnection connection) =>
+            {
+                tempTcpServer.Disponse();
+            });
             tempTcpServer.Start(localport, config.Client.BindIp);
 
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, localport);
 
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 5 / 1000);
+            tcpSocket.KeepAlive(time: Math.Max(config.Client.TimeoutDelay / 5 / 1000,5));
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
 

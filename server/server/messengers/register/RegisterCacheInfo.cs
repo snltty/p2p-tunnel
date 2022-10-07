@@ -23,6 +23,7 @@ namespace server.messengers.register
         public IPAddress[] LocalIps { get; set; }
         [JsonIgnore]
         public string Mac { get; set; }
+        public bool AutoPunchHole { get; set; } = false;
 
         public void UpdateUdpInfo(IConnection connection)
         {

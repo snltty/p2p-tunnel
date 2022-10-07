@@ -41,6 +41,8 @@ namespace common.server.model
         /// </summary>
         public int LocalUdpPort { get; set; } = 0;
 
+        public bool AutoPunchHole { get; set; } = false;
+
         public byte[] ToBytes()
         {
             int length = 0;
@@ -65,6 +67,9 @@ namespace common.server.model
             length += 2;
             var localudpPort = LocalUdpPort.ToBytes();
             length += 2;
+
+            //AutoPunchHole
+            length += 1;
 
             var bytes = new byte[length];
             int index = 0;
@@ -103,6 +108,8 @@ namespace common.server.model
             bytes[index + 1] = localudpPort[1];
             index += 2;
 
+            bytes[index] = (byte)(AutoPunchHole ? 1 : 0);
+
             return bytes;
 
         }
@@ -136,6 +143,9 @@ namespace common.server.model
             index += 2;
             LocalUdpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
+
+            AutoPunchHole = span[index] == 1;
+            index += 1;
         }
     }
 
@@ -152,6 +162,7 @@ namespace common.server.model
         /// 服务器是否支持中继
         /// </summary>
         public bool Relay { get; set; } = false;
+        public bool AutoPunchHole { get; set; } = false;
 
         public int UdpPort { get; set; } = 0;
         public int TcpPort { get; set; } = 0;
@@ -184,7 +195,7 @@ namespace common.server.model
             var groupIdBytes = GroupId.ToBytes();
 
             var bytes = new byte[
-                1 + 1
+                1 + 1 + 1
                 + 2 + 2
                 + timeoutBytes.Length
                 + 8
@@ -196,6 +207,9 @@ namespace common.server.model
             index += 1;
 
             bytes[index] = (byte)(Relay ? 1 : 0);
+            index += 1;
+
+            bytes[index] = (byte)(AutoPunchHole ? 1 : 0);
             index += 1;
 
             bytes[index] = udpPortBytes[0];
@@ -231,6 +245,9 @@ namespace common.server.model
             index += 1;
 
             Relay = span[index] != 0;
+            index += 1;
+
+            AutoPunchHole = span[index] != 0;
             index += 1;
 
             UdpPort = span.Slice(index, 2).ToUInt16();

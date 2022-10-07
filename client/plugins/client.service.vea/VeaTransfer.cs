@@ -63,12 +63,17 @@ namespace client.service.vea
 
         public void OnNotify(IConnection connection)
         {
-            if (clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
+            if(connection.FromConnection != null)
             {
-                IPAddressInfo ips = new IPAddressInfo();
-                ips.DeBytes(connection.ReceiveRequestWrap.Memory);
-                UpdateIp(client, ips);
+                bool res = clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client);
+                if (res)
+                {
+                    IPAddressInfo ips = new IPAddressInfo();
+                    ips.DeBytes(connection.ReceiveRequestWrap.Memory);
+                    UpdateIp(client, ips);
+                }
             }
+            
         }
         private void UpdateIp(ClientInfo client, IPAddressInfo _ips)
         {

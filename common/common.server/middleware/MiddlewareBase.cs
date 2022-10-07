@@ -38,8 +38,8 @@ namespace common.server.middleware
                 MiddlewareBase execute = first;
                 while (execute != null)
                 {
-                    var res = await  execute.Execute(connection);
-                    if (!res.Item1)
+                    var res = await execute.Execute(connection);
+                    if (res.Item1 == false)
                     {
                         return res;
                     }

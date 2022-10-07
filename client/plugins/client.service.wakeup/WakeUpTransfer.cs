@@ -36,9 +36,12 @@ namespace client.service.wakeup
 
         public void OnNotify(IConnection connection)
         {
-            if (clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
+            if(connection.FromConnection != null)
             {
-                UpdateMac(client, Config.DeBytes(connection.ReceiveRequestWrap.Memory));
+                if (clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
+                {
+                    UpdateMac(client, Config.DeBytes(connection.ReceiveRequestWrap.Memory));
+                }
             }
         }
         private void UpdateMac(ClientInfo client, List<ConfigItem> mac)

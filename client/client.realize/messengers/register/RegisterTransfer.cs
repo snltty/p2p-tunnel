@@ -50,9 +50,8 @@ namespace client.realize.messengers.register
         }
         private void Disconnect(IConnection connection, IConnection regConnection)
         {
-            //Console.WriteLine($"{connection.ServerType} 掉线");
-
-            if (regConnection != connection)
+            if (regConnection == null) return;
+            if (ReferenceEquals(regConnection, connection) == false)
             {
                 return;
             }
@@ -60,7 +59,6 @@ namespace client.realize.messengers.register
             {
                 return;
             }
-
             if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
             {
                 Register(true).ContinueWith((result) =>
@@ -123,7 +121,8 @@ namespace client.realize.messengers.register
                         }
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
-                        registerState.LocalInfo.UdpPort = registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort();
+                        registerState.LocalInfo.UdpPort = NetworkHelper.GetRandomPort();
+                        registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<int> { registerState.LocalInfo.UdpPort });
                         registerState.LocalInfo.Mac = string.Empty;
                         registerState.OnRegisterBind.Push(true);
 
@@ -170,6 +169,7 @@ namespace client.realize.messengers.register
                     catch (Exception ex)
                     {
                         Logger.Instance.DebugError(ex);
+                        Logger.Instance.Error(ex.Message);
                         success.ErrorMsg = ex.Message;
                     }
 
@@ -200,7 +200,7 @@ namespace client.realize.messengers.register
             //TCP 连接服务器
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.TcpPort);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 5 / 1000);
+            tcpSocket.KeepAlive(time: Math.Max(config.Client.TimeoutDelay / 5 / 1000, 5));
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             registerState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;
@@ -236,7 +236,8 @@ namespace client.realize.messengers.register
                 LocalTcpPort = registerState.LocalInfo.TcpPort,
                 Mac = registerState.LocalInfo.Mac,
                 LocalIps = new IPAddress[] { config.Client.LoopbackIp, registerState.LocalInfo.LocalIp },
-                Timeout = 15 * 1000
+                Timeout = 15 * 1000,
+                AutoPunchHole = config.Client.AutoPunchHole,
             }).ConfigureAwait(false);
             if (result.NetState.Code != MessageResponeCodes.OK)
             {

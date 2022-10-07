@@ -152,7 +152,6 @@ namespace common.socks5
 
         private void HandleCommand(IConnection connection)
         {
-
             Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
 
             if (socks5Validator.Validate(connection.FromConnection, data, config) == false)
@@ -201,7 +200,7 @@ namespace common.socks5
             };
             connectEventArgs.RemoteEndPoint = remoteEndPoint;
             connectEventArgs.Completed += Target_IO_Completed;
-            if (!socket.ConnectAsync(connectEventArgs))
+            if (socket.ConnectAsync(connectEventArgs) == false)
             {
                 TargetProcessConnect(connectEventArgs);
             }

@@ -66,6 +66,7 @@ namespace common.server.model
 
         public bool Udp { get; set; } = false;
         public bool Tcp { get; set; } = false;
+        public bool AutoPunchHole { get; set; } = false;
 
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; } = null;
@@ -85,7 +86,7 @@ namespace common.server.model
 
             int index = 0;
 
-            bytes[0] = (byte)(((Udp ? 1 : 0) << 1) | ((Tcp ? 1 : 0)));
+            bytes[0] = (byte)((AutoPunchHole ? 1 : 0) << 2 | ((Udp ? 1 : 0) << 1) | (Tcp ? 1 : 0));
             index += 1;
 
             Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
@@ -107,8 +108,9 @@ namespace common.server.model
             var span = data.Span;
             int index = 0;
 
-            Udp = (span[index] >> 1) == 0 ? false : true;
-            Tcp = (span[index] & 1) == 0 ? false : true;
+            AutoPunchHole = ((span[index] >> 2) & 1) == 1;
+            Udp = ((span[index] >> 1) & 1) == 1;
+            Tcp = (span[index] & 1) == 1;
             index += 1;
 
             Id = span.Slice(index, 8).ToUInt64();

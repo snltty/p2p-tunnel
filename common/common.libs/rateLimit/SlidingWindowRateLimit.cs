@@ -7,39 +7,13 @@ namespace common.libs.rateLimit
     {
         private readonly ConcurrentDictionary<TKey, SlidingRateInfo> limits = new ConcurrentDictionary<TKey, SlidingRateInfo>();
         private int rate = 0;
-        private int windowLength = 0;
-        private int mask = 0;
-        private Func<long> timeFunc;
+        private int windowLength = 20;
+        private int mask = 1000 / 20;
+        private Func<long> timeFunc = DateTimeHelper.GetTimeStamp;
 
-        public void Init(int rate, RateLimitTimeType type)
+        public SlidingWindowRateLimit(int rate)
         {
             this.rate = rate;
-
-            switch (type)
-            {
-                case RateLimitTimeType.Second:
-                    windowLength = 20;
-                    mask = 1000 / 20;
-                    timeFunc = DateTimeHelper.GetTimeStamp;
-                    break;
-                case RateLimitTimeType.Minute:
-                    windowLength = 60;
-                    mask = 60 / 60;
-                    timeFunc = DateTimeHelper.GetTimeStampSec;
-                    break;
-                case RateLimitTimeType.Hour:
-                    windowLength = 60;
-                    mask = 60 / 60;
-                    timeFunc = DateTimeHelper.GetTimeStampMinute;
-                    break;
-                case RateLimitTimeType.Day:
-                    windowLength = 24;
-                    mask = 24 / 24;
-                    timeFunc = DateTimeHelper.GetTimeStampHour;
-                    break;
-                default:
-                    break;
-            }
         }
 
         public void SetRate(TKey key, int rate)
@@ -114,8 +88,7 @@ namespace common.libs.rateLimit
         {
             limits.TryRemove(key, out _);
         }
-
-        public void Disponse()
+        public void Clear()
         {
             limits.Clear();
         }

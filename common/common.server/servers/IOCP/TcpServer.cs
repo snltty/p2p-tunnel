@@ -176,7 +176,7 @@ namespace common.server.servers.iocp
                         ArrayPool<byte>.Shared.Return(arr);
                     }
 
-                    if (!token.Socket.Connected || token.Port != port)
+                    if (token.Socket.Connected == false || token.Port != port)
                     {
                         token.Connection.SocketError = SocketError.SocketError;
                         CloseClientSocket(e);
@@ -197,7 +197,6 @@ namespace common.server.servers.iocp
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
-                //token.Connection.SocketError = SocketError.SocketError;
                 CloseClientSocket(e);
             }
         }

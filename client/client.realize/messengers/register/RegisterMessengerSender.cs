@@ -43,6 +43,7 @@ namespace client.realize.messengers.register
                         Mac = param.Mac,
                         LocalTcpPort = param.LocalTcpPort,
                         LocalUdpPort = param.LocalUdpPort,
+                        AutoPunchHole = param.AutoPunchHole
                     }.ToBytes(),
                     Timeout = param.Timeout,
                 }).ConfigureAwait(false);
@@ -73,6 +74,7 @@ namespace client.realize.messengers.register
                         Mac = param.Mac,
                         LocalTcpPort = param.LocalTcpPort,
                         LocalUdpPort = param.LocalUdpPort,
+                        AutoPunchHole = param.AutoPunchHole
                     }.ToBytes(),
                     Timeout = param.Timeout,
                 }).ConfigureAwait(false);
@@ -120,7 +122,7 @@ namespace client.realize.messengers.register
             }).ConfigureAwait(false);
         }
 
-       
+
     }
 
     public class TunnelRegisterParams
@@ -142,6 +144,7 @@ namespace client.realize.messengers.register
         public int Timeout { get; set; } = 15 * 1000;
         public int LocalUdpPort { get; set; } = 0;
         public int LocalTcpPort { get; set; } = 0;
+        public bool AutoPunchHole { get; set; } = false;
 
     }
 

@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using System.Text.Json.Serialization;
@@ -21,6 +22,11 @@ namespace client
             Config config = ReadConfig().Result;
             Client = config.Client;
             Server = config.Server;
+
+            if (Client.Name.Length == 0)
+            {
+                Client.Name = $"{Environment.MachineName}_{Environment.UserName}";
+            }
         }
         /// <summary>
         /// 客户端配置

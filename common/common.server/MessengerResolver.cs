@@ -78,10 +78,11 @@ namespace common.server
                 return;
             }
 
-
+            
 
             requestWrap.FromArray(receive);
             connection.FromConnection = sourceConnectionSelector.Select(connection);
+
 
             if (connection.EncodeEnabled)
             {
@@ -108,7 +109,7 @@ namespace common.server
                 if (middlewareTransfer != null)
                 {
                     var res = await middlewareTransfer.Execute(connection);
-                    if (!res.Item1)
+                    if (res.Item1 == false)
                     {
                         await messengerSender.ReplyOnly(new MessageResponseWrap
                         {

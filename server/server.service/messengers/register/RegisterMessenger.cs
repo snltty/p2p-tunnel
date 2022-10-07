@@ -68,7 +68,8 @@ namespace server.service.messengers.register
                 TcpPort = client.TcpConnection?.Address.Port ?? 0,
                 GroupId = client.GroupId,
                 Relay = relayValidator.Validate(client.GroupId),
-                TimeoutDelay = config.TimeoutDelay
+                TimeoutDelay = config.TimeoutDelay,
+                AutoPunchHole = model.AutoPunchHole
             }.ToBytes();
         }
         private async Task<byte[]> Tcp(IConnection connection, RegisterParamsInfo model)
@@ -97,7 +98,8 @@ namespace server.service.messengers.register
                 TcpPort = connection.Address.Port,
                 GroupId = client.GroupId,
                 Relay = relayValidator.Validate(client.GroupId),
-                TimeoutDelay = config.TimeoutDelay
+                TimeoutDelay = config.TimeoutDelay,
+                AutoPunchHole = model.AutoPunchHole
             }.ToBytes();
         }
         private async Task<(RegisterResultInfo, RegisterCacheInfo)> VerifyAndAdd(RegisterParamsInfo model)
@@ -134,7 +136,8 @@ namespace server.service.messengers.register
                         GroupId = model.GroupId,
                         LocalIps = model.LocalIps,
                         Mac = model.Mac,
-                        Id = 0
+                        Id = 0,
+                        AutoPunchHole = model.AutoPunchHole
                     };
                     clientRegisterCache.Add(client);
                 }

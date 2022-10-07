@@ -113,23 +113,12 @@ namespace client.realize.messengers.clients
             tcpServer.OnDisconnect.Sub((connection) => clientInfoCaching.Offline(connection.ConnectId, connection.ServerType));
             udpServer.OnDisconnect.Sub((connection) => clientInfoCaching.Offline(connection.ConnectId, connection.ServerType));
 
-
             //中继连线
             punchHoleMessengerSender.OnRelay.Sub((param) =>
             {
                 if (clientInfoCaching.Get(param.Raw.Data.FromId, out ClientInfo client))
                 {
-                    IConnection connection = param.Relay.ServerType switch
-                    {
-                        ServerType.TCP => registerState.TcpConnection.Clone(),
-                        ServerType.UDP => registerState.UdpConnection.Clone(),
-                        _ => throw new NotImplementedException(),
-                    };
-                    if (connection != null)
-                    {
-                        connection.Relay = registerState.RemoteInfo.Relay;
-                        clientInfoCaching.Online(param.Raw.Data.FromId, connection, ClientConnectTypes.Relay);
-                    }
+                    Relay(client, param.Relay.ServerType, false);
                 }
             });
 
@@ -168,18 +157,18 @@ namespace client.realize.messengers.clients
                 if (config.Client.UseUdp && info.Udp && info.UdpConnecting == false && info.UdpConnected == false)
                 {
                     //默认通道连一下，不成功的话，开一个新通道再次尝试连接
-                    udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+                    udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort, tryreverse >= TryReverseMaxValue).ConfigureAwait(false);
                     if (udp == false)
                     {
-                        udp = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+                        udp = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort, tryreverse >= TryReverseMaxValue).ConfigureAwait(false);
                     }
                 }
                 if (config.Client.UseTcp && info.Tcp && info.TcpConnecting == false && info.TcpConnected == false)
                 {
-                    tcp = await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
+                    tcp = await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort, false).ConfigureAwait(false);
                     if (tcp == false)
                     {
-                        tcp = await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
+                        tcp = await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort, tryreverse >= TryReverseMaxValue).ConfigureAwait(false);
                     }
                 }
 
@@ -219,26 +208,23 @@ namespace client.realize.messengers.clients
             punchHoleTcp.SendStep2Stop(id);
         }
 
-        private async Task<bool> ConnectUdp(ClientInfo info, ulong tunnelName, int localPort)
+        private async Task<bool> ConnectUdp(ClientInfo info, ulong tunnelName, int localPort, bool lastTry)
         {
             clientInfoCaching.Connecting(info.Id, true, ServerType.UDP);
             var result = await punchHoleUdp.Send(new ConnectParams
             {
                 Id = info.Id,
                 TunnelName = tunnelName,
-                TryTimes = 5,
+                TryTimes = 2,
                 LocalPort = localPort
             }).ConfigureAwait(false);
             if (result.State)
             {
                 return result.State;
             }
-            if (registerState.RemoteInfo.Relay)
+            if (registerState.RemoteInfo.Relay && lastTry)
             {
-                IConnection connection = registerState.UdpConnection.Clone();
-                connection.Relay = registerState.RemoteInfo.Relay;
-                clientInfoCaching.Online(info.Id, connection, ClientConnectTypes.Relay);
-                _ = punchHoleMessengerSender.SendRelay(info.Id, ServerType.UDP);
+                Relay(info, ServerType.UDP, true);
                 return true;
             }
             else
@@ -248,26 +234,24 @@ namespace client.realize.messengers.clients
             }
             return false;
         }
-        private async Task<bool> ConnectTcp(ClientInfo info, ulong tunnelName, int localPort)
+        private async Task<bool> ConnectTcp(ClientInfo info, ulong tunnelName, int localPort, bool lastTry)
         {
             clientInfoCaching.Connecting(info.Id, true, ServerType.TCP);
+
             var result = await punchHoleTcp.Send(new ConnectParams
             {
                 Id = info.Id,
                 TunnelName = tunnelName,
-                TryTimes = 5,
+                TryTimes = 2,
                 LocalPort = localPort
             }).ConfigureAwait(false);
             if (result.State)
             {
                 return result.State;
             }
-            if (registerState.RemoteInfo.Relay)
+            if (registerState.RemoteInfo.Relay && lastTry)
             {
-                IConnection connection = registerState.TcpConnection.Clone();
-                connection.Relay = registerState.RemoteInfo.Relay;
-                clientInfoCaching.Online(info.Id, connection, ClientConnectTypes.Relay);
-                _ = punchHoleMessengerSender.SendRelay(info.Id, ServerType.TCP);
+                Relay(info, ServerType.TCP, true);
                 return true;
             }
             else
@@ -326,18 +310,27 @@ namespace client.realize.messengers.clients
                         Name = item.Name,
                         Mac = item.Mac,
                         Tcp = item.Tcp,
-                        Udp = item.Udp
+                        Udp = item.Udp,
+                        AutoPunchHole = item.AutoPunchHole,
                     };
                     clientInfoCaching.Add(client);
-                    if (firstClients.Get() && config.Client.AutoPunchHole)
+                    if (firstClients.Get())
                     {
-                        if (registerState.LocalInfo.TcpPort == registerState.RemoteInfo.TcpPort || registerState.LocalInfo.UdpPort == registerState.RemoteInfo.UdpPort)
+                        if (config.Client.AutoPunchHole && client.AutoPunchHole)
                         {
-                            ConnectClient(client);
+                            if (registerState.LocalInfo.TcpPort == registerState.RemoteInfo.TcpPort || registerState.LocalInfo.UdpPort == registerState.RemoteInfo.UdpPort)
+                            {
+                                ConnectClient(client);
+                            }
+                            else
+                            {
+                                ConnectReverse(client.Id);
+                            }
                         }
-                        else
+                        else if (registerState.RemoteInfo.Relay)
                         {
-                            ConnectReverse(client.Id);
+                            Relay(client, ServerType.UDP, true);
+                            Relay(client, ServerType.TCP, true);
                         }
                     }
                 }
@@ -347,6 +340,25 @@ namespace client.realize.messengers.clients
             catch (Exception ex)
             {
                 Logger.Instance.Error(ex);
+            }
+        }
+        private void Relay(ClientInfo client, ServerType serverType, bool notify)
+        {
+            IConnection connection = serverType switch
+            {
+                ServerType.TCP => registerState.TcpConnection?.Clone(),
+                ServerType.UDP => registerState.UdpConnection?.Clone(),
+                _ => throw new NotImplementedException(),
+            };
+            if (connection != null)
+            {
+                connection.Relay = registerState.RemoteInfo.Relay;
+                clientInfoCaching.Online(client.Id, connection, ClientConnectTypes.Relay);
+            }
+
+            if (notify)
+            {
+                _ = punchHoleMessengerSender.SendRelay(client.Id, serverType);
             }
         }
     }

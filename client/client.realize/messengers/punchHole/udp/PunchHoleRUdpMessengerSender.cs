@@ -1,15 +1,11 @@
 ﻿using client.messengers.clients;
 using client.messengers.punchHole;
-using client.messengers.punchHole.tcp;
 using client.messengers.punchHole.udp;
 using client.messengers.register;
-using client.realize.messengers.clients;
 using client.realize.messengers.crypto;
 using common.libs;
-using common.libs.extends;
 using common.server;
 using common.server.model;
-using common.server.servers.iocp;
 using common.server.servers.rudp;
 using System;
 using System.Collections.Concurrent;
@@ -60,7 +56,7 @@ namespace client.realize.messengers.punchHole.udp
                 param.LocalPort = localPort;
             }
 
-            var timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 2000);
+            var timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 500);
 
             TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
             connectCache.TryAdd(param.Id, new ConnectCacheModel
@@ -85,13 +81,14 @@ namespace client.realize.messengers.punchHole.udp
         {
             try
             {
+                if (timeout.IsCanceled) return;
+
                 ulong toid = (ulong)timeout.Task.State;
                 timeout.Cancel();
                 if (connectCache.TryRemove(toid, out ConnectCacheModel cache))
                 {
                     cache.Canceled = true;
                     cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "udp打洞超时" } });
-
                 }
             }
             catch (Exception ex)
@@ -115,11 +112,11 @@ namespace client.realize.messengers.punchHole.udp
 
             if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
             {
-                foreach (var ip in arg.Data.LocalIps)
+                foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
-                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                    udpServer.SendUnconnectedMessage(Helper.FalseArray, new IPEndPoint(ip, arg.Data.LocalPort));
                 }
-                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+                udpServer.SendUnconnectedMessage(Helper.FalseArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
 
                 await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2Info>
                 {
@@ -137,11 +134,11 @@ namespace client.realize.messengers.punchHole.udp
             OnStep2Handler.Push(arg);
             await Task.Run(async () =>
             {
-                if (!connectCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache))
+                if (connectCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache) == false)
                 {
                     return;
                 }
-                if (!clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
+                if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer) == false)
                 {
                     return;
                 }
@@ -150,14 +147,16 @@ namespace client.realize.messengers.punchHole.udp
                 if (arg.Data.IsDefault)
                 {
                     List<IPEndPoint> ips = new List<IPEndPoint>();
+                    int times = cache.TryTimes;
                     if (UseLocalPort && registerState.RemoteInfo.Ip.ToString() == arg.Data.Ip.ToString())
                     {
-                        ips = arg.Data.LocalIps.Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
+                        times += 2;
+                        ips = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
                     }
                     ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
 
                     IConnection connection = null;
-                    for (int i = 0; i < cache.TryTimes; i++)
+                    for (int i = 0; i < times; i++)
                     {
                         IPEndPoint ip = i >= ips.Count - 1 ? ips[^1] : ips[i];
                         connection = await udpServer.CreateConnection(ip);
@@ -249,11 +248,11 @@ namespace client.realize.messengers.punchHole.udp
             }
             if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
             {
-                foreach (var ip in arg.Data.LocalIps)
+                foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
-                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                    udpServer.SendUnconnectedMessage(Helper.FalseArray, new IPEndPoint(ip, arg.Data.LocalPort));
                 }
-                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+                udpServer.SendUnconnectedMessage(Helper.FalseArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
             }
             await Task.CompletedTask;
         }

@@ -45,7 +45,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         private IConnection TcpServer => registerState.TcpConnection;
         private ulong ConnectId => registerState.ConnectId;
 
-        private int RouteLevel => registerState.LocalInfo.RouteLevel + 1;
+        private int RouteLevel => registerState.LocalInfo.RouteLevel + 2;
 #if DEBUG
         private bool UseLocalPort = false;
 #else
@@ -82,7 +82,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         }
 
         public SimpleSubPushHandler<OnStep1Params> OnStep1Handler { get; } = new SimpleSubPushHandler<OnStep1Params>();
-        public async Task OnStep1(OnStep1Params arg)    
+        public async Task OnStep1(OnStep1Params arg)
         {
             if (arg.Data.IsDefault)
             {
@@ -96,11 +96,16 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
             if (clientInfoCaching.GetTunnelPort(arg.RawData.TunnelName, out int localPort))
             {
-                List<IPEndPoint> ips = arg.Data.LocalIps.Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
+                List<IPEndPoint> ips = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
                 ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
 
                 foreach (IPEndPoint ip in ips)
                 {
+                    if (ip.Address.Equals(IPAddress.Any))
+                    {
+                        continue;
+                    }
+
                     using Socket targetSocket = new(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
@@ -124,14 +129,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             {
                 OnStep2Handler.Push(arg);
 
-                List<Tuple<IPAddress, int>> ips = new List<Tuple<IPAddress, int>>();
-                if (UseLocalPort && registerState.RemoteInfo.Ip.ToString() == arg.Data.Ip.ToString())
-                {
-                    ips = arg.Data.LocalIps.Select(c => new Tuple<IPAddress, int>(c, arg.Data.LocalPort)).ToList();
-                }
 
-                ips.Add(new Tuple<IPAddress, int>(arg.Data.Ip, arg.Data.Port));
-                if (!connectTcpCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache))
+                
+                if (connectTcpCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache) == false)
                 {
                     return;
                 }
@@ -139,8 +139,17 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
 
                 bool success = false;
-                int interval = 0, port = 0;
-                for (byte i = 0; i < cache.TryTimes; i++)
+                int interval = 0, port = 0, times = cache.TryTimes;
+                List<Tuple<IPAddress, int>> ips = new List<Tuple<IPAddress, int>>();
+                if (UseLocalPort && registerState.RemoteInfo.Ip.ToString() == arg.Data.Ip.ToString())
+                {
+                    times += 2;
+                    ips = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new Tuple<IPAddress, int>(c, arg.Data.LocalPort)).ToList();
+                }
+
+                ips.Add(new Tuple<IPAddress, int>(arg.Data.Ip, arg.Data.Port));
+
+                for (byte i = 0; i < times; i++)
                 {
                     if (cache.Canceled)
                     {
@@ -162,7 +171,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     Socket targetSocket = new Socket(targetEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
-                        targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 5 / 1000);
+                        targetSocket.KeepAlive(time: Math.Max(config.Client.TimeoutDelay / 5 / 1000, 5));
                         targetSocket.ReuseBind(new IPEndPoint(config.Client.BindIp, cache.LocalPort));
                         IAsyncResult result = targetSocket.BeginConnect(targetEndpoint, null, null);
                         result.AsyncWaitHandle.WaitOne(2000, false);
@@ -198,11 +207,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             targetSocket = null;
                             interval = 100;
                             await SendStep2Retry(arg, i).ConfigureAwait(false);
-                            if (arg.Data.GuessPort > 0)
-                            {
-                                interval = 0;
-                                port = arg.Data.GuessPort + i;
-                            }
                         }
                     }
                     catch (SocketException ex)
@@ -223,11 +227,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         else
                         {
                             await SendStep2Retry(arg, i).ConfigureAwait(false);
-                            if (arg.Data.GuessPort > 0)
-                            {
-                                interval = 0;
-                                port = arg.Data.GuessPort + i;
-                            }
                         }
                     }
                     catch (Exception ex)
@@ -270,12 +269,17 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 Socket targetSocket = null;
                 try
                 {
-                    IPEndPoint target = new IPEndPoint(e.Data.Ip, e.Data.Port);
-                    targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    targetSocket.Ttl = (short)(RouteLevel + e.RawData.Index);
-                    targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                    targetSocket.Bind(new IPEndPoint(config.Client.BindIp, localPort));
-                    _ = targetSocket.ConnectAsync(target);
+                    if (e.Data.Ip.Equals(IPAddress.Any) == false)
+                    {
+                        IPEndPoint target = new IPEndPoint(e.Data.Ip, e.Data.Port);
+                        targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                        targetSocket.Ttl = (short)(RouteLevel + e.RawData.Index);
+                        //targetSocket.Ttl = (short)(RouteLevel);
+                        targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                        targetSocket.Bind(new IPEndPoint(config.Client.BindIp, localPort));
+                        _ = targetSocket.ConnectAsync(target);
+                    }
+
                 }
                 catch (Exception)
                 {
@@ -356,6 +360,8 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         {
             try
             {
+                if (timeout.IsCanceled) return;
+
                 ulong toid = (ulong)timeout.Task.State;
                 timeout.Cancel();
                 if (connectTcpCache.TryRemove(toid, out ConnectCacheModel cache))
@@ -449,6 +455,8 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         {
             try
             {
+                if (timeout.IsCanceled) return;
+
                 ulong toid = (ulong)timeout.Task.State;
                 timeout.Cancel();
                 if (connectTcpCache.TryRemove(toid, out ConnectCacheModel cache))

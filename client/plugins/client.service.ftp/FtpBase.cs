@@ -16,6 +16,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using client.messengers.clients;
+using common.libs.rateLimit;
 
 namespace client.service.ftp
 {
@@ -35,6 +36,7 @@ namespace client.service.ftp
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly ServiceProvider serviceProvider;
         private readonly WheelTimer<FileSaveInfo> wheelTimer = new WheelTimer<FileSaveInfo>();
+        private readonly IRateLimit<ulong> rateLimit = new TokenBucketRatelimit<ulong>(500 * 1024);
 
         protected FtpBase(ServiceProvider serviceProvider, MessengerSender messengerSender, Config config, IClientInfoCaching clientInfoCaching)
         {
@@ -152,7 +154,7 @@ namespace client.service.ftp
                 Logger.Instance.Error($" Upload {ex}");
             }
         }
-        private void Upload(FileSaveInfo save)
+        private async void Upload(FileSaveInfo save)
         {
             if (save == null) return;
 
@@ -176,67 +178,81 @@ namespace client.service.ftp
             }, 1000, true);
 
             IConnection connection = client.OnlineConnection;
-            Task.Run(async () =>
+            try
             {
-                try
+                cmd.ToBytes();
+                byte[] sendData = new byte[cmd.MetaData.Length + packSize];
+                byte[] readData = new byte[packSize];
+
+                using FileStream fs = new FileStream(save.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, config.ReadWriteBufferSize, FileOptions.SequentialScan);
+
+                int index = 0;
+                while (index < packCount)
                 {
-                    cmd.ToBytes();
-                    byte[] sendData = new byte[cmd.MetaData.Length + packSize];
-                    byte[] readData = new byte[packSize];
-
-                    using FileStream fs = new FileStream(save.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, config.ReadWriteBufferSize, FileOptions.SequentialScan);
-
-                    int index = 0;
-                    while (index < packCount)
-                    {
-                        if (!save.Check())
-                        {
-                            return;
-                        }
-
-                        fs.Read(readData, 0, readData.Length);
-                        cmd.WriteData(readData, sendData);
-                        bool res = await SendOnlyTcp(sendData, connection).ConfigureAwait(false);
-                        if (res == false)
-                        {
-                            save.State = UploadStates.Error;
-                        }
-                        save.IndexLength += packSize;
-
-                        index++;
-                    }
-                    if (!save.Check())
+                    if (save.Check() == false)
                     {
                         return;
                     }
-                    if (lastPackSize > 0)
+
+                    fs.Read(readData, 0, readData.Length);
+                    cmd.WriteData(readData, sendData);
+                    bool res = await SendOnlyTcp(sendData, connection).ConfigureAwait(false);
+                    if (res == false)
                     {
-                        sendData = new byte[cmd.MetaData.Length + lastPackSize];
-                        readData = new byte[lastPackSize];
-                        fs.Read(readData, 0, readData.Length);
-                        cmd.WriteData(readData, sendData);
-                        if (!await SendOnlyTcp(sendData, connection).ConfigureAwait(false))
-                        {
-                            save.State = UploadStates.Error;
-                        }
-                        save.IndexLength += lastPackSize;
+                        save.State = UploadStates.Error;
                     }
-                    fs.Close();
-                    fs.Dispose();
-                    WaitToUpload();
+                    save.IndexLength += packSize;
+
+                    index++;
                 }
-                catch (Exception ex)
+                if (save.Check() == false)
                 {
-                    Logger.Instance.Debug(ex);
-                    save.Disponse();
+                    return;
                 }
-            }, save.Token.Token);
+                if (lastPackSize > 0)
+                {
+                    sendData = new byte[cmd.MetaData.Length + lastPackSize];
+                    readData = new byte[lastPackSize];
+                    fs.Read(readData, 0, readData.Length);
+                    cmd.WriteData(readData, sendData);
+
+                    bool res = await SendOnlyTcp(sendData, connection).ConfigureAwait(false);
+                    if (res == false)
+                    {
+                        save.State = UploadStates.Error;
+                    }
+                    save.IndexLength += lastPackSize;
+                }
+                fs.Close();
+                fs.Dispose();
+                WaitToUpload();
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Debug(ex);
+                save.Disponse();
+            }
         }
 
         protected async ValueTask OnFile(FtpFileCommand cmd, FtpPluginParamWrap wrap)
         {
             try
             {
+                /*
+                int length = cmd.ReadData.Length;
+                do
+                {
+
+                    int last = rateLimit.Try(wrap.Client.Id, length);
+                    length -= last;
+                    if (last == 0)
+                    {
+                        await Task.Delay(1);
+                    }
+
+                } while (length > 0);
+                */
+
                 FileSaveInfo fs = Downloads.Get(wrap.Client.Id, cmd.Md5);
                 if (fs == null)
                 {
@@ -419,7 +435,7 @@ namespace client.service.ftp
         }
         private void WaitToUpload()
         {
-            if (!Uploads.Caches.IsEmpty)
+            if (Uploads.Caches.IsEmpty == false)
             {
                 IEnumerable<FileSaveInfo> saves = Uploads.Caches.SelectMany(c => c.Value.Values);
                 int uploadCount = saves.Count(c => c.State == UploadStates.Uploading);

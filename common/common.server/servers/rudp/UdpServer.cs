@@ -29,9 +29,11 @@ namespace common.server.servers.rudp
             server = new NetManager(listener);
             server.NatPunchEnabled = false;
             server.UnsyncedEvents = true;
-            server.PingInterval = timeout / 5;
+            server.PingInterval = Math.Max(timeout / 5, 5000);
             server.DisconnectTimeout = timeout;
-            server.MaxConnectAttempts = 1;
+            server.MaxConnectAttempts = 10;
+            server.AutoRecycle = true;
+            server.ReuseAddress = true;
             server.Start(port);
 
             listener.ConnectionRequestEvent += request =>
@@ -62,6 +64,7 @@ namespace common.server.servers.rudp
                 {
                     IConnection connection = peer.Tag as IConnection;
                     connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
+
                     OnPacket(connection).Wait();
                 }
                 catch (Exception)
@@ -104,39 +107,37 @@ namespace common.server.servers.rudp
 
         public async Task<IConnection> CreateConnection(IPEndPoint address)
         {
-            return await Task.Run(async () =>
+            maxNumberConnectings.WaitOne();
+            maxNumberConnectingNumberSpace.Increment();
+            try
             {
-                maxNumberConnectings.WaitOne();
-                maxNumberConnectingNumberSpace.Increment();
-                try
+                var peer = server.Connect(address, string.Empty);
+                int index = 50;
+                while (peer.ConnectionState == ConnectionState.Outgoing && index > 0)
                 {
-                    var peer = server.Connect(address, string.Empty);
-                    while (peer.ConnectionState == ConnectionState.Outgoing)
-                    {
-                        await Task.Delay(10);
-                    }
-                    if (peer.ConnectionState == ConnectionState.Connected)
-                    {
-                        return peer.Tag as RudpConnection;
-                    }
-                    return null;
+                    await Task.Delay(15);
+                    index--;
                 }
-                catch (Exception)
+                if (peer.ConnectionState == ConnectionState.Connected)
                 {
-                    return null;
+                    return peer.Tag as RudpConnection;
                 }
-                finally
-                {
-                    Release();
-                }
-            });
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            finally
+            {
+                Release();
+            }
         }
 
         public bool SendUnconnectedMessage(byte[] message, IPEndPoint address)
         {
             return server.SendUnconnectedMessage(message, address);
         }
-
 
         private void Release()
         {
@@ -146,7 +147,5 @@ namespace common.server.servers.rudp
                 maxNumberConnectings.Release();
             }
         }
-
-
     }
 }
