@@ -27,12 +27,3 @@ docker cp /usr/local/p2p-tunnel-server/udpforward-appsettings.json  p2p-tunnel-s
 // 重启容器
 docker restart p2p-tunnel-server
 ```
-
-## 自己打包docker服务端镜像
-```
-//进入项目根目录
-//power shell 下
-./server-docker 你的镜像名(比如snltty/p2p-tunnel-server)
-//cmd 下
-server-docker 你的镜像名(比如snltty/p2p-tunnel-server)
-```

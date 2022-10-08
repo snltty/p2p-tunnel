@@ -74,7 +74,6 @@ namespace client.realize.messengers.punchHole.udp
                 ToId = param.Id,
                 Data = new PunchHoleStep1Info { Step = (byte)PunchHoleUdpSteps.STEP_1, PunchType = PunchHoleTypes.UDP }
             }).ConfigureAwait(false);
-
             return await tcs.Task.ConfigureAwait(false);
         }
         private void SendStep1Timeout(WheelTimerTimeout<object> timeout)
@@ -114,9 +113,9 @@ namespace client.realize.messengers.punchHole.udp
             {
                 foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
-                    udpServer.SendUnconnectedMessage(Helper.FalseArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
                 }
-                udpServer.SendUnconnectedMessage(Helper.FalseArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
 
                 await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2Info>
                 {
@@ -250,9 +249,9 @@ namespace client.realize.messengers.punchHole.udp
             {
                 foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
-                    udpServer.SendUnconnectedMessage(Helper.FalseArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
                 }
-                udpServer.SendUnconnectedMessage(Helper.FalseArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
             }
             await Task.CompletedTask;
         }

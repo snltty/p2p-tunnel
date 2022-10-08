@@ -1,7 +1,6 @@
 ﻿using client.messengers.punchHole;
 using client.messengers.register;
 using common.libs;
-using common.libs.extends;
 using Microsoft.Extensions.DependencyInjection;
 using common.server;
 using common.server.model;
@@ -9,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-using client.realize.messengers.register;
 
 namespace client.realize.messengers.punchHole
 {

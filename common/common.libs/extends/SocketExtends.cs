@@ -15,6 +15,7 @@ namespace common.libs.extends
                 try
                 {
                     socket.Shutdown(SocketShutdown.Both);
+                    //调试注释
                     socket.Disconnect(false);
                 }
                 catch (Exception)

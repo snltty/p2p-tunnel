@@ -28,13 +28,13 @@ namespace common.server.servers.rudp
         {
             listener = new EventBasedNetListener();
             server = new NetManager(listener);
-            server.NatPunchEnabled = true;
+            //server.NatPunchEnabled = true;
             server.UnsyncedEvents = true;
             server.PingInterval = Math.Max(timeout / 5, 5000);
             server.DisconnectTimeout = timeout;
             server.MaxConnectAttempts = 10;
-            //server.AutoRecycle = true;
-            //server.ReuseAddress = true;
+            server.AutoRecycle = true;
+            server.ReuseAddress = true;
             //server.ChannelsCount = 10;
             server.Start(port);
 
@@ -51,18 +51,14 @@ namespace common.server.servers.rudp
             };
             listener.PeerDisconnectedEvent += (peer, disconnectInfo) =>
             {
-                Console.WriteLine(disconnectInfo.SocketErrorCode);
-                Console.WriteLine(disconnectInfo.Reason.ToString());
                 if (peer.Tag is IConnection connection)
                 {
                     OnDisconnect.Push(connection);
-                    //connection.Disponse();
+                    connection.Disponse();
                 }
             };
             listener.NetworkErrorEvent += (endPoint, socketError) =>
             {
-                Console.WriteLine(endPoint);
-                Console.WriteLine(socketError);
             };
             listener.NetworkReceiveEvent += (NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod) =>
             {
@@ -71,7 +67,10 @@ namespace common.server.servers.rudp
                     IConnection connection = peer.Tag as IConnection;
                     connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
 
-                    OnPacket(connection).Wait();
+                    OnPacket(connection).ContinueWith((result) =>
+                    {
+                        reader.Recycle();
+                    });
                 }
                 catch (Exception)
                 {

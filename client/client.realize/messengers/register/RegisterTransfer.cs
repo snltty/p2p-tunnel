@@ -1,12 +1,10 @@
 ﻿using client.messengers.clients;
 using client.messengers.register;
 using client.realize.messengers.crypto;
-using client.realize.messengers.heart;
 using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using common.server.servers.rudp;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -59,8 +57,6 @@ namespace client.realize.messengers.register
             {
                 return;
             }
-
-            Console.WriteLine($"{connection.ServerType} 断开");
             if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
             {
                 Register(true).ContinueWith((result) =>
@@ -202,7 +198,7 @@ namespace client.realize.messengers.register
             //TCP 连接服务器
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.TcpPort);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            tcpSocket.KeepAlive(time: Math.Max(config.Client.TimeoutDelay / 5 / 1000, 5));
+            tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000, interval: Math.Max(config.Client.TimeoutDelay / 5 / 1000, 5));
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             registerState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;

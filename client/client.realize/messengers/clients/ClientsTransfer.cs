@@ -5,16 +5,12 @@ using client.messengers.punchHole.udp;
 using client.messengers.register;
 using client.realize.messengers.punchHole;
 using common.libs;
-using common.libs.extends;
 using common.server;
 using common.server.model;
-using common.server.servers.iocp;
 using common.server.servers.rudp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.clients
@@ -55,7 +51,7 @@ namespace client.realize.messengers.clients
                 if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                    //clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
+                    clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName);
                     _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
                 }
             });
@@ -110,6 +106,7 @@ namespace client.realize.messengers.clients
                 }
             });
 
+            //调试注释
             tcpServer.OnDisconnect.Sub((connection) => clientInfoCaching.Offline(connection.ConnectId, connection.ServerType));
             udpServer.OnDisconnect.Sub((connection) => clientInfoCaching.Offline(connection.ConnectId, connection.ServerType));
 
@@ -150,14 +147,13 @@ namespace client.realize.messengers.clients
             {
                 return;
             }
-
             Task.Run(async () =>
             {
                 bool udp = false, tcp = false;
                 if (config.Client.UseUdp && info.Udp && info.UdpConnecting == false && info.UdpConnected == false)
                 {
                     //默认通道连一下，不成功的话，开一个新通道再次尝试连接
-                    udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort, tryreverse >= TryReverseMaxValue).ConfigureAwait(false);
+                    udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort, false).ConfigureAwait(false);
                     if (udp == false)
                     {
                         udp = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort, tryreverse >= TryReverseMaxValue).ConfigureAwait(false);

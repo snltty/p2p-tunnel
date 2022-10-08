@@ -140,31 +140,29 @@ namespace common.server
         {
             return await Send(data.ToArray(), data.Length);
         }
-        public override ValueTask<bool> Send(byte[] data, int length)
+        public override async ValueTask<bool> Send(byte[] data, int length)
         {
             if (Connected)
             {
                 try
                 {
-                    lock (this)
+                    int index = 0;
+                    while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 100)
                     {
-                        int index = 0;
-                        while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 100)
-                        {
-                            System.Threading.Thread.Sleep(1);
-                            index++;
-                        }
-                        NetPeer.Send(data, 0, length, DeliveryMethod.ReliableOrdered);
-                        SendBytes += data.Length;
-                        return new ValueTask<bool>(true);
+                        await Task.Delay(15);
+                        index++;
                     }
+                    NetPeer.Send(data, 0, length, DeliveryMethod.ReliableOrdered);
+                    SendBytes += data.Length;
+
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     Logger.Instance.DebugError(ex);
                 }
             }
-            return new ValueTask<bool>(false);
+            return false;
         }
 
         public override void Disponse()

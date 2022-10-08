@@ -129,8 +129,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             {
                 OnStep2Handler.Push(arg);
 
-
-                
                 if (connectTcpCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache) == false)
                 {
                     return;
@@ -171,7 +169,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     Socket targetSocket = new Socket(targetEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
-                        targetSocket.KeepAlive(time: Math.Max(config.Client.TimeoutDelay / 5 / 1000, 5));
+                        targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000, interval: Math.Max(config.Client.TimeoutDelay / 5 / 1000, 5));
                         targetSocket.ReuseBind(new IPEndPoint(config.Client.BindIp, cache.LocalPort));
                         IAsyncResult result = targetSocket.BeginConnect(targetEndpoint, null, null);
                         result.AsyncWaitHandle.WaitOne(2000, false);

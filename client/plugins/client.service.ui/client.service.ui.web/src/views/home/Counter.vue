@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-16 13:00:43
+ * @LastEditTime: 2022-10-08 14:53:58
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Counter.vue
@@ -106,7 +106,7 @@
 <script>
 import { reactive, toRefs } from '@vue/reactivity'
 import { getCounter } from '../../apis/counter'
-import { onUnmounted } from '@vue/runtime-core'
+import { onMounted, onUnmounted } from '@vue/runtime-core'
 export default {
     name: 'Counter',
     components: {},
@@ -230,12 +230,17 @@ export default {
                     state.udp.receive.bytesSecUnit = format[1];
                     state.udp.receive._bytes = json.UdpReceiveBytes;
                 }
+                timer = setTimeout(updateData, 1000);
             }).catch(() => {
+                timer = setTimeout(updateData, 1000);
             });
         }
-        const timer = setInterval(updateData, 1000);
+        let timer = 0;
         onUnmounted(() => {
-            clearInterval(timer);
+            clearTimeout(timer);
+        });
+        onMounted(() => {
+            updateData();
         });
 
         return {
