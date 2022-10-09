@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-02 22:59:29
+ * @LastEditTime: 2022-10-09 10:05:40
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\httpproxy\Index.vue
@@ -66,6 +66,13 @@
                     </div>
                 </el-form-item>
                 <el-form-item label-width="0">
+                    <div class="w-100 t-c" style="line-height:1.8rem">
+                        <p>自动设置代理有可能失败，可以手动配置系统代理“使用设置脚本”</p>
+                        <p>预置pac规则文件地址 <strong>{{state.localtion}}/proxy.pac</strong></p>
+                        <p>自定义pac规则文件地址 <strong>{{state.localtion}}/proxy-custom.pac</strong></p>
+                    </div>
+                </el-form-item>
+                <el-form-item label-width="0">
                     <div class="w-100 t-c">
                         <el-button type="primary" :loading="state.loading" @click="handleSubmit" class="m-r-1">确 定</el-button>
                         <ConfigureModal className="TcpForwardClientConfigure">
@@ -75,7 +82,7 @@
                 </el-form-item>
                 <el-form-item label-width="0" class="hidden-xs-only">
                     <div class="w-100">
-                        <el-input v-model="state.form.Pac" :rows="22" type="textarea" placeholder="写pac内容" resize="none" />
+                        <el-input v-model="state.form.Pac" :rows="18" type="textarea" placeholder="写pac内容" resize="none" />
                     </div>
                 </el-form-item>
             </el-form>
@@ -141,6 +148,7 @@ export default {
         })
         const state = reactive({
             loading: false,
+            localtion: window.location.origin,
             pac: '',
             form: {
                 ID: 0,

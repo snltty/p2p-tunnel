@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-04 14:50:21
+ * @LastEditTime: 2022-10-09 10:04:15
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\socks5\Index.vue
@@ -79,11 +79,13 @@
                         </el-row>
                     </div>
                 </el-form-item>
-                <!-- <el-form-item label-width="0">
-                    <div class="w-100 t-c">
-                        tcp udp地址均为 <strong>127.0.0.1:{{state.form.ListenPort}}</strong>
+                <el-form-item label-width="0">
+                    <div class="w-100 t-c" style="line-height:1.8rem">
+                        <p>自动设置代理有可能失败，可以手动配置系统代理“使用设置脚本”</p>
+                        <p>预置pac规则文件地址 <strong>{{state.localtion}}/socks.pac</strong></p>
+                        <p>自定义pac规则文件地址 <strong>{{state.localtion}}/socks-custom.pac</strong></p>
                     </div>
-                </el-form-item> -->
+                </el-form-item>
                 <el-form-item label-width="0">
                     <div class="w-100 t-c">
                         <el-button type="primary" :loading="state.loading" @click="handleSubmit" class="m-r-1">确 定</el-button>
@@ -152,6 +154,7 @@ export default {
         const state = reactive({
             loading: false,
             pac: '',
+            localtion: window.location.origin,
             form: {
                 ListenEnable: false,
                 ListenPort: 5412,

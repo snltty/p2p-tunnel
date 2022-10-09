@@ -1,8 +1,8 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 
 namespace common.libs
 {
@@ -17,19 +17,24 @@ namespace common.libs
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    string CurrentUserSID = string.Empty;
-                    if (GetCurrentUserSID(ref CurrentUserSID))
+                    string[] names = GetWindowsCurrentIds();
+                    foreach (var item in names)
                     {
-                        RegistryKey rsg = Registry.Users.OpenSubKey($"{CurrentUserSID}\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-                        rsg.SetValue("AutoConfigURL", url);
-                        rsg.Close();
+                        try
+                        {
+                            RegistryKey reg = Registry.Users.OpenSubKey($"{item}\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+                            reg.SetValue("AutoConfigURL", url);
+                            reg.Close();
+                        }
+                        catch (Exception)
+                        {
+                        }
                     }
                     FlushOs();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Logger.Instance.Error(ex);
             }
         }
         private static void WindowsClear()
@@ -38,19 +43,25 @@ namespace common.libs
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    string CurrentUserSID = string.Empty;
-                    if (GetCurrentUserSID(ref CurrentUserSID))
+                    string[] names = GetWindowsCurrentIds();
+                    foreach (var item in names)
                     {
-                        RegistryKey rsg = Registry.Users.OpenSubKey($"{CurrentUserSID}\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-                        rsg.DeleteValue("AutoConfigURL");
-                        rsg.Close();
+                        try
+                        {
+                            RegistryKey reg = Registry.Users.OpenSubKey($"{item}\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+                            reg.DeleteValue("AutoConfigURL");
+                            reg.Close();
+                        }
+                        catch (Exception)
+                        {
+                        }
                     }
+
                     FlushOs();
                 }
             }
             catch (Exception)
             {
-
             }
         }
 
@@ -127,6 +138,14 @@ namespace common.libs
 
         #region windows
 
+        private static string[] GetWindowsCurrentIds()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return Registry.Users.GetSubKeyNames().Where(c => c.Length > 10 && c.Contains("Classes") == false).ToArray();
+            }
+            return Array.Empty<string>();
+        }
         [DllImport("wininet.dll")]
         static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int dwBufferLength);
         const int INTERNET_OPTION_SETTINGS_CHANGED = 39;
@@ -137,11 +156,41 @@ namespace common.libs
             InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
         }
 
+        /*
+        private static string[] GetWindowsCurrentIds()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return Registry.Users.GetSubKeyNames();
+            }
+            return Array.Empty<string>();
+        }
+        private static RegistryKey OpenWindowsRegistryKey1()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                string CurrentUserSID = string.Empty;
+                if (GetCurrentUserSID(ref CurrentUserSID))
+                {
+                    return Registry.Users.OpenSubKey($"{CurrentUserSID}\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+                }
+            }
+            return null;
+        }
+        private static RegistryKey OpenWindowsRegistryKey2()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+            }
+            return null;
+        }
         public static bool GetCurrentUserToken(ref IntPtr hCurrentUserToken)
         {
             uint dwSessionId = WTSGetActiveConsoleSessionId();
-            if (!WTSQueryUserToken(dwSessionId, ref hCurrentUserToken))
+            if (WTSQueryUserToken(dwSessionId, ref hCurrentUserToken) == false)
             {
+                Logger.Instance.Error($"查询用户token失败: last error {GetLastError()}");
                 return false;
             }
             return true;
@@ -153,8 +202,9 @@ namespace common.libs
                 IntPtr hUserToken = IntPtr.Zero;
                 if (GetCurrentUserToken(ref hUserToken))
                 {
-                    if (!ImpersonateLoggedOnUser(hUserToken))//Impersonate Current User logon
+                    if (ImpersonateLoggedOnUser(hUserToken) == false)//Impersonate Current User logon
                     {
+                        Logger.Instance.Error($"系统用户登录失败");
                         return false;
                     }
                     CloseHandle(hUserToken);
@@ -162,7 +212,7 @@ namespace common.libs
                     WindowsIdentity windowsIdentity = WindowsIdentity.GetCurrent();
                     CurrentUserSID = windowsIdentity.User.ToString();
 
-                    if (!RevertToSelf())
+                    if (RevertToSelf() == false)
                     {
                     }
                     return true;
@@ -170,7 +220,7 @@ namespace common.libs
             }
             return false;
         }
-        
+
 
         [DllImport("Advapi32.dll", EntryPoint = "ImpersonateLoggedOnUser", SetLastError = true)]
         private static extern bool ImpersonateLoggedOnUser(IntPtr hToken);
@@ -186,6 +236,10 @@ namespace common.libs
 
         [DllImport("Wtsapi32.dll", EntryPoint = "WTSQueryUserToken", SetLastError = true)]
         private static extern bool WTSQueryUserToken(uint SessionId, ref IntPtr hToken);
+
+        [DllImport("kernel32.dll")]
+        static extern uint GetLastError();
+        */
         #endregion
     }
 }
