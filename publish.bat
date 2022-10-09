@@ -16,7 +16,7 @@ rem dotnet publish ./client/client.service.tray -c release -f net6.0-windows -o 
 rem 客户端和服务端
 for %%f in (client,server) do (
 	for %%r in (win-x64,win-arm64,linux-x64,linux-arm64,osx-x64,osx-arm64) do (
-		dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/%%r-single/%%f	-r %%r	--self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true 
+		dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/%%r-single/%%f  -r %%r  --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true -p:UseNativeHttpHandler=true -p:MetadataUpdaterSupport=false -p:InvariantGlobalization=true -p:HttpActivityPropagationSupport=false -p:EventSourceSupport=false -p:EnableUnsafeUTF7Encoding=false -p:EnableUnsafeBinaryFormatterSerialization=false -p:DebuggerSupport=false -p:AutoreleasePoolSupport=false -p:TrimMode=link
 	)
 	dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/any/%%f 
 )

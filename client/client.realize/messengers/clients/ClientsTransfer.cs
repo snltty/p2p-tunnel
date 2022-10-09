@@ -160,7 +160,7 @@ namespace client.realize.messengers.clients
             }
             Task.Run(async () =>
             {
-                bool anyFail = false, anySuccess = false;
+                bool allSuccess = false, anySuccess = false;
                 if (config.Client.UseUdp && info.Udp)
                 {
                     if (info.UdpConnecting == false && info.UdpConnected == false)
@@ -170,12 +170,12 @@ namespace client.realize.messengers.clients
                         {
                             udp = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
                         }
-                        anyFail &= udp;
+                        allSuccess &= udp;
                         anySuccess |= udp;
                     }
                     else
                     {
-                        anyFail &= info.UdpConnected;
+                        allSuccess &= info.UdpConnected;
                         anySuccess |= info.UdpConnected;
                     }
                 }
@@ -188,24 +188,24 @@ namespace client.realize.messengers.clients
                         {
                             tcp = await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
                         }
-                        anyFail &= tcp;
+                        allSuccess &= tcp;
                         anySuccess |= tcp;
                     }
                     else
                     {
-                        anyFail &= info.TcpConnected;
+                        allSuccess &= info.TcpConnected;
                         anySuccess |= info.TcpConnected;
                     }
                 }
 
                 //有未成功的，并且尝试次数没达到限制，就通知对方反向连接
-                if (anyFail == false && tryreverse < TryReverseMaxValue)
+                if (allSuccess == false && tryreverse < TryReverseMaxValue)
                 {
                     ConnectReverse(info.Id, tryreverse);
                     return;
                 }
                 //一个都没成功的，才中继，任一成功则不中继
-                if (anySuccess == false)
+                else if (anySuccess == false)
                 {
                     Relay(info, ServerType.UDP, true);
                     Relay(info, ServerType.TCP, true);
@@ -300,7 +300,6 @@ namespace client.realize.messengers.clients
                 clientInfoCaching.RemoveTunnelPort((ulong)TunnelDefaults.TCP);
             }
         }
-
 
         private void OnServerSendClients(ClientsInfo clients)
         {

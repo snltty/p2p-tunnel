@@ -4,7 +4,7 @@ SET target=%~dp0
 SET image=%1
 if "%image%"=="" (SET image="snltty/p2p-tunnel-client")
 
-dotnet publish ./client/client.service -c release -f net6.0 -o ./public/publish/linux-alpine-x64/client -r alpine-x64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true
+dotnet publish ./client/client.service -c release -f net6.0 -o ./public/publish/linux-alpine-x64/client -r alpine-x64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:UseNativeHttpHandler=true -p:MetadataUpdaterSupport=false -p:InvariantGlobalization=true -p:HttpActivityPropagationSupport=false -p:EventSourceSupport=false -p:EnableUnsafeUTF7Encoding=false -p:EnableUnsafeBinaryFormatterSerialization=false -p:DebuggerSupport=false -p:AutoreleasePoolSupport=false -p:TrimMode=link
 
 echo F|xcopy "client\\client.service\\Dockerfile" "public\\publish\\linux-alpine-x64\\client\\Dockerfile"  /s /f /h /y
 echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-linux" "public\\publish\\linux-alpine-x64\\client\\"  /f /h /y
