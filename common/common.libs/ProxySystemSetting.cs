@@ -11,6 +11,12 @@ namespace common.libs
     /// </summary>
     public class ProxySystemSetting
     {
+        /// <summary>
+        /// windows 下， “应用级”也就是直接运行exe时，可以直接修改当前用户的注册表
+        /// 而作为 windows service时，无法修改，需要模拟登录当前用户，才能修改，而模拟登录还需要SE_TCB_NAME权限，并不能保证一定修改成功，这就增加了复杂性。
+        /// 所以，直接获取 HKEY_USERS 下的所有key，直接修改所有用户的注册表，反而更简单
+        /// </summary>
+        /// <param name="url"></param>
         private static void WindowsSet(string url)
         {
             try

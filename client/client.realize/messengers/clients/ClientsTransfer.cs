@@ -11,6 +11,8 @@ using common.server.servers.rudp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.clients
@@ -107,8 +109,8 @@ namespace client.realize.messengers.clients
             });
 
             //调试注释
-            tcpServer.OnDisconnect.Sub((connection) => clientInfoCaching.Offline(connection.ConnectId, connection.ServerType));
-            udpServer.OnDisconnect.Sub((connection) => clientInfoCaching.Offline(connection.ConnectId, connection.ServerType));
+            tcpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.TcpConnection));
+            udpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.UdpConnection));
 
             //中继连线
             punchHoleMessengerSender.OnRelay.Sub((param) =>
@@ -130,6 +132,15 @@ namespace client.realize.messengers.clients
             registerState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();
         }
 
+        private void Disconnect(IConnection connection, IConnection regConnection)
+        {
+            if (ReferenceEquals(regConnection, connection))
+            {
+                return;
+            }
+            clientInfoCaching.Offline(connection.ConnectId, connection.ServerType);
+        }
+
         public void ConnectClient(ulong id)
         {
             if (clientInfoCaching.Get(id, out ClientInfo client))
@@ -149,29 +160,55 @@ namespace client.realize.messengers.clients
             }
             Task.Run(async () =>
             {
-                bool udp = false, tcp = false;
-                if (config.Client.UseUdp && info.Udp && info.UdpConnecting == false && info.UdpConnected == false)
+                bool anyFail = false, anySuccess = false;
+                if (config.Client.UseUdp && info.Udp)
                 {
-                    //默认通道连一下，不成功的话，开一个新通道再次尝试连接
-                    udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort, false).ConfigureAwait(false);
-                    if (udp == false)
+                    if (info.UdpConnecting == false && info.UdpConnected == false)
                     {
-                        udp = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort, tryreverse >= TryReverseMaxValue).ConfigureAwait(false);
+                        bool udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+                        if (udp == false)
+                        {
+                            udp = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+                        }
+                        anyFail &= udp;
+                        anySuccess |= udp;
+                    }
+                    else
+                    {
+                        anyFail &= info.UdpConnected;
+                        anySuccess |= info.UdpConnected;
                     }
                 }
-                if (config.Client.UseTcp && info.Tcp && info.TcpConnecting == false && info.TcpConnected == false)
+                if (config.Client.UseTcp && info.Tcp)
                 {
-                    tcp = await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort, false).ConfigureAwait(false);
-                    if (tcp == false)
+                    if (info.TcpConnecting == false && info.TcpConnected == false)
                     {
-                        tcp = await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort, tryreverse >= TryReverseMaxValue).ConfigureAwait(false);
+                        bool tcp = await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
+                        if (tcp == false)
+                        {
+                            tcp = await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
+                        }
+                        anyFail &= tcp;
+                        anySuccess |= tcp;
+                    }
+                    else
+                    {
+                        anyFail &= info.TcpConnected;
+                        anySuccess |= info.TcpConnected;
                     }
                 }
 
                 //有未成功的，并且尝试次数没达到限制，就通知对方反向连接
-                if ((udp == false || tcp == false) && tryreverse < TryReverseMaxValue)
+                if (anyFail == false && tryreverse < TryReverseMaxValue)
                 {
                     ConnectReverse(info.Id, tryreverse);
+                    return;
+                }
+                //一个都没成功的，才中继，任一成功则不中继
+                if (anySuccess == false)
+                {
+                    Relay(info, ServerType.UDP, true);
+                    Relay(info, ServerType.TCP, true);
                 }
             });
         }
@@ -204,8 +241,10 @@ namespace client.realize.messengers.clients
             punchHoleTcp.SendStep2Stop(id);
         }
 
-        private async Task<bool> ConnectUdp(ClientInfo info, ulong tunnelName, int localPort, bool lastTry)
+        private async Task<bool> ConnectUdp(ClientInfo info, ulong tunnelName, int localPort)
         {
+            if (info.UdpConnected) return info.UdpConnected;
+
             clientInfoCaching.Connecting(info.Id, true, ServerType.UDP);
             var result = await punchHoleUdp.Send(new ConnectParams
             {
@@ -218,22 +257,16 @@ namespace client.realize.messengers.clients
             {
                 return result.State;
             }
-            if (registerState.RemoteInfo.Relay && lastTry)
-            {
-                Relay(info, ServerType.UDP, true);
-                return true;
-            }
-            else
-            {
-                Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
-                clientInfoCaching.Offline(info.Id, ServerType.UDP);
-            }
+
+            Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
+            clientInfoCaching.Offline(info.Id, ServerType.UDP);
             return false;
         }
-        private async Task<bool> ConnectTcp(ClientInfo info, ulong tunnelName, int localPort, bool lastTry)
+        private async Task<bool> ConnectTcp(ClientInfo info, ulong tunnelName, int localPort)
         {
-            clientInfoCaching.Connecting(info.Id, true, ServerType.TCP);
+            if (info.TcpConnected) return info.TcpConnected;
 
+            clientInfoCaching.Connecting(info.Id, true, ServerType.TCP);
             var result = await punchHoleTcp.Send(new ConnectParams
             {
                 Id = info.Id,
@@ -245,16 +278,8 @@ namespace client.realize.messengers.clients
             {
                 return result.State;
             }
-            if (registerState.RemoteInfo.Relay && lastTry)
-            {
-                Relay(info, ServerType.TCP, true);
-                return true;
-            }
-            else
-            {
-                Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
-                clientInfoCaching.Offline(info.Id, ServerType.TCP);
-            }
+            Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
+            clientInfoCaching.Offline(info.Id, ServerType.TCP);
             return false;
         }
 
@@ -340,21 +365,24 @@ namespace client.realize.messengers.clients
         }
         private void Relay(ClientInfo client, ServerType serverType, bool notify)
         {
-            IConnection connection = serverType switch
+            if (registerState.RemoteInfo.Relay)
             {
-                ServerType.TCP => registerState.TcpConnection?.Clone(),
-                ServerType.UDP => registerState.UdpConnection?.Clone(),
-                _ => throw new NotImplementedException(),
-            };
-            if (connection != null)
-            {
-                connection.Relay = registerState.RemoteInfo.Relay;
-                clientInfoCaching.Online(client.Id, connection, ClientConnectTypes.Relay);
-            }
+                IConnection connection = serverType switch
+                {
+                    ServerType.TCP => registerState.TcpConnection?.Clone(),
+                    ServerType.UDP => registerState.UdpConnection?.Clone(),
+                    _ => throw new NotImplementedException(),
+                };
+                if (connection != null)
+                {
+                    connection.Relay = registerState.RemoteInfo.Relay;
+                    clientInfoCaching.Online(client.Id, connection, ClientConnectTypes.Relay);
+                }
 
-            if (notify)
-            {
-                _ = punchHoleMessengerSender.SendRelay(client.Id, serverType);
+                if (notify)
+                {
+                    _ = punchHoleMessengerSender.SendRelay(client.Id, serverType);
+                }
             }
         }
     }
