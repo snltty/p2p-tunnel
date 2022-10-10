@@ -2,10 +2,10 @@
  * @Author: snltty
  * @Date: 2021-08-22 14:09:03
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-27 19:31:32
+ * @LastEditTime: 2022-10-10 11:55:08
  * @version: v1.0.0
  * @Descripttion: 功能说明
- * @FilePath: \undefinedd:\Desktop\p2p-tunnel\README.md
+ * @FilePath: \qbcode.vclass.client.vued:\desktop\p2p-tunnel\README.md
 -->
 <div align="center">
 
@@ -43,7 +43,10 @@
 
 ## 其它内容
 - [x] .NET6 跨平台，小尺寸，小内存
-- [x] 内网穿透 访问内网web，内网桌面，及其它TCP上层协议服务<br>windows<-->windows 可使用mstsc，其它可使用 TightVNC
+- [x] 内网穿透 访问内网web，内网桌面，及其它TCP上层协议服务
+    1. 远程桌面
+    2. windows，android，ios，macOS，web <a href="https://learn.microsoft.com/zh-cn/windows-server/remote/remote-desktop-services/clients/remote-desktop-clients" target="_blank">微软rdp全家桶</a>
+    3. linux <a href="https://github.com/neutrinolabs/xrdp" target="_blank">xrdp</a> 或者 <a href="https://github.com/FreeRDP/FreeRDP" target="_blank">FreeRDP</a>
 - [x] p2p 打洞、tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
 - [x] 简单易用的客户端web管理页面
 - [x] android app
