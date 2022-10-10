@@ -119,8 +119,7 @@ namespace client.realize.messengers.register
                         }
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
-                        registerState.LocalInfo.UdpPort = NetworkHelper.GetRandomPort();
-                        registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<int> { registerState.LocalInfo.UdpPort });
+                        registerState.LocalInfo.UdpPort = registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort();
                         registerState.LocalInfo.Mac = string.Empty;
                         registerState.OnRegisterBind.Push(true);
 
@@ -198,7 +197,7 @@ namespace client.realize.messengers.register
             //TCP 连接服务器
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.TcpPort);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000, interval: Math.Max(config.Client.TimeoutDelay / 5 / 1000, 5));
+            tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             registerState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;
