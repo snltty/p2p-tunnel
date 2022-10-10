@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server;
 using common.server.model;
 using System;
@@ -39,6 +40,24 @@ namespace client.service.vea
                 }
             }
             return null;
+        }
+
+        public async Task<bool> Reset(IConnection connection, ulong id)
+        {
+            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            {
+                Connection = connection,
+                Path = "vea/reset",
+                Memory = id.ToBytes(),
+                Timeout = 15000
+            }).ConfigureAwait(false);
+
+            if (resp.Code == MessageResponeCodes.OK)
+            {
+                return resp.Data.Span.SequenceEqual(Helper.TrueArray);
+            }
+            return false;
+
         }
     }
 }

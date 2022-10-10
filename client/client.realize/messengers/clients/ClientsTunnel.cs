@@ -94,9 +94,12 @@ namespace client.realize.messengers.clients
         {
             TcpServer tempTcpServer = new TcpServer();
             tempTcpServer.SetBufferSize(config.Client.TcpBufferSize);
-            tempTcpServer.OnPacket = tcpServer.InputData;
-            tempTcpServer.OnDisconnect.Sub((IConnection connection) => tempTcpServer.Disponse());
-            tempTcpServer.Start(localport, config.Client.BindIp);
+            tempTcpServer.OnConnected1 = (socket) =>
+            {
+                tcpServer.BindReceive(socket, config.Client.TcpBufferSize);
+                tempTcpServer.Disponse();
+            };
+            tempTcpServer.Start1(localport, config.Client.BindIp);
 
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, localport);
 

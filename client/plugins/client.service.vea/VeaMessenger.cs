@@ -1,5 +1,5 @@
-﻿using common.server;
-using System;
+﻿using common.libs;
+using common.server;
 
 namespace client.service.vea
 {
@@ -17,6 +17,12 @@ namespace client.service.vea
         {
             veaTransfer.OnNotify(connection);
             return new IPAddressInfo { IP = config.IP, LanIP = config.LanIP }.ToBytes();
+        }
+
+        public byte[] Reset(IConnection connection)
+        {
+            veaTransfer.Run();
+            return Helper.TrueArray;
         }
     }
 }

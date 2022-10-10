@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-21 13:58:43
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-01 23:17:54
+ * @LastEditTime: 2022-10-10 22:15:53
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\apis\vea.js
@@ -17,4 +17,7 @@ export const setConfig = (data) => {
 }
 export const getUpdate = () => {
     return sendWebsocketMsg(`vea/update`);
+}
+export const reset = (data) => {
+    return sendWebsocketMsg(`vea/reset`, data);
 }

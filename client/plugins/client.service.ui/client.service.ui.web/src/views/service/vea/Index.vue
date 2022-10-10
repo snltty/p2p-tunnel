@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-02 23:52:06
+ * @LastEditTime: 2022-10-10 22:23:43
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -125,6 +125,11 @@
                             <p style="color:#999">{{scope.row.veaIp.LanIP}}</p>
                         </template>
                     </el-table-column>
+                    <el-table-column prop="todo" label="操作">
+                        <template #default="scope">
+                            <el-button size="small" :loading="state.loading" @click="handleResetVea(scope.row)" class="m-r-1">重装其网卡</el-button>
+                        </template>
+                    </el-table-column>
                 </el-table>
             </div>
         </div>
@@ -133,7 +138,7 @@
 
 <script>
 import { computed, reactive, ref } from '@vue/reactivity'
-import { getConfig, setConfig, getUpdate } from '../../../apis/vea'
+import { getConfig, setConfig, getUpdate, reset } from '../../../apis/vea'
 import { onMounted, onUnmounted } from '@vue/runtime-core'
 import { ElMessage } from 'element-plus'
 import { injectClients } from '../../../states/clients'
@@ -246,7 +251,7 @@ export default {
                 json.SocksPort = Number(json.SocksPort);
                 json.TunnelType = Number(json.TunnelType);
                 json.BufferSize = Number(json.BufferSize);
-                setConfig(json).then(() => {
+                setConfig(json).then((res) => {
                     state.loading = false;
                     if (json.IsPac) {
                         savePac();
@@ -257,9 +262,23 @@ export default {
                 });
             })
         }
+        const handleResetVea = (row) => {
+            state.loading = true;
+            reset({ id: row.Id }).then((res) => {
+                state.loading = false;
+                if (res) {
+                    ElMessage.success('成功');
+                } else {
+                    ElMessage.error('失败');
+                }
+            }).catch(() => {
+                state.loading = false;
+                ElMessage.error('失败');
+            });
+        }
 
         return {
-            targets, shareData, registerState, state, showClients, formDom, handleSubmit
+            targets, shareData, registerState, state, showClients, formDom, handleSubmit, handleResetVea
         }
     }
 }
