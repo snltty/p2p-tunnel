@@ -165,10 +165,10 @@ namespace client.realize.messengers.clients
                 {
                     if (info.UdpConnecting == false && info.UdpConnected == false)
                     {
-                        bool udp = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
-                        if (udp == false)
+                        await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+                        if (info.UdpConnected == false)
                         {
-                            udp = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+                            await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
                         }
                     }
                     allSuccess &= info.UdpConnected;
@@ -178,10 +178,10 @@ namespace client.realize.messengers.clients
                 {
                     if (info.TcpConnecting == false && info.TcpConnected == false)
                     {
-                        bool tcp = await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
-                        if (tcp == false)
+                        await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
+                        if (info.TcpConnected == false)
                         {
-                            tcp = await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
+                            await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
                         }
                     }
                     allSuccess &= info.TcpConnected;
