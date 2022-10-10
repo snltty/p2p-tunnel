@@ -161,7 +161,7 @@ namespace client.realize.messengers.clients
             Task.Run(async () =>
             {
                 bool allSuccess = false, anySuccess = false;
-                if (config.Client.UseUdp && info.Udp)
+                if (config.Client.UseUdp && info.UseUdp)
                 {
                     if (info.UdpConnecting == false && info.UdpConnected == false)
                     {
@@ -170,16 +170,11 @@ namespace client.realize.messengers.clients
                         {
                             udp = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
                         }
-                        allSuccess &= udp;
-                        anySuccess |= udp;
                     }
-                    else
-                    {
-                        allSuccess &= info.UdpConnected;
-                        anySuccess |= info.UdpConnected;
-                    }
+                    allSuccess &= info.UdpConnected;
+                    anySuccess |= info.UdpConnected;
                 }
-                if (config.Client.UseTcp && info.Tcp)
+                if (config.Client.UseTcp && info.UseTcp)
                 {
                     if (info.TcpConnecting == false && info.TcpConnected == false)
                     {
@@ -188,21 +183,15 @@ namespace client.realize.messengers.clients
                         {
                             tcp = await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
                         }
-                        allSuccess &= tcp;
-                        anySuccess |= tcp;
                     }
-                    else
-                    {
-                        allSuccess &= info.TcpConnected;
-                        anySuccess |= info.TcpConnected;
-                    }
+                    allSuccess &= info.TcpConnected;
+                    anySuccess |= info.TcpConnected;
                 }
 
                 //有未成功的，并且尝试次数没达到限制，就通知对方反向连接
                 if (allSuccess == false && tryreverse < TryReverseMaxValue)
                 {
                     ConnectReverse(info.Id, tryreverse);
-                    return;
                 }
                 //一个都没成功的，才中继，任一成功则不中继
                 else if (anySuccess == false)
@@ -246,7 +235,7 @@ namespace client.realize.messengers.clients
             if (info.UdpConnected) return info.UdpConnected;
 
             clientInfoCaching.Connecting(info.Id, true, ServerType.UDP);
-            var result = await punchHoleUdp.Send(new ConnectParams
+            ConnectResultModel result = await punchHoleUdp.Send(new ConnectParams
             {
                 Id = info.Id,
                 TunnelName = tunnelName,
@@ -257,7 +246,6 @@ namespace client.realize.messengers.clients
             {
                 return result.State;
             }
-
             Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
             clientInfoCaching.Offline(info.Id, ServerType.UDP);
             return false;
@@ -329,8 +317,8 @@ namespace client.realize.messengers.clients
                         Id = item.Id,
                         Name = item.Name,
                         Mac = item.Mac,
-                        Tcp = item.Tcp,
-                        Udp = item.Udp,
+                        UseTcp = item.Tcp,
+                        UseUdp = item.Udp,
                         AutoPunchHole = item.AutoPunchHole,
                     };
                     clientInfoCaching.Add(client);
