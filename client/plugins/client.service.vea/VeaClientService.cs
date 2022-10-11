@@ -1,8 +1,10 @@
-﻿using client.service.ui.api.clientServer;
+﻿using client.messengers.clients;
+using client.service.ui.api.clientServer;
 using common.libs.extends;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace client.service.vea
 {
@@ -10,13 +12,17 @@ namespace client.service.vea
     {
         private readonly Config config;
         private readonly VeaTransfer virtualEthernetAdapterTransfer;
-        private IVeaSocks5ServerHandler veaSocks5ServerHandler;
+        private readonly IVeaSocks5ServerHandler veaSocks5ServerHandler;
+        private readonly VeaMessengerSender veaMessengerSender;
+        private readonly IClientInfoCaching clientInfoCaching;
 
-        public VeaClientService(Config config, VeaTransfer virtualEthernetAdapterTransfer, IVeaSocks5ServerHandler veaSocks5ServerHandler)
+        public VeaClientService(Config config, VeaTransfer virtualEthernetAdapterTransfer, IVeaSocks5ServerHandler veaSocks5ServerHandler, VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
         {
             this.config = config;
             this.virtualEthernetAdapterTransfer = virtualEthernetAdapterTransfer;
             this.veaSocks5ServerHandler = veaSocks5ServerHandler;
+            this.veaMessengerSender = veaMessengerSender;
+            this.clientInfoCaching = clientInfoCaching;
         }
 
         public Config Get(ClientServiceParamsInfo arg)
@@ -55,5 +61,20 @@ namespace client.service.vea
         {
             return virtualEthernetAdapterTransfer.IPList.ToDictionary(c => c.Value.Client.Id, d => d.Value);
         }
+
+        public async Task<bool> Reset(ClientServiceParamsInfo arg)
+        {
+            var model = arg.Content.DeJson<ResetModel>();
+            if (clientInfoCaching.Get(model.Id, out ClientInfo client))
+            {
+                await veaMessengerSender.Reset(client.OnlineConnection, model.Id);
+            }
+            return true;
+        }
+    }
+
+    class ResetModel
+    {
+        public ulong Id { get; set; }
     }
 }

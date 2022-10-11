@@ -241,7 +241,7 @@ namespace client.service.vea
                 $"ip link set dev {veaName} up"
             });
             interfaceLinux = GetLinuxInterfaceNum();
-            Tun2SocksProcess = Command.Execute("./tun2socks-darwin", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceLinux} -loglevel silent");
+            Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceLinux} -loglevel silent");
         }
         private void RunOsx()
         {

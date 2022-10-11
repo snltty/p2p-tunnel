@@ -15,16 +15,24 @@ namespace common.server.servers.iocp
         private int port = 0;
         private Socket socket;
         private CancellationTokenSource cancellationTokenSource;
+        bool isReceive = true;
 
         public Func<IConnection, Task> OnPacket { get; set; } = async (connection) => { await Task.CompletedTask; };
         public SimpleSubPushHandler<IConnection> OnDisconnect { get; private set; } = new SimpleSubPushHandler<IConnection>();
         public Action<IConnection> OnConnected { get; set; } = (connection) => { };
+        public Action<Socket> OnConnected1 { get; set; } = (socket) => { };
 
         public TcpServer() { }
 
         public void SetBufferSize(int bufferSize = 8 * 1024)
         {
             this.bufferSize = bufferSize;
+        }
+
+        public void Start1(int port, IPAddress ip )
+        {
+            isReceive = false;
+            Start(port, ip);
         }
         public void Start(int port, IPAddress ip)
         {
@@ -94,11 +102,21 @@ namespace common.server.servers.iocp
         }
         private void ProcessAccept(SocketAsyncEventArgs e)
         {
-            if (e.AcceptSocket != null)
+            if (isReceive)
             {
-                BindReceive(e.AcceptSocket, bufferSize);
+                if (e.AcceptSocket != null)
+                {
+                    BindReceive(e.AcceptSocket, bufferSize);
+                }
+                StartAccept(e);
             }
-            StartAccept(e);
+            else
+            {
+                if(OnConnected1 != null)
+                {
+                    OnConnected1(e.AcceptSocket);
+                }
+            }
         }
 
         public IConnection BindReceive(Socket socket, int bufferSize = 8 * 1024)
@@ -284,6 +302,7 @@ namespace common.server.servers.iocp
             OnPacket = null;
             OnDisconnect = null;
             OnConnected = null;
+            OnConnected1 = null;
         }
 
         public async Task InputData(IConnection connection)
