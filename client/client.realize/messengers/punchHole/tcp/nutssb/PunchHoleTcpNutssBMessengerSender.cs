@@ -139,7 +139,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 bool success = false;
                 int interval = 0, port = 0, times = cache.TryTimes;
                 List<Tuple<IPAddress, int>> ips = new List<Tuple<IPAddress, int>>();
-                if (UseLocalPort && registerState.RemoteInfo.Ip.ToString() == arg.Data.Ip.ToString())
+                if (UseLocalPort && registerState.RemoteInfo.Ip.Equals(arg.Data.Ip))
                 {
                     times += 2;
                     ips = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new Tuple<IPAddress, int>(c, arg.Data.LocalPort)).ToList();

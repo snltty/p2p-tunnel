@@ -56,7 +56,7 @@ namespace client.realize.messengers.punchHole.udp
                 param.LocalPort = localPort;
             }
 
-            var timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 500);
+            var timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 2000);
 
             TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
             connectCache.TryAdd(param.Id, new ConnectCacheModel
@@ -147,7 +147,7 @@ namespace client.realize.messengers.punchHole.udp
                 {
                     List<IPEndPoint> ips = new List<IPEndPoint>();
                     int times = cache.TryTimes;
-                    if (UseLocalPort && registerState.RemoteInfo.Ip.ToString() == arg.Data.Ip.ToString())
+                    if (UseLocalPort && registerState.RemoteInfo.Ip.Equals(arg.Data.Ip))
                     {
                         times += 2;
                         ips = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();

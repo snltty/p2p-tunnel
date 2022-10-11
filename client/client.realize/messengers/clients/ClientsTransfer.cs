@@ -78,7 +78,10 @@ namespace client.realize.messengers.clients
                 }
             });
 
-            punchHoleTcp.OnStep1Handler.Sub((e) => clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.TCP));
+            punchHoleTcp.OnStep1Handler.Sub((e) =>
+            {
+                clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.TCP);
+            });
             punchHoleTcp.OnStep2FailHandler.Sub((e) =>
             {
                 clientInfoCaching.Connecting(e.RawData.FromId, false, ServerType.TCP);
@@ -160,34 +163,43 @@ namespace client.realize.messengers.clients
             }
             Task.Run(async () =>
             {
-                bool allSuccess = false, anySuccess = false;
+                bool allSuccess = false, anySuccess = false, res = false;
                 if (config.Client.UseUdp && info.UseUdp)
                 {
                     if (info.UdpConnecting == false && info.UdpConnected == false)
                     {
-                        await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
-                        if (info.UdpConnected == false)
+                        res = await ConnectUdp(info, (ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+
+                        if (res == false)
                         {
-                            await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
+                            res = await ConnectUdp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.UdpPort).ConfigureAwait(false);
                         }
                     }
-                    allSuccess &= info.UdpConnected;
-                    anySuccess |= info.UdpConnected;
+                    else
+                    {
+                        res = info.UdpConnected;
+                    }
+                    allSuccess &= res;
+                    anySuccess |= res;
                 }
+
                 if (config.Client.UseTcp && info.UseTcp)
                 {
                     if (info.TcpConnecting == false && info.TcpConnected == false)
                     {
-                        await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
-                        if (info.TcpConnected == false)
+                        res = await ConnectTcp(info, (ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
+                        if (res == false)
                         {
-                            await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
+                            res = await ConnectTcp(info, (ulong)TunnelDefaults.MIN, registerState.LocalInfo.TcpPort).ConfigureAwait(false);
                         }
                     }
-                    allSuccess &= info.TcpConnected;
-                    anySuccess |= info.TcpConnected;
+                    else
+                    {
+                        res = info.TcpConnected;
+                    }
+                    allSuccess &= res;
+                    anySuccess |= res;
                 }
-
                 //有未成功的，并且尝试次数没达到限制，就通知对方反向连接
                 if (allSuccess == false && tryreverse < TryReverseMaxValue)
                 {
