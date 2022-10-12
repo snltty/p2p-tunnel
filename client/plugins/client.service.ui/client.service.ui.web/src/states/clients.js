@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-21 14:57:33
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-31 23:08:18
+ * @LastEditTime: 2022-10-12 16:44:01
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\clients.js
@@ -35,11 +35,11 @@ export const provideClients = () => {
                     c.tcpConnectTypeStyle = connectTypeColors[c.tcpConnectType];
 
                     c.connectDisabled = false;
-                    if (c.Udp || c.Tcp) {
+                    if (c.UseUdp || c.UseTcp) {
                         c.connectDisabled = c.UdpConnected && c.TcpConnected;
-                    } else if (c.Udp) {
+                    } else if (c.UseUdp) {
                         c.connectDisabled = c.UdpConnected;
-                    } else if (c.Tcp) {
+                    } else if (c.UseTcp) {
                         c.connectDisabled = c.TcpConnected;
                     }
 
