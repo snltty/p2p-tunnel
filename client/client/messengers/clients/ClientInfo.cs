@@ -24,11 +24,14 @@ namespace client.messengers.clients
         public bool UseUdp { get; set; } = false;
         public bool UseTcp { get; set; } = false;
         public bool AutoPunchHole { get; set; } = false;
-        
+
+
 
         public ClientConnectTypes UdpConnectType { get; set; } = ClientConnectTypes.P2P;
         public ClientConnectTypes TcpConnectType { get; set; } = ClientConnectTypes.P2P;
 
+        [JsonIgnore]
+        public byte TryReverseValue { get; set; } = 1;
         [JsonIgnore]
         public IConnection TcpConnection { get; set; } = null;
         [JsonIgnore]

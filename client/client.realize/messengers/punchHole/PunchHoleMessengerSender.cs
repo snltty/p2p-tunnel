@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using client.messengers.clients;
 
 namespace client.realize.messengers.punchHole
 {
@@ -60,7 +61,7 @@ namespace client.realize.messengers.punchHole
                 {
                     Data = msg.ToBytes(),
                     PunchForwardType = msg.ForwardType,
-                    FromId = 0,
+                    FromId = arg.Connection.ConnectId,
                     PunchStep = msg.Step,
                     PunchType = (byte)msg.PunchType,
                     ToId = arg.ToId,
@@ -81,7 +82,7 @@ namespace client.realize.messengers.punchHole
                 {
                     Data = msg.ToBytes(),
                     PunchForwardType = msg.ForwardType,
-                    FromId = 0,
+                    FromId = arg.Connection.ConnectId,
                     PunchStep = msg.Step,
                     PunchType = (byte)msg.PunchType,
                     ToId = arg.ToId,
@@ -99,13 +100,14 @@ namespace client.realize.messengers.punchHole
         /// <param name="toid"></param>
         /// <param name="tryreverse"></param>
         /// <returns></returns>
-        public async Task SendReverse(ulong toid, byte tryreverse = 0)
+        public async Task SendReverse(ClientInfo info)
         {
+            byte times = info.TryReverseValue;
             await Send(new SendPunchHoleArg<PunchHoleReverseInfo>
             {
                 Connection = registerState.OnlineConnection,
-                ToId = toid,
-                Data = new PunchHoleReverseInfo { TryReverse = tryreverse }
+                ToId = info.Id,
+                Data = new PunchHoleReverseInfo { TryReverse = times }
             }).ConfigureAwait(false);
         }
 

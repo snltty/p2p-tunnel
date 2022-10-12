@@ -28,14 +28,13 @@ namespace common.server.servers.rudp
         {
             listener = new EventBasedNetListener();
             server = new NetManager(listener);
-            //server.NatPunchEnabled = true;
+            server.ReconnectDelay = Math.Max(timeout / 5, 5000);
             server.UnsyncedEvents = true;
             server.PingInterval = Math.Max(timeout / 5, 5000);
             server.DisconnectTimeout = timeout;
             server.MaxConnectAttempts = 10;
             server.AutoRecycle = true;
             server.ReuseAddress = true;
-            //server.ChannelsCount = 10;
             server.Start(port);
 
             listener.ConnectionRequestEvent += request =>
