@@ -363,14 +363,17 @@ namespace common.socks5
         private void CloseClientSocket(SocketAsyncEventArgs e)
         {
             AsyncServerUserToken token = e.UserToken as AsyncServerUserToken;
-            if (!token.IsClosed)
+            if (token.IsClosed == false)
             {
                 IConnection connection = token.Connection.FromConnection;
                 token.Clear();
-                connections.TryRemove(token.Key, out _);
+
                 e.Dispose();
 
-                maxNumberAcceptedClients.Release();
+                if (connections.TryRemove(token.Key, out _))
+                {
+                    maxNumberAcceptedClients.Release();
+                }
                 socks5MessengerSender.ResponseClose(token.Key.RequestId, connection);
             }
         }

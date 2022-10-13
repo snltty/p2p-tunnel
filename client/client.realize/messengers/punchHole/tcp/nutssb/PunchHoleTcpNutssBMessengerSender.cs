@@ -47,7 +47,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         private int RouteLevel => registerState.LocalInfo.RouteLevel + 2;
 #if DEBUG
-        private bool UseLocalPort = false;
+        private bool UseLocalPort = true;
 #else
         private bool UseLocalPort = true;
 #endif

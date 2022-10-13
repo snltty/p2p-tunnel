@@ -105,7 +105,7 @@ namespace common.tcpforward
             {
                 TargetSocket = connectToken.TargetSocket,
                 Key = connectToken.Key,
-                SendArg = connectToken.SendArg
+                SendArg = connectToken.SendArg,
             };
 
             try
@@ -118,8 +118,11 @@ namespace common.tcpforward
                         SocketFlags = SocketFlags.None,
 
                     };
+                    readEventArgs.Completed += IO_Completed;
                     connections.TryAdd(token.Key, token);
 
+                    token.PoolBuffer = ArrayPool<byte>.Shared.Rent(config.BufferSize);
+                    readEventArgs.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
 
                     if (token.SendArg.ForwardType == TcpForwardTypes.PROXY)
                     {
@@ -129,10 +132,8 @@ namespace common.tcpforward
                     {
                         token.TargetSocket.Send(token.SendArg.Buffer.Span, SocketFlags.None);
                     }
-
                     token.SendArg.Buffer = Helper.EmptyArray;
-                    token.PoolBuffer = ArrayPool<byte>.Shared.Rent(config.BufferSize);
-                    readEventArgs.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
+
                     if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
                     {
                         ProcessReceive(readEventArgs);
@@ -196,10 +197,12 @@ namespace common.tcpforward
 
         private void CloseClientSocket(ConnectUserToken token)
         {
-            maxNumberAcceptedClients.Release();
             Receive(token, Helper.EmptyArray, 0, 0);
             token.Clear();
-            connections.TryRemove(token.Key, out _);
+            if (connections.TryRemove(token.Key, out _))
+            {
+                maxNumberAcceptedClients.Release();
+            }
         }
 
         private void Receive(ConnectUserToken token, byte[] data)
@@ -213,7 +216,7 @@ namespace common.tcpforward
         private void Receive(TcpForwardInfo arg, byte[] data, int offset, int length)
         {
             arg.Buffer = data.AsMemory(offset, length);
-            _ = tcpForwardMessengerSender.SendResponse(arg);
+            tcpForwardMessengerSender.SendResponse(arg);
         }
 
     }

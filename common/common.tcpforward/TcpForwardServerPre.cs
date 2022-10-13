@@ -129,7 +129,8 @@ namespace common.tcpforward
                             IsForward = false,
                             RequestId = requestIdNs.Increment(),
                             AliveType = acceptToken.Request.AliveType,
-                            SourcePort = acceptToken.SourcePort
+                            SourcePort = acceptToken.SourcePort,
+
                         },
                         SourcePort = acceptToken.SourcePort
                     }
@@ -159,7 +160,10 @@ namespace common.tcpforward
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
                     ForwardAsyncUserToken token = (ForwardAsyncUserToken)e.UserToken;
-                    Receive(e, e.Buffer, e.Offset, e.BytesTransferred);
+                    token.Request.Buffer = e.Buffer.AsMemory(e.Offset, e.BytesTransferred);
+                    Receive(token);
+                    token.Request.Buffer = Helper.EmptyArray;
+
                     if (token.SourceSocket.Available > 0)
                     {
                         var arr = ArrayPool<byte>.Shared.Rent(token.SourceSocket.Available);
@@ -168,7 +172,9 @@ namespace common.tcpforward
                             int length = token.SourceSocket.Receive(arr);
                             if (length > 0)
                             {
-                                Receive(e, arr, 0, length);
+                                token.Request.Buffer = arr.AsMemory(e.Offset, e.BytesTransferred);
+                                Receive(token);
+                                token.Request.Buffer = Helper.EmptyArray;
                             }
                         }
                         ArrayPool<byte>.Shared.Return(arr);
@@ -211,13 +217,10 @@ namespace common.tcpforward
                 CloseClientSocket(e);
             }
         }
-        private void Receive(SocketAsyncEventArgs e, byte[] data, int offset, int length)
+        private void Receive(ForwardAsyncUserToken token)
         {
-            ForwardAsyncUserToken token = (ForwardAsyncUserToken)e.UserToken;
-            token.Request.Buffer = data.AsMemory(offset, length);
             OnRequest.Push(token.Request);
             token.Request.IsForward = true;
-            token.Request.Buffer = Helper.EmptyArray;
         }
 
         private void CloseClientSocket(SocketAsyncEventArgs e)

@@ -1,7 +1,7 @@
 ﻿{
   "PortWhiteList": [], //白名单，只允许此列表内的端口被访问
   "PortBlackList": [], //黑名单，此列表内的端口不可被访问
-  "NumConnections": 1000, //支持连接数
+  "NumConnections": 10000, //支持连接数
   "BufferSize": 8192, //每个请求的 buffer size
   //是否允许被连接（包括tcp转发和http1.1代理)
   "ConnectEnable": false, //是否开启tcp转发转发和http1.1代理

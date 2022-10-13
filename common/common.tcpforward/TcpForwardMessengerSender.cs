@@ -14,15 +14,15 @@ namespace common.tcpforward
         }
 
         public SimpleSubPushHandler<TcpForwardInfo> OnRequestHandler { get; } = new SimpleSubPushHandler<TcpForwardInfo>();
-        public async Task SendRequest(TcpForwardInfo arg)
+        public void SendRequest(TcpForwardInfo arg)
         {
-            var res = messengerSender.SendOnly(new MessageRequestWrap
+            var bytes = arg.ToBytes();
+            _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = "TcpForward/Request",
                 Connection = arg.Connection,
-                Memory = arg.ToBytes()
-            }).ConfigureAwait(false);
-            await res;
+                Memory = bytes
+            });
         }
         public void OnRequest(TcpForwardInfo data)
         {
@@ -30,16 +30,15 @@ namespace common.tcpforward
         }
 
         public SimpleSubPushHandler<TcpForwardInfo> OnResponseHandler { get; } = new SimpleSubPushHandler<TcpForwardInfo>();
-        public async Task SendResponse(TcpForwardInfo arg)
+        public void SendResponse(TcpForwardInfo arg)
         {
             var bytes = arg.ToBytes();
-            var res = messengerSender.SendOnly(new MessageRequestWrap
+            _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = "TcpForward/Response",
                 Connection = arg.Connection.FromConnection,
                 Memory = bytes
-            }).ConfigureAwait(false);
-            await res;
+            });
         }
         public void OnResponse(TcpForwardInfo data)
         {

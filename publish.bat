@@ -21,7 +21,7 @@ for %%f in (client,server) do (
 	dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/any/%%f 
 )
 rem app
-dotnet publish ./client/client.service.app -c:Release -f:net6.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSigningStorePass=123321  /p:AndroidSdkDirectory=%sdkpath%
+rem dotnet publish ./client/client.service.app -c:Release -f:net6.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSigningStorePass=123321  /p:AndroidSdkDirectory=%sdkpath%
 echo F|xcopy "client\\client.service.app\\bin\\Release\\net6.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" "public\\publish-zip\\p2p-tunnel.apk"  /s /f /h /y
 
 

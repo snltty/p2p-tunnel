@@ -1,5 +1,5 @@
 ﻿{
-  "NumConnections": 1000, //支持连接数
+  "NumConnections": 10000, //支持连接数
   "ListenEnable": false, //是否开启监听
   "ListenPort": 5412, //监听端口
   "BufferSize": 8192,
