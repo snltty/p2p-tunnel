@@ -103,11 +103,9 @@ namespace common.tcpforward
             ConnectUserToken connectToken = (ConnectUserToken)e.UserToken;
             ConnectUserToken token = new ConnectUserToken
             {
-
                 TargetSocket = connectToken.TargetSocket,
                 Key = connectToken.Key,
-                SendArg = connectToken.SendArg,
-                PoolBuffer = connectToken.PoolBuffer
+                SendArg = connectToken.SendArg
             };
 
             try
