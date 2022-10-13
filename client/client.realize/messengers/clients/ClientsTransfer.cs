@@ -161,18 +161,10 @@ namespace client.realize.messengers.clients
             }
             Task.Run(async () =>
             {
-                EnumConnectResult result = EnumConnectResult.AllFail;
-                if (config.Client.UseUdp && client.UseUdp && client.UdpConnecting == false && client.UdpConnected == false)
-                {
-                    EnumConnectResult res = await ConnectUdp(client).ConfigureAwait(false);
-                    result |= res;
-                }
+                EnumConnectResult udp = await ConnectUdp(client).ConfigureAwait(false);
+                EnumConnectResult tcp = await ConnectTcp(client).ConfigureAwait(false);
 
-                if (config.Client.UseTcp && client.UseTcp && client.TcpConnecting == false && client.TcpConnected == false)
-                {
-                    EnumConnectResult res = await ConnectTcp(client).ConfigureAwait(false);
-                    result |= res;
-                }
+                EnumConnectResult result = udp | tcp;
 
                 if (client.TryReverseValue < TryReverseMaxValue)
                 {
@@ -227,21 +219,29 @@ namespace client.realize.messengers.clients
             punchHoleTcp.SendStep2Stop(id);
         }
 
-        private async Task<EnumConnectResult> ConnectUdp(ClientInfo info)
+        private async Task<EnumConnectResult> ConnectUdp(ClientInfo client)
         {
-            if (info.UdpConnected)
+            if (client.UdpConnected)
             {
                 return EnumConnectResult.UdpOnly;
             }
+            if (config.Client.UseUdp & client.UseUdp == false)
+            {
+                return EnumConnectResult.AllFail;
+            }
+            if (client.TcpConnecting)
+            {
+                return EnumConnectResult.AllFail;
+            }
 
-            clientInfoCaching.Connecting(info.Id, true, ServerType.UDP);
+            clientInfoCaching.Connecting(client.Id, true, ServerType.UDP);
 
             ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.UDP, (ulong)TunnelDefaults.MIN };
             for (int i = 0; i < tunnelNames.Length; i++)
             {
                 ConnectResultModel result = await punchHoleUdp.Send(new ConnectParams
                 {
-                    Id = info.Id,
+                    Id = client.Id,
                     TunnelName = tunnelNames[i],
                     TryTimes = 2,
                     LocalPort = registerState.LocalInfo.UdpPort
@@ -253,24 +253,32 @@ namespace client.realize.messengers.clients
                 Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
             }
 
-            clientInfoCaching.Offline(info.Id, ServerType.UDP);
+            clientInfoCaching.Offline(client.Id, ServerType.UDP);
             return EnumConnectResult.AllFail;
         }
-        private async Task<EnumConnectResult> ConnectTcp(ClientInfo info)
+        private async Task<EnumConnectResult> ConnectTcp(ClientInfo client)
         {
-            if (info.TcpConnected)
+            if (client.TcpConnected)
             {
                 return EnumConnectResult.TcpOnly;
             }
+            if (config.Client.UseTcp & client.UseTcp == false)
+            {
+                return EnumConnectResult.AllFail;
+            }
+            if (client.TcpConnecting)
+            {
+                return EnumConnectResult.AllFail;
+            }
 
-            clientInfoCaching.Connecting(info.Id, true, ServerType.TCP);
+            clientInfoCaching.Connecting(client.Id, true, ServerType.TCP);
 
             ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.TCP, (ulong)TunnelDefaults.MIN };
             for (int i = 0; i < tunnelNames.Length; i++)
             {
                 ConnectResultModel result = await punchHoleTcp.Send(new ConnectParams
                 {
-                    Id = info.Id,
+                    Id = client.Id,
                     TunnelName = tunnelNames[i],
                     TryTimes = 2,
                     LocalPort = registerState.LocalInfo.UdpPort
@@ -282,7 +290,7 @@ namespace client.realize.messengers.clients
                 Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
             }
 
-            clientInfoCaching.Offline(info.Id, ServerType.TCP);
+            clientInfoCaching.Offline(client.Id, ServerType.TCP);
             return EnumConnectResult.AllFail;
         }
 
