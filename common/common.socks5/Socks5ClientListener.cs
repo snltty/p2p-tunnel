@@ -90,7 +90,7 @@ namespace common.socks5
             AsyncUserToken token = ((AsyncUserToken)acceptEventArg.UserToken);
             try
             {
-                if (!token.Socket.AcceptAsync(acceptEventArg))
+                if (token.Socket.AcceptAsync(acceptEventArg) == false)
                 {
                     ProcessAccept(acceptEventArg);
                 }
@@ -124,7 +124,7 @@ namespace common.socks5
             token.PoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
             readEventArgs.SetBuffer(token.PoolBuffer, 0, bufferSize);
             readEventArgs.Completed += IO_Completed;
-            if (!socket.ReceiveAsync(readEventArgs))
+            if (socket.ReceiveAsync(readEventArgs) == false)
             {
                 ProcessReceive(readEventArgs);
             }

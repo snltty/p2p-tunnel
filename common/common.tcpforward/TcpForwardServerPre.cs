@@ -1,6 +1,5 @@
 ﻿using common.libs;
 using common.libs.extends;
-using common.server.servers.iocp;
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
@@ -8,18 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 
 namespace common.tcpforward
 {
     public class TcpForwardServerPre : ITcpForwardServer
     {
-        BufferManager bufferManager;
-        const int opsToPreAlloc = 1;
-        SocketAsyncEventArgsPool readWritePool;
-        Semaphore maxNumberAcceptedClients;
-
         public SimpleSubPushHandler<TcpForwardInfo> OnRequest { get; } = new SimpleSubPushHandler<TcpForwardInfo>();
         public SimpleSubPushHandler<ListeningChangeInfo> OnListeningChange { get; } = new SimpleSubPushHandler<ListeningChangeInfo>();
         private readonly ServersManager serversManager = new ServersManager();
@@ -27,31 +19,15 @@ namespace common.tcpforward
 
         private NumberSpace requestIdNs = new NumberSpace(0);
 
+        private int receiveBufferSize = 8 * 1024;
+
         public TcpForwardServerPre()
         {
         }
 
         public void Init(int numConnections, int receiveBufferSize)
         {
-            bufferManager = new BufferManager(receiveBufferSize * numConnections * opsToPreAlloc, receiveBufferSize);
-
-            readWritePool = new SocketAsyncEventArgsPool(numConnections);
-            maxNumberAcceptedClients = new Semaphore(numConnections, numConnections);
-
-            bufferManager.InitBuffer();
-
-            SocketAsyncEventArgs readWriteEventArg;
-
-            for (int i = 0; i < numConnections; i++)
-            {
-                readWriteEventArg = new SocketAsyncEventArgs();
-                readWriteEventArg.Completed += IO_Completed;
-                readWriteEventArg.UserToken = new ForwardAsyncUserToken();
-
-                bufferManager.SetBuffer(readWriteEventArg);
-
-                readWritePool.Push(readWriteEventArg);
-            }
+            this.receiveBufferSize = receiveBufferSize;
         }
         public void Start(int port, TcpForwardAliveTypes aliveType)
         {
@@ -96,8 +72,7 @@ namespace common.tcpforward
             {
                 acceptEventArg.AcceptSocket = null;
                 ForwardAsyncUserToken token = ((ForwardAsyncUserToken)acceptEventArg.UserToken);
-                maxNumberAcceptedClients.WaitOne();
-                if (!token.SourceSocket.AcceptAsync(acceptEventArg))
+                if (token.SourceSocket.AcceptAsync(acceptEventArg) == false)
                 {
                     ProcessAccept(acceptEventArg);
                 }
@@ -129,28 +104,51 @@ namespace common.tcpforward
         private void ProcessAccept(SocketAsyncEventArgs e)
         {
             ForwardAsyncUserToken acceptToken = (e.UserToken as ForwardAsyncUserToken);
-            SocketAsyncEventArgs readEventArgs = readWritePool.Pop();
-            ForwardAsyncUserToken token = ((ForwardAsyncUserToken)readEventArgs.UserToken);
+
             try
             {
-                token.SourceSocket = e.AcceptSocket;
-                token.Request.IsForward = false;
-                token.Request.RequestId = requestIdNs.Increment();
-                token.Request.AliveType = acceptToken.Request.AliveType;
-                token.Request.SourcePort = acceptToken.SourcePort;
-                token.SourcePort = acceptToken.SourcePort;
-                token.Request.Connection = null;
+                ForwardAsyncUserToken token = new ForwardAsyncUserToken
+                {
+                    SourceSocket = e.AcceptSocket,
+                    Request = new TcpForwardInfo
+                    {
+                        IsForward = false,
+                        RequestId = requestIdNs.Increment(),
+                        AliveType = acceptToken.Request.AliveType,
+                        SourcePort = acceptToken.SourcePort
+                    },
+                    SourcePort = acceptToken.SourcePort
+                };
+                SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
+                {
+                    UserToken = new ForwardAsyncUserToken
+                    {
+                        SourceSocket = e.AcceptSocket,
+                        Request = new TcpForwardInfo
+                        {
+                            IsForward = false,
+                            RequestId = requestIdNs.Increment(),
+                            AliveType = acceptToken.Request.AliveType,
+                            SourcePort = acceptToken.SourcePort
+                        },
+                        SourcePort = acceptToken.SourcePort
+                    }
+                };
+                token.PoolBuffer = ArrayPool<byte>.Shared.Rent(receiveBufferSize);
+                readEventArgs.UserToken = token;
+                readEventArgs.SetBuffer(token.PoolBuffer, 0, receiveBufferSize);
+                readEventArgs.Completed += IO_Completed;
 
                 clientsManager.TryAdd(token);
 
-                if (!e.AcceptSocket.ReceiveAsync(readEventArgs))
+                if (e.AcceptSocket.ReceiveAsync(readEventArgs) == false)
                 {
                     ProcessReceive(readEventArgs);
                 }
             }
             catch (Exception)
             {
-                CloseClientSocket(readEventArgs);
+                CloseClientSocket(e);
             }
             StartAccept(e);
         }
@@ -177,7 +175,7 @@ namespace common.tcpforward
                     }
                     if (token.SourceSocket.Connected)
                     {
-                        if (!token.SourceSocket.ReceiveAsync(e))
+                        if (token.SourceSocket.ReceiveAsync(e) == false)
                         {
                             ProcessReceive(e);
                         }
@@ -203,7 +201,7 @@ namespace common.tcpforward
             if (e.SocketError == SocketError.Success)
             {
                 ForwardAsyncUserToken token = (ForwardAsyncUserToken)e.UserToken;
-                if (!token.SourceSocket.ReceiveAsync(e))
+                if (token.SourceSocket.ReceiveAsync(e) == false)
                 {
                     ProcessReceive(e);
                 }
@@ -227,9 +225,6 @@ namespace common.tcpforward
             ForwardAsyncUserToken token = e.UserToken as ForwardAsyncUserToken;
 
             clientsManager.TryRemove(token.Request.RequestId, out _);
-
-            readWritePool.Push(e);
-            maxNumberAcceptedClients.Release();
 
             if (token.Request.Connection != null)
             {
@@ -287,6 +282,7 @@ namespace common.tcpforward
         public Socket SourceSocket { get; set; }
         public int SourcePort { get; set; } = 0;
         public TcpForwardInfo Request { get; set; } = new TcpForwardInfo { IsForward = false };
+        public byte[] PoolBuffer { get; set; }
     }
     public class ClientsManager
     {
@@ -307,6 +303,7 @@ namespace common.tcpforward
             {
                 try
                 {
+                    ArrayPool<byte>.Shared.Return(c.PoolBuffer);
                     c.SourceSocket.SafeClose();
                     GC.Collect();
                 }

@@ -297,7 +297,7 @@ namespace common.socks5
                 token.PoolBuffer = ArrayPool<byte>.Shared.Rent(config.BufferSize);
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
                 readEventArgs.Completed += Target_IO_Completed;
-                if (!token.TargetSocket.ReceiveAsync(readEventArgs))
+                if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
                 {
                     TargetProcessReceive(readEventArgs);
                 }
@@ -338,12 +338,12 @@ namespace common.socks5
                         ArrayPool<byte>.Shared.Return(arr);
                     }
 
-                    if (!token.TargetSocket.Connected)
+                    if (token.TargetSocket.Connected == false)
                     {
                         CloseClientSocket(e);
                         return;
                     }
-                    if (!token.TargetSocket.ReceiveAsync(e))
+                    if (token.TargetSocket.ReceiveAsync(e) == false)
                     {
                         TargetProcessReceive(e);
                     }

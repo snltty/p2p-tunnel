@@ -29,7 +29,7 @@ namespace common.tcpforward
             tcpForwardMessengerSender.OnRequestHandler.Sub(OnRequest);
 
             maxNumberAcceptedClients = new Semaphore(config.NumConnections, config.NumConnections);
-            this.tcpForwardValidator = tcpForwardValidator;   
+            this.tcpForwardValidator = tcpForwardValidator;
         }
 
         private void OnRequest(TcpForwardInfo arg)
@@ -74,10 +74,11 @@ namespace common.tcpforward
             saea.UserToken = new ConnectUserToken
             {
                 Key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId),
+                TargetSocket = socket,
                 SendArg = arg
             };
 
-            if (!socket.ConnectAsync(saea))
+            if (socket.ConnectAsync(saea) == false)
             {
                 ProcessConnect(saea);
             }
@@ -99,28 +100,44 @@ namespace common.tcpforward
         }
         private void ProcessConnect(SocketAsyncEventArgs e)
         {
-            ConnectUserToken token = (ConnectUserToken)e.UserToken;
+            ConnectUserToken connectToken = (ConnectUserToken)e.UserToken;
+            ConnectUserToken token = new ConnectUserToken
+            {
+
+                TargetSocket = connectToken.TargetSocket,
+                Key = connectToken.Key,
+                SendArg = connectToken.SendArg,
+                PoolBuffer = connectToken.PoolBuffer
+            };
+
             try
             {
                 if (e.SocketError == SocketError.Success)
                 {
+                    SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
+                    {
+                        UserToken = token,
+                        SocketFlags = SocketFlags.None,
+
+                    };
+                    connections.TryAdd(token.Key, token);
+
+
                     if (token.SendArg.ForwardType == TcpForwardTypes.PROXY)
                     {
                         Receive(token, HttpConnectMethodHelper.ConnectSuccessMessage());
                     }
-                    if (token.SendArg.Buffer.Length > 0 && token.SendArg.ForwardType != TcpForwardTypes.PROXY)
+                    else if (token.SendArg.Buffer.Length > 0)
                     {
-                        e.ConnectSocket.Send(token.SendArg.Buffer.Span, SocketFlags.None);
+                        token.TargetSocket.Send(token.SendArg.Buffer.Span, SocketFlags.None);
                     }
-                    token.SendArg.Buffer = Helper.EmptyArray;
 
-                    token.TargetSocket = e.ConnectSocket;
-                    token.Buffer = ArrayPool<byte>.Shared.Rent(config.BufferSize);
-                    e.SetBuffer(token.Buffer, 0, config.BufferSize);
-                    connections.TryAdd(token.Key, token);
-                    if (!token.TargetSocket.ReceiveAsync(e))
+                    token.SendArg.Buffer = Helper.EmptyArray;
+                    token.PoolBuffer = ArrayPool<byte>.Shared.Rent(config.BufferSize);
+                    readEventArgs.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
+                    if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
                     {
-                        ProcessReceive(e);
+                        ProcessReceive(readEventArgs);
                     }
                 }
                 else
@@ -141,7 +158,6 @@ namespace common.tcpforward
         private void ProcessReceive(SocketAsyncEventArgs e)
         {
             ConnectUserToken token = (ConnectUserToken)e.UserToken;
-
             try
             {
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
@@ -163,7 +179,7 @@ namespace common.tcpforward
                         ArrayPool<byte>.Shared.Return(arr);
                     }
 
-                    if (!token.TargetSocket.ReceiveAsync(e))
+                    if (token.TargetSocket.ReceiveAsync(e) == false)
                     {
                         ProcessReceive(e);
                     }
@@ -210,13 +226,13 @@ namespace common.tcpforward
         public ConnectionKey Key { get; set; }
         public TcpForwardInfo SendArg { get; set; }
 
-        public byte[] Buffer { get; set; }
+        public byte[] PoolBuffer { get; set; }
 
         public void Clear()
         {
-            if (Buffer != null && Buffer.Length > 0)
+            if (PoolBuffer != null && PoolBuffer.Length > 0)
             {
-                ArrayPool<byte>.Shared.Return(Buffer);
+                ArrayPool<byte>.Shared.Return(PoolBuffer);
             }
 
             TargetSocket?.SafeClose();
