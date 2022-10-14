@@ -4,7 +4,6 @@ using System;
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -47,7 +46,7 @@ namespace common.tcpforward
                     connections.TryRemove(token.Key, out _);
                 }
             }
-            else if (arg.TargetEndpoint.Length > 0)
+            else
             {
                 Connect(arg);
             }
@@ -57,20 +56,20 @@ namespace common.tcpforward
         {
             if (tcpForwardValidator.Validate(arg) == false)
             {
-                Receive(arg, Helper.EmptyArray, 0, 0);
+                Receive(arg, Helper.EmptyArray);
                 return;
             }
 
             IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
+            Console.WriteLine($"连接：{endpoint}");
 
-            maxNumberAcceptedClients.WaitOne();
+            //maxNumberAcceptedClients.WaitOne();
             Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
             SocketAsyncEventArgs saea = new SocketAsyncEventArgs();
             saea.RemoteEndPoint = endpoint;
             saea.Completed += IO_Completed;
-
             saea.UserToken = new ConnectUserToken
             {
                 Key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId),
@@ -126,13 +125,12 @@ namespace common.tcpforward
 
                     if (token.SendArg.ForwardType == TcpForwardTypes.PROXY)
                     {
-                        Receive(token, HttpConnectMethodHelper.ConnectSuccessMessage());
+                        Receive(token.SendArg, HttpConnectMethodHelper.ConnectSuccessMessage());
                     }
                     else if (token.SendArg.Buffer.Length > 0)
                     {
                         token.TargetSocket.Send(token.SendArg.Buffer.Span, SocketFlags.None);
                     }
-                    token.SendArg.Buffer = Helper.EmptyArray;
 
                     if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
                     {
@@ -143,7 +141,7 @@ namespace common.tcpforward
                 {
                     if (token.SendArg.ForwardType == TcpForwardTypes.PROXY)
                     {
-                        Receive(token, HttpConnectMethodHelper.ConnectErrorMessage());
+                        Receive(token.SendArg, HttpConnectMethodHelper.ConnectErrorMessage());
                     }
                     CloseClientSocket(token);
                 }
@@ -161,7 +159,7 @@ namespace common.tcpforward
             {
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
-                    Receive(token, e.Buffer, 0, e.BytesTransferred);
+                    Receive(token.SendArg, e.Buffer.AsMemory(e.Offset, e.BytesTransferred));
 
                     if (token.TargetSocket.Available > 0)
                     {
@@ -171,11 +169,16 @@ namespace common.tcpforward
                             int length = token.TargetSocket.Receive(arr);
                             if (length > 0)
                             {
-                                Receive(token, arr, 0, length);
+                                Receive(token.SendArg, arr.AsMemory(0, length));
                             }
                         }
 
                         ArrayPool<byte>.Shared.Return(arr);
+                    }
+                    if (token.TargetSocket.Connected == false)
+                    {
+                        CloseClientSocket(token);
+                        return;
                     }
 
                     if (token.TargetSocket.ReceiveAsync(e) == false)
@@ -197,28 +200,18 @@ namespace common.tcpforward
 
         private void CloseClientSocket(ConnectUserToken token)
         {
-            Receive(token, Helper.EmptyArray, 0, 0);
+            //maxNumberAcceptedClients.Release();
+            Receive(token.SendArg, Helper.EmptyArray);
             token.Clear();
-            if (connections.TryRemove(token.Key, out _))
-            {
-                maxNumberAcceptedClients.Release();
-            }
+            connections.TryRemove(token.Key, out _);
         }
 
-        private void Receive(ConnectUserToken token, byte[] data)
+        private void Receive(TcpForwardInfo arg, Memory<byte> data)
         {
-            Receive(token.SendArg, data, 0, data.Length);
-        }
-        private void Receive(ConnectUserToken token, byte[] data, int offset, int length)
-        {
-            Receive(token.SendArg, data, offset, length);
-        }
-        private void Receive(TcpForwardInfo arg, byte[] data, int offset, int length)
-        {
-            arg.Buffer = data.AsMemory(offset, length);
+            arg.Buffer = data;
             tcpForwardMessengerSender.SendResponse(arg);
+            arg.Buffer = Helper.EmptyArray;
         }
-
     }
 
     public class ConnectUserToken

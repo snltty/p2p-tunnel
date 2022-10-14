@@ -17,12 +17,12 @@ namespace common.tcpforward
         public void SendRequest(TcpForwardInfo arg)
         {
             var bytes = arg.ToBytes();
-            _ = messengerSender.SendOnly(new MessageRequestWrap
+            var res = messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = "TcpForward/Request",
                 Connection = arg.Connection,
                 Memory = bytes
-            });
+            }).Result;
         }
         public void OnRequest(TcpForwardInfo data)
         {
@@ -38,6 +38,15 @@ namespace common.tcpforward
                 Path = "TcpForward/Response",
                 Connection = arg.Connection.FromConnection,
                 Memory = bytes
+            });
+        }
+        public void SendResponse(TcpForwardInfo arg, byte[] data)
+        {
+            _ = messengerSender.SendOnly(new MessageRequestWrap
+            {
+                Path = "TcpForward/Response",
+                Connection = arg.Connection.FromConnection,
+                Memory = data
             });
         }
         public void OnResponse(TcpForwardInfo data)

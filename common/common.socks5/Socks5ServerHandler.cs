@@ -182,7 +182,7 @@ namespace common.socks5
         }
         private void Connect(IConnection connection, Socks5Info data, IPEndPoint remoteEndPoint)
         {
-            maxNumberAcceptedClients.WaitOne();
+            //maxNumberAcceptedClients.WaitOne();
             Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
@@ -370,10 +370,8 @@ namespace common.socks5
 
                 e.Dispose();
 
-                if (connections.TryRemove(token.Key, out _))
-                {
-                    maxNumberAcceptedClients.Release();
-                }
+                connections.TryRemove(token.Key, out _);
+                //maxNumberAcceptedClients.Release();
                 socks5MessengerSender.ResponseClose(token.Key.RequestId, connection);
             }
         }

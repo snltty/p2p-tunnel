@@ -31,6 +31,7 @@ namespace common.tcpforward
                 request.Connection = null;
                 GetTarget(request);
             }
+
             if (request.Connection == null)
             {
                 request.Buffer = HttpParseHelper.BuildMessage("未选择转发对象，或者未与转发对象建立连接");
@@ -46,6 +47,7 @@ namespace common.tcpforward
         private void GetTarget(TcpForwardInfo request)
         {
             request.ForwardType = TcpForwardTypes.FORWARD;
+
             //短链接
             if (request.AliveType == TcpForwardAliveTypes.WEB)
             {
@@ -60,6 +62,7 @@ namespace common.tcpforward
                 else
                 {
                     string domain = HttpParseHelper.GetHost(request.Buffer.Span).GetString();
+                    Console.WriteLine($"连接：{domain}");
                     tcpForwardTargetProvider?.Get(domain, request);
                 }
             }

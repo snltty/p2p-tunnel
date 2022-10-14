@@ -103,63 +103,50 @@ namespace common.tcpforward
 
         private void ProcessAccept(SocketAsyncEventArgs e)
         {
+            BindReceive(e);
+            StartAccept(e);
+        }
+
+        private void BindReceive(SocketAsyncEventArgs e)
+        {
             ForwardAsyncUserToken acceptToken = (e.UserToken as ForwardAsyncUserToken);
 
-            try
+            ulong id = requestIdNs.Increment();
+            ForwardAsyncUserToken token = new ForwardAsyncUserToken
             {
-                ForwardAsyncUserToken token = new ForwardAsyncUserToken
+                SourceSocket = e.AcceptSocket,
+                Request = new TcpForwardInfo
                 {
-                    SourceSocket = e.AcceptSocket,
-                    Request = new TcpForwardInfo
-                    {
-                        IsForward = false,
-                        RequestId = requestIdNs.Increment(),
-                        AliveType = acceptToken.Request.AliveType,
-                        SourcePort = acceptToken.SourcePort
-                    },
-                    SourcePort = acceptToken.SourcePort
-                };
-                SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
-                {
-                    UserToken = new ForwardAsyncUserToken
-                    {
-                        SourceSocket = e.AcceptSocket,
-                        Request = new TcpForwardInfo
-                        {
-                            IsForward = false,
-                            RequestId = requestIdNs.Increment(),
-                            AliveType = acceptToken.Request.AliveType,
-                            SourcePort = acceptToken.SourcePort,
+                    IsForward = false,
+                    RequestId = id,
+                    AliveType = acceptToken.Request.AliveType,
+                    SourcePort = acceptToken.SourcePort,
+                    Buffer = Helper.EmptyArray,
+                },
+                SourcePort = acceptToken.SourcePort
+            };
 
-                        },
-                        SourcePort = acceptToken.SourcePort
-                    }
-                };
-                token.PoolBuffer = ArrayPool<byte>.Shared.Rent(receiveBufferSize);
-                readEventArgs.UserToken = token;
-                readEventArgs.SetBuffer(token.PoolBuffer, 0, receiveBufferSize);
-                readEventArgs.Completed += IO_Completed;
-
-                clientsManager.TryAdd(token);
-
-                if (e.AcceptSocket.ReceiveAsync(readEventArgs) == false)
-                {
-                    ProcessReceive(readEventArgs);
-                }
-            }
-            catch (Exception)
+            SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
             {
-                CloseClientSocket(e);
+                UserToken = token,
+                SocketFlags = SocketFlags.None
+            };
+
+            token.PoolBuffer = ArrayPool<byte>.Shared.Rent(receiveBufferSize);
+            readEventArgs.SetBuffer(token.PoolBuffer, 0, receiveBufferSize);
+            readEventArgs.Completed += IO_Completed;
+            if (token.SourceSocket.ReceiveAsync(readEventArgs) == false)
+            {
+                ProcessReceive(readEventArgs);
             }
-            StartAccept(e);
         }
         private void ProcessReceive(SocketAsyncEventArgs e)
         {
             try
             {
+                ForwardAsyncUserToken token = (ForwardAsyncUserToken)e.UserToken;
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
-                    ForwardAsyncUserToken token = (ForwardAsyncUserToken)e.UserToken;
                     token.Request.Buffer = e.Buffer.AsMemory(e.Offset, e.BytesTransferred);
                     Receive(token);
                     token.Request.Buffer = Helper.EmptyArray;
@@ -172,7 +159,7 @@ namespace common.tcpforward
                             int length = token.SourceSocket.Receive(arr);
                             if (length > 0)
                             {
-                                token.Request.Buffer = arr.AsMemory(e.Offset, e.BytesTransferred);
+                                token.Request.Buffer = arr.AsMemory(0, length);
                                 Receive(token);
                                 token.Request.Buffer = Helper.EmptyArray;
                             }
@@ -219,6 +206,7 @@ namespace common.tcpforward
         }
         private void Receive(ForwardAsyncUserToken token)
         {
+            Console.WriteLine(token.Request.Buffer.GetString());
             OnRequest.Push(token.Request);
             token.Request.IsForward = true;
         }

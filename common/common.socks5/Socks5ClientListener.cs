@@ -137,9 +137,7 @@ namespace common.socks5
                 AsyncUserToken token = (AsyncUserToken)e.UserToken;
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
-                    Memory<byte> buffer = e.Buffer.AsMemory(e.Offset, e.BytesTransferred);
-                    token.DataWrap.Data = buffer;
-
+                    token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, e.BytesTransferred);
                     ExecuteHandle(token.DataWrap);
                     token.DataWrap.Data = Helper.EmptyArray;
 
@@ -159,12 +157,12 @@ namespace common.socks5
                         ArrayPool<byte>.Shared.Return(arr);
                     }
 
-                    if (!token.Socket.Connected)
+                    if (token.Socket.Connected == false)
                     {
                         CloseClientSocket(e);
                         return;
                     }
-                    if (!token.Socket.ReceiveAsync(e))
+                    if (token.Socket.ReceiveAsync(e) == false)
                     {
                         ProcessReceive(e);
                     }

@@ -54,12 +54,8 @@ namespace common.tcpforward
         {
             byte[] requestIdBytes = RequestId.ToBytes();
             int length = 1 + requestIdBytes.Length + Buffer.Length;
-            byte isForward = 1;
-            if (IsForward == false)
-            {
-                length += TargetEndpoint.Length;
-                isForward = 0;
-            }
+            length += TargetEndpoint.Length;
+            byte isForward = 0;
 
             byte[] bytes = new byte[length];
             int index = 1;
@@ -73,11 +69,8 @@ namespace common.tcpforward
             bytes[0] = (byte)(((byte)AliveType - 1) << 7 | ((byte)ForwardType - 1) << 6 | isForward << 5 | (byte)TargetEndpoint.Length);
 
             //转发阶段不需要这些
-            if (IsForward == false)
-            {
-                TargetEndpoint.CopyTo(bytes.AsMemory(index, TargetEndpoint.Length));
-                index += TargetEndpoint.Length;
-            }
+            TargetEndpoint.CopyTo(bytes.AsMemory(index, TargetEndpoint.Length));
+            index += TargetEndpoint.Length;
 
             Array.Copy(requestIdBytes, 0, bytes, index, requestIdBytes.Length);
             index += requestIdBytes.Length;
@@ -92,19 +85,15 @@ namespace common.tcpforward
             var span = memory.Span;
             int index = 1;
 
-            byte isForward = (byte)((span[0] >> 5) & 0b1);
+            IsForward = (byte)((span[0] >> 5) & 0b1) == 1;
             byte epLength = (byte)(span[0] & 0b11111);
 
             //转发阶段不需要这些
-            if (isForward == 0)
-            {
-                AliveType = (TcpForwardAliveTypes)(byte)(((span[0] >> 7) & 0b1) + 1);
-                ForwardType = (TcpForwardTypes)(byte)(((span[0] >> 6) & 0b1) + 1);
+            AliveType = (TcpForwardAliveTypes)(byte)(((span[0] >> 7) & 0b1) + 1);
+            ForwardType = (TcpForwardTypes)(byte)(((span[0] >> 6) & 0b1) + 1);
 
-                TargetEndpoint = memory.Slice(index, epLength);
-                index += epLength;
-            }
-
+            TargetEndpoint = memory.Slice(index, epLength);
+            index += epLength;
 
             RequestId = span.Slice(index).ToUInt64();
             index += 8;
