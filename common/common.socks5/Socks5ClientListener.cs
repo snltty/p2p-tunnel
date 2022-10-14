@@ -47,7 +47,6 @@ namespace common.socks5
             DistEndpoint = new IPEndPoint(IPAddress.Loopback, port);
 
             socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             socket.Bind(localEndPoint);
             socket.Listen(int.MaxValue);
 

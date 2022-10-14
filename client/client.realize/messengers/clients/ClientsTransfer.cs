@@ -44,7 +44,13 @@ namespace client.realize.messengers.clients
             this.udpServer = udpServer;
 
 
-            punchHoleUdp.OnStep1Handler.Sub((e) => { clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.UDP); });
+            punchHoleUdp.OnStep1Handler.Sub((e) =>
+            {
+                if (config.Client.UseUdp == true)
+                {
+                    clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.UDP);
+                }
+            });
             punchHoleUdp.OnStep2FailHandler.Sub((e) =>
             {
                 if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
@@ -82,7 +88,10 @@ namespace client.realize.messengers.clients
 
             punchHoleTcp.OnStep1Handler.Sub((e) =>
             {
-                clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.TCP);
+                if (config.Client.UseTcp == true)
+                {
+                    clientInfoCaching.Connecting(e.RawData.FromId, true, ServerType.TCP);
+                }
             });
             punchHoleTcp.OnStep2FailHandler.Sub((e) =>
             {
@@ -225,7 +234,7 @@ namespace client.realize.messengers.clients
             {
                 return EnumConnectResult.UdpOnly;
             }
-            if (config.Client.UseUdp & client.UseUdp == false)
+            if ((config.Client.UseUdp & client.UseUdp) == false)
             {
                 return EnumConnectResult.AllFail;
             }
@@ -262,7 +271,7 @@ namespace client.realize.messengers.clients
             {
                 return EnumConnectResult.TcpOnly;
             }
-            if (config.Client.UseTcp & client.UseTcp == false)
+            if ((config.Client.UseTcp & client.UseTcp) == false)
             {
                 return EnumConnectResult.AllFail;
             }

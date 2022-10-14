@@ -63,7 +63,7 @@ namespace client.service.vea
 
         public void OnNotify(IConnection connection)
         {
-            if(connection.FromConnection != null)
+            if (connection.FromConnection != null)
             {
                 bool res = clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client);
                 if (res)
@@ -73,7 +73,7 @@ namespace client.service.vea
                     UpdateIp(client, ips);
                 }
             }
-            
+
         }
         private void UpdateIp(ClientInfo client, IPAddressInfo _ips)
         {
@@ -213,23 +213,30 @@ namespace client.service.vea
 
         private void RunWindows()
         {
-            Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
-            for (int i = 0; i < 60; i++)
+            for (int i = 0; i < 20; i++)
             {
-                interfaceNumber = GetWindowsInterfaceNum();
-                if (interfaceNumber > 0)
+                Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
+                System.Threading.Thread.Sleep(3000);
+                if (GetWindowsHasInterface(veaName))
                 {
-                    Command.Execute("cmd.exe", string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
-                    AddRoute();
-                    if (config.ProxyAll) //代理所有
+                    interfaceNumber = GetWindowsInterfaceNum();
+                    if (interfaceNumber > 0)
                     {
-                        //AddRoute(IPAddress.Any);
+                        Command.Execute("cmd.exe", string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
+                        if (GetWindowsHasIp(config.IP))
+                        {
+                            AddRoute();
+                            if (config.ProxyAll) //代理所有
+                            {
+                                //AddRoute(IPAddress.Any);
+                            }
+                            break;
+                        }
                     }
-                    break;
                 }
                 else
                 {
-                    System.Threading.Thread.Sleep(1000);
+                    KillWindows();
                 }
             }
         }
@@ -279,6 +286,16 @@ namespace client.service.vea
                 }
             }
             return 0;
+        }
+        private bool GetWindowsHasInterface(string name)
+        {
+            string output = Command.Execute("cmd.exe", string.Empty, new string[] { $"ipconfig | findstr \"{name}\"" });
+            return string.IsNullOrWhiteSpace(output) == false;
+        }
+        private bool GetWindowsHasIp(IPAddress ip)
+        {
+            string output = Command.Execute("cmd.exe", string.Empty, new string[] { $"ipconfig | findstr \"{ip}\"" });
+            return string.IsNullOrWhiteSpace(output) == false;
         }
         private string GetLinuxInterfaceNum()
         {

@@ -3,8 +3,6 @@
 SET sdkpath=%1
 if "%sdkpath%"=="" (SET sdkpath="D:\\Android\\android-sdk")
 
-rem 27行发布安卓那里，改为自己的Android sdk地址, 可以在 工具->选项->Xamarin->Android设置 里查看sdk地址
-
 rd /s /q public\\publish
 rd /s /q public\\publish-zip
 mkdir public\\publish-zip
@@ -20,8 +18,8 @@ for %%f in (client,server) do (
 	)
 	dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/any/%%f 
 )
-rem app
-rem dotnet publish ./client/client.service.app -c:Release -f:net6.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSigningStorePass=123321  /p:AndroidSdkDirectory=%sdkpath%
+rem app 改为自己的Android sdk地址, 可以在 工具->选项->Xamarin->Android设置 里查看sdk地址
+dotnet publish ./client/client.service.app -c:Release -f:net6.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSigningStorePass=123321  /p:AndroidSdkDirectory=%sdkpath%
 echo F|xcopy "client\\client.service.app\\bin\\Release\\net6.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" "public\\publish-zip\\p2p-tunnel.apk"  /s /f /h /y
 
 

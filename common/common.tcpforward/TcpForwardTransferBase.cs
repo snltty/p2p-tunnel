@@ -62,7 +62,6 @@ namespace common.tcpforward
                 else
                 {
                     string domain = HttpParseHelper.GetHost(request.Buffer.Span).GetString();
-                    Console.WriteLine($"连接：{domain}");
                     tcpForwardTargetProvider?.Get(domain, request);
                 }
             }

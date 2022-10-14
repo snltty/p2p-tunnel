@@ -61,7 +61,6 @@ namespace common.tcpforward
             }
 
             IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
-            Console.WriteLine($"连接：{endpoint}");
 
             //maxNumberAcceptedClients.WaitOne();
             Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -76,7 +75,6 @@ namespace common.tcpforward
                 TargetSocket = socket,
                 SendArg = arg
             };
-
             if (socket.ConnectAsync(saea) == false)
             {
                 ProcessConnect(saea);

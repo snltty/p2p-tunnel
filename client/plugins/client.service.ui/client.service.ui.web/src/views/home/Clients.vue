@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-11 19:36:49
+ * @LastEditTime: 2022-10-14 19:35:46
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -17,7 +17,7 @@
                         <div class="item">
                             <dl v-loading="item.UdpConnecting || item.TcpConnecting">
                                 <dt @click="handleClientClick(item)">{{item.Name}}</dt>
-                                <dd v-if="item.UseTcp && registerState.ClientConfig.UseUdp" :style="item.udpConnectTypeStyle" class="flex">
+                                <dd v-if="item.UseUdp && registerState.ClientConfig.UseUdp" :style="item.udpConnectTypeStyle" class="flex">
                                     <span class="label">Udp</span>
                                     <el-icon>
                                         <connection />

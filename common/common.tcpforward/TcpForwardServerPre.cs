@@ -44,7 +44,6 @@ namespace common.tcpforward
         {
             var endpoint = new IPEndPoint(IPAddress.Any, port);
             var socket = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             socket.Bind(endpoint);
             socket.Listen(int.MaxValue);
 
@@ -125,6 +124,7 @@ namespace common.tcpforward
                 },
                 SourcePort = acceptToken.SourcePort
             };
+            clientsManager.TryAdd(token);
 
             SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
             {
@@ -206,7 +206,6 @@ namespace common.tcpforward
         }
         private void Receive(ForwardAsyncUserToken token)
         {
-            Console.WriteLine(token.Request.Buffer.GetString());
             OnRequest.Push(token.Request);
             token.Request.IsForward = true;
         }
@@ -296,7 +295,7 @@ namespace common.tcpforward
                 {
                     ArrayPool<byte>.Shared.Return(c.PoolBuffer);
                     c.SourceSocket.SafeClose();
-                    GC.Collect();
+                    //GC.Collect();
                 }
                 catch (Exception)
                 {
