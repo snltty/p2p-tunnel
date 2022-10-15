@@ -33,8 +33,8 @@ namespace common.server.servers.rudp
             server.PingInterval = Math.Max(timeout / 5, 5000);
             server.DisconnectTimeout = timeout;
             server.MaxConnectAttempts = 10;
-            server.AutoRecycle = true;
-            server.ReuseAddress = true;
+            //server.AutoRecycle = true;
+            //server.ReuseAddress = true;
             server.Start(port);
 
             listener.ConnectionRequestEvent += request =>
@@ -66,10 +66,8 @@ namespace common.server.servers.rudp
                     IConnection connection = peer.Tag as IConnection;
                     connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
 
-                    OnPacket(connection).ContinueWith((result) =>
-                    {
-                        reader.Recycle();
-                    });
+                    OnPacket(connection).Wait();
+                    reader.Recycle();
                 }
                 catch (Exception)
                 {

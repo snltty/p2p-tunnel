@@ -146,12 +146,12 @@ namespace common.server
             {
                 try
                 {
-                    int index = 0;
-                    while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 100)
-                    {
-                        await Task.Delay(15);
-                        index++;
-                    }
+                    //int index = 0;
+                    //while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 1000)
+                    //{
+                    //    await Task.Delay(15);
+                    //    index++;
+                    //}
                     NetPeer.Send(data, 0, length, DeliveryMethod.ReliableOrdered);
                     SendBytes += data.Length;
 

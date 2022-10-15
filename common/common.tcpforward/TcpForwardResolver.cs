@@ -36,6 +36,7 @@ namespace common.tcpforward
             ConnectionKey key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId);
             if (connections.TryGetValue(key, out ConnectUserToken token) && token.TargetSocket != null && token.TargetSocket.Connected)
             {
+                Console.WriteLine($"{arg.RequestId}连接:发送数据:{arg.Buffer.Length}");
                 if (arg.Buffer.Length > 0)
                 {
                     token.TargetSocket.Send(arg.Buffer.Span);
@@ -61,7 +62,7 @@ namespace common.tcpforward
             }
 
             IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
-
+            Console.WriteLine($"{arg.RequestId}连接:{endpoint}");
             //maxNumberAcceptedClients.WaitOne();
             Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
@@ -104,6 +105,7 @@ namespace common.tcpforward
                 Key = connectToken.Key,
                 SendArg = connectToken.SendArg,
             };
+            Console.WriteLine($"{token.SendArg.RequestId}连接:成功:{e.SocketError}");
 
             try
             {
@@ -123,6 +125,7 @@ namespace common.tcpforward
 
                     if (token.SendArg.ForwardType == TcpForwardTypes.PROXY)
                     {
+                        Console.WriteLine($"{token.SendArg.RequestId}连接:返回:{token.SendArg.Buffer.Span.GetString()}");
                         Receive(token.SendArg, HttpConnectMethodHelper.ConnectSuccessMessage());
                     }
                     else if (token.SendArg.Buffer.Length > 0)
@@ -130,6 +133,7 @@ namespace common.tcpforward
                         token.TargetSocket.Send(token.SendArg.Buffer.Span, SocketFlags.None);
                     }
 
+                    Console.WriteLine($"{token.SendArg.RequestId}连接:开始接收数据");
                     if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
                     {
                         ProcessReceive(readEventArgs);
@@ -206,6 +210,7 @@ namespace common.tcpforward
 
         private void Receive(TcpForwardInfo arg, Memory<byte> data)
         {
+            Console.WriteLine($"{arg.RequestId}连接:返回数据：{data.Length}");
             arg.Buffer = data;
             tcpForwardMessengerSender.SendResponse(arg);
             arg.Buffer = Helper.EmptyArray;
