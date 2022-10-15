@@ -53,22 +53,22 @@ namespace common.tcpforward
         public byte[] ToBytes()
         {
             byte[] requestIdBytes = RequestId.ToBytes();
-            int length = 1 + requestIdBytes.Length + Buffer.Length;
+            int length = 1 + 1 + requestIdBytes.Length + Buffer.Length;
             length += TargetEndpoint.Length;
-            byte isForward = 0;
 
             byte[] bytes = new byte[length];
-            int index = 1;
+            int index = 2;
             /*
-                0b111 1111  
+                0b111  
                 AliveType               1bit
                 ForwardType             1bit
                 isForward               1bit
-                TargetEndpoint.Length   4bit
              */
-            bytes[0] = (byte)(((byte)AliveType - 1) << 7 | ((byte)ForwardType - 1) << 6 | isForward << 5 | (byte)TargetEndpoint.Length);
+            bytes[0] |= (byte)(((byte)AliveType - 1) << 2);
+            bytes[0] |= (byte)(((byte)ForwardType - 1) << 1);
+            bytes[0] |= 0;
+            bytes[1] = (byte)TargetEndpoint.Length;
 
-            //转发阶段不需要这些
             TargetEndpoint.CopyTo(bytes.AsMemory(index, TargetEndpoint.Length));
             index += TargetEndpoint.Length;
 
@@ -83,14 +83,13 @@ namespace common.tcpforward
         public void DeBytes(in Memory<byte> memory)
         {
             var span = memory.Span;
-            int index = 1;
-
-            IsForward = (byte)((span[0] >> 5) & 0b1) == 1;
-            byte epLength = (byte)(span[0] & 0b11111);
+            int index = 2;
 
             //转发阶段不需要这些
-            AliveType = (TcpForwardAliveTypes)(byte)(((span[0] >> 7) & 0b1) + 1);
-            ForwardType = (TcpForwardTypes)(byte)(((span[0] >> 6) & 0b1) + 1);
+            AliveType = (TcpForwardAliveTypes)(byte)(((span[0] >> 2) & 0b1) + 1);
+            ForwardType = (TcpForwardTypes)(byte)(((span[0] >> 1) & 0b1) + 1);
+            IsForward = (span[0] & 0b1) == 1;
+            byte epLength = span[1];
 
             TargetEndpoint = memory.Slice(index, epLength);
             index += epLength;

@@ -228,7 +228,6 @@ namespace common.tcpforward
             if (clientsManager.TryGetValue(model.RequestId, out ForwardAsyncUserToken token))
             {
                 var span = model.Buffer.Span;
-                Console.WriteLine($"{model.RequestId}连接:收到回复:{span.Length}");
                 if (span.Length > 0)
                 {
                     try

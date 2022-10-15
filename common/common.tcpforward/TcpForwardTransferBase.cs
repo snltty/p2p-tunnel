@@ -57,6 +57,7 @@ namespace common.tcpforward
                     request.ForwardType = TcpForwardTypes.PROXY;
                     tcpForwardTargetProvider?.Get(request.SourcePort, request);
                     request.TargetEndpoint = HttpConnectMethodHelper.GetHost(request.Buffer);
+                    request.Buffer = Helper.EmptyArray;
                 }
                 //正常的http请求
                 else
