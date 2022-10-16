@@ -5,6 +5,7 @@ using LiteNetLib;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace common.server
@@ -146,12 +147,6 @@ namespace common.server
             {
                 try
                 {
-                    //int index = 0;
-                    //while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 10)
-                    //{
-                    //    await Task.Delay(15);
-                    //    index++;
-                    //}
                     NetPeer.Send(data, 0, length, DeliveryMethod.ReliableOrdered);
                     SendBytes += data.Length;
 

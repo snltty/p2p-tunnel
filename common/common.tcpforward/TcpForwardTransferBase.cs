@@ -56,12 +56,6 @@ namespace common.tcpforward
                     tcpForwardTargetProvider?.Get(request.SourcePort, request);
                     request.TargetEndpoint = HttpConnectMethodHelper.GetHost(request.Buffer);
 
-
-                    TcpForwardInfo model = new TcpForwardInfo();
-                    model.DeBytes(request.ToBytes());
-
-                    Console.WriteLine($"{request.RequestId}:{request.TargetEndpoint.GetString()}:{model.TargetEndpoint.GetString()}");
-
                     request.Buffer = Helper.EmptyArray;
                 }
                 //正常的http请求
