@@ -269,7 +269,7 @@ namespace common.tcpforward
     {
         public Socket SourceSocket { get; set; }
         public int SourcePort { get; set; } = 0;
-        public TcpForwardInfo Request { get; set; } = new TcpForwardInfo {  };
+        public TcpForwardInfo Request { get; set; } = new TcpForwardInfo { };
         public byte[] PoolBuffer { get; set; }
     }
     public class ClientsManager
@@ -293,7 +293,8 @@ namespace common.tcpforward
                 {
                     ArrayPool<byte>.Shared.Return(c.PoolBuffer);
                     c.SourceSocket.SafeClose();
-                    //GC.Collect();
+                    GC.Collect();
+                    GC.SuppressFinalize(c);
                 }
                 catch (Exception)
                 {
@@ -343,6 +344,7 @@ namespace common.tcpforward
                 {
                     c.Socket.SafeClose();
                     GC.Collect();
+                    GC.SuppressFinalize(c);
                 }
                 catch (Exception)
                 {
@@ -358,6 +360,7 @@ namespace common.tcpforward
                 {
                     item.Socket.SafeClose();
                     GC.Collect();
+                    GC.SuppressFinalize(item);
                 }
                 catch (Exception)
                 {

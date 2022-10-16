@@ -126,7 +126,7 @@ namespace common.tcpforward
                 }
                 else
                 {
-                    Logger.Instance.Error($"{connectToken.SendArg.RequestId}:{connectToken.SendArg.TargetEndpoint.GetString()}:{e.SocketError}");
+                    Logger.Instance.DebugError($"{connectToken.SendArg.RequestId}:{connectToken.SendArg.TargetEndpoint.GetString()}:{e.SocketError}");
                     if (connectToken.SendArg.ForwardType == TcpForwardTypes.PROXY)
                     {
                         Receive(connectToken.SendArg, HttpConnectMethodHelper.ConnectErrorMessage());
@@ -136,7 +136,7 @@ namespace common.tcpforward
             }
             catch (Exception ex)
             {
-                Logger.Instance.Error(ex);
+                Logger.Instance.DebugError(ex);
                 CloseClientSocket(connectToken);
             }
         }
@@ -205,7 +205,7 @@ namespace common.tcpforward
             }
             catch (Exception ex)
             {
-                Logger.Instance.Error(ex);
+                Logger.Instance.DebugError(ex);
                 CloseClientSocket(token);
             }
         }
