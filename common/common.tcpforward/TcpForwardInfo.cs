@@ -20,10 +20,6 @@ namespace common.tcpforward
         public int SourcePort { get; set; }
 
         /// <summary>
-        /// 是否是转发数据阶段，连接阶段需要带上TargetEndpoint，而转发阶段不需要待
-        /// </summary>
-        public bool IsForward { get; set; }
-        /// <summary>
         /// 短链接还是长连接
         /// </summary>
         public TcpForwardAliveTypes AliveType { get; set; }
@@ -59,14 +55,12 @@ namespace common.tcpforward
             byte[] bytes = new byte[length];
             int index = 2;
             /*
-                0b111  
+                0b11
                 AliveType               1bit
                 ForwardType             1bit
-                isForward               1bit
              */
-            bytes[0] |= (byte)(((byte)AliveType - 1) << 2);
-            bytes[0] |= (byte)(((byte)ForwardType - 1) << 1);
-            bytes[0] |= 0;
+            bytes[0] |= (byte)(((byte)AliveType - 1) << 1);
+            bytes[0] |= (byte)((byte)ForwardType - 1);
             bytes[1] = (byte)TargetEndpoint.Length;
 
             TargetEndpoint.CopyTo(bytes.AsMemory(index, TargetEndpoint.Length));
@@ -86,9 +80,8 @@ namespace common.tcpforward
             int index = 2;
 
             //转发阶段不需要这些
-            AliveType = (TcpForwardAliveTypes)(byte)(((span[0] >> 2) & 0b1) + 1);
-            ForwardType = (TcpForwardTypes)(byte)(((span[0] >> 1) & 0b1) + 1);
-            IsForward = (span[0] & 0b1) == 1;
+            AliveType = (TcpForwardAliveTypes)(byte)(((span[0] >> 1) & 0b1) + 1);
+            ForwardType = (TcpForwardTypes)(byte)((span[0] & 0b1) + 1);
             byte epLength = span[1];
 
             TargetEndpoint = memory.Slice(index, epLength);

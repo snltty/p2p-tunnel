@@ -120,7 +120,7 @@ namespace client.service.tcpforward
                 }
 
                 P2PListenInfo old = GetP2PByID(param.ID);
-                bool listening = old.Listening || param.Listening;
+                bool listening  = param.ForwardType == TcpForwardTypes.PROXY ?  param.Listening : (old.Listening || param.Listening);
                 if (old.ID > 0)
                 {
                     StopP2PListen(old);

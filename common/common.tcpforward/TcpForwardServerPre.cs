@@ -116,7 +116,6 @@ namespace common.tcpforward
                 SourceSocket = e.AcceptSocket,
                 Request = new TcpForwardInfo
                 {
-                    IsForward = false,
                     RequestId = id,
                     AliveType = acceptToken.Request.AliveType,
                     SourcePort = acceptToken.SourcePort,
@@ -207,7 +206,6 @@ namespace common.tcpforward
         private void Receive(ForwardAsyncUserToken token)
         {
             OnRequest.Push(token.Request);
-            token.Request.IsForward = true;
         }
 
         private void CloseClientSocket(SocketAsyncEventArgs e)
@@ -271,7 +269,7 @@ namespace common.tcpforward
     {
         public Socket SourceSocket { get; set; }
         public int SourcePort { get; set; } = 0;
-        public TcpForwardInfo Request { get; set; } = new TcpForwardInfo { IsForward = false };
+        public TcpForwardInfo Request { get; set; } = new TcpForwardInfo {  };
         public byte[] PoolBuffer { get; set; }
     }
     public class ClientsManager

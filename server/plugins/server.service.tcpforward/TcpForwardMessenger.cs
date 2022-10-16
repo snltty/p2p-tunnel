@@ -16,8 +16,9 @@ namespace server.service.tcpforward
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
         private readonly ITcpForwardServer tcpForwardServer;
         private readonly ITcpForwardValidator tcpForwardValidator;
+        private readonly TcpForwardResolver tcpForwardResolver;
 
-        public TcpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.tcpforward.Config config, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, TcpForwardMessengerSender tcpForwardMessengerSender, ITcpForwardServer tcpForwardServer, ITcpForwardValidator tcpForwardValidator)
+        public TcpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.tcpforward.Config config, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, TcpForwardMessengerSender tcpForwardMessengerSender, ITcpForwardServer tcpForwardServer, ITcpForwardValidator tcpForwardValidator, TcpForwardResolver tcpForwardResolver)
         {
             this.clientRegisterCache = clientRegisterCache;
             this.config = config;
@@ -25,14 +26,12 @@ namespace server.service.tcpforward
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.tcpForwardServer = tcpForwardServer;
             this.tcpForwardValidator = tcpForwardValidator;
+            this.tcpForwardResolver = tcpForwardResolver;
         }
 
         public void Request(IConnection connection)
         {
-            TcpForwardInfo data = new TcpForwardInfo();
-            data.Connection = connection;
-            data.DeBytes(connection.ReceiveRequestWrap.Memory);
-            tcpForwardMessengerSender.OnRequest(data);
+            tcpForwardResolver.InputData(connection);
         }
 
         public void Response(IConnection connection)
@@ -40,7 +39,7 @@ namespace server.service.tcpforward
             TcpForwardInfo data = new TcpForwardInfo();
             data.Connection = connection;
             data.DeBytes(connection.ReceiveRequestWrap.Memory);
-            tcpForwardMessengerSender.OnResponse(data);
+            tcpForwardServer.Response(data);
         }
 
         public byte[] GetPorts(IConnection connection)

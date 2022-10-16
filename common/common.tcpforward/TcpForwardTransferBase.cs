@@ -20,13 +20,11 @@ namespace common.tcpforward
 
             //A来了请求 ，转发到B，
             tcpForwardServer.OnRequest.Sub(OnRequest);
-            //A收到B的回复
-            tcpForwardMessengerSender.OnResponseHandler.Sub(tcpForwardServer.Response);
         }
 
         private void OnRequest(TcpForwardInfo request)
         {
-            if (request.Connection == null || !request.Connection.Connected)
+            if (request.Connection == null || request.Connection.Connected == false)
             {
                 request.Connection = null;
                 GetTarget(request);
@@ -57,6 +55,13 @@ namespace common.tcpforward
                     request.ForwardType = TcpForwardTypes.PROXY;
                     tcpForwardTargetProvider?.Get(request.SourcePort, request);
                     request.TargetEndpoint = HttpConnectMethodHelper.GetHost(request.Buffer);
+
+
+                    TcpForwardInfo model = new TcpForwardInfo();
+                    model.DeBytes(request.ToBytes());
+
+                    Console.WriteLine($"{request.RequestId}:{request.TargetEndpoint.GetString()}:{model.TargetEndpoint.GetString()}");
+
                     request.Buffer = Helper.EmptyArray;
                 }
                 //正常的http请求

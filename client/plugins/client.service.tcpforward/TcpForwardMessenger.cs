@@ -5,18 +5,18 @@ namespace client.service.tcpforward
 {
     public class TcpForwardMessenger : IMessenger
     {
-        private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
-        public TcpForwardMessenger(TcpForwardMessengerSender tcpForwardMessengerSender)
+        private readonly TcpForwardResolver tcpForwardResolver;
+        private readonly ITcpForwardServer tcpForwardServer;
+
+        public TcpForwardMessenger(TcpForwardResolver tcpForwardResolver, ITcpForwardServer tcpForwardServer)
         {
-            this.tcpForwardMessengerSender = tcpForwardMessengerSender;
+            this.tcpForwardResolver = tcpForwardResolver;
+            this.tcpForwardServer = tcpForwardServer;
         }
 
         public void Request(IConnection connection)
         {
-            TcpForwardInfo data = new TcpForwardInfo();
-            data.Connection = connection;
-            data.DeBytes(connection.ReceiveRequestWrap.Memory);
-            tcpForwardMessengerSender.OnRequest(data);
+            tcpForwardResolver.InputData(connection);
         }
 
         public void Response(IConnection connection)
@@ -24,7 +24,7 @@ namespace client.service.tcpforward
             TcpForwardInfo data = new TcpForwardInfo();
             data.Connection = connection;
             data.DeBytes(connection.ReceiveRequestWrap.Memory);
-            tcpForwardMessengerSender.OnResponse(data);
+            tcpForwardServer.Response(data);
         }
     }
 }

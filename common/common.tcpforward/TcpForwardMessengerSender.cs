@@ -13,7 +13,6 @@ namespace common.tcpforward
             this.messengerSender = messengerSender;
         }
 
-        public SimpleSubPushHandler<TcpForwardInfo> OnRequestHandler { get; } = new SimpleSubPushHandler<TcpForwardInfo>();
         public void SendRequest(TcpForwardInfo arg)
         {
             var bytes = arg.ToBytes();
@@ -24,12 +23,7 @@ namespace common.tcpforward
                 Memory = bytes
             }).Result;
         }
-        public void OnRequest(TcpForwardInfo data)
-        {
-            OnRequestHandler.Push(data);
-        }
 
-        public SimpleSubPushHandler<TcpForwardInfo> OnResponseHandler { get; } = new SimpleSubPushHandler<TcpForwardInfo>();
         public void SendResponse(TcpForwardInfo arg)
         {
             var bytes = arg.ToBytes();
@@ -39,19 +33,6 @@ namespace common.tcpforward
                 Connection = arg.Connection.FromConnection,
                 Memory = bytes
             });
-        }
-        public void SendResponse(TcpForwardInfo arg, byte[] data)
-        {
-            _ = messengerSender.SendOnly(new MessageRequestWrap
-            {
-                Path = "TcpForward/Response",
-                Connection = arg.Connection.FromConnection,
-                Memory = data
-            });
-        }
-        public void OnResponse(TcpForwardInfo data)
-        {
-            OnResponseHandler.Push(data);
         }
 
         public async Task<MessageResponeInfo> GetPorts(IConnection Connection)
