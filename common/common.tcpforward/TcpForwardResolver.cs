@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace common.tcpforward
@@ -85,7 +86,7 @@ namespace common.tcpforward
                 TargetSocket = socket,
                 SendArg = arg
             };
-            if (arg.Buffer.Length > 0)
+            if (arg.Buffer.Length > 0 && RuntimeInformation.IsOSPlatform(OSPlatform.Linux) == false)
             {
                 saea.SetBuffer(arg.Buffer);
             }
@@ -121,6 +122,10 @@ namespace common.tcpforward
                     {
                         Receive(connectToken.SendArg, HttpConnectMethodHelper.ConnectSuccessMessage());
                         return;
+                    }
+                    if (connectToken.SendArg.Buffer.Length > 0 && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        connectToken.TargetSocket.Send(connectToken.SendArg.Buffer.Span, SocketFlags.None);
                     }
                     BindReceive(connectToken);
                 }
