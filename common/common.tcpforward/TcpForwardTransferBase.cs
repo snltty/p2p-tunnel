@@ -32,6 +32,7 @@ namespace common.tcpforward
 
             if (request.Connection == null)
             {
+                request.StateType = TcpForwardStateTypes.Fail;
                 request.Buffer = HttpParseHelper.BuildMessage("未选择转发对象，或者未与转发对象建立连接");
                 tcpForwardServer.Response(request);
             }
@@ -45,23 +46,24 @@ namespace common.tcpforward
         private void GetTarget(TcpForwardInfo request)
         {
             request.ForwardType = TcpForwardTypes.FORWARD;
+            request.Cache = request.Buffer;
+            request.Buffer = Helper.EmptyArray;
 
             //短链接
             if (request.AliveType == TcpForwardAliveTypes.WEB)
             {
                 //http1.1代理
-                if (HttpConnectMethodHelper.IsConnectMethod(request.Buffer.Span))
+                if (HttpConnectMethodHelper.IsConnectMethod(request.Cache.Span))
                 {
                     request.ForwardType = TcpForwardTypes.PROXY;
                     tcpForwardTargetProvider?.Get(request.SourcePort, request);
-                    request.TargetEndpoint = HttpConnectMethodHelper.GetHost(request.Buffer);
-
-                    request.Buffer = Helper.EmptyArray;
+                    request.TargetEndpoint = HttpConnectMethodHelper.GetHost(request.Cache);
+                    request.Cache = Helper.EmptyArray;
                 }
                 //正常的http请求
                 else
                 {
-                    string domain = HttpParseHelper.GetHost(request.Buffer.Span).GetString();
+                    string domain = HttpParseHelper.GetHost(request.Cache.Span).GetString();
                     tcpForwardTargetProvider?.Get(domain, request);
                 }
             }

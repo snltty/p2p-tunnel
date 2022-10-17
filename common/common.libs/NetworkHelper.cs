@@ -188,7 +188,16 @@ namespace common.libs
             {
                 return ip;
             }
-            return Dns.GetHostEntry(domain).AddressList[0];
+            var list = Dns.GetHostEntry(domain).AddressList;
+            return list[0];
+
+            //for (int i = 0; i < list.Length; i++)
+            //{
+            //    if (list[i].AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            //        return list[i];
+            //}
+
+            //return list[0];
         }
 
         /// <summary>

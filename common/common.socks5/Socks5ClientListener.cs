@@ -199,7 +199,7 @@ namespace common.socks5
         {
             if (OnData != null)
             {
-                if (!OnData(info))
+                if (OnData(info) == false)
                 {
                     CloseClientSocket(info.Id);
                 }
