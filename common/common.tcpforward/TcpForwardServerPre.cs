@@ -154,10 +154,10 @@ namespace common.tcpforward
                     Receive(token);
                     token.Request.Buffer = Helper.EmptyArray;
 
-                    if (token.Request.DataType == TcpForwardDataTypes.CONNECT)
-                    {
-                        return;
-                    }
+                    //if (token.Request.DataType == TcpForwardDataTypes.CONNECT)
+                    //{
+                    //    return;
+                    //}
 
                     if (token.SourceSocket.Available > 0)
                     {
@@ -253,10 +253,10 @@ namespace common.tcpforward
                             Receive(token);
                         }
                        
-                        if (token.SourceSocket.ReceiveAsync(token.Saea) == false)
-                        {
-                            ProcessReceive(token.Saea);
-                        }
+                        //if (token.SourceSocket.ReceiveAsync(token.Saea) == false)
+                        //{
+                        //    ProcessReceive(token.Saea);
+                        //}
                     }
                     if (model.Buffer.Length > 0)
                     {

@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace common.tcpforward
 {
@@ -121,7 +120,7 @@ namespace common.tcpforward
                     tcpForwardMessengerSender.SendResponse(token.SendArg);
 
 
-                    token.PoolBuffer = ArrayPool<byte>.Shared.Rent(config.BufferSize);
+                    token.PoolBuffer = new byte[config.BufferSize];//ConnectUserToken.arrayPool.Rent(config.BufferSize);
                     e.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
 
                     if (token.TargetSocket.ReceiveAsync(e) == false)
@@ -159,22 +158,22 @@ namespace common.tcpforward
                     tcpForwardMessengerSender.SendResponse(token.SendArg);
                     token.SendArg.Buffer = Helper.EmptyArray;
 
-                    //if (token.TargetSocket.Available > 0)
-                    //{
-                    //    var arr = ArrayPool<byte>.Shared.Rent(config.BufferSize);
-                    //    while (token.TargetSocket.Available > 0)
-                    //    {
-                    //        length = token.TargetSocket.Receive(arr);
-                    //        if (length > 0)
-                    //        {
-                    //            token.SendArg.Buffer = arr.AsMemory(0, length);
-                    //            tcpForwardMessengerSender.SendResponse(token.SendArg);
-                    //            token.SendArg.Buffer = Helper.EmptyArray;
-                    //        }
-                    //    }
+                    if (token.TargetSocket.Available > 0)
+                    {
+                        var arr = ArrayPool<byte>.Shared.Rent(config.BufferSize);
+                        while (token.TargetSocket.Available > 0)
+                        {
+                            length = token.TargetSocket.Receive(arr);
+                            if (length > 0)
+                            {
+                                token.SendArg.Buffer = arr.AsMemory(0, length);
+                                tcpForwardMessengerSender.SendResponse(token.SendArg);
+                                token.SendArg.Buffer = Helper.EmptyArray;
+                            }
+                        }
 
-                    //    ArrayPool<byte>.Shared.Return(arr);
-                    //}
+                        ArrayPool<byte>.Shared.Return(arr);
+                    }
                     if (token.TargetSocket.Connected == false)
                     {
                         CloseClientSocket(token);
@@ -211,6 +210,7 @@ namespace common.tcpforward
 
     public class ConnectUserToken
     {
+        public static ArrayPool<byte> arrayPool = ArrayPool<byte>.Create();
         public Socket TargetSocket { get; set; }
         public ConnectionKey Key { get; set; }
         public TcpForwardInfo SendArg { get; set; }
@@ -221,7 +221,7 @@ namespace common.tcpforward
         {
             if (PoolBuffer != null && PoolBuffer.Length > 0)
             {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
+                //arrayPool.Return(PoolBuffer,true);
             }
 
             TargetSocket?.SafeClose();
