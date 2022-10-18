@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
+using System;
 using System.Threading.Tasks;
 
 namespace common.tcpforward
@@ -16,12 +17,12 @@ namespace common.tcpforward
         public void SendRequest(TcpForwardInfo arg)
         {
             var bytes = arg.ToBytes();
-            var res = messengerSender.SendOnly(new MessageRequestWrap
+            _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = "TcpForward/Request",
                 Connection = arg.Connection,
                 Memory = bytes
-            }).Result;
+            });
         }
 
         public void SendResponse(TcpForwardInfo arg)

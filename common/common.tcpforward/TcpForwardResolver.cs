@@ -38,26 +38,47 @@ namespace common.tcpforward
 
         private void OnRequest(TcpForwardInfo arg)
         {
-            if (arg.DataType == TcpForwardDataTypes.FORWARD)
+            ConnectionKey key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId);
+            if (arg.StateType == TcpForwardStateTypes.Success)
             {
-                ConnectionKey key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId);
-                if (connections.TryGetValue(key, out ConnectUserToken token) && token.TargetSocket != null && token.TargetSocket.Connected)
+                if (arg.DataType == TcpForwardDataTypes.FORWARD)
                 {
-                    token.SendArg.DataType = arg.DataType;
-                    if (arg.Buffer.Length > 0)
+                   // Console.WriteLine($"收到数据：{arg.DataType}：{arg.StateType}：{arg.Buffer.Length}：{arg.RequestId}");
+                    if (connections.TryGetValue(key, out ConnectUserToken token))
                     {
-                        token.TargetSocket.Send(arg.Buffer.Span, SocketFlags.None);
+                        if (arg.Buffer.Length > 0)
+                        {
+                            try
+                            {
+                                //Console.WriteLine($"收到数据1：{arg.DataType}：{arg.StateType}：{arg.Buffer.Length}：{arg.RequestId}");
+                                token.TargetSocket.Send(arg.Buffer.Span, SocketFlags.None);
+                                return;
+                            }
+                            catch (Exception)
+                            {
+                                CloseClientSocket(token);
+                                return;
+                            }
+                        }
                     }
-                    else
-                    {
-                        token.Clear();
-                        connections.TryRemove(token.Key, out _);
-                    }
+
+                    arg.StateType = TcpForwardStateTypes.Close;
+                    Receive(arg, Helper.EmptyArray);
+
+                }
+                else if (arg.DataType == TcpForwardDataTypes.CONNECT)
+                {
+                    //Console.WriteLine($"收到连接：{arg.DataType}：{arg.StateType}：{arg.Buffer.Length}：{arg.RequestId}");
+                    Connect(arg);
                 }
             }
             else
             {
-                Connect(arg);
+                //Console.WriteLine($"收到关闭：{arg.DataType}：{arg.StateType}：{arg.Buffer.Length}：{arg.RequestId}");
+                if (connections.TryRemove(key, out ConnectUserToken token))
+                {
+                    CloseClientSocket(token);
+                }
             }
         }
 
@@ -66,14 +87,13 @@ namespace common.tcpforward
             if (tcpForwardValidator.Validate(arg) == false)
             {
                 arg.StateType = TcpForwardStateTypes.Fail;
-                arg.Buffer = Helper.EmptyArray;
-                tcpForwardMessengerSender.SendResponse(arg);
+                Receive(arg, Helper.EmptyArray);
                 return;
             }
 
             IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
 
-            //maxNumberAcceptedClients.WaitOne();
+           // maxNumberAcceptedClients.WaitOne();
             Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
@@ -108,34 +128,41 @@ namespace common.tcpforward
         }
         private void ProcessConnect(SocketAsyncEventArgs e)
         {
-            ConnectUserToken token = (ConnectUserToken)e.UserToken;
+            ConnectUserToken connectToken = (ConnectUserToken)e.UserToken;
+            ConnectUserToken token = new ConnectUserToken
+            {
+                TargetSocket = connectToken.TargetSocket,
+                Key = connectToken.Key,
+                SendArg = connectToken.SendArg,
+            };
+
             try
             {
                 if (e.SocketError == SocketError.Success)
                 {
                     connections.TryAdd(token.Key, token);
 
-                    token.SendArg.StateType = TcpForwardStateTypes.Success;
-                    token.SendArg.Buffer = Helper.EmptyArray;
-                    tcpForwardMessengerSender.SendResponse(token.SendArg);
-
-
-                    token.PoolBuffer = new byte[config.BufferSize];//ConnectUserToken.arrayPool.Rent(config.BufferSize);
-                    e.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
-
-                    if (token.TargetSocket.ReceiveAsync(e) == false)
+                    SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
                     {
-                        ProcessReceive(e);
+                        UserToken = token,
+                        SocketFlags = SocketFlags.None,
+                    };
+                    token.SendArg.TargetEndpoint = Helper.EmptyArray;
+                    token.SendArg.StateType = TcpForwardStateTypes.Success;
+                    Receive(token.SendArg, Helper.EmptyArray);
+
+                    token.PoolBuffer = new byte[config.BufferSize];
+                    readEventArgs.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
+                    readEventArgs.Completed += IO_Completed;
+
+                    if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
+                    {
+                        ProcessReceive(readEventArgs);
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"{token.SendArg.TargetEndpoint.GetString()} fail:{e.SocketError}");
-                    token.SendArg.StateType = TcpForwardStateTypes.Fail;
-                    token.SendArg.Buffer = Helper.EmptyArray;
-                    tcpForwardMessengerSender.SendResponse(token.SendArg);
-                    token.Clear();
-                    connections.TryRemove(token.Key, out _);
+                    CloseClientSocket(token, TcpForwardStateTypes.Fail);
                 }
             }
             catch (Exception ex)
@@ -146,40 +173,39 @@ namespace common.tcpforward
         }
         private void ProcessReceive(SocketAsyncEventArgs e)
         {
-            ConnectUserToken token = (ConnectUserToken)e.UserToken;
             try
             {
+                ConnectUserToken token = e.UserToken as ConnectUserToken;
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
+                    //Console.WriteLine($"异步接收数据:{e.BytesTransferred}:{token.SendArg.RequestId}");
 
                     int offset = e.Offset;
                     int length = e.BytesTransferred;
-                    token.SendArg.Buffer = e.Buffer.AsMemory(offset, length);
-                    tcpForwardMessengerSender.SendResponse(token.SendArg);
-                    token.SendArg.Buffer = Helper.EmptyArray;
+                    Receive(token.SendArg, e.Buffer.AsMemory(offset, length));
+                   // Console.WriteLine($"回复异步接收数据:{res}:{e.BytesTransferred}:{token.SendArg.RequestId}");
 
                     if (token.TargetSocket.Available > 0)
                     {
-                        var arr = ArrayPool<byte>.Shared.Rent(config.BufferSize);
                         while (token.TargetSocket.Available > 0)
                         {
-                            length = token.TargetSocket.Receive(arr);
+                           // Console.WriteLine($"同步接收数据:{token.SendArg.RequestId}");
+                            length = token.TargetSocket.Receive(e.Buffer);
+                            //Console.WriteLine($"同步接收数据:{length}:{token.SendArg.RequestId}");
                             if (length > 0)
                             {
-                                token.SendArg.Buffer = arr.AsMemory(0, length);
-                                tcpForwardMessengerSender.SendResponse(token.SendArg);
-                                token.SendArg.Buffer = Helper.EmptyArray;
+                                Receive(token.SendArg, e.Buffer.AsMemory(0, length));
+                               // Console.WriteLine($"回复同步接收数据:{res}:{length}:{token.SendArg.RequestId}");
                             }
                         }
-
-                        ArrayPool<byte>.Shared.Return(arr);
                     }
                     if (token.TargetSocket.Connected == false)
                     {
+                       // Console.WriteLine($"关闭接收数据:{token.SendArg.RequestId}");
                         CloseClientSocket(token);
                         return;
                     }
-
+                  //  Console.WriteLine($"继续接收数据:{token.SendArg.RequestId}");
                     if (token.TargetSocket.ReceiveAsync(e) == false)
                     {
                         ProcessReceive(e);
@@ -187,43 +213,52 @@ namespace common.tcpforward
                 }
                 else
                 {
+                  //  Console.WriteLine($"关闭接收数据1:{token.SendArg.RequestId}:{e.BytesTransferred}:{e.SocketError}");
                     CloseClientSocket(token);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
-                CloseClientSocket(token);
+                CloseClientSocket(e);
             }
         }
 
-        private void CloseClientSocket(ConnectUserToken token)
+        private void Receive(TcpForwardInfo arg, Memory<byte> data)
         {
-            //maxNumberAcceptedClients.Release();
-            token.SendArg.StateType = TcpForwardStateTypes.Close;
-            token.SendArg.Buffer = Helper.EmptyArray;
-            tcpForwardMessengerSender.SendResponse(token.SendArg);
-            token.Clear();
-            connections.TryRemove(token.Key, out _);
+            arg.Buffer = data;
+            tcpForwardMessengerSender.SendResponse(arg);
+            arg.Buffer = Helper.EmptyArray;
+        }
+
+        private void CloseClientSocket(SocketAsyncEventArgs e)
+        {
+            ConnectUserToken token = e.UserToken as ConnectUserToken;
+            CloseClientSocket(token);
+        }
+        private void CloseClientSocket(ConnectUserToken token, TcpForwardStateTypes state = TcpForwardStateTypes.Close)
+        {
+            if (token != null)
+            {
+                //maxNumberAcceptedClients.Release();
+                //Console.WriteLine($"发送关闭数据包:{token.SendArg.RequestId}");
+                token.SendArg.StateType = state;
+                Receive(token.SendArg, Helper.EmptyArray);
+                token.Clear();
+                connections.TryRemove(token.Key, out _);
+            }
         }
     }
 
     public class ConnectUserToken
     {
-        public static ArrayPool<byte> arrayPool = ArrayPool<byte>.Create();
         public Socket TargetSocket { get; set; }
         public ConnectionKey Key { get; set; }
         public TcpForwardInfo SendArg { get; set; }
-        public bool Receive { get; set; } = false;
         public byte[] PoolBuffer { get; set; }
 
         public void Clear()
         {
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                //arrayPool.Return(PoolBuffer,true);
-            }
-
             TargetSocket?.SafeClose();
             TargetSocket = null;
 

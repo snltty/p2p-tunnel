@@ -82,10 +82,6 @@ namespace common.server
                 bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
                 msg.Return(bytes);
 
-                //if (res)
-                //{
-                //    msg.Connection.UpdateTime(DateTimeHelper.GetTimeStamp());
-                //}
                 return res;
             }
             catch (Exception ex)
@@ -103,7 +99,6 @@ namespace common.server
         {
             try
             {
-
                 if (msg.Connection.EncodeEnabled)
                 {
                     msg.Memory = msg.Connection.Crypto.Encode(msg.Memory);
@@ -112,11 +107,6 @@ namespace common.server
                 (byte[] bytes, int length) = msg.ToArray(msg.Connection.ServerType, true);
                 bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
                 msg.Return(bytes);
-
-                //if (res)
-                //{
-                //    msg.Connection.UpdateTime(DateTimeHelper.GetTimeStamp());
-                //}
             }
             catch (Exception ex)
             {

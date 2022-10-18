@@ -5,6 +5,7 @@ using common.server.middleware;
 using common.server.model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -78,7 +79,7 @@ namespace common.server
                 return;
             }
 
-            
+
 
             requestWrap.FromArray(receive);
             connection.FromConnection = sourceConnectionSelector.Select(connection);

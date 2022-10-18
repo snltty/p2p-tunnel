@@ -96,7 +96,7 @@ namespace common.socks5
                 data.TargetEP = remoteEndPoint;
                 Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                 token = new UdpToken { Connection = connection.FromConnection, Data = data, TargetSocket = socket, };
-                token.PoolBuffer = ArrayPool<byte>.Shared.Rent(65535);
+                token.PoolBuffer =new byte[65535];
                 udpConnections.AddOrUpdate(key, token, (a, b) => token);
 
                 _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
@@ -294,7 +294,7 @@ namespace common.socks5
                     UserToken = token,
                     SocketFlags = SocketFlags.None,
                 };
-                token.PoolBuffer = ArrayPool<byte>.Shared.Rent(config.BufferSize);
+                token.PoolBuffer = new byte[config.BufferSize];
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
                 readEventArgs.Completed += Target_IO_Completed;
                 if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
@@ -324,18 +324,16 @@ namespace common.socks5
 
                     if (token.TargetSocket.Available > 0)
                     {
-                        var arr = ArrayPool<byte>.Shared.Rent(config.BufferSize);
                         while (token.TargetSocket.Available > 0)
                         {
-                            length = token.TargetSocket.Receive(arr);
+                            length = token.TargetSocket.Receive(e.Buffer);
                             if (length > 0)
                             {
-                                token.Data.Data = arr.AsMemory(0, length);
+                                token.Data.Data = e.Buffer.AsMemory(0, length);
                                 socks5MessengerSender.Response(token.Data, token.Connection.FromConnection);
                                 token.Data.Data = Helper.EmptyArray;
                             }
                         }
-                        ArrayPool<byte>.Shared.Return(arr);
                     }
 
                     if (token.TargetSocket.Connected == false)
@@ -396,10 +394,6 @@ namespace common.socks5
         public void Clear()
         {
             TargetSocket?.SafeClose();
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-            }
             GC.Collect();
             GC.SuppressFinalize(this);
         }
@@ -441,10 +435,6 @@ namespace common.socks5
         public void Clear()
         {
             TargetSocket?.SafeClose();
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-            }
             GC.Collect();
             GC.SuppressFinalize(this);
         }

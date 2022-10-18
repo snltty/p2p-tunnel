@@ -186,7 +186,6 @@ namespace common.libs
     {
         private ICryptoTransform encryptoTransform;
         private ICryptoTransform decryptoTransform;
-        ArrayPool<byte> arrayPool = ArrayPool<byte>.Create();
 
         public AesCrypto(in string password)
         {
@@ -196,10 +195,6 @@ namespace common.libs
 
             encryptoTransform = aes.CreateEncryptor(aes.Key, aes.IV);
             decryptoTransform = aes.CreateDecryptor(aes.Key, aes.IV);
-        }
-        ~AesCrypto()
-        {
-            arrayPool = null;
         }
 
         public byte[] Encode(byte[] buffer)

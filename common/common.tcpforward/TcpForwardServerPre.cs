@@ -92,9 +92,6 @@ namespace common.tcpforward
                 case SocketAsyncOperation.Receive:
                     ProcessReceive(e);
                     break;
-                case SocketAsyncOperation.Send:
-                    ProcessSend(e);
-                    break;
                 default:
                     Logger.Instance.Error(e.LastOperation.ToString());
                     break;
@@ -112,6 +109,7 @@ namespace common.tcpforward
             ForwardAsyncUserToken acceptToken = (e.UserToken as ForwardAsyncUserToken);
 
             ulong id = requestIdNs.Increment();
+            //Console.WriteLine($"收到连接：{id}");
             ForwardAsyncUserToken token = new ForwardAsyncUserToken
             {
                 SourceSocket = e.AcceptSocket,
@@ -135,12 +133,20 @@ namespace common.tcpforward
             };
             token.Saea = readEventArgs;
 
-            token.PoolBuffer = ArrayPool<byte>.Shared.Rent(receiveBufferSize);
+            token.PoolBuffer = new byte[receiveBufferSize];
             readEventArgs.SetBuffer(token.PoolBuffer, 0, receiveBufferSize);
             readEventArgs.Completed += IO_Completed;
-            if (token.SourceSocket.ReceiveAsync(readEventArgs) == false)
+
+            if (token.Request.AliveType == TcpForwardAliveTypes.TUNNEL)
             {
-                ProcessReceive(readEventArgs);
+                Receive(token, Helper.EmptyArray);
+            }
+            else
+            {
+                if (token.SourceSocket.ReceiveAsync(readEventArgs) == false)
+                {
+                    ProcessReceive(readEventArgs);
+                }
             }
         }
         private void ProcessReceive(SocketAsyncEventArgs e)
@@ -150,29 +156,23 @@ namespace common.tcpforward
                 ForwardAsyncUserToken token = (ForwardAsyncUserToken)e.UserToken;
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
-                    token.Request.Buffer = e.Buffer.AsMemory(e.Offset, e.BytesTransferred);
-                    Receive(token);
-                    token.Request.Buffer = Helper.EmptyArray;
-
-                    //if (token.Request.DataType == TcpForwardDataTypes.CONNECT)
-                    //{
-                    //    return;
-                    //}
+                    Receive(token, e.Buffer.AsMemory(e.Offset, e.BytesTransferred));
+                    if (token.FirstPacket == true)
+                    {
+                        token.FirstPacket = false;
+                        return;
+                    }
 
                     if (token.SourceSocket.Available > 0)
                     {
-                        var arr = ArrayPool<byte>.Shared.Rent(token.SourceSocket.Available);
                         while (token.SourceSocket.Available > 0)
                         {
-                            int length = token.SourceSocket.Receive(arr);
+                            int length = token.SourceSocket.Receive(e.Buffer);
                             if (length > 0)
                             {
-                                token.Request.Buffer = arr.AsMemory(0, length);
-                                Receive(token);
-                                token.Request.Buffer = Helper.EmptyArray;
+                                Receive(token, e.Buffer.AsMemory(0, length));
                             }
                         }
-                        ArrayPool<byte>.Shared.Return(arr);
                     }
                     if (token.SourceSocket.Connected)
                     {
@@ -197,25 +197,11 @@ namespace common.tcpforward
             }
         }
 
-        private void ProcessSend(SocketAsyncEventArgs e)
+        private void Receive(ForwardAsyncUserToken token, Memory<byte> data)
         {
-            if (e.SocketError == SocketError.Success)
-            {
-                ForwardAsyncUserToken token = (ForwardAsyncUserToken)e.UserToken;
-                if (token.SourceSocket.ReceiveAsync(e) == false)
-                {
-                    ProcessReceive(e);
-                }
-            }
-            else
-            {
-                CloseClientSocket(e);
-            }
-        }
-
-        private void Receive(ForwardAsyncUserToken token)
-        {
+            token.Request.Buffer = data;
             OnRequest.Push(token.Request);
+            token.Request.Buffer = Helper.EmptyArray;
         }
 
         private void CloseClientSocket(SocketAsyncEventArgs e)
@@ -226,6 +212,7 @@ namespace common.tcpforward
 
             if (token.Request.Connection != null)
             {
+                token.Request.StateType = TcpForwardStateTypes.Close;
                 token.Request.Buffer = Helper.EmptyArray;
                 OnRequest.Push(token.Request);
             }
@@ -233,35 +220,38 @@ namespace common.tcpforward
 
         public void Response(TcpForwardInfo model)
         {
+            //Console.WriteLine($"收到回复:{model.DataType}：{model.StateType}：{model.Buffer.Length}：{model.RequestId}");
             if (clientsManager.TryGetValue(model.RequestId, out ForwardAsyncUserToken token))
             {
                 if (model.StateType == TcpForwardStateTypes.Success)
                 {
                     if (token.Request.DataType == TcpForwardDataTypes.CONNECT)
                     {
+                        //Console.WriteLine($"收到回复连接成功：{model.Buffer.Length}：{token.Request.Cache.Length}：{model.RequestId} ");
                         token.Request.DataType = TcpForwardDataTypes.FORWARD;
-                        //token.Request.TargetEndpoint = Helper.EmptyArray;
-
+                        token.Request.TargetEndpoint = Helper.EmptyArray;
                         if (token.Request.ForwardType == TcpForwardTypes.PROXY)
                         {
                             token.SourceSocket.Send(HttpConnectMethodHelper.ConnectSuccessMessage(), SocketFlags.None);
                         }
                         else if (token.Request.Cache.Length > 0)
                         {
-                            token.Request.Buffer = token.Request.Cache;
+                           // Console.WriteLine($"首发数据：{token.Request.Cache.Length}：{model.RequestId} ");
+                            Receive(token, token.Request.Cache);
                             token.Request.Cache = Helper.EmptyArray;
-                            Receive(token);
                         }
-                       
-                        //if (token.SourceSocket.ReceiveAsync(token.Saea) == false)
-                        //{
-                        //    ProcessReceive(token.Saea);
-                        //}
+                        //Console.WriteLine($"开始接收数据：{model.RequestId}");
+                        if (token.SourceSocket.ReceiveAsync(token.Saea) == false)
+                        {
+                            ProcessReceive(token.Saea);
+                        }
+
                     }
                     if (model.Buffer.Length > 0)
                     {
                         try
                         {
+                           // Console.WriteLine($"收到返回数据：{model.Buffer.Length}：{model.RequestId}");
                             token.SourceSocket.Send(model.Buffer.Span, SocketFlags.None);
                         }
                         catch (Exception)
@@ -272,7 +262,7 @@ namespace common.tcpforward
                 }
                 else
                 {
-                    if (token.Request.ForwardType == TcpForwardTypes.PROXY && model.StateType == TcpForwardStateTypes.Fail)
+                    if (token.Request.ForwardType == TcpForwardTypes.PROXY)
                     {
                         token.SourceSocket.Send(HttpConnectMethodHelper.ConnectErrorMessage(), SocketFlags.None);
                     }
@@ -308,6 +298,7 @@ namespace common.tcpforward
         public int SourcePort { get; set; } = 0;
         public TcpForwardInfo Request { get; set; } = new TcpForwardInfo { };
         public SocketAsyncEventArgs Saea { get; set; }
+        public bool FirstPacket { get; set; } = true;
 
         public byte[] PoolBuffer { get; set; }
     }
@@ -330,7 +321,6 @@ namespace common.tcpforward
             {
                 try
                 {
-                    ArrayPool<byte>.Shared.Return(c.PoolBuffer);
                     c.SourceSocket.SafeClose();
                     c.Saea.Dispose();
                     GC.Collect();

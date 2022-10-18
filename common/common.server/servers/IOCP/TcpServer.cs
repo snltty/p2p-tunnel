@@ -29,7 +29,7 @@ namespace common.server.servers.iocp
             this.bufferSize = bufferSize;
         }
 
-        public void Start1(int port, IPAddress ip )
+        public void Start1(int port, IPAddress ip)
         {
             isReceive = false;
             Start(port, ip);
@@ -48,7 +48,7 @@ namespace common.server.servers.iocp
         {
             IPEndPoint localEndPoint = new IPEndPoint(ip, port);
 
-            var socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            Socket socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.ReuseBind(localEndPoint);
             socket.Listen(int.MaxValue);
 
@@ -73,7 +73,7 @@ namespace common.server.servers.iocp
             AsyncUserToken token = ((AsyncUserToken)acceptEventArg.UserToken);
             try
             {
-                if (!token.Socket.AcceptAsync(acceptEventArg))
+                if (token.Socket.AcceptAsync(acceptEventArg) == false)
                 {
                     ProcessAccept(acceptEventArg);
                 }
@@ -92,11 +92,7 @@ namespace common.server.servers.iocp
                 case SocketAsyncOperation.Receive:
                     ProcessReceive(e);
                     break;
-                case SocketAsyncOperation.Send:
-                    ProcessSend(e);
-                    break;
                 default:
-                    // Logger.Instance.DebugError(e.LastOperation.ToString());
                     break;
             }
         }
@@ -112,7 +108,7 @@ namespace common.server.servers.iocp
             }
             else
             {
-                if(OnConnected1 != null)
+                if (OnConnected1 != null)
                 {
                     OnConnected1(e.AcceptSocket);
                 }
@@ -134,23 +130,19 @@ namespace common.server.servers.iocp
                 {
                     Socket = socket,
                     Connection = CreateConnection(socket),
-                    Port = this.port
+                    Port = port
                 };
 
-                if (OnConnected == null)
-                {
-                    return null;
-                }
                 OnConnected(userToken.Connection);
                 SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
                 {
                     UserToken = userToken,
                     SocketFlags = SocketFlags.None,
                 };
-                userToken.PoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+                userToken.PoolBuffer = new byte[bufferSize];
                 readEventArgs.SetBuffer(userToken.PoolBuffer, 0, bufferSize);
                 readEventArgs.Completed += IO_Completed;
-                if (!socket.ReceiveAsync(readEventArgs))
+                if (socket.ReceiveAsync(readEventArgs) == false)
                 {
                     ProcessReceive(readEventArgs);
                 }
@@ -175,23 +167,20 @@ namespace common.server.servers.iocp
 
                     if (token.Socket.Available > 0)
                     {
-                        var arr = ArrayPool<byte>.Shared.Rent(bufferSize);
                         while (token.Socket.Available > 0)
                         {
-                            length = token.Socket.Receive(arr);
+                            length = token.Socket.Receive(e.Buffer);
                             if (length > 0)
                             {
-                                await ReadPacket(token, arr, 0, length);
+                                await ReadPacket(token, e.Buffer, 0, length);
                             }
                             else
                             {
                                 token.Connection.SocketError = SocketError.SocketError;
                                 CloseClientSocket(e);
-                                ArrayPool<byte>.Shared.Return(arr);
                                 return;
                             }
                         }
-                        ArrayPool<byte>.Shared.Return(arr);
                     }
 
                     if (token.Socket.Connected == false || token.Port != port)
@@ -201,7 +190,7 @@ namespace common.server.servers.iocp
                         return;
                     }
 
-                    if (!token.Socket.ReceiveAsync(e))
+                    if (token.Socket.ReceiveAsync(e) == false)
                     {
                         ProcessReceive(e);
                     }
@@ -222,6 +211,7 @@ namespace common.server.servers.iocp
         {
             if (token.Port != port) return;
 
+            //是一个完整的包
             if (token.DataBuffer.Size == 0 && length > 4)
             {
                 Memory<byte> memory = data.AsMemory(offset, length);
@@ -237,6 +227,7 @@ namespace common.server.servers.iocp
                 }
             }
 
+            //不是完整包
             token.DataBuffer.AddRange(data, offset, length);
             do
             {
@@ -255,21 +246,6 @@ namespace common.server.servers.iocp
             } while (token.DataBuffer.Size > 4);
         }
 
-        private void ProcessSend(SocketAsyncEventArgs e)
-        {
-            if (e.SocketError == SocketError.Success)
-            {
-                AsyncUserToken token = (AsyncUserToken)e.UserToken;
-                if (!token.Socket.ReceiveAsync(e))
-                {
-                    ProcessReceive(e);
-                }
-            }
-            else
-            {
-                CloseClientSocket(e);
-            }
-        }
         private void CloseClientSocket(SocketAsyncEventArgs e)
         {
             AsyncUserToken token = e.UserToken as AsyncUserToken;
@@ -299,10 +275,6 @@ namespace common.server.servers.iocp
         public void Disponse()
         {
             Stop();
-            OnPacket = null;
-            OnDisconnect = null;
-            OnConnected = null;
-            OnConnected1 = null;
         }
 
         public async Task InputData(IConnection connection)
@@ -325,11 +297,6 @@ namespace common.server.servers.iocp
 
         public void Clear()
         {
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-            }
-
             Socket?.SafeClose();
             Socket = null;
 

@@ -115,13 +115,12 @@ namespace common.server.servers.websocket
         private static string BuildSecWebSocketAccept(Memory<byte> key)
         {
             int keyLength = key.Length + magicCode.Length;
-            byte[] acceptBytes = ArrayPool<byte>.Shared.Rent(keyLength);
+            byte[] acceptBytes = new byte[keyLength];
 
             key.CopyTo(acceptBytes);
             magicCode.CopyTo(acceptBytes.AsMemory(key.Length));
 
             string acceptStr = Convert.ToBase64String(sha1.ComputeHash(acceptBytes, 0, keyLength));
-            ArrayPool<byte>.Shared.Return(acceptBytes);
 
             return acceptStr;
         }
@@ -236,7 +235,7 @@ namespace common.server.servers.websocket
 
             int totalLength = span.Length * 2;
 
-            char[] result = ArrayPool<char>.Shared.Rent(totalLength);
+            char[] result = new char[totalLength];
             Span<char> resultSpan = result.AsSpan(0, totalLength);
             span.CopyTo(resultSpan);
 
@@ -252,7 +251,6 @@ namespace common.server.servers.websocket
             }
 
             string resultStr = resultSpan.Slice(0, span.Length + length).ToString();
-            ArrayPool<char>.Shared.Return(result);
 
             return resultStr;
         }

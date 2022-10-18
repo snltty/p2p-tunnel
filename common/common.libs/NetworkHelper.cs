@@ -173,14 +173,14 @@ namespace common.libs
             catch (Exception)
             {
             }
-            return new List<int>();
+            return new List<int>();                        
 
         }
 
         /// <summary>
         /// 域名解析
         /// </summary>
-        /// <param name="domain"></param>
+        /// <param name="domain"></param>                      
         /// <returns></returns>
         public static IPAddress GetDomainIp(string domain)
         {
@@ -190,14 +190,6 @@ namespace common.libs
             }
             var list = Dns.GetHostEntry(domain).AddressList;
             return list[0];
-
-            //for (int i = 0; i < list.Length; i++)
-            //{
-            //    if (list[i].AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-            //        return list[i];
-            //}
-
-            //return list[0];
         }
 
         /// <summary>

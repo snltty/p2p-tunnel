@@ -38,6 +38,7 @@ namespace common.tcpforward
             }
             else
             {
+               // Console.WriteLine($"收到连接：{request.DataType}：{request.StateType}：{request.Buffer.Length}：{request.RequestId}");
                 request.Connection.ReceiveBytes += request.Buffer.Length;
                 tcpForwardMessengerSender.SendRequest(request);
             }
@@ -58,7 +59,7 @@ namespace common.tcpforward
                     request.ForwardType = TcpForwardTypes.PROXY;
                     tcpForwardTargetProvider?.Get(request.SourcePort, request);
                     request.TargetEndpoint = HttpConnectMethodHelper.GetHost(request.Cache);
-                    request.Cache = Helper.EmptyArray;
+                    //request.Buffer = Helper.EmptyArray;
                 }
                 //正常的http请求
                 else

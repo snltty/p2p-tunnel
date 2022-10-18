@@ -150,7 +150,7 @@ namespace common.server.servers.websocket
                 UserToken = token,
                 SocketFlags = SocketFlags.None,
             };
-            token.PoolBuffer = ArrayPool<byte>.Shared.Rent(BufferSize);
+            token.PoolBuffer = new byte[BufferSize];
             readEventArgs.SetBuffer(token.PoolBuffer, 0, BufferSize);
             readEventArgs.Completed += IO_Completed;
             if (!socket.ReceiveAsync(readEventArgs))
@@ -169,17 +169,15 @@ namespace common.server.servers.websocket
                     ReadFrame(token, memory);
                     if (token.Connectrion.Socket.Available > 0)
                     {
-                        var arr = ArrayPool<byte>.Shared.Rent(token.Connectrion.Socket.Available);
                         while (token.Connectrion.Socket.Available > 0)
                         {
-                            int length = token.Connectrion.Socket.Receive(arr);
+                            int length = token.Connectrion.Socket.Receive(e.Buffer);
                             if (length > 0)
                             {
-                                memory = arr.AsMemory(0, length);
+                                memory = e.Buffer.AsMemory(0, length);
                                 ReadFrame(token, memory);
                             }
                         }
-                        ArrayPool<byte>.Shared.Return(arr);
                     }
 
                     if (!token.Connectrion.Socket.Connected)
@@ -466,11 +464,6 @@ namespace common.server.servers.websocket
         public bool Disposabled { get; private set; } = false;
         public void Clear()
         {
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-            }
-
             Disposabled = true;
             Connectrion.Close();
         }

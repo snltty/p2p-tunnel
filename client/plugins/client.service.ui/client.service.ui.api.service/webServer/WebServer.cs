@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.webServer
 {
@@ -12,10 +14,12 @@ namespace client.service.ui.api.service.webServer
     {
         private readonly Config config;
         private readonly IWebServerFileReader webServerFileReader;
+        Semaphore maxNumberAcceptedClients;
         public WebServer(Config config, IWebServerFileReader webServerFileReader)
         {
             this.config = config;
             this.webServerFileReader = webServerFileReader;
+            maxNumberAcceptedClients = new Semaphore(10, 10);
         }
 
         public void Start()
@@ -23,44 +27,46 @@ namespace client.service.ui.api.service.webServer
             HttpListener http = new HttpListener();
             http.Prefixes.Add($"http://{config.Web.BindIp}:{config.Web.Port}/");
             http.Start();
-            http.BeginGetContext(Callback, http);
-        }
-        private void Callback(IAsyncResult result)
-        {
-            HttpListener http = result.AsyncState as HttpListener;
-            HttpListenerContext context = http.EndGetContext(result);
 
-            HttpListenerRequest request = context.Request;
-            using HttpListenerResponse response = context.Response;
-            using Stream stream = response.OutputStream;
-            try
+            Task.Factory.StartNew(() =>
             {
-                response.Headers["Server"] = "snltty";
-
-                string path = request.Url.AbsolutePath;
-                //默认页面
-                if (path == "/") path = "index.html";
-
-                byte[] bytes = webServerFileReader.Read(path);
-                if (bytes.Length > 0)
+                while (true)
                 {
-                    response.ContentLength64 = bytes.Length;
-                    response.ContentType = GetContentType(path);
-                    stream.Write(bytes, 0, bytes.Length);
-                }
-                else
-                {
-                    response.StatusCode = (int)HttpStatusCode.NotFound;
-                }
-            }
-            catch (Exception)
-            {
-                response.StatusCode = (int)HttpStatusCode.BadRequest;
-            }
-            stream.Close();
-            stream.Dispose();
+                    var context = http.GetContext();
 
-            http.BeginGetContext(Callback, http);
+
+                    HttpListenerRequest request = context.Request;
+                    using HttpListenerResponse response = context.Response;
+                    using Stream stream = response.OutputStream;
+
+                    try
+                    {
+                        response.Headers["Server"] = "snltty";
+
+                        string path = request.Url.AbsolutePath;
+                        //默认页面
+                        if (path == "/") path = "index.html";
+
+                        byte[] bytes = webServerFileReader.Read(path);
+                        if (bytes.Length > 0)
+                        {
+                            response.ContentLength64 = bytes.Length;
+                            response.ContentType = GetContentType(path);
+                            stream.Write(bytes, 0, bytes.Length);
+                        }
+                        else
+                        {
+                            response.StatusCode = (int)HttpStatusCode.NotFound;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    }
+                    stream.Close();
+                    stream.Dispose();
+                }
+            }, TaskCreationOptions.LongRunning);
         }
 
 

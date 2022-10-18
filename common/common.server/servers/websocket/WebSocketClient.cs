@@ -15,7 +15,7 @@ namespace common.server.servers.websocket
         private bool connected = false;
         private bool connecSuccess = false;
 
-        
+
         // <summary>
         /// 连接中，false表示失败，会关闭连接
         /// </summary>
@@ -161,10 +161,10 @@ namespace common.server.servers.websocket
                     UserToken = token,
                     SocketFlags = SocketFlags.None,
                 };
-                token.PoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+                token.PoolBuffer = new byte[bufferSize];
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, bufferSize);
                 readEventArgs.Completed += Target_IO_Completed;
-                if (!token.TargetSocket.ReceiveAsync(readEventArgs))
+                if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
                 {
                     TargetProcessReceive();
                 }
@@ -187,24 +187,22 @@ namespace common.server.servers.websocket
                     ReadFrame(token, readEventArgs.Buffer.AsMemory(offset, length));
                     if (token.TargetSocket.Available > 0)
                     {
-                        var arr = ArrayPool<byte>.Shared.Rent(token.TargetSocket.Available);
                         while (token.TargetSocket.Available > 0)
                         {
-                            length = token.TargetSocket.Receive(arr);
+                            length = token.TargetSocket.Receive(readEventArgs.Buffer);
                             if (length > 0)
                             {
-                                ReadFrame(token, arr.AsMemory(0, length));
+                                ReadFrame(token, readEventArgs.Buffer.AsMemory(0, length));
                             }
                         }
-                        ArrayPool<byte>.Shared.Return(arr);
                     }
 
-                    if (!token.TargetSocket.Connected)
+                    if (token.TargetSocket.Connected == false)
                     {
                         CloseClientSocket();
                         return;
                     }
-                    if (!token.TargetSocket.ReceiveAsync(readEventArgs))
+                    if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
                     {
                         TargetProcessReceive();
                     }
@@ -455,11 +453,6 @@ namespace common.server.servers.websocket
         public void Clear()
         {
             TargetSocket?.SafeClose();
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-                PoolBuffer = null;
-            }
             GC.Collect();
             GC.SuppressFinalize(this);
         }

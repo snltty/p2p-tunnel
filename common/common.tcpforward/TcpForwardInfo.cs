@@ -56,6 +56,7 @@ namespace common.tcpforward
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Buffer { get; set; }
         public Memory<byte> Cache { get; set; }
+
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; }
 

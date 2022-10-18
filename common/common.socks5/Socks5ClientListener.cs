@@ -120,7 +120,7 @@ namespace common.socks5
                 UserToken = token,
                 SocketFlags = SocketFlags.None,
             };
-            token.PoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+            token.PoolBuffer = new byte[bufferSize];
             readEventArgs.SetBuffer(token.PoolBuffer, 0, bufferSize);
             readEventArgs.Completed += IO_Completed;
             if (socket.ReceiveAsync(readEventArgs) == false)
@@ -142,18 +142,16 @@ namespace common.socks5
 
                     if (token.Socket.Available > 0)
                     {
-                        var arr = ArrayPool<byte>.Shared.Rent(token.Socket.Available);
                         while (token.Socket.Available > 0)
                         {
-                            int length = token.Socket.Receive(arr);
+                            int length = token.Socket.Receive(e.Buffer);
                             if (length > 0)
                             {
-                                token.DataWrap.Data = arr.AsMemory(0, length);
+                                token.DataWrap.Data = e.Buffer.AsMemory(0, length);
                                 ExecuteHandle(token.DataWrap);
                                 token.DataWrap.Data = Helper.EmptyArray;
                             }
                         }
-                        ArrayPool<byte>.Shared.Return(arr);
                     }
 
                     if (token.Socket.Connected == false)
@@ -301,10 +299,6 @@ namespace common.socks5
 
         public void Clear()
         {
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-            }
             Socket?.SafeClose();
             Disposabled = true;
         }
