@@ -109,7 +109,6 @@ namespace common.tcpforward
             ForwardAsyncUserToken acceptToken = (e.UserToken as ForwardAsyncUserToken);
 
             ulong id = requestIdNs.Increment();
-            //Console.WriteLine($"收到连接：{id}");
             ForwardAsyncUserToken token = new ForwardAsyncUserToken
             {
                 SourceSocket = e.AcceptSocket,
@@ -220,14 +219,12 @@ namespace common.tcpforward
 
         public void Response(TcpForwardInfo model)
         {
-            //Console.WriteLine($"收到回复:{model.DataType}：{model.StateType}：{model.Buffer.Length}：{model.RequestId}");
             if (clientsManager.TryGetValue(model.RequestId, out ForwardAsyncUserToken token))
             {
                 if (model.StateType == TcpForwardStateTypes.Success)
                 {
                     if (token.Request.DataType == TcpForwardDataTypes.CONNECT)
                     {
-                        //Console.WriteLine($"收到回复连接成功：{model.Buffer.Length}：{token.Request.Cache.Length}：{model.RequestId} ");
                         token.Request.DataType = TcpForwardDataTypes.FORWARD;
                         token.Request.TargetEndpoint = Helper.EmptyArray;
                         if (token.Request.ForwardType == TcpForwardTypes.PROXY)
@@ -236,11 +233,9 @@ namespace common.tcpforward
                         }
                         else if (token.Request.Cache.Length > 0)
                         {
-                           // Console.WriteLine($"首发数据：{token.Request.Cache.Length}：{model.RequestId} ");
                             Receive(token, token.Request.Cache);
                             token.Request.Cache = Helper.EmptyArray;
                         }
-                        //Console.WriteLine($"开始接收数据：{model.RequestId}");
                         if (token.SourceSocket.ReceiveAsync(token.Saea) == false)
                         {
                             ProcessReceive(token.Saea);
@@ -251,7 +246,6 @@ namespace common.tcpforward
                     {
                         try
                         {
-                           // Console.WriteLine($"收到返回数据：{model.Buffer.Length}：{model.RequestId}");
                             token.SourceSocket.Send(model.Buffer.Span, SocketFlags.None);
                         }
                         catch (Exception)

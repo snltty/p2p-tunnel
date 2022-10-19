@@ -73,9 +73,16 @@ namespace common.socks5
             ConnectionKey key = new ConnectionKey(connection.FromConnection.ConnectId, data.Id);
             if (connections.TryGetValue(key, out AsyncServerUserToken token))
             {
-                if (data.Data.Length > 0)
+                if (data.Data.Length > 0 && token.TargetSocket.Connected)
                 {
-                    _ = token.TargetSocket.SendAsync(data.Data, SocketFlags.None);
+                    try
+                    {
+                        _ = token.TargetSocket.SendAsync(data.Data, SocketFlags.None);
+                    }
+                    catch (Exception)
+                    {
+                        CloseClientSocket(token);
+                    }
                 }
                 else
                 {
@@ -96,12 +103,18 @@ namespace common.socks5
                 data.TargetEP = remoteEndPoint;
                 Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                 token = new UdpToken { Connection = connection.FromConnection, Data = data, TargetSocket = socket, };
-                token.PoolBuffer =new byte[65535];
+                token.PoolBuffer = new byte[65535];
                 udpConnections.AddOrUpdate(key, token, (a, b) => token);
 
-                _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
-                token.Data.Data = Helper.EmptyArray;
-                IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
+                try
+                {
+                    _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
+                    token.Data.Data = Helper.EmptyArray;
+                    IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
+                }
+                catch (Exception)
+                {
+                }
             }
             else
             {
@@ -294,7 +307,7 @@ namespace common.socks5
                     UserToken = token,
                     SocketFlags = SocketFlags.None,
                 };
-                token.PoolBuffer = new byte[config.BufferSize];
+                token.PoolBuffer = ArrayPool<byte>.Shared.Rent(config.BufferSize);//new byte[config.BufferSize];
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
                 readEventArgs.Completed += Target_IO_Completed;
                 if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
@@ -394,6 +407,13 @@ namespace common.socks5
         public void Clear()
         {
             TargetSocket?.SafeClose();
+            TargetSocket = null;
+
+            if (PoolBuffer != null && PoolBuffer.Length > 0)
+            {
+                ArrayPool<byte>.Shared.Return(PoolBuffer);
+                PoolBuffer = null;
+            }
             GC.Collect();
             GC.SuppressFinalize(this);
         }

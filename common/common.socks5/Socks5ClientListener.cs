@@ -120,7 +120,7 @@ namespace common.socks5
                 UserToken = token,
                 SocketFlags = SocketFlags.None,
             };
-            token.PoolBuffer = new byte[bufferSize];
+            token.PoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);// new byte[bufferSize];
             readEventArgs.SetBuffer(token.PoolBuffer, 0, bufferSize);
             readEventArgs.Completed += IO_Completed;
             if (socket.ReceiveAsync(readEventArgs) == false)
@@ -300,6 +300,13 @@ namespace common.socks5
         public void Clear()
         {
             Socket?.SafeClose();
+            Socket = null;
+            if (PoolBuffer != null && PoolBuffer.Length > 0)
+            {
+                ArrayPool<byte>.Shared.Return(PoolBuffer);
+                PoolBuffer = null;
+            }
+
             Disposabled = true;
         }
     }

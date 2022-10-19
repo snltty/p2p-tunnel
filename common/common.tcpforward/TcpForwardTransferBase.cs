@@ -38,7 +38,7 @@ namespace common.tcpforward
             }
             else
             {
-               // Console.WriteLine($"收到连接：{request.DataType}：{request.StateType}：{request.Buffer.Length}：{request.RequestId}");
+                // Console.WriteLine($"收到连接：{request.DataType}：{request.StateType}：{request.Buffer.Length}：{request.RequestId}");
                 request.Connection.ReceiveBytes += request.Buffer.Length;
                 tcpForwardMessengerSender.SendRequest(request);
             }
@@ -47,24 +47,25 @@ namespace common.tcpforward
         private void GetTarget(TcpForwardInfo request)
         {
             request.ForwardType = TcpForwardTypes.FORWARD;
-            request.Cache = request.Buffer;
-            request.Buffer = Helper.EmptyArray;
+            //缓存第一个包，等连接成功后发送
+            //request.Cache = request.Buffer;
+            //request.Buffer = Helper.EmptyArray;
 
             //短链接
             if (request.AliveType == TcpForwardAliveTypes.WEB)
             {
                 //http1.1代理
-                if (HttpConnectMethodHelper.IsConnectMethod(request.Cache.Span))
+                if (HttpConnectMethodHelper.IsConnectMethod(request.Buffer.Span))
                 {
                     request.ForwardType = TcpForwardTypes.PROXY;
                     tcpForwardTargetProvider?.Get(request.SourcePort, request);
-                    request.TargetEndpoint = HttpConnectMethodHelper.GetHost(request.Cache);
-                    //request.Buffer = Helper.EmptyArray;
+                    request.TargetEndpoint = HttpConnectMethodHelper.GetHost(request.Buffer);
+                    request.Buffer = Helper.EmptyArray;
                 }
                 //正常的http请求
                 else
                 {
-                    string domain = HttpParseHelper.GetHost(request.Cache.Span).GetString();
+                    string domain = HttpParseHelper.GetHost(request.Buffer.Span).GetString();
                     tcpForwardTargetProvider?.Get(domain, request);
                 }
             }

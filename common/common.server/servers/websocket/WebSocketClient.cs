@@ -453,6 +453,7 @@ namespace common.server.servers.websocket
         public void Clear()
         {
             TargetSocket?.SafeClose();
+            TargetSocket = null;
             GC.Collect();
             GC.SuppressFinalize(this);
         }
