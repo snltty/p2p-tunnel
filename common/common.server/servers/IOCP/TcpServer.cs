@@ -139,7 +139,7 @@ namespace common.server.servers.iocp
                     UserToken = userToken,
                     SocketFlags = SocketFlags.None,
                 };
-                userToken.PoolBuffer =  new byte[bufferSize];
+                userToken.PoolBuffer = new byte[bufferSize];
                 readEventArgs.SetBuffer(userToken.PoolBuffer, 0, bufferSize);
                 readEventArgs.Completed += IO_Completed;
                 if (socket.ReceiveAsync(readEventArgs) == false)
@@ -303,6 +303,9 @@ namespace common.server.servers.iocp
             PoolBuffer = Helper.EmptyArray;
 
             DataBuffer.Clear(true);
+
+            GC.Collect();
+            GC.SuppressFinalize(this);
         }
     }
 }
