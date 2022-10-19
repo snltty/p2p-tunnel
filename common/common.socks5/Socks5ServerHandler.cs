@@ -451,6 +451,7 @@ namespace common.socks5
         public void Clear()
         {
             TargetSocket?.SafeClose();
+            PoolBuffer = Helper.EmptyArray;
             GC.Collect();
             GC.SuppressFinalize(this);
         }
