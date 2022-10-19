@@ -307,7 +307,7 @@ namespace common.socks5
                     UserToken = token,
                     SocketFlags = SocketFlags.None,
                 };
-                token.PoolBuffer = ArrayPool<byte>.Shared.Rent(config.BufferSize);//new byte[config.BufferSize];
+                token.PoolBuffer = new byte[config.BufferSize];
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
                 readEventArgs.Completed += Target_IO_Completed;
                 if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
@@ -409,11 +409,7 @@ namespace common.socks5
             TargetSocket?.SafeClose();
             TargetSocket = null;
 
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-                PoolBuffer = null;
-            }
+            PoolBuffer = Helper.EmptyArray;
             GC.Collect();
             GC.SuppressFinalize(this);
         }

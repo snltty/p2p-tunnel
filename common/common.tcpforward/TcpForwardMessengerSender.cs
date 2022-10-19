@@ -14,15 +14,15 @@ namespace common.tcpforward
             this.messengerSender = messengerSender;
         }
 
-        public void SendRequest(TcpForwardInfo arg)
+        public bool SendRequest(TcpForwardInfo arg)
         {
             var bytes = arg.ToBytes();
-            _ = messengerSender.SendOnly(new MessageRequestWrap
+            return messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = "TcpForward/Request",
                 Connection = arg.Connection,
                 Memory = bytes
-            });
+            }).Result;
         }
 
         public void SendResponse(TcpForwardInfo arg)

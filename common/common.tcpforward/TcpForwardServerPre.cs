@@ -7,13 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 
 namespace common.tcpforward
 {
     public class TcpForwardServerPre : ITcpForwardServer
     {
-        public SimpleSubPushHandler<TcpForwardInfo> OnRequest { get; } = new SimpleSubPushHandler<TcpForwardInfo>();
+        public Func<TcpForwardInfo, bool> OnRequest { get; set; } = (info) => true;
         public SimpleSubPushHandler<ListeningChangeInfo> OnListeningChange { get; } = new SimpleSubPushHandler<ListeningChangeInfo>();
         private readonly ServersManager serversManager = new ServersManager();
         private readonly ClientsManager clientsManager = new ClientsManager();
@@ -138,6 +137,7 @@ namespace common.tcpforward
 
             if (token.Request.AliveType == TcpForwardAliveTypes.TUNNEL)
             {
+                token.FirstPacket = false;
                 Receive(token, Helper.EmptyArray);
             }
             else
@@ -196,24 +196,32 @@ namespace common.tcpforward
             }
         }
 
-        private void Receive(ForwardAsyncUserToken token, Memory<byte> data)
+        private bool Receive(ForwardAsyncUserToken token, Memory<byte> data)
         {
             token.Request.Buffer = data;
-            OnRequest.Push(token.Request);
+            bool res = OnRequest(token.Request);
             token.Request.Buffer = Helper.EmptyArray;
+            if (res == false)
+            {
+                CloseClientSocket(token);
+            }
+            return res;
         }
 
         private void CloseClientSocket(SocketAsyncEventArgs e)
         {
             ForwardAsyncUserToken token = e.UserToken as ForwardAsyncUserToken;
-
+            CloseClientSocket(token);
+        }
+        private void CloseClientSocket(ForwardAsyncUserToken token)
+        {
             clientsManager.TryRemove(token.Request.RequestId, out _);
 
             if (token.Request.Connection != null)
             {
                 token.Request.StateType = TcpForwardStateTypes.Close;
                 token.Request.Buffer = Helper.EmptyArray;
-                OnRequest.Push(token.Request);
+                OnRequest(token.Request);
             }
         }
 
@@ -259,6 +267,10 @@ namespace common.tcpforward
                     if (token.Request.ForwardType == TcpForwardTypes.PROXY)
                     {
                         token.SourceSocket.Send(HttpConnectMethodHelper.ConnectErrorMessage(), SocketFlags.None);
+                    }
+                    else if (model.Buffer.Length > 0)
+                    {
+                        token.SourceSocket.Send(model.Buffer.Span, SocketFlags.None);
                     }
                     clientsManager.TryRemove(model.RequestId, out _);
                 }
@@ -316,6 +328,9 @@ namespace common.tcpforward
                 try
                 {
                     c.SourceSocket.SafeClose();
+
+                    c.PoolBuffer = Helper.EmptyArray;
+
                     c.Saea.Dispose();
                     GC.Collect();
                     GC.SuppressFinalize(c);

@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using System;
 
 namespace common.tcpforward
 {
@@ -13,7 +14,7 @@ namespace common.tcpforward
         public void Stop(int sourcePort);
         public void Stop();
 
-        public SimpleSubPushHandler<TcpForwardInfo> OnRequest { get; }
+        public Func<TcpForwardInfo,bool> OnRequest { get; set; }
         public SimpleSubPushHandler<ListeningChangeInfo> OnListeningChange { get; }
     }
    

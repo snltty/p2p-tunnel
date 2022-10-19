@@ -161,7 +161,7 @@ namespace common.server.servers.websocket
                     UserToken = token,
                     SocketFlags = SocketFlags.None,
                 };
-                token.PoolBuffer = new byte[bufferSize];
+                token.PoolBuffer =  new byte[bufferSize];
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, bufferSize);
                 readEventArgs.Completed += Target_IO_Completed;
                 if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
@@ -454,6 +454,9 @@ namespace common.server.servers.websocket
         {
             TargetSocket?.SafeClose();
             TargetSocket = null;
+
+            PoolBuffer = Helper.EmptyArray;
+
             GC.Collect();
             GC.SuppressFinalize(this);
         }

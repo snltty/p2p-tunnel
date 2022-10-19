@@ -30,8 +30,6 @@ namespace common.udpforward
             if (serversManager.Contains(sourcePort))
                 return;
 
-
-
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, sourcePort);
             var udpClient = new UdpClient(localEndPoint);
 

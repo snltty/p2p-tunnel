@@ -139,7 +139,7 @@ namespace common.server.servers.iocp
                     UserToken = userToken,
                     SocketFlags = SocketFlags.None,
                 };
-                userToken.PoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);// new byte[bufferSize];
+                userToken.PoolBuffer =  new byte[bufferSize];
                 readEventArgs.SetBuffer(userToken.PoolBuffer, 0, bufferSize);
                 readEventArgs.Completed += IO_Completed;
                 if (socket.ReceiveAsync(readEventArgs) == false)
@@ -300,11 +300,7 @@ namespace common.server.servers.iocp
             Socket?.SafeClose();
             Socket = null;
 
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-                PoolBuffer = null;
-            }
+            PoolBuffer = Helper.EmptyArray;
 
             DataBuffer.Clear(true);
         }

@@ -131,18 +131,12 @@ namespace common.tcpforward
                 {
                     connections.TryAdd(token.Key, token);
 
-                    var buffer = token.SendArg.Buffer;
                     token.SendArg.TargetEndpoint = Helper.EmptyArray;
                     token.SendArg.StateType = TcpForwardStateTypes.Success;
                     Receive(token.SendArg, Helper.EmptyArray);
 
-                    token.PoolBuffer = ArrayPool<byte>.Shared.Rent(config.BufferSize); //new byte[config.BufferSize];
+                    token.PoolBuffer = new byte[config.BufferSize];
                     e.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
-
-                    if (buffer.Length > 0)
-                    {
-                        token.TargetSocket.SendAsync(buffer, SocketFlags.None);
-                    }
 
                     if (token.TargetSocket.ReceiveAsync(e) == false)
                     {
@@ -242,11 +236,7 @@ namespace common.tcpforward
             TargetSocket?.SafeClose();
             TargetSocket = null;
 
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-                PoolBuffer = null;
-            }
+            PoolBuffer = Helper.EmptyArray;
 
             GC.Collect();
             GC.SuppressFinalize(this);

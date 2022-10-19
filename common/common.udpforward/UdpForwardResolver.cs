@@ -2,7 +2,6 @@
 using common.libs.extends;
 using common.server;
 using System;
-using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +46,7 @@ namespace common.udpforward
                 token = new UdpToken { Connection = arg.Connection, Data = arg, TargetSocket = socket, };
 
                 token.TargetEP = endpoint;
-                token.PoolBuffer = ArrayPool<byte>.Shared.Rent(65535);// new byte[65535];
+                token.PoolBuffer = new byte[65535];
                 connections.AddOrUpdate(key, token, (a, b) => token);
 
                 _ = token.TargetSocket.SendTo(arg.Buffer.Span, endpoint);
@@ -117,11 +116,7 @@ namespace common.udpforward
         {
             TargetSocket?.SafeClose();
             TargetSocket = null;
-            if (PoolBuffer != null && PoolBuffer.Length > 0)
-            {
-                ArrayPool<byte>.Shared.Return(PoolBuffer);
-                PoolBuffer = null;
-            }
+            PoolBuffer = Helper.EmptyArray;
 
             GC.Collect();
             GC.SuppressFinalize(this);
