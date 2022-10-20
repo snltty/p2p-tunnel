@@ -33,7 +33,7 @@ namespace common.server.servers.rudp
             server.DisconnectTimeout = timeout;
             server.MaxConnectAttempts = 10;
             //server.AutoRecycle = true;
-            //server.ReuseAddress = true;
+            server.ReuseAddress = true;
             server.Start(port);
 
             listener.ConnectionRequestEvent += request =>
@@ -58,7 +58,7 @@ namespace common.server.servers.rudp
             listener.NetworkErrorEvent += (endPoint, socketError) =>
             {
             };
-            listener.NetworkReceiveEvent += (NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod) =>
+            listener.NetworkReceiveEvent += (NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod) =>
             {
                 try
                 {

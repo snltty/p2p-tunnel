@@ -187,7 +187,7 @@ namespace client.realize.messengers.clients
                 {
                     if (result == EnumConnectResult.AllFail)
                     {
-                        Relay(client, ServerType.UDP, true);
+                        //Relay(client, ServerType.UDP, true);
                         Relay(client, ServerType.TCP, true);
                     }
                 }
@@ -371,7 +371,7 @@ namespace client.realize.messengers.clients
                             }
                             else if (registerState.RemoteInfo.Relay)
                             {
-                                Relay(client, ServerType.UDP, true);
+                                //Relay(client, ServerType.UDP, true);
                                 Relay(client, ServerType.TCP, true);
                             }
                         }
