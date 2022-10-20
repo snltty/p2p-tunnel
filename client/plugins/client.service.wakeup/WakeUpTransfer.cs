@@ -36,7 +36,7 @@ namespace client.service.wakeup
 
         public void OnNotify(IConnection connection)
         {
-            if(connection.FromConnection != null)
+            if (connection.FromConnection != null)
             {
                 if (clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
                 {

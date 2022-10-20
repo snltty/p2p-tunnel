@@ -358,7 +358,7 @@ namespace client.realize.messengers.clients
                         clientInfoCaching.Add(client);
                         if (first)
                         {
-                            if (config.Client.AutoPunchHole || client.AutoPunchHole)
+                            if (config.Client.AutoPunchHole && client.AutoPunchHole)
                             {
                                 if (registerState.LocalInfo.TcpPort == registerState.RemoteInfo.TcpPort || registerState.LocalInfo.UdpPort == registerState.RemoteInfo.UdpPort)
                                 {

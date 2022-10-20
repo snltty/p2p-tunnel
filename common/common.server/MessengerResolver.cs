@@ -109,15 +109,15 @@ namespace common.server
 
                 if (middlewareTransfer != null)
                 {
-                    var res = await middlewareTransfer.Execute(connection);
-                    if (res.Item1 == false)
+                    var middleres = await middlewareTransfer.Execute(connection);
+                    if (middleres.Item1 == false)
                     {
                         await messengerSender.ReplyOnly(new MessageResponseWrap
                         {
                             Connection = connection,
                             RequestId = requestWrap.RequestId,
                             Code = MessageResponeCodes.ERROR,
-                            Memory = res.Item2
+                            Memory = middleres.Item2
                         }).ConfigureAwait(false);
                         return;
                     }
@@ -148,7 +148,8 @@ namespace common.server
                 {
                     resultObject = resultAsync as byte[];
                 }
-                await messengerSender.ReplyOnly(new MessageResponseWrap
+
+                bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
                 {
                     Connection = connection,
                     Memory = resultObject,
@@ -167,7 +168,7 @@ namespace common.server
             }
             finally
             {
-                requestWrap.Reset();
+                //requestWrap.Reset();
             }
         }
 

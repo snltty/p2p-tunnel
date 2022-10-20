@@ -2,7 +2,6 @@
 using common.libs.extends;
 using common.server;
 using System;
-using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
@@ -31,14 +30,14 @@ namespace common.tcpforward
         public void InputData(IConnection connection)
         {
             TcpForwardInfo data = new TcpForwardInfo();
-            data.Connection = connection;
+            data.Connection = connection.FromConnection;
             data.DeBytes(connection.ReceiveRequestWrap.Memory);
             OnRequest(data);
         }
 
         private void OnRequest(TcpForwardInfo arg)
         {
-            ConnectionKey key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId);
+            ConnectionKey key = new ConnectionKey(arg.Connection.ConnectId, arg.RequestId);
             if (arg.StateType == TcpForwardStateTypes.Success)
             {
                 if (arg.DataType == TcpForwardDataTypes.FORWARD)
@@ -98,7 +97,7 @@ namespace common.tcpforward
             saea.Completed += IO_Completed;
             saea.UserToken = new ConnectUserToken
             {
-                Key = new ConnectionKey(arg.Connection.FromConnection.ConnectId, arg.RequestId),
+                Key = new ConnectionKey(arg.Connection.ConnectId, arg.RequestId),
                 TargetSocket = socket,
                 SendArg = arg
             };
@@ -202,7 +201,7 @@ namespace common.tcpforward
         private void Receive(TcpForwardInfo arg, Memory<byte> data)
         {
             arg.Buffer = data;
-            tcpForwardMessengerSender.SendResponse(arg);
+            tcpForwardMessengerSender.SendResponse(arg, arg.Connection);
             arg.Buffer = Helper.EmptyArray;
         }
 
@@ -229,6 +228,7 @@ namespace common.tcpforward
         public Socket TargetSocket { get; set; }
         public ConnectionKey Key { get; set; }
         public TcpForwardInfo SendArg { get; set; }
+        public IConnection Connection { get; set; }
         public byte[] PoolBuffer { get; set; }
 
         public void Clear()

@@ -189,9 +189,11 @@ namespace common.server.model
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
             index += requestIdByte.Length;
 
-            Memory.CopyTo(res.AsMemory(index, Memory.Length));
-            index += Memory.Length;
-
+            if (Memory.Length > 0)
+            {
+                Memory.CopyTo(res.AsMemory(index, Memory.Length));
+                index += Memory.Length;
+            }
             return (res, length);
         }
         /// <summary>
@@ -209,7 +211,10 @@ namespace common.server.model
             RequestId = span.Slice(index).ToUInt64();
             index += 8;
 
-            Memory = memory.Slice(index, memory.Length - index);
+            if (memory.Length - index > 0)
+            {
+                Memory = memory.Slice(index, memory.Length - index);
+            }
         }
 
         public void Return(byte[] array)

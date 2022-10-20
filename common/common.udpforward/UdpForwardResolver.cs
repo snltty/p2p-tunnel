@@ -43,7 +43,7 @@ namespace common.udpforward
                 IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
 
                 Socket socket = new Socket(endpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-                token = new UdpToken { Connection = arg.Connection, Data = arg, TargetSocket = socket, };
+                token = new UdpToken { Connection = arg.Connection.FromConnection, Data = arg, TargetSocket = socket, };
 
                 token.TargetEP = endpoint;
                 token.PoolBuffer = new byte[65535];
@@ -90,7 +90,7 @@ namespace common.udpforward
                     token.Data.Buffer = token.PoolBuffer.AsMemory(0, length);
 
                     token.Update();
-                    _ = udpForwardMessengerSender.SendResponse(token.Data);
+                    _ = udpForwardMessengerSender.SendResponse(token.Data, token.Connection);
                     token.Data.Buffer = Helper.EmptyArray;
                 }
                 result = token.TargetSocket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);

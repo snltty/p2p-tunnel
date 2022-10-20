@@ -1,9 +1,12 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers;
 using server.messengers.register;
+using System;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Threading.Tasks;
 
 namespace server.service.messengers
@@ -48,7 +51,6 @@ namespace server.service.messengers
                             Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection,
                             Memory = model.Data,
                             MemoryPath = model.Path,
-                            RequestId = connection.ReceiveRequestWrap.RequestId,
                             Relay = 1,
                             RelayId = source.Id,
                         }).ConfigureAwait(false);
@@ -76,15 +78,15 @@ namespace server.service.messengers
                     //是否在同一个组
                     if (source.GroupId == target.GroupId)
                     {
-                        return (await messengerSender.SendReply(new MessageRequestWrap
+                        var res = await messengerSender.SendReply(new MessageRequestWrap
                         {
                             Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection,
                             Memory = model.Data,
                             MemoryPath = model.Path,
-                            RequestId = connection.ReceiveRequestWrap.RequestId,
                             Relay = 1,
-                            RelayId = source.Id,
-                        }).ConfigureAwait(false)).Data.ToArray();
+                            RelayId = source.Id
+                        }).ConfigureAwait(false);
+                        return res.Data.ToArray();
                     }
                 }
             }

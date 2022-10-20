@@ -117,7 +117,7 @@ namespace common.libs
             //一次最多转移100000个
             for (int i = 0; i < 100000; i++)
             {
-                if (!timeouts.TryDequeue(out WheelTimerTimeout<T> timeout))
+                if (timeouts.TryDequeue(out WheelTimerTimeout<T> timeout) == false)
                 {
                     break;
                 }

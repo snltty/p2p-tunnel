@@ -1,4 +1,6 @@
 ﻿using common.libs;
+using common.libs.extends;
+using common.server.model;
 using LiteNetLib;
 using System;
 using System.Net;
@@ -65,9 +67,7 @@ namespace common.server.servers.rudp
                 {
                     IConnection connection = peer.Tag as IConnection;
                     connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
-
                     OnPacket(connection).Wait();
-                    reader.Recycle();
                 }
                 catch (Exception)
                 {

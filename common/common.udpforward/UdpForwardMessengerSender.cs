@@ -31,12 +31,12 @@ namespace common.udpforward
         }
 
         public SimpleSubPushHandler<UdpForwardInfo> OnResponseHandler { get; } = new SimpleSubPushHandler<UdpForwardInfo>();
-        public async Task SendResponse(UdpForwardInfo arg)
+        public async Task SendResponse(UdpForwardInfo arg, IConnection Connection)
         {
             var res = messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = "UdpForward/Response",
-                Connection = arg.Connection.FromConnection,
+                Connection = Connection,
                 Memory = arg.ToBytes()
             }).ConfigureAwait(false);
             await res;

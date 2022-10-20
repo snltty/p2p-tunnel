@@ -12,7 +12,7 @@ namespace common.server
     /// </summary>
     public class MessengerSender
     {
-        private NumberSpace requestIdNumberSpace = new NumberSpace(0);
+        public NumberSpace requestIdNumberSpace = new NumberSpace(0);
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
         private ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>>();
         private Memory<byte> sendOnlyPath = "relay/sendonly".ToBytes();
@@ -35,7 +35,7 @@ namespace common.server
                 msg.RequestId = requestIdNumberSpace.Increment();
             }
             WheelTimerTimeout<TimeoutState> timeout = NewReply(msg.RequestId, msg.Timeout);
-            if (!await SendOnly(msg).ConfigureAwait(false))
+            if (await SendOnly(msg).ConfigureAwait(false) == false)
             {
                 sends.TryRemove(msg.RequestId, out _);
                 timeout.Cancel();
@@ -95,7 +95,7 @@ namespace common.server
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public async ValueTask ReplyOnly(MessageResponseWrap msg)
+        public async ValueTask<bool> ReplyOnly(MessageResponseWrap msg)
         {
             try
             {
@@ -107,11 +107,13 @@ namespace common.server
                 (byte[] bytes, int length) = msg.ToArray(msg.Connection.ServerType, true);
                 bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
                 msg.Return(bytes);
+                return res;
             }
             catch (Exception ex)
             {
                 Logger.Instance.Debug(ex);
             }
+            return false;
         }
         /// <summary>
         /// 回复本地消息，发送消息后，socket收到消息，通过这个方法回复给刚刚发送的对象

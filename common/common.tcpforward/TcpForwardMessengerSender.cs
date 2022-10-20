@@ -25,13 +25,13 @@ namespace common.tcpforward
             }).Result;
         }
 
-        public void SendResponse(TcpForwardInfo arg)
+        public void SendResponse(TcpForwardInfo arg, IConnection connection)
         {
             var bytes = arg.ToBytes();
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = "TcpForward/Response",
-                Connection = arg.Connection.FromConnection,
+                Connection = connection,
                 Memory = bytes
             });
         }
