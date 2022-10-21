@@ -396,7 +396,7 @@ namespace client.service.ftp
         {
             return await messengerSender.SendOnly(new MessageRequestWrap
             {
-                Memory = data,
+                Payload = data,
                 Path = SocketPath,
                 Connection = connection
             }).ConfigureAwait(false);
@@ -405,7 +405,7 @@ namespace client.service.ftp
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                Memory = data.ToBytes(),
+                Payload = data.ToBytes(),
                 Path = SocketPath,
                 Connection = client.OnlineConnection,
             }).ConfigureAwait(false);

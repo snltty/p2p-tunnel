@@ -20,7 +20,7 @@ namespace client.service.ftp.server.plugin
             await Task.Yield();
 
             FtpDelCommand cmd = new FtpDelCommand();
-            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Memory);
+            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Payload);
 
             if (string.IsNullOrWhiteSpace(cmd.Path))
             {

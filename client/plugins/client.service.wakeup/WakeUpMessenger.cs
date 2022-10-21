@@ -17,7 +17,7 @@ namespace client.service.wakeup
 
         public byte[] Macs(IConnection connection)
         {
-            if (connection.ReceiveRequestWrap.Memory.Length > 0)
+            if (connection.ReceiveRequestWrap.Payload.Length > 0)
             {
                 wakeUpTransfer.OnNotify(connection);
             }
@@ -26,7 +26,7 @@ namespace client.service.wakeup
 
         public void Execute(IConnection connection)
         {
-            wakeUpTransfer.WakeUp(connection.ReceiveRequestWrap.Memory.GetString());
+            wakeUpTransfer.WakeUp(connection.ReceiveRequestWrap.Payload.GetString());
         }
     }
 }

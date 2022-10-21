@@ -4,6 +4,7 @@ using common.server;
 using common.server.model;
 using server.messengers;
 using server.messengers.register;
+using server.service.messengers.register;
 using System;
 using System.Linq;
 using System.Runtime.Intrinsics.X86;
@@ -38,7 +39,7 @@ namespace server.service.messengers
                 }
 
                 RelayParamsInfo model = new RelayParamsInfo();
-                model.DeBytes(connection.ReceiveRequestWrap.Memory);
+                model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
                 //B已注册
                 if (clientRegisterCache.Get(model.ToId, out RegisterCacheInfo target))
@@ -49,7 +50,7 @@ namespace server.service.messengers
                         await messengerSender.SendOnly(new MessageRequestWrap
                         {
                             Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection,
-                            Memory = model.Data,
+                            Payload = model.Data,
                             MemoryPath = model.Path,
                             Relay = 1,
                             RelayId = source.Id,

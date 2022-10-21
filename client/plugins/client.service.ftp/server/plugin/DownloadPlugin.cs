@@ -20,7 +20,7 @@ namespace client.service.ftp.server.plugin
         public async Task<FtpResultInfo> Execute(FtpPluginParamWrap arg)
         {
             FtpDownloadCommand cmd = new FtpDownloadCommand();
-            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Memory);
+            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Payload);
 
             IEnumerable<string> error = await ftpServer.Upload(cmd, arg).ConfigureAwait(false);
             if (error.Any())

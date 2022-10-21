@@ -100,7 +100,7 @@ namespace server.service
                         _ = messengerSender.SendOnly(new MessageRequestWrap
                         {
                             Connection = client.Connection,
-                            Memory = bytes,
+                            Payload = bytes,
                             Path = "clients/execute"
                         }).ConfigureAwait(false);
                     }

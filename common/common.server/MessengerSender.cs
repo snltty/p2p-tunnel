@@ -72,7 +72,7 @@ namespace common.server
                 }
                 if (msg.Connection.EncodeEnabled)
                 {
-                    msg.Memory = msg.Connection.Crypto.Encode(msg.Memory);
+                    msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
 
                 byte[] bytes = msg.ToArray(msg.Connection.ServerType, out int length, true);
@@ -98,7 +98,7 @@ namespace common.server
             {
                 if (msg.Connection.EncodeEnabled)
                 {
-                    msg.Memory = msg.Connection.Crypto.Encode(msg.Memory);
+                    msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
 
                 (byte[] bytes, int length) = msg.ToArray(msg.Connection.ServerType, true);
@@ -121,7 +121,7 @@ namespace common.server
             if (sends.TryRemove(wrap.RequestId, out WheelTimerTimeout<TimeoutState> timeout))
             {
                 timeout.Cancel();
-                timeout.Task.State.Tcs.SetResult(new MessageResponeInfo { Code = wrap.Code, Data = wrap.Memory });
+                timeout.Task.State.Tcs.SetResult(new MessageResponeInfo { Code = wrap.Code, Data = wrap.Payload });
             }
         }
 

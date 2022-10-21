@@ -28,29 +28,32 @@ namespace common.server.model
             }
         }
         /// <summary>
-        /// 目标路径
+        /// 目标路径，【只发发数据的话，不用填这里】
         /// </summary>
         public Memory<byte> MemoryPath { get; set; } = Memory<byte>.Empty;
 
         /// <summary>
-        /// 每条数据都有个id
+        /// 每条数据都有个id，【只发发数据的话，不用填这里】
         /// </summary>
         public ulong RequestId { get; set; } = 0;
 
         /// <summary>
-        /// 服务器给客户端发送数据时，可以写1，表示是中继数据，
+        /// 服务器给客户端发送数据时，可以写1，表示是中继数据，【只发发数据的话，不用填这里】
         /// </summary>
         public byte Relay { get; set; } = 0;
         /// <summary>
-        /// 中继数据时，写明是谁发的中继数据，以便目标客户端回复给来源客户端
+        /// 中继数据时，写明是谁发的中继数据，以便目标客户端回复给来源客户端，【只发发数据的话，不用填这里】
         /// </summary>
         public ulong RelayId { get; set; } = 0;
+        /// <summary>
+        /// 【只发发数据的话，不用填这里】
+        /// </summary>
         public Memory<byte> OriginPath { get; set; } = Memory<byte>.Empty;
 
         /// <summary>
         /// 数据荷载
         /// </summary>
-        public Memory<byte> Memory { get; set; } = Helper.EmptyArray;
+        public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
 
         /// <summary>
         /// 转包
@@ -66,7 +69,7 @@ namespace common.server.model
                 + 1
                 + requestIdByte.Length
                 + 1 + MemoryPath.Length
-                + Memory.Length;
+                + Payload.Length;
             if (Relay == 1)
             {
                 length += 8;
@@ -106,8 +109,8 @@ namespace common.server.model
             MemoryPath.CopyTo(res.AsMemory(index, MemoryPath.Length));
             index += MemoryPath.Length;
 
-            Memory.CopyTo(res.AsMemory(index, Memory.Length));
-            index += Memory.Length;
+            Payload.CopyTo(res.AsMemory(index, Payload.Length));
+            index += Payload.Length;
 
             return res;
         }
@@ -143,7 +146,7 @@ namespace common.server.model
             MemoryPath = memory.Slice(index, pathLength);
             index += pathLength;
 
-            Memory = memory.Slice(index, memory.Length - index);
+            Payload = memory.Slice(index, memory.Length - index);
         }
 
         public void Return(byte[] array)
@@ -154,8 +157,8 @@ namespace common.server.model
         public void Reset()
         {
             MemoryPath = Memory<byte>.Empty;
-            Memory = Helper.EmptyArray;
-            Memory = Helper.EmptyArray;
+            Payload = Helper.EmptyArray;
+            Payload = Helper.EmptyArray;
         }
     }
     public class MessageResponseWrap
@@ -163,7 +166,7 @@ namespace common.server.model
         public IConnection Connection { get; set; }
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
         public ulong RequestId { get; set; } = 0;
-        public ReadOnlyMemory<byte> Memory { get; set; } = Helper.EmptyArray;
+        public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
 
         /// <summary>
         /// 转包
@@ -175,7 +178,7 @@ namespace common.server.model
                 + 1
                 + 1
                 + 8
-                + Memory.Length;
+                + Payload.Length;
 
             byte[] res = pool ? ArrayPool<byte>.Shared.Rent(length) : new byte[length];
 
@@ -197,10 +200,10 @@ namespace common.server.model
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
             index += requestIdByte.Length;
 
-            if (Memory.Length > 0)
+            if (Payload.Length > 0)
             {
-                Memory.CopyTo(res.AsMemory(index, Memory.Length));
-                index += Memory.Length;
+                Payload.CopyTo(res.AsMemory(index, Payload.Length));
+                index += Payload.Length;
             }
             return (res, length);
         }
@@ -221,7 +224,7 @@ namespace common.server.model
 
             if (memory.Length - index > 0)
             {
-                Memory = memory.Slice(index, memory.Length - index);
+                Payload = memory.Slice(index, memory.Length - index);
             }
         }
 
@@ -232,8 +235,8 @@ namespace common.server.model
 
         public void Reset()
         {
-            Memory = Helper.EmptyArray;
-            Memory = Helper.EmptyArray;
+            Payload = Helper.EmptyArray;
+            Payload = Helper.EmptyArray;
         }
     }
 

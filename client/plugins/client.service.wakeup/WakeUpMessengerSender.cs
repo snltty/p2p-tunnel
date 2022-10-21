@@ -25,7 +25,7 @@ namespace client.service.wakeup
             {
                 Connection = connection,
                 Path = "wakeup/macs",
-                Memory = config.ToBytes(),
+                Payload = config.ToBytes(),
                 Timeout = 1000
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
@@ -43,7 +43,7 @@ namespace client.service.wakeup
             {
                 Connection = connection,
                 Path = "wakeup/execute",
-                Memory = mac.ToBytes(),
+                Payload = mac.ToBytes(),
                 Timeout = 1000
             }).ConfigureAwait(false);
 

@@ -28,7 +28,7 @@ namespace server.service.messengers
         public byte[] AddTunnel(IConnection connection)
         {
             TunnelRegisterInfo model = new TunnelRegisterInfo();
-            model.DeBytes(connection.ReceiveRequestWrap.Memory);
+            model.DeBytes(connection.ReceiveRequestWrap.Payload);
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
                 if (model.TunnelName == (ulong)TunnelDefaults.MIN)
@@ -52,7 +52,7 @@ namespace server.service.messengers
         {
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
-                ulong tunnelName = connection.ReceiveRequestWrap.Memory.Span.ToUInt64();
+                ulong tunnelName = connection.ReceiveRequestWrap.Payload.Span.ToUInt64();
                 source.RemoveTunnel(tunnelName);
             }
         }

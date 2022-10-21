@@ -73,7 +73,7 @@ namespace common.server
                 responseWrap.FromArray(receive);
                 if (connection.EncodeEnabled)
                 {
-                    responseWrap.Memory = connection.Crypto.Decode(responseWrap.Memory);
+                    responseWrap.Payload = connection.Crypto.Decode(responseWrap.Payload);
                 }
                 messengerSender.Response(responseWrap);
                 return;
@@ -87,7 +87,7 @@ namespace common.server
 
             if (connection.EncodeEnabled)
             {
-                requestWrap.Memory = connection.Crypto.Decode(requestWrap.Memory);
+                requestWrap.Payload = connection.Crypto.Decode(requestWrap.Payload);
             }
             try
             {
@@ -117,7 +117,7 @@ namespace common.server
                             Connection = connection,
                             RequestId = requestWrap.RequestId,
                             Code = MessageResponeCodes.ERROR,
-                            Memory = middleres.Item2
+                            Payload = middleres.Item2
                         }).ConfigureAwait(false);
                         return;
                     }
@@ -152,7 +152,7 @@ namespace common.server
                 bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
                 {
                     Connection = connection,
-                    Memory = resultObject,
+                    Payload = resultObject,
                     RequestId = requestWrap.RequestId
                 }).ConfigureAwait(false);
             }

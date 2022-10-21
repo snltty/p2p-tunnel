@@ -20,7 +20,7 @@ namespace server.service.messengers
         public async Task<byte[]> Execute(IConnection connection)
         {
             PunchHoleParamsInfo model = new PunchHoleParamsInfo();
-            model.DeBytes(connection.ReceiveRequestWrap.Memory);
+            model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
             //A已注册
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
@@ -53,7 +53,7 @@ namespace server.service.messengers
                         var res = await messengerSender.SendOnly(new MessageRequestWrap
                         {
                             Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection,
-                            Memory = model.ToBytes(),
+                            Payload = model.ToBytes(),
                             MemoryPath = connection.ReceiveRequestWrap.MemoryPath,
                             RequestId = connection.ReceiveRequestWrap.RequestId,
                         }).ConfigureAwait(false);

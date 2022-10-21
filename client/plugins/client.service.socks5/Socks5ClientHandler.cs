@@ -52,7 +52,7 @@ namespace client.service.socks5
         }
         public void InputData(IConnection connection)
         {
-            Socks5Info info = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
+            Socks5Info info = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
             if (info.Data.Length == 0)
             {
                 socks5ClientListener.Close(info.Id);

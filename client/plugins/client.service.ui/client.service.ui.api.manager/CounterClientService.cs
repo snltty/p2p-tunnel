@@ -28,7 +28,7 @@ namespace client.service.ui.api.manager
             {
                 var resp = await messengerSender.SendReply(new MessageRequestWrap
                 {
-                    Memory = Helper.EmptyArray,
+                    Payload = Helper.EmptyArray,
                     Path = "Counter/Info",
                     Connection = registerState.OnlineConnection,
                     Timeout = 15000

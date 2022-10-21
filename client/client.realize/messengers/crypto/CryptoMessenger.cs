@@ -31,9 +31,9 @@ namespace client.realize.messengers.crypto
         public byte[] Set(IConnection connection)
         {
             string password;
-            if (connection.ReceiveRequestWrap.Memory.Length > 0)
+            if (connection.ReceiveRequestWrap.Payload.Length > 0)
             {
-                var memory = asymmetricCrypto.Decode(connection.ReceiveRequestWrap.Memory);
+                var memory = asymmetricCrypto.Decode(connection.ReceiveRequestWrap.Payload);
                 password = memory.GetString();
             }
             else
@@ -61,7 +61,7 @@ namespace client.realize.messengers.crypto
 
         public bool Test(IConnection connection)
         {
-            Console.WriteLine($"{connection.ServerType},encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Memory).Span)}");
+            Console.WriteLine($"{connection.ServerType},encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");
 
             return true;
         }

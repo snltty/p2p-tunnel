@@ -28,9 +28,9 @@ namespace server.service.messengers
         public byte[] Set(IConnection connection)
         {
             string password;
-            if (connection.ReceiveRequestWrap.Memory.Length > 0)
+            if (connection.ReceiveRequestWrap.Payload.Length > 0)
             {
-                var memory = asymmetricCrypto.Decode(connection.ReceiveRequestWrap.Memory);
+                var memory = asymmetricCrypto.Decode(connection.ReceiveRequestWrap.Payload);
                 password = memory.GetString();
             }
             else
@@ -48,7 +48,7 @@ namespace server.service.messengers
         }
         public byte[] Test(IConnection connection)
         {
-            Logger.Instance.DebugDebug($"encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Memory).Span)}");
+            Logger.Instance.DebugDebug($"encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");
             return Helper.TrueArray;
         }
         public byte[] Clear(IConnection connection)

@@ -57,7 +57,7 @@ namespace client.realize.messengers.punchHole
             {
                 Connection = arg.Connection,
                 Path = "punchhole/Execute",
-                Memory = new PunchHoleParamsInfo
+                Payload = new PunchHoleParamsInfo
                 {
                     Data = msg.ToBytes(),
                     PunchForwardType = msg.ForwardType,
@@ -78,7 +78,7 @@ namespace client.realize.messengers.punchHole
             {
                 Connection = arg.Connection,
                 Path = "punchhole/Execute",
-                Memory = new PunchHoleParamsInfo
+                Payload = new PunchHoleParamsInfo
                 {
                     Data = msg.ToBytes(),
                     PunchForwardType = msg.ForwardType,

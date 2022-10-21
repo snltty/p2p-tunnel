@@ -28,7 +28,7 @@ namespace server.service.messengers.register
         public async Task<byte[]> Execute(IConnection connection)
         {
             RegisterParamsInfo model = new RegisterParamsInfo();
-            model.DeBytes(connection.ReceiveRequestWrap.Memory);
+            model.DeBytes(connection.ReceiveRequestWrap.Payload);
             //验证key
             if (registerKeyValidator.Validate(model.GroupId) == false)
             {
@@ -158,7 +158,7 @@ namespace server.service.messengers.register
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Memory = Helper.EmptyArray,
+                Payload = Helper.EmptyArray,
                 Path = "heart/alive",
                 Timeout = 2000,
             });

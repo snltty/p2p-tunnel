@@ -21,7 +21,7 @@ namespace common.socks5
             {
                 Path = $"{Target}/request",
                 Connection = connection,
-                Memory = bytes
+                Payload = bytes
             }).Result;
         }
         public void Response(Socks5Info data, IConnection connection)
@@ -31,7 +31,7 @@ namespace common.socks5
             {
                 Path = $"{Target}/response",
                 Connection = connection,
-                Memory = bytes
+                Payload = bytes
             });
         }
         public void ResponseClose(ulong id, IConnection connection)

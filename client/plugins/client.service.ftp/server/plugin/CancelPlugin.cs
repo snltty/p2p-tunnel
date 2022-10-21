@@ -16,7 +16,7 @@ namespace client.service.ftp.server.plugin
         public async Task<FtpResultInfo> Execute(FtpPluginParamWrap arg)
         {
             FtpCancelCommand cmd = new FtpCancelCommand();
-            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Memory);
+            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Payload);
             await ftpServer.OnFileUploadCancel(cmd, arg).ConfigureAwait(false);
             return new FtpResultInfo();
         }
@@ -36,7 +36,7 @@ namespace client.service.ftp.server.plugin
         {
             await Task.Yield();
             FtpCanceledCommand cmd = new FtpCanceledCommand();
-            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Memory);
+            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Payload);
             ftpServer.OnFileUploadCanceled(cmd, arg);
             return new FtpResultInfo();
         }

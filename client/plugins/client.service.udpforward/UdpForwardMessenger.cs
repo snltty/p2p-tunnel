@@ -15,7 +15,7 @@ namespace client.service.udpforward
         {
             UdpForwardInfo data = new UdpForwardInfo();
             data.Connection = connection;
-            data.DeBytes(connection.ReceiveRequestWrap.Memory);
+            data.DeBytes(connection.ReceiveRequestWrap.Payload);
             udpForwardMessengerSender.OnRequest(data);
         }
 
@@ -23,7 +23,7 @@ namespace client.service.udpforward
         {
             UdpForwardInfo data = new UdpForwardInfo();
             data.Connection = connection;
-            data.DeBytes(connection.ReceiveRequestWrap.Memory);
+            data.DeBytes(connection.ReceiveRequestWrap.Payload);
             udpForwardMessengerSender.OnResponse(data);
         }
     }

@@ -16,7 +16,7 @@ namespace client.service.ftp.server.plugin
         public async Task<FtpResultInfo> Execute(FtpPluginParamWrap arg)
         {
             FtpSetCurrentPathCommand cmd = new FtpSetCurrentPathCommand();
-            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Memory);
+            cmd.DeBytes(arg.Connection.ReceiveRequestWrap.Payload);
 
             ftpServer.SetCurrentPath(cmd, arg);
 

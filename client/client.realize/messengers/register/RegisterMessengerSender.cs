@@ -34,7 +34,7 @@ namespace client.realize.messengers.register
                 {
                     Connection = registerState.UdpConnection,
                     Path = "register/Execute",
-                    Memory = new RegisterParamsInfo
+                    Payload = new RegisterParamsInfo
                     {
                         Id = id,
                         Name = param.ClientName,
@@ -66,7 +66,7 @@ namespace client.realize.messengers.register
                 {
                     Connection = registerState.TcpConnection,
                     Path = "register/Execute",
-                    Memory = new RegisterParamsInfo
+                    Payload = new RegisterParamsInfo
                     {
                         Id = id,
                         Name = param.ClientName,
@@ -107,7 +107,7 @@ namespace client.realize.messengers.register
             return await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = registerState.OnlineConnection,
-                Memory = Helper.EmptyArray,
+                Payload = Helper.EmptyArray,
                 Path = "register/notify"
             }).ConfigureAwait(false);
         }
@@ -116,7 +116,7 @@ namespace client.realize.messengers.register
             await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = registerState.OnlineConnection,
-                Memory = Helper.EmptyArray,
+                Payload = Helper.EmptyArray,
                 Path = "exit/execute",
                 Timeout = 2000
             }).ConfigureAwait(false);

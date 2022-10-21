@@ -46,7 +46,7 @@ namespace common.socks5
 
         public void InputData(IConnection connection)
         {
-            Socks5EnumStep step = (Socks5EnumStep)(byte)(connection.ReceiveRequestWrap.Memory.Span[0] >> 4);
+            Socks5EnumStep step = (Socks5EnumStep)(byte)(connection.ReceiveRequestWrap.Payload.Span[0] >> 4);
             if (handles.TryGetValue(step, out Action<IConnection> action))
             {
                 action(connection);
@@ -55,21 +55,21 @@ namespace common.socks5
 
         private void HandleRequest(IConnection connection)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
+            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
             data.Response[0] = (byte)Socks5EnumAuthType.NoAuth;
             data.Data = data.Response;
             socks5MessengerSender.Response(data, connection.FromConnection);
         }
         private void HandleAuth(IConnection connection)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
+            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
             data.Response[0] = (byte)Socks5EnumAuthState.Success;
             data.Data = data.Response;
             socks5MessengerSender.Response(data, connection.FromConnection);
         }
         private void HndleForward(IConnection connection)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
+            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
             ConnectionKey key = new ConnectionKey(connection.FromConnection.ConnectId, data.Id);
             if (connections.TryGetValue(key, out AsyncServerUserToken token))
             {
@@ -92,7 +92,7 @@ namespace common.socks5
         }
         private void HndleForwardUdp(IConnection connection)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
+            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
 
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
             Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
@@ -165,7 +165,7 @@ namespace common.socks5
 
         private void HandleCommand(IConnection connection)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Memory);
+            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
 
             if (socks5Validator.Validate(connection.FromConnection, data, config) == false)
             {

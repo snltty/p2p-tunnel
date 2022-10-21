@@ -31,7 +31,7 @@ namespace server.service.udpforward
         {
             UdpForwardInfo data = new UdpForwardInfo();
             data.Connection = connection;
-            data.DeBytes(connection.ReceiveRequestWrap.Memory);
+            data.DeBytes(connection.ReceiveRequestWrap.Payload);
             tcpForwardMessengerSender.OnRequest(data);
         }
 
@@ -39,7 +39,7 @@ namespace server.service.udpforward
         {
             UdpForwardInfo data = new UdpForwardInfo();
             data.Connection = connection;
-            data.DeBytes(connection.ReceiveRequestWrap.Memory);
+            data.DeBytes(connection.ReceiveRequestWrap.Payload);
             tcpForwardMessengerSender.OnResponse(data);
         }
 
@@ -55,7 +55,7 @@ namespace server.service.udpforward
         {
             try
             {
-                int port = connection.ReceiveRequestWrap.Memory.Span.ToUInt16();
+                int port = connection.ReceiveRequestWrap.Payload.Span.ToUInt16();
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
                     if (udpForwardValidator.Validate(source.GroupId) == false)
@@ -83,7 +83,7 @@ namespace server.service.udpforward
             try
             {
                 UdpForwardRegisterParamsInfo model = new UdpForwardRegisterParamsInfo();
-                model.DeBytes(connection.ReceiveRequestWrap.Memory);
+                model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
                 //取出注册缓存，没取出来就说明没注册
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))

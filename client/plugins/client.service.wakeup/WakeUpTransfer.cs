@@ -43,7 +43,7 @@ namespace client.service.wakeup
             {
                 if (clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
                 {
-                    UpdateMac(client, Config.DeBytes(connection.ReceiveRequestWrap.Memory));
+                    UpdateMac(client, Config.DeBytes(connection.ReceiveRequestWrap.Payload));
                 }
             }
         }

@@ -31,7 +31,7 @@ namespace common.tcpforward
         {
             TcpForwardInfo data = new TcpForwardInfo();
             data.Connection = connection.FromConnection;
-            data.DeBytes(connection.ReceiveRequestWrap.Memory);
+            data.DeBytes(connection.ReceiveRequestWrap.Payload);
             OnRequest(data);
         }
 

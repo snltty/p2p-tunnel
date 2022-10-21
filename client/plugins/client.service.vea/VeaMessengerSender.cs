@@ -27,7 +27,7 @@ namespace client.service.vea
             {
                 Connection = connection,
                 Path = "vea/ip",
-                Memory = new IPAddressInfo { IP = config.IP, LanIP = config.LanIP }.ToBytes(),
+                Payload = new IPAddressInfo { IP = config.IP, LanIP = config.LanIP }.ToBytes(),
                 Timeout = 1000
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
@@ -48,7 +48,7 @@ namespace client.service.vea
             {
                 Connection = connection,
                 Path = "vea/reset",
-                Memory = id.ToBytes(),
+                Payload = id.ToBytes(),
                 Timeout = 15000
             }).ConfigureAwait(false);
 

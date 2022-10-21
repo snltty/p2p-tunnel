@@ -22,7 +22,7 @@ namespace client.realize.messengers.clients
         public void Execute(IConnection connection)
         {
             ClientsInfo res = new ClientsInfo();
-            res.DeBytes(connection.ReceiveRequestWrap.Memory);
+            res.DeBytes(connection.ReceiveRequestWrap.Payload);
             clientsMessengerSender.OnServerClientsData.Push(res);
         }
 

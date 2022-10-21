@@ -71,7 +71,7 @@ namespace client.service.vea
                 if (res)
                 {
                     IPAddressInfo ips = new IPAddressInfo();
-                    ips.DeBytes(connection.ReceiveRequestWrap.Memory);
+                    ips.DeBytes(connection.ReceiveRequestWrap.Payload);
                     UpdateIp(client, ips);
                 }
             }

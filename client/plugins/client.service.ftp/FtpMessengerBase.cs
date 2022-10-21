@@ -32,7 +32,7 @@ namespace client.service.ftp
             }
             else
             {
-                FtpCommand cmd = (FtpCommand)connection.ReceiveRequestWrap.Memory.Span[0];
+                FtpCommand cmd = (FtpCommand)connection.ReceiveRequestWrap.Payload.Span[0];
                 FtpPluginParamWrap wrap = new FtpPluginParamWrap
                 {
                     Connection = connection,

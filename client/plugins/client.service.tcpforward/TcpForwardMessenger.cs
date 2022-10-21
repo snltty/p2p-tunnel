@@ -24,7 +24,7 @@ namespace client.service.tcpforward
         {
             TcpForwardInfo data = new TcpForwardInfo();
             data.Connection = connection;
-            data.DeBytes(connection.ReceiveRequestWrap.Memory);
+            data.DeBytes(connection.ReceiveRequestWrap.Payload);
             tcpForwardServer.Response(data);
         }
     }

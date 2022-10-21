@@ -37,7 +37,7 @@ namespace client.service.ui.api.service.clientServer.services
                 {
                     await messengerSender.SendOnly(new common.server.model.MessageRequestWrap
                     {
-                        Memory = bytes,
+                        Payload = bytes,
                         Path = "Test/Packet",
                         Connection = client.TcpConnection,
                         Timeout = 0

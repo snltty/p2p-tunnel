@@ -21,7 +21,7 @@ namespace client.realize.messengers.clients
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Memory = Helper.EmptyArray,
+                Payload = Helper.EmptyArray,
                 Path = "clients/port",
                 Timeout = 2000
             }).ConfigureAwait(false);
@@ -37,7 +37,7 @@ namespace client.realize.messengers.clients
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Memory = new TunnelRegisterInfo { LocalPort = localPort, Port = port, TunnelName = tunnelName }.ToBytes(),
+                Payload = new TunnelRegisterInfo { LocalPort = localPort, Port = port, TunnelName = tunnelName }.ToBytes(),
                 Path = "clients/addtunnel",
                 Timeout = 2000
             }).ConfigureAwait(false);
@@ -53,7 +53,7 @@ namespace client.realize.messengers.clients
             var resp = await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = connection,
-                Memory = tunnelName.ToBytes(),
+                Payload = tunnelName.ToBytes(),
                 Path = "clients/removetunnel",
                 Timeout = 2000
             }).ConfigureAwait(false);

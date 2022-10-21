@@ -38,7 +38,7 @@ namespace server.service.tcpforward
         {
             TcpForwardInfo data = new TcpForwardInfo();
             data.Connection = connection;
-            data.DeBytes(connection.ReceiveRequestWrap.Memory);
+            data.DeBytes(connection.ReceiveRequestWrap.Payload);
             tcpForwardServer.Response(data);
         }
 
@@ -56,7 +56,7 @@ namespace server.service.tcpforward
             try
             {
                 TcpForwardUnRegisterParamsInfo model = new TcpForwardUnRegisterParamsInfo();
-                model.DeBytes(connection.ReceiveRequestWrap.Memory);
+                model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
@@ -90,7 +90,7 @@ namespace server.service.tcpforward
             try
             {
                 TcpForwardRegisterParamsInfo model = new TcpForwardRegisterParamsInfo();
-                model.DeBytes(connection.ReceiveRequestWrap.Memory);
+                model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
                 //取出注册缓存，没取出来就说明没注册
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))

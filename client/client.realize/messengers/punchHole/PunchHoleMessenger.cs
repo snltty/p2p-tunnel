@@ -19,7 +19,7 @@ namespace client.realize.messengers.punchHole
         {
             PunchHoleParamsInfo model = new PunchHoleParamsInfo();
 
-            model.DeBytes(connection.ReceiveRequestWrap.Memory);
+            model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
             punchHoleMessengerSender.OnPunchHole(new OnPunchHoleArg
             {
