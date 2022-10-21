@@ -33,11 +33,6 @@ namespace common.server
         public MessageResponseWrap ReceiveResponseWrap { get; }
         public Memory<byte> ReceiveData { get; set; }
 
-        public long LastTime { get; }
-        public void UpdateTime(long time);
-        public bool IsTimeout(long time, int timeout);
-        public bool IsNeedHeart(long time, int timeout);
-
         public long SendBytes { get; set; }
         public long ReceiveBytes { get; set; }
         public ValueTask<bool> Send(ReadOnlyMemory<byte> data);
@@ -46,6 +41,7 @@ namespace common.server
         public void Disponse();
 
         public IConnection Clone();
+        public IConnection CloneFull();
 
     }
 
@@ -84,8 +80,9 @@ namespace common.server
         public IPEndPoint Address { get; protected set; }
         public virtual ServerType ServerType => ServerType.UDP;
 
-        public MessageRequestWrap ReceiveRequestWrap { get; private set; } = new MessageRequestWrap();
-        public MessageResponseWrap ReceiveResponseWrap { get; private set; } = new MessageResponseWrap();
+        public MessageRequestWrap ReceiveRequestWrap { get; set; }
+        public MessageResponseWrap ReceiveResponseWrap { get; set; }
+
         private Memory<byte> receiveData = Helper.EmptyArray;
         public Memory<byte> ReceiveData
         {
@@ -98,14 +95,6 @@ namespace common.server
                 receiveData = value;
                 ReceiveBytes += receiveData.Length;
             }
-        }
-
-        public long LastTime { get; private set; } = DateTimeHelper.GetTimeStamp();
-        public void UpdateTime(long time) => LastTime = time;
-        public bool IsTimeout(long time, int timeout) => (time - LastTime > timeout);
-        public bool IsNeedHeart(long time, int timeout)
-        {
-            return (time - LastTime > (Math.Max(timeout / 5, 5000)));
         }
 
         public long SendBytes { get; set; } = 0;
@@ -122,6 +111,7 @@ namespace common.server
         }
 
         public abstract IConnection Clone();
+        public abstract IConnection CloneFull();
     }
 
     public class RudpConnection : Connection
@@ -177,6 +167,20 @@ namespace common.server
         {
             RudpConnection clone = new RudpConnection(NetPeer, Address);
             clone.EncodeEnable(Crypto);
+            clone.ReceiveRequestWrap = ReceiveRequestWrap;
+            clone.ReceiveResponseWrap = ReceiveResponseWrap;
+            return clone;
+        }
+        public override IConnection CloneFull()
+        {
+            RudpConnection clone = new RudpConnection(NetPeer, Address);
+            clone.EncodeEnable(Crypto);
+            clone.ReceiveRequestWrap = ReceiveRequestWrap;
+            clone.ReceiveResponseWrap = ReceiveResponseWrap;
+            clone.ConnectId = ConnectId;
+            clone.Relay = Relay;
+            clone.SendBytes = SendBytes;
+            clone.ReceiveBytes = ReceiveBytes;
             return clone;
         }
     }
@@ -230,6 +234,21 @@ namespace common.server
         {
             TcpConnection clone = new TcpConnection(TcpSocket);
             clone.EncodeEnable(Crypto);
+            clone.ReceiveRequestWrap = ReceiveRequestWrap;
+            clone.ReceiveResponseWrap = ReceiveResponseWrap;
+            return clone;
+        }
+
+        public override IConnection CloneFull()
+        {
+            TcpConnection clone = new TcpConnection(TcpSocket);
+            clone.EncodeEnable(Crypto);
+            clone.ReceiveRequestWrap = ReceiveRequestWrap;
+            clone.ReceiveResponseWrap = ReceiveResponseWrap;
+            clone.ConnectId = ConnectId;
+            clone.Relay = Relay;
+            clone.SendBytes = SendBytes;
+            clone.ReceiveBytes = ReceiveBytes;
             return clone;
         }
 

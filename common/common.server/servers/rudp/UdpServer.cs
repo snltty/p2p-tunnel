@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.server.model;
 using LiteNetLib;
 using System;
 using System.Net;
@@ -43,7 +44,11 @@ namespace common.server.servers.rudp
 
             listener.PeerConnectedEvent += peer =>
             {
-                RudpConnection connection = new RudpConnection(peer, peer.EndPoint);
+                RudpConnection connection = new RudpConnection(peer, peer.EndPoint)
+                {
+                    ReceiveRequestWrap = new MessageRequestWrap(),
+                    ReceiveResponseWrap = new MessageResponseWrap()
+                };
                 peer.Tag = connection;
                 OnConnected(connection);
             };
@@ -63,7 +68,9 @@ namespace common.server.servers.rudp
                 try
                 {
                     IConnection connection = peer.Tag as IConnection;
-                    connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
+
+                    connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize).ToArray();
+
                     OnPacket(connection).Wait();
                 }
                 catch (Exception)

@@ -1,6 +1,5 @@
 ﻿using common.libs;
 using common.server;
-using common.server.model;
 using server.messengers.register;
 using server.service.manager.models;
 using System;

@@ -45,6 +45,7 @@ namespace common.server.model
         /// 中继数据时，写明是谁发的中继数据，以便目标客户端回复给来源客户端
         /// </summary>
         public ulong RelayId { get; set; } = 0;
+        public Memory<byte> OriginPath { get; set; } = Memory<byte>.Empty;
 
         /// <summary>
         /// 数据荷载
@@ -57,8 +58,8 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToArray(ServerType type, out int length, bool pool = false)
         {
-            byte typeByte = (byte)MessageTypes.REQUEST;
             byte[] requestIdByte = RequestId.ToBytes();
+            int index = 0;
 
             length = (type == ServerType.TCP ? 4 : 0)
                 + 1
@@ -69,12 +70,10 @@ namespace common.server.model
             if (Relay == 1)
             {
                 length += 8;
+                length += 1 + OriginPath.Length;
             }
 
             byte[] res = pool ? ArrayPool<byte>.Shared.Rent(length) : new byte[length];
-
-            int index = 0;
-
             if (type == ServerType.TCP)
             {
                 byte[] payloadLengthByte = (length - 4).ToBytes();
@@ -82,7 +81,7 @@ namespace common.server.model
                 index += payloadLengthByte.Length;
             }
 
-            res[index] = typeByte;
+            res[index] = (byte)MessageTypes.REQUEST;
             index += 1;
 
             res[index] = Relay;
@@ -92,6 +91,11 @@ namespace common.server.model
                 byte[] delayidByte = RelayId.ToBytes();
                 Array.Copy(delayidByte, 0, res, index, delayidByte.Length);
                 index += delayidByte.Length;
+
+                res[index] = (byte)OriginPath.Length;
+                index += 1;
+                OriginPath.CopyTo(res.AsMemory(index, OriginPath.Length));
+                index += OriginPath.Length;
             }
 
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
@@ -99,7 +103,6 @@ namespace common.server.model
 
             res[index] = (byte)MemoryPath.Length;
             index += 1;
-
             MemoryPath.CopyTo(res.AsMemory(index, MemoryPath.Length));
             index += MemoryPath.Length;
 
@@ -124,6 +127,11 @@ namespace common.server.model
             {
                 RelayId = span.Slice(index).ToUInt64();
                 index += 8;
+
+                byte originPathLength = span[index];
+                index += 1;
+                OriginPath = memory.Slice(index, originPathLength);
+                index += originPathLength;
             }
 
             RequestId = span.Slice(index).ToUInt64();

@@ -65,12 +65,9 @@ namespace common.server
 
                 if (msg.Connection.Relay)
                 {
-                    msg.Memory = new RelayParamsInfo
-                    {
-                        Data = msg.Memory,
-                        Path = msg.MemoryPath,
-                        ToId = msg.Connection.ConnectId
-                    }.ToBytes();
+                    msg.Relay = 1;
+                    msg.RelayId = msg.Connection.ConnectId;
+                    msg.OriginPath = msg.MemoryPath;
                     msg.MemoryPath = reply ? sendReplyPath : sendOnlyPath;
                 }
                 if (msg.Connection.EncodeEnabled)

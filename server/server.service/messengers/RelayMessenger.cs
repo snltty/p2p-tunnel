@@ -69,24 +69,19 @@ namespace server.service.messengers
                     return Helper.EmptyArray;
                 }
 
-                RelayParamsInfo model = new RelayParamsInfo();
-                model.DeBytes(connection.ReceiveRequestWrap.Memory);
-
                 //B已注册
-                if (clientRegisterCache.Get(model.ToId, out RegisterCacheInfo target))
+                if (clientRegisterCache.Get(connection.ReceiveRequestWrap.RelayId, out RegisterCacheInfo target))
                 {
                     //是否在同一个组
                     if (source.GroupId == target.GroupId)
                     {
-                        var res = await messengerSender.SendReply(new MessageRequestWrap
-                        {
-                            Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection,
-                            Memory = model.Data,
-                            MemoryPath = model.Path,
-                            Relay = 1,
-                            RelayId = source.Id
-                        }).ConfigureAwait(false);
-
+                        connection.ReceiveRequestWrap.MemoryPath = connection.ReceiveRequestWrap.OriginPath;
+                        connection.ReceiveRequestWrap.OriginPath = Helper.EmptyArray;
+                        connection.ReceiveRequestWrap.Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
+                        connection.ReceiveRequestWrap.RelayId = source.Id;
+                        connection.ReceiveRequestWrap.Relay = 1;
+                        connection.ReceiveRequestWrap.RequestId = 0;
+                        var res = await messengerSender.SendReply(connection.ReceiveRequestWrap).ConfigureAwait(false);
                         return res.Data.ToArray();
                     }
                 }

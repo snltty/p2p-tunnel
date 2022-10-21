@@ -1,5 +1,6 @@
 ﻿using common.libs;
 using common.libs.extends;
+using common.server.model;
 using System;
 using System.Buffers;
 using System.Net;
@@ -262,7 +263,11 @@ namespace common.server.servers.iocp
 
         public IConnection CreateConnection(Socket socket)
         {
-            return new TcpConnection(socket);
+            return new TcpConnection(socket)
+            {
+                ReceiveRequestWrap = new MessageRequestWrap(),
+                ReceiveResponseWrap = new MessageResponseWrap()
+            };
         }
 
         public void Stop()

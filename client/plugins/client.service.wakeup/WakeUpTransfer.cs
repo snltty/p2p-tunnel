@@ -56,6 +56,7 @@ namespace client.service.wakeup
             foreach (var item in clientInfoCaching.All().Where(c => c.Id != registerStateInfo.ConnectId))
             {
                 var connection = item.OnlineConnection;
+                //var connection = registerStateInfo.OnlineConnection;
                 var client = item;
                 if (connection != null)
                 {
