@@ -31,13 +31,15 @@ namespace client.service.vea
         private readonly IVeaSocks5ClientListener socks5ClientListener;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaMessengerSender veaMessengerSender;
+        private readonly RegisterStateInfo registerStateInfo;
 
-        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener)
+        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener, RegisterStateInfo registerStateInfo)
         {
             this.config = config;
             this.socks5ClientListener = socks5ClientListener;
             this.clientInfoCaching = clientInfoCaching;
             this.veaMessengerSender = veaMessengerSender;
+            this.registerStateInfo = registerStateInfo;
 
             clientInfoCaching.OnOnline.Sub((client) =>
             {
@@ -102,7 +104,7 @@ namespace client.service.vea
         }
         private void UpdateIp()
         {
-            foreach (var item in clientInfoCaching.All())
+            foreach (var item in clientInfoCaching.All().Where(c => c.Id != registerStateInfo.ConnectId))
             {
                 var connection = item.OnlineConnection;
                 var client = item;

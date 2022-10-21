@@ -1,4 +1,5 @@
 ﻿using client.messengers.clients;
+using client.messengers.register;
 using common.libs;
 using common.server;
 using System.Collections.Concurrent;
@@ -14,12 +15,14 @@ namespace client.service.wakeup
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly WakeUpMessengerSender wakeUpMessengerSender;
+        private readonly RegisterStateInfo registerStateInfo;
         private readonly ConcurrentDictionary<string, List<ConfigItem>> macs = new ConcurrentDictionary<string, List<ConfigItem>>();
 
-        public WakeUpTransfer(IClientInfoCaching clientInfoCaching, WakeUpMessengerSender wakeUpMessengerSender, Config config)
+        public WakeUpTransfer(IClientInfoCaching clientInfoCaching, WakeUpMessengerSender wakeUpMessengerSender, Config config, RegisterStateInfo registerStateInfo)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.wakeUpMessengerSender = wakeUpMessengerSender;
+            this.registerStateInfo = registerStateInfo;
 
             clientInfoCaching.OnOnline.Sub((client) =>
             {
@@ -50,7 +53,7 @@ namespace client.service.wakeup
         }
         public void UpdateMac()
         {
-            foreach (var item in clientInfoCaching.All())
+            foreach (var item in clientInfoCaching.All().Where(c => c.Id != registerStateInfo.ConnectId))
             {
                 var connection = item.OnlineConnection;
                 var client = item;

@@ -86,6 +86,7 @@ namespace server.service.messengers
                             Relay = 1,
                             RelayId = source.Id
                         }).ConfigureAwait(false);
+
                         return res.Data.ToArray();
                     }
                 }

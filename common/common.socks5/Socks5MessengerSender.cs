@@ -30,7 +30,7 @@ namespace common.socks5
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 Path = $"{Target}/response",
-                Connection = connection.FromConnection,
+                Connection = connection,
                 Memory = bytes
             });
         }
