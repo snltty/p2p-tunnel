@@ -26,6 +26,7 @@ namespace client.realize.messengers.clients
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly Config config;
         private readonly IUdpServer udpServer;
+        private readonly IRelayConnectionSelector relayConnectionSelector;
 
         private const byte TryReverseMaxValue = 2;
         private object lockObject = new();
@@ -33,7 +34,7 @@ namespace client.realize.messengers.clients
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
-            IUdpServer udpServer, ITcpServer tcpServer
+            IUdpServer udpServer, ITcpServer tcpServer, IRelayConnectionSelector relayConnectionSelector
         )
         {
             this.punchHoleUdp = punchHoleUdp;
@@ -42,6 +43,7 @@ namespace client.realize.messengers.clients
             this.clientInfoCaching = clientInfoCaching;
             this.config = config;
             this.udpServer = udpServer;
+            this.relayConnectionSelector = relayConnectionSelector;
 
 
             punchHoleUdp.OnStep1Handler.Sub((e) =>
@@ -187,9 +189,7 @@ namespace client.realize.messengers.clients
                 {
                     if (result == EnumConnectResult.AllFail)
                     {
-#if DEBUG
                         Relay(client, ServerType.UDP, true);
-#endif
                         Relay(client, ServerType.TCP, true);
                     }
                 }
@@ -373,9 +373,7 @@ namespace client.realize.messengers.clients
                             }
                             else if (registerState.RemoteInfo.Relay)
                             {
-#if DEBUG
                                 Relay(client, ServerType.UDP, true);
-#endif
                                 Relay(client, ServerType.TCP, true);
                             }
                         }
@@ -392,18 +390,13 @@ namespace client.realize.messengers.clients
         private void Relay(ClientInfo client, ServerType serverType, bool notify)
         {
             if (registerState.RemoteInfo.Relay == false) return;
-
             if (client.TcpConnected == true && serverType == ServerType.TCP) return;
             if (client.UdpConnected == true && serverType == ServerType.UDP) return;
 
-            IConnection connection = serverType switch
+            IConnection sourceConnection = relayConnectionSelector.Select(serverType);
+            if (sourceConnection != null && sourceConnection.Connected)
             {
-                ServerType.TCP => registerState.TcpConnection?.Clone(),
-                ServerType.UDP => registerState.UdpConnection?.Clone(),
-                _ => throw new NotImplementedException(),
-            };
-            if (connection != null)
-            {
+                IConnection connection = sourceConnection.Clone();
                 connection.Relay = registerState.RemoteInfo.Relay;
                 clientInfoCaching.Online(client.Id, connection, ClientConnectTypes.Relay);
             }

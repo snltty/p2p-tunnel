@@ -15,8 +15,7 @@ namespace common.server
         public NumberSpace requestIdNumberSpace = new NumberSpace(0);
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
         private ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>>();
-        private Memory<byte> sendOnlyPath = "relay/sendonly".ToBytes();
-        private Memory<byte> sendReplyPath = "relay/sendreply".ToBytes();
+        private Memory<byte> relayPath = "relay/execute".ToBytes();
 
         public MessengerSender()
         {
@@ -53,7 +52,6 @@ namespace common.server
         {
             try
             {
-                bool reply = msg.RequestId > 0;
                 if (msg.RequestId == 0)
                 {
                     msg.RequestId = requestIdNumberSpace.Increment();
@@ -65,10 +63,9 @@ namespace common.server
 
                 if (msg.Connection.Relay)
                 {
-                    msg.Relay = 1;
                     msg.RelayId = msg.Connection.ConnectId;
                     msg.OriginPath = msg.MemoryPath;
-                    msg.MemoryPath = reply ? sendReplyPath : sendOnlyPath;
+                    msg.MemoryPath = relayPath;
                 }
                 if (msg.Connection.EncodeEnabled)
                 {

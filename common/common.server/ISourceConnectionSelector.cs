@@ -2,11 +2,11 @@
 {
     public interface ISourceConnectionSelector
     {
-        public IConnection Select(IConnection connection);
+        public IConnection Select(IConnection connection,ulong relayid);
     }
 
     public class SourceConnectionSelector : ISourceConnectionSelector
     {
-        public IConnection Select(IConnection connection) { return connection; }
+        public IConnection Select(IConnection connection, ulong relayid) { return connection; }
     }
 }

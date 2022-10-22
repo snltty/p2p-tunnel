@@ -1,6 +1,7 @@
 ﻿using common.libs.extends;
 using common.server;
 using common.server.model;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -26,7 +27,7 @@ namespace client.service.wakeup
                 Connection = connection,
                 Path = "wakeup/macs",
                 Payload = config.ToBytes(),
-                Timeout = 1000
+                Timeout = 2000
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
             {

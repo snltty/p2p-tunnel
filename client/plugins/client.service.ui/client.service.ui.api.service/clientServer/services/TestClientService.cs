@@ -29,7 +29,7 @@ namespace client.service.ui.api.service.clientServer.services
                 bytes[i] = 1;
             }
 
-            if (clientInfoCaching.Get(param.Id, out ClientInfo client))
+            if (clientInfoCaching.Get(param.Id, out ClientInfo client) && client.TcpConnection != null && client.TcpConnection.Relay == false)
             {
                 var watch = new Stopwatch();
                 watch.Start();
@@ -54,7 +54,7 @@ namespace client.service.ui.api.service.clientServer.services
             }
             else
             {
-                arg.SetCode(ClientServiceResponseCodes.Error, "请选择目标客户端");
+                arg.SetCode(ClientServiceResponseCodes.Error, "客户端未连接或中继，不支持测试");
             }
             return new TestPacketResponseInfo { };
         }

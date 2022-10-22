@@ -68,9 +68,7 @@ namespace common.server.servers.rudp
                 try
                 {
                     IConnection connection = peer.Tag as IConnection;
-
-                    connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize).ToArray();
-
+                    connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
                     OnPacket(connection).Wait();
                 }
                 catch (Exception)

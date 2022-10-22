@@ -38,17 +38,13 @@ namespace common.server.model
         public ulong RequestId { get; set; } = 0;
 
         /// <summary>
-        /// 服务器给客户端发送数据时，可以写1，表示是中继数据，【只发发数据的话，不用填这里】
-        /// </summary>
-        public byte Relay { get; set; } = 0;
-        /// <summary>
         /// 中继数据时，写明是谁发的中继数据，以便目标客户端回复给来源客户端，【只发发数据的话，不用填这里】
         /// </summary>
         public ulong RelayId { get; set; } = 0;
         /// <summary>
         /// 【只发发数据的话，不用填这里】
         /// </summary>
-        public Memory<byte> OriginPath { get; set; } = Memory<byte>.Empty;
+        public Memory<byte> OriginPath { get; set; } = Helper.EmptyArray;
 
         /// <summary>
         /// 数据荷载
@@ -65,12 +61,12 @@ namespace common.server.model
             int index = 0;
 
             length = (type == ServerType.TCP ? 4 : 0)
-                + 1
-                + 1
+                + 1 // type
+                + 1 // RelayId
                 + requestIdByte.Length
                 + 1 + MemoryPath.Length
                 + Payload.Length;
-            if (Relay == 1)
+            if (RelayId > 0)
             {
                 length += 8;
                 length += 1 + OriginPath.Length;
@@ -87,9 +83,9 @@ namespace common.server.model
             res[index] = (byte)MessageTypes.REQUEST;
             index += 1;
 
-            res[index] = Relay;
+            res[index] = (byte)(RelayId > 0 ? 1 : 0);
             index += 1;
-            if (Relay == 1)
+            if (res[index - 1] == 1)
             {
                 byte[] delayidByte = RelayId.ToBytes();
                 Array.Copy(delayidByte, 0, res, index, delayidByte.Length);
@@ -97,8 +93,11 @@ namespace common.server.model
 
                 res[index] = (byte)OriginPath.Length;
                 index += 1;
-                OriginPath.CopyTo(res.AsMemory(index, OriginPath.Length));
-                index += OriginPath.Length;
+                if (OriginPath.Length > 0)
+                {
+                    OriginPath.CopyTo(res.AsMemory(index, OriginPath.Length));
+                    index += OriginPath.Length;
+                }
             }
 
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
@@ -123,18 +122,24 @@ namespace common.server.model
             var span = memory.Span;
             int index = 1;
 
-            Relay = span[index];
+            byte relay = span[index];
             index += 1;
-
-            if (Relay == 1)
+            if (relay == 1)
             {
                 RelayId = span.Slice(index).ToUInt64();
                 index += 8;
 
                 byte originPathLength = span[index];
                 index += 1;
-                OriginPath = memory.Slice(index, originPathLength);
-                index += originPathLength;
+                if (originPathLength > 0)
+                {
+                    OriginPath = memory.Slice(index, originPathLength);
+                    index += originPathLength;
+                }
+            }
+            else
+            {
+                RelayId = 0;
             }
 
             RequestId = span.Slice(index).ToUInt64();
@@ -166,6 +171,7 @@ namespace common.server.model
         public IConnection Connection { get; set; }
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
         public ulong RequestId { get; set; } = 0;
+        public ulong RelayId { get; set; } = 0;
         public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
 
         /// <summary>
@@ -175,10 +181,15 @@ namespace common.server.model
         public (byte[] data, int length) ToArray(ServerType type, bool pool = false)
         {
             int length = (type == ServerType.TCP ? 4 : 0)
-                + 1
-                + 1
-                + 8
+                + 1 //type
+                + 1 //code
+                + 1 //RelayId
+                + 8 //requestid
                 + Payload.Length;
+            if (RelayId > 0)
+            {
+                length += 8;
+            }
 
             byte[] res = pool ? ArrayPool<byte>.Shared.Rent(length) : new byte[length];
 
@@ -195,6 +206,15 @@ namespace common.server.model
 
             res[index] = (byte)Code;
             index += 1;
+
+            res[index] = (byte)(RelayId > 0 ? 1 : 0);
+            index += 1;
+            if (RelayId > 0)
+            {
+                byte[] relayidByte = RelayId.ToBytes();
+                Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
+                index += relayidByte.Length;
+            }
 
             byte[] requestIdByte = RequestId.ToBytes();
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
@@ -218,6 +238,18 @@ namespace common.server.model
 
             Code = (MessageResponeCodes)span[index];
             index += 1;
+
+            byte relay = span[index];
+            index += 1;
+            if (relay == 1)
+            {
+                RelayId = span.Slice(index).ToUInt64();
+                index += 8;
+            }
+            else
+            {
+                RelayId = 0;
+            }
 
             RequestId = span.Slice(index).ToUInt64();
             index += 8;

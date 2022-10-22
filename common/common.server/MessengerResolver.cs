@@ -71,24 +71,33 @@ namespace common.server
             if (type == MessageTypes.RESPONSE)
             {
                 responseWrap.FromArray(receive);
-                if (connection.EncodeEnabled)
+                if (responseWrap.RelayId == 0)
                 {
-                    responseWrap.Payload = connection.Crypto.Decode(responseWrap.Payload);
+                    if (connection.EncodeEnabled)
+                    {
+                        responseWrap.Payload = connection.Crypto.Decode(responseWrap.Payload);
+                    }
+                    messengerSender.Response(responseWrap);
                 }
-                messengerSender.Response(responseWrap);
+                else
+                {
+                    responseWrap.Connection = sourceConnectionSelector.Select(connection, responseWrap.RelayId);
+                    responseWrap.RelayId = 0;
+                    await messengerSender.ReplyOnly(responseWrap).ConfigureAwait(false);
+                }
+
                 return;
             }
 
 
-
+            //新的请求
             requestWrap.FromArray(receive);
-            connection.FromConnection = sourceConnectionSelector.Select(connection);
-
-
+            connection.FromConnection = sourceConnectionSelector.Select(connection, requestWrap.RelayId);
             if (connection.EncodeEnabled)
             {
                 requestWrap.Payload = connection.Crypto.Decode(requestWrap.Payload);
             }
+
             try
             {
                 //404,没这个插件
@@ -100,6 +109,7 @@ namespace common.server
                     {
                         Connection = connection,
                         RequestId = requestWrap.RequestId,
+                        RelayId = requestWrap.RelayId,
                         Code = MessageResponeCodes.NOT_FOUND
                     }).ConfigureAwait(false);
                     return;
@@ -116,13 +126,13 @@ namespace common.server
                         {
                             Connection = connection,
                             RequestId = requestWrap.RequestId,
+                            RelayId = requestWrap.RelayId,
                             Code = MessageResponeCodes.ERROR,
                             Payload = middleres.Item2
                         }).ConfigureAwait(false);
                         return;
                     }
                 }
-
                 object resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { connection });
                 //void的，task的 没有返回值，不回复，需要回复的可以返回任意类型
                 if (plugin.IsVoid)
@@ -148,11 +158,11 @@ namespace common.server
                 {
                     resultObject = resultAsync as byte[];
                 }
-
                 bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
                 {
                     Connection = connection,
                     Payload = resultObject,
+                    RelayId = requestWrap.RelayId,
                     RequestId = requestWrap.RequestId
                 }).ConfigureAwait(false);
             }
@@ -162,6 +172,7 @@ namespace common.server
                 await messengerSender.ReplyOnly(new MessageResponseWrap
                 {
                     Connection = connection,
+                    RelayId = requestWrap.RelayId,
                     RequestId = requestWrap.RequestId,
                     Code = MessageResponeCodes.ERROR
                 }).ConfigureAwait(false);

@@ -26,10 +26,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="LiteNetLib" Version="0.9.5.2" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <ProjectReference Include="..\common.libs\common.libs.csproj" />
 	</ItemGroup>
 

@@ -2,6 +2,7 @@
 using client.messengers.register;
 using common.libs;
 using common.server;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +57,6 @@ namespace client.service.wakeup
             foreach (var item in clientInfoCaching.All().Where(c => c.Id != registerStateInfo.ConnectId))
             {
                 var connection = item.OnlineConnection;
-                //var connection = registerStateInfo.OnlineConnection;
                 var client = item;
                 if (connection != null)
                 {
@@ -94,7 +94,7 @@ namespace client.service.wakeup
             using UdpClient client = new UdpClient();
             for (int i = 0; i < 10; i++)
             {
-                client.Send(packet, new IPEndPoint(IPAddress.Parse("255.255.255.255"), 5410));
+                client.Send(packet, new IPEndPoint(IPAddress.Parse("255.255.255.255"), 59410));
             }
         }
     }

@@ -12,11 +12,11 @@ namespace client.realize.messengers
             this.clientInfoCaching = clientInfoCaching;
         }
 
-        public IConnection Select(IConnection connection)
+        public IConnection Select(IConnection connection, ulong relayid)
         {
-            if (connection.ReceiveRequestWrap.Relay == 1)
+            if (relayid > 0)
             {
-                if (clientInfoCaching.Get(connection.ReceiveRequestWrap.RelayId, out ClientInfo client))
+                if (clientInfoCaching.Get(relayid, out ClientInfo client))
                 {
                     return connection.ServerType == common.server.model.ServerType.TCP ? client.TcpConnection : client.UdpConnection;
                 }

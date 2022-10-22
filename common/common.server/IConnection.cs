@@ -167,8 +167,8 @@ namespace common.server
         {
             RudpConnection clone = new RudpConnection(NetPeer, Address);
             clone.EncodeEnable(Crypto);
-            clone.ReceiveRequestWrap = ReceiveRequestWrap;
-            clone.ReceiveResponseWrap = ReceiveResponseWrap;
+            // clone.ReceiveRequestWrap = ReceiveRequestWrap;
+            // clone.ReceiveResponseWrap = ReceiveResponseWrap;
             return clone;
         }
         public override IConnection CloneFull()
@@ -234,8 +234,8 @@ namespace common.server
         {
             TcpConnection clone = new TcpConnection(TcpSocket);
             clone.EncodeEnable(Crypto);
-            clone.ReceiveRequestWrap = ReceiveRequestWrap;
-            clone.ReceiveResponseWrap = ReceiveResponseWrap;
+            //clone.ReceiveRequestWrap = ReceiveRequestWrap;
+            //clone.ReceiveResponseWrap = ReceiveResponseWrap;
             return clone;
         }
 
