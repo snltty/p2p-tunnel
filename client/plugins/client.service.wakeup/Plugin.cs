@@ -1,5 +1,6 @@
 ﻿using common.server;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Reflection;
 
 namespace client.service.wakeup

@@ -97,7 +97,7 @@ namespace client.service.wakeup
             List<ConfigItem> res = new List<ConfigItem>();
 
             int index = 0;
-            do
+            while (index < span.Length - 1)
             {
                 res.Add(new ConfigItem
                 {
@@ -106,9 +106,7 @@ namespace client.service.wakeup
                 });
 
                 index += span[index] + span[index + 1 + span[index]] + 2;
-
-            } while (index < span.Length - 1);
-
+            }
             return res;
         }
     }
