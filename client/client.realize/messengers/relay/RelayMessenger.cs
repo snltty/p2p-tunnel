@@ -27,7 +27,7 @@ namespace client.realize.messengers.relay
 
         public async Task Execute(IConnection connection)
         {
-            if (config.Client.Relay == false)
+            if (config.Client.UseRelay == false)
             {
                 return;
             }
@@ -47,7 +47,7 @@ namespace client.realize.messengers.relay
 
         public async Task Relay(IConnection connection)
         {
-            if (config.Client.Relay == false)
+            if (config.Client.UseRelay == false)
             {
                 return;
             }
@@ -75,7 +75,7 @@ namespace client.realize.messengers.relay
 
         public byte[] Verify(IConnection connection)
         {
-            if (config.Client.Relay == false)
+            if (config.Client.UseRelay == false)
             {
                 return Helper.FalseArray;
             }

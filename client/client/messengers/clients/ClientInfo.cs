@@ -23,7 +23,7 @@ namespace client.messengers.clients
         public IPAddress Ip { get => ip; }
 
         public ulong Id { get; init; } = 0;
-        public bool AutoPunchHole { get; init; } = false;
+        public bool UsePunchHole { get; init; } = false;
 
         public bool UseUdp { get; init; } = false;
         public bool UseTcp { get; init; } = false;

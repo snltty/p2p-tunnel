@@ -413,13 +413,13 @@ namespace client.realize.messengers.clients
                             Name = item.Name,
                             UseTcp = (enumClientAccess & EnumClientAccess.UseTcp) == EnumClientAccess.UseTcp,
                             UseUdp = (enumClientAccess & EnumClientAccess.UseUdp) == EnumClientAccess.UseUdp,
-                            AutoPunchHole = (enumClientAccess & EnumClientAccess.AutoPunchHole) == EnumClientAccess.AutoPunchHole,
-                            UseRelay = (enumClientAccess & EnumClientAccess.Relay) == EnumClientAccess.Relay,
+                            UsePunchHole = (enumClientAccess & EnumClientAccess.UsePunchHole) == EnumClientAccess.UsePunchHole,
+                            UseRelay = (enumClientAccess & EnumClientAccess.UseRelay) == EnumClientAccess.UseRelay,
                         };
                         clientInfoCaching.Add(client);
                         if (first)
                         {
-                            if (config.Client.AutoPunchHole && client.AutoPunchHole)
+                            if (config.Client.UsePunchHole && client.UsePunchHole)
                             {
                                 if (registerState.LocalInfo.TcpPort == registerState.RemoteInfo.TcpPort || registerState.LocalInfo.UdpPort == registerState.RemoteInfo.UdpPort)
                                 {

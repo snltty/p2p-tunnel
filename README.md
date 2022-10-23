@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-22 14:09:03
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-23 17:40:59
+ * @LastEditTime: 2022-10-23 18:41:43
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.webd:\Desktop\p2p-tunnel\README.md
@@ -11,6 +11,9 @@
 
 # p2p-tunnel
 ## Visual Studio 2022 LTSC 17.3.0
+#### tcp,udp打洞、服务器中继、节点中继、服务器代理
+#### tun网卡组网、tcp转发、udp转发、http代理、socks5代理
+
 ![GitHub Repo stars](https://img.shields.io/github/stars/snltty/p2p-tunnel?style=social)
 ![GitHub Repo forks](https://img.shields.io/github/forks/snltty/p2p-tunnel?style=social)
 [![star](https://gitee.com/snltty/p2p-tunnel/badge/star.svg?theme=dark)](https://gitee.com/snltty/p2p-tunnel/stargazers)
@@ -21,50 +24,27 @@
 1. 有任何想法，皆可进群(**1121552990**)了解
 2. <a href="http://snltty.gitee.io/p2p-tunnel/" target="_blank">在线web管理端</a>，<a href="https://update7.simplix.info/UpdatePack7R2.exe" target="_blank">win7不能运行.NET6的补丁</a>
 3. 服务器 或 内网电脑，暴露服务在公网时，请做好安全防范
-4. 组网可以让你直接访问目标端所在局域网的任一设备
-5. 用一台垃圾手机作为客户端放家里，就可以远程开机了
+4. 用一台垃圾手机作为客户端放家里，就可以远程开机了
 
-## 为什么需要穿透
+## 问个why？
 1. A、B 任一设备在NAT后面，没有公网ipv4，没有ipv6，无法直接通信，这种情况当然需要穿透
 2. A、B 一台设备有公网ipv4，一台设备有ipv6（没有ipv4公网），这时候仍然需要穿透，因为只有ipv4的一方，无法访问ipv6
 3. A、B 两台设备都是ipv4，或者都是ipv6，可以直接通信（ipv4开启upnp映射，ipv6允许入栈，之类的），但如此一来，任何人都可以访问你开放的端口，并不安全，如果使用打洞，则相对安全很多
 
-## 穿透方式
-- [x] p2p打洞、A<---->B（网络环境支持打洞时，打洞连接效率最好）
-- [x] 中继、A<---->server<---->B（免费打洞服务器不开启，服务器开启时，打洞失败则退化为服务器中继）
-- [x] 中继1、A<---->B<---->C 使用某个节点进行中继
-- [x] 服务器代理、server<---->A（免费打洞服务器不开启，网络环境不支持打洞，可以选择服务器代理）
-
-## 连线策略
+## 连个线
 ```mermaid
-    graph LR
-    D((开始)) --> F{开启打洞}
-    F{开启打洞} --> 打洞成功
-    F{开启打洞} --> 打洞失败
-    打洞失败 --> 服务器允许中继
-    打洞失败 --> 某节点允许中继
-    服务器允许中继 --> 中继
-    某节点允许中继 --> 中继
-    
-    D((开始)) --> 不开启打洞
-    不开启打洞 --> 服务器允许中继
-    不开启打洞 --> 某节点允许中继
+    flowchart LR
 
-   打洞成功 --> C(结束)
-   中继 --> C(结束)
+    id6((浏览器)) <--> |服务器代理| id12[(服务器代理)] <-->|服务器代理| id5([B客户端])
+    id7((浏览器)) <-->|服务器中继| id3([A客户端])<-->|服务器中继| id11[(服务器中继)] <-->|服务器中继| id5([B客户端])
+
+    id8((浏览器)) <-->|节点中继| id3([A客户端])<-->|节点中继| id10[(节点XX)] <-->|节点中继| id5([B客户端])
+
+    id9((浏览器)) <-->|p2p| id3([A客户端]) <-->|p2p| id5([B客户端])
+
 ```
 
-## 服务端权限配置
-- [x] 关闭全局权限时，注册、 中继、 服务器代理tcp转发+http代理、 服务器代理udp转发、socks5  这些功能可以单独配置哪些分组编号的客户端被允许
-
-## 通信方式
-- [x] tcp转发
-- [x] udp转发
-- [x] http代理
-- [x] socks5代理(支持tcp，udp，不实现bind)
-- [x] <a href="https://github.com/xjasonlyu/tun2socks" target="_blank">tun2socks</a>虚拟网卡组网，让你的多个不同内网客户端组成一个网络，通过其ip访问，更有局域网网段绑定，访问目标局域网任意设备(**暂时仅支持windows、linux、osx**)，如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
-
-## 其它内容
+## 有个啥
 - [x] .NET6 跨平台，小尺寸，小内存
 - [x] 内网穿透 访问内网web，内网桌面，及其它TCP上层协议服务
     1. 远程桌面
@@ -79,12 +59,16 @@
 - [x] 高效的打包解包，作死的全手写序列化
 - [x] 权限管理，可以只允许某些分组做某些事情
 - [ ] 如果你有某个节点比较牛逼，可以允许某个节点作为中继节点，节省服务器带宽
+- [x] <a href="https://github.com/xjasonlyu/tun2socks" target="_blank">tun2socks</a>虚拟网卡组网，让你的多个不同内网客户端组成一个网络，通过其ip访问，更有局域网网段绑定，访问目标局域网任意设备(**暂时仅支持windows、linux、osx**)，如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
 
-## 介绍视频
+## 介个绍
 - 基础介绍 <a href="https://www.bilibili.com/video/BV1Pa411R79U/">https://www.bilibili.com/video/BV1Pa411R79U/</a>
 - 联机cs1.6 <a href="https://www.bilibili.com/video/BV18d4y1u7DN/">https://www.bilibili.com/video/BV18d4y1u7DN/</a>
 
 
-## 部署说明
+## 部个署
 - <a href="./readme/server-linux.md">服务端 linux docker托管</a>
 - <a href="./readme/client-linux.md">客户端 linux supervisor托管</a>
+
+- 服务端docker镜像  **snltty/p2p-tunnel-server**
+- 客户端端docker镜像  **snltty/p2p-tunnel-client**

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-04 12:35:40
+ * @LastEditTime: 2022-10-23 18:57:59
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -182,20 +182,27 @@
                 <el-form-item label="" label-width="80">
                     <div class="t-c">
                         <el-row>
-                            <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
+                            <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
                                 <el-form-item label="UDP" prop="UdpConnected">
                                     <el-switch disabled v-model="registerState.LocalInfo.UdpConnected">UDP</el-switch>
                                 </el-form-item>
                             </el-col>
-                            <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
+                            <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
                                 <el-form-item label="TCP" prop="TcpConnected">
                                     <el-switch disabled v-model="registerState.LocalInfo.TcpConnected">TCP</el-switch>
                                 </el-form-item>
                             </el-col>
-                            <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
-                                <el-form-item label="自动打洞" prop="AutoPunchHole">
+                            <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                <el-form-item label="自动打洞" prop="UsePunchHole">
                                     <el-tooltip class="box-item" effect="dark" content="发现新客户端后是否自动打洞" placement="top-start">
-                                        <el-switch v-model="model.AutoPunchHole">TCP</el-switch>
+                                        <el-switch v-model="model.UsePunchHole"></el-switch>
+                                    </el-tooltip>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                <el-form-item label="作节点" prop="UseRelay">
+                                    <el-tooltip class="box-item" effect="dark" content="是否允许本客户端作为中继节点" placement="top-start">
+                                        <el-switch v-model="model.UseRelay"></el-switch>
                                     </el-tooltip>
                                 </el-form-item>
                             </el-col>
@@ -240,7 +247,7 @@ export default {
                 ClientEncodePassword: "",
                 ServerEncode: false,
                 ServerEncodePassword: "",
-                AutoPunchHole: false,
+                UsePunchHole: false,
                 TimeoutDelay: 20000,
                 UseUdp: false,
                 UseTcp: false,
@@ -310,11 +317,13 @@ export default {
             state.model.UseMac = registerState.ClientConfig.UseMac = json.ClientConfig.UseMac;
             state.model.ClientEncode = registerState.ClientConfig.Encode = json.ClientConfig.Encode;
             state.model.ClientEncodePassword = registerState.ClientConfig.ClientEncodePassword = json.ClientConfig.EncodePassword;
-            state.model.AutoPunchHole = registerState.ClientConfig.AutoPunchHole = json.ClientConfig.AutoPunchHole;
+            state.model.UsePunchHole = registerState.ClientConfig.UsePunchHole = json.ClientConfig.UsePunchHole;
             state.model.TimeoutDelay = registerState.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
 
             state.model.UseUdp = registerState.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
             state.model.UseTcp = registerState.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
+            state.model.UseRelay = registerState.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
+
 
             state.model.ServerIp = registerState.ServerConfig.Ip = json.ServerConfig.Ip;
             state.model.ServerUdpPort = registerState.ServerConfig.UdpPort = json.ServerConfig.UdpPort;
@@ -344,10 +353,11 @@ export default {
                         UseMac: state.model.UseMac,
                         Encode: state.model.ClientEncode,
                         EncodePassword: state.model.ClientEncodePassword,
-                        AutoPunchHole: state.model.AutoPunchHole,
+                        UsePunchHole: state.model.UsePunchHole,
                         TimeoutDelay: +state.model.TimeoutDelay,
                         UseUdp: state.model.UseUdp,
                         UseTcp: state.model.UseTcp,
+                        UseRelay: state.model.UseRelay,
                     },
                     ServerConfig: {
                         Ip: state.model.ServerIp,
