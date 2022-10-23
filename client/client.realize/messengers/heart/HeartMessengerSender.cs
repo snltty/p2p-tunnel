@@ -23,7 +23,8 @@ namespace client.realize.messengers.heart
             {
                 Connection = connection,
                 Path = "heart/Execute",
-                Payload = Helper.EmptyArray
+                Payload = Helper.EmptyArray,
+                Timeout = 1000
             }).ConfigureAwait(false);
             return resp.Code == MessageResponeCodes.OK && Helper.TrueArray.AsSpan().SequenceEqual(resp.Data.Span);
         }

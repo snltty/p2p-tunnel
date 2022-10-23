@@ -40,10 +40,9 @@ namespace client.realize.messengers.register
                         Name = param.ClientName,
                         GroupId = param.GroupId,
                         LocalIps = param.LocalIps,
-                        Mac = param.Mac,
                         LocalTcpPort = param.LocalTcpPort,
                         LocalUdpPort = param.LocalUdpPort,
-                        AutoPunchHole = param.AutoPunchHole
+                        ClientAccess = (uint)param.ClientAccess
                     }.ToBytes(),
                     Timeout = param.Timeout,
                 }).ConfigureAwait(false);
@@ -71,10 +70,10 @@ namespace client.realize.messengers.register
                         Id = id,
                         Name = param.ClientName,
                         GroupId = param.GroupId,
-                        Mac = param.Mac,
+                        LocalIps = param.LocalIps,
                         LocalTcpPort = param.LocalTcpPort,
                         LocalUdpPort = param.LocalUdpPort,
-                        AutoPunchHole = param.AutoPunchHole
+                        ClientAccess = (uint)param.ClientAccess
                     }.ToBytes(),
                     Timeout = param.Timeout,
                 }).ConfigureAwait(false);
@@ -144,7 +143,7 @@ namespace client.realize.messengers.register
         public int Timeout { get; set; } = 15 * 1000;
         public int LocalUdpPort { get; set; } = 0;
         public int LocalTcpPort { get; set; } = 0;
-        public bool AutoPunchHole { get; set; } = false;
+        public EnumClientAccess ClientAccess { get; set; } = EnumClientAccess.None;
 
     }
 

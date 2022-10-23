@@ -1,5 +1,4 @@
-﻿using common.server.model;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace client.messengers.clients
 {
@@ -10,5 +9,6 @@ namespace client.messengers.clients
         public void ConnectReverse(ulong id);
         public void Reset(ulong id);
         public void ConnectStop(ulong id);
+        public Task Ping();
     }
 }

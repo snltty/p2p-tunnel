@@ -84,10 +84,7 @@ namespace server.service
                     Connection = c.OnLineConnection,
                     Id = c.Id,
                     Name = c.Name,
-                    Mac = c.Mac,
-                    Tcp = c.TcpConnection != null,
-                    Udp = c.UdpConnection != null,
-                    AutoPunchHole = c.AutoPunchHole
+                    ClientAccess = c.ClientAccess,
                 }).ToList();
                 if (clients.Any())
                 {

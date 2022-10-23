@@ -198,7 +198,7 @@ namespace LiteNetLib
         /// <summary>
         /// Library logic update and send period in milliseconds
         /// </summary>
-        public int UpdateTime = 15;
+        public int UpdateTime = 5;
 
         /// <summary>
         /// Interval for latency detection and checking connection

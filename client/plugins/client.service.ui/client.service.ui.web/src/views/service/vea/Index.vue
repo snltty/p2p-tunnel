@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-14 19:27:18
+ * @LastEditTime: 2022-10-23 01:14:25
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -110,7 +110,10 @@
             </div>
         </div>
         <div class="inner">
-            <h3 class="title t-c">组网列表</h3>
+            <h3 class="title t-c">
+                <span>组网列表</span>
+                <el-button type="primary" size="small" :loading="loading" @click="handleUpdate">刷新列表</el-button>
+            </h3>
             <div>
                 <el-table size="small" border :data="showClients" style="width: 100%">
                     <el-table-column prop="Name" label="客户端">
@@ -138,7 +141,7 @@
 
 <script>
 import { computed, reactive, ref } from '@vue/reactivity'
-import { getConfig, setConfig, getUpdate, reset } from '../../../apis/vea'
+import { getConfig, setConfig, getList, reset, update } from '../../../apis/vea'
 import { onMounted, onUnmounted } from '@vue/runtime-core'
 import { ElMessage } from 'element-plus'
 import { injectClients } from '../../../states/clients'
@@ -222,7 +225,7 @@ export default {
         let timer = 0;
         const loadVeaClients = () => {
             if (websocketState.connected) {
-                getUpdate().then((res) => {
+                getList().then((res) => {
                     state.veaClients = res;
                     timer = setTimeout(loadVeaClients, 1000);
                 });
@@ -233,6 +236,7 @@ export default {
         }
 
         onMounted(() => {
+            handleUpdate();
             loadConfig();
             loadVeaClients();
         });
@@ -276,9 +280,14 @@ export default {
                 ElMessage.error('失败');
             });
         }
+        const handleUpdate = () => {
+            update().then(() => {
+                ElMessage.success('已更新');
+            })
+        }
 
         return {
-            targets, shareData, registerState, state, showClients, formDom, handleSubmit, handleResetVea
+            targets, shareData, registerState, state, showClients, formDom, handleSubmit, handleResetVea, handleUpdate
         }
     }
 }

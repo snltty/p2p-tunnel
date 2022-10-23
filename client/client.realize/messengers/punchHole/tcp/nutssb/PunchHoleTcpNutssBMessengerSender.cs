@@ -349,7 +349,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 TunnelName = param.TunnelName,
                 Connection = TcpServer,
                 ToId = param.Id,
-                GuessPort = 0,
                 Data = new PunchHoleStep1Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_1, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
             Logger.Instance.DebugDebug($"after Send Step1, toid:{param.Id},fromid:{ConnectId}");
@@ -384,7 +383,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 TunnelName = arg.RawData.TunnelName,
                 Connection = TcpServer,
                 ToId = arg.RawData.FromId,
-                GuessPort = 0,
                 Data = new PunchHoleStep2Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
             Logger.Instance.DebugDebug($"after Send Step2, toid:{arg.RawData.FromId},fromid:{ConnectId}");
@@ -397,7 +395,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 TunnelName = arg.RawData.TunnelName,
                 Connection = TcpServer,
                 ToId = arg.RawData.FromId,
-                GuessPort = 0,
                 Index = index,
                 Data = new PunchHoleStep2TryInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_TRY, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);

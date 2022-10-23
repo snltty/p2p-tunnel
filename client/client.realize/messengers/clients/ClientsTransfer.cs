@@ -3,7 +3,9 @@ using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using client.messengers.punchHole.udp;
 using client.messengers.register;
+using client.realize.messengers.heart;
 using client.realize.messengers.punchHole;
+using client.realize.messengers.relay;
 using common.libs;
 using common.server;
 using common.server.model;
@@ -27,6 +29,8 @@ namespace client.realize.messengers.clients
         private readonly Config config;
         private readonly IUdpServer udpServer;
         private readonly IRelayConnectionSelector relayConnectionSelector;
+        private readonly HeartMessengerSender heartMessengerSender;
+        private readonly RelayMessengerSender relayMessengerSender;
 
         private const byte TryReverseMaxValue = 2;
         private object lockObject = new();
@@ -34,7 +38,7 @@ namespace client.realize.messengers.clients
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
-            IUdpServer udpServer, ITcpServer tcpServer, IRelayConnectionSelector relayConnectionSelector
+            IUdpServer udpServer, ITcpServer tcpServer, IRelayConnectionSelector relayConnectionSelector, HeartMessengerSender heartMessengerSender, RelayMessengerSender relayMessengerSender
         )
         {
             this.punchHoleUdp = punchHoleUdp;
@@ -44,6 +48,8 @@ namespace client.realize.messengers.clients
             this.config = config;
             this.udpServer = udpServer;
             this.relayConnectionSelector = relayConnectionSelector;
+            this.heartMessengerSender = heartMessengerSender;
+            this.relayMessengerSender = relayMessengerSender;
 
 
             punchHoleUdp.OnStep1Handler.Sub((e) =>
@@ -129,11 +135,11 @@ namespace client.realize.messengers.clients
             udpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.UdpConnection));
 
             //中继连线
-            punchHoleMessengerSender.OnRelay.Sub((param) =>
+            relayMessengerSender.OnRelay.Sub((param) =>
             {
-                if (clientInfoCaching.Get(param.Raw.Data.FromId, out ClientInfo client))
+                if (clientInfoCaching.Get(param.FromId, out ClientInfo client))
                 {
-                    Relay(client, param.Relay.ServerType, false);
+                    _ = Relay(client, param.Connection);
                 }
             });
 
@@ -189,8 +195,8 @@ namespace client.realize.messengers.clients
                 {
                     if (result == EnumConnectResult.AllFail)
                     {
-                        Relay(client, ServerType.UDP, true);
-                        Relay(client, ServerType.TCP, true);
+                        _ = Relay(client, ServerType.UDP, true);
+                        _ = Relay(client, ServerType.TCP, true);
                     }
                 }
 
@@ -305,6 +311,58 @@ namespace client.realize.messengers.clients
             return EnumConnectResult.AllFail;
         }
 
+
+        public async Task Ping()
+        {
+            if (config.Client.UseUdp)
+            {
+                var udps = clientInfoCaching.All().Where(c => c.UseUdp && config.Client.UseUdp);
+                foreach (var item in udps)
+                {
+                    try
+                    {
+                        var start = DateTime.Now;
+                        var res = await heartMessengerSender.Heart(item.UdpConnection);
+                        if (res)
+                        {
+                            item.UdpPing = (ushort)(DateTime.Now - start).TotalMilliseconds;
+                        }
+                        else
+                        {
+                            item.UdpPing = 0;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
+            if (config.Client.UseTcp)
+            {
+                var tcps = clientInfoCaching.All().Where(c => c.UseTcp && config.Client.UseTcp);
+                foreach (var item in tcps)
+                {
+                    try
+                    {
+                        var start = DateTime.Now;
+                        var res = await heartMessengerSender.Heart(item.TcpConnection);
+                        if (res)
+                        {
+                            item.TcpPing = (ushort)(DateTime.Now - start).TotalMilliseconds;
+                        }
+                        else
+                        {
+                            item.TcpPing = 0;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
+        }
+
+
         private void OnRegisterBind(bool state)
         {
             firstClients.Reset();
@@ -348,14 +406,15 @@ namespace client.realize.messengers.clients
                     bool first = firstClients.Get();
                     foreach (ClientsClientInfo item in upLineClients)
                     {
+                        EnumClientAccess enumClientAccess = (EnumClientAccess)item.ClientAccess;
                         ClientInfo client = new ClientInfo
                         {
                             Id = item.Id,
                             Name = item.Name,
-                            Mac = item.Mac,
-                            UseTcp = item.Tcp,
-                            UseUdp = item.Udp,
-                            AutoPunchHole = item.AutoPunchHole,
+                            UseTcp = (enumClientAccess & EnumClientAccess.UseTcp) == EnumClientAccess.UseTcp,
+                            UseUdp = (enumClientAccess & EnumClientAccess.UseUdp) == EnumClientAccess.UseUdp,
+                            AutoPunchHole = (enumClientAccess & EnumClientAccess.AutoPunchHole) == EnumClientAccess.AutoPunchHole,
+                            UseRelay = (enumClientAccess & EnumClientAccess.Relay) == EnumClientAccess.Relay,
                         };
                         clientInfoCaching.Add(client);
                         if (first)
@@ -371,10 +430,10 @@ namespace client.realize.messengers.clients
                                     ConnectReverse(client);
                                 }
                             }
-                            else if (registerState.RemoteInfo.Relay)
+                            else
                             {
-                                Relay(client, ServerType.UDP, true);
-                                Relay(client, ServerType.TCP, true);
+                                _ = Relay(client, ServerType.UDP, true);
+                                _ = Relay(client, ServerType.TCP, true);
                             }
                         }
                     }
@@ -387,23 +446,27 @@ namespace client.realize.messengers.clients
                 Logger.Instance.Error(ex);
             }
         }
-        private void Relay(ClientInfo client, ServerType serverType, bool notify)
+        private async Task Relay(ClientInfo client, ServerType serverType, bool notify = false)
         {
-            if (registerState.RemoteInfo.Relay == false) return;
-            if (client.TcpConnected == true && serverType == ServerType.TCP) return;
-            if (client.UdpConnected == true && serverType == ServerType.UDP) return;
+            IConnection sourceConnection = await relayConnectionSelector.Select(serverType);
+            await Relay(client, sourceConnection, notify);
+        }
+        private async Task Relay(ClientInfo client, IConnection sourceConnection, bool notify = false)
+        {
+            if (sourceConnection == null || sourceConnection.Connected == false) return;
+            if (client.TcpConnected == true && sourceConnection.ServerType == ServerType.TCP) return;
+            if (client.UdpConnected == true && sourceConnection.ServerType == ServerType.UDP) return;
 
-            IConnection sourceConnection = relayConnectionSelector.Select(serverType);
-            if (sourceConnection != null && sourceConnection.Connected)
-            {
-                IConnection connection = sourceConnection.Clone();
-                connection.Relay = registerState.RemoteInfo.Relay;
-                clientInfoCaching.Online(client.Id, connection, ClientConnectTypes.Relay);
-            }
+            bool verify = await relayMessengerSender.Verify(client.Id, sourceConnection);
+            if (verify == false) return;
+
+            IConnection connection = sourceConnection.Clone();
+            connection.Relay = true;
+            clientInfoCaching.Online(client.Id, connection, ClientConnectTypes.Relay);
 
             if (notify)
             {
-                _ = punchHoleMessengerSender.SendRelay(client.Id, serverType);
+                await relayMessengerSender.SendRelay(client.Id, sourceConnection);
             }
         }
 

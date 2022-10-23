@@ -66,7 +66,6 @@ namespace client.realize.messengers.punchHole
                     PunchType = (byte)msg.PunchType,
                     ToId = arg.ToId,
                     TunnelName = arg.TunnelName,
-                    GuessPort = arg.GuessPort,
                     Index = arg.Index,
                 }.ToBytes()
             }).ConfigureAwait(false);
@@ -87,7 +86,6 @@ namespace client.realize.messengers.punchHole
                     PunchType = (byte)msg.PunchType,
                     ToId = arg.ToId,
                     TunnelName = arg.TunnelName,
-                    GuessPort = arg.GuessPort,
                     Index = arg.Index,
                 }.ToBytes()
             }).ConfigureAwait(false);
@@ -108,23 +106,6 @@ namespace client.realize.messengers.punchHole
                 Connection = registerState.OnlineConnection,
                 ToId = info.Id,
                 Data = new PunchHoleReverseInfo { TryReverse = times }
-            }).ConfigureAwait(false);
-        }
-
-        public SimpleSubPushHandler<OnRelayParam> OnRelay { get; } = new SimpleSubPushHandler<OnRelayParam>();
-        /// <summary>
-        /// 通知其要使用中继
-        /// </summary>
-        /// <param name="toid"></param>
-        /// <param name="serverType"></param>
-        /// <returns></returns>
-        public async Task SendRelay(ulong toid, ServerType serverType)
-        {
-            await Send(new SendPunchHoleArg<PunchHoleRelayInfo>
-            {
-                Connection = registerState.OnlineConnection,
-                ToId = toid,
-                Data = new PunchHoleRelayInfo { ServerType = serverType }
             }).ConfigureAwait(false);
         }
 
@@ -162,20 +143,11 @@ namespace client.realize.messengers.punchHole
         }
     }
 
-    public class OnRelayParam
-    {
-        public OnPunchHoleArg Raw { get; set; }
-        public PunchHoleRelayInfo Relay { get; set; }
-    }
-
     public class SendPunchHoleArg<T>
     {
         public IConnection Connection { get; set; }
 
         public ulong ToId { get; set; }
-
-        public int GuessPort { get; set; } = 0;
-
         public ulong TunnelName { get; set; } = 0;
         public byte Index { get; set; } = 0;
 

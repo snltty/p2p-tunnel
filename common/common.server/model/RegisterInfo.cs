@@ -28,10 +28,7 @@ namespace common.server.model
         /// 名称
         /// </summary>
         public string Name { get; set; } = string.Empty;
-        /// <summary>
-        /// mac地址，暂时没什么卵用
-        /// </summary>
-        public string Mac { get; set; } = string.Empty;
+
         /// <summary>
         /// 本机tcp端口
         /// </summary>
@@ -41,7 +38,10 @@ namespace common.server.model
         /// </summary>
         public int LocalUdpPort { get; set; } = 0;
 
-        public bool AutoPunchHole { get; set; } = false;
+        /// <summary>
+        /// 客户端自定义的权限列表
+        /// </summary>
+        public uint ClientAccess { get; set; } = 0;
 
         public byte[] ToBytes()
         {
@@ -61,15 +61,13 @@ namespace common.server.model
             length += 1 + groupidBytes.Length;
             var nameBytes = Name.ToBytes();
             length += 1 + nameBytes.Length;
-            var macBytes = Mac.ToBytes();
-            length += 1 + macBytes.Length;
             var localtcpPort = LocalTcpPort.ToBytes();
             length += 2;
             var localudpPort = LocalUdpPort.ToBytes();
             length += 2;
 
-            //AutoPunchHole
-            length += 1;
+            var clientAccess = ClientAccess.ToBytes();
+            length += clientAccess.Length;
 
             var bytes = new byte[length];
             int index = 0;
@@ -95,10 +93,6 @@ namespace common.server.model
             Array.Copy(nameBytes, 0, bytes, index, nameBytes.Length);
             index += nameBytes.Length;
 
-            bytes[index] = (byte)macBytes.Length;
-            index += 1;
-            Array.Copy(macBytes, 0, bytes, index, macBytes.Length);
-            index += macBytes.Length;
 
             bytes[index] = localtcpPort[0];
             bytes[index + 1] = localtcpPort[1];
@@ -108,7 +102,8 @@ namespace common.server.model
             bytes[index + 1] = localudpPort[1];
             index += 2;
 
-            bytes[index] = (byte)(AutoPunchHole ? 1 : 0);
+            Array.Copy(clientAccess, 0, bytes, index, clientAccess.Length);
+            index += clientAccess.Length;
 
             return bytes;
 
@@ -136,16 +131,13 @@ namespace common.server.model
             Name = span.Slice(index + 1, span[index]).GetString();
             index += 1 + span[index];
 
-            Mac = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
-
             LocalTcpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
             LocalUdpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
 
-            AutoPunchHole = span[index] == 1;
-            index += 1;
+            ClientAccess = span.Slice(index, 4).ToUInt32();
+            index += 4;
         }
     }
 
@@ -162,15 +154,9 @@ namespace common.server.model
         /// 服务器是否支持中继
         /// </summary>
         public bool Relay { get; set; } = false;
-        public bool AutoPunchHole { get; set; } = false;
 
         public int UdpPort { get; set; } = 0;
         public int TcpPort { get; set; } = 0;
-
-        /// <summary>
-        /// 服务器超时时间
-        /// </summary>
-        public int TimeoutDelay { get; set; } = 0;
 
         /// <summary>
         /// 连接id
@@ -189,16 +175,15 @@ namespace common.server.model
         {
             var udpPortBytes = UdpPort.ToBytes();
             var tcpPortBytes = TcpPort.ToBytes();
-            var timeoutBytes = TimeoutDelay.ToBytes();
             var idBytes = Id.ToBytes();
             var ipBytes = Ip.GetAddressBytes();
             var groupIdBytes = GroupId.ToBytes();
 
             var bytes = new byte[
-                1 + 1 + 1
-                + 2 + 2
-                + timeoutBytes.Length
-                + 8
+                1 //Code
+                + 1//Relay
+                + 2 + 2 //port
+                + 8 //id
                 + 1 + ipBytes.Length
                 + groupIdBytes.Length];
 
@@ -209,9 +194,6 @@ namespace common.server.model
             bytes[index] = (byte)(Relay ? 1 : 0);
             index += 1;
 
-            bytes[index] = (byte)(AutoPunchHole ? 1 : 0);
-            index += 1;
-
             bytes[index] = udpPortBytes[0];
             bytes[index + 1] = udpPortBytes[1];
             index += 2;
@@ -219,9 +201,6 @@ namespace common.server.model
             bytes[index] = tcpPortBytes[0];
             bytes[index + 1] = tcpPortBytes[1];
             index += 2;
-
-            Array.Copy(timeoutBytes, 0, bytes, index, timeoutBytes.Length);
-            index += 4;
 
             Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
             index += 8;
@@ -247,17 +226,11 @@ namespace common.server.model
             Relay = span[index] != 0;
             index += 1;
 
-            AutoPunchHole = span[index] != 0;
-            index += 1;
-
             UdpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
 
             TcpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
-
-            TimeoutDelay = span.Slice(index, 4).ToInt32();
-            index += 4;
 
             Id = span.Slice(index, 8).ToUInt64();
             index += 8;

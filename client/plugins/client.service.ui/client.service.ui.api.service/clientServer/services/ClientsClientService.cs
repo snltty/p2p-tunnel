@@ -2,6 +2,7 @@
 using client.service.ui.api.clientServer;
 using common.libs.extends;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
 {
@@ -49,6 +50,12 @@ namespace client.service.ui.api.service.clientServer.services
         {
             ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
             clientsTransfer.Reset(model.ID);
+        }
+
+        public async Task<bool> Ping(ClientServiceParamsInfo arg)
+        {
+            await clientsTransfer.Ping();
+            return true;
         }
 
     }

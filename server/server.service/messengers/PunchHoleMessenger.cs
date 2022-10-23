@@ -33,7 +33,7 @@ namespace server.service.messengers
                     {
                         if (model.PunchForwardType == PunchForwardTypes.NOTIFY)
                         {
-                            if (!source.GetTunnel(model.TunnelName, out TunnelRegisterCacheInfo tunnel))
+                            if (source.GetTunnel(model.TunnelName, out TunnelRegisterCacheInfo tunnel) == false)
                             {
                                 return Helper.FalseArray;
                             }
@@ -44,7 +44,6 @@ namespace server.service.messengers
                                 LocalPort = tunnel.LocalPort,
                                 Port = tunnel.Port,
                                 IsDefault = tunnel.IsDefault,
-                                GuessPort = model.GuessPort,
                                 Index = model.Index,
                             }.ToBytes();
                         }

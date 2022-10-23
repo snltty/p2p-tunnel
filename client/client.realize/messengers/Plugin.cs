@@ -19,6 +19,7 @@ using System.Reflection;
 using common.libs.database;
 using common.server.servers.rudp;
 using common.server.servers.iocp;
+using client.realize.messengers.relay;
 
 namespace client.realize.messengers
 {
@@ -73,6 +74,8 @@ namespace client.realize.messengers
             //services.AddSingleton<IPunchHoleUdp, PunchHoleUdpMessengerSender>();
             services.AddSingleton<IPunchHoleUdp, PunchHoleRUdpMessengerSender>();
             services.AddSingleton<IPunchHoleTcp, PunchHoleTcpNutssBMessengerSender>();
+
+            services.AddSingleton<RelayMessengerSender>();
 
             //默认时间轮
             services.AddSingleton<WheelTimer<object>>();

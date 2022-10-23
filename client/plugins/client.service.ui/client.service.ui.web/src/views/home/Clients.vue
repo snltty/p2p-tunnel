@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-14 19:35:46
+ * @LastEditTime: 2022-10-23 11:33:46
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -15,26 +15,24 @@
                 <template v-for="(item,index) in clients" :key="index">
                     <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
                         <div class="item">
-                            <dl v-loading="item.UdpConnecting || item.TcpConnecting">
+                            <dl v-loading="item.loading">
                                 <dt @click="handleClientClick(item)">{{item.Name}}</dt>
-                                <dd v-if="item.UseUdp && registerState.ClientConfig.UseUdp" :style="item.udpConnectTypeStyle" class="flex">
+                                <dd v-if="item.showUdp" :style="item.udpConnectTypeStyle" class="flex">
                                     <span class="label">Udp</span>
-                                    <el-icon>
-                                        <connection />
-                                    </el-icon>
                                     <span>{{item.udpConnectTypeStr}}</span>
+                                    <span class="flex-1"></span>
+                                    <Signal :value="item.UdpPing"></Signal>
                                 </dd>
-                                <dd v-if="item.UseTcp  && registerState.ClientConfig.UseTcp" :style="item.tcpConnectTypeStyle" class="flex">
+                                <dd v-if="item.showTcp" :style="item.tcpConnectTypeStyle" class="flex">
                                     <span class="label">Tcp</span>
-                                    <el-icon>
-                                        <connection />
-                                    </el-icon>
                                     <span>{{item.tcpConnectTypeStr}}</span>
+                                    <span class="flex-1"></span>
+                                    <Signal :value="item.TcpPing"></Signal>
                                 </dd>
                                 <dd class="t-r">
                                     <el-button plain text bg :disabled="item.connectDisabled" size="small" @click="handleConnect(item)">连它</el-button>
                                     <el-button plain text bg :disabled="item.connectDisabled" size="small" @click="handleConnectReverse(item)">连我</el-button>
-                                    <el-button plain text bg :loading="item.UdpConnecting || item.TcpConnecting" size="small" @click="handleConnectReset(item)">重启</el-button>
+                                    <el-button plain text bg :loading="item.loading" size="small" @click="handleConnectReset(item)">重启</el-button>
                                 </dd>
                             </dl>
                         </div>
@@ -66,15 +64,48 @@
 import { computed, reactive, ref, toRefs } from '@vue/reactivity';
 import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
-import { sendClientConnect, sendClientConnectReverse, sendClientReset } from '../../apis/clients'
+import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing } from '../../apis/clients'
 import { sendPacketTest } from '../../apis/test'
+import Signal from './Signal.vue'
+import { onMounted, onUnmounted } from '@vue/runtime-core';
 export default {
     name: 'Clients',
-    components: {},
+    components: { Signal },
     setup () {
         const clientsState = injectClients();
         const registerState = injectRegister();
         const localIp = computed(() => registerState.LocalInfo.LocalIp.split('.').slice(0, 3).join('.'));
+        const connectTypeStrs = ['未连接', '已连接-打洞', '已连接-中继'];
+        const connectTypeColors = ['color:#333;', 'color:#148727;font-weight:bold;', 'color:#148727;font-weight:bold;'];
+        const clients = computed(() => {
+            clientsState.clients.forEach(c => {
+                c.showUdp = c.UseUdp && registerState.ClientConfig.UseUdp;
+                c.showTcp = c.UseTcp && registerState.ClientConfig.UseTcp;
+
+                c.udpConnectType = c.UdpConnected ? c.UdpConnectType : Number(c.UdpConnected);
+                c.tcpConnectType = c.TcpConnected ? c.TcpConnectType : Number(c.TcpConnected);
+
+                c.udpConnectTypeStr = connectTypeStrs[c.udpConnectType];
+                c.udpConnectTypeStyle = connectTypeColors[c.udpConnectType];
+
+                c.tcpConnectTypeStr = connectTypeStrs[c.tcpConnectType];
+                c.tcpConnectTypeStyle = connectTypeColors[c.tcpConnectType];
+
+                c.connectDisabled = false;
+                if (c.UseUdp || c.UseTcp) {
+                    c.connectDisabled = c.UdpConnected && c.TcpConnected;
+                } else if (c.UseUdp) {
+                    c.connectDisabled = c.UdpConnected;
+                } else if (c.UseTcp) {
+                    c.connectDisabled = c.TcpConnected;
+                }
+
+                c.online = c.UdpConnected || c.TcpConnected;
+
+                c.loading = c.UdpConnecting || c.TcpConnecting;
+            });
+            return clientsState.clients;
+        });
 
         const handleConnect = (row) => {
             sendClientConnect(row.Id);
@@ -84,6 +115,21 @@ export default {
         }
         const handleConnectReset = (row) => {
             sendClientReset(row.Id);
+        }
+
+        let pingTimer = 0;
+        onMounted(() => {
+            handlePing();
+        });
+        onUnmounted(() => {
+            clearTimeout(pingTimer);
+        })
+        const handlePing = () => {
+            sendPing().then(() => {
+                pingTimer = setTimeout(handlePing, 1000);
+            }).catch(() => {
+                pingTimer = setTimeout(handlePing, 1000);
+            })
         }
 
         const state = reactive({
@@ -126,7 +172,7 @@ export default {
 
         return {
             ...toRefs(state), registerState, handleSubmit, formDom, handleClientClick,
-            ...toRefs(clientsState), handleConnect, handleConnectReverse, handleConnectReset, localIp
+            clients, handleConnect, handleConnectReverse, handleConnectReset, localIp
         }
 
     }

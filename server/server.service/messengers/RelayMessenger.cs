@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.register;
@@ -46,6 +47,58 @@ namespace server.service.messengers
                     }
                 }
             }
+        }
+        public async Task Relay(IConnection connection)
+        {
+            RelayInfo relayInfo = new RelayInfo();
+            relayInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
+            if (relayInfo.ToId > 0)
+            {
+                if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+                {
+                    if (relayValidator.Validate(source.GroupId) == false)
+                    {
+                        return;
+                    }
+
+                    if (clientRegisterCache.Get(relayInfo.ToId, out RegisterCacheInfo target))
+                    {
+                        if (source.GroupId == target.GroupId)
+                        {
+                            connection.ReceiveRequestWrap.Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
+                            RelayInfo.ClearToId(connection.ReceiveRequestWrap.Payload);
+                            await messengerSender.SendOnly(connection.ReceiveRequestWrap).ConfigureAwait(false);
+                        }
+                    }
+                }
+            }
+        }
+
+        public byte[] Verify(IConnection connection)
+        {
+            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+            {
+                if (relayValidator.Validate(source.GroupId) == false)
+                {
+                    return Helper.FalseArray;
+                }
+
+                ulong toid = connection.ReceiveRequestWrap.Payload.Span.ToUInt64();
+                if (clientRegisterCache.Get(toid, out RegisterCacheInfo target))
+                {
+                    if (source.GroupId == target.GroupId)
+                    {
+                        return connection.ServerType switch
+                        {
+                            ServerType.TCP => source.TcpConnection != null && source.TcpConnection.Connected ? Helper.TrueArray : Helper.FalseArray,
+                            ServerType.UDP => source.UdpConnection != null && source.UdpConnection.Connected ? Helper.TrueArray : Helper.FalseArray,
+                            _ => Helper.FalseArray,
+                        };
+                    }
+                }
+            }
+
+            return Helper.FalseArray;
         }
     }
 

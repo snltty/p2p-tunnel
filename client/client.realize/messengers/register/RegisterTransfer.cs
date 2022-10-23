@@ -151,7 +151,6 @@ namespace client.realize.messengers.register
                         RegisterResult result = await GetRegisterResult();
                         //上线
                         config.Client.GroupId = result.Data.GroupId;
-                        registerState.RemoteInfo.TimeoutDelay = result.Data.TimeoutDelay;
                         registerState.RemoteInfo.Relay = result.Data.Relay;
                         registerState.Online(result.Data.Id, result.Data.Ip, result.Data.UdpPort, result.Data.TcpPort);
                         //上线通知
@@ -234,7 +233,7 @@ namespace client.realize.messengers.register
                 Mac = registerState.LocalInfo.Mac,
                 LocalIps = new IPAddress[] { config.Client.LoopbackIp, registerState.LocalInfo.LocalIp },
                 Timeout = 15 * 1000,
-                AutoPunchHole = config.Client.AutoPunchHole,
+                ClientAccess = config.Client.GetAccess()
             }).ConfigureAwait(false);
             if (result.NetState.Code != MessageResponeCodes.OK)
             {

@@ -2,10 +2,10 @@
  * @Author: snltty
  * @Date: 2021-08-22 14:09:03
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-10 11:55:08
+ * @LastEditTime: 2022-10-23 17:40:59
  * @version: v1.0.0
  * @Descripttion: 功能说明
- * @FilePath: \qbcode.vclass.client.vued:\desktop\p2p-tunnel\README.md
+ * @FilePath: \client.service.ui.webd:\Desktop\p2p-tunnel\README.md
 -->
 <div align="center">
 
@@ -32,7 +32,30 @@
 ## 穿透方式
 - [x] p2p打洞、A<---->B（网络环境支持打洞时，打洞连接效率最好）
 - [x] 中继、A<---->server<---->B（免费打洞服务器不开启，服务器开启时，打洞失败则退化为服务器中继）
+- [x] 中继1、A<---->B<---->C 使用某个节点进行中继
 - [x] 服务器代理、server<---->A（免费打洞服务器不开启，网络环境不支持打洞，可以选择服务器代理）
+
+## 连线策略
+```mermaid
+    graph LR
+    D((开始)) --> F{开启打洞}
+    F{开启打洞} --> 打洞成功
+    F{开启打洞} --> 打洞失败
+    打洞失败 --> 服务器允许中继
+    打洞失败 --> 某节点允许中继
+    服务器允许中继 --> 中继
+    某节点允许中继 --> 中继
+    
+    D((开始)) --> 不开启打洞
+    不开启打洞 --> 服务器允许中继
+    不开启打洞 --> 某节点允许中继
+
+   打洞成功 --> C(结束)
+   中继 --> C(结束)
+```
+
+## 服务端权限配置
+- [x] 关闭全局权限时，注册、 中继、 服务器代理tcp转发+http代理、 服务器代理udp转发、socks5  这些功能可以单独配置哪些分组编号的客户端被允许
 
 ## 通信方式
 - [x] tcp转发
@@ -54,6 +77,8 @@
 - [x] 可扩展的插件式
 - [x] 免费的打洞服务器
 - [x] 高效的打包解包，作死的全手写序列化
+- [x] 权限管理，可以只允许某些分组做某些事情
+- [ ] 如果你有某个节点比较牛逼，可以允许某个节点作为中继节点，节省服务器带宽
 
 ## 介绍视频
 - 基础介绍 <a href="https://www.bilibili.com/video/BV1Pa411R79U/">https://www.bilibili.com/video/BV1Pa411R79U/</a>

@@ -12,23 +12,28 @@ namespace client.messengers.clients
     /// </summary>
     public class ClientInfo
     {
-        public bool UdpConnecting { get; set; } = false;
-        public bool TcpConnecting { get; set; } = false;
+        public bool UdpConnecting { get; private set; } = false;
+        public bool TcpConnecting { get; private set; } = false;
         public bool UdpConnected { get => UdpConnection != null && UdpConnection.Connected; }
         public bool TcpConnected { get => TcpConnection != null && TcpConnection.Connected; }
 
-        public string Name { get; set; } = string.Empty;
-        public string Mac { get; set; } = string.Empty;
-        public IPAddress Ip { get; set; } = IPAddress.Any;
-        public ulong Id { get; set; } = 0;
-        public bool UseUdp { get; set; } = false;
-        public bool UseTcp { get; set; } = false;
-        public bool AutoPunchHole { get; set; } = false;
+        public string Name { get; init; } = string.Empty;
+
+        private IPAddress ip = IPAddress.Any;
+        public IPAddress Ip { get => ip; }
+
+        public ulong Id { get; init; } = 0;
+        public bool AutoPunchHole { get; init; } = false;
+
+        public bool UseUdp { get; init; } = false;
+        public bool UseTcp { get; init; } = false;
+        public bool UseRelay { get; init; } = false;
+        public ushort UdpPing { get; set; } = 0;
+        public ushort TcpPing { get; set; } = 0;
 
 
-
-        public ClientConnectTypes UdpConnectType { get; set; } = ClientConnectTypes.P2P;
-        public ClientConnectTypes TcpConnectType { get; set; } = ClientConnectTypes.P2P;
+        public ClientConnectTypes UdpConnectType { get; private set; } = ClientConnectTypes.P2P;
+        public ClientConnectTypes TcpConnectType { get; private set; } = ClientConnectTypes.P2P;
 
         [JsonIgnore]
         public byte TryReverseValue { get; set; } = 1;
@@ -75,13 +80,13 @@ namespace client.messengers.clients
             if (connection.ServerType == ServerType.UDP)
             {
                 UdpConnection = connection;
-                Ip = connection.Address.Address;
+                ip = connection.Address.Address;
                 UdpConnectType = connectType;
             }
             else
             {
                 TcpConnection = connection;
-                Ip = connection.Address.Address;
+                ip = connection.Address.Address;
                 TcpConnectType = connectType;
             }
             Connecting(false, connection.ServerType);

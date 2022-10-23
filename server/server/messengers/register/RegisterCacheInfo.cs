@@ -21,9 +21,7 @@ namespace server.messengers.register
         public string GroupId { get; set; }
         [JsonIgnore]
         public IPAddress[] LocalIps { get; set; }
-        [JsonIgnore]
-        public string Mac { get; set; }
-        public bool AutoPunchHole { get; set; } = false;
+        public uint ClientAccess { get; set; } = 0;
 
         public void UpdateUdpInfo(IConnection connection)
         {
@@ -43,7 +41,7 @@ namespace server.messengers.register
         }
         public void RemoveTunnel(ulong tunnameName)
         {
-            tunnels.TryRemove(tunnameName,out _);
+            tunnels.TryRemove(tunnameName, out _);
         }
         public bool TunnelExists(ulong tunnelName)
         {

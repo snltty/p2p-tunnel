@@ -26,10 +26,6 @@ namespace common.server.model
         public byte PunchType { get; set; } = 0;
         public byte Index { get; set; } = 0;
         /// <summary>
-        /// 猜测的端口
-        /// </summary>
-        public int GuessPort { get; set; } = 0;
-        /// <summary>
         /// 来自谁
         /// </summary>
         public ulong FromId { get; set; } = 0;
@@ -50,14 +46,12 @@ namespace common.server.model
         public ReadOnlyMemory<byte> Data { get; set; } = Helper.EmptyArray;
         public byte[] ToBytes()
         {
-            var guessPortBytes = GuessPort.ToBytes();
             var fromidBytes = FromId.ToBytes();
             var toidBytes = ToId.ToBytes();
             var nameBytes = TunnelName.ToBytes();
 
             var bytes = new byte[
                 1 + 1 + 1 + 1
-                + 2
                 + 8 + 8
                 + nameBytes.Length + Data.Length
                 ];
@@ -71,10 +65,6 @@ namespace common.server.model
             index += 1;
             bytes[index] = Index;
             index += 1;
-
-            bytes[index] = guessPortBytes[0];
-            bytes[index + 1] = guessPortBytes[1];
-            index += 2;
 
             Array.Copy(fromidBytes, 0, bytes, index, fromidBytes.Length);
             index += 8;
@@ -102,9 +92,6 @@ namespace common.server.model
             index += 1;
             Index = span[index];
             index += 1;
-
-            GuessPort = span.Slice(index, 2).ToUInt16();
-            index += 2;
 
             FromId = span.Slice(index, 8).ToUInt64();
             index += 8;
@@ -139,7 +126,6 @@ namespace common.server.model
         public IPAddress Ip { get; set; } = IPAddress.Any;
         public int Port { get; set; } = 0;
         public int LocalPort { get; set; } = 0;
-        public int GuessPort { get; set; } = 0;
 
         public byte[] ToBytes()
         {
@@ -162,8 +148,6 @@ namespace common.server.model
             var port = Port.ToBytes();
             length += 2;
             var localport = LocalPort.ToBytes();
-            length += 2;
-            var guessPortBytes = GuessPort.ToBytes();
             length += 2;
 
 
@@ -193,9 +177,6 @@ namespace common.server.model
             index += 2;
             bytes[index] = localport[0];
             bytes[index + 1] = localport[1];
-            index += 2;
-            bytes[index] = guessPortBytes[0];
-            bytes[index + 1] = guessPortBytes[1];
             index += 2;
 
             return bytes;
@@ -227,8 +208,6 @@ namespace common.server.model
             Port = span.Slice(index, 2).ToUInt16();
             index += 2;
             LocalPort = span.Slice(index, 2).ToUInt16();
-            index += 2;
-            GuessPort = span.Slice(index, 2).ToUInt16();
             index += 2;
         }
     }

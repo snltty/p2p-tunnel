@@ -62,11 +62,7 @@ namespace common.server.model
     {
         public ulong Id { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
-        public string Mac { get; set; } = string.Empty;
-
-        public bool Udp { get; set; } = false;
-        public bool Tcp { get; set; } = false;
-        public bool AutoPunchHole { get; set; } = false;
+        public uint ClientAccess { get; set; } = 0;
 
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; } = null;
@@ -75,19 +71,18 @@ namespace common.server.model
         {
             var idBytes = Id.ToBytes();
             var nameBytes = Name.ToBytes();
-            var macBytes = Mac.ToBytes();
+            var clientAccessBytes = ClientAccess.ToBytes();
 
             var bytes = new byte[
-                1
+                4
                 + 8
                 + 1 + nameBytes.Length
-                + 1 + macBytes.Length
                 ];
 
             int index = 0;
 
-            bytes[0] = (byte)((AutoPunchHole ? 1 : 0) << 2 | ((Udp ? 1 : 0) << 1) | (Tcp ? 1 : 0));
-            index += 1;
+            Array.Copy(clientAccessBytes, 0, bytes, index, clientAccessBytes.Length);
+            index += 4;
 
             Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
             index += 8;
@@ -95,10 +90,6 @@ namespace common.server.model
             bytes[index] = (byte)nameBytes.Length;
             Array.Copy(nameBytes, 0, bytes, index + 1, nameBytes.Length);
             index += 1 + nameBytes.Length;
-
-            bytes[index] = (byte)macBytes.Length;
-            Array.Copy(macBytes, 0, bytes, index + 1, macBytes.Length);
-            index += 1 + macBytes.Length;
 
             return bytes;
         }
@@ -108,18 +99,13 @@ namespace common.server.model
             var span = data.Span;
             int index = 0;
 
-            AutoPunchHole = ((span[index] >> 2) & 1) == 1;
-            Udp = ((span[index] >> 1) & 1) == 1;
-            Tcp = (span[index] & 1) == 1;
-            index += 1;
+            ClientAccess = span.Slice(index, 4).ToUInt32();
+            index += 4;
 
             Id = span.Slice(index, 8).ToUInt64();
             index += 8;
 
             Name = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
-
-            Mac = span.Slice(index + 1, span[index]).GetString();
             index += 1 + span[index];
 
             return index;

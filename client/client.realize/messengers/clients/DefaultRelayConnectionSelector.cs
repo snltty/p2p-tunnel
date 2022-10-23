@@ -3,6 +3,7 @@ using client.messengers.register;
 using common.server;
 using common.server.model;
 using System;
+using System.Threading.Tasks;
 
 namespace client.realize.messengers.clients
 {
@@ -13,8 +14,12 @@ namespace client.realize.messengers.clients
         {
             this.registerState = registerState;
         }
-        public IConnection Select(ServerType serverType)
+        public async Task<IConnection> Select(ServerType serverType)
         {
+            await Task.CompletedTask;
+
+            if (registerState.RemoteInfo.Relay == false) return null;
+
             return serverType switch
             {
                 ServerType.TCP => registerState.TcpConnection,

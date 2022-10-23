@@ -102,7 +102,7 @@ namespace client.service.vea
                 }
             }
         }
-        private void UpdateIp()
+        public void UpdateIp()
         {
             foreach (var item in clientInfoCaching.All().Where(c => c.Id != registerStateInfo.ConnectId))
             {

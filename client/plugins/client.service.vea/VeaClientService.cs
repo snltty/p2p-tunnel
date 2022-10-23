@@ -11,15 +11,15 @@ namespace client.service.vea
     public class VeaClientService : IClientService
     {
         private readonly Config config;
-        private readonly VeaTransfer virtualEthernetAdapterTransfer;
+        private readonly VeaTransfer VeaTransfer;
         private readonly IVeaSocks5ServerHandler veaSocks5ServerHandler;
         private readonly VeaMessengerSender veaMessengerSender;
         private readonly IClientInfoCaching clientInfoCaching;
 
-        public VeaClientService(Config config, VeaTransfer virtualEthernetAdapterTransfer, IVeaSocks5ServerHandler veaSocks5ServerHandler, VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
+        public VeaClientService(Config config, VeaTransfer VeaTransfer, IVeaSocks5ServerHandler veaSocks5ServerHandler, VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
         {
             this.config = config;
-            this.virtualEthernetAdapterTransfer = virtualEthernetAdapterTransfer;
+            this.VeaTransfer = VeaTransfer;
             this.veaSocks5ServerHandler = veaSocks5ServerHandler;
             this.veaMessengerSender = veaMessengerSender;
             this.clientInfoCaching = clientInfoCaching;
@@ -47,7 +47,7 @@ namespace client.service.vea
 
             try
             {
-                virtualEthernetAdapterTransfer.Run();
+                VeaTransfer.Run();
             }
             catch (Exception ex)
             {
@@ -57,9 +57,9 @@ namespace client.service.vea
             config.SaveConfig().Wait();
         }
 
-        public Dictionary<ulong, IPAddressCacheInfo> Update(ClientServiceParamsInfo arg)
+        public Dictionary<ulong, IPAddressCacheInfo> List(ClientServiceParamsInfo arg)
         {
-            return virtualEthernetAdapterTransfer.IPList.ToDictionary(c => c.Value.Client.Id, d => d.Value);
+            return VeaTransfer.IPList.ToDictionary(c => c.Value.Client.Id, d => d.Value);
         }
 
         public async Task<bool> Reset(ClientServiceParamsInfo arg)
@@ -69,6 +69,12 @@ namespace client.service.vea
             {
                 await veaMessengerSender.Reset(client.OnlineConnection, model.Id);
             }
+            return true;
+        }
+
+        public bool Update(ClientServiceParamsInfo arg)
+        {
+            VeaTransfer.UpdateIp();
             return true;
         }
     }

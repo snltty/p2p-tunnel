@@ -22,7 +22,7 @@ namespace client.service.wakeup
             return config;
         }
 
-        public Dictionary<string, List<ConfigItem>> Update(ClientServiceParamsInfo arg)
+        public Dictionary<string, List<ConfigItem>> List(ClientServiceParamsInfo arg)
         {
             return wakeUpTransfer.Get();
         }
@@ -41,6 +41,12 @@ namespace client.service.wakeup
         {
             RemoveModel model = arg.Content.DeJson<RemoveModel>();
             return await config.Remove(model.Index);
+        }
+
+        public bool Update(ClientServiceParamsInfo arg)
+        {
+            wakeUpTransfer.UpdateMac();
+            return true;
         }
     }
 

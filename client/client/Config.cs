@@ -98,9 +98,7 @@ namespace client
         public bool AutoPunchHole { get; set; } = true;
         public bool UseUdp { get; set; } = true;
         public bool UseTcp { get; set; } = true;
-
-
-
+        public bool Relay { get; set; } = true;
 
         [JsonIgnore]
         public IPAddress BindIp
@@ -119,6 +117,27 @@ namespace client
                 return UseIpv6 ? IPAddress.IPv6Loopback : IPAddress.Loopback;
             }
         }
+
+        public EnumClientAccess GetAccess()
+        {
+            return EnumClientAccess.None
+                | (UseUdp ? EnumClientAccess.UseUdp : EnumClientAccess.None)
+                | (UseTcp ? EnumClientAccess.UseTcp : EnumClientAccess.None)
+                | (AutoPunchHole ? EnumClientAccess.AutoPunchHole : EnumClientAccess.None)
+                | (Relay ? EnumClientAccess.Relay : EnumClientAccess.None);
+
+        }
+    }
+
+    [Flags]
+    public enum EnumClientAccess : uint
+    {
+        None = 0,
+        UseUdp = 1,
+        UseTcp = 2,
+        AutoPunchHole = 4,
+        Relay = 8,
+        All = 0xffffffff
     }
 
     /// <summary>
