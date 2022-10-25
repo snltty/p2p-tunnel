@@ -12,7 +12,7 @@ echo =================================
 echo.
 echo.
 echo 安装服务==========================
-nssm install p2p-tunnel-client	 %exepath%server.service.exe
+nssm install p2p-tunnel-server	 %exepath%server.service.exe
 nssm set p2p-tunnel-server AppDirectory %exepath%
 echo =================================
 echo.
