@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-23 01:14:25
+ * @LastEditTime: 2022-10-25 15:57:02
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -204,6 +204,7 @@ export default {
         const showClients = computed(() => {
             clientsState.clients.forEach(c => {
                 c.veaIp = state.veaClients[c.Id] || { IP: '', LanIP: '' };
+                c.online = c.UdpConnected || c.TcpConnected;
             });
             return clientsState.clients;
         });
