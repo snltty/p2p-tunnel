@@ -13,7 +13,7 @@ rem dotnet publish ./client/client.service.tray -c release -f net6.0-windows -o 
 rem dotnet publish ./client/client.service.tray -c release -f net6.0-windows -o ./public/publish/tray-arm64 -r win-arm64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=true
 rem 客户端和服务端
 for %%f in (client,server) do (
-	for %%r in (win-x64,win-arm64,linux-x64,linux-arm64,osx-x64,osx-arm64) do (
+	for %%r in (win-x64,win-arm64,linux-x64,linux-arm64,linux-arm,osx-x64,osx-arm64) do (
 		dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/%%r-single/%%f  -r %%r  --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true
 	)
 	dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/any/%%f 
@@ -23,7 +23,7 @@ dotnet publish ./client/client.service.app -c:Release -f:net6.0-android /p:Andro
 echo F|xcopy "client\\client.service.app\\bin\\Release\\net6.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" "public\\publish-zip\\p2p-tunnel.apk"  /s /f /h /y
 
 
-for %%r in (x64,arm64) do (
+for %%r in (x64,arm64,arm) do (
 	for %%f in (tun2socks-linux) do (
 		echo F|xcopy "client\\plugins\\client.service.vea\\%%f" "public\\publish\\linux-%%r-single\\client\\"  /f /h /y
 		del  "public\\publish\\win-%%r-single\\client\\%%f"
@@ -63,11 +63,15 @@ for %%r in (x64,arm64) do (
 	
 )
 del  "public\\publish\\any\\server\\*.pac"
+rd /s /q "public\\publish\\osx-arm-single"
+rd /s /q "public\\publish\\win-arm-single"
 
 7z a -tzip ./public/publish-zip/any.zip ./public/publish/any/*
 7z a -tzip ./public/publish-zip/win-x64-single.zip ./public/publish/win-x64-single/*
 7z a -tzip ./public/publish-zip/win-arm64-single.zip ./public/publish/win-arm64-single/*
 7z a -tzip ./public/publish-zip/linux-x64-single.zip ./public/publish/linux-x64-single/*
 7z a -tzip ./public/publish-zip/linux-arm64-single.zip ./public/publish/linux-arm64-single/*
+7z a -tzip ./public/publish-zip/linux-arm-single.zip ./public/publish/linux-arm-single/*
 7z a -tzip ./public/publish-zip/osx-x64-single.zip ./public/publish/osx-x64-single/*
 7z a -tzip ./public/publish-zip/osx-arm64-single.zip ./public/publish/osx-arm64-single/*
+
