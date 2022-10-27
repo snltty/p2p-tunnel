@@ -45,7 +45,7 @@ namespace common.server.servers.iocp
             }
         }
 
-        public Socket BindAccept(int port, IPAddress ip)
+        private Socket BindAccept(int port, IPAddress ip)
         {
             IPEndPoint localEndPoint = new IPEndPoint(ip, port);
 

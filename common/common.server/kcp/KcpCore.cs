@@ -53,8 +53,8 @@ namespace System.Net.Sockets.Kcp
 
         #region Const
 
-        public const int IKCP_RTO_NDL = 30;  // no delay min rto
-        public const int IKCP_RTO_MIN = 100; // normal min rto
+        public const int IKCP_RTO_NDL = 5;  // no delay min rto
+        public const int IKCP_RTO_MIN = 30; // normal min rto
         public const int IKCP_RTO_DEF = 200;
         public const int IKCP_RTO_MAX = 60000;
         /// <summary>
