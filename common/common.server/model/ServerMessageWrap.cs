@@ -60,7 +60,7 @@ namespace common.server.model
             byte[] requestIdByte = RequestId.ToBytes();
             int index = 0;
 
-            length = (type == ServerType.TCP ? 4 : 0)
+            length = 4
                 + 1 // type
                 + 1 // RelayId
                 + requestIdByte.Length
@@ -77,8 +77,8 @@ namespace common.server.model
             {
                 byte[] payloadLengthByte = (length - 4).ToBytes();
                 Array.Copy(payloadLengthByte, 0, res, index, payloadLengthByte.Length);
-                index += payloadLengthByte.Length;
             }
+            index += 4;
 
             res[index] = (byte)MessageTypes.REQUEST;
             index += 1;
@@ -180,7 +180,7 @@ namespace common.server.model
         /// <returns></returns>
         public (byte[] data, int length) ToArray(ServerType type, bool pool = false)
         {
-            int length = (type == ServerType.TCP ? 4 : 0)
+            int length = 4
                 + 1 //type
                 + 1 //code
                 + 1 //RelayId
@@ -198,8 +198,8 @@ namespace common.server.model
             {
                 byte[] payloadLengthByte = (length - 4).ToBytes();
                 Array.Copy(payloadLengthByte, 0, res, index, payloadLengthByte.Length);
-                index += payloadLengthByte.Length;
             }
+            index += 4;
 
             res[index] = (byte)MessageTypes.RESPONSE;
             index += 1;

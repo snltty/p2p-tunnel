@@ -22,6 +22,7 @@ namespace common.server.servers.kcp
 
         public void Start(int port, IPAddress ip = null)
         {
+
             Start(port, ip, 20000);
         }
 
@@ -29,15 +30,43 @@ namespace common.server.servers.kcp
         private PoolSegManager.Kcp kcp;
         public void Start(int port, IPAddress ip = null, int timeout = 20000)
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            kcp = new PoolSegManager.Kcp(2001, this);
-            kcp.NoDelay(1, 1, 2, 1);//fast
-            kcp.Interval(1);
-            kcp.WndSize(1024, 1024);
+            if (socket == null)
+            {
+                socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                kcp = new PoolSegManager.Kcp(2001, this);
+                kcp.NoDelay(1, 1, 2, 1);//fast
+                kcp.Interval(1);
+                kcp.WndSize(1024, 1024);
+
+                byte[] buffer = new byte[8 * 1024];
+                socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, Callback, new KcpUserToken
+                {
+                    Socket = socket,
+                    Buffer = buffer
+                });
+            }
+        }
+        private void Callback(IAsyncResult result)
+        {
+            KcpUserToken state = result.AsyncState as KcpUserToken;
+            int len = state.Socket.EndReceive(result);
+
+            kcp.Input(state.Buffer.AsSpan(0, len));
+
+            (IMemoryOwner<byte> buffer, int length) = kcp.TryRecv();
+            if (length > 0)
+            {
+               // OnPacket();
+            }
+
+            state.Socket.BeginReceive(state.Buffer, 0, state.Buffer.Length, SocketFlags.None, Callback, state);
         }
         public void Output(IMemoryOwner<byte> buffer, int avalidLength)
         {
-            //socket.Send
+            if (socket != null)
+            {
+                socket.Send(buffer.Memory.Span.Slice(0, avalidLength), SocketFlags.None);
+            }
         }
 
 
@@ -56,7 +85,29 @@ namespace common.server.servers.kcp
         {
             await OnPacket(connection);
         }
+    }
 
+    class KcpUserToken
+    {
+        public Socket Socket { get; set; }
+        public byte[] Buffer { get; set; }
+    }
 
+    class KcpPeer
+    {
+        private IPEndPoint ep;
+        public KcpPeer(IPEndPoint ep)
+        {
+
+        }
+
+    }
+
+    enum MessageType : byte
+    {
+        Connect = 1,
+        ConnectResponse = 2,
+        DisConnect = 4,
+        DisconnectResponse = 8,
     }
 }
