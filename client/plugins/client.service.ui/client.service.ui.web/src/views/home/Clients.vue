@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-23 11:33:46
+ * @LastEditTime: 2022-10-30 14:14:45
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -64,7 +64,7 @@
 import { computed, reactive, ref, toRefs } from '@vue/reactivity';
 import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
-import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing } from '../../apis/clients'
+import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing, getDelay } from '../../apis/clients'
 import { sendPacketTest } from '../../apis/test'
 import Signal from './Signal.vue'
 import { onMounted, onUnmounted } from '@vue/runtime-core';
