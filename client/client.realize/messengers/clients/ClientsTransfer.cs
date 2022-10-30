@@ -13,6 +13,7 @@ using common.server.servers.rudp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.clients
@@ -362,6 +363,82 @@ namespace client.realize.messengers.clients
             }
         }
 
+        public async Task<Dictionary<ulong, int[]>> Delay(ulong toid)
+        {
+            Dictionary<ulong, int[]> data = new Dictionary<ulong, int[]>();
+            bool res = false;
+            DateTime current;
+
+            foreach (var item in clientInfoCaching.All().Where(c => c.UseRelay && c.Id != toid && c.Id != registerState.ConnectId))
+            {
+                if (data.ContainsKey(item.Id)) continue;
+
+                int[] result = new int[] { 0, 0 };
+                data.Add(item.Id, result);
+
+                if (config.Client.UseTcp && item.UseTcp && item.TcpConnected && item.TcpConnectType == ClientConnectTypes.P2P)
+                {
+                    res = await relayMessengerSender.Verify(toid, item.TcpConnection);
+                    if (res)
+                    {
+                        current = DateTime.Now;
+                        res = await relayMessengerSender.RelayDelay(toid, item.TcpConnection);
+                        if (res)
+                        {
+                            result[0] = (int)(DateTime.Now - current).TotalMilliseconds;
+                        }
+                    }
+                }
+
+                if (config.Client.UseUdp && item.UseUdp && item.UdpConnected && item.UdpConnectType == ClientConnectTypes.P2P)
+                {
+                    res = await relayMessengerSender.Verify(toid, item.UdpConnection);
+                    if (res)
+                    {
+                        current = DateTime.Now;
+                        res = await relayMessengerSender.RelayDelay(toid, item.UdpConnection);
+                        if (res)
+                        {
+                            result[1] = (int)(DateTime.Now - current).TotalMilliseconds;
+                        }
+                    }
+                }
+            }
+
+
+            int[] resultServer = new int[] { 0, 0 };
+            data.Add(0, resultServer);
+
+            if (config.Client.UseTcp)
+            {
+                res = await relayMessengerSender.Verify(toid, registerState.TcpConnection);
+                if (res)
+                {
+                    current = DateTime.Now;
+                    res = await relayMessengerSender.RelayDelay(toid, registerState.TcpConnection);
+                    if (res)
+                    {
+                        resultServer[0] = (int)(DateTime.Now - current).TotalMilliseconds;
+                    }
+                }
+            }
+            if (config.Client.UseUdp)
+            {
+                res = await relayMessengerSender.Verify(toid, registerState.UdpConnection);
+                if (res)
+                {
+                    current = DateTime.Now;
+                    res = await relayMessengerSender.RelayDelay(toid, registerState.UdpConnection);
+                    if (res)
+                    {
+                        resultServer[1] = (int)(DateTime.Now - current).TotalMilliseconds;
+                    }
+                }
+            }
+
+
+            return data;
+        }
 
         private void OnRegisterBind(bool state)
         {
@@ -454,8 +531,8 @@ namespace client.realize.messengers.clients
         private async Task Relay(ClientInfo client, IConnection sourceConnection, bool notify = false)
         {
             if (sourceConnection == null || sourceConnection.Connected == false) return;
-            if (client.TcpConnected == true && sourceConnection.ServerType == ServerType.TCP) return;
-            if (client.UdpConnected == true && sourceConnection.ServerType == ServerType.UDP) return;
+            if (sourceConnection.ServerType == ServerType.TCP && client.TcpConnected == true && client.TcpConnectType == ClientConnectTypes.P2P) return;
+            if (sourceConnection.ServerType == ServerType.UDP && client.UdpConnected == true && client.UdpConnectType == ClientConnectTypes.P2P) return;
 
             bool verify = await relayMessengerSender.Verify(client.Id, sourceConnection);
             if (verify == false) return;
@@ -479,4 +556,5 @@ namespace client.realize.messengers.clients
             All = UdpOnly | TcpOnly,
         }
     }
+
 }

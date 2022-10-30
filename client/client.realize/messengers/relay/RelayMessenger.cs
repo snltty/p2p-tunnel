@@ -93,5 +93,10 @@ namespace client.realize.messengers.relay
 
             return Helper.FalseArray;
         }
+
+        public byte[] Delay(IConnection connection)
+        {
+            return Helper.TrueArray;
+        }
     }
 }

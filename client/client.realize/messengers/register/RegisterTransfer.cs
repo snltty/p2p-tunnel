@@ -230,7 +230,6 @@ namespace client.realize.messengers.register
                 GroupId = config.Client.GroupId,
                 LocalUdpPort = registerState.LocalInfo.UdpPort,
                 LocalTcpPort = registerState.LocalInfo.TcpPort,
-                Mac = registerState.LocalInfo.Mac,
                 LocalIps = new IPAddress[] { config.Client.LoopbackIp, registerState.LocalInfo.LocalIp },
                 Timeout = 15 * 1000,
                 ClientAccess = config.Client.GetAccess()

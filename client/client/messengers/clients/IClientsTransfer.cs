@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace client.messengers.clients
 {
@@ -10,5 +11,6 @@ namespace client.messengers.clients
         public void Reset(ulong id);
         public void ConnectStop(ulong id);
         public Task Ping();
+        public  Task<Dictionary<ulong, int[]>> Delay(ulong toid);
     }
 }

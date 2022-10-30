@@ -100,6 +100,11 @@ namespace server.service.messengers
 
             return Helper.FalseArray;
         }
+
+        public byte[] Delay(IConnection connection)
+        {
+            return Helper.TrueArray;
+        }
     }
 
     public class SourceConnectionSelector : ISourceConnectionSelector

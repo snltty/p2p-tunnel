@@ -58,6 +58,11 @@ namespace client.service.ui.api.service.clientServer.services
             return true;
         }
 
+        public async Task<Dictionary<ulong, int[]>> Delay(ClientServiceParamsInfo arg)
+        {
+            return await clientsTransfer.Delay(ulong.Parse(arg.Content));
+        }
+
     }
     public class ConnectParamsInfo
     {

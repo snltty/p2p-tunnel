@@ -54,6 +54,28 @@ namespace client.realize.messengers.relay
 
             return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
         }
+
+        /// <summary>
+        /// 中继延迟
+        /// </summary>
+        /// <param name="toid"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task<bool> RelayDelay(ulong toid, IConnection connection)
+        {
+            var data = new MessageRequestWrap
+            {
+                Path = "relay/delay",
+                Connection = connection,
+                RelayId = toid,
+                Timeout = 2000
+            };
+            data.OriginPath = data.MemoryPath;
+            data.MemoryPath = "relay/execute".ToBytes();
+
+            var resp = await messengerSender.SendReply(data).ConfigureAwait(false);
+            return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
+        }
     }
 
     public class OnRelayInfo
