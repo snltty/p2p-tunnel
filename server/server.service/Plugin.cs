@@ -54,7 +54,7 @@ namespace server.service
 
             var server = services.GetService<ITcpServer>();
             server.SetBufferSize(config.TcpBufferSize);
-            server.Start(config.Tcp, ip: IPAddress.Any);
+            server.Start(config.Tcp);
             Logger.Instance.Info("TCP服务已开启");
 
             services.GetService<IUdpServer>().Start(services.GetService<Config>().Udp, timeout: config.TimeoutDelay);

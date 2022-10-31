@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -110,6 +111,14 @@ namespace common.libs
             return result;
         }
 
+        private static byte[] ipv6LocalBytes = new byte[] { 254, 128, 0, 0, 0, 0, 0, 0 };
+        public static IEnumerable<IPAddress> GetIPV6()
+        {
+            return Dns.GetHostAddresses(Dns.GetHostName())
+                 .Where(c => c.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                 .Where(c => c.GetAddressBytes().AsSpan(0, 8).SequenceEqual(ipv6LocalBytes) == false);
+        }
+
         /// <summary>
         /// 获取一个随机端口
         /// </summary>
@@ -173,7 +182,7 @@ namespace common.libs
             catch (Exception)
             {
             }
-            return new List<int>();                        
+            return new List<int>();
 
         }
 
@@ -264,5 +273,21 @@ namespace common.libs
 
             return res;
         }
+
+
+
+#if DISABLE_IPV6 || (!UNITY_EDITOR && ENABLE_IL2CPP && !UNITY_2018_3_OR_NEWER)
+            public static bool  IPv6Support = false;
+#elif !UNITY_2019_1_OR_NEWER && !UNITY_2018_4_OR_NEWER && (!UNITY_EDITOR && ENABLE_IL2CPP && UNITY_2018_3_OR_NEWER)
+           public static bool   IPv6Support = Socket.OSSupportsIPv6 && int.Parse(UnityEngine.Application.unityVersion.Remove(UnityEngine.Application.unityVersion.IndexOf('f')).Split('.')[2]) >= 6;
+#elif UNITY_2018_2_OR_NEWER
+           public static bool   IPv6Support = Socket.OSSupportsIPv6;
+#elif UNITY
+#pragma warning disable 618
+           public static bool   IPv6Support = Socket.SupportsIPv6;
+#pragma warning restore 618
+#else
+        public static bool IPv6Support = Socket.OSSupportsIPv6;
+#endif
     }
 }

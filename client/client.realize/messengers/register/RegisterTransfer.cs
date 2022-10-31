@@ -6,6 +6,7 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -120,7 +121,6 @@ namespace client.realize.messengers.register
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
                         registerState.LocalInfo.UdpPort = registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort();
-                        registerState.LocalInfo.Mac = string.Empty;
                         registerState.OnRegisterBind.Push(true);
 
                         if (config.Client.UseUdp)
@@ -185,18 +185,28 @@ namespace client.realize.messengers.register
         private async Task UdpBind(IPAddress serverAddress)
         {
             //UDP 开始监听
-            udpServer.Start(registerState.LocalInfo.UdpPort, config.Client.BindIp, config.Client.TimeoutDelay);
+            udpServer.Start(registerState.LocalInfo.UdpPort, config.Client.TimeoutDelay);
             registerState.UdpConnection = await udpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
         }
         private void TcpBind(IPAddress serverAddress)
         {
             //TCP 本地开始监听
             tcpServer.SetBufferSize(config.Client.TcpBufferSize);
-            tcpServer.Start(registerState.LocalInfo.TcpPort, config.Client.BindIp);
+            tcpServer.Start(registerState.LocalInfo.TcpPort);
             //TCP 连接服务器
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.TcpPort);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
+            if (config.Client.BindIp.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                try
+                {
+                    tcpSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                }
+                catch (Exception)
+                {
+                }
+            }
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             registerState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;
@@ -223,6 +233,9 @@ namespace client.realize.messengers.register
         }
         private async Task<RegisterResult> GetRegisterResult()
         {
+            IPAddress[] localIps = new IPAddress[] { config.Client.LoopbackIp, registerState.LocalInfo.LocalIp };
+            localIps = localIps.Concat(NetworkHelper.GetIPV6()).ToArray();
+
             //注册
             RegisterResult result = await registerMessageHelper.Register(new RegisterParams
             {
@@ -230,7 +243,7 @@ namespace client.realize.messengers.register
                 GroupId = config.Client.GroupId,
                 LocalUdpPort = registerState.LocalInfo.UdpPort,
                 LocalTcpPort = registerState.LocalInfo.TcpPort,
-                LocalIps = new IPAddress[] { config.Client.LoopbackIp, registerState.LocalInfo.LocalIp },
+                LocalIps = localIps,
                 Timeout = 15 * 1000,
                 ClientAccess = config.Client.GetAccess()
             }).ConfigureAwait(false);

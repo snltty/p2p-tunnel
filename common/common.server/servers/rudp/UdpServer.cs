@@ -20,11 +20,11 @@ namespace common.server.servers.rudp
         private NetManager server;
         private EventBasedNetListener listener;
 
-        public void Start(int port, IPAddress ip = null)
+        public void Start(int port)
         {
-            Start(port, ip, 20000);
+            Start(port, 20000);
         }
-        public void Start(int port, IPAddress ip = null, int timeout = 20000)
+        public void Start(int port, int timeout = 20000)
         {
             listener = new EventBasedNetListener();
             server = new NetManager(listener);
@@ -34,8 +34,8 @@ namespace common.server.servers.rudp
             server.PingInterval = Math.Max(timeout / 5, 5000);
             server.DisconnectTimeout = timeout;
             server.MaxConnectAttempts = 10;
-            //server.AutoRecycle = true;
-            server.ReuseAddress = true;
+            //server.ReuseAddress = true;
+            //server.IPv6Enabled = IPv6Mode.DualMode;
             server.Start(port);
 
             listener.ConnectionRequestEvent += request =>
@@ -70,7 +70,9 @@ namespace common.server.servers.rudp
                 {
                     IConnection connection = peer.Tag as IConnection;
                     connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset + 4, reader.UserDataSize);
+                    Console.WriteLine($"udp receive:{connection.ReceiveData.Length}");
                     OnPacket(connection).Wait();
+                    Console.WriteLine($"udp receive:{connection.ReceiveData.Length} --------------");
                 }
                 catch (Exception)
                 {
@@ -80,6 +82,7 @@ namespace common.server.servers.rudp
 
         public void Stop()
         {
+            Console.WriteLine("udp stop");
             if (listener != null)
             {
                 listener.ClearConnectionRequestEvent();

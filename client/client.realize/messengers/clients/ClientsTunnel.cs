@@ -72,7 +72,7 @@ namespace client.realize.messengers.clients
             UdpServer tempUdpServer = new UdpServer();
             tempUdpServer.OnPacket = udpServer.InputData;
             tempUdpServer.OnDisconnect.Sub((IConnection _connection) => { if (connection != _connection) tempUdpServer.Disponse(); });
-            tempUdpServer.Start(localport, config.Client.BindIp, config.Client.TimeoutDelay);
+            tempUdpServer.Start(localport, config.Client.TimeoutDelay);
             connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
 
             int port = await clientsMessengerSender.GetTunnelPort(connection);
@@ -99,11 +99,18 @@ namespace client.realize.messengers.clients
                 tcpServer.BindReceive(socket, config.Client.TcpBufferSize);
                 tempTcpServer.Disponse();
             };
-            tempTcpServer.Start1(localport, config.Client.BindIp);
+            tempTcpServer.Start1(localport);
 
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, localport);
 
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                tcpSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+            }
+            catch (Exception)
+            {
+            }
             tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));

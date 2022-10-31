@@ -30,26 +30,35 @@ namespace common.server.servers.iocp
             this.bufferSize = bufferSize;
         }
 
-        public void Start1(int port, IPAddress ip)
+        public void Start1(int port)
         {
             isReceive = false;
-            Start(port, ip);
+            Start(port);
         }
-        public void Start(int port, IPAddress ip)
+        public void Start(int port)
         {
             if (socket == null)
             {
                 this.port = port;
                 cancellationTokenSource = new CancellationTokenSource();
-                socket = BindAccept(port, ip ?? IPAddress.Any);
+                socket = BindAccept(port);
             }
         }
 
-        private Socket BindAccept(int port, IPAddress ip)
+        private Socket BindAccept(int port)
         {
-            IPEndPoint localEndPoint = new IPEndPoint(ip, port);
-
+            IPEndPoint localEndPoint = new IPEndPoint(NetworkHelper.IPv6Support ? IPAddress.IPv6Any : IPAddress.Any, port);
             Socket socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            if (NetworkHelper.IPv6Support)
+            {
+                try
+                {
+                    socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                }
+                catch (Exception)
+                {
+                }
+            }
             socket.ReuseBind(localEndPoint);
             socket.Listen(int.MaxValue);
 

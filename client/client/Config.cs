@@ -1,4 +1,5 @@
-﻿using common.libs.database;
+﻿using common.libs;
+using common.libs.database;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
@@ -105,7 +106,7 @@ namespace client
         {
             get
             {
-                return UseIpv6 ? IPAddress.IPv6Any : IPAddress.Any;
+                return UseIpv6 && NetworkHelper.IPv6Support ? IPAddress.IPv6Any : IPAddress.Any;
             }
         }
 
@@ -114,7 +115,7 @@ namespace client
         {
             get
             {
-                return UseIpv6 ? IPAddress.IPv6Loopback : IPAddress.Loopback;
+                return UseIpv6 && NetworkHelper.IPv6Support ? IPAddress.IPv6Loopback : IPAddress.Loopback;
             }
         }
 

@@ -91,6 +91,7 @@ namespace common.server
         /// <returns></returns>
         public async ValueTask<bool> ReplyOnly(MessageResponseWrap msg)
         {
+            Console.WriteLine($"reply:{msg.RequestId},{msg.RelayId}:{msg.Connection.ServerType}:{msg.Connection.ConnectId}:{msg.Connection.Connected}");
             try
             {
                 if (msg.Connection.EncodeEnabled)
@@ -105,7 +106,7 @@ namespace common.server
             }
             catch (Exception ex)
             {
-                Logger.Instance.Debug(ex);
+                Logger.Instance.DebugError(ex);
             }
             return false;
         }

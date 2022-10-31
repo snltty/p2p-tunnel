@@ -2,7 +2,6 @@
 using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using client.messengers.register;
-using client.realize.messengers.clients;
 using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;
@@ -11,6 +10,7 @@ using common.server.model;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -101,7 +101,11 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
                 foreach (IPEndPoint ip in ips)
                 {
-                    if (ip.Address.Equals(IPAddress.Any))
+                    if (ip.Address.Equals(IPAddress.Any) || ip.Address.Equals(IPAddress.IPv6Any))
+                    {
+                        continue;
+                    }
+                    if (NetworkHelper.IPv6Support == false && ip.Address.AddressFamily == AddressFamily.InterNetworkV6)
                     {
                         continue;
                     }
@@ -109,8 +113,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     using Socket targetSocket = new(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetworkV6)
+                        {
+                            targetSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                        }
                         targetSocket.Ttl = (short)(RouteLevel);
-                        targetSocket.ReuseBind(new IPEndPoint(config.Client.BindIp, localPort));
+                        targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
                         _ = targetSocket.ConnectAsync(ip);
                     }
                     catch (Exception)
@@ -165,12 +173,18 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         port = ip.Item2;
                     }
 
+                    if (NetworkHelper.IPv6Support == false && ip.Item1.AddressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        continue;
+                    }
+
                     IPEndPoint targetEndpoint = new IPEndPoint(ip.Item1, port);
                     Socket targetSocket = new Socket(targetEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
+                        targetSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
                         targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
-                        targetSocket.ReuseBind(new IPEndPoint(config.Client.BindIp, cache.LocalPort));
+                        targetSocket.ReuseBind(new IPEndPoint(ip.Item1.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
                         IAsyncResult result = targetSocket.BeginConnect(targetEndpoint, null, null);
                         result.AsyncWaitHandle.WaitOne(2000, false);
 
@@ -183,6 +197,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             }
                             targetSocket.EndConnect(result);
 
+                            Logger.Instance.DebugDebug($"{ip.Item1} connect success");
                             if (arg.Data.IsDefault)
                             {
                                 IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: config.Client.TcpBufferSize);
@@ -201,6 +216,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         }
                         else
                         {
+                            Logger.Instance.DebugError($"{ip.Item1} connect fail");
                             targetSocket.SafeClose();
                             targetSocket = null;
                             interval = 100;
@@ -209,7 +225,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                     catch (SocketException ex)
                     {
-                        Logger.Instance.DebugError($"{targetEndpoint}--------{ex}");
+                        Logger.Instance.DebugError($"{ip.Item1} connect fail:{ex}");
                         targetSocket.SafeClose();
                         targetSocket = null;
                         interval = 100;
@@ -229,7 +245,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.DebugError($"{targetEndpoint}--------{ex}");
+                        Logger.Instance.DebugError($"{ip.Item1} connect fail:{ex}");
                     }
                 }
 
@@ -263,18 +279,23 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             if (clientInfoCaching.GetTunnelPort(e.RawData.TunnelName, out int localPort))
             {
                 OnStep2RetryHandler.Push(e);
+                if (NetworkHelper.IPv6Support == false && e.Data.Ip.AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    return;
+                }
 
                 Socket targetSocket = null;
                 try
                 {
-                    if (e.Data.Ip.Equals(IPAddress.Any) == false)
+                    if (e.Data.Ip.Equals(IPAddress.Any) == false || e.Data.Ip.Equals(IPAddress.IPv6Any))
                     {
                         IPEndPoint target = new IPEndPoint(e.Data.Ip, e.Data.Port);
                         targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                        targetSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
                         targetSocket.Ttl = (short)(RouteLevel + e.RawData.Index);
                         //targetSocket.Ttl = (short)(RouteLevel);
                         targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                        targetSocket.Bind(new IPEndPoint(config.Client.BindIp, localPort));
+                        targetSocket.Bind(new IPEndPoint(e.Data.Ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
                         _ = targetSocket.ConnectAsync(target);
                     }
 

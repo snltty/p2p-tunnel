@@ -139,10 +139,7 @@ namespace client.messengers.register
         /// 外网距离
         /// </summary>
         public int RouteLevel { get; set; } = 0;
-        /// <summary>
-        /// 本地mac地址
-        /// </summary>
-        public string Mac { get; set; } = string.Empty;
+
         /// <summary>
         /// 本地UDP端口
         /// </summary>
