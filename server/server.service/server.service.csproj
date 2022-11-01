@@ -53,7 +53,6 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\common\common.libs\common.libs.csproj" />
 	  <ProjectReference Include="..\..\common\common.server\common.server.csproj" />
-	  <ProjectReference Include="..\plugins\server.service.manager\server.service.manager.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.socks5\server.service.socks5.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.tcpforward\server.service.tcpforward.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.udpforward\server.service.udpforward.csproj" />

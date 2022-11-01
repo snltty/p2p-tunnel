@@ -3,7 +3,6 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using System;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace client.service.vea
@@ -26,7 +25,7 @@ namespace client.service.vea
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Path = "vea/ip",
+                MessengerId = (int)VeaSocks5MessengerIds.Ip,
                 Payload = new IPAddressInfo { IP = config.IP, LanIP = config.LanIP }.ToBytes(),
                 Timeout = 1000
             }).ConfigureAwait(false);
@@ -47,7 +46,7 @@ namespace client.service.vea
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Path = "vea/reset",
+                MessengerId = (int)VeaSocks5MessengerIds.Reset,
                 Payload = id.ToBytes(),
                 Timeout = 15000
             }).ConfigureAwait(false);

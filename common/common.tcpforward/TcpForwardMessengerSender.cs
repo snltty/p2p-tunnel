@@ -19,7 +19,7 @@ namespace common.tcpforward
             var bytes = arg.ToBytes();
             return messengerSender.SendOnly(new MessageRequestWrap
             {
-                Path = "TcpForward/Request",
+                MessengerId = (int)TcpForwardMessengerIds.Request,
                 Connection = arg.Connection,
                 Payload = bytes
             }).Result;
@@ -30,7 +30,7 @@ namespace common.tcpforward
             var bytes = arg.ToBytes();
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
-                Path = "TcpForward/Response",
+                MessengerId = (int)TcpForwardMessengerIds.Response,
                 Connection = connection,
                 Payload = bytes
             });
@@ -40,7 +40,7 @@ namespace common.tcpforward
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                Path = "TcpForward/GetPorts",
+                MessengerId = (int)TcpForwardMessengerIds.Ports,
                 Connection = Connection,
                 Payload = Helper.EmptyArray
             }).ConfigureAwait(false);
@@ -50,7 +50,7 @@ namespace common.tcpforward
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                Path = "TcpForward/UnRegister",
+                MessengerId = (int)TcpForwardMessengerIds.SignOut,
                 Connection = Connection,
                 Payload = data.ToBytes()
             }).ConfigureAwait(false);
@@ -59,7 +59,7 @@ namespace common.tcpforward
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                Path = "TcpForward/Register",
+                MessengerId = (int)TcpForwardMessengerIds.SignIn,
                 Connection = Connection,
                 Payload = data.ToBytes(),
             }).ConfigureAwait(false);

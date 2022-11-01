@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace server.service.tcpforward
 {
+    [MessengerIdRange((int)TcpForwardMessengerIds.Min,(int)TcpForwardMessengerIds.Max)]
     public class TcpForwardMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -29,11 +30,13 @@ namespace server.service.tcpforward
             this.tcpForwardResolver = tcpForwardResolver;
         }
 
+        [MessengerId((int)TcpForwardMessengerIds.Request)]
         public void Request(IConnection connection)
         {
             tcpForwardResolver.InputData(connection);
         }
 
+        [MessengerId((int)TcpForwardMessengerIds.Response)]
         public void Response(IConnection connection)
         {
             TcpForwardInfo data = new TcpForwardInfo();
@@ -42,7 +45,8 @@ namespace server.service.tcpforward
             tcpForwardServer.Response(data);
         }
 
-        public byte[] GetPorts(IConnection connection)
+        [MessengerId((int)TcpForwardMessengerIds.Ports)]
+        public byte[] Ports(IConnection connection)
         {
             return config.WebListens
                 .Concat(new int[] {
@@ -51,7 +55,8 @@ namespace server.service.tcpforward
                 }).ToArray().ToBytes();
         }
 
-        public byte[] UnRegister(IConnection connection)
+        [MessengerId((int)TcpForwardMessengerIds.SignOut)]
+        public byte[] SignOut(IConnection connection)
         {
             try
             {
@@ -83,7 +88,8 @@ namespace server.service.tcpforward
             }
         }
 
-        public byte[] Register(IConnection connection)
+        [MessengerId((int)TcpForwardMessengerIds.SignIn)]
+        public byte[] SignIn(IConnection connection)
         {
 
 

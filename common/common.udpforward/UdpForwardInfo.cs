@@ -101,4 +101,17 @@ namespace common.udpforward
         [Description("优先udp")]
         UDP_FIRST = 1 << 4,
     }
+
+
+    [Flags, MessengerIdEnum]
+    public enum UdpForwardMessengerIds : int
+    {
+        Min = 701,
+        Request = 702,
+        Response = 703,
+        Ports = 704,
+        SignIn = 705,
+        SignOut = 706,
+        Max = 800,
+    }
 }

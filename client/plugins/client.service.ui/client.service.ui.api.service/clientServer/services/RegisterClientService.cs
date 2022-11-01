@@ -50,6 +50,7 @@ namespace client.service.ui.api.service.clientServer.services
 
             config.Client = model.ClientConfig;
             config.Server = model.ServerConfig;
+
             await config.SaveConfig().ConfigureAwait(false);
         }
     }

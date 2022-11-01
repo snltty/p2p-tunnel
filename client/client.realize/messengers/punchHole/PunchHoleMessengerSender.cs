@@ -56,7 +56,7 @@ namespace client.realize.messengers.punchHole
             await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = arg.Connection,
-                Path = "punchhole/Execute",
+                MessengerId = (int)PunchHoleMessengerIds.Execute,
                 Payload = new PunchHoleParamsInfo
                 {
                     Data = msg.ToBytes(),
@@ -76,7 +76,7 @@ namespace client.realize.messengers.punchHole
             return await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = arg.Connection,
-                Path = "punchhole/Execute",
+                MessengerId = (int)PunchHoleMessengerIds.Execute,
                 Payload = new PunchHoleParamsInfo
                 {
                     Data = msg.ToBytes(),

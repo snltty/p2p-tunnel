@@ -34,8 +34,7 @@ namespace common.server.servers.rudp
             server.PingInterval = Math.Max(timeout / 5, 5000);
             server.DisconnectTimeout = timeout;
             server.MaxConnectAttempts = 10;
-            //server.ReuseAddress = true;
-            //server.IPv6Enabled = IPv6Mode.DualMode;
+            server.MtuOverride = 1400;
             server.Start(port);
 
             listener.ConnectionRequestEvent += request =>
@@ -64,15 +63,13 @@ namespace common.server.servers.rudp
             listener.NetworkErrorEvent += (endPoint, socketError) =>
             {
             };
-            listener.NetworkReceiveEvent += (NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod) =>
+            listener.NetworkReceiveEvent += (NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod) =>
             {
                 try
                 {
                     IConnection connection = peer.Tag as IConnection;
-                    connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset + 4, reader.UserDataSize);
-                    Console.WriteLine($"udp receive:{connection.ReceiveData.Length}");
+                    connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset + 4, reader.UserDataSize - 4);
                     OnPacket(connection).Wait();
-                    Console.WriteLine($"udp receive:{connection.ReceiveData.Length} --------------");
                 }
                 catch (Exception)
                 {
@@ -82,7 +79,6 @@ namespace common.server.servers.rudp
 
         public void Stop()
         {
-            Console.WriteLine("udp stop");
             if (listener != null)
             {
                 listener.ClearConnectionRequestEvent();

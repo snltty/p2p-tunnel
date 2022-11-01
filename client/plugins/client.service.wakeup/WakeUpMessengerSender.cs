@@ -25,7 +25,7 @@ namespace client.service.wakeup
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Path = "wakeup/macs",
+                MessengerId = (int)WakeUpMessengerIds.Macs,
                 Payload = config.ToBytes(),
                 Timeout = 2000
             }).ConfigureAwait(false);
@@ -43,7 +43,7 @@ namespace client.service.wakeup
             return await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = connection,
-                Path = "wakeup/execute",
+                MessengerId = (int)WakeUpMessengerIds.WakeUp,
                 Payload = mac.ToBytes(),
                 Timeout = 1000
             }).ConfigureAwait(false);

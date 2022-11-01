@@ -20,17 +20,7 @@ namespace common.server.model
         /// <summary>
         /// 目标路径
         /// </summary>
-        public string Path
-        {
-            set
-            {
-                MemoryPath = value.ToLower().ToBytes();
-            }
-        }
-        /// <summary>
-        /// 目标路径，【只发发数据的话，不用填这里】
-        /// </summary>
-        public Memory<byte> MemoryPath { get; set; } = Memory<byte>.Empty;
+        public int MessengerId { get; set; } = 0;
 
         /// <summary>
         /// 每条数据都有个id，【只发发数据的话，不用填这里】
@@ -41,10 +31,11 @@ namespace common.server.model
         /// 中继数据时，写明是谁发的中继数据，以便目标客户端回复给来源客户端，【只发发数据的话，不用填这里】
         /// </summary>
         public ulong RelayId { get; set; } = 0;
+
         /// <summary>
         /// 【只发发数据的话，不用填这里】
         /// </summary>
-        public Memory<byte> OriginPath { get; set; } = Helper.EmptyArray;
+        public int OriginMessengerId { get; set; } = 0;
 
         /// <summary>
         /// 数据荷载
@@ -58,18 +49,21 @@ namespace common.server.model
         public byte[] ToArray(ServerType type, out int length, bool pool = false)
         {
             byte[] requestIdByte = RequestId.ToBytes();
+            byte[] messengerIdByte = MessengerId.ToBytes();
+            byte[] originMessengerIdByte = OriginMessengerId.ToBytes();
+
             int index = 0;
 
             length = 4
                 + 1 // type
                 + 1 // RelayId
                 + requestIdByte.Length
-                + 1 + MemoryPath.Length
+                + messengerIdByte.Length
                 + Payload.Length;
             if (RelayId > 0)
             {
                 length += 8;
-                length += 1 + OriginPath.Length;
+                length += originMessengerIdByte.Length;
             }
 
             byte[] res = pool ? ArrayPool<byte>.Shared.Rent(length) : new byte[length];
@@ -91,22 +85,18 @@ namespace common.server.model
                 Array.Copy(delayidByte, 0, res, index, delayidByte.Length);
                 index += delayidByte.Length;
 
-                res[index] = (byte)OriginPath.Length;
-                index += 1;
-                if (OriginPath.Length > 0)
+                if (originMessengerIdByte.Length > 0)
                 {
-                    OriginPath.CopyTo(res.AsMemory(index, OriginPath.Length));
-                    index += OriginPath.Length;
+                    originMessengerIdByte.CopyTo(res.AsMemory(index, originMessengerIdByte.Length));
+                    index += originMessengerIdByte.Length;
                 }
             }
 
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
             index += requestIdByte.Length;
 
-            res[index] = (byte)MemoryPath.Length;
-            index += 1;
-            MemoryPath.CopyTo(res.AsMemory(index, MemoryPath.Length));
-            index += MemoryPath.Length;
+            messengerIdByte.CopyTo(res.AsMemory(index, messengerIdByte.Length));
+            index += messengerIdByte.Length;
 
             Payload.CopyTo(res.AsMemory(index, Payload.Length));
             index += Payload.Length;
@@ -129,13 +119,8 @@ namespace common.server.model
                 RelayId = span.Slice(index).ToUInt64();
                 index += 8;
 
-                byte originPathLength = span[index];
-                index += 1;
-                if (originPathLength > 0)
-                {
-                    OriginPath = memory.Slice(index, originPathLength);
-                    index += originPathLength;
-                }
+                OriginMessengerId = span.Slice(index, 4).ToInt32();
+                index += 4;
             }
             else
             {
@@ -145,11 +130,8 @@ namespace common.server.model
             RequestId = span.Slice(index).ToUInt64();
             index += 8;
 
-            int pathLength = span[index];
-            index += 1;
-
-            MemoryPath = memory.Slice(index, pathLength);
-            index += pathLength;
+            MessengerId = span.Slice(index, 4).ToInt32();
+            index += 4;
 
             Payload = memory.Slice(index, memory.Length - index);
         }
@@ -157,13 +139,6 @@ namespace common.server.model
         public void Return(byte[] array)
         {
             ArrayPool<byte>.Shared.Return(array);
-        }
-
-        public void Reset()
-        {
-            MemoryPath = Memory<byte>.Empty;
-            Payload = Helper.EmptyArray;
-            Payload = Helper.EmptyArray;
         }
     }
     public class MessageResponseWrap

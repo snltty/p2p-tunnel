@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-01 17:19:16
+ * @LastEditTime: 2022-11-01 17:39:44
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\router\index.js
@@ -54,12 +54,6 @@ const routes = [
                 name: 'ServiceSocks5',
                 component: () => import('../views/service/socks5/Index.vue'),
                 meta: { name: 'socks5代理', service: 'Socks5ClientService' }
-            },
-            {
-                path: '/service-ftp.html',
-                name: 'ServiceFtp',
-                component: () => import('../views/service/ftp/Index.vue'),
-                meta: { name: '文件服务', service: 'FtpClientService' }
             },
             {
                 path: '/wakeup.html',

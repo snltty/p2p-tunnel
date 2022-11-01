@@ -111,4 +111,19 @@ namespace common.server.model
             return index;
         }
     }
+
+
+    [Flags, MessengerIdEnum]
+    public enum ClientsMessengerIds : int
+    {
+        Min = 101,
+        IP = 101,
+        Port = 102,
+        AddTunnel = 103,
+        RemoveTunnel = 104,
+        Notify = 105,
+        Reset = 106,
+
+        Max = 200,
+    }
 }

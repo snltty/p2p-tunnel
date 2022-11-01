@@ -32,7 +32,7 @@ namespace client.realize.messengers
             MessengerResolver serverPluginHelper = services.GetService<MessengerResolver>();
 
             //加载所有的消息处理器
-            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)))
+            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)).Distinct())
             {
                 serverPluginHelper.LoadMessenger(item, services.GetService(item));
             }
@@ -47,7 +47,7 @@ namespace client.realize.messengers
 
             services.AddSingleton<ISourceConnectionSelector, SourceConnectionSelector>();
             services.AddSingleton<IRelayConnectionSelector, DefaultRelayConnectionSelector>();
-            
+
 
             //监听服务
             services.AddSingleton<ITcpServer, TcpServer>();

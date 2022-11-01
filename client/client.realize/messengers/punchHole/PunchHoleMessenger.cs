@@ -6,6 +6,7 @@ using System;
 
 namespace client.realize.messengers.punchHole
 {
+    [MessengerIdRange((int)PunchHoleMessengerIds.Min, (int)PunchHoleMessengerIds.Max)]
     public class PunchHoleMessenger : IMessenger
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
@@ -15,6 +16,7 @@ namespace client.realize.messengers.punchHole
             this.punchHoleMessengerSender = punchHoleMessengerSender;
         }
 
+        [MessengerId((int)PunchHoleMessengerIds.Execute)]
         public void Execute(IConnection connection)
         {
             PunchHoleParamsInfo model = new PunchHoleParamsInfo();

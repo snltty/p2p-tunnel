@@ -195,7 +195,10 @@ namespace client.realize.messengers.clients
                 {
                     if (result == EnumConnectResult.AllFail)
                     {
-                        _ = Relay(client, ServerType.UDP, true);
+                        if (config.Client.UseTcp | client.UseTcp == false)
+                        {
+                            _ = Relay(client, ServerType.UDP, true);
+                        }
                         _ = Relay(client, ServerType.TCP, true);
                     }
                 }
@@ -254,6 +257,11 @@ namespace client.realize.messengers.clients
             clientInfoCaching.Connecting(client.Id, true, ServerType.UDP);
 
             ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.UDP, (ulong)TunnelDefaults.MIN };
+            if (config.Client.UseOriginPort == false)
+            {
+                tunnelNames[0] = (ulong)TunnelDefaults.MIN;
+            }
+
             for (int i = 0; i < tunnelNames.Length; i++)
             {
                 ConnectResultModel result = await punchHoleUdp.Send(new ConnectParams
@@ -291,6 +299,10 @@ namespace client.realize.messengers.clients
             clientInfoCaching.Connecting(client.Id, true, ServerType.TCP);
 
             ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.TCP, (ulong)TunnelDefaults.MIN };
+            if (config.Client.UseOriginPort == false)
+            {
+                tunnelNames[0] = (ulong)TunnelDefaults.MIN;
+            }
             for (int i = 0; i < tunnelNames.Length; i++)
             {
                 ConnectResultModel result = await punchHoleTcp.Send(new ConnectParams
@@ -508,7 +520,10 @@ namespace client.realize.messengers.clients
                             }
                             else
                             {
-                                _ = Relay(client, ServerType.UDP, true);
+                                if (config.Client.UseTcp | client.UseTcp == false)
+                                {
+                                    _ = Relay(client, ServerType.UDP, true);
+                                }
                                 _ = Relay(client, ServerType.TCP, true);
                             }
                         }

@@ -4,10 +4,10 @@ using common.server;
 using common.udpforward;
 using server.messengers.register;
 using System;
-using System.Linq;
 
 namespace server.service.udpforward
 {
+    [MessengerIdRange((int)UdpForwardMessengerIds.Min,(int)UdpForwardMessengerIds.Max)]
     public class UdpForwardMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -27,6 +27,7 @@ namespace server.service.udpforward
             this.udpForwardValidator = udpForwardValidator; 
         }
 
+        [MessengerId((int)UdpForwardMessengerIds.Request)]
         public void Request(IConnection connection)
         {
             UdpForwardInfo data = new UdpForwardInfo();
@@ -35,6 +36,7 @@ namespace server.service.udpforward
             tcpForwardMessengerSender.OnRequest(data);
         }
 
+        [MessengerId((int)UdpForwardMessengerIds.Response)]
         public void Response(IConnection connection)
         {
             UdpForwardInfo data = new UdpForwardInfo();
@@ -43,7 +45,8 @@ namespace server.service.udpforward
             tcpForwardMessengerSender.OnResponse(data);
         }
 
-        public byte[] GetPorts(IConnection connection)
+        [MessengerId((int)UdpForwardMessengerIds.Ports)]
+        public byte[] Ports(IConnection connection)
         {
             return new int[] {
                 config.TunnelListenRange.Min,
@@ -51,7 +54,8 @@ namespace server.service.udpforward
                 }.ToBytes();
         }
 
-        public byte[] UnRegister(IConnection connection)
+        [MessengerId((int)UdpForwardMessengerIds.SignOut)]
+        public byte[] SignOut(IConnection connection)
         {
             try
             {
@@ -78,6 +82,7 @@ namespace server.service.udpforward
             }
         }
 
+        [MessengerId((int)UdpForwardMessengerIds.SignIn)]
         public byte[] Register(IConnection connection)
         {
             try

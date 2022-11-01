@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:39:45
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-23 18:58:06
+ * @LastEditTime: 2022-11-01 17:49:18
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\register.js
@@ -23,7 +23,6 @@ export const provideRegister = () => {
             AutoRegTimes: 10,
             AutoRegInterval: 5000,
             AutoRegDelay: 5000,
-            UseMac: false,
             Encode: false,
             EncodePassword: "",
             UsePunchHole: false,
@@ -31,6 +30,7 @@ export const provideRegister = () => {
             UseUdp: false,
             UseTcp: false,
             UseRelay: false,
+            UseOriginPort: false,
         },
         ServerConfig: {
             Ip: '',
@@ -73,6 +73,7 @@ export const provideRegister = () => {
                 state.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
                 state.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
+                state.ClientConfig.UseOriginPort = json.ClientConfig.UseOriginPort;
 
                 state.ClientConfig.UsePunchHole = json.ClientConfig.UsePunchHole;
                 state.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;

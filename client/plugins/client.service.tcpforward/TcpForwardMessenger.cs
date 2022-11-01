@@ -1,9 +1,9 @@
 ﻿using common.server;
 using common.tcpforward;
-using System;
 
 namespace client.service.tcpforward
 {
+    [MessengerIdRange((int)TcpForwardMessengerIds.Min, (int)TcpForwardMessengerIds.Max)]
     public class TcpForwardMessenger : IMessenger
     {
         private readonly TcpForwardResolver tcpForwardResolver;
@@ -15,11 +15,13 @@ namespace client.service.tcpforward
             this.tcpForwardServer = tcpForwardServer;
         }
 
+        [MessengerId((int)TcpForwardMessengerIds.Request)]
         public void Request(IConnection connection)
         {
             tcpForwardResolver.InputData(connection);
         }
 
+        [MessengerId((int)TcpForwardMessengerIds.Response)]
         public void Response(IConnection connection)
         {
             TcpForwardInfo data = new TcpForwardInfo();

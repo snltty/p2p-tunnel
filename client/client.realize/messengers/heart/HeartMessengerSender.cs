@@ -22,7 +22,7 @@ namespace client.realize.messengers.heart
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Path = "heart/Execute",
+                MessengerId = (int)HeartMessengerIds.Alive,
                 Payload = Helper.EmptyArray,
                 Timeout = 2000
             }).ConfigureAwait(false);

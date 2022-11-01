@@ -119,6 +119,12 @@ namespace common.server
         public RudpConnection(NetPeer peer, IPEndPoint address)
         {
             NetPeer = peer;
+
+            if (address.Address.AddressFamily == AddressFamily.InterNetworkV6 && address.Address.IsIPv4MappedToIPv6)
+            {
+                address = new IPEndPoint(new IPAddress(address.Address.GetAddressBytes()[^4..]), address.Port);
+            }
+
             Address = address;
         }
 
@@ -137,9 +143,11 @@ namespace common.server
             {
                 try
                 {
-                    while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 1000)
+                    int index = 0;
+                    while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 1024)
                     {
-                        await Task.Delay(1);
+                        index++;
+                        await Task.Delay(15);
                     }
 
                     NetPeer.Send(data, 0, length, DeliveryMethod.ReliableOrdered);
@@ -172,6 +180,8 @@ namespace common.server
         {
             RudpConnection clone = new RudpConnection(NetPeer, Address);
             clone.EncodeEnable(Crypto);
+            clone.ReceiveRequestWrap = ReceiveRequestWrap;
+            clone.ReceiveResponseWrap = ReceiveResponseWrap;
             return clone;
         }
         public override IConnection CloneFull()
@@ -193,7 +203,13 @@ namespace common.server
         public TcpConnection(Socket tcpSocket)
         {
             TcpSocket = tcpSocket;
-            Address = (TcpSocket.RemoteEndPoint as IPEndPoint);
+
+            IPEndPoint address = (TcpSocket.RemoteEndPoint as IPEndPoint);
+            if (address.Address.AddressFamily == AddressFamily.InterNetworkV6 && address.Address.IsIPv4MappedToIPv6)
+            {
+                address = new IPEndPoint(new IPAddress(address.Address.GetAddressBytes()[^4..]), address.Port);
+            }
+            Address = address;
         }
 
         public override bool Connected => TcpSocket != null && TcpSocket.Connected;
@@ -237,6 +253,8 @@ namespace common.server
         {
             TcpConnection clone = new TcpConnection(TcpSocket);
             clone.EncodeEnable(Crypto);
+            clone.ReceiveRequestWrap = ReceiveRequestWrap;
+            clone.ReceiveResponseWrap = ReceiveResponseWrap;
             return clone;
         }
 

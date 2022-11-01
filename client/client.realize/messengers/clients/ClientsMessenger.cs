@@ -9,6 +9,7 @@ namespace client.realize.messengers.clients
     /// <summary>
     /// 服务器发来的客户端列表
     /// </summary>
+    [MessengerIdRange((int)ClientsMessengerIds.Min, (int)ClientsMessengerIds.Max)]
     public class ClientsMessenger : IMessenger
     {
         private readonly ClientsMessengerSender clientsMessengerSender;
@@ -19,13 +20,15 @@ namespace client.realize.messengers.clients
             this.registerTransfer = registerTransfer;
         }
 
-        public void Execute(IConnection connection)
+        [MessengerId((int)ClientsMessengerIds.Notify)]
+        public void Notify(IConnection connection)
         {
             ClientsInfo res = new ClientsInfo();
             res.DeBytes(connection.ReceiveRequestWrap.Payload);
             clientsMessengerSender.OnServerClientsData.Push(res);
         }
 
+        [MessengerId((int)ClientsMessengerIds.Reset)]
         public async Task Reset(IConnection connection)
         {
             await registerTransfer.Register().ConfigureAwait(false);

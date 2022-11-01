@@ -16,6 +16,8 @@ namespace common.libs
         public static char SeparatorChar = ',';
 
 
+        public static int Version = 1;
+
         public static string GetStackTraceModelName()
         {
             string result = "";

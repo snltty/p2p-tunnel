@@ -78,11 +78,6 @@ namespace client
         public int AutoRegInterval { get; set; } = 5000;
         public int AutoRegDelay { get; set; } = 5000;
 
-
-        /// <summary>
-        /// 上报MAC地址
-        /// </summary>
-        public bool UseMac { get; set; } = false;
         /// <summary>
         /// 使用ipv6
         /// </summary>
@@ -100,6 +95,7 @@ namespace client
         public bool UseUdp { get; set; } = true;
         public bool UseTcp { get; set; } = true;
         public bool UseRelay { get; set; } = true;
+        public bool UseOriginPort { get; set; } = true;
 
         [JsonIgnore]
         public IPAddress BindIp

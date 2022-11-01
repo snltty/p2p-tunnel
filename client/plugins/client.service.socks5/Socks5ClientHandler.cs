@@ -4,9 +4,7 @@ using common.libs;
 using common.server;
 using common.socks5;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net;
 
 namespace client.service.socks5
 {

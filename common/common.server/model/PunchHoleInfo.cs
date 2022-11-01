@@ -212,4 +212,12 @@ namespace common.server.model
         }
     }
 
+
+    [Flags, MessengerIdEnum]
+    public enum PunchHoleMessengerIds : int
+    {
+        Min = 401,
+        Execute = 401,
+        Max = 500,
+    }
 }

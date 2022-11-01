@@ -21,7 +21,6 @@ namespace client.realize.messengers.register
         private readonly IUdpServer udpServer;
         private readonly Config config;
         private readonly RegisterStateInfo registerState;
-        private readonly IClientInfoCaching clientInfoCaching;
         private readonly CryptoSwap cryptoSwap;
         private int lockObject = 0;
 
@@ -37,7 +36,6 @@ namespace client.realize.messengers.register
             this.udpServer = udpServer;
             this.config = config;
             this.registerState = registerState;
-            this.clientInfoCaching = clientInfoCaching;
             this.cryptoSwap = cryptoSwap;
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
@@ -120,6 +118,8 @@ namespace client.realize.messengers.register
                         }
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
+                        config.Client.UseIpv6 = serverAddress.AddressFamily == AddressFamily.InterNetworkV6;
+
                         registerState.LocalInfo.UdpPort = registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort();
                         registerState.OnRegisterBind.Push(true);
 
@@ -193,6 +193,7 @@ namespace client.realize.messengers.register
             //TCP 本地开始监听
             tcpServer.SetBufferSize(config.Client.TcpBufferSize);
             tcpServer.Start(registerState.LocalInfo.TcpPort);
+
             //TCP 连接服务器
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.TcpPort);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -210,10 +211,6 @@ namespace client.realize.messengers.register
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             registerState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;
-            if (config.Client.UseMac)
-            {
-                //registerState.LocalInfo.Mac = NetworkHelper.GetMacAddress(registerState.LocalInfo.LocalIp.ToString());
-            }
             registerState.TcpConnection = tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
         }
         private async Task SwapCryptoTcp()

@@ -308,4 +308,15 @@ namespace common.server.model
         TCP = 2,
         MAX = 2,
     }
+
+    [Flags, MessengerIdEnum]
+    public enum RegisterMessengerIds:int
+    {
+        Min = 0,
+        SignIn = 0,
+        Notify = 1,
+        SignOut = 2,
+
+        Max = 100,
+    }
 }

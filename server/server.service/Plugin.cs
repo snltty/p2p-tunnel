@@ -63,11 +63,10 @@ namespace server.service
 
             MessengerResolver messenger = services.GetService<MessengerResolver>();
             MessengerSender sender = services.GetService<MessengerSender>();
-            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)))
+            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)).Distinct())
             {
                 messenger.LoadMessenger(item, services.GetService(item));
             }
-
             Loop(services);
         }
 
@@ -98,7 +97,7 @@ namespace server.service
                         {
                             Connection = client.Connection,
                             Payload = bytes,
-                            Path = "clients/execute"
+                            MessengerId = (int)ClientsMessengerIds.Notify
                         }).ConfigureAwait(false);
                     }
                 }

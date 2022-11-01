@@ -10,6 +10,8 @@ namespace client.realize.messengers.relay
     /// <summary>
     /// 中继
     /// </summary>
+
+    [MessengerIdRange((int)RelayMessengerIds.Min,(int)RelayMessengerIds.Max)]
     public class RelayMessenger : IMessenger
     {
         private readonly IClientInfoCaching clientInfoCaching;
@@ -25,7 +27,8 @@ namespace client.realize.messengers.relay
             this.relayMessengerSender = relayMessengerSender;
         }
 
-        public async Task Execute(IConnection connection)
+        [MessengerId((int)RelayMessengerIds.Relay)]
+        public async Task Relay(IConnection connection)
         {
             if (config.Client.UseRelay == false)
             {
@@ -37,15 +40,16 @@ namespace client.realize.messengers.relay
                 if (clientInfoCaching.Get(connection.ReceiveRequestWrap.RelayId, out ClientInfo target))
                 {
                     connection.ReceiveRequestWrap.Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
-                    connection.ReceiveRequestWrap.MemoryPath = connection.ReceiveRequestWrap.OriginPath;
-                    connection.ReceiveRequestWrap.OriginPath = Helper.EmptyArray;
+                    connection.ReceiveRequestWrap.MessengerId = connection.ReceiveRequestWrap.OriginMessengerId;
+                    connection.ReceiveRequestWrap.OriginMessengerId = 0;
                     connection.ReceiveRequestWrap.RelayId = source.Id;
                     await messengerSender.SendOnly(connection.ReceiveRequestWrap).ConfigureAwait(false);
                 }
             }
         }
 
-        public async Task Relay(IConnection connection)
+        [MessengerId((int)RelayMessengerIds.Notify)]
+        public async Task Notify(IConnection connection)
         {
             if (config.Client.UseRelay == false)
             {
@@ -73,6 +77,7 @@ namespace client.realize.messengers.relay
             }
         }
 
+        [MessengerId((int)RelayMessengerIds.Verify)]
         public byte[] Verify(IConnection connection)
         {
             if (config.Client.UseRelay == false)
@@ -94,6 +99,7 @@ namespace client.realize.messengers.relay
             return Helper.FalseArray;
         }
 
+        [MessengerId((int)RelayMessengerIds.Delay)]
         public byte[] Delay(IConnection connection)
         {
             return Helper.TrueArray;

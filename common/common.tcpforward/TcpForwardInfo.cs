@@ -191,4 +191,16 @@ namespace common.tcpforward
         [Description("优先udp")]
         UDP_FIRST = 1 << 4,
     }
+
+    [Flags, MessengerIdEnum]
+    public enum TcpForwardMessengerIds : int
+    {
+        Min = 601,
+        Request = 602,
+        Response = 603,
+        Ports = 604,
+        SignIn = 605,
+        SignOut = 606,
+        Max = 700,
+    }
 }

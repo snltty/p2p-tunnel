@@ -33,7 +33,7 @@ namespace client.realize.messengers.register
                 MessageResponeInfo result = await messengerSender.SendReply(new MessageRequestWrap
                 {
                     Connection = registerState.UdpConnection,
-                    Path = "register/Execute",
+                    MessengerId = (int)RegisterMessengerIds.SignIn,
                     Payload = new RegisterParamsInfo
                     {
                         Id = id,
@@ -64,7 +64,7 @@ namespace client.realize.messengers.register
                 MessageResponeInfo tcpResult = await messengerSender.SendReply(new MessageRequestWrap
                 {
                     Connection = registerState.TcpConnection,
-                    Path = "register/Execute",
+                    MessengerId = (int)RegisterMessengerIds.SignIn,
                     Payload = new RegisterParamsInfo
                     {
                         Id = id,
@@ -107,7 +107,7 @@ namespace client.realize.messengers.register
             {
                 Connection = registerState.OnlineConnection,
                 Payload = Helper.EmptyArray,
-                Path = "register/notify"
+                MessengerId = (int)RegisterMessengerIds.Notify,
             }).ConfigureAwait(false);
         }
         public async Task Exit()
@@ -116,7 +116,7 @@ namespace client.realize.messengers.register
             {
                 Connection = registerState.OnlineConnection,
                 Payload = Helper.EmptyArray,
-                Path = "exit/execute",
+                MessengerId = (int)RegisterMessengerIds.SignOut,
                 Timeout = 2000
             }).ConfigureAwait(false);
         }

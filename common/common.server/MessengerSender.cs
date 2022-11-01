@@ -15,7 +15,6 @@ namespace common.server
         public NumberSpace requestIdNumberSpace = new NumberSpace(0);
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
         private ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>>();
-        private Memory<byte> relayPath = "relay/execute".ToBytes();
 
         public MessengerSender()
         {
@@ -64,8 +63,8 @@ namespace common.server
                 if (msg.Connection.Relay)
                 {
                     msg.RelayId = msg.Connection.ConnectId;
-                    msg.OriginPath = msg.MemoryPath;
-                    msg.MemoryPath = relayPath;
+                    msg.OriginMessengerId = msg.MessengerId;
+                    msg.MessengerId = (int)RelayMessengerIds.Relay;
                 }
                 if (msg.Connection.EncodeEnabled)
                 {
@@ -91,7 +90,6 @@ namespace common.server
         /// <returns></returns>
         public async ValueTask<bool> ReplyOnly(MessageResponseWrap msg)
         {
-            Console.WriteLine($"reply:{msg.RequestId},{msg.RelayId}:{msg.Connection.ServerType}:{msg.Connection.ConnectId}:{msg.Connection.Connected}");
             try
             {
                 if (msg.Connection.EncodeEnabled)

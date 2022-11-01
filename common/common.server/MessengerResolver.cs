@@ -15,7 +15,7 @@ namespace common.server
     public class MessengerResolver
     {
 
-        private readonly Dictionary<ReadOnlyMemory<byte>, MessengerCacheInfo> messengers = new(new MemoryByteDictionaryComparer());
+        private readonly Dictionary<int, MessengerCacheInfo> messengers = new();
 
         private readonly ITcpServer tcpserver;
         private readonly IUdpServer udpserver;
@@ -37,14 +37,18 @@ namespace common.server
 
             //rateLimit.Init(100 * 1024, RateLimitTimeType.Second);
         }
+
+#if DEBUG
+        Dictionary<string, int[]> overlap = new Dictionary<string, int[]>();
+#endif
         public void LoadMessenger(Type type, object obj)
         {
             Type voidType = typeof(void);
-            string path = type.Name.Replace("Messenger", "");
+            Type midType = typeof(MessengerIdAttribute);
             foreach (var method in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
             {
-                Memory<byte> key = $"{path}/{method.Name}".ToLower().ToBytes().AsMemory();
-                if (!messengers.ContainsKey(key))
+                MessengerIdAttribute mid = method.GetCustomAttribute(midType) as MessengerIdAttribute;
+                if (messengers.ContainsKey(mid.Id) == false)
                 {
                     MessengerCacheInfo cache = new MessengerCacheInfo
                     {
@@ -54,10 +58,21 @@ namespace common.server
                         IsTask = method.ReturnType.GetProperty("IsCompleted") != null && method.ReturnType.GetMethod("GetAwaiter") != null,
                         IsTaskResult = method.ReturnType.GetProperty("Result") != null
                     };
-                    messengers.TryAdd(key, cache);
+                    messengers.TryAdd(mid.Id, cache);
                 }
-
+                else
+                {
+                    Logger.Instance.Error($"{type.Name}->{method.Name}->{mid.Id} 消息id已存在");
+                }
             }
+
+#if DEBUG
+            MessengerIdRangeAttribute range = type.GetCustomAttribute(typeof(MessengerIdRangeAttribute)) as MessengerIdRangeAttribute;
+            if (overlap.ContainsKey(type.FullName) == false)
+            {
+                overlap.Add(type.FullName, new int[] { range.Min, range.Max });
+            }
+#endif
         }
 
         public async Task InputData(IConnection connection)
@@ -101,10 +116,10 @@ namespace common.server
             try
             {
                 //404,没这个插件
-                if (!messengers.ContainsKey(requestWrap.MemoryPath))
+                if (!messengers.ContainsKey(requestWrap.MessengerId))
                 {
 
-                    Logger.Instance.Error($"{requestWrap.MemoryPath.Span.GetString()},{receive.Length},{connection.ServerType}, not found");
+                    Logger.Instance.Error($"{requestWrap.MessengerId},{receive.Length},{connection.ServerType}, not found");
                     await messengerSender.ReplyOnly(new MessageResponseWrap
                     {
                         Connection = connection,
@@ -115,7 +130,7 @@ namespace common.server
                     return;
                 }
 
-                MessengerCacheInfo plugin = messengers[requestWrap.MemoryPath];
+                MessengerCacheInfo plugin = messengers[requestWrap.MessengerId];
 
                 if (middlewareTransfer != null)
                 {

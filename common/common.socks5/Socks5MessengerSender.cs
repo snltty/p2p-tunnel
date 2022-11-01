@@ -7,7 +7,8 @@ namespace common.socks5
     public class Socks5MessengerSender : ISocks5MessengerSender
     {
         private readonly MessengerSender messengerSender;
-        protected virtual string Target { get; } = "socks5";
+        protected virtual int TargetRequest { get; } = (int)Socks5MessengerIds.Request;
+        protected virtual int TargetResponse { get; } = (int)Socks5MessengerIds.Response;
 
         public Socks5MessengerSender(MessengerSender messengerSender)
         {
@@ -19,7 +20,7 @@ namespace common.socks5
             var bytes = data.ToBytes();
             return messengerSender.SendOnly(new MessageRequestWrap
             {
-                Path = $"{Target}/request",
+                MessengerId = TargetRequest,
                 Connection = connection,
                 Payload = bytes
             }).Result;
@@ -29,7 +30,7 @@ namespace common.socks5
             var bytes = data.ToBytes();
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
-                Path = $"{Target}/response",
+                MessengerId = TargetResponse,
                 Connection = connection,
                 Payload = bytes
             });

@@ -29,4 +29,16 @@ namespace common.server.model
             0.ToBytes().AsSpan().CopyTo(data.Span.Slice(8));
         }
     }
+
+
+    [Flags, MessengerIdEnum]
+    public enum RelayMessengerIds : int
+    {
+        Min = 501,
+        Relay = 502,
+        Notify = 503,
+        Verify = 504,
+        Delay = 505,
+        Max = 600,
+    }
 }

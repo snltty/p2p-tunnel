@@ -4,8 +4,6 @@ using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using server.service.manager.models;
-using System;
 using System.Threading.Tasks;
 
 namespace client.service.ui.api.manager
@@ -29,7 +27,7 @@ namespace client.service.ui.api.manager
                 var resp = await messengerSender.SendReply(new MessageRequestWrap
                 {
                     Payload = Helper.EmptyArray,
-                    Path = "Counter/Info",
+                    MessengerId = (int)CounterMessengerIds.Info,
                     Connection = registerState.OnlineConnection,
                     Timeout = 15000
                 }).ConfigureAwait(false);

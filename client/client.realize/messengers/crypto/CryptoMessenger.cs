@@ -8,6 +8,7 @@ using System.Text;
 
 namespace client.realize.messengers.crypto
 {
+    [MessengerIdRange((int)CryptoMessengerIds.Min,(int)CryptoMessengerIds.Max)]
     public class CryptoMessenger : IMessenger
     {
         private readonly IAsymmetricCrypto asymmetricCrypto;
@@ -23,11 +24,13 @@ namespace client.realize.messengers.crypto
             this.config = config;
         }
 
+        [MessengerId((int)CryptoMessengerIds.Key)]
         public byte[] Key(IConnection connection)
         {
             return asymmetricCrypto.Key.PublicKey.ToBytes();
         }
 
+        [MessengerId((int)CryptoMessengerIds.Set)]
         public byte[] Set(IConnection connection)
         {
             string password;
@@ -49,6 +52,8 @@ namespace client.realize.messengers.crypto
             connection.EncodeEnable(encoder);
             return true.ToBytes();
         }
+
+        [MessengerId((int)CryptoMessengerIds.Clear)]
         public bool Clear(IConnection connection)
         {
             if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
@@ -59,6 +64,7 @@ namespace client.realize.messengers.crypto
             return true;
         }
 
+        [MessengerId((int)CryptoMessengerIds.Test)]
         public bool Test(IConnection connection)
         {
             Console.WriteLine($"{connection.ServerType},encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");

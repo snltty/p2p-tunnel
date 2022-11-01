@@ -1,5 +1,4 @@
 ﻿using common.libs;
-using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.register;
@@ -9,23 +8,24 @@ using System.Threading.Tasks;
 
 namespace server.service.messengers.register
 {
+
+    [MessengerIdRange((int)RegisterMessengerIds.Min, (int)RegisterMessengerIds.Max)]
     public class RegisterMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
-        private readonly Config config;
         private readonly IRegisterKeyValidator registerKeyValidator;
         private readonly MessengerSender messengerSender;
         private readonly IRelayValidator relayValidator;
 
-        public RegisterMessenger(IClientRegisterCaching clientRegisterCache, Config config, IRegisterKeyValidator registerKeyValidator, MessengerSender messengerSender, IRelayValidator relayValidator)
+        public RegisterMessenger(IClientRegisterCaching clientRegisterCache, IRegisterKeyValidator registerKeyValidator, MessengerSender messengerSender, IRelayValidator relayValidator)
         {
             this.clientRegisterCache = clientRegisterCache;
-            this.config = config;
             this.registerKeyValidator = registerKeyValidator;
             this.messengerSender = messengerSender;
             this.relayValidator = relayValidator;
         }
 
+        [MessengerId((int)RegisterMessengerIds.SignIn)]
         public async Task<byte[]> Execute(IConnection connection)
         {
             RegisterParamsInfo model = new RegisterParamsInfo();
@@ -43,6 +43,7 @@ namespace server.service.messengers.register
                 _ => new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.UNKNOW }.ToBytes()
             };
         }
+
         private async Task<byte[]> Udp(IConnection connection, RegisterParamsInfo model)
         {
             (RegisterResultInfo verify, RegisterCacheInfo client) = await VerifyAndAdd(model);
@@ -145,20 +146,29 @@ namespace server.service.messengers.register
             return (verify, client);
         }
 
+        [MessengerId((int)RegisterMessengerIds.Notify)]
         public void Notify(IConnection connection)
         {
             clientRegisterCache.Notify(connection);
         }
+
         private async Task<bool> GetAlive(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
                 Payload = Helper.EmptyArray,
-                Path = "heart/alive",
+                MessengerId =(int)HeartMessengerIds.Alive,
                 Timeout = 2000,
             });
             return resp.Code == MessageResponeCodes.OK && Helper.TrueArray.AsSpan().SequenceEqual(resp.Data.Span);
+        }
+
+
+        [MessengerId((int)RegisterMessengerIds.SignOut)]
+        public void Exit(IConnection connection)
+        {
+            connection.Disponse();
         }
     }
 }

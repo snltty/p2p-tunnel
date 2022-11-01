@@ -1,5 +1,6 @@
 ﻿using common.libs;
 using common.libs.extends;
+using common.server;
 using System;
 using System.Net;
 
@@ -254,6 +255,15 @@ namespace common.socks5
         /// 未分配
         /// </summary>
         Unknow = 8,
+    }
+
+    [Flags, MessengerIdEnum]
+    public enum Socks5MessengerIds : int
+    {
+        Min = 801,
+        Request = 802,
+        Response = 803,
+        Max = 900,
     }
 
 }

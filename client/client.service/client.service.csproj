@@ -38,7 +38,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\client.realize\client.realize.csproj" />
-		<ProjectReference Include="..\plugins\client.service.ftp\client.service.ftp.csproj" />
 		<ProjectReference Include="..\plugins\client.service.logger\client.service.logger.csproj" />
 		<ProjectReference Include="..\plugins\client.service.socks5\client.service.socks5.csproj" />
 		<ProjectReference Include="..\plugins\client.service.tcpforward\client.service.tcpforward.csproj" />

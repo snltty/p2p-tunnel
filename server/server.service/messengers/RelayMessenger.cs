@@ -10,6 +10,7 @@ namespace server.service.messengers
     /// <summary>
     /// 中继
     /// </summary>
+    [MessengerIdRange((int)RelayMessengerIds.Min, (int)RelayMessengerIds.Max)]
     public class RelayMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -23,7 +24,8 @@ namespace server.service.messengers
             this.relayValidator = relayValidator;
         }
 
-        public async Task Execute(IConnection connection)
+        [MessengerId((int)RelayMessengerIds.Relay)]
+        public async Task Relay(IConnection connection)
         {
             //A已注册
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
@@ -40,15 +42,17 @@ namespace server.service.messengers
                     if (source.GroupId == target.GroupId)
                     {
                         connection.ReceiveRequestWrap.Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
-                        connection.ReceiveRequestWrap.MemoryPath = connection.ReceiveRequestWrap.OriginPath;
-                        connection.ReceiveRequestWrap.OriginPath = Helper.EmptyArray;
+                        connection.ReceiveRequestWrap.MessengerId = connection.ReceiveRequestWrap.OriginMessengerId;
+                        connection.ReceiveRequestWrap.OriginMessengerId = 0;
                         connection.ReceiveRequestWrap.RelayId = source.Id;
                         await messengerSender.SendOnly(connection.ReceiveRequestWrap).ConfigureAwait(false);
                     }
                 }
             }
         }
-        public async Task Relay(IConnection connection)
+
+        [MessengerId((int)RelayMessengerIds.Notify)]
+        public async Task Notify(IConnection connection)
         {
             RelayInfo relayInfo = new RelayInfo();
             relayInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
@@ -74,6 +78,7 @@ namespace server.service.messengers
             }
         }
 
+        [MessengerId((int)RelayMessengerIds.Verify)]
         public byte[] Verify(IConnection connection)
         {
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
@@ -101,6 +106,7 @@ namespace server.service.messengers
             return Helper.FalseArray;
         }
 
+        [MessengerId((int)RelayMessengerIds.Delay)]
         public byte[] Delay(IConnection connection)
         {
             return Helper.TrueArray;

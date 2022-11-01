@@ -1,11 +1,13 @@
 ﻿using common.libs;
 using common.libs.extends;
 using common.server;
+using common.server.model;
 using server.messengers.register;
 using System.Text;
 
 namespace server.service.messengers
 {
+    [MessengerIdRange((int)CryptoMessengerIds.Min,(int)CryptoMessengerIds.Max)]
     public class CryptoMessenger : IMessenger
     {
         private readonly IAsymmetricCrypto asymmetricCrypto;
@@ -20,11 +22,13 @@ namespace server.service.messengers
             this.config = config;
         }
 
+        [MessengerId((int)CryptoMessengerIds.Key)]
         public byte[] Key(IConnection connection)
         {
             return asymmetricCrypto.Key.PublicKey.ToBytes();
         }
 
+        [MessengerId((int)CryptoMessengerIds.Set)]
         public byte[] Set(IConnection connection)
         {
             string password;
@@ -46,11 +50,15 @@ namespace server.service.messengers
             connection.EncodeEnable(encoder);
             return Helper.TrueArray;
         }
+
+        [MessengerId((int)CryptoMessengerIds.Test)]
         public byte[] Test(IConnection connection)
         {
             Logger.Instance.DebugDebug($"encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");
             return Helper.TrueArray;
         }
+
+        [MessengerId((int)CryptoMessengerIds.Clear)]
         public byte[] Clear(IConnection connection)
         {
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo client))
