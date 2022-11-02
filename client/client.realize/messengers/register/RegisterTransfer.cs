@@ -8,6 +8,7 @@ using common.server.model;
 using System;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,13 +23,14 @@ namespace client.realize.messengers.register
         private readonly Config config;
         private readonly RegisterStateInfo registerState;
         private readonly CryptoSwap cryptoSwap;
+        private readonly IIPv6AddressRequest iPv6AddressRequest;
         private int lockObject = 0;
 
         public RegisterTransfer(
             RegisterMessengerSender registerMessageHelper, IClientInfoCaching clientInfoCaching,
             ITcpServer tcpServer, IUdpServer udpServer,
             Config config, RegisterStateInfo registerState,
-            CryptoSwap cryptoSwap
+            CryptoSwap cryptoSwap, IIPv6AddressRequest iPv6AddressRequest
         )
         {
             this.registerMessageHelper = registerMessageHelper;
@@ -37,6 +39,7 @@ namespace client.realize.messengers.register
             this.config = config;
             this.registerState = registerState;
             this.cryptoSwap = cryptoSwap;
+            this.iPv6AddressRequest = iPv6AddressRequest;
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
             //安卓注释
@@ -56,6 +59,8 @@ namespace client.realize.messengers.register
             {
                 return;
             }
+
+            Logger.Instance.Error($"{connection.ServerType} 断开~~~~");
             if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
             {
                 Register(true).ContinueWith((result) =>
@@ -231,7 +236,10 @@ namespace client.realize.messengers.register
         private async Task<RegisterResult> GetRegisterResult()
         {
             IPAddress[] localIps = new IPAddress[] { config.Client.LoopbackIp, registerState.LocalInfo.LocalIp };
-            localIps = localIps.Concat(NetworkHelper.GetIPV6()).ToArray();
+
+            registerState.LocalInfo.Ipv6s = iPv6AddressRequest.GetIPV6();
+
+            localIps = localIps.Concat(registerState.LocalInfo.Ipv6s).ToArray();
 
             //注册
             RegisterResult result = await registerMessageHelper.Register(new RegisterParams

@@ -17,6 +17,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Reflection;
 using client.service.wakeup;
+using System.Net.NetworkInformation;
 
 namespace client.service.app
 {
@@ -57,7 +58,6 @@ namespace client.service.app
             Logger.Instance.PaddingWidth = 10;
             Logger.Instance.Info("正在启动...");
 
-
             ServiceCollection serviceCollection = new ServiceCollection();
             //注入 依赖注入服务供应 使得可以在别的地方通过注入的方式获得 ServiceProvider 以用来获取其它服务
             serviceCollection.AddSingleton((e) => serviceProvider);
@@ -84,6 +84,7 @@ namespace client.service.app
             //覆盖几个实现，由于平台实现不一样
             serviceCollection.AddTransient(typeof(IConfigDataProvider<>), typeof(ConfigDataFileProvider<>));
             serviceCollection.AddSingleton<IWebServerFileReader, WebServerFileReader>();
+            serviceCollection.AddSingleton<IIPv6AddressRequest, IPv6AddressRequest>();
 
             serviceProvider = serviceCollection.BuildServiceProvider();
             serviceProvider.UseMiddleware(assemblys);

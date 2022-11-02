@@ -17,23 +17,21 @@ namespace common.socks5
 
         public bool Request(Socks5Info data, IConnection connection)
         {
-            var bytes = data.ToBytes();
             return messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = TargetRequest,
                 Connection = connection,
-                Payload = bytes
+                Payload = data.ToBytes()
             }).Result;
         }
         public void Response(Socks5Info data, IConnection connection)
         {
-            var bytes = data.ToBytes();
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = TargetResponse,
                 Connection = connection,
-                Payload = bytes
-            });
+                Payload = data.ToBytes()
+            }).Result;
         }
         public void ResponseClose(ulong id, IConnection connection)
         {

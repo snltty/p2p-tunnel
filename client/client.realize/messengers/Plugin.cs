@@ -48,6 +48,7 @@ namespace client.realize.messengers
             services.AddSingleton<ISourceConnectionSelector, SourceConnectionSelector>();
             services.AddSingleton<IRelayConnectionSelector, DefaultRelayConnectionSelector>();
 
+            services.AddSingleton<IIPv6AddressRequest, IPv6AddressRequest>();
 
             //监听服务
             services.AddSingleton<ITcpServer, TcpServer>();

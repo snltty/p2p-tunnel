@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace server.service.messengers
 {
-    [MessengerIdRange((int)PunchHoleMessengerIds.Min,(int)PunchHoleMessengerIds.Max)]
+    [MessengerIdRange((int)PunchHoleMessengerIds.Min, (int)PunchHoleMessengerIds.Max)]
     public class PunchHoleMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -52,9 +52,14 @@ namespace server.service.messengers
                         }
 
                         model.FromId = connection.ConnectId;
+                        IConnection online = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
+                        if (online == null || online.Connected == false)
+                        {
+                            online = target.OnLineConnection;
+                        }
                         var res = await messengerSender.SendOnly(new MessageRequestWrap
                         {
-                            Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection,
+                            Connection = online,
                             Payload = model.ToBytes(),
                             MessengerId = connection.ReceiveRequestWrap.MessengerId,
                             RequestId = connection.ReceiveRequestWrap.RequestId,

@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace common.libs
@@ -109,14 +108,6 @@ namespace common.libs
                 //失败
             }
             return result;
-        }
-
-        private static byte[] ipv6LocalBytes = new byte[] { 254, 128, 0, 0, 0, 0, 0, 0 };
-        public static IEnumerable<IPAddress> GetIPV6()
-        {
-            return Dns.GetHostAddresses(Dns.GetHostName())
-                 .Where(c => c.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
-                 .Where(c => c.GetAddressBytes().AsSpan(0, 8).SequenceEqual(ipv6LocalBytes) == false);
         }
 
         /// <summary>

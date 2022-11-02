@@ -105,7 +105,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     {
                         continue;
                     }
-                    if (NetworkHelper.IPv6Support == false && ip.Address.AddressFamily == AddressFamily.InterNetworkV6)
+                    if (NotIPv6Support(ip.Address))
                     {
                         continue;
                     }
@@ -150,7 +150,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 if (UseLocalPort && registerState.RemoteInfo.Ip.Equals(arg.Data.Ip))
                 {
                     times += 2;
-                    ips = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new Tuple<IPAddress, int>(c, arg.Data.LocalPort)).ToList();
+                    ips.AddRange(arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new Tuple<IPAddress, int>(c, arg.Data.LocalPort)));
+                }
+                if (IPv6Support())
+                {
+                    ips.AddRange(arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6)
+                    .Select(c => new Tuple<IPAddress, int>(c, arg.Data.Port)));
                 }
 
                 ips.Add(new Tuple<IPAddress, int>(arg.Data.Ip, arg.Data.Port));
@@ -173,7 +178,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         port = ip.Item2;
                     }
 
-                    if (NetworkHelper.IPv6Support == false && ip.Item1.AddressFamily == AddressFamily.InterNetworkV6)
+                    if (NotIPv6Support(ip.Item1))
                     {
                         continue;
                     }
@@ -185,6 +190,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         targetSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
                         targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
                         targetSocket.ReuseBind(new IPEndPoint(ip.Item1.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
+                        Logger.Instance.DebugDebug($"{ip.Item1} connect====================");
                         IAsyncResult result = targetSocket.BeginConnect(targetEndpoint, null, null);
                         result.AsyncWaitHandle.WaitOne(2000, false);
 
@@ -279,11 +285,11 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             if (clientInfoCaching.GetTunnelPort(e.RawData.TunnelName, out int localPort))
             {
                 OnStep2RetryHandler.Push(e);
-                if (NetworkHelper.IPv6Support == false && e.Data.Ip.AddressFamily == AddressFamily.InterNetworkV6)
+
+                if (NotIPv6Support(e.Data.Ip))
                 {
                     return;
                 }
-
                 Socket targetSocket = null;
                 try
                 {
@@ -547,6 +553,15 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 }
             });
             Logger.Instance.DebugDebug($"after Send Step4, toid:{arg.RawData.FromId},fromid:{ConnectId}");
+        }
+
+        private bool NotIPv6Support(IPAddress ip)
+        {
+            return ip.AddressFamily == AddressFamily.InterNetworkV6 && (NetworkHelper.IPv6Support == false || registerState.LocalInfo.Ipv6s.Length == 0);
+        }
+        private bool IPv6Support()
+        {
+            return NetworkHelper.IPv6Support == true && registerState.LocalInfo.Ipv6s.Length == 0;
         }
     }
 }

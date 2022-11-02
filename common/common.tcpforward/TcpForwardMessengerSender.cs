@@ -16,24 +16,22 @@ namespace common.tcpforward
 
         public bool SendRequest(TcpForwardInfo arg)
         {
-            var bytes = arg.ToBytes();
             return messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (int)TcpForwardMessengerIds.Request,
                 Connection = arg.Connection,
-                Payload = bytes
+                Payload = arg.ToBytes()
             }).Result;
         }
 
         public void SendResponse(TcpForwardInfo arg, IConnection connection)
         {
-            var bytes = arg.ToBytes();
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (int)TcpForwardMessengerIds.Response,
                 Connection = connection,
-                Payload = bytes
-            });
+                Payload = arg.ToBytes()
+            }).Result;
         }
 
         public async Task<MessageResponeInfo> GetPorts(IConnection Connection)

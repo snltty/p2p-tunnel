@@ -41,7 +41,13 @@ namespace server.service.messengers
                     //是否在同一个组
                     if (source.GroupId == target.GroupId)
                     {
-                        connection.ReceiveRequestWrap.Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
+                        IConnection online = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
+                        if (online == null || online.Connected == false)
+                        {
+                            online = target.OnLineConnection;
+                        }
+
+                        connection.ReceiveRequestWrap.Connection = online;
                         connection.ReceiveRequestWrap.MessengerId = connection.ReceiveRequestWrap.OriginMessengerId;
                         connection.ReceiveRequestWrap.OriginMessengerId = 0;
                         connection.ReceiveRequestWrap.RelayId = source.Id;
@@ -69,7 +75,13 @@ namespace server.service.messengers
                     {
                         if (source.GroupId == target.GroupId)
                         {
-                            connection.ReceiveRequestWrap.Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
+                            IConnection online = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
+                            if (online == null || online.Connected == false)
+                            {
+                                online = target.OnLineConnection;
+                            }
+
+                            connection.ReceiveRequestWrap.Connection = online;
                             RelayInfo.ClearToId(connection.ReceiveRequestWrap.Payload);
                             await messengerSender.SendOnly(connection.ReceiveRequestWrap).ConfigureAwait(false);
                         }

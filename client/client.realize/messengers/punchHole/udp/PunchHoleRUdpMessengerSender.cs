@@ -12,6 +12,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole.udp
@@ -113,6 +114,10 @@ namespace client.realize.messengers.punchHole.udp
             {
                 foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
+                    if (NotIPv6Support(ip))
+                    {
+                        continue;
+                    }
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
                 }
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
@@ -150,14 +155,20 @@ namespace client.realize.messengers.punchHole.udp
                     if (UseLocalPort && registerState.RemoteInfo.Ip.Equals(arg.Data.Ip))
                     {
                         times += 2;
-                        ips = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
+                        ips.AddRange(arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList());
                     }
+                    if (IPv6Support())
+                    {
+                        ips.AddRange(arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, arg.Data.Port)).ToList());
+                    }
+
                     ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
 
                     IConnection connection = null;
                     for (int i = 0; i < times; i++)
                     {
                         IPEndPoint ip = i >= ips.Count - 1 ? ips[^1] : ips[i];
+
 
                         connection = await udpServer.CreateConnection(ip);
                         if (connection != null)
@@ -250,6 +261,10 @@ namespace client.realize.messengers.punchHole.udp
             {
                 foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
+                    if (NotIPv6Support(ip))
+                    {
+                        continue;
+                    }
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
                 }
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
@@ -290,6 +305,15 @@ namespace client.realize.messengers.punchHole.udp
                 cache.Tcs.SetResult(new ConnectResultModel { State = true });
             }
             OnStep4Handler.Push(arg);
+        }
+
+        private bool NotIPv6Support(IPAddress ip)
+        {
+            return ip.AddressFamily == AddressFamily.InterNetworkV6 && (NetworkHelper.IPv6Support == false || registerState.LocalInfo.Ipv6s.Length == 0);
+        }
+        private bool IPv6Support()
+        {
+            return NetworkHelper.IPv6Support == true && registerState.LocalInfo.Ipv6s.Length == 0;
         }
 
     }
