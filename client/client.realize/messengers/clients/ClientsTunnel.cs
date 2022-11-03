@@ -68,21 +68,40 @@ namespace client.realize.messengers.clients
         /// <returns></returns>
         private async Task<ulong> NewBindUdp(int localport, IPAddress serverAddress, ulong tunnelName)
         {
+            TunnelNameModel model = new TunnelNameModel { TunnelName = tunnelName };
+
             IConnection connection = null;
             UdpServer tempUdpServer = new UdpServer();
             tempUdpServer.OnPacket = udpServer.InputData;
-            tempUdpServer.OnDisconnect.Sub((IConnection _connection) => { if (connection != _connection) tempUdpServer.Disponse(); });
+
+            tempUdpServer.OnDisconnect.Sub((IConnection _connection) =>
+            {
+                if (ReferenceEquals(connection, _connection) == false)
+                {
+                    clientInfoCaching.RemoveUdpserver(model.TunnelName);
+                    tempUdpServer.Disponse();
+                }
+            });
             tempUdpServer.Start(localport, config.Client.TimeoutDelay);
             connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
+            while (connection == null)
+            {
+                connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
+            }
 
             int port = await clientsMessengerSender.GetTunnelPort(connection);
-            tunnelName = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, tunnelName, port, localport);
+            model.TunnelName = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, model.TunnelName, port, localport);
 
-            clientInfoCaching.AddTunnelPort(tunnelName, port);
-            clientInfoCaching.AddUdpserver(tunnelName, tempUdpServer);
+            clientInfoCaching.AddTunnelPort(model.TunnelName, port);
+            clientInfoCaching.AddUdpserver(model.TunnelName, tempUdpServer);
 
-            return tunnelName;
+            return model.TunnelName;
         }
+        class TunnelNameModel
+        {
+            public ulong TunnelName { get; set; }
+        }
+
         /// <summary>
         /// 新绑定一个tcp
         /// </summary>

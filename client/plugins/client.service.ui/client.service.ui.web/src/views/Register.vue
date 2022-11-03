@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-01 17:48:51
+ * @LastEditTime: 2022-11-03 11:35:17
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -162,16 +162,16 @@
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="掉线超时" prop="TimeoutDelay">
-                                        <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top-start">
-                                            <el-input v-model="model.TimeoutDelay" placeholder="掉线超时"></el-input>
+                                    <el-form-item label="原端口" prop="UseOriginPort" label-width="80">
+                                        <el-tooltip class="box-item" effect="dark" content="是否使用原端口打洞" placement="top-start">
+                                            <el-switch v-model="model.UseOriginPort" />
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="原端口" prop="UseOriginPort" label-width="80">
-                                        <el-tooltip class="box-item" effect="dark" content="是否使用原端口打洞" placement="top-start">
-                                            <el-switch v-model="model.UseOriginPort" />
+                                    <el-form-item label="掉线超时" prop="TimeoutDelay">
+                                        <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top-start">
+                                            <el-input v-model="model.TimeoutDelay" placeholder="掉线超时"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>

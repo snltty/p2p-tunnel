@@ -90,6 +90,7 @@ namespace common.server.servers.iocp
             }
             catch (Exception)
             {
+                token.Clear();
             }
         }
         private void IO_Completed(object sender, SocketAsyncEventArgs e)

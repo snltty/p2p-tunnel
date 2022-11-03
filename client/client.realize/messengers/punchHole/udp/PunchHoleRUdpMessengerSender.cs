@@ -112,6 +112,7 @@ namespace client.realize.messengers.punchHole.udp
 
             if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
             {
+
                 foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
                     if (NotIPv6Support(ip))
@@ -168,8 +169,6 @@ namespace client.realize.messengers.punchHole.udp
                     for (int i = 0; i < times; i++)
                     {
                         IPEndPoint ip = i >= ips.Count - 1 ? ips[^1] : ips[i];
-
-
                         connection = await udpServer.CreateConnection(ip);
                         if (connection != null)
                         {
@@ -313,7 +312,7 @@ namespace client.realize.messengers.punchHole.udp
         }
         private bool IPv6Support()
         {
-            return NetworkHelper.IPv6Support == true && registerState.LocalInfo.Ipv6s.Length == 0;
+            return NetworkHelper.IPv6Support == true && registerState.LocalInfo.Ipv6s.Length > 0;
         }
 
     }

@@ -32,7 +32,7 @@ namespace client.messengers.clients
 
         public void AddUdpserver(ulong tunnelName, UdpServer server);
         public bool GetUdpserver(ulong tunnelName, out UdpServer server);
-        public void RemoveUdpserver(ulong tunnelName);
+        public void RemoveUdpserver(ulong tunnelName,bool clear = false);
 
         public void Clear();
     }

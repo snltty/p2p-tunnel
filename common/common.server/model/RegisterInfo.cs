@@ -273,7 +273,7 @@ namespace common.server.model
 
             var tunnelNameBytes = TunnelName.ToBytes();
             var localPortBytes = LocalPort.ToBytes();
-            var portBytes = LocalPort.ToBytes();
+            var portBytes = Port.ToBytes();
 
             int index = 0;
             Array.Copy(tunnelNameBytes, 0, bytes, 0, tunnelNameBytes.Length);

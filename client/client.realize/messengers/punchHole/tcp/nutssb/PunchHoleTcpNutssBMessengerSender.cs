@@ -203,7 +203,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             }
                             targetSocket.EndConnect(result);
 
-                            Logger.Instance.DebugDebug($"{ip.Item1} connect success");
                             if (arg.Data.IsDefault)
                             {
                                 IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: config.Client.TcpBufferSize);
@@ -561,7 +560,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         }
         private bool IPv6Support()
         {
-            return NetworkHelper.IPv6Support == true && registerState.LocalInfo.Ipv6s.Length == 0;
+            return NetworkHelper.IPv6Support == true && registerState.LocalInfo.Ipv6s.Length > 0;
         }
     }
 }

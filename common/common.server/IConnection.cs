@@ -137,6 +137,8 @@ namespace common.server
         {
             return await Send(data.ToArray(), data.Length);
         }
+
+        AutoResetEvent autoResetEvent = new AutoResetEvent(false);
         public override async ValueTask<bool> Send(byte[] data, int length)
         {
             if (Connected)
@@ -144,16 +146,16 @@ namespace common.server
                 try
                 {
                     int index = 0;
-                    while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 1024)
+                    while (index < 1000 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
                         index++;
-                        await Task.Delay(15);
+                        autoResetEvent.WaitOne(2);
                     }
 
                     NetPeer.Send(data, 0, length, DeliveryMethod.ReliableOrdered);
                     SendBytes += data.Length;
 
-                    return true;
+                    return await ValueTask.FromResult(true);
                 }
                 catch (Exception ex)
                 {
@@ -174,6 +176,7 @@ namespace common.server
                 }
                 NetPeer = null;
             }
+            autoResetEvent.Dispose();
         }
 
         public override IConnection Clone()

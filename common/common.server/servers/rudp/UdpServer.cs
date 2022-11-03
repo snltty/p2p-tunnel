@@ -145,7 +145,7 @@ namespace common.server.servers.rudp
 
         private void Release()
         {
-            if (maxNumberConnectingNumberSpace.Get() > 0)
+            if (maxNumberConnectingNumberSpace != null && maxNumberConnectingNumberSpace.Get() > 0)
             {
                 maxNumberConnectingNumberSpace.Decrement();
                 maxNumberConnectings.Release();
