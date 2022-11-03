@@ -1621,8 +1621,11 @@ namespace LiteNetLib
                 _logicThread.Join();
                 _logicThread = null;
 
-                _heartThread.Join();
-                _heartThread = null;
+                if(_heartThread != null)
+                {
+                    _heartThread.Join();
+                    _heartThread = null;
+                }
             }
 
             //clear peers

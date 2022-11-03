@@ -116,7 +116,7 @@ namespace client.realize.messengers.clients
         }
         public void RemoveUdpserver(ulong tunnelName, bool clear = false)
         {
-            if (udpservers.TryRemove(tunnelName, out UdpServer server) && server != null)
+            if (udpservers.TryRemove(tunnelName, out UdpServer server) && server != null && clear)
             {
                 server.Disponse();
             }
