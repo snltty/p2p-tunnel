@@ -5,7 +5,6 @@ using LiteNetLib;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace common.server
@@ -138,7 +137,6 @@ namespace common.server
             return await Send(data.ToArray(), data.Length);
         }
 
-        AutoResetEvent autoResetEvent = new AutoResetEvent(false);
         public override async ValueTask<bool> Send(byte[] data, int length)
         {
             if (Connected)
@@ -146,16 +144,16 @@ namespace common.server
                 try
                 {
                     int index = 0;
-                    while (index < 1000 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
+                    while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
                         index++;
-                        autoResetEvent.WaitOne(2);
+                        await Task.Delay(5);
                     }
 
                     NetPeer.Send(data, 0, length, DeliveryMethod.ReliableOrdered);
                     SendBytes += data.Length;
 
-                    return await ValueTask.FromResult(true);
+                    return true;
                 }
                 catch (Exception ex)
                 {
@@ -176,7 +174,6 @@ namespace common.server
                 }
                 NetPeer = null;
             }
-            autoResetEvent.Dispose();
         }
 
         public override IConnection Clone()

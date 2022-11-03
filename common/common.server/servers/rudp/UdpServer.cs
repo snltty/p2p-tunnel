@@ -111,6 +111,7 @@ namespace common.server.servers.rudp
 
         public async Task<IConnection> CreateConnection(IPEndPoint address)
         {
+            if (OnConnected == null) return null;
             maxNumberConnectings.WaitOne();
             maxNumberConnectingNumberSpace.Increment();
             try
