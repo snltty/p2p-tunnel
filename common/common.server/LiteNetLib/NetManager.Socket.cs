@@ -53,6 +53,8 @@ namespace LiteNetLib
     {
         private const int ReceivePollingTime = 500000; //0.5 second
 
+        public int WindowSize { get; set; } = NetConstants.DefaultWindowSize;
+
         private Socket _udpSocketv4;
         private Socket _udpSocketv6;
         private Thread _threadv4;

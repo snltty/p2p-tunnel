@@ -35,6 +35,8 @@ namespace common.server
 
         public long SendBytes { get; set; }
         public long ReceiveBytes { get; set; }
+        public int RoundTripTime { get; set; }
+
         public ValueTask<bool> Send(ReadOnlyMemory<byte> data);
         public ValueTask<bool> Send(byte[] data, int length);
 
@@ -99,7 +101,7 @@ namespace common.server
 
         public long SendBytes { get; set; } = 0;
         public long ReceiveBytes { get; set; } = 0;
-
+        public virtual int RoundTripTime { get; set; } = 0;
 
         public abstract ValueTask<bool> Send(ReadOnlyMemory<byte> data);
         public abstract ValueTask<bool> Send(byte[] data, int length);
@@ -132,6 +134,7 @@ namespace common.server
 
         public NetPeer NetPeer { get; private set; }
         public override ServerType ServerType => ServerType.UDP;
+        public override int RoundTripTime { get; set; } = 0;
 
         public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
         {
@@ -163,7 +166,13 @@ namespace common.server
                 }
                 finally
                 {
-                    semaphore.Release();
+                    try
+                    {
+                        semaphore.Release();
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             }
             return false;
@@ -223,6 +232,7 @@ namespace common.server
 
         public Socket TcpSocket { get; private set; }
         public override ServerType ServerType => ServerType.TCP;
+        public override int RoundTripTime { get; set; } = 0;
 
         public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
         {

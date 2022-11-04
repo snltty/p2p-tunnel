@@ -3,6 +3,7 @@ using common.libs.extends;
 using common.server.model;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace common.server
@@ -32,7 +33,7 @@ namespace common.server
             {
                 msg.RequestId = requestIdNumberSpace.Increment();
             }
-            WheelTimerTimeout<TimeoutState> timeout = NewReply(msg.RequestId, msg.Timeout);
+            WheelTimerTimeout<TimeoutState> timeout = NewReply(msg);
             if (await SendOnly(msg).ConfigureAwait(false) == false)
             {
                 sends.TryRemove(msg.RequestId, out _);
@@ -121,18 +122,18 @@ namespace common.server
             }
         }
 
-        private WheelTimerTimeout<TimeoutState> NewReply(ulong requestId, int timeoutDelay = 15000)
+        private WheelTimerTimeout<TimeoutState> NewReply(MessageRequestWrap msg)
         {
-            if (timeoutDelay <= 0)
+            if (msg.Timeout <= 0)
             {
-                timeoutDelay = 15000;
+                msg.Timeout = 15000;
             }
             WheelTimerTimeout<TimeoutState> timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<TimeoutState>
             {
                 Callback = TimeoutCallback,
-                State = new TimeoutState { RequestId = requestId, Tcs = new TaskCompletionSource<MessageResponeInfo>() }
-            }, timeoutDelay);
-            sends.TryAdd(requestId, timeout);
+                State = new TimeoutState { RequestId = msg.RequestId, Tcs = new TaskCompletionSource<MessageResponeInfo>() }
+            }, msg.Timeout);
+            sends.TryAdd(msg.RequestId, timeout);
             return timeout;
         }
         private void TimeoutCallback(WheelTimerTimeout<TimeoutState> timeout)

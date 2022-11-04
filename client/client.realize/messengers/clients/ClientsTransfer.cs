@@ -67,7 +67,7 @@ namespace client.realize.messengers.clients
                     if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                     {
                         clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                         clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName,true);
+                        clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName, true);
                         _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
                     }
                 }
@@ -337,11 +337,11 @@ namespace client.realize.messengers.clients
                         var res = await heartMessengerSender.Heart(item.UdpConnection);
                         if (res)
                         {
-                            item.UdpPing = (ushort)(DateTime.Now - start).TotalMilliseconds;
+                            item.UdpConnection.RoundTripTime = (ushort)(DateTime.Now - start).TotalMilliseconds;
                         }
                         else
                         {
-                            item.UdpPing = 0;
+                            item.UdpConnection.RoundTripTime = 0;
                         }
                     }
                     catch (Exception)
@@ -360,11 +360,11 @@ namespace client.realize.messengers.clients
                         var res = await heartMessengerSender.Heart(item.TcpConnection);
                         if (res)
                         {
-                            item.TcpPing = (ushort)(DateTime.Now - start).TotalMilliseconds;
+                            item.TcpConnection.RoundTripTime = (ushort)(DateTime.Now - start).TotalMilliseconds;
                         }
                         else
                         {
-                            item.TcpPing = 0;
+                            item.TcpConnection.RoundTripTime = 0;
                         }
                     }
                     catch (Exception)

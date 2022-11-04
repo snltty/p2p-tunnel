@@ -1,13 +1,9 @@
 ﻿using common.libs;
-using common.libs.extends;
-using common.libs.rateLimit;
 using common.server.middleware;
 using common.server.model;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace common.server
@@ -38,9 +34,6 @@ namespace common.server
             //rateLimit.Init(100 * 1024, RateLimitTimeType.Second);
         }
 
-#if DEBUG
-        Dictionary<string, int[]> overlap = new Dictionary<string, int[]>();
-#endif
         public void LoadMessenger(Type type, object obj)
         {
             Type voidType = typeof(void);
@@ -65,14 +58,6 @@ namespace common.server
                     Logger.Instance.Error($"{type.Name}->{method.Name}->{mid.Id} 消息id已存在");
                 }
             }
-
-#if DEBUG
-            MessengerIdRangeAttribute range = type.GetCustomAttribute(typeof(MessengerIdRangeAttribute)) as MessengerIdRangeAttribute;
-            if (overlap.ContainsKey(type.FullName) == false)
-            {
-                overlap.Add(type.FullName, new int[] { range.Min, range.Max });
-            }
-#endif
         }
 
         public async Task InputData(IConnection connection)
