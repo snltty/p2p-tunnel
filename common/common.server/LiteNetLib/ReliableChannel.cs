@@ -95,7 +95,7 @@ namespace LiteNetLib
             _localSeqence = 0;
             _remoteSequence = 0;
             _remoteWindowStart = 0;
-            _outgoingAcks = new NetPacket(PacketProperty.Ack, (_windowSize - 1) / BitsInByte + 2) {ChannelId = id};
+            _outgoingAcks = new NetPacket(PacketProperty.Ack, (_windowSize - 1) / BitsInByte + 2) { ChannelId = id };
         }
 
         //ProcessAck in packet
@@ -171,7 +171,7 @@ namespace LiteNetLib
             {
                 _mustSendAcks = false;
                 NetDebug.Write("[RR]SendAcks");
-                lock(_outgoingAcks)
+                lock (_outgoingAcks)
                     Peer.SendUserData(_outgoingAcks);
             }
 
@@ -190,7 +190,7 @@ namespace LiteNetLib
                     if (!OutgoingQueue.TryDequeue(out var netPacket))
                         break;
 
-                    netPacket.Sequence = (ushort) _localSeqence;
+                    netPacket.Sequence = (ushort)_localSeqence;
                     netPacket.ChannelId = _id;
                     _pendingPackets[_localSeqence % _windowSize].Init(netPacket);
                     _localSeqence = (_localSeqence + 1) % NetConstants.MaxSequence;
@@ -256,7 +256,7 @@ namespace LiteNetLib
                 {
                     //New window position
                     int newWindowStart = (_remoteWindowStart + relate - _windowSize + 1) % NetConstants.MaxSequence;
-                    _outgoingAcks.Sequence = (ushort) newWindowStart;
+                    _outgoingAcks.Sequence = (ushort)newWindowStart;
 
                     //Clean old data
                     while (_remoteWindowStart != newWindowStart)
@@ -264,7 +264,7 @@ namespace LiteNetLib
                         ackIdx = _remoteWindowStart % _windowSize;
                         ackByte = NetConstants.ChanneledHeaderSize + ackIdx / BitsInByte;
                         ackBit = ackIdx % BitsInByte;
-                        _outgoingAcks.RawData[ackByte] &= (byte) ~(1 << ackBit);
+                        _outgoingAcks.RawData[ackByte] &= (byte)~(1 << ackBit);
                         _remoteWindowStart = (_remoteWindowStart + 1) % NetConstants.MaxSequence;
                     }
                 }
@@ -285,7 +285,7 @@ namespace LiteNetLib
                 }
 
                 //save ack
-                _outgoingAcks.RawData[ackByte] |= (byte) (1 << ackBit);
+                _outgoingAcks.RawData[ackByte] |= (byte)(1 << ackBit);
             }
 
             AddToPeerChannelSendQueue();

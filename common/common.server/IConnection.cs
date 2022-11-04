@@ -5,6 +5,7 @@ using LiteNetLib;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace common.server
@@ -137,16 +138,17 @@ namespace common.server
             return await Send(data.ToArray(), data.Length);
         }
 
+
+        SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         public override async ValueTask<bool> Send(byte[] data, int length)
         {
             if (Connected)
             {
                 try
                 {
-                    int index = 0;
-                    while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
+                    await semaphore.WaitAsync();
+                    while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
-                        index++;
                         await Task.Delay(5);
                     }
 
@@ -158,6 +160,10 @@ namespace common.server
                 catch (Exception ex)
                 {
                     Logger.Instance.DebugError(ex);
+                }
+                finally
+                {
+                    semaphore.Release();
                 }
             }
             return false;
@@ -174,6 +180,7 @@ namespace common.server
                 }
                 NetPeer = null;
             }
+            semaphore.Dispose();
         }
 
         public override IConnection Clone()
