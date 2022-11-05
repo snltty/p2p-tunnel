@@ -5,6 +5,7 @@ using LiteNetLib;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace common.server
@@ -34,6 +35,8 @@ namespace common.server
 
         public long SendBytes { get; set; }
         public long ReceiveBytes { get; set; }
+        public int RoundTripTime { get; set; }
+
         public ValueTask<bool> Send(ReadOnlyMemory<byte> data);
         public ValueTask<bool> Send(byte[] data, int length);
 
@@ -98,7 +101,7 @@ namespace common.server
 
         public long SendBytes { get; set; } = 0;
         public long ReceiveBytes { get; set; } = 0;
-
+        public virtual int RoundTripTime { get; set; } = 0;
 
         public abstract ValueTask<bool> Send(ReadOnlyMemory<byte> data);
         public abstract ValueTask<bool> Send(byte[] data, int length);
@@ -131,22 +134,24 @@ namespace common.server
 
         public NetPeer NetPeer { get; private set; }
         public override ServerType ServerType => ServerType.UDP;
+        public override int RoundTripTime { get; set; } = 0;
 
         public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
         {
             return await Send(data.ToArray(), data.Length);
         }
 
+
+        SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         public override async ValueTask<bool> Send(byte[] data, int length)
         {
             if (Connected)
             {
                 try
                 {
-                    int index = 0;
-                    while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
+                    await semaphore.WaitAsync();
+                    while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
-                        index++;
                         await Task.Delay(5);
                     }
 
@@ -158,6 +163,16 @@ namespace common.server
                 catch (Exception ex)
                 {
                     Logger.Instance.DebugError(ex);
+                }
+                finally
+                {
+                    try
+                    {
+                        semaphore.Release();
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             }
             return false;
@@ -174,6 +189,7 @@ namespace common.server
                 }
                 NetPeer = null;
             }
+            semaphore.Dispose();
         }
 
         public override IConnection Clone()
@@ -216,6 +232,7 @@ namespace common.server
 
         public Socket TcpSocket { get; private set; }
         public override ServerType ServerType => ServerType.TCP;
+        public override int RoundTripTime { get; set; } = 0;
 
         public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
         {

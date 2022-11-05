@@ -28,8 +28,8 @@ namespace client.messengers.clients
         public bool UseUdp { get; init; } = false;
         public bool UseTcp { get; init; } = false;
         public bool UseRelay { get; init; } = false;
-        public ushort UdpPing { get; set; } = 0;
-        public ushort TcpPing { get; set; } = 0;
+        public int UdpPing => UdpConnection?.RoundTripTime ?? 0;
+        public int TcpPing => TcpConnection?.RoundTripTime ?? 0;
 
 
         public ClientConnectTypes UdpConnectType { get; private set; } = ClientConnectTypes.P2P;

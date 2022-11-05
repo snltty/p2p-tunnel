@@ -34,6 +34,7 @@ namespace common.server.servers.rudp
             server.PingInterval = Math.Max(timeout / 5, 5000);
             server.DisconnectTimeout = timeout;
             server.MaxConnectAttempts = 10;
+            server.WindowSize = 32;
             server.MtuOverride = 1400;
             server.Start(port);
 

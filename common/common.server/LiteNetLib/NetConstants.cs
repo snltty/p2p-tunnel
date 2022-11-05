@@ -38,7 +38,7 @@
     public static class NetConstants
     {
         //can be tuned
-        public const int DefaultWindowSize = 1024;
+        public static int DefaultWindowSize = 32;
         public const int SocketBufferSize = 1024 * 1024; //1mb
         public const int SocketTTL = 255;
 
