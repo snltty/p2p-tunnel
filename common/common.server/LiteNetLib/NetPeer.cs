@@ -55,6 +55,7 @@ namespace LiteNetLib
         //Ping and RTT
         private int _rtt;
         private int _avgRtt;
+        private int _avgRttOld;
         private int _rttCount;
         private double _resendDelay = 27.0;
         private int _pingSendTimer;
@@ -167,6 +168,7 @@ namespace LiteNetLib
         /// Round trip time in milliseconds
         /// </summary>
         public int RoundTripTime => _avgRtt;
+        public int RoundTripTimeOld => _avgRttOld;
 
         /// <summary>
         /// Current MTU - Maximum Transfer Unit ( maximum udp packet size without fragmentation )
@@ -883,6 +885,8 @@ namespace LiteNetLib
         {
             _rtt += roundTripTime;
             _rttCount++;
+
+            _avgRttOld = _avgRtt;
             _avgRtt = _rtt / _rttCount;
             _resendDelay = 25.0 + _avgRtt * 2.1; // 25 ms + double rtt
         }

@@ -68,6 +68,7 @@ namespace LiteNetLib
         private readonly DeliveryMethod _deliveryMethod;
         private readonly bool _ordered;
         private readonly int _windowSize;
+        private int max_windowSize;
         private const int BitsInByte = 8;
         private readonly byte _id;
 
@@ -75,6 +76,7 @@ namespace LiteNetLib
         {
             _id = id;
             _windowSize = peer.NetManager.WindowSize;
+            max_windowSize = 16;
             _ordered = ordered;
             _pendingPackets = new PendingPacket[_windowSize];
             for (int i = 0; i < _pendingPackets.Length; i++)
@@ -178,19 +180,21 @@ namespace LiteNetLib
             long currentTime = DateTime.UtcNow.Ticks;
             bool hasPendingPackets = false;
 
-            int max_windowSize = _windowSize;
-            if (Peer.RoundTripTime > 500)
+            if (Peer.RoundTripTime > Peer.RoundTripTimeOld && (Peer.RoundTripTime / (float)Peer.RoundTripTimeOld) > 1.5)
             {
-                if (max_windowSize > 16)
-                    max_windowSize /= 2;
+                max_windowSize -= 16 * (int)(Peer.RoundTripTime / (float)Peer.RoundTripTimeOld);
             }
-            else
+            else if (Peer.RoundTripTime < Peer.RoundTripTimeOld && (Peer.RoundTripTimeOld / (float)Peer.RoundTripTime) > 1.5)
             {
-                if (max_windowSize < 1024)
-                {
-                    max_windowSize *= 2;
-                }
+                max_windowSize += 16 * (int)(Peer.RoundTripTimeOld / (float)Peer.RoundTripTime);
             }
+            else if (Peer.RoundTripTime < 50 && OutgoingQueue.Count > 16)
+            {
+                max_windowSize += 16;
+            }
+            if (max_windowSize > 1024) max_windowSize = 1024;
+            if (max_windowSize < 16) max_windowSize = 16;
+
 
             lock (_pendingPackets)
             {
