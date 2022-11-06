@@ -45,12 +45,6 @@ namespace LiteNetLib
             {
                 if (_packet != null)
                 {
-                    //peer.PacketRttCount++;
-                    //peer.PacketRttAvgPrev = peer.PacketRttAvg;
-                    //peer.PacketRtt += (ulong)(DateTime.UtcNow.Ticks - _timeStamp) / TimeSpan.TicksPerMillisecond;
-                    //peer.PacketRttAvg = (int)((DateTime.UtcNow.Ticks - _timeStamp) / TimeSpan.TicksPerMillisecond);
-                    // peer.PacketRttAvg = (int)(peer.PacketRtt / peer.PacketRttCount);
-
                     peer.RecycleAndDeliver(_packet);
                     _packet = null;
                     return true;
