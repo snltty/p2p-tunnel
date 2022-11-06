@@ -174,7 +174,6 @@ namespace LiteNetLib
         /// Round trip time in milliseconds
         /// </summary>
         public int RoundTripTime => _avgRtt;
-        public int RoundTripTimeOld => _avgRttOld;
 
         /// <summary>
         /// Current MTU - Maximum Transfer Unit ( maximum udp packet size without fragmentation )
@@ -892,7 +891,6 @@ namespace LiteNetLib
             _rtt += roundTripTime;
             _rttCount++;
 
-            _avgRttOld = _avgRtt;
             _avgRtt = _rtt / _rttCount;
             _resendDelay = 25.0 + _avgRtt * 2.1; // 25 ms + double rtt
         }
@@ -1292,10 +1290,7 @@ namespace LiteNetLib
                 if (_pingTimer.IsRunning)
                     UpdateRoundTripTime((int)_pingTimer.ElapsedMilliseconds);
                 _pingTimer.Restart();
-                if(NetManager.SendRaw(_pingPacket, _remoteEndPoint) > 0)
-                {
-                    Interlocked.Exchange(ref _timeSinceLastPacket, 0);
-                }
+                NetManager.SendRaw(_pingPacket, _remoteEndPoint);
             }
 
             //RTT - round trip time

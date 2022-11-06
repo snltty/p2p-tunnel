@@ -74,7 +74,6 @@ namespace LiteNetLib
         private readonly DeliveryMethod _deliveryMethod;
         private readonly bool _ordered;
         private readonly int _windowSize;
-        //private int max_windowSize;
         private const int BitsInByte = 8;
         private readonly byte _id;
 
@@ -185,24 +184,6 @@ namespace LiteNetLib
 
             long currentTime = DateTime.UtcNow.Ticks;
             bool hasPendingPackets = false;
-
-            //if (Peer.PacketRttAvg > Peer.PacketRttAvgPrev && (Peer.PacketRttAvg / (float)Peer.PacketRttAvgPrev) > 1.5)
-            //{
-            //    max_windowSize -= 16 * (int)(Peer.PacketRttAvg / (float)Peer.PacketRttAvgPrev);
-            //}
-            //else if (Peer.PacketRttAvg < Peer.PacketRttAvgPrev && (Peer.PacketRttAvgPrev / (float)Peer.PacketRttAvg) > 1.5)
-            //{
-            //    max_windowSize += 16 * (int)(Peer.PacketRttAvgPrev / (float)Peer.PacketRttAvg);
-            //}
-            //else if (Peer.PacketRttAvg < 50 && OutgoingQueue.Count > 16)
-            //{
-            //    max_windowSize += 16;
-            //}
-            //if (max_windowSize > 512) max_windowSize = 512;
-            //if (max_windowSize < 16) max_windowSize = 16;
-
-            // Console.WriteLine($"rtt:avg:{Peer.PacketRttAvg}.....max_windowSize:{_windowSize}");
-
 
             lock (_pendingPackets)
             {
