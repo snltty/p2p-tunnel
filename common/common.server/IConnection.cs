@@ -150,8 +150,10 @@ namespace common.server
                 try
                 {
                     await semaphore.WaitAsync();
-                    while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
+                    int index = 0;
+                    while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
+                        index++;
                         await Task.Delay(5);
                     }
 

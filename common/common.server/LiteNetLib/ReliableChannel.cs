@@ -45,6 +45,12 @@ namespace LiteNetLib
             {
                 if (_packet != null)
                 {
+                    //peer.PacketRttCount++;
+                    //peer.PacketRttAvgPrev = peer.PacketRttAvg;
+                    //peer.PacketRtt += (ulong)(DateTime.UtcNow.Ticks - _timeStamp) / TimeSpan.TicksPerMillisecond;
+                    //peer.PacketRttAvg = (int)((DateTime.UtcNow.Ticks - _timeStamp) / TimeSpan.TicksPerMillisecond);
+                    // peer.PacketRttAvg = (int)(peer.PacketRtt / peer.PacketRttCount);
+
                     peer.RecycleAndDeliver(_packet);
                     _packet = null;
                     return true;
@@ -68,7 +74,7 @@ namespace LiteNetLib
         private readonly DeliveryMethod _deliveryMethod;
         private readonly bool _ordered;
         private readonly int _windowSize;
-        private int max_windowSize;
+        //private int max_windowSize;
         private const int BitsInByte = 8;
         private readonly byte _id;
 
@@ -76,7 +82,7 @@ namespace LiteNetLib
         {
             _id = id;
             _windowSize = peer.NetManager.WindowSize;
-            max_windowSize = 16;
+            //max_windowSize = 16;
             _ordered = ordered;
             _pendingPackets = new PendingPacket[_windowSize];
             for (int i = 0; i < _pendingPackets.Length; i++)
@@ -180,20 +186,22 @@ namespace LiteNetLib
             long currentTime = DateTime.UtcNow.Ticks;
             bool hasPendingPackets = false;
 
-            if (Peer.RoundTripTime > Peer.RoundTripTimeOld && (Peer.RoundTripTime / (float)Peer.RoundTripTimeOld) > 1.5)
-            {
-                max_windowSize -= 16 * (int)(Peer.RoundTripTime / (float)Peer.RoundTripTimeOld);
-            }
-            else if (Peer.RoundTripTime < Peer.RoundTripTimeOld && (Peer.RoundTripTimeOld / (float)Peer.RoundTripTime) > 1.5)
-            {
-                max_windowSize += 16 * (int)(Peer.RoundTripTimeOld / (float)Peer.RoundTripTime);
-            }
-            else if (Peer.RoundTripTime < 50 && OutgoingQueue.Count > 16)
-            {
-                max_windowSize += 16;
-            }
-            if (max_windowSize > 1024) max_windowSize = 1024;
-            if (max_windowSize < 16) max_windowSize = 16;
+            //if (Peer.PacketRttAvg > Peer.PacketRttAvgPrev && (Peer.PacketRttAvg / (float)Peer.PacketRttAvgPrev) > 1.5)
+            //{
+            //    max_windowSize -= 16 * (int)(Peer.PacketRttAvg / (float)Peer.PacketRttAvgPrev);
+            //}
+            //else if (Peer.PacketRttAvg < Peer.PacketRttAvgPrev && (Peer.PacketRttAvgPrev / (float)Peer.PacketRttAvg) > 1.5)
+            //{
+            //    max_windowSize += 16 * (int)(Peer.PacketRttAvgPrev / (float)Peer.PacketRttAvg);
+            //}
+            //else if (Peer.PacketRttAvg < 50 && OutgoingQueue.Count > 16)
+            //{
+            //    max_windowSize += 16;
+            //}
+            //if (max_windowSize > 512) max_windowSize = 512;
+            //if (max_windowSize < 16) max_windowSize = 16;
+
+            // Console.WriteLine($"rtt:avg:{Peer.PacketRttAvg}.....max_windowSize:{_windowSize}");
 
 
             lock (_pendingPackets)
@@ -202,7 +210,7 @@ namespace LiteNetLib
                 while (!OutgoingQueue.IsEmpty)
                 {
                     int relate = NetUtils.RelativeSequenceNumber(_localSeqence, _localWindowStart);
-                    if (relate >= max_windowSize)
+                    if (relate >= _windowSize)
                         break;
 
                     if (!OutgoingQueue.TryDequeue(out var netPacket))

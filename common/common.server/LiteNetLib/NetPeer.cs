@@ -64,6 +64,12 @@ namespace LiteNetLib
         private int _timeSinceLastPacket;
         private long _remoteDelta;
 
+
+        //public ulong PacketRtt { get; set; } = 0;
+        //public int PacketRttAvgPrev { get; set; } = 0;
+        //public int PacketRttAvg { get; set; } = 0;
+        //public ulong PacketRttCount { get; set; } = 0;
+
         //Common
         private readonly object _shutdownLock = new object();
 
@@ -1286,7 +1292,10 @@ namespace LiteNetLib
                 if (_pingTimer.IsRunning)
                     UpdateRoundTripTime((int)_pingTimer.ElapsedMilliseconds);
                 _pingTimer.Restart();
-                NetManager.SendRaw(_pingPacket, _remoteEndPoint);
+                if(NetManager.SendRaw(_pingPacket, _remoteEndPoint) > 0)
+                {
+                    Interlocked.Exchange(ref _timeSinceLastPacket, 0);
+                }
             }
 
             //RTT - round trip time
