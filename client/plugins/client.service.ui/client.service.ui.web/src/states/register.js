@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:39:45
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-01 17:49:18
+ * @LastEditTime: 2022-11-07 10:45:48
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\register.js
@@ -31,6 +31,7 @@ export const provideRegister = () => {
             UseTcp: false,
             UseRelay: false,
             UseOriginPort: false,
+            UdpUploadSpeedLimit: 0,
         },
         ServerConfig: {
             Ip: '',
@@ -74,6 +75,7 @@ export const provideRegister = () => {
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
                 state.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
                 state.ClientConfig.UseOriginPort = json.ClientConfig.UseOriginPort;
+                state.ClientConfig.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
 
                 state.ClientConfig.UsePunchHole = json.ClientConfig.UsePunchHole;
                 state.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;

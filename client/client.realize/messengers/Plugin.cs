@@ -29,6 +29,14 @@ namespace client.realize.messengers
         {
             services.GetService<IClientsTransfer>();
             services.GetService<MessengerSender>();
+
+            var udpServer = services.GetService<IUdpServer>();
+            if (udpServer is UdpServer udp)
+            {
+                var config = services.GetService<Config>();
+                udp.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
+            }
+
             MessengerResolver serverPluginHelper = services.GetService<MessengerResolver>();
 
             //加载所有的消息处理器

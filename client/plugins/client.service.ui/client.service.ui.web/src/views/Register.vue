@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-03 11:35:17
+ * @LastEditTime: 2022-11-07 10:48:14
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -62,6 +62,14 @@
                                         <el-input readonly v-model="registerState.LocalInfo.TcpPort"></el-input>
                                     </el-form-item>
                                 </el-col>
+                                <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                                    <el-form-item label="udp限速" prop="UdpUploadSpeedLimit">
+                                        <el-tooltip class="box-item" effect="dark" content="udp发送速度限制（字节数,0不限制）" placement="top-start">
+                                            <el-input readonly v-model="model.UdpUploadSpeedLimit"></el-input>
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
+
                             </el-row>
                         </el-form-item>
                         <el-form-item label="" label-width="0">
@@ -252,7 +260,8 @@ export default {
                 TimeoutDelay: 20000,
                 UseUdp: false,
                 UseTcp: false,
-                UseOriginPort: true
+                UseOriginPort: true,
+                UdpUploadSpeedLimit: 0
             },
             rules: {
                 ClientName: [{ required: true, message: '必填', trigger: 'blur' }],
@@ -304,7 +313,15 @@ export default {
                             return Number(value)
                         }
                     }
-                ]
+                ],
+                UdpUploadSpeedLimit: [
+                    { required: true, message: '必填', trigger: 'blur' },
+                    {
+                        type: 'number', min: 0, max: 2147483647, message: '数字 0-2147483647', trigger: 'blur', transform (value) {
+                            return Number(value)
+                        }
+                    }
+                ],
             }
         });
 
@@ -325,6 +342,7 @@ export default {
             state.model.UseTcp = registerState.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
             state.model.UseRelay = registerState.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
             state.model.UseOriginPort = registerState.ClientConfig.UseOriginPort = json.ClientConfig.UseOriginPort;
+            state.model.UdpUploadSpeedLimit = registerState.ClientConfig.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
 
 
             state.model.ServerIp = registerState.ServerConfig.Ip = json.ServerConfig.Ip;
@@ -359,7 +377,8 @@ export default {
                         UseUdp: state.model.UseUdp,
                         UseTcp: state.model.UseTcp,
                         UseRelay: state.model.UseRelay,
-                        UseOriginPort: state.model.UseOriginPort
+                        UseOriginPort: state.model.UseOriginPort,
+                        UdpUploadSpeedLimit: +state.model.UdpUploadSpeedLimit,
                     },
                     ServerConfig: {
                         Ip: state.model.ServerIp,

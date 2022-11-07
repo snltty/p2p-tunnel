@@ -11,7 +11,6 @@ namespace common.libs
     /// </summary>
     public class WheelTimer<T>
     {
-        double tickMs = 0;
         //流转次数，
         long ticks = 0;
         //槽数
@@ -24,10 +23,10 @@ namespace common.libs
         WheelTimerBucket<T>[] buckets = Array.Empty<WheelTimerBucket<T>>();
         //先入列，等待入槽
         ConcurrentQueue<WheelTimerTimeout<T>> timeouts = new ConcurrentQueue<WheelTimerTimeout<T>>();
+        AutoResetEvent autoReset = new AutoResetEvent(false);
 
         public WheelTimer()
         {
-            tickMs = (Stopwatch.Frequency / 1000000 * 1000);
             CreateBuckets();
             Worker();
         }
@@ -64,7 +63,7 @@ namespace common.libs
             {
                 for (; ; )
                 {
-                    long start = Stopwatch.GetTimestamp();
+                    long start = DateTime.UtcNow.Ticks;
                     //等下一个时间点
                     WaitForNextTick();
                     //待入槽队列入槽
@@ -72,21 +71,21 @@ namespace common.libs
                     //执行当前槽的任务
                     ExpireTimeouts(buckets[(ticks & mask)]);
                     ticks++;
-                    ticksMore += (Stopwatch.GetTimestamp() - start) / tickMs - tickDurationMs;
+                    ticksMore += (DateTime.UtcNow.Ticks - start) / TimeSpan.TicksPerMillisecond - tickDurationMs;
 
                     double forwardCount = (ticksMore / tickDurationMs);
                     while (forwardCount > 1)
                     {
                         ticksMore -= tickDurationMs;
 
-                        start = Stopwatch.GetTimestamp();
+                        start = DateTime.UtcNow.Ticks;
                         //待入槽队列入槽
                         TransferTimeoutsToBuckets();
                         //执行当前槽的任务
                         ExpireTimeouts(buckets[(ticks & mask)]);
                         ticks++;
 
-                        ticksMore += (Stopwatch.GetTimestamp() - start) / tickMs;
+                        ticksMore += (DateTime.UtcNow.Ticks - start) / TimeSpan.TicksPerMillisecond;
 
                         forwardCount = ticksMore / tickDurationMs;
                     }
@@ -97,16 +96,7 @@ namespace common.libs
         }
         private void WaitForNextTick()
         {
-            Thread.Sleep(tickDurationMs);
-            /*
-            double now = 0;
-            while (now < tickDurationMs)
-            {
-                double start = Stopwatch.GetTimestamp() / tickMs;
-                Thread.Sleep(tickDurationMs);
-                now += Stopwatch.GetTimestamp() / tickMs - start;
-            }
-            */
+            autoReset.WaitOne(tickDurationMs);
         }
         private void TransferTimeoutsToBuckets()
         {

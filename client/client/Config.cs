@@ -97,6 +97,9 @@ namespace client
         public bool UseRelay { get; set; } = true;
         public bool UseOriginPort { get; set; } = true;
 
+        public int UdpUploadSpeedLimit { get; set; } = 0;
+        
+
         [JsonIgnore]
         public IPAddress BindIp
         {

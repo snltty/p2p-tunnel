@@ -234,6 +234,20 @@ namespace LiteNetLib
         /// </summary>
         public int SimulationMaxLatency = 100;
 
+        private int speedLimit = 0;
+        public int SpeedLimit
+        {
+            get
+            {
+                return speedLimit;
+            }
+            set
+            {
+                speedLimit = value;
+                ReliableChannel.tokenBucketRatelimit.ChangeRate(value);
+            }
+        }
+
         /// <summary>
         /// Events automatically will be called without PollEvents method from another thread
         /// </summary>
@@ -1621,7 +1635,7 @@ namespace LiteNetLib
                 _logicThread.Join();
                 _logicThread = null;
 
-                if(_heartThread != null)
+                if (_heartThread != null)
                 {
                     _heartThread.Join();
                     _heartThread = null;

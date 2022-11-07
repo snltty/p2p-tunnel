@@ -4,6 +4,8 @@ namespace LiteNetLib
 {
     internal sealed class ReliableChannel : BaseChannel
     {
+        public static TokenBucketRatelimit tokenBucketRatelimit = new TokenBucketRatelimit(0);
+
         private struct PendingPacket
         {
             private NetPacket _packet;
@@ -35,9 +37,13 @@ namespace LiteNetLib
                         return true;
                     NetDebug.Write("[RC]Resend: {0} > {1}", (int)packetHoldTime, resendDelay);
                 }
-                _timeStamp = currentTime;
-                _isSent = true;
-                peer.SendUserData(_packet);
+                int len = tokenBucketRatelimit.Try(_packet.Size);
+                if (len >= _packet.Size)
+                {
+                    _timeStamp = currentTime;
+                    _isSent = true;
+                    peer.SendUserData(_packet);
+                }
                 return true;
             }
 
@@ -75,7 +81,6 @@ namespace LiteNetLib
         {
             _id = id;
             _windowSize = peer.NetManager.WindowSize;
-            //max_windowSize = 16;
             _ordered = ordered;
             _pendingPackets = new PendingPacket[_windowSize];
             for (int i = 0; i < _pendingPackets.Length; i++)
@@ -332,6 +337,64 @@ namespace LiteNetLib
                 Peer.AddReliablePacket(_deliveryMethod, packet);
             }
             return true;
+        }
+    }
+
+    internal class TokenBucketRatelimit
+    {
+        double ticks = 1000.0d * TimeSpan.TicksPerMillisecond;
+        TokenBucketRateInfo info;
+
+        public TokenBucketRatelimit(int rate)
+        {
+            double _rate = rate / 0.9d;
+            info = new TokenBucketRateInfo { Rate = _rate, CurrentRate = 0, Token = _rate / ticks, LastTime = GetTime() };
+            Console.WriteLine(info.Token);
+        }
+
+        public void ChangeRate(int rate)
+        {
+            info.Rate = rate;
+        }
+
+        public int Try(int num)
+        {
+            if (info.Rate == 0)
+            {
+                return num;
+            }
+            AddToken(info);
+            //消耗掉能消耗的
+            int canEat = Math.Min(num, (int)info.CurrentRate);
+            if (canEat >= num)
+            {
+                info.CurrentRate -= canEat;
+            }
+            return canEat;
+        }
+
+        private void AddToken(TokenBucketRateInfo info)
+        {
+            long time = GetTime();
+            long times = (time - info.LastTime);
+
+            info.CurrentRate = Math.Min(info.CurrentRate + times * info.Token, info.Rate);
+
+            info.LastTime = time;
+        }
+
+        private long GetTime()
+        {
+            return DateTime.UtcNow.Ticks;
+        }
+
+        class TokenBucketRateInfo
+        {
+            public double Rate { get; set; }
+            public double CurrentRate { get; set; }
+            public double Token { get; set; }
+            public long LastTime { get; set; }
+
         }
     }
 }

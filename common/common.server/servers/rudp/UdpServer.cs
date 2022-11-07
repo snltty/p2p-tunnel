@@ -3,6 +3,7 @@ using common.server.model;
 using LiteNetLib;
 using System;
 using System.Net;
+using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -142,6 +143,13 @@ namespace common.server.servers.rudp
         public bool SendUnconnectedMessage(byte[] message, IPEndPoint address)
         {
             return server.SendUnconnectedMessage(message, address);
+        }
+        public void SetSpeedLimit(int limit)
+        {
+            if (server != null)
+            {
+                server.SpeedLimit = limit;
+            }
         }
 
         private void Release()

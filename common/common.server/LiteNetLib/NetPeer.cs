@@ -55,7 +55,6 @@ namespace LiteNetLib
         //Ping and RTT
         private int _rtt;
         private int _avgRtt;
-        private int _avgRttOld;
         private int _rttCount;
         private double _resendDelay = 27.0;
         private int _pingSendTimer;
