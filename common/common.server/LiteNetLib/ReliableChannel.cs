@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace LiteNetLib
 {
@@ -202,26 +201,22 @@ namespace LiteNetLib
 
             lock (_pendingPackets)
             {
-                int count = _pendingPackets.Count(c => c.NeedResend(currentTime, Peer));
-                if(count < 10)
+
+                //get packets from queue
+                while (!OutgoingQueue.IsEmpty)
                 {
-                    //get packets from queue
-                    while (!OutgoingQueue.IsEmpty)
-                    {
-                        int relate = NetUtils.RelativeSequenceNumber(_localSeqence, _localWindowStart);
-                        if (relate >= _windowSize)
-                            break;
+                    int relate = NetUtils.RelativeSequenceNumber(_localSeqence, _localWindowStart);
+                    if (relate >= _windowSize)
+                        break;
 
-                        if (!OutgoingQueue.TryDequeue(out var netPacket))
-                            break;
+                    if (!OutgoingQueue.TryDequeue(out var netPacket))
+                        break;
 
-                        netPacket.Sequence = (ushort)_localSeqence;
-                        netPacket.ChannelId = _id;
-                        _pendingPackets[_localSeqence % _windowSize].Init(netPacket);
-                        _localSeqence = (_localSeqence + 1) % NetConstants.MaxSequence;
-                    }
+                    netPacket.Sequence = (ushort)_localSeqence;
+                    netPacket.ChannelId = _id;
+                    _pendingPackets[_localSeqence % _windowSize].Init(netPacket);
+                    _localSeqence = (_localSeqence + 1) % NetConstants.MaxSequence;
                 }
-                
 
                 //send
                 for (int pendingSeq = _localWindowStart; pendingSeq != _localSeqence; pendingSeq = (pendingSeq + 1) % NetConstants.MaxSequence)
