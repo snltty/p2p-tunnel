@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-07 10:48:14
+ * @LastEditTime: 2022-11-07 14:19:32
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -65,7 +65,7 @@
                                 <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                                     <el-form-item label="udp限速" prop="UdpUploadSpeedLimit">
                                         <el-tooltip class="box-item" effect="dark" content="udp发送速度限制（字节数,0不限制）" placement="top-start">
-                                            <el-input readonly v-model="model.UdpUploadSpeedLimit"></el-input>
+                                            <el-input v-model="model.UdpUploadSpeedLimit"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
