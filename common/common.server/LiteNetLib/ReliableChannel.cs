@@ -37,7 +37,11 @@ namespace LiteNetLib
                         return true;
                     NetDebug.Write("[RC]Resend: {0} > {1}", (int)packetHoldTime, resendDelay);
                 }
-                int len = tokenBucketRatelimit.Try(_packet.Size);
+                int len = 0;
+                lock (tokenBucketRatelimit)
+                {
+                    len = tokenBucketRatelimit.Try(_packet.Size);
+                }
                 if (len >= _packet.Size)
                 {
                     _timeStamp = currentTime;
@@ -349,12 +353,12 @@ namespace LiteNetLib
         {
             double _rate = rate / 0.9d;
             info = new TokenBucketRateInfo { Rate = _rate, CurrentRate = 0, Token = _rate / ticks, LastTime = GetTime() };
-            Console.WriteLine(info.Token);
         }
 
         public void ChangeRate(int rate)
         {
             info.Rate = rate;
+            info.Token = rate / ticks;
         }
 
         public int Try(int num)
