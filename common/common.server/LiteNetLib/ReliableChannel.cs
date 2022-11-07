@@ -357,8 +357,9 @@ namespace LiteNetLib
 
         public void ChangeRate(int rate)
         {
-            info.Rate = rate;
-            info.Token = rate / ticks;
+            double _rate = rate / 0.9d;
+            info.Rate = _rate;
+            info.Token = _rate / ticks;
         }
 
         public int Try(int num)
