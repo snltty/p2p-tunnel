@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace LiteNetLib
 {
@@ -58,6 +59,17 @@ namespace LiteNetLib
                     peer.RecycleAndDeliver(_packet);
                     _packet = null;
                     return true;
+                }
+                return false;
+            }
+
+            public bool NeedResend(long currentTime, NetPeer peer)
+            {
+                if (_isSent) //check send time
+                {
+                    double resendDelay = peer.ResendDelay * TimeSpan.TicksPerMillisecond;
+                    double packetHoldTime = currentTime - _timeStamp;
+                    return packetHoldTime < resendDelay;
                 }
                 return false;
             }
@@ -190,21 +202,26 @@ namespace LiteNetLib
 
             lock (_pendingPackets)
             {
-                //get packets from queue
-                while (!OutgoingQueue.IsEmpty)
+                int count = _pendingPackets.Count(c => c.NeedResend(currentTime, Peer));
+                if(count < 10)
                 {
-                    int relate = NetUtils.RelativeSequenceNumber(_localSeqence, _localWindowStart);
-                    if (relate >= _windowSize)
-                        break;
+                    //get packets from queue
+                    while (!OutgoingQueue.IsEmpty)
+                    {
+                        int relate = NetUtils.RelativeSequenceNumber(_localSeqence, _localWindowStart);
+                        if (relate >= _windowSize)
+                            break;
 
-                    if (!OutgoingQueue.TryDequeue(out var netPacket))
-                        break;
+                        if (!OutgoingQueue.TryDequeue(out var netPacket))
+                            break;
 
-                    netPacket.Sequence = (ushort)_localSeqence;
-                    netPacket.ChannelId = _id;
-                    _pendingPackets[_localSeqence % _windowSize].Init(netPacket);
-                    _localSeqence = (_localSeqence + 1) % NetConstants.MaxSequence;
+                        netPacket.Sequence = (ushort)_localSeqence;
+                        netPacket.ChannelId = _id;
+                        _pendingPackets[_localSeqence % _windowSize].Init(netPacket);
+                        _localSeqence = (_localSeqence + 1) % NetConstants.MaxSequence;
+                    }
                 }
+                
 
                 //send
                 for (int pendingSeq = _localWindowStart; pendingSeq != _localSeqence; pendingSeq = (pendingSeq + 1) % NetConstants.MaxSequence)
