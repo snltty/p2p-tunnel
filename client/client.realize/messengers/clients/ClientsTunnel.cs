@@ -83,6 +83,7 @@ namespace client.realize.messengers.clients
                 }
             });
             tempUdpServer.Start(localport, config.Client.TimeoutDelay);
+            tempUdpServer.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
             connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
             while (connection == null)
             {

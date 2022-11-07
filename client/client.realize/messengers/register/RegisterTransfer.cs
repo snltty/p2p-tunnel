@@ -5,6 +5,7 @@ using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
+using common.server.servers.rudp;
 using System;
 using System.Linq;
 using System.Net;
@@ -191,6 +192,10 @@ namespace client.realize.messengers.register
         {
             //UDP 开始监听
             udpServer.Start(registerState.LocalInfo.UdpPort, config.Client.TimeoutDelay);
+            if (udpServer is UdpServer udp)
+            {
+                udp.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
+            }
             registerState.UdpConnection = await udpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
         }
         private void TcpBind(IPAddress serverAddress)
