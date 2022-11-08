@@ -4,7 +4,7 @@ using System;
 
 namespace client.service.wakeup
 {
-    [MessengerIdRange((int)WakeUpMessengerIds.Min, (int)WakeUpMessengerIds.Max)]
+    [MessengerIdRange((ushort)WakeUpMessengerIds.Min, (ushort)WakeUpMessengerIds.Max)]
     public class WakeUpMessenger : IMessenger
     {
         private readonly WakeUpTransfer wakeUpTransfer;
@@ -16,7 +16,7 @@ namespace client.service.wakeup
             this.config = config;
         }
 
-        [MessengerId((int)WakeUpMessengerIds.Macs)]
+        [MessengerId((ushort)WakeUpMessengerIds.Macs)]
         public byte[] Macs(IConnection connection)
         {
             if (connection.ReceiveRequestWrap.Payload.Length > 0)
@@ -26,7 +26,7 @@ namespace client.service.wakeup
             return config.ToBytes();
         }
 
-        [MessengerId((int)WakeUpMessengerIds.WakeUp)]
+        [MessengerId((ushort)WakeUpMessengerIds.WakeUp)]
         public void WakeUp(IConnection connection)
         {
             wakeUpTransfer.WakeUp(connection.ReceiveRequestWrap.Payload.GetString());
@@ -34,7 +34,7 @@ namespace client.service.wakeup
     }
 
     [Flags, MessengerIdEnum]
-    public enum WakeUpMessengerIds : int
+    public enum WakeUpMessengerIds : ushort
     {
         Min = 1001,
         Macs = 1002,

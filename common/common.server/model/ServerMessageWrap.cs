@@ -20,12 +20,12 @@ namespace common.server.model
         /// <summary>
         /// 目标路径
         /// </summary>
-        public int MessengerId { get; set; } = 0;
+        public ushort MessengerId { get; set; } = 0;
 
         /// <summary>
         /// 每条数据都有个id，【只发发数据的话，不用填这里】
         /// </summary>
-        public ulong RequestId { get; set; } = 0;
+        public ulong RequestId = 0;
 
         /// <summary>
         /// 中继数据时，写明是谁发的中继数据，以便目标客户端回复给来源客户端，【只发发数据的话，不用填这里】
@@ -35,7 +35,7 @@ namespace common.server.model
         /// <summary>
         /// 【只发发数据的话，不用填这里】
         /// </summary>
-        public int OriginMessengerId { get; set; } = 0;
+        public ushort OriginMessengerId { get; set; } = 0;
 
         /// <summary>
         /// 数据荷载
@@ -119,8 +119,8 @@ namespace common.server.model
                 RelayId = span.Slice(index).ToUInt64();
                 index += 8;
 
-                OriginMessengerId = span.Slice(index, 4).ToInt32();
-                index += 4;
+                OriginMessengerId = span.Slice(index, 2).ToUInt16();
+                index += 2;
             }
             else
             {
@@ -130,8 +130,8 @@ namespace common.server.model
             RequestId = span.Slice(index).ToUInt64();
             index += 8;
 
-            MessengerId = span.Slice(index, 4).ToInt32();
-            index += 4;
+            MessengerId = span.Slice(index, 2).ToUInt16();
+            index += 2;
 
             Payload = memory.Slice(index, memory.Length - index);
         }

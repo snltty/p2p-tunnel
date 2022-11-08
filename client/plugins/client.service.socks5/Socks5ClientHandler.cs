@@ -16,7 +16,6 @@ namespace client.service.socks5
         private readonly common.socks5.Config config;
         private IConnection connection;
         private IClientInfoCaching clientInfoCaching;
-        private NumberSpace numberSpace = new NumberSpace();
 
         protected Dictionary<Socks5EnumStep, Func<Socks5Info, bool>> handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, bool>>();
         protected Dictionary<Socks5EnumStep, Action<Socks5Info>> buildHandles = new Dictionary<Socks5EnumStep, Action<Socks5Info>>();

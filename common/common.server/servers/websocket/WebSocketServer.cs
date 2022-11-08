@@ -139,7 +139,6 @@ namespace common.server.servers.websocket
         }
         private void BindReceive(Socket socket)
         {
-            ulong id = numberSpace.Increment();
             AsyncUserToken token = new AsyncUserToken
             {
                 Connectrion = new WebsocketConnection { Socket = socket, Id = numberSpace.Get() }
@@ -153,7 +152,7 @@ namespace common.server.servers.websocket
             token.PoolBuffer = new byte[BufferSize];
             readEventArgs.SetBuffer(token.PoolBuffer, 0, BufferSize);
             readEventArgs.Completed += IO_Completed;
-            if (!socket.ReceiveAsync(readEventArgs))
+            if (socket.ReceiveAsync(readEventArgs) == false)
             {
                 ProcessReceive(readEventArgs);
             }

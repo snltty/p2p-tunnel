@@ -114,7 +114,7 @@ namespace common.server.model
 
 
     [Flags, MessengerIdEnum]
-    public enum ClientsMessengerIds : int
+    public enum ClientsMessengerIds : ushort
     {
         Min = 101,
         IP = 101,

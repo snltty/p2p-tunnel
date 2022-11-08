@@ -4,14 +4,14 @@ using common.server.model;
 
 namespace server.service.messengers
 {
-    [MessengerIdRange((int)HeartMessengerIds.Min, (int)HeartMessengerIds.Max)]
+    [MessengerIdRange((ushort)HeartMessengerIds.Min, (ushort)HeartMessengerIds.Max)]
     public class HeartMessenger : IMessenger
     {
         public HeartMessenger()
         {
         }
 
-        [MessengerId((int)HeartMessengerIds.Alive)]
+        [MessengerId((ushort)HeartMessengerIds.Alive)]
         public byte[] Alive(IConnection connection)
         {
             return Helper.TrueArray;

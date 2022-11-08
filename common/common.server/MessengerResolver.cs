@@ -11,7 +11,7 @@ namespace common.server
     public class MessengerResolver
     {
 
-        private readonly Dictionary<int, MessengerCacheInfo> messengers = new();
+        private readonly Dictionary<ushort, MessengerCacheInfo> messengers = new();
 
         private readonly ITcpServer tcpserver;
         private readonly IUdpServer udpserver;

@@ -1,9 +1,8 @@
 ﻿using common.libs;
-using common.libs.extends;
 using common.server.model;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace common.server
@@ -31,7 +30,7 @@ namespace common.server
         {
             if (msg.RequestId == 0)
             {
-                msg.RequestId = requestIdNumberSpace.Increment();
+                Interlocked.CompareExchange(ref msg.RequestId, 0, requestIdNumberSpace.Increment());
             }
             WheelTimerTimeout<TimeoutState> timeout = NewReply(msg);
             if (await SendOnly(msg).ConfigureAwait(false) == false)
@@ -52,9 +51,9 @@ namespace common.server
         {
             try
             {
-                if (msg.RequestId == 0)
+                if(msg.RequestId == 0)
                 {
-                    msg.RequestId = requestIdNumberSpace.Increment();
+                    Interlocked.CompareExchange(ref msg.RequestId, 0, requestIdNumberSpace.Increment());
                 }
                 if (msg.Connection == null)
                 {
@@ -65,7 +64,7 @@ namespace common.server
                 {
                     msg.RelayId = msg.Connection.ConnectId;
                     msg.OriginMessengerId = msg.MessengerId;
-                    msg.MessengerId = (int)RelayMessengerIds.Relay;
+                    msg.MessengerId = (ushort)RelayMessengerIds.Relay;
                 }
                 if (msg.Connection.EncodeEnabled)
                 {

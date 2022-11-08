@@ -3,7 +3,6 @@ using common.libs.extends;
 using System;
 using System.Buffers.Binary;
 using System.Net;
-using System.Reflection;
 using System.Text;
 
 namespace common.socks5

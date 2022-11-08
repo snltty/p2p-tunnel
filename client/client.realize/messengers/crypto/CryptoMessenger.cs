@@ -8,7 +8,7 @@ using System.Text;
 
 namespace client.realize.messengers.crypto
 {
-    [MessengerIdRange((int)CryptoMessengerIds.Min,(int)CryptoMessengerIds.Max)]
+    [MessengerIdRange((ushort)CryptoMessengerIds.Min,(ushort)CryptoMessengerIds.Max)]
     public class CryptoMessenger : IMessenger
     {
         private readonly IAsymmetricCrypto asymmetricCrypto;
@@ -24,13 +24,13 @@ namespace client.realize.messengers.crypto
             this.config = config;
         }
 
-        [MessengerId((int)CryptoMessengerIds.Key)]
+        [MessengerId((ushort)CryptoMessengerIds.Key)]
         public byte[] Key(IConnection connection)
         {
             return asymmetricCrypto.Key.PublicKey.ToBytes();
         }
 
-        [MessengerId((int)CryptoMessengerIds.Set)]
+        [MessengerId((ushort)CryptoMessengerIds.Set)]
         public byte[] Set(IConnection connection)
         {
             string password;
@@ -53,7 +53,7 @@ namespace client.realize.messengers.crypto
             return true.ToBytes();
         }
 
-        [MessengerId((int)CryptoMessengerIds.Clear)]
+        [MessengerId((ushort)CryptoMessengerIds.Clear)]
         public bool Clear(IConnection connection)
         {
             if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
@@ -64,7 +64,7 @@ namespace client.realize.messengers.crypto
             return true;
         }
 
-        [MessengerId((int)CryptoMessengerIds.Test)]
+        [MessengerId((ushort)CryptoMessengerIds.Test)]
         public bool Test(IConnection connection)
         {
             Console.WriteLine($"{connection.ServerType},encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");

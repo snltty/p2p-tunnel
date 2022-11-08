@@ -11,7 +11,7 @@ namespace common.server.model
     }
 
     [Flags, MessengerIdEnum]
-    public enum HeartMessengerIds : int
+    public enum HeartMessengerIds : ushort
     {
         Min = 301,
         Alive = 301,

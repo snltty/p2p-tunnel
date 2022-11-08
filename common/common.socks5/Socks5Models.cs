@@ -258,7 +258,7 @@ namespace common.socks5
     }
 
     [Flags, MessengerIdEnum]
-    public enum Socks5MessengerIds : int
+    public enum Socks5MessengerIds : ushort
     {
         Min = 801,
         Request = 802,

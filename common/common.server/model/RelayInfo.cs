@@ -32,7 +32,7 @@ namespace common.server.model
 
 
     [Flags, MessengerIdEnum]
-    public enum RelayMessengerIds : int
+    public enum RelayMessengerIds : ushort
     {
         Min = 501,
         Relay = 502,

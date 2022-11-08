@@ -7,7 +7,7 @@ namespace common.server.model
     }
 
     [Flags, MessengerIdEnum]
-    public enum CryptoMessengerIds:int
+    public enum CryptoMessengerIds: ushort
     {
         Min = 201,
         Key = 201,

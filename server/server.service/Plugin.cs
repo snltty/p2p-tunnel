@@ -97,7 +97,7 @@ namespace server.service
                         {
                             Connection = client.Connection,
                             Payload = bytes,
-                            MessengerId = (int)ClientsMessengerIds.Notify
+                            MessengerId = (ushort)ClientsMessengerIds.Notify
                         }).ConfigureAwait(false);
                     }
                 }

@@ -7,8 +7,8 @@ namespace common.socks5
     public class Socks5MessengerSender : ISocks5MessengerSender
     {
         private readonly MessengerSender messengerSender;
-        protected virtual int TargetRequest { get; } = (int)Socks5MessengerIds.Request;
-        protected virtual int TargetResponse { get; } = (int)Socks5MessengerIds.Response;
+        protected virtual ushort TargetRequest { get; } = (ushort)Socks5MessengerIds.Request;
+        protected virtual ushort TargetResponse { get; } = (ushort)Socks5MessengerIds.Response;
 
         public Socks5MessengerSender(MessengerSender messengerSender)
         {

@@ -310,7 +310,7 @@ namespace common.server.model
     }
 
     [Flags, MessengerIdEnum]
-    public enum RegisterMessengerIds:int
+    public enum RegisterMessengerIds: ushort
     {
         Min = 0,
         SignIn = 0,

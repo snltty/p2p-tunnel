@@ -7,7 +7,7 @@ using System.Text;
 
 namespace server.service.messengers
 {
-    [MessengerIdRange((int)CryptoMessengerIds.Min,(int)CryptoMessengerIds.Max)]
+    [MessengerIdRange((ushort)CryptoMessengerIds.Min,(ushort)CryptoMessengerIds.Max)]
     public class CryptoMessenger : IMessenger
     {
         private readonly IAsymmetricCrypto asymmetricCrypto;
@@ -22,13 +22,13 @@ namespace server.service.messengers
             this.config = config;
         }
 
-        [MessengerId((int)CryptoMessengerIds.Key)]
+        [MessengerId((ushort)CryptoMessengerIds.Key)]
         public byte[] Key(IConnection connection)
         {
             return asymmetricCrypto.Key.PublicKey.ToBytes();
         }
 
-        [MessengerId((int)CryptoMessengerIds.Set)]
+        [MessengerId((ushort)CryptoMessengerIds.Set)]
         public byte[] Set(IConnection connection)
         {
             string password;
@@ -51,14 +51,14 @@ namespace server.service.messengers
             return Helper.TrueArray;
         }
 
-        [MessengerId((int)CryptoMessengerIds.Test)]
+        [MessengerId((ushort)CryptoMessengerIds.Test)]
         public byte[] Test(IConnection connection)
         {
             Logger.Instance.DebugDebug($"encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");
             return Helper.TrueArray;
         }
 
-        [MessengerId((int)CryptoMessengerIds.Clear)]
+        [MessengerId((ushort)CryptoMessengerIds.Clear)]
         public byte[] Clear(IConnection connection)
         {
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo client))

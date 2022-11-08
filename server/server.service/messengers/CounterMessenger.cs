@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace server.service.messengers
 {
-    [MessengerIdRange((int)CounterMessengerIds.Min, (int)CounterMessengerIds.Max)]
+    [MessengerIdRange((ushort)CounterMessengerIds.Min, (ushort)CounterMessengerIds.Max)]
     public class CounterMessenger : IMessenger
     {
         private readonly Process proc = ProcessHelper.GetCurrentProcess();
@@ -39,7 +39,7 @@ namespace server.service.messengers
             }, 1000, true);
         }
 
-        [MessengerId((int)CounterMessengerIds.Info)]
+        [MessengerId((ushort)CounterMessengerIds.Info)]
         public byte[] Info(IConnection connection)
         {
             return counterResultInfo.ToBytes();

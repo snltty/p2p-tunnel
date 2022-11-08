@@ -19,7 +19,7 @@ namespace common.udpforward
         {
             var res = messengerSender.SendOnly(new MessageRequestWrap
             {
-                MessengerId = (int)UdpForwardMessengerIds.Request,
+                MessengerId = (ushort)UdpForwardMessengerIds.Request,
                 Connection = arg.Connection,
                 Payload = arg.ToBytes()
             }).ConfigureAwait(false);
@@ -35,7 +35,7 @@ namespace common.udpforward
         {
             var res = messengerSender.SendOnly(new MessageRequestWrap
             {
-                MessengerId = (int)UdpForwardMessengerIds.Response,
+                MessengerId = (ushort)UdpForwardMessengerIds.Response,
                 Connection = Connection,
                 Payload = arg.ToBytes()
             }).ConfigureAwait(false);
@@ -50,7 +50,7 @@ namespace common.udpforward
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (int)UdpForwardMessengerIds.Ports,
+                MessengerId = (ushort)UdpForwardMessengerIds.Ports,
                 Connection = Connection,
                 Payload = Helper.EmptyArray
             }).ConfigureAwait(false);
@@ -60,7 +60,7 @@ namespace common.udpforward
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (int)UdpForwardMessengerIds.SignOut,
+                MessengerId = (ushort)UdpForwardMessengerIds.SignOut,
                 Connection = Connection,
                 Payload = port.ToBytes()
             }).ConfigureAwait(false);
@@ -69,7 +69,7 @@ namespace common.udpforward
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (int)UdpForwardMessengerIds.SignIn,
+                MessengerId = (ushort)UdpForwardMessengerIds.SignIn,
                 Connection = Connection,
                 Payload = param.ToBytes(),
             }).ConfigureAwait(false);

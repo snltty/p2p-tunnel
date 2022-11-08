@@ -25,7 +25,7 @@ namespace client.service.vea
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                MessengerId = (int)VeaSocks5MessengerIds.Ip,
+                MessengerId = (ushort)VeaSocks5MessengerIds.Ip,
                 Payload = new IPAddressInfo { IP = config.IP, LanIP = config.LanIP }.ToBytes(),
                 Timeout = 1000
             }).ConfigureAwait(false);
@@ -46,7 +46,7 @@ namespace client.service.vea
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                MessengerId = (int)VeaSocks5MessengerIds.Reset,
+                MessengerId = (ushort)VeaSocks5MessengerIds.Reset,
                 Payload = id.ToBytes(),
                 Timeout = 15000
             }).ConfigureAwait(false);

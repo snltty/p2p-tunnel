@@ -18,7 +18,7 @@ namespace common.tcpforward
         {
             return messengerSender.SendOnly(new MessageRequestWrap
             {
-                MessengerId = (int)TcpForwardMessengerIds.Request,
+                MessengerId = (ushort)TcpForwardMessengerIds.Request,
                 Connection = arg.Connection,
                 Payload = arg.ToBytes()
             }).Result;
@@ -28,7 +28,7 @@ namespace common.tcpforward
         {
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
-                MessengerId = (int)TcpForwardMessengerIds.Response,
+                MessengerId = (ushort)TcpForwardMessengerIds.Response,
                 Connection = connection,
                 Payload = arg.ToBytes()
             }).Result;
@@ -38,7 +38,7 @@ namespace common.tcpforward
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (int)TcpForwardMessengerIds.Ports,
+                MessengerId = (ushort)TcpForwardMessengerIds.Ports,
                 Connection = Connection,
                 Payload = Helper.EmptyArray
             }).ConfigureAwait(false);
@@ -48,7 +48,7 @@ namespace common.tcpforward
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (int)TcpForwardMessengerIds.SignOut,
+                MessengerId = (ushort)TcpForwardMessengerIds.SignOut,
                 Connection = Connection,
                 Payload = data.ToBytes()
             }).ConfigureAwait(false);
@@ -57,7 +57,7 @@ namespace common.tcpforward
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (int)TcpForwardMessengerIds.SignIn,
+                MessengerId = (ushort)TcpForwardMessengerIds.SignIn,
                 Connection = Connection,
                 Payload = data.ToBytes(),
             }).ConfigureAwait(false);

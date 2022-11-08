@@ -22,7 +22,7 @@ namespace client.realize.messengers.clients
             {
                 Connection = connection,
                 Payload = Helper.EmptyArray,
-                MessengerId =(int)ClientsMessengerIds.Port,
+                MessengerId =(ushort)ClientsMessengerIds.Port,
                 Timeout = 2000
             }).ConfigureAwait(false);
 
@@ -38,7 +38,7 @@ namespace client.realize.messengers.clients
             {
                 Connection = connection,
                 Payload = new TunnelRegisterInfo { LocalPort = localPort, Port = port, TunnelName = tunnelName }.ToBytes(),
-                MessengerId = (int)ClientsMessengerIds.AddTunnel,
+                MessengerId = (ushort)ClientsMessengerIds.AddTunnel,
                 Timeout = 2000
             }).ConfigureAwait(false);
 
@@ -54,7 +54,7 @@ namespace client.realize.messengers.clients
             {
                 Connection = connection,
                 Payload = tunnelName.ToBytes(),
-                MessengerId = (int)ClientsMessengerIds.RemoveTunnel,
+                MessengerId = (ushort)ClientsMessengerIds.RemoveTunnel,
                 Timeout = 2000
             }).ConfigureAwait(false);
         }

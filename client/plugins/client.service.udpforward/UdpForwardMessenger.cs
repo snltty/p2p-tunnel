@@ -3,7 +3,7 @@ using common.udpforward;
 
 namespace client.service.udpforward
 {
-    [MessengerIdRange((int)UdpForwardMessengerIds.Min, (int)UdpForwardMessengerIds.Max)]
+    [MessengerIdRange((ushort)UdpForwardMessengerIds.Min, (ushort)UdpForwardMessengerIds.Max)]
     public class UdpForwardMessenger : IMessenger
     {
         private readonly UdpForwardMessengerSender udpForwardMessengerSender;
@@ -12,7 +12,7 @@ namespace client.service.udpforward
             this.udpForwardMessengerSender = udpForwardMessengerSender;
         }
 
-        [MessengerId((int)UdpForwardMessengerIds.Request)]
+        [MessengerId((ushort)UdpForwardMessengerIds.Request)]
         public void Request(IConnection connection)
         {
             UdpForwardInfo data = new UdpForwardInfo();
@@ -21,7 +21,7 @@ namespace client.service.udpforward
             udpForwardMessengerSender.OnRequest(data);
         }
 
-        [MessengerId((int)UdpForwardMessengerIds.Response)]
+        [MessengerId((ushort)UdpForwardMessengerIds.Response)]
         public void Response(IConnection connection)
         {
             UdpForwardInfo data = new UdpForwardInfo();

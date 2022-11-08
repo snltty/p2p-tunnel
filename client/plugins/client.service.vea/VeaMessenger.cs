@@ -3,7 +3,7 @@ using common.server;
 
 namespace client.service.vea
 {
-    [MessengerIdRange((int)VeaSocks5MessengerIds.Min,(int)VeaSocks5MessengerIds.Max)]
+    [MessengerIdRange((ushort)VeaSocks5MessengerIds.Min,(ushort)VeaSocks5MessengerIds.Max)]
     public class VeaMessenger : IMessenger
     {
         private readonly VeaTransfer veaTransfer;
@@ -14,14 +14,14 @@ namespace client.service.vea
             this.config = config;
         }
 
-        [MessengerId((int)VeaSocks5MessengerIds.Ip)]
+        [MessengerId((ushort)VeaSocks5MessengerIds.Ip)]
         public byte[] IP(IConnection connection)
         {
             veaTransfer.OnNotify(connection);
             return new IPAddressInfo { IP = config.IP, LanIP = config.LanIP }.ToBytes();
         }
 
-        [MessengerId((int)VeaSocks5MessengerIds.Reset)]
+        [MessengerId((ushort)VeaSocks5MessengerIds.Reset)]
         public byte[] Reset(IConnection connection)
         {
             veaTransfer.Run();

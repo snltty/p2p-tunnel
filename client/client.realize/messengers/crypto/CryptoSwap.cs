@@ -31,7 +31,7 @@ namespace client.realize.messengers.crypto
                     MessageResponeInfo publicKeyResponse = await messengerSender.SendReply(new MessageRequestWrap
                     {
                         Connection = tcp ?? udp,
-                        MessengerId = (int)CryptoMessengerIds.Key,
+                        MessengerId = (ushort)CryptoMessengerIds.Key,
                         Payload = Helper.EmptyArray
                     }).ConfigureAwait(false);
                     if (publicKeyResponse.Code != MessageResponeCodes.OK)
@@ -52,7 +52,7 @@ namespace client.realize.messengers.crypto
                     MessageResponeInfo setResponse = await messengerSender.SendReply(new MessageRequestWrap
                     {
                         Connection = tcp,
-                        MessengerId = (int)CryptoMessengerIds.Set,
+                        MessengerId = (ushort)CryptoMessengerIds.Set,
                         Payload = encodedData
                     }).ConfigureAwait(false);
                     if (setResponse.Code != MessageResponeCodes.OK || crypto.Decode(setResponse.Data.ToArray()).GetBool() == false)
@@ -65,7 +65,7 @@ namespace client.realize.messengers.crypto
                     MessageResponeInfo setResponse = await messengerSender.SendReply(new MessageRequestWrap
                     {
                         Connection = udp,
-                        MessengerId = (int)CryptoMessengerIds.Set,
+                        MessengerId = (ushort)CryptoMessengerIds.Set,
                         Payload = encodedData
                     }).ConfigureAwait(false);
                     if (setResponse.Code != MessageResponeCodes.OK || crypto.Decode(setResponse.Data.ToArray()).GetBool() == false)
@@ -88,7 +88,7 @@ namespace client.realize.messengers.crypto
             MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                MessengerId = (int)CryptoMessengerIds.Test,
+                MessengerId = (ushort)CryptoMessengerIds.Test,
                 Payload = connection.Crypto.Encode(Encoding.UTF8.GetBytes("test"))
             }).ConfigureAwait(false);
 

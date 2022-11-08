@@ -12,7 +12,7 @@ namespace client.realize.messengers.relay
     /// 中继
     /// </summary>
 
-    [MessengerIdRange((int)RelayMessengerIds.Min,(int)RelayMessengerIds.Max)]
+    [MessengerIdRange((ushort)RelayMessengerIds.Min,(ushort)RelayMessengerIds.Max)]
     public class RelayMessenger : IMessenger
     {
         private readonly IClientInfoCaching clientInfoCaching;
@@ -28,7 +28,7 @@ namespace client.realize.messengers.relay
             this.relayMessengerSender = relayMessengerSender;
         }
 
-        [MessengerId((int)RelayMessengerIds.Relay)]
+        [MessengerId((ushort)RelayMessengerIds.Relay)]
         public async Task Relay(IConnection connection)
         {
             if (config.Client.UseRelay == false)
@@ -49,7 +49,7 @@ namespace client.realize.messengers.relay
             }
         }
 
-        [MessengerId((int)RelayMessengerIds.Notify)]
+        [MessengerId((ushort)RelayMessengerIds.Notify)]
         public async Task Notify(IConnection connection)
         {
             if (config.Client.UseRelay == false)
@@ -78,7 +78,7 @@ namespace client.realize.messengers.relay
             }
         }
 
-        [MessengerId((int)RelayMessengerIds.Verify)]
+        [MessengerId((ushort)RelayMessengerIds.Verify)]
         public byte[] Verify(IConnection connection)
         {
             if (config.Client.UseRelay == false)
@@ -100,7 +100,7 @@ namespace client.realize.messengers.relay
             return Helper.FalseArray;
         }
 
-        [MessengerId((int)RelayMessengerIds.Delay)]
+        [MessengerId((ushort)RelayMessengerIds.Delay)]
         public byte[] Delay(IConnection connection)
         {
             return Helper.TrueArray;

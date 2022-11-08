@@ -104,7 +104,7 @@ namespace common.udpforward
 
 
     [Flags, MessengerIdEnum]
-    public enum UdpForwardMessengerIds : int
+    public enum UdpForwardMessengerIds : ushort
     {
         Min = 701,
         Request = 702,

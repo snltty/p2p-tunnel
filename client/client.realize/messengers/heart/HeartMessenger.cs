@@ -7,14 +7,14 @@ namespace client.realize.messengers.heart
     /// <summary>
     /// 心跳包
     /// </summary>
-    [MessengerIdRange((int)HeartMessengerIds.Min, (int)HeartMessengerIds.Max)]
+    [MessengerIdRange((ushort)HeartMessengerIds.Min, (ushort)HeartMessengerIds.Max)]
     public class HeartMessenger : IMessenger
     {
         public HeartMessenger()
         {
         }
 
-        [MessengerId((int)HeartMessengerIds.Alive)]
+        [MessengerId((ushort)HeartMessengerIds.Alive)]
         public byte[] Alive(IConnection connection)
         {
             return Helper.TrueArray;

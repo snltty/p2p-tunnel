@@ -10,10 +10,10 @@ namespace common.server
     [AttributeUsage(AttributeTargets.Class)]
     public class MessengerIdRangeAttribute : Attribute
     {
-        public int Min { get; set; }
-        public int Max { get; set; }
+        public ushort Min { get; set; }
+        public ushort Max { get; set; }
 
-        public MessengerIdRangeAttribute(int min, int max)
+        public MessengerIdRangeAttribute(ushort min, ushort max)
         {
             Min = min;
             Max = max;
@@ -23,9 +23,9 @@ namespace common.server
     [AttributeUsage(AttributeTargets.Method)]
     public class MessengerIdAttribute : Attribute
     {
-        public int Id { get; set; }
+        public ushort Id { get; set; }
 
-        public MessengerIdAttribute(int id)
+        public MessengerIdAttribute(ushort id)
         {
             Id = id;
         }

@@ -193,7 +193,7 @@ namespace common.tcpforward
     }
 
     [Flags, MessengerIdEnum]
-    public enum TcpForwardMessengerIds : int
+    public enum TcpForwardMessengerIds : ushort
     {
         Min = 601,
         Request = 602,

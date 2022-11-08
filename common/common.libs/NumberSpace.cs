@@ -64,36 +64,6 @@ namespace common.libs
         }
     }
 
-    public class NumberSpaceInt64
-    {
-        private long num = 0;
-
-        public NumberSpaceInt64(long defaultVal = 0)
-        {
-            num = defaultVal;
-        }
-
-        public long Get()
-        {
-            return num;
-        }
-
-        public long Increment()
-        {
-            Interlocked.Increment(ref num);
-            return num;
-        }
-
-        public void Decrement()
-        {
-            Interlocked.Decrement(ref num);
-        }
-
-        public void Reset(long val = 0)
-        {
-            Interlocked.Exchange(ref num, val);
-        }
-    }
 
     public class NumberSpaceInt32
     {
@@ -142,6 +112,10 @@ namespace common.libs
 
         public uint Increment()
         {
+            if (uint.MaxValue - 10000 < num)
+            {
+                Reset(0);
+            }
             Interlocked.Increment(ref num);
             return num;
         }
@@ -181,6 +155,19 @@ namespace common.libs
         public void Reset()
         {
             value = _default;
+        }
+    }
+
+    public class RequestIdNumberSpace
+    {
+        private ulong num = 0;
+        public RequestIdNumberSpace()
+        {
+        }
+
+        public void Increment(ref ulong id)
+        {
+            Interlocked.CompareExchange(ref id, 0, Interlocked.Increment(ref num));
         }
     }
 }

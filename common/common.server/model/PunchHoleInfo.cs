@@ -214,7 +214,7 @@ namespace common.server.model
 
 
     [Flags, MessengerIdEnum]
-    public enum PunchHoleMessengerIds : int
+    public enum PunchHoleMessengerIds : ushort
     {
         Min = 401,
         Execute = 401,

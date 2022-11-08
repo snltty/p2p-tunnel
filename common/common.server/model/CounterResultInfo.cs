@@ -86,7 +86,7 @@ namespace common.server.model
     }
 
     [Flags, MessengerIdEnum]
-    public enum CounterMessengerIds : int
+    public enum CounterMessengerIds : ushort
     {
         Min = 1101,
         Info = 1101,

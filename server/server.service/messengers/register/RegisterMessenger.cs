@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace server.service.messengers.register
 {
 
-    [MessengerIdRange((int)RegisterMessengerIds.Min, (int)RegisterMessengerIds.Max)]
+    [MessengerIdRange((ushort)RegisterMessengerIds.Min, (ushort)RegisterMessengerIds.Max)]
     public class RegisterMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -25,7 +25,7 @@ namespace server.service.messengers.register
             this.relayValidator = relayValidator;
         }
 
-        [MessengerId((int)RegisterMessengerIds.SignIn)]
+        [MessengerId((ushort)RegisterMessengerIds.SignIn)]
         public async Task<byte[]> Execute(IConnection connection)
         {
             RegisterParamsInfo model = new RegisterParamsInfo();
@@ -146,7 +146,7 @@ namespace server.service.messengers.register
             return (verify, client);
         }
 
-        [MessengerId((int)RegisterMessengerIds.Notify)]
+        [MessengerId((ushort)RegisterMessengerIds.Notify)]
         public void Notify(IConnection connection)
         {
             clientRegisterCache.Notify(connection);
@@ -158,14 +158,14 @@ namespace server.service.messengers.register
             {
                 Connection = connection,
                 Payload = Helper.EmptyArray,
-                MessengerId =(int)HeartMessengerIds.Alive,
+                MessengerId =(ushort)HeartMessengerIds.Alive,
                 Timeout = 2000,
             });
             return resp.Code == MessageResponeCodes.OK && Helper.TrueArray.AsSpan().SequenceEqual(resp.Data.Span);
         }
 
 
-        [MessengerId((int)RegisterMessengerIds.SignOut)]
+        [MessengerId((ushort)RegisterMessengerIds.SignOut)]
         public void Exit(IConnection connection)
         {
             connection.Disponse();

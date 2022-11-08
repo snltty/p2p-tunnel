@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace server.service.tcpforward
 {
-    [MessengerIdRange((int)TcpForwardMessengerIds.Min,(int)TcpForwardMessengerIds.Max)]
+    [MessengerIdRange((ushort)TcpForwardMessengerIds.Min,(ushort)TcpForwardMessengerIds.Max)]
     public class TcpForwardMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -30,13 +30,13 @@ namespace server.service.tcpforward
             this.tcpForwardResolver = tcpForwardResolver;
         }
 
-        [MessengerId((int)TcpForwardMessengerIds.Request)]
+        [MessengerId((ushort)TcpForwardMessengerIds.Request)]
         public void Request(IConnection connection)
         {
             tcpForwardResolver.InputData(connection);
         }
 
-        [MessengerId((int)TcpForwardMessengerIds.Response)]
+        [MessengerId((ushort)TcpForwardMessengerIds.Response)]
         public void Response(IConnection connection)
         {
             TcpForwardInfo data = new TcpForwardInfo();
@@ -45,7 +45,7 @@ namespace server.service.tcpforward
             tcpForwardServer.Response(data);
         }
 
-        [MessengerId((int)TcpForwardMessengerIds.Ports)]
+        [MessengerId((ushort)TcpForwardMessengerIds.Ports)]
         public byte[] Ports(IConnection connection)
         {
             return config.WebListens
@@ -55,7 +55,7 @@ namespace server.service.tcpforward
                 }).ToArray().ToBytes();
         }
 
-        [MessengerId((int)TcpForwardMessengerIds.SignOut)]
+        [MessengerId((ushort)TcpForwardMessengerIds.SignOut)]
         public byte[] SignOut(IConnection connection)
         {
             try
@@ -88,7 +88,7 @@ namespace server.service.tcpforward
             }
         }
 
-        [MessengerId((int)TcpForwardMessengerIds.SignIn)]
+        [MessengerId((ushort)TcpForwardMessengerIds.SignIn)]
         public byte[] SignIn(IConnection connection)
         {
 

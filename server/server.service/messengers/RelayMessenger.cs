@@ -10,7 +10,7 @@ namespace server.service.messengers
     /// <summary>
     /// 中继
     /// </summary>
-    [MessengerIdRange((int)RelayMessengerIds.Min, (int)RelayMessengerIds.Max)]
+    [MessengerIdRange((ushort)RelayMessengerIds.Min, (ushort)RelayMessengerIds.Max)]
     public class RelayMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -24,7 +24,7 @@ namespace server.service.messengers
             this.relayValidator = relayValidator;
         }
 
-        [MessengerId((int)RelayMessengerIds.Relay)]
+        [MessengerId((ushort)RelayMessengerIds.Relay)]
         public async Task Relay(IConnection connection)
         {
             //A已注册
@@ -57,7 +57,7 @@ namespace server.service.messengers
             }
         }
 
-        [MessengerId((int)RelayMessengerIds.Notify)]
+        [MessengerId((ushort)RelayMessengerIds.Notify)]
         public async Task Notify(IConnection connection)
         {
             RelayInfo relayInfo = new RelayInfo();
@@ -90,7 +90,7 @@ namespace server.service.messengers
             }
         }
 
-        [MessengerId((int)RelayMessengerIds.Verify)]
+        [MessengerId((ushort)RelayMessengerIds.Verify)]
         public byte[] Verify(IConnection connection)
         {
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
@@ -118,7 +118,7 @@ namespace server.service.messengers
             return Helper.FalseArray;
         }
 
-        [MessengerId((int)RelayMessengerIds.Delay)]
+        [MessengerId((ushort)RelayMessengerIds.Delay)]
         public byte[] Delay(IConnection connection)
         {
             return Helper.TrueArray;

@@ -2,12 +2,11 @@
 using common.server;
 using common.server.model;
 using server.messengers.register;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace server.service.messengers
 {
-    [MessengerIdRange((int)PunchHoleMessengerIds.Min, (int)PunchHoleMessengerIds.Max)]
+    [MessengerIdRange((ushort)PunchHoleMessengerIds.Min, (ushort)PunchHoleMessengerIds.Max)]
     public class PunchHoleMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -19,7 +18,7 @@ namespace server.service.messengers
             this.messengerSender = messengerSender;
         }
 
-        [MessengerId((int)PunchHoleMessengerIds.Execute)]
+        [MessengerId((ushort)PunchHoleMessengerIds.Execute)]
         public async Task<byte[]> Execute(IConnection connection)
         {
             PunchHoleParamsInfo model = new PunchHoleParamsInfo();
