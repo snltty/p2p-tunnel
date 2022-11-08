@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-21 14:58:34
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-30 14:03:25
+ * @LastEditTime: 2022-11-08 11:11:35
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\apis\clients.js
@@ -30,4 +30,7 @@ export const sendPing = () => {
 
 export const getDelay = (tid) => {
     return sendWebsocketMsg(`clients/delay`, tid);
+}
+export const setRelay = (data) => {
+    return sendWebsocketMsg(`clients/relay`, data);
 }

@@ -1,6 +1,9 @@
 ﻿using client.messengers.clients;
+using client.messengers.register;
 using client.service.ui.api.clientServer;
 using common.libs.extends;
+using common.server;
+using common.server.model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,11 +13,13 @@ namespace client.service.ui.api.service.clientServer.services
     {
         private readonly IClientsTransfer clientsTransfer;
         private readonly IClientInfoCaching clientInfoCaching;
+        private readonly RegisterStateInfo registerStateInfo;
 
-        public ClientsClientService(IClientsTransfer clientsTransfer, IClientInfoCaching clientInfoCaching)
+        public ClientsClientService(IClientsTransfer clientsTransfer, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerStateInfo)
         {
             this.clientsTransfer = clientsTransfer;
             this.clientInfoCaching = clientInfoCaching;
+            this.registerStateInfo = registerStateInfo;
         }
 
         public IEnumerable<ClientInfo> List(ClientServiceParamsInfo arg)
@@ -62,10 +67,37 @@ namespace client.service.ui.api.service.clientServer.services
         {
             return await clientsTransfer.Delay(ulong.Parse(arg.Content));
         }
+        public async Task<bool> Relay(ClientServiceParamsInfo arg)
+        {
+            RelayParamsInfo model = arg.Content.DeJson<RelayParamsInfo>();
+
+            IConnection sourceConnection = null;
+            if (model.ID == 0)
+            {
+                sourceConnection = model.Type == ServerType.TCP ? registerStateInfo.TcpConnection : registerStateInfo.UdpConnection;
+            }
+            else if (clientInfoCaching.Get(model.ID, out ClientInfo sourceClient))
+            {
+                sourceConnection = model.Type == ServerType.TCP ? sourceClient.TcpConnection : sourceClient.UdpConnection;
+            }
+
+            if (sourceConnection != null && sourceConnection.Connected && clientInfoCaching.Get(model.ToId, out ClientInfo targetClient))
+            {
+                await clientsTransfer.Relay(targetClient, sourceConnection, true);
+            }
+
+            return true;
+        }
 
     }
     public class ConnectParamsInfo
     {
         public ulong ID { get; set; } = 0;
+    }
+    public class RelayParamsInfo
+    {
+        public ulong ID { get; set; } = 0;
+        public ulong ToId { get; set; } = 0;
+        public ServerType Type { get; set; } = ServerType.TCP;
     }
 }

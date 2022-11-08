@@ -154,13 +154,14 @@ namespace client.realize.messengers.clients
             registerState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();
         }
 
-        private void Disconnect(IConnection connection, IConnection regConnection)
+        public void Disconnect(IConnection connection, IConnection regConnection)
         {
             if (ReferenceEquals(regConnection, connection))
             {
                 return;
             }
             clientInfoCaching.Offline(connection.ConnectId, connection.ServerType);
+            ConnectClient(connection.ConnectId);
         }
 
         public void ConnectClient(ulong id)
@@ -173,6 +174,10 @@ namespace client.realize.messengers.clients
         public void ConnectClient(ClientInfo client)
         {
             if (client.Id == registerState.ConnectId)
+            {
+                return;
+            }
+            if(registerState.LocalInfo.IsConnecting)
             {
                 return;
             }
@@ -323,7 +328,6 @@ namespace client.realize.messengers.clients
             return EnumConnectResult.AllFail;
         }
 
-
         public async Task Ping()
         {
             if (config.Client.UseUdp)
@@ -341,7 +345,7 @@ namespace client.realize.messengers.clients
                         }
                         else
                         {
-                            item.UdpConnection.RoundTripTime = 0;
+                            item.UdpConnection.RoundTripTime = -1;
                         }
                     }
                     catch (Exception)
@@ -351,7 +355,7 @@ namespace client.realize.messengers.clients
             }
             if (config.Client.UseTcp)
             {
-                var tcps = clientInfoCaching.All().Where(c => c.UseTcp && config.Client.UseTcp);
+                var tcps = clientInfoCaching.All().Where(c => c.UseTcp && config.Client.UseTcp && c.TcpConnected);
                 foreach (var item in tcps)
                 {
                     try
@@ -364,7 +368,7 @@ namespace client.realize.messengers.clients
                         }
                         else
                         {
-                            item.TcpConnection.RoundTripTime = 0;
+                            item.TcpConnection.RoundTripTime = -1;
                         }
                     }
                     catch (Exception)
@@ -384,7 +388,7 @@ namespace client.realize.messengers.clients
             {
                 if (data.ContainsKey(item.Id)) continue;
 
-                int[] result = new int[] { 0, 0 };
+                int[] result = new int[] { -1, -1 };
                 data.Add(item.Id, result);
 
                 if (config.Client.UseTcp && item.UseTcp && item.TcpConnected && item.TcpConnectType == ClientConnectTypes.P2P)
@@ -417,7 +421,7 @@ namespace client.realize.messengers.clients
             }
 
 
-            int[] resultServer = new int[] { 0, 0 };
+            int[] resultServer = new int[] { -1, -1 };
             data.Add(0, resultServer);
 
             if (config.Client.UseTcp)
@@ -542,7 +546,7 @@ namespace client.realize.messengers.clients
             IConnection sourceConnection = await relayConnectionSelector.Select(serverType);
             await Relay(client, sourceConnection, notify);
         }
-        private async Task Relay(ClientInfo client, IConnection sourceConnection, bool notify = false)
+        public async Task Relay(ClientInfo client, IConnection sourceConnection, bool notify = false)
         {
             if (sourceConnection == null || sourceConnection.Connected == false) return;
             if (sourceConnection.ServerType == ServerType.TCP && client.TcpConnected == true && client.TcpConnectType == ClientConnectTypes.P2P) return;

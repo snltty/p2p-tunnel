@@ -21,7 +21,9 @@ namespace client.realize.messengers.clients
         private readonly IUdpServer udpServer;
         private readonly ITcpServer tcpServer;
         private readonly ClientsMessengerSender clientsMessengerSender;
-        public ClientsTunnel(ClientsMessengerSender clientsMessengerSender, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerState, Config config, IUdpServer udpServer, ITcpServer tcpServer
+        private readonly IClientsTransfer clientsTransfer;
+
+        public ClientsTunnel(ClientsMessengerSender clientsMessengerSender, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerState, Config config, IUdpServer udpServer, ITcpServer tcpServer, IClientsTransfer clientsTransfer
         )
         {
             this.clientsMessengerSender = clientsMessengerSender;
@@ -30,6 +32,7 @@ namespace client.realize.messengers.clients
             this.config = config;
             this.udpServer = udpServer;
             this.tcpServer = tcpServer;
+            this.clientsTransfer = clientsTransfer;
         }
         /// <summary>
         /// 新绑定
@@ -68,7 +71,7 @@ namespace client.realize.messengers.clients
         /// <returns></returns>
         private async Task<ulong> NewBindUdp(int localport, IPAddress serverAddress, ulong tunnelName)
         {
-            TunnelNameModel model = new TunnelNameModel { TunnelName = tunnelName };
+            ValuePacket<ulong> model = new ValuePacket<ulong> { Value = tunnelName };
 
             IConnection connection = null;
             UdpServer tempUdpServer = new UdpServer();
@@ -78,8 +81,10 @@ namespace client.realize.messengers.clients
             {
                 if (ReferenceEquals(connection, _connection) == false)
                 {
-                    clientInfoCaching.RemoveUdpserver(model.TunnelName);
+                    clientInfoCaching.RemoveUdpserver(model.Value);
                     tempUdpServer.Disponse();
+
+                    clientsTransfer.Disconnect(_connection, registerState.UdpConnection);
                 }
             });
             tempUdpServer.Start(localport, config.Client.TimeoutDelay);
@@ -91,16 +96,12 @@ namespace client.realize.messengers.clients
             }
 
             int port = await clientsMessengerSender.GetTunnelPort(connection);
-            model.TunnelName = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, model.TunnelName, port, localport);
+            model.Value = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, model.Value, port, localport);
 
-            clientInfoCaching.AddTunnelPort(model.TunnelName, port);
-            clientInfoCaching.AddUdpserver(model.TunnelName, tempUdpServer);
+            clientInfoCaching.AddTunnelPort(model.Value, port);
+            clientInfoCaching.AddUdpserver(model.Value, tempUdpServer);
 
-            return model.TunnelName;
-        }
-        class TunnelNameModel
-        {
-            public ulong TunnelName { get; set; }
+            return model.Value;
         }
 
         /// <summary>

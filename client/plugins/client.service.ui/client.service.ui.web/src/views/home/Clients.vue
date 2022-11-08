@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-07 14:14:06
+ * @LastEditTime: 2022-11-08 11:33:25
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -17,13 +17,13 @@
                         <div class="item">
                             <dl v-loading="item.loading">
                                 <dt>{{item.Name}}</dt>
-                                <dd v-if="item.showUdp" :style="item.udpConnectTypeStyle" class="flex">
+                                <dd v-if="item.showUdp" :style="item.udpConnectTypeStyle" class="flex" @click="handleShowDelay(item)">
                                     <span class="label">Udp</span>
                                     <span>{{item.udpConnectTypeStr}}</span>
                                     <span class="flex-1"></span>
                                     <Signal :value="item.UdpPing"></Signal>
                                 </dd>
-                                <dd v-if="item.showTcp" :style="item.tcpConnectTypeStyle" class="flex">
+                                <dd v-if="item.showTcp" :style="item.tcpConnectTypeStyle" class="flex" @click="handleShowDelay(item)">
                                     <span class="label">Tcp</span>
                                     <span>{{item.tcpConnectTypeStr}}</span>
                                     <span class="flex-1"></span>
@@ -40,19 +40,21 @@
                 </template>
             </el-row>
         </div>
+        <RelayView v-if="state.showDelay" v-model="state.showDelay" @success="handleOnRelay"></RelayView>
     </div>
 </template>
 
 <script>
-import { computed } from '@vue/reactivity';
+import { computed, reactive } from '@vue/reactivity';
 import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
-import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing, getDelay } from '../../apis/clients'
+import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing, setRelay } from '../../apis/clients'
 import Signal from './Signal.vue'
-import { onMounted, onUnmounted } from '@vue/runtime-core';
+import RelayView from './RelayView.vue'
+import { onMounted, onUnmounted, provide } from '@vue/runtime-core';
 export default {
     name: 'Clients',
-    components: { Signal },
+    components: { Signal, RelayView },
     setup () {
         const clientsState = injectClients();
         const registerState = injectRegister();
@@ -113,8 +115,24 @@ export default {
             })
         }
 
+        const state = reactive({
+            showDelay: false,
+            toId: 0
+        });
+        provide('share-data', state);
+        const handleShowDelay = (item) => {
+            if (item.udpConnectType == 1 && c.tcpConnectType == 1) return;
+            state.toId = item.Id;
+            state.showDelay = true;
+        }
+        const handleOnRelay = (item) => {
+            setRelay(item);
+        }
+
+
         return {
-            registerState, clients, handleConnect, handleConnectReverse, handleConnectReset
+            registerState, clients, handleConnect, handleConnectReverse, handleConnectReset,
+            state, handleShowDelay, handleOnRelay
         }
 
     }
@@ -144,7 +162,11 @@ export default {
             color: #555;
 
         dd
+            cursor: pointer;
             padding: 0.4rem 1rem;
+
+            &:hover
+                text-decoration: underline;
 
             &:nth-child(2)
                 padding-top: 1rem;

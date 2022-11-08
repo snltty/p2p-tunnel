@@ -9,7 +9,6 @@ using common.server.servers.rudp;
 using System;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -93,7 +92,7 @@ namespace client.realize.messengers.register
                 success.ErrorMsg = "注册操作中...";
                 return success;
             }
-            if (!config.Client.UseUdp && !config.Client.UseTcp)
+            if (config.Client.UseUdp == false && config.Client.UseTcp == false)
             {
                 success.ErrorMsg = "udp tcp至少要启用一种...";
                 return success;

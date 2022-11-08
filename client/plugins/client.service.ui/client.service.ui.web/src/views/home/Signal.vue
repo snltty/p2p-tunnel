@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-10-23 01:39:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-23 10:46:29
+ * @LastEditTime: 2022-11-08 10:46:44
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Signal.vue
@@ -28,7 +28,7 @@ export default {
 
         const step = [1000, 500, 100, 50, 30];
         const classValue = computed(() => {
-            if (props.value == 0) return props.value;
+            if (props.value == -1) return props.value;
             for (let i = 1; i <= step.length; i++) {
                 if (props.value >= step[i - 1]) {
                     return i;
