@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 
 namespace common.libs
@@ -15,7 +14,7 @@ namespace common.libs
         long ticks = 0;
         //槽数
         int bucketLength = 2 << 8;
-        //mask = ticksPerWheel-1;ticks & mask; 获得槽下标
+        //mask = bucketLength-1;ticks & mask; 获得槽下标
         int mask = 0;
         //精度，应使用Thread.Sleep(1)时间的倍数
         int tickDurationMs = 30;
@@ -23,7 +22,7 @@ namespace common.libs
         WheelTimerBucket<T>[] buckets = Array.Empty<WheelTimerBucket<T>>();
         //先入列，等待入槽
         ConcurrentQueue<WheelTimerTimeout<T>> timeouts = new ConcurrentQueue<WheelTimerTimeout<T>>();
-        AutoResetEvent autoReset = new AutoResetEvent(false);
+        AutoResetEvent autoReset = new AutoResetEvent(true);
 
         public WheelTimer()
         {

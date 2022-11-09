@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Threading;
 
 namespace LiteNetLib
 {
     internal sealed class ReliableChannel : BaseChannel
     {
         public static TokenBucketRatelimit tokenBucketRatelimit = new TokenBucketRatelimit(0);
+        public static AutoResetEvent AutoResetEvent = new AutoResetEvent(true);
 
         private struct PendingPacket
         {
@@ -40,7 +42,14 @@ namespace LiteNetLib
                 int len = 0;
                 lock (tokenBucketRatelimit)
                 {
-                    len = tokenBucketRatelimit.Try(_packet.Size);
+                    do
+                    {
+                        len = tokenBucketRatelimit.Try(_packet.Size);
+                        if (len < _packet.Size)
+                        {
+                            AutoResetEvent.WaitOne(1);
+                        }
+                    } while (len < _packet.Size);
                 }
                 if (len >= _packet.Size)
                 {
@@ -363,15 +372,13 @@ namespace LiteNetLib
 
         public TokenBucketRatelimit(int rate)
         {
-            double _rate = rate / 0.9d;
-            info = new TokenBucketRateInfo { Rate = _rate, CurrentRate = 0, Token = _rate / ticks, LastTime = GetTime() };
+            info = new TokenBucketRateInfo { Rate = rate, CurrentRate = 0, Token = rate / ticks, LastTime = GetTime() };
         }
 
         public void ChangeRate(int rate)
         {
-            double _rate = rate / 0.9d;
-            info.Rate = _rate;
-            info.Token = _rate / ticks;
+            info.Rate = rate;
+            info.Token = rate / ticks;
         }
 
         public int Try(int num)

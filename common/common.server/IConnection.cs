@@ -143,6 +143,7 @@ namespace common.server
 
 
         SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        SemaphoreSlim semaphore1 = new SemaphoreSlim(1, 1);
         public override async ValueTask<bool> Send(byte[] data, int length)
         {
             if (Connected)
@@ -154,7 +155,8 @@ namespace common.server
                     while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
                         index++;
-                        await Task.Delay(5);
+                        await semaphore1.WaitAsync(1);
+                        semaphore1.Release();
                     }
 
                     NetPeer.Send(data, 0, length, DeliveryMethod.ReliableOrdered);
@@ -192,6 +194,7 @@ namespace common.server
                 NetPeer = null;
             }
             semaphore.Dispose();
+            semaphore1.Dispose();
         }
 
         public override IConnection Clone()
