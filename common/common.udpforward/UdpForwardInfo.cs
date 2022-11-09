@@ -15,7 +15,7 @@ namespace common.udpforward
         public UdpForwardInfo() { }
 
         
-        public int SourcePort { get; set; } = 0;
+        public ushort SourcePort { get; set; } = 0;
 
         /// <summary>
         /// 来源地址，是谁发的数据，目标端回复的时候知道回复给谁

@@ -21,9 +21,10 @@ namespace client.realize.messengers.clients
         private readonly IUdpServer udpServer;
         private readonly ITcpServer tcpServer;
         private readonly ClientsMessengerSender clientsMessengerSender;
-        private readonly IClientsTransfer clientsTransfer;
 
-        public ClientsTunnel(ClientsMessengerSender clientsMessengerSender, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerState, Config config, IUdpServer udpServer, ITcpServer tcpServer, IClientsTransfer clientsTransfer
+        public Action<IConnection, IConnection> OnDisConnect { get; set; } = (IConnection connection, IConnection connection1) => { };
+
+        public ClientsTunnel(ClientsMessengerSender clientsMessengerSender, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerState, Config config, IUdpServer udpServer, ITcpServer tcpServer
         )
         {
             this.clientsMessengerSender = clientsMessengerSender;
@@ -32,7 +33,6 @@ namespace client.realize.messengers.clients
             this.config = config;
             this.udpServer = udpServer;
             this.tcpServer = tcpServer;
-            this.clientsTransfer = clientsTransfer;
         }
         /// <summary>
         /// 新绑定
@@ -84,7 +84,7 @@ namespace client.realize.messengers.clients
                     clientInfoCaching.RemoveUdpserver(model.Value);
                     tempUdpServer.Disponse();
 
-                    clientsTransfer.Disconnect(_connection, registerState.UdpConnection);
+                    OnDisConnect(_connection, registerState.UdpConnection);
                 }
             });
             tempUdpServer.Start(localport, config.Client.TimeoutDelay);

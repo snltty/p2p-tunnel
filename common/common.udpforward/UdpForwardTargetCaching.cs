@@ -8,28 +8,28 @@ namespace common.udpforward
 {
     public class UdpForwardTargetCaching : IUdpForwardTargetCaching<UdpForwardTargetCacheInfo>
     {
-        private readonly ConcurrentDictionary<int, UdpForwardTargetCacheInfo> cache = new();
+        private readonly ConcurrentDictionary<ushort, UdpForwardTargetCacheInfo> cache = new();
 
         public UdpForwardTargetCaching()
         {
 
         }
 
-        public UdpForwardTargetCacheInfo Get(int port)
+        public UdpForwardTargetCacheInfo Get(ushort port)
         {
             cache.TryGetValue(port, out UdpForwardTargetCacheInfo cacheInfo);
             return cacheInfo;
         }
-        public bool Add(int port, UdpForwardTargetCacheInfo mdoel)
+        public bool Add(ushort port, UdpForwardTargetCacheInfo mdoel)
         {
             bool res = cache.TryAdd(port, mdoel);
             return res;
         }
-        public bool Remove(int port)
+        public bool Remove(ushort port)
         {
             return cache.TryRemove(port, out _);
         }
-        public IEnumerable<int> Remove(string targetName)
+        public IEnumerable<ushort> Remove(string targetName)
         {
             var keys = cache.Where(c => c.Value.Name == targetName).Select(c => c.Key);
             foreach (var key in keys)

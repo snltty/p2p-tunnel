@@ -13,10 +13,10 @@ namespace common.tcpforward
         public TcpForwardRegisterParamsInfo() { }
 
         public string SourceIp { get; set; } = IPAddress.Any.ToString();
-        public int SourcePort { get; set; } = 8080;
+        public ushort SourcePort { get; set; } = 8080;
         public string TargetName { get; set; } = string.Empty;
         public string TargetIp { get; set; } = IPAddress.Loopback.ToString();
-        public int TargetPort { get; set; } = 8080;
+        public ushort TargetPort { get; set; } = 8080;
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
         public TcpForwardTunnelTypes TunnelType { get; set; } = TcpForwardTunnelTypes.TCP_FIRST;
 
@@ -97,7 +97,7 @@ namespace common.tcpforward
         public TcpForwardUnRegisterParamsInfo() { }
 
         public string SourceIp { get; set; } = IPAddress.Any.ToString();
-        public int SourcePort { get; set; } = 8080;
+        public ushort SourcePort { get; set; } = 8080;
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
 
         public byte[] ToBytes()

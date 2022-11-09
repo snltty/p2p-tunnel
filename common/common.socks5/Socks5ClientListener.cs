@@ -31,7 +31,7 @@ namespace common.socks5
 
 
         private readonly ConcurrentDictionary<ulong, AsyncUserToken> connections = new();
-        private readonly NumberSpace numberSpace = new NumberSpace(0);
+        private readonly NumberSpaceUInt32 numberSpace = new NumberSpaceUInt32(0);
 
         public Func<Socks5Info, bool> OnData { get; set; }
         public Action<Socks5Info> OnClose { get; set; }
@@ -108,7 +108,7 @@ namespace common.socks5
         {
             if (socket == null) return;
 
-            ulong id = numberSpace.Increment();
+            uint id = numberSpace.Increment();
             AsyncUserToken token = new AsyncUserToken
             {
                 Socket = socket,

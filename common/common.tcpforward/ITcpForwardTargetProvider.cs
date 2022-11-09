@@ -18,7 +18,7 @@ namespace common.tcpforward
         /// </summary>
         /// <param name="port"></param>
         /// <returns></returns>
-        void Get(int port, TcpForwardInfo info);
+        void Get(ushort port, TcpForwardInfo info);
     }
     /// <summary>
     /// 目标缓存器，缓存注册的监听和转发信息，以提供后续查询
@@ -27,17 +27,17 @@ namespace common.tcpforward
     public interface ITcpForwardTargetCaching<T>
     {
         T Get(string host);
-        T Get(string domain, int port);
-        T Get(int port);
-        bool Add(string domain, int port, T mdoel);
-        bool Add(int port, T mdoel);
-        void AddOrUpdate(string domain, int port, T mdoel);
-        void AddOrUpdate(int port, T mdoel);
-        bool Remove(string domain, int port);
-        bool Remove(int port);
-        IEnumerable<int> Remove(string targetName);
-        bool Contains(string domain, int port);
-        bool Contains(int port);
+        T Get(string domain, ushort port);
+        T Get(ushort port);
+        bool Add(string domain, ushort port, T mdoel);
+        bool Add(ushort port, T mdoel);
+        void AddOrUpdate(string domain, ushort port, T mdoel);
+        void AddOrUpdate(ushort port, T mdoel);
+        bool Remove(string domain, ushort port);
+        bool Remove(ushort port);
+        IEnumerable<ushort> Remove(string targetName);
+        bool Contains(string domain, ushort port);
+        bool Contains(ushort port);
 
         void ClearConnection();
         void ClearConnection(string name);

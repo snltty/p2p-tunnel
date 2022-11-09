@@ -33,11 +33,11 @@ namespace common.socks5
                 Payload = data.ToBytes()
             }).Result;
         }
-        public void ResponseClose(ulong id, IConnection connection)
+        public void ResponseClose(uint id, IConnection connection)
         {
             Response(new Socks5Info { Id = id, Data = Helper.EmptyArray, Socks5Step = Socks5EnumStep.Forward }, connection);
         }
-        public void RequestClose(ulong id, IConnection connection)
+        public void RequestClose(uint id, IConnection connection)
         {
             Request(new Socks5Info { Id = id, Data = Helper.EmptyArray, Socks5Step = Socks5EnumStep.Forward }, connection);
         }

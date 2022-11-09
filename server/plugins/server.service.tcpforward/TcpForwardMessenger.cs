@@ -49,7 +49,7 @@ namespace server.service.tcpforward
         public byte[] Ports(IConnection connection)
         {
             return config.WebListens
-                .Concat(new int[] {
+                .Concat(new ushort[] {
                     config.TunnelListenRange.Min,
                     config.TunnelListenRange.Max
                 }).ToArray().ToBytes();

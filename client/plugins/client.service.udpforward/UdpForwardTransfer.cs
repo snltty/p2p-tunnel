@@ -22,7 +22,7 @@ namespace client.service.udpforward
     {
         private readonly IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching;
         private readonly IUdpForwardServer udpForwardServer;
-        NumberSpaceInt32 listenNS = new NumberSpaceInt32();
+        NumberSpaceUInt32 listenNS = new NumberSpaceUInt32();
 
         public readonly P2PConfigInfo p2PConfigInfo;
         private readonly IConfigDataProvider<P2PConfigInfo> p2pConfigDataProvider;
@@ -156,7 +156,7 @@ namespace client.service.udpforward
             }
         }
 
-        public void StopP2PListen(int port)
+        public void StopP2PListen(ushort port)
         {
             try
             {
@@ -179,7 +179,7 @@ namespace client.service.udpforward
         {
             return StartP2P(listen.Port);
         }
-        public string StartP2P(int port)
+        public string StartP2P(ushort port)
         {
             try
             {
@@ -230,15 +230,15 @@ namespace client.service.udpforward
 
         #region 服务器代理
 
-        public async Task<int[]> GetServerPorts()
+        public async Task<ushort[]> GetServerPorts()
         {
             var resp = await udpForwardMessengerSender.GetPorts(registerStateInfo.OnlineConnection);
             if (resp.Code == MessageResponeCodes.OK)
             {
-                return resp.Data.DeBytes2IntArray();
+                return resp.Data.DeBytes2UInt16Array();
             }
 
-            return Array.Empty<int>();
+            return Array.Empty<ushort>();
         }
         public async Task<string> AddServerForward(ServerForwardItemInfo forward)
         {
@@ -393,13 +393,13 @@ namespace client.service.udpforward
     }
     public class P2PListenInfo
     {
-        public int ID { get; set; } = 0;
-        public int Port { get; set; } = 0;
+        public uint ID { get; set; } = 0;
+        public ushort Port { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
         public bool Listening { get; set; } = false;
         public UdpForwardTunnelTypes TunnelType { get; set; } = UdpForwardTunnelTypes.TCP_FIRST;
-        public string TargetIp { get; set; } = String.Empty;
-        public int TargetPort { get; set; } = 0;
+        public string TargetIp { get; set; } = string.Empty;
+        public ushort TargetPort { get; set; } = 0;
         public string Desc { get; set; } = string.Empty;
     }
     [Table("server-udp-forwards")]
@@ -410,9 +410,9 @@ namespace client.service.udpforward
     }
     public class ServerForwardItemInfo
     {
-        public int ServerPort { get; set; }
+        public ushort ServerPort { get; set; }
         public string LocalIp { get; set; }
-        public int LocalPort { get; set; }
+        public ushort LocalPort { get; set; }
         public UdpForwardTunnelTypes TunnelType { get; set; } = UdpForwardTunnelTypes.TCP_FIRST;
         public string Desc { get; set; } = string.Empty;
         public bool Listening { get; set; } = false;

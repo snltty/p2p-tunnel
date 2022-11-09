@@ -6,7 +6,7 @@ namespace common.socks5
     {
         public bool Request(Socks5Info data, IConnection connection);
         public void Response(Socks5Info data, IConnection connection);
-        public void ResponseClose(ulong id, IConnection connection);
-        public void RequestClose(ulong id, IConnection connection);
+        public void ResponseClose(uint id, IConnection connection);
+        public void RequestClose(uint id, IConnection connection);
     }
 }

@@ -30,7 +30,7 @@ namespace client.service.tcpforward
         {
             GetTarget(tcpForwardTargetCaching.Get(domain), info);
         }
-        public void Get(int port, TcpForwardInfo info)
+        public void Get(ushort port, TcpForwardInfo info)
         {
             GetTarget(tcpForwardTargetCaching.Get(port), info);
         }

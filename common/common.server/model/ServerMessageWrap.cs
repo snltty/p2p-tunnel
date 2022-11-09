@@ -25,7 +25,7 @@ namespace common.server.model
         /// <summary>
         /// 每条数据都有个id，【只发发数据的话，不用填这里】
         /// </summary>
-        public ulong RequestId = 0;
+        public uint RequestId = 0;
 
         /// <summary>
         /// 中继数据时，写明是谁发的中继数据，以便目标客户端回复给来源客户端，【只发发数据的话，不用填这里】
@@ -127,8 +127,8 @@ namespace common.server.model
                 RelayId = 0;
             }
 
-            RequestId = span.Slice(index).ToUInt64();
-            index += 8;
+            RequestId = span.Slice(index).ToUInt32();
+            index += 4;
 
             MessengerId = span.Slice(index, 2).ToUInt16();
             index += 2;
@@ -145,7 +145,7 @@ namespace common.server.model
     {
         public IConnection Connection { get; set; }
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
-        public ulong RequestId { get; set; } = 0;
+        public uint RequestId { get; set; } = 0;
         public ulong RelayId { get; set; } = 0;
         public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
 
@@ -226,8 +226,8 @@ namespace common.server.model
                 RelayId = 0;
             }
 
-            RequestId = span.Slice(index).ToUInt64();
-            index += 8;
+            RequestId = span.Slice(index).ToUInt32();
+            index += 4;
 
             if (memory.Length - index > 0)
             {

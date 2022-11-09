@@ -257,10 +257,10 @@ namespace common.tcpforward
     }
     public readonly struct ConnectionKey
     {
-        public readonly ulong RequestId { get; }
+        public readonly uint RequestId { get; }
         public readonly ulong ConnectId { get; }
 
-        public ConnectionKey(ulong connectId, ulong requestId)
+        public ConnectionKey(ulong connectId, uint requestId)
         {
             ConnectId = connectId;
             RequestId = requestId;

@@ -48,7 +48,7 @@ namespace server.service.udpforward
         [MessengerId((ushort)UdpForwardMessengerIds.Ports)]
         public byte[] Ports(IConnection connection)
         {
-            return new int[] {
+            return new ushort[] {
                 config.TunnelListenRange.Min,
                     config.TunnelListenRange.Max
                 }.ToBytes();
@@ -59,7 +59,7 @@ namespace server.service.udpforward
         {
             try
             {
-                int port = connection.ReceiveRequestWrap.Payload.Span.ToUInt16();
+                ushort port = connection.ReceiveRequestWrap.Payload.Span.ToUInt16();
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
                     if (udpForwardValidator.Validate(source.GroupId) == false)

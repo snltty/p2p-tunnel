@@ -21,7 +21,7 @@ namespace common.socks5
         /// <summary>
         /// 请求id
         /// </summary>
-        public ulong Id { get; set; } = 0;
+        public uint Id { get; set; } = 0;
         /// <summary>
         /// 来源地址，数据从目标端回来的时候回给谁
         /// </summary>
@@ -105,8 +105,8 @@ namespace common.socks5
             Socks5Step = (Socks5EnumStep)(span[0] >> 4);
             Version = (byte)(span[0] & 0b1111);
 
-            Id = span.Slice(index, 8).ToUInt64();
-            index += 8;
+            Id = span.Slice(index).ToUInt32();
+            index += 4;
 
             byte epLength = span[index];
             index += 1;

@@ -9,10 +9,10 @@ namespace common.udpforward
     {
         public UdpForwardRegisterParamsInfo() { }
 
-        public int SourcePort { get; set; } = 8080;
+        public ushort SourcePort { get; set; } = 8080;
         public string TargetName { get; set; } = string.Empty;
         public string TargetIp { get; set; } = IPAddress.Loopback.ToString();
-        public int TargetPort { get; set; } = 8080;
+        public ushort TargetPort { get; set; } = 8080;
         public UdpForwardTunnelTypes TunnelType { get; set; } = UdpForwardTunnelTypes.TCP_FIRST;
 
         public byte[] ToBytes()

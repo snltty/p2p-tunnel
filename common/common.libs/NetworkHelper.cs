@@ -193,17 +193,17 @@ namespace common.libs
         }
 
         /// <summary>
-        /// 地址转数组，端口必须4字节
+        /// 地址转数组，端口必须2字节
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
         /// <returns></returns>
-        public static Memory<byte> EndpointToArray(string ip, int port)
+        public static Memory<byte> EndpointToArray(string ip, ushort port)
         {
             return EndpointToArray(ip.ToBytes(), port.ToBytes());
         }
         /// <summary>
-        /// 地址转数组，端口必须4字节
+        /// 地址转数组，端口必须2字节
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
@@ -221,12 +221,12 @@ namespace common.libs
         /// </summary>
         /// <param name="array"></param>
         /// <returns></returns>
-        public static int PortFromArray(Memory<byte> array)
+        public static ushort PortFromArray(Memory<byte> array)
         {
-            return array.Span.Slice(array.Length - 4, 4).ToInt32();
+            return array.Span.Slice(array.Length - 2, 2).ToUInt16();
         }
         /// <summary>
-        /// 从数组中解析地址，端口必须4字节
+        /// 从数组中解析地址，端口必须2字节
         /// </summary>
         /// <param name="array"></param>
         /// <returns></returns>
@@ -234,7 +234,7 @@ namespace common.libs
         {
             var span = array.Span;
             string ip = span.Slice(0, array.Length - 4).GetString();
-            int port = span.Slice(array.Length - 4, 4).ToInt32();
+            int port = span.Slice(array.Length - 2, 2).ToUInt16();
             return new IPEndPoint(GetDomainIp(ip), port);
         }
 

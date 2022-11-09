@@ -25,7 +25,7 @@ namespace common.udpforward
             }, 1000, true);
         }
 
-        public void Start(int sourcePort)
+        public void Start(ushort sourcePort)
         {
             if (serversManager.Contains(sourcePort))
                 return;
@@ -87,7 +87,7 @@ namespace common.udpforward
             }
         }
 
-        public void Stop(int sourcePort)
+        public void Stop(ushort sourcePort)
         {
             if (serversManager.TryRemove(sourcePort, out ForwardAsyncServerToken model))
             {
@@ -160,26 +160,26 @@ namespace common.udpforward
     }
     public class ForwardAsyncServerToken
     {
-        public int SourcePort { get; set; }
+        public ushort SourcePort { get; set; }
         public IPEndPoint TempRemoteEP = new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort);
         public UdpClient UdpClient { get; set; }
     }
     public class ServersManager
     {
-        public ConcurrentDictionary<int, ForwardAsyncServerToken> services = new();
+        public ConcurrentDictionary<ushort, ForwardAsyncServerToken> services = new();
         public bool TryAdd(ForwardAsyncServerToken model)
         {
             return services.TryAdd(model.SourcePort, model);
         }
-        public bool Contains(int port)
+        public bool Contains(ushort port)
         {
             return services.ContainsKey(port);
         }
-        public bool TryGetValue(int port, out ForwardAsyncServerToken c)
+        public bool TryGetValue(ushort port, out ForwardAsyncServerToken c)
         {
             return services.TryGetValue(port, out c);
         }
-        public bool TryRemove(int port, out ForwardAsyncServerToken c)
+        public bool TryRemove(ushort port, out ForwardAsyncServerToken c)
         {
             bool res = services.TryRemove(port, out c);
             if (res)

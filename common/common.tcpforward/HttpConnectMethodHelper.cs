@@ -64,19 +64,19 @@ namespace common.tcpforward
             if (hostEndindex >= 0 && portEndIndex >= 0)
             {
                 var host = memory.Slice(start, hostEndindex - start - 1);
-                var port = Array2Int(memory.Slice(hostEndindex, portEndIndex - hostEndindex - 1));
+                var port = Array2Port(memory.Slice(hostEndindex, portEndIndex - hostEndindex - 1));
 
                 return NetworkHelper.EndpointToArray(host, port);
             }
             return Array.Empty<byte>();
         }
-        private static Memory<byte> Array2Int(in Memory<byte> memory)
+        private static Memory<byte> Array2Port(in Memory<byte> memory)
         {
             var span = memory.Span;
-            int result = 0;
+            ushort result = 0;
             for (int i = 0, len = span.Length; i < len; i++)
             {
-                result += (span[i] - 48) * (int)Math.Pow(10, len - i - 1);
+                result += (ushort)((span[i] - 48) * (int)Math.Pow(10, len - i - 1));
             }
             return result.ToBytes();
         }

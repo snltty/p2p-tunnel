@@ -12,9 +12,9 @@ namespace common.server
     /// </summary>
     public class MessengerSender
     {
-        public NumberSpace requestIdNumberSpace = new NumberSpace(0);
+        public NumberSpaceUInt32 requestIdNumberSpace = new NumberSpaceUInt32(0);
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
-        private ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>>();
+        private ConcurrentDictionary<uint, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<uint, WheelTimerTimeout<TimeoutState>>();
 
         public MessengerSender()
         {
@@ -150,7 +150,7 @@ namespace common.server
 
     public class TimeoutState
     {
-        public ulong RequestId { get; set; }
+        public uint RequestId { get; set; }
         public TaskCompletionSource<MessageResponeInfo> Tcs { get; set; }
     }
 }

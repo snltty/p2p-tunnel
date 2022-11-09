@@ -22,16 +22,16 @@ namespace common.tcpforward
             TunnelListenRange = config.TunnelListenRange;
             PortWhiteList = config.PortWhiteList;
             PortBlackList = config.PortBlackList;
-            
+
         }
 
-        public int[] PortWhiteList { get; set; } = Array.Empty<int>();
-        public int[] PortBlackList { get; set; } = Array.Empty<int>();
-        
+        public ushort[] PortWhiteList { get; set; } = Array.Empty<ushort>();
+        public ushort[] PortBlackList { get; set; } = Array.Empty<ushort>();
+
         public bool ConnectEnable { get; set; } = false;
         public int NumConnections { get; set; } = 1000;
         public int BufferSize { get; set; } = 8 * 1024;
-        public int[] WebListens { get; set; } = Array.Empty<int>();
+        public ushort[] WebListens { get; set; } = Array.Empty<ushort>();
         public TunnelListenRangeInfo TunnelListenRange { get; set; } = new TunnelListenRangeInfo();
 
         public async Task<Config> ReadConfig()
@@ -56,7 +56,7 @@ namespace common.tcpforward
 
     public class TunnelListenRangeInfo
     {
-        public int Min { get; set; } = 10000;
-        public int Max { get; set; } = 60000;
+        public ushort Min { get; set; } = 10000;
+        public ushort Max { get; set; } = 60000;
     }
 }

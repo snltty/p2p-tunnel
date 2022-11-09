@@ -31,6 +31,31 @@ namespace common.libs.extends
         }
 
 
+        public static byte[] ToBytes(this ushort[] obj)
+        {
+            var bytes = new byte[obj.Length * 4];
+            int index = 0;
+            for (int i = 0; i < obj.Length; i++)
+            {
+                Array.Copy(obj[i].ToBytes(), 0, bytes, index, 4);
+                index += 4;
+            }
+            return bytes;
+        }
+        public static ushort[] DeBytes2UInt16Array(this ReadOnlyMemory<byte> data)
+        {
+            var span = data.Span;
+            ushort[] res = new ushort[data.Length / 2];
+            int index = 0;
+            for (int i = 0; i < res.Length; i++)
+            {
+                res[i] = span.Slice(index, 2).ToUInt16();
+                index += 2;
+            }
+            return res;
+        }
+
+
         public static byte[] GZip(this byte[] bytes)
         {
             using MemoryStream compressStream = new MemoryStream();

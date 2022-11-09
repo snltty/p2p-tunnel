@@ -15,7 +15,7 @@ namespace common.server.servers.rudp
         public Action<IConnection> OnConnected { get; set; } = (IConnection connection) => { };
 
         Semaphore maxNumberConnectings = new Semaphore(1, 1);
-        NumberSpaceDefault maxNumberConnectingNumberSpace = new NumberSpaceDefault();
+        BoolSpace maxNumberConnectingNumberSpace = new BoolSpace(false);
 
         private NetManager server;
         private EventBasedNetListener listener;
@@ -113,7 +113,7 @@ namespace common.server.servers.rudp
         public async Task<IConnection> CreateConnection(IPEndPoint address)
         {
             maxNumberConnectings.WaitOne();
-            maxNumberConnectingNumberSpace.Increment();
+            maxNumberConnectingNumberSpace.Reverse();
             try
             {
                 var peer = server.Connect(address, string.Empty);
@@ -153,9 +153,9 @@ namespace common.server.servers.rudp
 
         private void Release()
         {
-            if (maxNumberConnectingNumberSpace != null && maxNumberConnectingNumberSpace.Get() > 0)
+            if (maxNumberConnectingNumberSpace != null && maxNumberConnectingNumberSpace.IsDefault == false)
             {
-                maxNumberConnectingNumberSpace.Decrement();
+                maxNumberConnectingNumberSpace.Reset();
                 maxNumberConnectings.Release();
             }
         }

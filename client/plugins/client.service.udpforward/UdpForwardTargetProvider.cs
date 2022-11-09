@@ -26,7 +26,7 @@ namespace client.service.udpforward
             });
         }
 
-        public void Get(int port, UdpForwardInfo info)
+        public void Get(ushort port, UdpForwardInfo info)
         {
             UdpForwardTargetCacheInfo cacheInfo = udpForwardTargetCaching.Get(port);
             if (cacheInfo == null)

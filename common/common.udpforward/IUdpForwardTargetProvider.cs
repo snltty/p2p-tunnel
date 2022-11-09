@@ -4,14 +4,14 @@ namespace common.udpforward
 {
     public interface IUdpForwardTargetProvider
     {
-        void Get(int sourcePort, UdpForwardInfo info);
+        void Get(ushort sourcePort, UdpForwardInfo info);
     }
     public interface IUdpForwardTargetCaching<T>
     {
-        T Get(int port);
-        bool Add(int port, T mdoel);
-        bool Remove(int port);
-        IEnumerable<int> Remove(string targetName);
+        T Get(ushort port);
+        bool Add(ushort port, T mdoel);
+        bool Remove(ushort port);
+        IEnumerable<ushort> Remove(string targetName);
         void ClearConnection();
         void ClearConnection(string name);
     }

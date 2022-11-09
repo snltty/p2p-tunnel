@@ -13,13 +13,13 @@
     public class ClientServiceRequestInfo
     {
         public string Path { get; set; } = string.Empty;
-        public long RequestId { get; set; } = 0;
+        public uint RequestId { get; set; } = 0;
         public string Content { get; set; } = string.Empty;
     }
 
     public class ClientServiceParamsInfo
     {
-        public long RequestId { get; set; } = 0;
+        public uint RequestId { get; set; } = 0;
         public string Content { get; set; } = string.Empty;
         public string Path { get; set; } = string.Empty;
 

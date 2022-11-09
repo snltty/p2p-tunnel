@@ -16,7 +16,7 @@ namespace common.tcpforward
         private readonly ServersManager serversManager = new ServersManager();
         private readonly ClientsManager clientsManager = new ClientsManager();
 
-        private NumberSpace requestIdNs = new NumberSpace(0);
+        private NumberSpaceUInt32 requestIdNs = new NumberSpaceUInt32(0);
 
         private int receiveBufferSize = 8 * 1024;
 
@@ -28,7 +28,7 @@ namespace common.tcpforward
         {
             this.receiveBufferSize = receiveBufferSize;
         }
-        public void Start(int port, TcpForwardAliveTypes aliveType)
+        public void Start(ushort port, TcpForwardAliveTypes aliveType)
         {
             if (serversManager.Contains(port))
             {
@@ -39,7 +39,7 @@ namespace common.tcpforward
             OnListeningChange.Push(new ListeningChangeInfo { Port = port, State = true });
         }
 
-        private void BindAccept(int port, TcpForwardAliveTypes aliveType)
+        private void BindAccept(ushort port, TcpForwardAliveTypes aliveType)
         {
             var endpoint = new IPEndPoint(IPAddress.Any, port);
             var socket = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -106,7 +106,7 @@ namespace common.tcpforward
         {
             ForwardAsyncUserToken acceptToken = (e.UserToken as ForwardAsyncUserToken);
 
-            ulong id = requestIdNs.Increment();
+            uint id = requestIdNs.Increment();
             ForwardAsyncUserToken token = new ForwardAsyncUserToken
             {
                 SourceSocket = e.AcceptSocket,
@@ -276,7 +276,7 @@ namespace common.tcpforward
             }
         }
 
-        public void Stop(int sourcePort)
+        public void Stop(ushort sourcePort)
         {
             if (serversManager.TryRemove(sourcePort, out ServerInfo model))
             {
@@ -300,7 +300,7 @@ namespace common.tcpforward
     public class ForwardAsyncUserToken
     {
         public Socket SourceSocket { get; set; }
-        public int SourcePort { get; set; } = 0;
+        public ushort SourcePort { get; set; } = 0;
         public TcpForwardInfo Request { get; set; } = new TcpForwardInfo { };
         public SocketAsyncEventArgs Saea { get; set; }
         public bool FirstPacket { get; set; } = true;
@@ -410,7 +410,7 @@ namespace common.tcpforward
     }
     public class ServerInfo
     {
-        public int SourcePort { get; set; } = 0;
+        public ushort SourcePort { get; set; } = 0;
         public Socket Socket { get; set; }
     }
 }

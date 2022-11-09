@@ -23,12 +23,10 @@ namespace common.socks5
         private readonly WheelTimer<object> wheelTimer;
         private readonly ISocks5Validator socks5Validator;
 
-        Semaphore maxNumberAcceptedClients;
         public Socks5ServerHandler(ISocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, ISocks5Validator socks5Validator)
         {
             this.socks5MessengerSender = socks5MessengerSender;
             this.config = config;
-            maxNumberAcceptedClients = new Semaphore(config.NumConnections, config.NumConnections);
 
             this.wheelTimer = wheelTimer;
             this.socks5Validator = socks5Validator;
@@ -428,10 +426,10 @@ namespace common.socks5
     }
     public readonly struct ConnectionKey
     {
-        public readonly ulong RequestId { get; }
+        public readonly uint RequestId { get; }
         public readonly ulong ConnectId { get; }
 
-        public ConnectionKey(ulong connectId, ulong requestId)
+        public ConnectionKey(ulong connectId, uint requestId)
         {
             ConnectId = connectId;
             RequestId = requestId;

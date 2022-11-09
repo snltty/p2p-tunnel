@@ -37,7 +37,7 @@ namespace server.service.tcpforward
 
                 Logger.Instance.Info("TCP转发服务已启动...");
                 //转发监听
-                foreach (int port in config.WebListens)
+                foreach (ushort port in config.WebListens)
                 {
                     tcpForwardServer.Start(port, TcpForwardAliveTypes.WEB);
                     Logger.Instance.Warning($"TCP转发监听:{port}");

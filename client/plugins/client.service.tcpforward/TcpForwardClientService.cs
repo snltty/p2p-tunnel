@@ -93,7 +93,7 @@ namespace client.service.tcpforward
         {
             return tcpForwardTransfer.serverForwards;
         }
-        public async Task<int[]> ServerPorts(ClientServiceParamsInfo arg)
+        public async Task<ushort[]> ServerPorts(ClientServiceParamsInfo arg)
         {
             return await tcpForwardTransfer.GetServerPorts();
         }
@@ -122,7 +122,7 @@ namespace client.service.tcpforward
 
     public class ForwardSettingParamsInfo
     {
-        public int ID { get; set; } = 0;
+        public uint ID { get; set; } = 0;
         public string Content { get; set; } = string.Empty;
     }
 }

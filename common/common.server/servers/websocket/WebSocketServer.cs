@@ -1,7 +1,6 @@
 ﻿using common.libs;
 using common.libs.extends;
 using System;
-using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +16,7 @@ namespace common.server.servers.websocket
         private int BufferSize = 4 * 1024;
 
         private readonly ConcurrentDictionary<ulong, AsyncUserToken> connections = new();
-        private readonly NumberSpace numberSpace = new NumberSpace(0);
+        private readonly NumberSpaceUInt32 numberSpace = new NumberSpaceUInt32(0);
 
         /// <summary>
         /// 收到连接，可以在这处理 subProtocol extensions 及其它信息，false表示阻止连接，应设置header 的 StatusCode
@@ -375,7 +374,7 @@ namespace common.server.servers.websocket
 
     public class WebsocketConnection
     {
-        public ulong Id { get; set; }
+        public uint Id { get; set; }
         public Socket Socket { get; init; }
         public bool Connected { get; set; } = false;
         private bool Closed = false;

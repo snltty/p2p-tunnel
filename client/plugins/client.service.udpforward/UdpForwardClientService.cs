@@ -60,7 +60,7 @@ namespace client.service.udpforward
         {
             return udpForwardTransfer.serverConfigInfo.Tunnels;
         }
-        public async Task<int[]> ServerPorts(ClientServiceParamsInfo arg)
+        public async Task<ushort[]> ServerPorts(ClientServiceParamsInfo arg)
         {
             return await udpForwardTransfer.GetServerPorts();
         }
@@ -88,7 +88,7 @@ namespace client.service.udpforward
 
     public class ForwardSettingParamsInfo
     {
-        public int Port { get; set; } = 0;
+        public ushort Port { get; set; } = 0;
         public string Content { get; set; } = string.Empty;
     }
 }

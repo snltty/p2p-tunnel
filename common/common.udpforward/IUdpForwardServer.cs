@@ -7,9 +7,9 @@ namespace common.udpforward
     /// </summary>
     public interface IUdpForwardServer
     {
-        public void Start(int sourcePort);
+        public void Start(ushort sourcePort);
         public void Response(UdpForwardInfo model);
-        public void Stop(int sourcePort);
+        public void Stop(ushort sourcePort);
         public void Stop();
 
         public SimpleSubPushHandler<UdpForwardInfo> OnRequest { get; }

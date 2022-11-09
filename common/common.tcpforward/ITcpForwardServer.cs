@@ -9,9 +9,9 @@ namespace common.tcpforward
     public interface ITcpForwardServer
     {
         public void Init(int numConnections, int receiveBufferSize);
-        public void Start(int port, TcpForwardAliveTypes aliveType);
+        public void Start(ushort port, TcpForwardAliveTypes aliveType);
         public void Response(TcpForwardInfo model);
-        public void Stop(int sourcePort);
+        public void Stop(ushort sourcePort);
         public void Stop();
 
         public Func<TcpForwardInfo,bool> OnRequest { get; set; }

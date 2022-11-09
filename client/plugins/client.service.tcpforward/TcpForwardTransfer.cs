@@ -26,8 +26,8 @@ namespace client.service.tcpforward
         private readonly IConfigDataProvider<P2PConfigInfo> p2pConfigDataProvider;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;
         private readonly ITcpForwardServer tcpForwardServer;
-        NumberSpaceInt32 listenNS = new NumberSpaceInt32();
-        NumberSpaceInt32 forwardNS = new NumberSpaceInt32();
+        NumberSpaceUInt32 listenNS = new NumberSpaceUInt32();
+        NumberSpaceUInt32 forwardNS = new NumberSpaceUInt32();
 
         private readonly ServerForwardConfigInfo serverForwardConfigInfo;
         public List<ServerForwardItemInfo> serverForwards = new List<ServerForwardItemInfo>();
@@ -176,7 +176,7 @@ namespace client.service.tcpforward
             }
             return string.Empty;
         }
-        public void RemoveP2PListen(int listenid)
+        public void RemoveP2PListen(uint listenid)
         {
             RemoveP2PListen(GetP2PByID(listenid));
         }
@@ -194,7 +194,7 @@ namespace client.service.tcpforward
             }
         }
 
-        public void StopP2PListen(int listenid)
+        public void StopP2PListen(uint listenid)
         {
             StopP2PListen(GetP2PByID(listenid));
         }
@@ -210,11 +210,11 @@ namespace client.service.tcpforward
             }
         }
 
-        public P2PListenInfo GetP2PByID(int id)
+        public P2PListenInfo GetP2PByID(uint id)
         {
             return p2pListens.FirstOrDefault(c => c.ID == id) ?? new P2PListenInfo { };
         }
-        private P2PListenInfo GetP2PByPort(int port)
+        private P2PListenInfo GetP2PByPort(ushort port)
         {
             return p2pListens.FirstOrDefault(c => c.Port == port) ?? new P2PListenInfo { };
         }
@@ -310,7 +310,7 @@ namespace client.service.tcpforward
             SaveP2PConfig();
         }
 
-        public string StartP2P(int id)
+        public string StartP2P(uint id)
         {
             return StartP2P(GetP2PByID(id));
         }
@@ -333,7 +333,7 @@ namespace client.service.tcpforward
             return string.Empty;
         }
 
-        public string StopP2P(int id)
+        public string StopP2P(uint id)
         {
             StopP2PListen(GetP2PByID(id));
             return string.Empty;
@@ -418,15 +418,15 @@ namespace client.service.tcpforward
 
         #region 服务器代理
 
-        public async Task<int[]> GetServerPorts()
+        public async Task<ushort[]> GetServerPorts()
         {
             var resp = await tcpForwardMessengerSender.GetPorts(registerStateInfo.OnlineConnection);
             if (resp.Code == MessageResponeCodes.OK)
             {
-                return resp.Data.DeBytes2IntArray();
+                return resp.Data.DeBytes2UInt16Array();
             }
 
-            return Array.Empty<int>();
+            return Array.Empty<ushort>();
         }
         public async Task<string> AddServerForward(ServerForwardItemInfo forward)
         {
@@ -694,8 +694,8 @@ namespace client.service.tcpforward
 
     public class P2PListenAddParams
     {
-        public int ID { get; set; } = 0;
-        public int Port { get; set; } = 0;
+        public uint ID { get; set; } = 0;
+        public ushort Port { get; set; } = 0;
         public bool Listening { get; set; } = false;
         public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.FORWARD;
         public string Name { get; set; } = String.Empty;
@@ -710,13 +710,13 @@ namespace client.service.tcpforward
     }
     public class P2PForwardAddParams
     {
-        public int ListenID { get; set; } = 0;
+        public uint ListenID { get; set; } = 0;
         public P2PForwardInfo Forward { get; set; } = new P2PForwardInfo();
     }
     public class P2PForwardRemoveParams
     {
-        public int ListenID { get; set; } = 0;
-        public int ForwardID { get; set; } = 0;
+        public uint ListenID { get; set; } = 0;
+        public uint ForwardID { get; set; } = 0;
     }
 
     [Table("p2p-tcp-forwards")]
@@ -729,8 +729,8 @@ namespace client.service.tcpforward
     }
     public class P2PListenInfo
     {
-        public int ID { get; set; } = 0;
-        public int Port { get; set; } = 0;
+        public uint ID { get; set; } = 0;
+        public ushort Port { get; set; } = 0;
 
         public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.FORWARD;
         /// <summary>
@@ -770,11 +770,11 @@ namespace client.service.tcpforward
     }
     public class P2PForwardInfo
     {
-        public int ID { get; set; } = 0;
+        public uint ID { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
         public string SourceIp { get; set; } = string.Empty;
         public string TargetIp { get; set; } = string.Empty;
-        public int TargetPort { get; set; } = 0;
+        public ushort TargetPort { get; set; } = 0;
         public string Desc { get; set; } = string.Empty;
         public TcpForwardTunnelTypes TunnelType { get; set; } = TcpForwardTunnelTypes.TCP_FIRST;
     }
@@ -790,9 +790,9 @@ namespace client.service.tcpforward
     {
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
         public string Domain { get; set; }
-        public int ServerPort { get; set; }
+        public ushort ServerPort { get; set; }
         public string LocalIp { get; set; }
-        public int LocalPort { get; set; }
+        public ushort LocalPort { get; set; }
         public TcpForwardTunnelTypes TunnelType { get; set; } = TcpForwardTunnelTypes.TCP_FIRST;
         public string Desc { get; set; } = string.Empty;
         public bool Listening { get; set; } = false;

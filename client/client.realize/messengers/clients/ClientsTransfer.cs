@@ -38,7 +38,7 @@ namespace client.realize.messengers.clients
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
-            IUdpServer udpServer, ITcpServer tcpServer, IRelayConnectionSelector relayConnectionSelector, HeartMessengerSender heartMessengerSender, RelayMessengerSender relayMessengerSender
+            IUdpServer udpServer, ITcpServer tcpServer, IRelayConnectionSelector relayConnectionSelector, HeartMessengerSender heartMessengerSender, RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel
         )
         {
             this.punchHoleUdp = punchHoleUdp;
@@ -50,7 +50,7 @@ namespace client.realize.messengers.clients
             this.relayConnectionSelector = relayConnectionSelector;
             this.heartMessengerSender = heartMessengerSender;
             this.relayMessengerSender = relayMessengerSender;
-
+            
 
             punchHoleUdp.OnStep1Handler.Sub((e) =>
             {
@@ -133,6 +133,7 @@ namespace client.realize.messengers.clients
             //调试注释
             tcpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.TcpConnection));
             udpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.UdpConnection));
+            clientsTunnel.OnDisConnect = Disconnect;
 
             //中继连线
             relayMessengerSender.OnRelay.Sub((param) =>
@@ -177,7 +178,7 @@ namespace client.realize.messengers.clients
             {
                 return;
             }
-            if(registerState.LocalInfo.IsConnecting)
+            if (registerState.LocalInfo.IsConnecting)
             {
                 return;
             }
@@ -495,7 +496,6 @@ namespace client.realize.messengers.clients
                     IEnumerable<ulong> upLines = remoteIds.Except(clientInfoCaching.AllIds());
                     IEnumerable<ClientsClientInfo> upLineClients = clients.Clients.Where(c => upLines.Contains(c.Id) && c.Id != registerState.ConnectId);
 
-                    bool first = firstClients.Get();
                     foreach (ClientsClientInfo item in upLineClients)
                     {
                         EnumClientAccess enumClientAccess = (EnumClientAccess)item.ClientAccess;
@@ -509,7 +509,7 @@ namespace client.realize.messengers.clients
                             UseRelay = (enumClientAccess & EnumClientAccess.UseRelay) == EnumClientAccess.UseRelay,
                         };
                         clientInfoCaching.Add(client);
-                        if (first)
+                        if (firstClients.IsDefault)
                         {
                             if (config.Client.UsePunchHole && client.UsePunchHole)
                             {

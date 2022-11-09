@@ -46,7 +46,7 @@ namespace common.udpforward
 
     public class TunnelListenRangeInfo
     {
-        public int Min { get; set; } = 10000;
-        public int Max { get; set; } = 60000;
+        public ushort Min { get; set; } = 10000;
+        public ushort Max { get; set; } = 60000;
     }
 }

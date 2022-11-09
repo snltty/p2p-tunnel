@@ -7,7 +7,7 @@ namespace common.tcpforward
 {
     public struct ListeningChangeInfo
     {
-        public int Port { get; set; }
+        public ushort Port { get; set; }
         public bool State { get; set; }
     }
 
@@ -17,7 +17,7 @@ namespace common.tcpforward
         /// <summary>
         /// 监听的端口
         /// </summary>
-        public int SourcePort { get; set; }
+        public ushort SourcePort { get; set; }
 
         /// <summary>
         /// 短链接还是长连接
@@ -42,7 +42,7 @@ namespace common.tcpforward
         /// <summary>
         /// 请求id
         /// </summary>
-        public ulong RequestId { get; set; }
+        public uint RequestId { get; set; }
 
         /// <summary>
         /// 目标地址
@@ -114,8 +114,8 @@ namespace common.tcpforward
             StateType = (TcpForwardStateTypes)(byte)(span[index] & 0b1111);
             index += 1;
 
-            RequestId = span.Slice(index).ToUInt64();
-            index += 8;
+            RequestId = span.Slice(index).ToUInt32();
+            index += 4;
 
             byte epLength = span[index];
             index += 1;

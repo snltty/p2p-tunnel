@@ -23,7 +23,7 @@ namespace common.tcpforward
                 return false;
             }
 
-            int port = NetworkHelper.PortFromArray(arg.TargetEndpoint);
+            ushort port = NetworkHelper.PortFromArray(arg.TargetEndpoint);
             if (config.PortWhiteList.Length > 0 && config.PortWhiteList.Contains(port) == false)
             {
                 return false;
