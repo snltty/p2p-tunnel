@@ -891,7 +891,7 @@ namespace LiteNetLib
             _rttCount++;
 
             _avgRtt = _rtt / _rttCount;
-            _resendDelay = 25.0 + _avgRtt * 2.1; // 25 ms + double rtt
+            _resendDelay = 20.0 + _avgRtt * 2.1; // 25 ms + double rtt
         }
 
         internal void AddReliablePacket(DeliveryMethod method, NetPacket p)
@@ -1411,6 +1411,10 @@ namespace LiteNetLib
             }
 
             SendMerged();
+        }
+        internal void Update()
+        {
+            NetManager.TriggerUpdate();
         }
 
         //For reliable channel

@@ -1,12 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TieredCompilation>true</TieredCompilation>
+	</PropertyGroup>
 	<PropertyGroup Condition="'$(VisualStudioVersion)'&gt;='17.0'">
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(VisualStudioVersion)'&lt;'17.0'">
 		<TargetFramework>net5.0</TargetFramework>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
