@@ -10,7 +10,7 @@
 <div align="center">
 
 # p2p-tunnel
-## Visual Studio 2022 LTSC 17.3.0
+## Visual Studio 2022 LTSC 17.4.0
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/snltty/p2p-tunnel?style=social)
 ![GitHub Repo forks](https://img.shields.io/github/forks/snltty/p2p-tunnel?style=social)
@@ -46,7 +46,7 @@
 ```
 
 ## 有个啥
-- [x] .NET6 跨平台，小尺寸，小内存
+- [x] .NET7 跨平台，小尺寸，小内存
 - [x] 内网穿透 访问内网web，内网桌面，及其它TCP上层协议服务
     1. 远程桌面
     2. windows，android，ios，macOS，web <a href="https://learn.microsoft.com/zh-cn/windows-server/remote/remote-desktop-services/clients/remote-desktop-clients" target="_blank">微软rdp全家桶</a>
