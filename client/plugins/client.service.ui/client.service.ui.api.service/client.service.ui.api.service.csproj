@@ -33,7 +33,6 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\client.service.socks5\client.service.socks5.csproj" />
-	  <ProjectReference Include="..\client.service.ui.api.manager\client.service.ui.api.manager.csproj" />
 	  <ProjectReference Include="..\client.service.ui.api\client.service.ui.api.csproj" />
 	</ItemGroup>
 
