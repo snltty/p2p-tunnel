@@ -145,20 +145,32 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
 
                 bool success = false;
-                int interval = 0, port = 0, times = cache.TryTimes;
-                List<Tuple<IPAddress, int>> ips = new List<Tuple<IPAddress, int>>();
-                if (UseLocalPort && registerState.RemoteInfo.Ip.Equals(arg.Data.Ip))
+                int interval = 0, times = cache.TryTimes;
+                List<IPEndPoint> ips = new List<IPEndPoint>();
+
+                if (UseLocalPort)
                 {
-                    times += 2;
-                    ips.AddRange(arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new Tuple<IPAddress, int>(c, arg.Data.LocalPort)));
-                }
-                if (IPv6Support())
-                {
-                    ips.AddRange(arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6)
-                    .Select(c => new Tuple<IPAddress, int>(c, arg.Data.Port)));
+                    if (registerState.RemoteInfo.Ip.Equals(arg.Data.Ip))
+                    {
+                        var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
+                        times += locals.Count;
+                        ips.AddRange(locals);
+                    }
+                    else
+                    {
+                        foreach (var item in arg.Data.LocalIps)
+                        {
+                            long rtt = NetworkHelper.Ping(item);
+                            if (rtt > -1)
+                            {
+                                ips.Add(new IPEndPoint(item, arg.Data.LocalPort));
+                                times += 1;
+                            }
+                        }
+                    }
                 }
 
-                ips.Add(new Tuple<IPAddress, int>(arg.Data.Ip, arg.Data.Port));
+                ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
 
                 for (byte i = 0; i < times; i++)
                 {
@@ -172,26 +184,20 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         interval = 0;
                     }
 
-                    Tuple<IPAddress, int> ip = i >= ips.Count ? ips[^1] : ips[i];
-                    if (port == 0)
-                    {
-                        port = ip.Item2;
-                    }
-
-                    if (NotIPv6Support(ip.Item1))
+                    IPEndPoint ip = i >= ips.Count ? ips[^1] : ips[i];
+                    if (NotIPv6Support(ip.Address))
                     {
                         continue;
                     }
 
-                    IPEndPoint targetEndpoint = new IPEndPoint(ip.Item1, port);
-                    Socket targetSocket = new Socket(targetEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    Socket targetSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
                         targetSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
                         targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
-                        targetSocket.ReuseBind(new IPEndPoint(ip.Item1.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
-                        Logger.Instance.DebugDebug($"{ip.Item1} connect====================");
-                        IAsyncResult result = targetSocket.BeginConnect(targetEndpoint, null, null);
+                        targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
+                        Logger.Instance.DebugDebug($"{ip} connect====================");
+                        IAsyncResult result = targetSocket.BeginConnect(ip, null, null);
                         result.AsyncWaitHandle.WaitOne(2000, false);
 
                         if (result.IsCompleted)
@@ -221,7 +227,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         }
                         else
                         {
-                            Logger.Instance.DebugError($"{ip.Item1} connect fail");
+                            Logger.Instance.DebugError($"{ip} connect fail");
                             targetSocket.SafeClose();
                             targetSocket = null;
                             interval = 100;
@@ -230,7 +236,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                     catch (SocketException ex)
                     {
-                        Logger.Instance.DebugError($"{ip.Item1} connect fail:{ex}");
+                        Logger.Instance.DebugError($"{ip} connect fail:{ex}");
                         targetSocket.SafeClose();
                         targetSocket = null;
                         interval = 100;
@@ -241,7 +247,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         else if (ex.SocketErrorCode == SocketError.AddressNotAvailable)
                         {
                             interval = 1000;
-                            Logger.Instance.DebugError($"{ex.SocketErrorCode}:{targetEndpoint}");
+                            Logger.Instance.DebugError($"{ex.SocketErrorCode}:{ip}");
                         }
                         else
                         {
@@ -250,7 +256,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.DebugError($"{ip.Item1} connect fail:{ex}");
+                        Logger.Instance.DebugError($"{ip} connect fail:{ex}");
                     }
                 }
 

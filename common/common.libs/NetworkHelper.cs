@@ -110,6 +110,39 @@ namespace common.libs
             return result;
         }
 
+        public static long Ping(string address, int timeout = 100)
+        {
+            try
+            {
+                using Ping pinger = new();
+                PingReply reply = pinger.Send(address, timeout);
+                if (reply.Status == IPStatus.Success)
+                {
+                    return reply.RoundtripTime;
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return -1;
+        }
+        public static long Ping(IPAddress address, int timeout = 100)
+        {
+            try
+            {
+                using Ping pinger = new();
+                PingReply reply = pinger.Send(address, timeout);
+                if (reply.Status == IPStatus.Success)
+                {
+                    return reply.RoundtripTime;
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return -1;
+        }
+
         /// <summary>
         /// 获取一个随机端口
         /// </summary>

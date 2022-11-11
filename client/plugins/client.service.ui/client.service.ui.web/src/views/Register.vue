@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-07 14:19:32
+ * @LastEditTime: 2022-11-11 15:51:11
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -53,40 +53,10 @@
                         <el-form-item label="" label-width="0">
                             <el-row>
                                 <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                                    <el-form-item label="本地udp" prop="UdpPort">
-                                        <el-input readonly v-model="registerState.LocalInfo.UdpPort"></el-input>
-                                    </el-form-item>
-                                </el-col>
-                                <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                                    <el-form-item label="本地tcp" prop="TcpPort">
-                                        <el-input readonly v-model="registerState.LocalInfo.TcpPort"></el-input>
-                                    </el-form-item>
-                                </el-col>
-                                <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                                     <el-form-item label="udp限速" prop="UdpUploadSpeedLimit">
                                         <el-tooltip class="box-item" effect="dark" content="udp发送速度限制（字节数,0不限制）" placement="top-start">
                                             <el-input v-model="model.UdpUploadSpeedLimit"></el-input>
                                         </el-tooltip>
-                                    </el-form-item>
-                                </el-col>
-
-                            </el-row>
-                        </el-form-item>
-                        <el-form-item label="" label-width="0">
-                            <el-row>
-                                <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                                    <el-form-item label="外网udp" prop="UdpPort">
-                                        <el-input readonly v-model="registerState.RemoteInfo.UdpPort"></el-input>
-                                    </el-form-item>
-                                </el-col>
-                                <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                                    <el-form-item label="外网tcp" prop="TcpPort">
-                                        <el-input readonly v-model="registerState.RemoteInfo.TcpPort"></el-input>
-                                    </el-form-item>
-                                </el-col>
-                                <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                                    <el-form-item label="外网IP" prop="Ip">
-                                        <el-input readonly v-model="registerState.RemoteInfo.Ip"></el-input>
                                     </el-form-item>
                                 </el-col>
                             </el-row>
@@ -378,7 +348,7 @@ export default {
                         UseTcp: state.model.UseTcp,
                         UseRelay: state.model.UseRelay,
                         UseOriginPort: state.model.UseOriginPort,
-                        UdpUploadSpeedLimit: +state.model.UdpUploadSpeedLimit,
+                        UdpUploadSpeedLimit: +state.model.UdpUploadSpeedLimit
                     },
                     ServerConfig: {
                         Ip: state.model.ServerIp,

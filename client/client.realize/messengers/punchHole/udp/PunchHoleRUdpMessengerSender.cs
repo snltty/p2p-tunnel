@@ -153,22 +153,41 @@ namespace client.realize.messengers.punchHole.udp
                 {
                     List<IPEndPoint> ips = new List<IPEndPoint>();
                     int times = cache.TryTimes;
-                    if (UseLocalPort && registerState.RemoteInfo.Ip.Equals(arg.Data.Ip))
+                    if (UseLocalPort)
                     {
-                        times += 2;
-                        ips.AddRange(arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList());
+                        if (registerState.RemoteInfo.Ip.Equals(arg.Data.Ip))
+                        {
+                            var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
+                            times += locals.Count;
+                            ips.AddRange(locals);
+                        }
+                        else
+                        {
+                            foreach (var item in arg.Data.LocalIps)
+                            {
+                                long rtt = NetworkHelper.Ping(item);
+                                if (rtt > -1)
+                                {
+                                    ips.Add(new IPEndPoint(item, arg.Data.LocalPort));
+                                    times += 1;
+                                }
+                            }
+                        }
                     }
                     if (IPv6Support())
                     {
                         ips.AddRange(arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, arg.Data.Port)).ToList());
                     }
-
                     ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
 
                     IConnection connection = null;
                     for (int i = 0; i < times; i++)
                     {
                         IPEndPoint ip = i >= ips.Count - 1 ? ips[^1] : ips[i];
+                        if (NotIPv6Support(ip.Address))
+                        {
+                            continue;
+                        }
                         connection = await udpServer.CreateConnection(ip);
                         if (connection != null)
                         {
