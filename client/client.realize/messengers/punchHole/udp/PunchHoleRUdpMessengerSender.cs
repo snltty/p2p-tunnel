@@ -155,27 +155,15 @@ namespace client.realize.messengers.punchHole.udp
                     int times = cache.TryTimes;
                     if (UseLocalPort)
                     {
-                        if (registerState.RemoteInfo.Ip.Equals(arg.Data.Ip))
-                        {
-                            var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
-                            times += locals.Count;
-                            ips.AddRange(locals);
-                        }
-                        else
-                        {
-                            foreach (var item in arg.Data.LocalIps)
-                            {
-                                if (IPAddress.Loopback.Equals(item) == false && NetworkHelper.Ping(item))
-                                {
-                                    ips.Add(new IPEndPoint(item, arg.Data.LocalPort));
-                                    times += 1;
-                                }
-                            }
-                        }
+                        var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
+                        times += locals.Count;
+                        ips.AddRange(locals);
                     }
                     if (IPv6Support())
                     {
-                        ips.AddRange(arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, arg.Data.Port)).ToList());
+                        var locals = arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, arg.Data.Port)).ToList();
+                        times += locals.Count;
+                        ips.AddRange(locals);
                     }
                     ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
 

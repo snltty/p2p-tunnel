@@ -4,11 +4,8 @@
 		<OutputType>Exe</OutputType>
 		<TieredCompilation>true</TieredCompilation>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(VisualStudioVersion)'&gt;='17.0'">
-		<TargetFramework>net7.0</TargetFramework>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(VisualStudioVersion)'&lt;'17.0'">
-		<TargetFramework>net5.0</TargetFramework>
+	<PropertyGroup>
+		<TargetFrameworks>net7.0;net6.0</TargetFrameworks>
 	</PropertyGroup>
 	
 

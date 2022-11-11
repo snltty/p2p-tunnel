@@ -6,12 +6,8 @@
 		<TieredCompilation>true</TieredCompilation>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(VisualStudioVersion)'&gt;='17.0'">
-		<TargetFramework>net7.0-windows</TargetFramework>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(VisualStudioVersion)'&lt;'17.0'">
-		<TargetFramework>net5.0-windows</TargetFramework>
+	<PropertyGroup>
+		<TargetFrameworks>net7.0-windows;net6.0-windows</TargetFrameworks>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
