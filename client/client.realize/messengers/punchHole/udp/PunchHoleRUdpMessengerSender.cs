@@ -165,8 +165,7 @@ namespace client.realize.messengers.punchHole.udp
                         {
                             foreach (var item in arg.Data.LocalIps)
                             {
-                                long rtt = NetworkHelper.Ping(item);
-                                if (rtt > -1)
+                                if (IPAddress.Loopback.Equals(item) == false && NetworkHelper.Ping(item))
                                 {
                                     ips.Add(new IPEndPoint(item, arg.Data.LocalPort));
                                     times += 1;
