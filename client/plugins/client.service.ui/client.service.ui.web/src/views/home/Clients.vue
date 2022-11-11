@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-11 11:54:58
+ * @LastEditTime: 2022-11-11 15:03:27
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -22,6 +22,7 @@
                                     <span>{{item.udpConnectTypeStr}}</span>
                                     <span class="flex-1"></span>
                                     <Signal :value="item.UdpPing"></Signal>
+
                                 </dd>
                                 <dd v-if="item.showTcp" :style="item.tcpConnectTypeStyle" class="flex" @click="handleShowDelay(item)">
                                     <span class="label">Tcp</span>
@@ -30,9 +31,10 @@
                                     <Signal :value="item.TcpPing"></Signal>
                                 </dd>
                                 <dd class="t-r">
-                                    <el-button plain text bg :disabled="item.connectDisabled" size="small" @click="handleConnect(item)">连它</el-button>
-                                    <el-button plain text bg :disabled="item.connectDisabled" size="small" @click="handleConnectReverse(item)">连我</el-button>
+                                    <el-button plain text bg size="small" @click="handleConnect(item)">连它</el-button>
+                                    <el-button plain text bg size="small" @click="handleConnectReverse(item)">连我</el-button>
                                     <el-button plain text bg :loading="item.loading" size="small" @click="handleConnectReset(item)">重启</el-button>
+                                    <el-button plain text bg :loading="item.loading" size="small" @click="handleConnectReset(item)">断开</el-button>
                                 </dd>
                             </dl>
                         </div>

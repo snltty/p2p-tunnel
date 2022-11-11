@@ -6,7 +6,7 @@ using common.server;
 using common.server.model;
 using System.Threading.Tasks;
 
-namespace client.service.ui.api.manager
+namespace client.service.ui.api.service.clientServer.services
 {
     public class CounterClientService : IClientService
     {

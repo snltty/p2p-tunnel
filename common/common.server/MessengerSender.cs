@@ -30,7 +30,7 @@ namespace common.server
         {
             if (msg.RequestId == 0)
             {
-                Interlocked.CompareExchange(ref msg.RequestId, 0, requestIdNumberSpace.Increment());
+                Interlocked.CompareExchange(ref msg.RequestId, requestIdNumberSpace.Increment(), 0);
             }
             WheelTimerTimeout<TimeoutState> timeout = NewReply(msg);
             if (await SendOnly(msg).ConfigureAwait(false) == false)
@@ -53,7 +53,7 @@ namespace common.server
             {
                 if(msg.RequestId == 0)
                 {
-                    Interlocked.CompareExchange(ref msg.RequestId, 0, requestIdNumberSpace.Increment());
+                    Interlocked.CompareExchange(ref msg.RequestId, requestIdNumberSpace.Increment(), 0);
                 }
                 if (msg.Connection == null)
                 {

@@ -598,7 +598,9 @@ namespace common.server.servers.websocket
                                 int index = span.Slice(startIndex).IndexOf((byte)13);
                                 flag &= ~(bit << k);
 
+#pragma warning disable CS0675 // 对进行了带符号扩展的操作数使用了按位或运算符
                                 res[k] = ((ulong)(startIndex + bytes[k].Length) << 32) | (ulong)(index - bytes[k].Length);
+#pragma warning restore CS0675 // 对进行了带符号扩展的操作数使用了按位或运算符
 
                                 i += index + 1;
                                 break;

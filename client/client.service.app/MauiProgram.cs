@@ -4,7 +4,6 @@ using client.service.logger;
 using client.service.socks5;
 using client.service.tcpforward;
 using client.service.udpforward;
-using client.service.ui.api.manager;
 using client.service.ui.api.service.clientServer;
 using client.service.ui.api.service.webServer;
 using common.libs;
@@ -17,7 +16,6 @@ using System.Net.Sockets;
 using System.Net;
 using System.Reflection;
 using client.service.wakeup;
-using System.Net.NetworkInformation;
 
 namespace client.service.app
 {
@@ -70,7 +68,6 @@ namespace client.service.app
                 typeof(TcpForwardMessenger).Assembly,
                 typeof(UdpForwardMessenger).Assembly,
                 typeof(ClientServer).Assembly,
-                typeof(CounterClientService).Assembly,
                 typeof(Socks5ClientService).Assembly,
                 typeof(Socks5Messenger).Assembly,
                 typeof(PunchHoleMessenger).Assembly,

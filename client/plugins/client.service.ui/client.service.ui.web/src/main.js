@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 09:12:44
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-19 00:17:08
+ * @LastEditTime: 2022-11-11 15:01:54
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\main.js
@@ -26,10 +26,11 @@ import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/display.css'
 
 
-import { Loading, FolderDelete, Connection, ArrowDown } from '@element-plus/icons'
+import { Loading, FolderDelete, Connection, ArrowDown, CloseBold } from '@element-plus/icons'
 app.component(Loading.name, Loading);
 app.component(FolderDelete.name, FolderDelete);
 app.component(Connection.name, Connection);
 app.component(ArrowDown.name, ArrowDown);
+app.component(CloseBold.name, CloseBold);
 
 app.use(ElementPlus).use(router).mount('#app');
