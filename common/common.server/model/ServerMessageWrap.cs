@@ -159,7 +159,7 @@ namespace common.server.model
                 + 1 //type
                 + 1 //code
                 + 1 //RelayId
-                + 8 //requestid
+                + 4 //requestid
                 + Payload.Length;
             if (RelayId > 0)
             {
