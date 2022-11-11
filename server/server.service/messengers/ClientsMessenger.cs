@@ -25,7 +25,7 @@ namespace server.service.messengers
         [MessengerId((ushort)ClientsMessengerIds.Port)]
         public byte[] Port(IConnection connection)
         {
-            return connection.Address.Port.ToBytes();
+            return ((ushort)connection.Address.Port).ToBytes();
         }
 
         [MessengerId((ushort)ClientsMessengerIds.AddTunnel)]
@@ -62,6 +62,6 @@ namespace server.service.messengers
             }
         }
 
-        
+
     }
 }

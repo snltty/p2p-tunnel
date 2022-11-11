@@ -8,6 +8,6 @@ namespace client.messengers.clients
     public interface IClientsTunnel
     {
         public Action<IConnection, IConnection> OnDisConnect { get; set; }
-        public Task<(ulong, int)> NewBind(ServerType serverType, ulong tunnelName);
+        public Task<(ulong, ushort)> NewBind(ServerType serverType, ulong tunnelName);
     }
 }

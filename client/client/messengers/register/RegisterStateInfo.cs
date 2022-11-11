@@ -138,16 +138,16 @@ namespace client.messengers.register
         /// <summary>
         /// 外网距离
         /// </summary>
-        public int RouteLevel { get; set; } = 0;
+        public ushort RouteLevel { get; set; } = 0;
 
         /// <summary>
         /// 本地UDP端口
         /// </summary>
-        public int UdpPort { get; set; } = 0;
+        public ushort UdpPort { get; set; } = 0;
         /// <summary>
         /// 本地TCP端口
         /// </summary>
-        public int TcpPort { get; set; } = 0;
+        public ushort TcpPort { get; set; } = 0;
 
         public IPAddress LocalIp { get; set; } = IPAddress.Any;
 

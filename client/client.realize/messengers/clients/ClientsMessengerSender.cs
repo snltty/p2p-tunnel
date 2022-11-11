@@ -16,7 +16,7 @@ namespace client.realize.messengers.clients
 
         public SimpleSubPushHandler<ClientsInfo> OnServerClientsData { get; } = new SimpleSubPushHandler<ClientsInfo>();
 
-        public async Task<int> GetTunnelPort(IConnection connection)
+        public async Task<ushort> GetTunnelPort(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
@@ -28,11 +28,11 @@ namespace client.realize.messengers.clients
 
             if (resp.Code == MessageResponeCodes.OK)
             {
-                return resp.Data.Span.ToInt32();
+                return resp.Data.Span.ToUInt16();
             }
             return 0;
         }
-        public async Task<ulong> AddTunnel(IConnection connection, ulong tunnelName, int port, int localPort)
+        public async Task<ulong> AddTunnel(IConnection connection, ulong tunnelName, ushort port, ushort localPort)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {

@@ -43,13 +43,13 @@ namespace common.libs
         /// 获取路由层数，自己与外网距离几个网关，用于发送一个对方网络收不到没有回应的数据包
         /// </summary>
         /// <returns></returns>
-        public static int GetRouteLevel()
+        public static ushort GetRouteLevel()
         {
             try
             {
                 List<string> starts = new() { "10.", "100.", "192.168.", "172." };
                 IEnumerable<IPAddress> list = GetTraceRoute("www.baidu.com");
-                for (int i = 0; i < list.Count(); i++)
+                for (ushort i = 0; i < list.Count(); i++)
                 {
                     string ip = list.ElementAt(i).ToString();
                     if (ip.StartsWith(starts[0]) || ip.StartsWith(starts[1]) || ip.StartsWith(starts[2]))
@@ -65,7 +65,7 @@ namespace common.libs
             catch (Exception)
             {
             }
-            return -1;
+            return 0;
         }
         public static IEnumerable<IPAddress> GetTraceRoute(string hostNameOrAddress)
         {
@@ -115,10 +115,10 @@ namespace common.libs
         /// </summary>
         /// <param name="usedPorts"></param>
         /// <returns></returns>
-        public static int GetRandomPort(List<int> usedPorts = null)
+        public static ushort GetRandomPort(List<ushort> usedPorts = null)
         {
 
-            List<int> allPorts = GetUsedPort();
+            List<ushort> allPorts = GetUsedPort();
             if (usedPorts != null)
             {
                 allPorts.AddRange(usedPorts);
@@ -126,7 +126,7 @@ namespace common.libs
             Random rd = new();
             while (true)
             {
-                int port = rd.Next(10000, 56000);
+                ushort port = (ushort)rd.Next(10000, 56000);
                 if (!allPorts.Contains(port))
                 {
                     return port;
@@ -137,7 +137,7 @@ namespace common.libs
         /// 获取已使用过的端口
         /// </summary>
         /// <returns></returns>
-        public static List<int> GetUsedPort()
+        public static List<ushort> GetUsedPort()
         {
             try
             {
@@ -153,27 +153,27 @@ namespace common.libs
                 //返回本地计算机上的Internet协议版本4(IPV4 传输控制协议(TCP)连接的信息。
                 TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
 
-                List<int> allPorts = new();
+                List<ushort> allPorts = new();
                 foreach (IPEndPoint ep in ipsTCP)
                 {
-                    allPorts.Add(ep.Port);
+                    allPorts.Add((ushort)ep.Port);
                 }
 
                 foreach (IPEndPoint ep in ipsUDP)
                 {
-                    allPorts.Add(ep.Port);
+                    allPorts.Add((ushort)ep.Port);
                 }
 
                 foreach (TcpConnectionInformation conn in tcpConnInfoArray)
                 {
-                    allPorts.Add(conn.LocalEndPoint.Port);
+                    allPorts.Add((ushort)conn.LocalEndPoint.Port);
                 }
                 return allPorts;
             }
             catch (Exception)
             {
             }
-            return new List<int>();
+            return new List<ushort>();
 
         }
 
@@ -233,7 +233,7 @@ namespace common.libs
         public static IPEndPoint EndpointFromArray(Memory<byte> array)
         {
             var span = array.Span;
-            string ip = span.Slice(0, array.Length - 4).GetString();
+            string ip = span.Slice(0, array.Length - 2).GetString();
             int port = span.Slice(array.Length - 2, 2).ToUInt16();
             return new IPEndPoint(GetDomainIp(ip), port);
         }

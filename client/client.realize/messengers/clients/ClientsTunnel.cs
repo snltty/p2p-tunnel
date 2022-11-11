@@ -40,14 +40,14 @@ namespace client.realize.messengers.clients
         /// <param name="serverType"></param>
         /// <param name="tunnelName"></param>
         /// <returns></returns>
-        public async Task<(ulong, int)> NewBind(ServerType serverType, ulong tunnelName)
+        public async Task<(ulong, ushort)> NewBind(ServerType serverType, ulong tunnelName)
         {
             IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
             while (true)
             {
                 try
                 {
-                    int port = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<int> { registerState.LocalInfo.UdpPort, registerState.LocalInfo.TcpPort });
+                    ushort port = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<ushort> { registerState.LocalInfo.UdpPort, registerState.LocalInfo.TcpPort });
 
                     return serverType switch
                     {
@@ -69,7 +69,7 @@ namespace client.realize.messengers.clients
         /// <param name="serverAddress"></param>
         /// <param name="tunnelName"></param>
         /// <returns></returns>
-        private async Task<ulong> NewBindUdp(int localport, IPAddress serverAddress, ulong tunnelName)
+        private async Task<ulong> NewBindUdp(ushort localport, IPAddress serverAddress, ulong tunnelName)
         {
             ValuePacket<ulong> model = new ValuePacket<ulong> { Value = tunnelName };
 
@@ -95,7 +95,7 @@ namespace client.realize.messengers.clients
                 connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
             }
 
-            int port = await clientsMessengerSender.GetTunnelPort(connection);
+            ushort port = await clientsMessengerSender.GetTunnelPort(connection);
             model.Value = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, model.Value, port, localport);
 
             clientInfoCaching.AddTunnelPort(model.Value, port);
@@ -111,7 +111,7 @@ namespace client.realize.messengers.clients
         /// <param name="serverAddress"></param>
         /// <param name="tunnelName"></param>
         /// <returns></returns>
-        private async Task<ulong> NewBindTcp(int localport, IPAddress serverAddress, ulong tunnelName)
+        private async Task<ulong> NewBindTcp(ushort localport, IPAddress serverAddress, ulong tunnelName)
         {
             TcpServer tempTcpServer = new TcpServer();
             tempTcpServer.SetBufferSize(config.Client.TcpBufferSize);
@@ -140,7 +140,7 @@ namespace client.realize.messengers.clients
 
             IConnection connection = tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
 
-            int port = await clientsMessengerSender.GetTunnelPort(connection);
+            ushort port = await clientsMessengerSender.GetTunnelPort(connection);
             tunnelName = await clientsMessengerSender.AddTunnel(registerState.TcpConnection, tunnelName, port, localport);
 
             clientInfoCaching.AddTunnelPort(tunnelName, port);
