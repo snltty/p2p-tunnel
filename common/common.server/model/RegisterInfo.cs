@@ -155,8 +155,8 @@ namespace common.server.model
         /// </summary>
         public bool Relay { get; set; } = false;
 
-        public int UdpPort { get; set; } = 0;
-        public int TcpPort { get; set; } = 0;
+        public ushort UdpPort { get; set; } = 0;
+        public ushort TcpPort { get; set; } = 0;
 
         /// <summary>
         /// 连接id
@@ -264,8 +264,8 @@ namespace common.server.model
         public TunnelRegisterInfo() { }
 
         public ulong TunnelName { get; set; } = 0;
-        public int LocalPort { get; set; } = 0;
-        public int Port { get; set; } = 0;
+        public ushort LocalPort { get; set; } = 0;
+        public ushort Port { get; set; } = 0;
 
         public byte[] ToBytes()
         {

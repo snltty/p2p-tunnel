@@ -66,8 +66,8 @@ namespace server.service.messengers.register
             {
                 Id = client.Id,
                 Ip = connection.Address.Address,
-                UdpPort = connection.Address.Port,
-                TcpPort = client.TcpConnection?.Address.Port ?? 0,
+                UdpPort = (ushort)connection.Address.Port,
+                TcpPort =(ushort)(client.TcpConnection?.Address.Port ?? 0),
                 GroupId = client.GroupId,
                 Relay = relayValidator.Validate(client.GroupId)
             }.ToBytes();
@@ -94,8 +94,8 @@ namespace server.service.messengers.register
             {
                 Id = client.Id,
                 Ip = connection.Address.Address,
-                UdpPort = client.UdpConnection?.Address.Port ?? 0,
-                TcpPort = connection.Address.Port,
+                UdpPort = (ushort)(client.UdpConnection?.Address.Port ?? 0),
+                TcpPort = (ushort)connection.Address.Port,
                 GroupId = client.GroupId,
                 Relay = relayValidator.Validate(client.GroupId),
             }.ToBytes();

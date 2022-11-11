@@ -18,7 +18,7 @@ namespace common.libs
 
         public ulong Increment()
         {
-            Interlocked.CompareExchange(ref num, ulong.MaxValue - 10000, 0);
+            Interlocked.CompareExchange(ref num, 0, ulong.MaxValue - 10000);
             Interlocked.Increment(ref num);
             return num;
         }
@@ -50,7 +50,7 @@ namespace common.libs
 
         public uint Increment()
         {
-            Interlocked.CompareExchange(ref num, uint.MaxValue - 10000, 0);
+            Interlocked.CompareExchange(ref num, 0, uint.MaxValue - 10000);
             Interlocked.Increment(ref num);
             return num;
         }
