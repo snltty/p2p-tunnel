@@ -117,7 +117,7 @@ namespace common.server.servers.rudp
             try
             {
                 var peer = server.Connect(address, string.Empty);
-                int index = 50;
+                int index = 20;
                 while (peer.ConnectionState == ConnectionState.Outgoing && index > 0)
                 {
                     await Task.Delay(15);
