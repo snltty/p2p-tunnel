@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-13 14:56:31
+ * @LastEditTime: 2022-11-13 15:17:01
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -127,7 +127,15 @@ export default {
             }
         }
         const handleConnectReset = (row) => {
-            sendClientReset(row.Id);
+            ElMessageBox.confirm('确定重启它吗', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning',
+            }).then(() => {
+                sendClientReset(row.Id);
+            }).catch(() => {
+
+            });
         }
 
         let pingTimer = 0;

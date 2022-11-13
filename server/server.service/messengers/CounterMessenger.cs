@@ -13,7 +13,7 @@ namespace server.service.messengers
     {
         private readonly Process proc = ProcessHelper.GetCurrentProcess();
         private readonly DateTime startTime = DateTime.Now;
-        private CounterResultInfo counterResultInfo;
+        private CounterResultInfo counterResultInfo = new CounterResultInfo();
 
         public CounterMessenger(IClientRegisterCaching clientRegisterCaching, WheelTimer<object> wheelTimer)
         {
@@ -23,18 +23,14 @@ namespace server.service.messengers
                 {
                     proc.Refresh();
                     var clients = clientRegisterCaching.GetAll();
-
-                    counterResultInfo = new CounterResultInfo
-                    {
-                        OnlineCount = clientRegisterCaching.Count,
-                        Cpu = ProcessHelper.GetCpu(proc),
-                        Memory = ProcessHelper.GetMemory(proc),
-                        RunTime = (int)(DateTime.Now - startTime).TotalSeconds,
-                        TcpSendBytes = clients.Sum(c => (c.TcpConnection?.SendBytes ?? 0)),
-                        TcpReceiveBytes = clients.Sum(c => (c.TcpConnection?.ReceiveBytes ?? 0)),
-                        UdpSendBytes = clients.Sum(c => (c.UdpConnection?.SendBytes ?? 0)),
-                        UdpReceiveBytes = clients.Sum(c => (c.UdpConnection?.ReceiveBytes ?? 0)),
-                    };
+                    counterResultInfo.OnlineCount = clientRegisterCaching.Count;
+                    counterResultInfo.Cpu = ProcessHelper.GetCpu(proc);
+                    counterResultInfo.Memory = ProcessHelper.GetMemory(proc);
+                    counterResultInfo.RunTime = (int)(DateTime.Now - startTime).TotalSeconds;
+                    counterResultInfo.TcpSendBytes = clients.Sum(c => (c.TcpConnection?.SendBytes ?? 0));
+                    counterResultInfo.TcpReceiveBytes = clients.Sum(c => (c.TcpConnection?.ReceiveBytes ?? 0));
+                    counterResultInfo.UdpSendBytes = clients.Sum(c => (c.UdpConnection?.SendBytes ?? 0));
+                    counterResultInfo.UdpReceiveBytes = clients.Sum(c => (c.UdpConnection?.ReceiveBytes ?? 0));
                 }
             }, 1000, true);
         }

@@ -5,14 +5,14 @@ namespace common.server.model
 {
     public class CounterResultInfo
     {
-        public int OnlineCount { get; set; }
-        public double Cpu { get; set; }
-        public double Memory { get; set; }
-        public int RunTime { get; set; }
-        public long TcpSendBytes { get; set; }
-        public long TcpReceiveBytes { get; set; }
-        public long UdpSendBytes { get; set; }
-        public long UdpReceiveBytes { get; set; }
+        public int OnlineCount { get; set; } = 0;
+        public double Cpu { get; set; } = 0;
+        public double Memory { get; set; } = 0;
+        public int RunTime { get; set; } = 0;
+        public long TcpSendBytes { get; set; } = 0;
+        public long TcpReceiveBytes { get; set; } = 0;
+        public long UdpSendBytes { get; set; } = 0;
+        public long UdpReceiveBytes { get; set; } = 0;
 
         public byte[] ToBytes()
         {
