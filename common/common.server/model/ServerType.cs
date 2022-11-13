@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace common.server.model
+﻿namespace common.server.model
 {
-    public enum ServerType
+    public enum ServerType : byte
     {
-        TCP, UDP
+        TCP = 1, UDP = 2, TCPUDP = TCP | UDP
     }
 }

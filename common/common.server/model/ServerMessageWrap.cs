@@ -30,27 +30,34 @@ namespace common.server.model
         /// <summary>
         /// 中继数据时，写明是谁发的中继数据，以便目标客户端回复给来源客户端，【只发发数据的话，不用填这里】
         /// </summary>
-        public ulong RelayId { get; set; } = 0;
-
+        public ulong RelaySourceId { get; set; } = 0;
         /// <summary>
-        /// 【只发发数据的话，不用填这里】
+        /// 中继数据时，写明消息给谁，【只发发数据的话，不用填这里】
         /// </summary>
-        public ushort OriginMessengerId { get; set; } = 0;
+        public ulong RelayId { get; set; } = 0;
 
         /// <summary>
         /// 数据荷载
         /// </summary>
         public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
 
+        public static void WriteRelayId(Memory<byte> memory, ulong relayId)
+        {
+            relayId.ToBytes().CopyTo(memory.Slice(2));
+        }
+        public static void WriteRelaySourceId(Memory<byte> memory, ulong relaySourceId)
+        {
+            relaySourceId.ToBytes().CopyTo(memory.Slice(2 + 8));
+        }
+
         /// <summary>
         /// 转包
         /// </summary>
         /// <returns></returns>
-        public byte[] ToArray(ServerType type, out int length, bool pool = false)
+        public byte[] ToArray(ServerType type, out int length)
         {
             byte[] requestIdByte = RequestId.ToBytes();
             byte[] messengerIdByte = MessengerId.ToBytes();
-            byte[] originMessengerIdByte = OriginMessengerId.ToBytes();
 
             int index = 0;
 
@@ -62,11 +69,10 @@ namespace common.server.model
                 + Payload.Length;
             if (RelayId > 0)
             {
-                length += 8;
-                length += originMessengerIdByte.Length;
+                length += 16;
             }
 
-            byte[] res = pool ? ArrayPool<byte>.Shared.Rent(length) : new byte[length];
+            byte[] res = ArrayPool<byte>.Shared.Rent(length);
             if (type == ServerType.TCP)
             {
                 byte[] payloadLengthByte = (length - 4).ToBytes();
@@ -79,17 +85,15 @@ namespace common.server.model
 
             res[index] = (byte)(RelayId > 0 ? 1 : 0);
             index += 1;
-            if (res[index - 1] == 1)
+            if (RelayId > 0)
             {
-                byte[] delayidByte = RelayId.ToBytes();
-                Array.Copy(delayidByte, 0, res, index, delayidByte.Length);
-                index += delayidByte.Length;
+                byte[] relayidByte = RelayId.ToBytes();
+                Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
+                index += relayidByte.Length;
 
-                if (originMessengerIdByte.Length > 0)
-                {
-                    originMessengerIdByte.CopyTo(res.AsMemory(index, originMessengerIdByte.Length));
-                    index += originMessengerIdByte.Length;
-                }
+                byte[] relayidSorceByte = RelaySourceId.ToBytes();
+                Array.Copy(relayidSorceByte, 0, res, index, relayidSorceByte.Length);
+                index += relayidSorceByte.Length;
             }
 
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
@@ -112,15 +116,14 @@ namespace common.server.model
             var span = memory.Span;
             int index = 1;
 
-            byte relay = span[index];
             index += 1;
-            if (relay == 1)
+            if (span[index - 1] == 1)
             {
                 RelayId = span.Slice(index).ToUInt64();
                 index += 8;
 
-                OriginMessengerId = span.Slice(index, 2).ToUInt16();
-                index += 2;
+                RelaySourceId = span.Slice(index).ToUInt64();
+                index += 8;
             }
             else
             {
@@ -141,6 +144,7 @@ namespace common.server.model
             ArrayPool<byte>.Shared.Return(array);
         }
     }
+
     public class MessageResponseWrap
     {
         public IConnection Connection { get; set; }
@@ -149,13 +153,18 @@ namespace common.server.model
         public ulong RelayId { get; set; } = 0;
         public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
 
+        public static void WriteRelayId(Memory<byte> memory, ulong relayId)
+        {
+            relayId.ToBytes().CopyTo(memory.Slice(3));
+        }
+
         /// <summary>
         /// 转包
         /// </summary>
         /// <returns></returns>
-        public (byte[] data, int length) ToArray(ServerType type, bool pool = false)
+        public byte[] ToArray(ServerType type, out int length)
         {
-            int length = 4
+            length = 4
                 + 1 //type
                 + 1 //code
                 + 1 //RelayId
@@ -166,7 +175,7 @@ namespace common.server.model
                 length += 8;
             }
 
-            byte[] res = pool ? ArrayPool<byte>.Shared.Rent(length) : new byte[length];
+            byte[] res = ArrayPool<byte>.Shared.Rent(length);
 
             int index = 0;
             if (type == ServerType.TCP)
@@ -200,7 +209,7 @@ namespace common.server.model
                 Payload.CopyTo(res.AsMemory(index, Payload.Length));
                 index += Payload.Length;
             }
-            return (res, length);
+            return res;
         }
         /// <summary>
         /// 解包
@@ -214,9 +223,8 @@ namespace common.server.model
             Code = (MessageResponeCodes)span[index];
             index += 1;
 
-            byte relay = span[index];
             index += 1;
-            if (relay == 1)
+            if (span[index - 1] == 1)
             {
                 RelayId = span.Slice(index).ToUInt64();
                 index += 8;

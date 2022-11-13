@@ -12,47 +12,26 @@ namespace client.realize.messengers.relay
     /// 中继
     /// </summary>
 
-    [MessengerIdRange((ushort)RelayMessengerIds.Min,(ushort)RelayMessengerIds.Max)]
+    [MessengerIdRange((ushort)RelayMessengerIds.Min, (ushort)RelayMessengerIds.Max)]
     public class RelayMessenger : IMessenger
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly MessengerSender messengerSender;
-        private readonly Config config;
         private readonly RelayMessengerSender relayMessengerSender;
+        private readonly IRelayValidator relayValidator;
 
-        public RelayMessenger(IClientInfoCaching clientInfoCaching, MessengerSender messengerSender, Config config, RelayMessengerSender relayMessengerSender)
+        public RelayMessenger(IClientInfoCaching clientInfoCaching, MessengerSender messengerSender, RelayMessengerSender relayMessengerSender, IRelayValidator relayValidator)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.messengerSender = messengerSender;
-            this.config = config;
             this.relayMessengerSender = relayMessengerSender;
-        }
-
-        [MessengerId((ushort)RelayMessengerIds.Relay)]
-        public async Task Relay(IConnection connection)
-        {
-            if (config.Client.UseRelay == false)
-            {
-                return;
-            }
-           
-            if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo source))
-            {
-                if (clientInfoCaching.Get(connection.ReceiveRequestWrap.RelayId, out ClientInfo target))
-                {
-                    connection.ReceiveRequestWrap.Connection = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
-                    connection.ReceiveRequestWrap.MessengerId = connection.ReceiveRequestWrap.OriginMessengerId;
-                    connection.ReceiveRequestWrap.OriginMessengerId = 0;
-                    connection.ReceiveRequestWrap.RelayId = source.Id;
-                    await messengerSender.SendOnly(connection.ReceiveRequestWrap).ConfigureAwait(false);
-                }
-            }
+            this.relayValidator = relayValidator;
         }
 
         [MessengerId((ushort)RelayMessengerIds.Notify)]
         public async Task Notify(IConnection connection)
         {
-            if (config.Client.UseRelay == false)
+            if (relayValidator.Validate(connection) == false)
             {
                 return;
             }
@@ -81,7 +60,7 @@ namespace client.realize.messengers.relay
         [MessengerId((ushort)RelayMessengerIds.Verify)]
         public byte[] Verify(IConnection connection)
         {
-            if (config.Client.UseRelay == false)
+            if (relayValidator.Validate(connection) == false)
             {
                 return Helper.FalseArray;
             }
@@ -91,8 +70,8 @@ namespace client.realize.messengers.relay
             {
                 return connection.ServerType switch
                 {
-                    ServerType.TCP => source.TcpConnected && source.TcpConnectType == ClientConnectTypes.P2P ? Helper.TrueArray : Helper.FalseArray,
-                    ServerType.UDP => source.UdpConnected && source.UdpConnectType == ClientConnectTypes.P2P ? Helper.TrueArray : Helper.FalseArray,
+                    ServerType.TCP => source.TcpConnected && source.TcpConnectType != ClientConnectTypes.RelayServer ? Helper.TrueArray : Helper.FalseArray,
+                    ServerType.UDP => source.UdpConnected && source.UdpConnectType != ClientConnectTypes.RelayServer ? Helper.TrueArray : Helper.FalseArray,
                     _ => Helper.FalseArray,
                 };
             }

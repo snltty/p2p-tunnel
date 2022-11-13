@@ -69,7 +69,7 @@ namespace server.service.messengers.register
                 UdpPort = (ushort)connection.Address.Port,
                 TcpPort =(ushort)(client.TcpConnection?.Address.Port ?? 0),
                 GroupId = client.GroupId,
-                Relay = relayValidator.Validate(client.GroupId)
+                Relay = relayValidator.Validate(connection)
             }.ToBytes();
         }
         private async Task<byte[]> Tcp(IConnection connection, RegisterParamsInfo model)
@@ -97,7 +97,7 @@ namespace server.service.messengers.register
                 UdpPort = (ushort)(client.UdpConnection?.Address.Port ?? 0),
                 TcpPort = (ushort)connection.Address.Port,
                 GroupId = client.GroupId,
-                Relay = relayValidator.Validate(client.GroupId),
+                Relay = relayValidator.Validate(connection),
             }.ToBytes();
         }
         private async Task<(RegisterResultInfo, RegisterCacheInfo)> VerifyAndAdd(RegisterParamsInfo model)

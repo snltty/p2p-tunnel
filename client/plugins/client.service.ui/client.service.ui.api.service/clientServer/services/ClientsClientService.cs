@@ -33,12 +33,6 @@ namespace client.service.ui.api.service.clientServer.services
             clientsTransfer.ConnectClient(model.ID);
         }
 
-        public void Stop(ClientServiceParamsInfo arg)
-        {
-            ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
-            clientsTransfer.ConnectStop(model.ID);
-        }
-
         public void Offline(ClientServiceParamsInfo arg)
         {
             ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
@@ -83,6 +77,7 @@ namespace client.service.ui.api.service.clientServer.services
 
             if (sourceConnection != null && sourceConnection.Connected && clientInfoCaching.Get(model.ToId, out ClientInfo targetClient))
             {
+                clientInfoCaching.Offline(sourceConnection.ConnectId, model.Type);
                 await clientsTransfer.Relay(targetClient, sourceConnection, true);
             }
 
@@ -93,6 +88,7 @@ namespace client.service.ui.api.service.clientServer.services
     public class ConnectParamsInfo
     {
         public ulong ID { get; set; } = 0;
+        public ServerType Type { get; set; } = ServerType.TCP;
     }
     public class RelayParamsInfo
     {

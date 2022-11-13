@@ -229,7 +229,7 @@ namespace common.server.servers.iocp
                 int packageLen = memory.Span.ToInt32();
                 if (packageLen == length - 4)
                 {
-                    token.Connection.ReceiveData = data.AsMemory(offset + 4, packageLen);
+                    token.Connection.ReceiveData = data.AsMemory(offset, packageLen + 4);
                     if (OnPacket != null)
                     {
                         await OnPacket(token.Connection);
@@ -247,7 +247,7 @@ namespace common.server.servers.iocp
                 {
                     break;
                 }
-                token.Connection.ReceiveData = token.DataBuffer.Data.Slice(4, packageLen);
+                token.Connection.ReceiveData = token.DataBuffer.Data.Slice(0, packageLen+4);
                 if (OnPacket != null)
                 {
                     await OnPacket(token.Connection);

@@ -113,9 +113,17 @@ namespace client.messengers.clients
     [Flags]
     public enum ClientConnectTypes : byte
     {
-        [Description("打洞")]
-        P2P = 1 << 0,
-        [Description("中继")]
-        Relay = 1 << 1
+        /// <summary>
+        /// 打洞
+        /// </summary>
+        P2P = 1,
+        /// <summary>
+        /// 节点中继
+        /// </summary>
+        RelayNode = 2,
+        /// <summary>
+        /// 服务器中继
+        /// </summary>
+        RelayServer = 4
     }
 }

@@ -35,10 +35,9 @@ namespace common.server.model
     public enum RelayMessengerIds : ushort
     {
         Min = 501,
-        Relay = 502,
-        Notify = 503,
-        Verify = 504,
-        Delay = 505,
+        Notify = 501,
+        Verify = 502,
+        Delay = 503,
         Max = 600,
     }
 }

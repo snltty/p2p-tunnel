@@ -1,6 +1,8 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server.model;
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,7 +53,7 @@ namespace common.server
         {
             try
             {
-                if(msg.RequestId == 0)
+                if (msg.RequestId == 0)
                 {
                     Interlocked.CompareExchange(ref msg.RequestId, requestIdNumberSpace.Increment(), 0);
                 }
@@ -60,18 +62,16 @@ namespace common.server
                     return false;
                 }
 
-                if (msg.Connection.Relay)
+                if (msg.Connection.Relay && msg.RelayId == 0)
                 {
                     msg.RelayId = msg.Connection.ConnectId;
-                    msg.OriginMessengerId = msg.MessengerId;
-                    msg.MessengerId = (ushort)RelayMessengerIds.Relay;
                 }
                 if (msg.Connection.EncodeEnabled)
                 {
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
 
-                byte[] bytes = msg.ToArray(msg.Connection.ServerType, out int length, true);
+                byte[] bytes = msg.ToArray(msg.Connection.ServerType, out int length);
                 bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
                 msg.Return(bytes);
 
@@ -83,6 +83,7 @@ namespace common.server
             }
             return false;
         }
+
         /// <summary>
         /// 回复远程消息，收到某个连接的消息后，通过这个再返回消息给它
         /// </summary>
@@ -97,7 +98,7 @@ namespace common.server
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
 
-                (byte[] bytes, int length) = msg.ToArray(msg.Connection.ServerType, true);
+                byte[] bytes = msg.ToArray(msg.Connection.ServerType, out int length);
                 bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
                 msg.Return(bytes);
                 return res;

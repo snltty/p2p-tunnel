@@ -12,10 +12,20 @@ namespace common.server
 {
     public interface IConnection
     {
+        /// <summary>
+        /// 连接id
+        /// </summary>
         public ulong ConnectId { get; set; }
         public bool Connected { get; }
 
         public bool Relay { get; set; }
+        /// <summary>
+        /// 中继对象id，通过谁中继的，就是谁的id，直连的跟连接id一样
+        /// </summary>
+        public ulong RelayConnectId { get; set; }
+        /// <summary>
+        /// 来源客户端，中继时，数据来源可能不是给你发数据的那个
+        /// </summary>
         public IConnection FromConnection { get; set; }
 
         public bool EncodeEnabled { get; }
@@ -24,13 +34,20 @@ namespace common.server
         public void EncodeDisable();
 
         public SocketError SocketError { get; set; }
-
         public IPEndPoint Address { get; }
-
         public ServerType ServerType { get; }
 
+        /// <summary>
+        /// 请求数据包装对象
+        /// </summary>
         public MessageRequestWrap ReceiveRequestWrap { get; }
+        /// <summary>
+        /// 回复数据包装对象
+        /// </summary>
         public MessageResponseWrap ReceiveResponseWrap { get; }
+        /// <summary>
+        /// 接收到的原始数据
+        /// </summary>
         public Memory<byte> ReceiveData { get; set; }
 
         public long SendBytes { get; set; }
@@ -59,11 +76,16 @@ namespace common.server
             set
             {
                 connectId = value;
+                if(RelayConnectId == 0)
+                {
+                    RelayConnectId = connectId;
+                }
             }
         }
         public virtual bool Connected => false;
 
         public bool Relay { get; set; } = false;
+        public ulong RelayConnectId { get; set; } = 0;
         public IConnection FromConnection { get; set; }
 
         public bool EncodeEnabled => Crypto != null;
@@ -136,14 +158,14 @@ namespace common.server
         public override ServerType ServerType => ServerType.UDP;
         public override int RoundTripTime { get; set; } = 0;
 
-        public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
+        public override async ValueTask<bool> Send(byte[] data, int length)
         {
-            return await Send(data.ToArray(), data.Length);
+            return await Send(data.AsMemory(0, length));
         }
 
 
         SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
-        public override async ValueTask<bool> Send(byte[] data, int length)
+        public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
         {
             if (Connected)
             {
@@ -157,7 +179,7 @@ namespace common.server
                         await Task.Delay(1);
                     }
 
-                    NetPeer.Send(data, 0, length, DeliveryMethod.ReliableOrdered);
+                    NetPeer.Send(data, 0, data.Length, DeliveryMethod.ReliableOrdered);
                     NetPeer.Update();
                     SendBytes += data.Length;
 

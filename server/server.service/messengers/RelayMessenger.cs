@@ -24,39 +24,6 @@ namespace server.service.messengers
             this.relayValidator = relayValidator;
         }
 
-        [MessengerId((ushort)RelayMessengerIds.Relay)]
-        public async Task Relay(IConnection connection)
-        {
-            //A已注册
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
-            {
-                if (relayValidator.Validate(source.GroupId) == false)
-                {
-                    return;
-                }
-
-                //B已注册
-                if (clientRegisterCache.Get(connection.ReceiveRequestWrap.RelayId, out RegisterCacheInfo target))
-                {
-                    //是否在同一个组
-                    if (source.GroupId == target.GroupId)
-                    {
-                        IConnection online = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
-                        if (online == null || online.Connected == false)
-                        {
-                            online = target.OnLineConnection;
-                        }
-
-                        connection.ReceiveRequestWrap.Connection = online;
-                        connection.ReceiveRequestWrap.MessengerId = connection.ReceiveRequestWrap.OriginMessengerId;
-                        connection.ReceiveRequestWrap.OriginMessengerId = 0;
-                        connection.ReceiveRequestWrap.RelayId = source.Id;
-                        await messengerSender.SendOnly(connection.ReceiveRequestWrap).ConfigureAwait(false);
-                    }
-                }
-            }
-        }
-
         [MessengerId((ushort)RelayMessengerIds.Notify)]
         public async Task Notify(IConnection connection)
         {
@@ -66,7 +33,7 @@ namespace server.service.messengers
             {
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
-                    if (relayValidator.Validate(source.GroupId) == false)
+                    if (relayValidator.Validate(connection) == false)
                     {
                         return;
                     }
@@ -95,7 +62,7 @@ namespace server.service.messengers
         {
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
-                if (relayValidator.Validate(source.GroupId) == false)
+                if (relayValidator.Validate(connection) == false)
                 {
                     return Helper.FalseArray;
                 }

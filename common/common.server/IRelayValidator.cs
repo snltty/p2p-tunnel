@@ -1,10 +1,10 @@
 ﻿using common.server;
 
-namespace server.messengers.register
+namespace common.server
 {
     public interface IRelayValidator
     {
-        public bool Validate(string key);
+        public bool Validate(IConnection connection);
     }
 
     public class DefaultRelayValidator : IRelayValidator
@@ -12,7 +12,7 @@ namespace server.messengers.register
         public DefaultRelayValidator()
         {
         }
-        public bool Validate(string key)
+        public bool Validate(IConnection connection)
         {
             return true;
         }

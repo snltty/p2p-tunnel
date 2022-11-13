@@ -50,7 +50,7 @@ namespace client.realize.messengers.clients
             this.relayConnectionSelector = relayConnectionSelector;
             this.heartMessengerSender = heartMessengerSender;
             this.relayMessengerSender = relayMessengerSender;
-            
+
 
             punchHoleUdp.OnStep1Handler.Sub((e) =>
             {
@@ -140,7 +140,7 @@ namespace client.realize.messengers.clients
             {
                 if (clientInfoCaching.Get(param.FromId, out ClientInfo client))
                 {
-                    _ = Relay(client, param.Connection);
+                    _ = Relay1(client, param.Connection);
                 }
             });
 
@@ -162,7 +162,18 @@ namespace client.realize.messengers.clients
                 return;
             }
             clientInfoCaching.Offline(connection.ConnectId, connection.ServerType);
-            ConnectClient(connection.ConnectId);
+
+            //Logger.Instance.DebugDebug($"客户端掉线");
+            //ulong connectId = connection.ConnectId;
+            //Task.Run(async () =>
+            //{
+            //    await Task.Delay(1000);
+            //    if (clientInfoCaching.Get(connectId, out ClientInfo client))
+            //    {
+            //        Logger.Instance.DebugDebug($"客户端掉线:重连:{client.Name}");
+            //        ConnectClient(client);
+            //    }
+            //});
         }
 
         public void ConnectClient(ulong id)
@@ -187,28 +198,30 @@ namespace client.realize.messengers.clients
                 EnumConnectResult udp = await ConnectUdp(client).ConfigureAwait(false);
                 EnumConnectResult tcp = await ConnectTcp(client).ConfigureAwait(false);
 
-                EnumConnectResult result = udp | tcp;
-
-                if (client.TryReverseValue < TryReverseMaxValue)
+                //任一失败
+                if (((udp | tcp) & EnumConnectResult.Fail) == EnumConnectResult.Fail)
                 {
-                    if (result != EnumConnectResult.All)
+                    if (client.TryReverseValue < TryReverseMaxValue)
                     {
                         client.TryReverseValue++;
                         ConnectReverse(client);
                     }
-                }
-                else
-                {
-                    if (result == EnumConnectResult.AllFail)
+                    else
                     {
-                        if (config.Client.UseTcp | client.UseTcp == false)
+                        if (udp == EnumConnectResult.Fail)
                         {
-                            _ = Relay(client, ServerType.UDP, true);
+                            //不启用tcp时，才中继udp
+                            if ((config.Client.UseTcp | client.UseTcp) == false)
+                            {
+                                _ = Relay(client, ServerType.UDP, true);
+                            }
                         }
-                        _ = Relay(client, ServerType.TCP, true);
+                        if (tcp == EnumConnectResult.Fail)
+                        {
+                            _ = Relay(client, ServerType.TCP, true);
+                        }
                     }
                 }
-
                 client.TryReverseValue = 1;
             });
         }
@@ -249,15 +262,15 @@ namespace client.realize.messengers.clients
         {
             if (client.UdpConnected)
             {
-                return EnumConnectResult.UdpOnly;
+                return EnumConnectResult.Success;
             }
             if ((config.Client.UseUdp & client.UseUdp) == false)
             {
-                return EnumConnectResult.AllFail;
+                return EnumConnectResult.BreakOff;
             }
-            if (client.TcpConnecting)
+            if (client.UdpConnecting)
             {
-                return EnumConnectResult.AllFail;
+                return EnumConnectResult.BreakOff;
             }
 
             clientInfoCaching.Connecting(client.Id, true, ServerType.UDP);
@@ -279,27 +292,27 @@ namespace client.realize.messengers.clients
                 }).ConfigureAwait(false);
                 if (result.State)
                 {
-                    return EnumConnectResult.UdpOnly;
+                    return EnumConnectResult.Success;
                 }
                 Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
             }
 
             clientInfoCaching.Offline(client.Id, ServerType.UDP);
-            return EnumConnectResult.AllFail;
+            return EnumConnectResult.Fail;
         }
         private async Task<EnumConnectResult> ConnectTcp(ClientInfo client)
         {
             if (client.TcpConnected)
             {
-                return EnumConnectResult.TcpOnly;
+                return EnumConnectResult.Success;
             }
             if ((config.Client.UseTcp & client.UseTcp) == false)
             {
-                return EnumConnectResult.AllFail;
+                return EnumConnectResult.BreakOff;
             }
             if (client.TcpConnecting)
             {
-                return EnumConnectResult.AllFail;
+                return EnumConnectResult.BreakOff;
             }
 
             clientInfoCaching.Connecting(client.Id, true, ServerType.TCP);
@@ -320,13 +333,13 @@ namespace client.realize.messengers.clients
                 }).ConfigureAwait(false);
                 if (result.State)
                 {
-                    return EnumConnectResult.TcpOnly;
+                    return EnumConnectResult.Success;
                 }
                 Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
             }
 
             clientInfoCaching.Offline(client.Id, ServerType.TCP);
-            return EnumConnectResult.AllFail;
+            return EnumConnectResult.Fail;
         }
 
         public async Task Ping()
@@ -392,7 +405,7 @@ namespace client.realize.messengers.clients
                 int[] result = new int[] { -1, -1 };
                 data.Add(item.Id, result);
 
-                if (config.Client.UseTcp && item.UseTcp && item.TcpConnected && item.TcpConnectType == ClientConnectTypes.P2P)
+                if (config.Client.UseTcp && item.UseTcp && item.TcpConnected && item.TcpConnectType != ClientConnectTypes.RelayServer)
                 {
                     res = await relayMessengerSender.Verify(toid, item.TcpConnection);
                     if (res)
@@ -406,7 +419,7 @@ namespace client.realize.messengers.clients
                     }
                 }
 
-                if (config.Client.UseUdp && item.UseUdp && item.UdpConnected && item.UdpConnectType == ClientConnectTypes.P2P)
+                if (config.Client.UseUdp && item.UseUdp && item.UdpConnected && item.UdpConnectType != ClientConnectTypes.RelayServer)
                 {
                     res = await relayMessengerSender.Verify(toid, item.UdpConnection);
                     if (res)
@@ -544,20 +557,41 @@ namespace client.realize.messengers.clients
         private async Task Relay(ClientInfo client, ServerType serverType, bool notify = false)
         {
             IConnection sourceConnection = await relayConnectionSelector.Select(serverType);
+            await Relay1(client, sourceConnection, notify);
+        }
+        private async Task Relay1(ClientInfo client, IConnection sourceConnection, bool notify = false)
+        {
+            bool connected = sourceConnection.ServerType switch
+            {
+                ServerType.TCP => client.TcpConnected,
+                ServerType.UDP => client.UdpConnected,
+                _ => false,
+            };
+            if (connected) return;
+
             await Relay(client, sourceConnection, notify);
         }
+
         public async Task Relay(ClientInfo client, IConnection sourceConnection, bool notify = false)
         {
             if (sourceConnection == null || sourceConnection.Connected == false) return;
-            if (sourceConnection.ServerType == ServerType.TCP && client.TcpConnected == true && client.TcpConnectType == ClientConnectTypes.P2P) return;
-            if (sourceConnection.ServerType == ServerType.UDP && client.UdpConnected == true && client.UdpConnectType == ClientConnectTypes.P2P) return;
 
             bool verify = await relayMessengerSender.Verify(client.Id, sourceConnection);
             if (verify == false) return;
 
             IConnection connection = sourceConnection.Clone();
             connection.Relay = true;
-            clientInfoCaching.Online(client.Id, connection, ClientConnectTypes.Relay);
+            connection.RelayConnectId = sourceConnection.ConnectId;
+
+            bool isServer = sourceConnection.ServerType switch
+            {
+                ServerType.TCP => ReferenceEquals(registerState.TcpConnection, sourceConnection),
+                ServerType.UDP => ReferenceEquals(registerState.UdpConnection, sourceConnection),
+                ServerType.TCPUDP => true,
+                _ => true,
+            };
+            ClientConnectTypes relayType = isServer ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
+            clientInfoCaching.Online(client.Id, connection, relayType);
 
             if (notify)
             {
@@ -568,10 +602,9 @@ namespace client.realize.messengers.clients
         [Flags]
         enum EnumConnectResult : byte
         {
-            AllFail = 0,
-            UdpOnly = 1,
-            TcpOnly = 2,
-            All = UdpOnly | TcpOnly,
+            Fail = 1,
+            Success = 2,
+            BreakOff = 4
         }
     }
 

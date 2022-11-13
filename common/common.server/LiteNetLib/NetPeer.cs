@@ -490,7 +490,7 @@ namespace LiteNetLib
         ///     MTU - headerSize bytes for Unreliable<para/>
         ///     Fragment count exceeded ushort.MaxValue<para/>
         /// </exception>
-        public void Send(byte[] data, DeliveryMethod deliveryMethod)
+        public void Send (ReadOnlyMemory<byte> data, DeliveryMethod deliveryMethod)
         {
             SendInternal(data, 0, data.Length, 0, deliveryMethod, null);
         }
@@ -522,7 +522,7 @@ namespace LiteNetLib
         ///     MTU - headerSize bytes for Unreliable<para/>
         ///     Fragment count exceeded ushort.MaxValue<para/>
         /// </exception>
-        public void Send(byte[] data, int start, int length, DeliveryMethod options)
+        public void Send(ReadOnlyMemory<byte> data, int start, int length, DeliveryMethod options)
         {
             SendInternal(data, start, length, 0, options, null);
         }
@@ -538,7 +538,7 @@ namespace LiteNetLib
         ///     MTU - headerSize bytes for Unreliable<para/>
         ///     Fragment count exceeded ushort.MaxValue<para/>
         /// </exception>
-        public void Send(byte[] data, byte channelNumber, DeliveryMethod deliveryMethod)
+        public void Send(ReadOnlyMemory<byte> data, byte channelNumber, DeliveryMethod deliveryMethod)
         {
             SendInternal(data, 0, data.Length, channelNumber, deliveryMethod, null);
         }
@@ -572,13 +572,13 @@ namespace LiteNetLib
         ///     MTU - headerSize bytes for Unreliable<para/>
         ///     Fragment count exceeded ushort.MaxValue<para/>
         /// </exception>
-        public void Send(byte[] data, int start, int length, byte channelNumber, DeliveryMethod deliveryMethod)
+        public void Send(ReadOnlyMemory<byte> data, int start, int length, byte channelNumber, DeliveryMethod deliveryMethod)
         {
             SendInternal(data, start, length, channelNumber, deliveryMethod, null);
         }
 
         private void SendInternal(
-            byte[] data,
+            ReadOnlyMemory<byte> data,
             int start,
             int length,
             byte channelNumber,
@@ -644,7 +644,8 @@ namespace LiteNetLib
                     p.FragmentsTotal = (ushort)totalPackets;
                     p.MarkFragmented();
 
-                    Buffer.BlockCopy(data, start + partIdx * packetDataSize, p.RawData, NetConstants.FragmentedHeaderTotalSize, sendLength);
+                    data.Slice(start + partIdx * packetDataSize, sendLength).CopyTo(p.RawData.AsMemory(NetConstants.FragmentedHeaderTotalSize));
+                   // Buffer.BlockCopy(data, start + partIdx * packetDataSize, p.RawData, NetConstants.FragmentedHeaderTotalSize, sendLength);
                     channel.AddToQueue(p);
 
                     length -= sendLength;
@@ -655,7 +656,8 @@ namespace LiteNetLib
             //Else just send
             NetPacket packet = NetManager.PoolGetPacket(headerSize + length);
             packet.Property = property;
-            Buffer.BlockCopy(data, start, packet.RawData, headerSize, length);
+            data.Slice(start, length).CopyTo(packet.RawData.AsMemory(headerSize));
+            //Buffer.BlockCopy(data, start, packet.RawData, headerSize, length);
             packet.UserData = userData;
 
             if (channel == null) //unreliable

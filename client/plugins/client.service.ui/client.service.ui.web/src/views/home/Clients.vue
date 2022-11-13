@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-11 15:03:27
+ * @LastEditTime: 2022-11-13 01:15:45
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -34,7 +34,6 @@
                                     <el-button plain text bg size="small" @click="handleConnect(item)">连它</el-button>
                                     <el-button plain text bg size="small" @click="handleConnectReverse(item)">连我</el-button>
                                     <el-button plain text bg :loading="item.loading" size="small" @click="handleConnectReset(item)">重启</el-button>
-                                    <el-button plain text bg :loading="item.loading" size="small" @click="handleConnectReset(item)">断开</el-button>
                                 </dd>
                             </dl>
                         </div>
@@ -60,15 +59,15 @@ export default {
     setup () {
         const clientsState = injectClients();
         const registerState = injectRegister();
-        const connectTypeStrs = ['未连接', '已连接-打洞', '已连接-中继'];
+        const connectTypeStrs = ['未连接', '打洞', '节点中继', '', '服务器中继'];
         const connectTypeColors = ['color:#333;', 'color:#148727;font-weight:bold;', 'color:#148727;font-weight:bold;'];
         const clients = computed(() => {
             clientsState.clients.forEach(c => {
                 c.showUdp = c.UseUdp && registerState.ClientConfig.UseUdp;
                 c.showTcp = c.UseTcp && registerState.ClientConfig.UseTcp;
 
-                c.udpConnectType = c.UdpConnected ? c.UdpConnectType : Number(c.UdpConnected);
-                c.tcpConnectType = c.TcpConnected ? c.TcpConnectType : Number(c.TcpConnected);
+                c.udpConnectType = c.UdpConnected ? c.UdpConnectType : 0;
+                c.tcpConnectType = c.TcpConnected ? c.TcpConnectType : 0;
 
                 c.udpConnectTypeStr = connectTypeStrs[c.udpConnectType];
                 c.udpConnectTypeStyle = connectTypeColors[c.udpConnectType];

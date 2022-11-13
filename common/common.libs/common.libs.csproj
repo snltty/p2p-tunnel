@@ -27,10 +27,10 @@
 		<Optimize>True</Optimize>
 	</PropertyGroup>
 
-	<ItemGroup  Condition="'$(VisualStudioVersion)'&gt;='17.0'">
+	<ItemGroup Condition="'$(VisualStudioVersion)'&gt;='17.0'">
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-preview.7.22375.6" />
 	</ItemGroup>
-	<ItemGroup  Condition="'$(VisualStudioVersion)'&lt;'17.0'">
+	<ItemGroup Condition="'$(VisualStudioVersion)'&lt;'17.0'">
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
 	</ItemGroup>
 	<ItemGroup>

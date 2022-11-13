@@ -63,17 +63,14 @@ namespace client.realize.messengers.relay
         /// <returns></returns>
         public async Task<bool> RelayDelay(ulong toid, IConnection connection)
         {
-            var data = new MessageRequestWrap
+            var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 MessengerId = (ushort)RelayMessengerIds.Delay,
                 Connection = connection,
-                RelayId = toid,
-                Timeout = 2000
-            };
-            data.OriginMessengerId = data.MessengerId;
-            data.MessengerId = (ushort)RelayMessengerIds.Relay;
-
-            var resp = await messengerSender.SendReply(data).ConfigureAwait(false);
+                Timeout = 2000,
+                Payload = Helper.EmptyArray,
+                RelayId = toid
+            }).ConfigureAwait(false);
             return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
         }
     }
