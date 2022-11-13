@@ -36,7 +36,7 @@ namespace client.service.ui.api.service.clientServer.services
         public void Offline(ClientServiceParamsInfo arg)
         {
             ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
-            clientInfoCaching.Offline(model.ID);
+            clientInfoCaching.Offline(model.ID, model.Type);
         }
 
         public void ConnectReverse(ClientServiceParamsInfo arg)
@@ -77,7 +77,6 @@ namespace client.service.ui.api.service.clientServer.services
 
             if (sourceConnection != null && sourceConnection.Connected && clientInfoCaching.Get(model.ToId, out ClientInfo targetClient))
             {
-                clientInfoCaching.Offline(sourceConnection.ConnectId, model.Type);
                 await clientsTransfer.Relay(targetClient, sourceConnection, true);
             }
 

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-21 14:58:34
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-08 11:11:35
+ * @LastEditTime: 2022-11-13 14:55:50
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\apis\clients.js
@@ -15,6 +15,9 @@ export const getClients = () => {
 
 export const sendClientConnect = (id) => {
     return sendWebsocketMsg(`clients/connect`, { id: id });
+}
+export const sendClientOffline = (id, serverType = 3) => {
+    return sendWebsocketMsg(`clients/offline`, { id: id, type: serverType });
 }
 
 export const sendClientConnectReverse = (id) => {

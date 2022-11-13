@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-13 01:15:45
+ * @LastEditTime: 2022-11-13 14:56:31
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -49,10 +49,11 @@
 import { computed, reactive } from '@vue/reactivity';
 import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
-import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing, setRelay } from '../../apis/clients'
+import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing, setRelay, sendClientOffline } from '../../apis/clients'
 import Signal from './Signal.vue'
 import RelayView from './RelayView.vue'
 import { onMounted, onUnmounted, provide } from '@vue/runtime-core';
+import { ElMessageBox } from 'element-plus'
 export default {
     name: 'Clients',
     components: { Signal, RelayView },
@@ -60,7 +61,7 @@ export default {
         const clientsState = injectClients();
         const registerState = injectRegister();
         const connectTypeStrs = ['未连接', '打洞', '节点中继', '', '服务器中继'];
-        const connectTypeColors = ['color:#333;', 'color:#148727;font-weight:bold;', 'color:#148727;font-weight:bold;'];
+        const connectTypeColors = ['color:#333;', 'color:#148727;font-weight:bold;', 'color:#148727;font-weight:bold;', '', 'color:#148727;font-weight:bold;'];
         const clients = computed(() => {
             clientsState.clients.forEach(c => {
                 c.showUdp = c.UseUdp && registerState.ClientConfig.UseUdp;
@@ -92,10 +93,38 @@ export default {
         });
 
         const handleConnect = (row) => {
-            sendClientConnect(row.Id);
+            if (row.UdpConnected || row.TcpConnected) {
+                ElMessageBox.confirm('已连接，是否确定重新连接', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                }).then(() => {
+                    sendClientOffline(row.Id).then(() => {
+                        sendClientConnect(row.Id);
+                    });
+                }).catch(() => {
+
+                });
+            } else {
+                sendClientConnect(row.Id);
+            }
         }
         const handleConnectReverse = (row) => {
-            sendClientConnectReverse(row.Id);
+            if (row.UdpConnected || row.TcpConnected) {
+                ElMessageBox.confirm('已连接，是否确定重新连接', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                }).then(() => {
+                    sendClientOffline(row.Id).then(() => {
+                        sendClientConnectReverse(row.Id);
+                    });
+                }).catch(() => {
+
+                });
+            } else {
+                sendClientConnectReverse(row.Id);
+            }
         }
         const handleConnectReset = (row) => {
             sendClientReset(row.Id);
@@ -122,12 +151,13 @@ export default {
         });
         provide('share-data', state);
         const handleShowDelay = (item) => {
-            if (item.udpConnectType == 1 && c.tcpConnectType == 1) return;
             state.toId = item.Id;
             state.showDelay = true;
         }
         const handleOnRelay = (item) => {
-            setRelay(item);
+            sendClientOffline(item.toid, item.type).then(() => {
+                setRelay(item);
+            });
         }
 
 

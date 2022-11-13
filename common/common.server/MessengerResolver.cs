@@ -62,74 +62,77 @@ namespace common.server
         public async Task InputData(IConnection connection)
         {
             var receive = connection.ReceiveData;
+            //去掉表示数据长度的4字节
             var readReceive = receive.Slice(4);
             var responseWrap = connection.ReceiveResponseWrap;
             var requestWrap = connection.ReceiveRequestWrap;
 
-            //回复的消息
-            if ((MessageTypes)readReceive.Span[0] == MessageTypes.RESPONSE)
-            {
-                responseWrap.FromArray(readReceive);
-                //是中继的回复
-                if (responseWrap.RelayId > 0)
-                {
-                    //目的地连接对象
-                    IConnection _connection = sourceConnectionSelector.Select(connection, responseWrap.RelayId);
-                    //接下来的目的地是最终的节点
-                    if (_connection.RelayConnectId == responseWrap.RelayId)
-                    {
-                        MessageResponseWrap.WriteRelayId(readReceive, 0);
-                    }
-                    //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                    await _connection.Send(receive).ConfigureAwait(false);
-                }
-                else
-                {
-                    if (connection.EncodeEnabled)
-                    {
-                        responseWrap.Payload = connection.Crypto.Decode(responseWrap.Payload);
-                    }
-                    messengerSender.Response(responseWrap);
-                }
-                return;
-            }
-
-            //新的请求
-            requestWrap.FromArray(readReceive);
-            //是中继数据
-            if (requestWrap.RelayId > 0)
-            {
-                if ((requestWrap.MessengerId >= (ushort)RelayMessengerIds.Min && requestWrap.MessengerId <= (ushort)RelayMessengerIds.Max) || relayValidator.Validate(connection))
-                {
-                    //目的地连接对象
-                    IConnection _connection = sourceConnectionSelector.Select(connection, requestWrap.RelayId);
-                    //第一个节点收到中继数据，它知道是哪里来的，填写一下数据来源
-                    if (requestWrap.RelaySourceId == 0)
-                    {
-                        MessageRequestWrap.WriteRelaySourceId(readReceive, connection.ConnectId);
-                    }
-                    //接下来的目的地是最终的节点
-                    if (_connection.RelayConnectId == requestWrap.RelayId)
-                    {
-                        MessageRequestWrap.WriteRelayId(readReceive, 0);
-                    }
-                    //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                    await _connection.Send(receive).ConfigureAwait(false);
-                }
-                return;
-            }
-
-
-
-            if (connection.EncodeEnabled)
-            {
-                requestWrap.Payload = connection.Crypto.Decode(requestWrap.Payload);
-            }
-            connection.FromConnection = sourceConnectionSelector.Select(connection, requestWrap.RelayId);
-
-
             try
             {
+                //回复的消息
+                if ((MessageTypes)readReceive.Span[0] == MessageTypes.RESPONSE)
+                {
+                    responseWrap.FromArray(readReceive);
+                    //是中继的回复
+                    if (responseWrap.RelayId > 0)
+                    {
+                        //目的地连接对象
+                        IConnection _connection = sourceConnectionSelector.Select(connection, responseWrap.RelayId);
+                        if (_connection == null) return;
+                        //接下来的目的地是最终的节点
+                        if (_connection.RelayConnectId == responseWrap.RelayId)
+                        {
+                            MessageResponseWrap.WriteRelayId(readReceive, 0);
+                        }
+                        //中继数据不再次序列化，直接在原数据上更新数据然后发送
+                        await _connection.Send(receive).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        if (connection.EncodeEnabled)
+                        {
+                            responseWrap.Payload = connection.Crypto.Decode(responseWrap.Payload);
+                        }
+                        messengerSender.Response(responseWrap);
+                    }
+                    return;
+                }
+
+                //新的请求
+                requestWrap.FromArray(readReceive);
+                //是中继数据
+                if (requestWrap.RelayId > 0)
+                {
+                    if ((requestWrap.MessengerId >= (ushort)RelayMessengerIds.Min && requestWrap.MessengerId <= (ushort)RelayMessengerIds.Max) || relayValidator.Validate(connection))
+                    {
+                        //目的地连接对象
+                        IConnection _connection = sourceConnectionSelector.Select(connection, requestWrap.RelayId);
+                        if (_connection == null) return;
+                        //第一个节点收到中继数据，它知道是哪里来的，填写一下数据来源
+                        if (requestWrap.RelaySourceId == 0)
+                        {
+                            requestWrap.RelaySourceId = connection.ConnectId;
+                            MessageRequestWrap.WriteRelaySourceId(readReceive, connection.ConnectId);
+                        }
+                        //接下来的目的地是最终的节点
+                        if (_connection.RelayConnectId == requestWrap.RelayId)
+                        {
+                            MessageRequestWrap.WriteRelayId(readReceive, 0);
+                        }
+                        //中继数据不再次序列化，直接在原数据上更新数据然后发送
+                        await _connection.Send(receive).ConfigureAwait(false);
+                    }
+                    return;
+                }
+
+
+
+                if (connection.EncodeEnabled)
+                {
+                    requestWrap.Payload = connection.Crypto.Decode(requestWrap.Payload);
+                }
+                connection.FromConnection = sourceConnectionSelector.Select(connection, requestWrap.RelaySourceId);
+
                 //404,没这个插件
                 if (!messengers.ContainsKey(requestWrap.MessengerId))
                 {
@@ -156,7 +159,7 @@ namespace common.server
                         {
                             Connection = connection,
                             RequestId = requestWrap.RequestId,
-                            RelayId = requestWrap.RelayId,
+                            RelayId = requestWrap.RelaySourceId,
                             Code = MessageResponeCodes.ERROR,
                             Payload = middleres.Item2
                         }).ConfigureAwait(false);
@@ -192,7 +195,7 @@ namespace common.server
                 {
                     Connection = connection,
                     Payload = resultObject,
-                    RelayId = requestWrap.RelayId,
+                    RelayId = requestWrap.RelaySourceId,
                     RequestId = requestWrap.RequestId
                 }).ConfigureAwait(false);
             }
@@ -202,7 +205,7 @@ namespace common.server
                 await messengerSender.ReplyOnly(new MessageResponseWrap
                 {
                     Connection = connection,
-                    RelayId = requestWrap.RelayId,
+                    RelayId = requestWrap.RelaySourceId,
                     RequestId = requestWrap.RequestId,
                     Code = MessageResponeCodes.ERROR
                 }).ConfigureAwait(false);

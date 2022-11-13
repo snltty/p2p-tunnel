@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-11-08 09:57:59
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-08 11:34:34
+ * @LastEditTime: 2022-11-13 13:59:38
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\RelayView.vue
@@ -25,10 +25,10 @@
                         </dd>
                         <dd class="flex">
                             <span class="flex-1">
-                                <el-button size="small" @click="handleSelect(item.id,0)" v-if="item.tcp >= 0">选择</el-button>
+                                <el-button size="small" @click="handleSelect(item.id,1)" v-if="item.tcp >= 0">选择</el-button>
                             </span>
                             <span class="flex-1">
-                                <el-button size="small" @click="handleSelect(item.id,1)" v-if="item.udp >= 0">选择</el-button>
+                                <el-button size="small" @click="handleSelect(item.id,2)" v-if="item.udp >= 0">选择</el-button>
                             </span>
                         </dd>
                     </dl>
@@ -82,7 +82,6 @@ export default {
         let timer = 0;
         const getData = () => {
             getDelay(shareData.toId).then((res) => {
-                console.log(res);
                 state.delays = res;
                 timer = setTimeout(getData, 1000);
             }).catch(() => {

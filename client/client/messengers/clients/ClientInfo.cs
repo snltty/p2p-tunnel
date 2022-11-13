@@ -64,13 +64,12 @@ namespace client.messengers.clients
         }
         public void Offline(ServerType serverType)
         {
-            if (serverType == ServerType.UDP)
+            if ((serverType & ServerType.UDP) == ServerType.UDP)
             {
                 OfflineUdp();
             }
-            else
+            if ((serverType & ServerType.TCP) == ServerType.TCP)
             {
-                //Offline();
                 OfflineTcp();
             }
         }
@@ -99,11 +98,11 @@ namespace client.messengers.clients
 
         public void Connecting(bool val, ServerType serverType)
         {
-            if (serverType == ServerType.UDP)
+            if ((serverType & ServerType.UDP) == ServerType.UDP)
             {
                 UdpConnecting = val;
             }
-            else
+            if ((serverType & ServerType.TCP) == ServerType.TCP)
             {
                 TcpConnecting = val;
             }

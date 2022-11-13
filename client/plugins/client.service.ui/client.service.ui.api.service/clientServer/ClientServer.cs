@@ -129,7 +129,7 @@ namespace client.service.ui.api.service.clientServer
                 };
                 dynamic resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { param });
                 object resultObject = null;
-                if (!plugin.IsVoid)
+                if (plugin.IsVoid == false)
                 {
                     if (plugin.IsTask)
                     {
