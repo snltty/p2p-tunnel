@@ -3,6 +3,7 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.register;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace server.service.messengers
@@ -90,6 +91,51 @@ namespace server.service.messengers
         {
             return Helper.TrueArray;
         }
+
+
+        [MessengerId((ushort)RelayMessengerIds.AskConnects)]
+        public void AskConnects(IConnection connection)
+        {
+            foreach (var item in clientRegisterCache.GetAll().Where(c => c.Id != connection.ConnectId))
+            {
+                _ = messengerSender.SendOnly(new MessageRequestWrap
+                {
+                    Connection = item.OnLineConnection,
+                    MessengerId = (ushort)RelayMessengerIds.AskConnects,
+                    Payload = connection.ConnectId.ToBytes()
+                });
+            }
+        }
+
+        [MessengerId((ushort)RelayMessengerIds.Connects)]
+        public void Connects(IConnection connection)
+        {
+            ulong toid = ConnectsInfo.ReadToId(connection.ReceiveRequestWrap.Payload);
+            if (clientRegisterCache.Get(toid, out RegisterCacheInfo client))
+            {
+                _ = messengerSender.SendOnly(new MessageRequestWrap
+                {
+                    Connection = client.OnLineConnection,
+                    MessengerId = (ushort)RelayMessengerIds.Connects,
+                    Payload = connection.ReceiveRequestWrap.Payload
+                });
+            }
+        }
+
+        [MessengerId((ushort)RelayMessengerIds.Routes)]
+        public void Routes(IConnection connection)
+        {
+            ulong toid = RoutesInfo.ReadToId(connection.ReceiveRequestWrap.Payload);
+            if (clientRegisterCache.Get(toid, out RegisterCacheInfo client))
+            {
+                _ = messengerSender.SendOnly(new MessageRequestWrap
+                {
+                    Connection = client.OnLineConnection,
+                    MessengerId = (ushort)RelayMessengerIds.Routes,
+                    Payload = connection.ReceiveRequestWrap.Payload
+                });
+            }
+        }
     }
 
     public class SourceConnectionSelector : ISourceConnectionSelector
@@ -101,7 +147,19 @@ namespace server.service.messengers
             this.clientRegisterCaching = clientRegisterCaching;
         }
 
-        public IConnection Select(IConnection connection, ulong relayid)
+        public IConnection SelectSource(IConnection connection, ulong relayid)
+        {
+            if (relayid > 0)
+            {
+                if (clientRegisterCaching.Get(relayid, out RegisterCacheInfo client))
+                {
+                    return connection.ServerType == ServerType.TCP ? client.TcpConnection : client.UdpConnection;
+                }
+            }
+            return connection;
+        }
+
+        public IConnection SelectTarget(IConnection connection, ulong relayid)
         {
             if (relayid > 0)
             {

@@ -1,9 +1,12 @@
 ﻿using client.messengers.clients;
+using client.messengers.register;
+using client.messengers.relay;
 using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.relay
@@ -19,13 +22,19 @@ namespace client.realize.messengers.relay
         private readonly MessengerSender messengerSender;
         private readonly RelayMessengerSender relayMessengerSender;
         private readonly IRelayValidator relayValidator;
+        private readonly IConnecRouteCaching connecRouteCaching;
+        private readonly RegisterStateInfo registerStateInfo;
 
-        public RelayMessenger(IClientInfoCaching clientInfoCaching, MessengerSender messengerSender, RelayMessengerSender relayMessengerSender, IRelayValidator relayValidator)
+        public RelayMessenger(IClientInfoCaching clientInfoCaching, MessengerSender messengerSender,
+            RelayMessengerSender relayMessengerSender, IRelayValidator relayValidator,
+            IConnecRouteCaching connecRouteCaching, RegisterStateInfo registerStateInfo)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.messengerSender = messengerSender;
             this.relayMessengerSender = relayMessengerSender;
             this.relayValidator = relayValidator;
+            this.connecRouteCaching = connecRouteCaching;
+            this.registerStateInfo = registerStateInfo;
         }
 
         [MessengerId((ushort)RelayMessengerIds.Notify)]
@@ -66,14 +75,16 @@ namespace client.realize.messengers.relay
             }
 
             ulong toid = connection.ReceiveRequestWrap.Payload.Span.ToUInt64();
-            if (clientInfoCaching.Get(toid, out ClientInfo source))
+            if (clientInfoCaching.Get(toid, out ClientInfo target))
             {
-                return connection.ServerType switch
+
+                bool res = connection.ServerType switch
                 {
-                    ServerType.TCP => source.TcpConnected && source.TcpConnectType != ClientConnectTypes.RelayServer ? Helper.TrueArray : Helper.FalseArray,
-                    ServerType.UDP => source.UdpConnected && source.UdpConnectType != ClientConnectTypes.RelayServer ? Helper.TrueArray : Helper.FalseArray,
-                    _ => Helper.FalseArray,
+                    ServerType.TCP => target.TcpConnected && target.TcpConnectType != ClientConnectTypes.RelayServer,
+                    ServerType.UDP => target.UdpConnected && target.UdpConnectType != ClientConnectTypes.RelayServer,
+                    _ => false,
                 };
+                return res ? Helper.TrueArray : Helper.FalseArray;
             }
 
             return Helper.FalseArray;
@@ -83,6 +94,40 @@ namespace client.realize.messengers.relay
         public byte[] Delay(IConnection connection)
         {
             return Helper.TrueArray;
+        }
+
+
+
+        [MessengerId((ushort)RelayMessengerIds.AskConnects)]
+        public void AskConnects(IConnection connection)
+        {
+            ulong fromid = connection.ReceiveRequestWrap.Payload.Span.ToUInt64();
+            _ = relayMessengerSender.Connects(new ConnectsInfo
+            {
+                Id = registerStateInfo.ConnectId,
+                ToId = fromid,
+                Connects = clientInfoCaching.All().Where(c => c.TcpConnected || c.UdpConnected).Select(c => new ConnectInfo
+                {
+                    Id = c.Id,
+                    Tcp = c.TcpConnected,
+                    Udp = c.UdpConnected
+                }).ToArray(),
+            });
+        }
+        [MessengerId((ushort)RelayMessengerIds.Connects)]
+        public void Connects(IConnection connection)
+        {
+            ConnectsInfo connectInfo = new ConnectsInfo();
+            connectInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
+            connecRouteCaching.AddConnects(connectInfo);
+        }
+
+        [MessengerId((ushort)RelayMessengerIds.Routes)]
+        public void Routes(IConnection connection)
+        {
+            RoutesInfo routes = new RoutesInfo();
+            routes.DeBytes(connection.ReceiveRequestWrap.Payload);
+            connecRouteCaching.AddRoutes(routes);
         }
     }
 }

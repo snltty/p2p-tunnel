@@ -27,7 +27,6 @@ namespace client.realize.messengers.heart
                 Payload = Helper.EmptyArray,
                 Timeout = 5000
             }).ConfigureAwait(false);
-
             return resp.Code == MessageResponeCodes.OK && Helper.TrueArray.AsSpan().SequenceEqual(resp.Data.Span);
         }
     }

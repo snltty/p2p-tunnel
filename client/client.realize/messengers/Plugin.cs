@@ -20,6 +20,7 @@ using common.libs.database;
 using common.server.servers.rudp;
 using common.server.servers.iocp;
 using client.realize.messengers.relay;
+using client.messengers.relay;
 
 namespace client.realize.messengers
 {
@@ -45,9 +46,10 @@ namespace client.realize.messengers
             services.AddSingleton<Config>();
             services.AddTransient(typeof(IConfigDataProvider<>), typeof(ConfigDataFileProvider<>));
 
-            services.AddSingleton<ISourceConnectionSelector, SourceConnectionSelector>();
-            services.AddSingleton<IRelayConnectionSelector, DefaultRelayConnectionSelector>();
+            services.AddSingleton<ISourceConnectionSelector, relay.SourceConnectionSelector>();
             services.AddSingleton<IRelayValidator, RelayValidator>();
+            services.AddSingleton<IConnecRouteCaching,ConnecRouteCaching>();
+            
 
             services.AddSingleton<IIPv6AddressRequest, IPv6AddressRequest>();
 

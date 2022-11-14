@@ -1,6 +1,6 @@
 ﻿using common.server;
 
-namespace client.realize.messengers
+namespace client.realize.messengers.relay
 {
     public class RelayValidator : IRelayValidator
     {

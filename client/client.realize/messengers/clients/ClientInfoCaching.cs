@@ -19,6 +19,7 @@ namespace client.realize.messengers.clients
         public SimpleSubPushHandler<ClientInfo> OnOffline { get; } = new SimpleSubPushHandler<ClientInfo>();
         public SimpleSubPushHandler<ClientInfo> OnOnline { get; } = new SimpleSubPushHandler<ClientInfo>();
         public SimpleSubPushHandler<ClientInfo> OnAdd { get; } = new SimpleSubPushHandler<ClientInfo>();
+        public SimpleSubPushHandler<ClientInfo> OnRemove { get; } = new SimpleSubPushHandler<ClientInfo>();
 
         public bool Add(ClientInfo client)
         {
@@ -75,7 +76,10 @@ namespace client.realize.messengers.clients
 
         public void Remove(ulong id)
         {
-            clients.TryRemove(id, out _);
+            if(clients.TryRemove(id, out ClientInfo client))
+            {
+                OnRemove.Push(client);
+            }
         }
 
         public void Online(ulong id, IConnection connection, ClientConnectTypes connectType)
@@ -131,6 +135,7 @@ namespace client.realize.messengers.clients
                 item.OfflineTcp();
                 OnOffline.Push(item);
                 clients.TryRemove(item.Id, out _);
+                OnRemove.Push(item);
             }
             tunnelPorts.Clear();
         }

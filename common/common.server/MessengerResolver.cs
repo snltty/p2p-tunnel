@@ -77,8 +77,9 @@ namespace common.server
                     if (responseWrap.RelayId > 0)
                     {
                         //目的地连接对象
-                        IConnection _connection = sourceConnectionSelector.Select(connection, responseWrap.RelayId);
+                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, responseWrap.RelayId);
                         if (_connection == null) return;
+
                         //接下来的目的地是最终的节点
                         if (_connection.RelayConnectId == responseWrap.RelayId)
                         {
@@ -103,10 +104,11 @@ namespace common.server
                 //是中继数据
                 if (requestWrap.RelayId > 0)
                 {
+
                     if ((requestWrap.MessengerId >= (ushort)RelayMessengerIds.Min && requestWrap.MessengerId <= (ushort)RelayMessengerIds.Max) || relayValidator.Validate(connection))
                     {
                         //目的地连接对象
-                        IConnection _connection = sourceConnectionSelector.Select(connection, requestWrap.RelayId);
+                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, requestWrap.RelayId);
                         if (_connection == null) return;
                         //第一个节点收到中继数据，它知道是哪里来的，填写一下数据来源
                         if (requestWrap.RelaySourceId == 0)
@@ -131,7 +133,7 @@ namespace common.server
                 {
                     requestWrap.Payload = connection.Crypto.Decode(requestWrap.Payload);
                 }
-                connection.FromConnection = sourceConnectionSelector.Select(connection, requestWrap.RelaySourceId);
+                connection.FromConnection = sourceConnectionSelector.SelectSource(connection, requestWrap.RelaySourceId);
 
                 //404,没这个插件
                 if (!messengers.ContainsKey(requestWrap.MessengerId))
@@ -142,7 +144,7 @@ namespace common.server
                     {
                         Connection = connection,
                         RequestId = requestWrap.RequestId,
-                        RelayId = requestWrap.RelayId,
+                        RelayId = requestWrap.RelaySourceId,
                         Code = MessageResponeCodes.NOT_FOUND
                     }).ConfigureAwait(false);
                     return;

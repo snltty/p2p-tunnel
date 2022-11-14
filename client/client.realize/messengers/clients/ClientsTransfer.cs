@@ -28,7 +28,6 @@ namespace client.realize.messengers.clients
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly Config config;
         private readonly IUdpServer udpServer;
-        private readonly IRelayConnectionSelector relayConnectionSelector;
         private readonly HeartMessengerSender heartMessengerSender;
         private readonly RelayMessengerSender relayMessengerSender;
 
@@ -38,7 +37,7 @@ namespace client.realize.messengers.clients
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
-            IUdpServer udpServer, ITcpServer tcpServer, IRelayConnectionSelector relayConnectionSelector, HeartMessengerSender heartMessengerSender, RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel
+            IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender, RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel
         )
         {
             this.punchHoleUdp = punchHoleUdp;
@@ -47,7 +46,6 @@ namespace client.realize.messengers.clients
             this.clientInfoCaching = clientInfoCaching;
             this.config = config;
             this.udpServer = udpServer;
-            this.relayConnectionSelector = relayConnectionSelector;
             this.heartMessengerSender = heartMessengerSender;
             this.relayMessengerSender = relayMessengerSender;
 
@@ -351,6 +349,7 @@ namespace client.realize.messengers.clients
                 {
                     try
                     {
+
                         var start = DateTime.Now;
                         var res = await heartMessengerSender.Heart(item.UdpConnection);
                         if (res)
@@ -411,7 +410,7 @@ namespace client.realize.messengers.clients
                     if (res)
                     {
                         current = DateTime.Now;
-                        res = await relayMessengerSender.RelayDelay(toid, item.TcpConnection);
+                        res = await relayMessengerSender.Delay(toid, item.TcpConnection);
                         if (res)
                         {
                             result[0] = (int)(DateTime.Now - current).TotalMilliseconds;
@@ -425,7 +424,7 @@ namespace client.realize.messengers.clients
                     if (res)
                     {
                         current = DateTime.Now;
-                        res = await relayMessengerSender.RelayDelay(toid, item.UdpConnection);
+                        res = await relayMessengerSender.Delay(toid, item.UdpConnection);
                         if (res)
                         {
                             result[1] = (int)(DateTime.Now - current).TotalMilliseconds;
@@ -444,7 +443,7 @@ namespace client.realize.messengers.clients
                 if (res)
                 {
                     current = DateTime.Now;
-                    res = await relayMessengerSender.RelayDelay(toid, registerState.TcpConnection);
+                    res = await relayMessengerSender.Delay(toid, registerState.TcpConnection);
                     if (res)
                     {
                         resultServer[0] = (int)(DateTime.Now - current).TotalMilliseconds;
@@ -457,7 +456,7 @@ namespace client.realize.messengers.clients
                 if (res)
                 {
                     current = DateTime.Now;
-                    res = await relayMessengerSender.RelayDelay(toid, registerState.UdpConnection);
+                    res = await relayMessengerSender.Delay(toid, registerState.UdpConnection);
                     if (res)
                     {
                         resultServer[1] = (int)(DateTime.Now - current).TotalMilliseconds;
@@ -556,7 +555,12 @@ namespace client.realize.messengers.clients
         }
         private async Task Relay(ClientInfo client, ServerType serverType, bool notify = false)
         {
-            IConnection sourceConnection = await relayConnectionSelector.Select(serverType);
+            IConnection sourceConnection = serverType switch
+            {
+                ServerType.TCP => registerState.TcpConnection,
+                ServerType.UDP => registerState.UdpConnection,
+                _ => throw new NotImplementedException(),
+            }; ;
             await Relay1(client, sourceConnection, notify);
         }
         private async Task Relay1(ClientInfo client, IConnection sourceConnection, bool notify = false)
@@ -595,7 +599,7 @@ namespace client.realize.messengers.clients
 
             if (notify)
             {
-                await relayMessengerSender.SendRelay(client.Id, sourceConnection);
+                await relayMessengerSender.Relay(client.Id, sourceConnection);
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using client.messengers.register;
+using client.messengers.relay;
 using common.libs;
 using common.libs.extends;
 using common.server;
@@ -27,7 +28,7 @@ namespace client.realize.messengers.relay
         /// <param name="toid"></param>
         /// <param name="connection">中继节点</param>
         /// <returns></returns>
-        public async Task SendRelay(ulong toid, IConnection connection)
+        public async Task Relay(ulong toid, IConnection connection)
         {
             await messengerSender.SendOnly(new MessageRequestWrap
             {
@@ -61,7 +62,7 @@ namespace client.realize.messengers.relay
         /// <param name="toid"></param>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public async Task<bool> RelayDelay(ulong toid, IConnection connection)
+        public async Task<bool> Delay(ulong toid, IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
@@ -72,6 +73,35 @@ namespace client.realize.messengers.relay
                 RelayId = toid
             }).ConfigureAwait(false);
             return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
+        }
+
+
+        public async Task<bool> AskConnects()
+        {
+            return await messengerSender.SendOnly(new MessageRequestWrap
+            {
+                MessengerId = (ushort)RelayMessengerIds.AskConnects,
+                Connection = registerStateInfo.OnlineConnection,
+                Payload = Helper.EmptyArray,
+            }).ConfigureAwait(false);
+        }
+        public async Task<bool> Connects(ConnectsInfo routes)
+        {
+            return await messengerSender.SendOnly(new MessageRequestWrap
+            {
+                MessengerId = (ushort)RelayMessengerIds.Connects,
+                Connection = registerStateInfo.OnlineConnection,
+                Payload = routes.ToBytes(),
+            }).ConfigureAwait(false);
+        }
+        public async Task<bool> Routes(RoutesInfo routes)
+        {
+            return await messengerSender.SendOnly(new MessageRequestWrap
+            {
+                MessengerId = (ushort)RelayMessengerIds.Routes,
+                Connection = registerStateInfo.OnlineConnection,
+                Payload = routes.ToBytes(),
+            }).ConfigureAwait(false);
         }
     }
 

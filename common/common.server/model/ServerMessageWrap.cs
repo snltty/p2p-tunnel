@@ -128,6 +128,7 @@ namespace common.server.model
             else
             {
                 RelayId = 0;
+                RelaySourceId = 0;
             }
 
             RequestId = span.Slice(index).ToUInt32();
