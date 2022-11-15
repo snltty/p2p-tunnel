@@ -67,7 +67,7 @@ namespace common.server.model
             ToId.ToBytes().CopyTo(span);
             index += 8;
 
-            Id.ToBytes().CopyTo(span);
+            Id.ToBytes().CopyTo(span.Slice(index));
             index += 8;
 
 
@@ -93,7 +93,7 @@ namespace common.server.model
             ToId = span.ToUInt64();
             index += 8;
 
-            Id = span.ToUInt64();
+            Id = span.Slice(index).ToUInt64();
             index += 8;
 
             int len = (span.Length - 8) / 9;
@@ -103,8 +103,8 @@ namespace common.server.model
                 Connects[i] = new ConnectInfo
                 {
                     Id = span.Slice(index).ToUInt64(),
-                    Tcp = (span[index + 1] >> 1) == 1,
-                    Udp = (span[index + 1] & 0x1) == 1
+                    Tcp = (span[index + 8] >> 1) == 1,
+                    Udp = (span[index + 8] & 0x1) == 1
 
                 };
                 index += 9;

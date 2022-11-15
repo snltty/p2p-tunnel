@@ -152,6 +152,7 @@ namespace common.server.model
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
         public uint RequestId { get; set; } = 0;
         public ulong RelayId { get; set; } = 0;
+        public ulong RelaySourceId { get; set; } = 0;
         public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
 
         public static void WriteRelayId(Memory<byte> memory, ulong relayId)
@@ -173,7 +174,7 @@ namespace common.server.model
                 + Payload.Length;
             if (RelayId > 0)
             {
-                length += 8;
+                length += 16;
             }
 
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
@@ -199,6 +200,10 @@ namespace common.server.model
                 byte[] relayidByte = RelayId.ToBytes();
                 Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
                 index += relayidByte.Length;
+
+                byte[] relayidSorceByte = RelaySourceId.ToBytes();
+                Array.Copy(relayidSorceByte, 0, res, index, relayidSorceByte.Length);
+                index += relayidSorceByte.Length;
             }
 
             byte[] requestIdByte = RequestId.ToBytes();
@@ -229,10 +234,14 @@ namespace common.server.model
             {
                 RelayId = span.Slice(index).ToUInt64();
                 index += 8;
+
+                RelaySourceId = span.Slice(index).ToUInt64();
+                index += 8;
             }
             else
             {
                 RelayId = 0;
+                RelaySourceId = 0;
             }
 
             RequestId = span.Slice(index).ToUInt32();

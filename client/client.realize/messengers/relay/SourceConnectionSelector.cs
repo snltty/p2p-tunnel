@@ -12,10 +12,12 @@ namespace client.realize.messengers.relay
     public class SourceConnectionSelector : ISourceConnectionSelector
     {
         private readonly IClientInfoCaching clientInfoCaching;
+        private readonly IConnecRouteCaching connecRouteCaching;
 
         public SourceConnectionSelector(IClientInfoCaching clientInfoCaching, RegisterStateInfo registerStateInfo, IConnecRouteCaching connecRouteCaching)
         {
             this.clientInfoCaching = clientInfoCaching;
+            this.connecRouteCaching = connecRouteCaching;
 
             clientInfoCaching.OnRemove.Sub((client) =>
             {
@@ -36,19 +38,23 @@ namespace client.realize.messengers.relay
             {
                 if (clientInfoCaching.Get(relayid, out ClientInfo client))
                 {
-                    return connection.ServerType == common.server.model.ServerType.TCP ? client.TcpConnection : client.UdpConnection;
+                    return connection.ServerType == ServerType.TCP ? client.TcpConnection : client.UdpConnection;
                 }
             }
             return connection;
         }
 
-        public IConnection SelectTarget(IConnection connection, ulong relayid)
+        public IConnection SelectTarget(IConnection connection, ulong fromid, ulong toid)
         {
-            if (relayid > 0)
+            if ((fromid & toid) > 0)
             {
-                if (clientInfoCaching.Get(relayid, out ClientInfo client))
+                if(connecRouteCaching.Get(fromid, toid,out RouteInfo route))
                 {
-                    return connection.ServerType == common.server.model.ServerType.TCP ? client.TcpConnection : client.UdpConnection;
+                    toid = route.TargetId;
+                }
+                if (clientInfoCaching.Get(toid, out ClientInfo client))
+                {
+                    return connection.ServerType == ServerType.TCP ? client.TcpConnection : client.UdpConnection;
                 }
             }
             return connection;
@@ -59,6 +65,13 @@ namespace client.realize.messengers.relay
     {
         ConcurrentDictionary<ulong, ConnectInfo[]> connectsDic = new ConcurrentDictionary<ulong, ConnectInfo[]>();
         ConcurrentDictionary<RouteKey, RouteInfo> routesDic = new ConcurrentDictionary<RouteKey, RouteInfo>();
+
+        public ConcurrentDictionary<ulong, ConnectInfo[]> Connects => connectsDic;
+
+        public bool Get(ulong fromId, ulong toId, out RouteInfo route)
+        {
+            return routesDic.TryGetValue(new RouteKey(fromId, toId), out route);
+        }
 
         public void AddConnects(ConnectsInfo connects)
         {
@@ -86,7 +99,6 @@ namespace client.realize.messengers.relay
             connectsDic.Clear();
             routesDic.Clear();
         }
-
 
         public struct RouteKey
         {

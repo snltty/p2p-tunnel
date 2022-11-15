@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-11-08 09:57:59
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-13 13:59:38
+ * @LastEditTime: 2022-11-15 16:39:28
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\RelayView.vue
@@ -41,8 +41,9 @@
 <script>
 import { computed, reactive } from '@vue/reactivity';
 import { inject, onMounted, onUnmounted, watch } from '@vue/runtime-core';
-import { getDelay } from '../../apis/clients'
+import { getDelay, getConnects } from '../../apis/clients'
 import { injectClients } from '../../states/clients'
+import { injectRegister } from '../../states/register'
 import Signal from './Signal.vue'
 export default {
     props: ['modelValue'],
@@ -52,10 +53,17 @@ export default {
 
         const shareData = inject('share-data');
         const clientsState = injectClients();
+        const registerState = injectRegister();
         const state = reactive({
             show: props.modelValue,
             loading: false,
-            delays: {}
+            delays: {},
+            connects: {},
+            start: registerState.RemoteInfo.ConnectId,
+            starts: [],
+            end: shareData.toId,
+            type: 'Tcp'
+
         });
         watch(() => state.show, (val) => {
             if (!val) {
@@ -81,12 +89,59 @@ export default {
 
         let timer = 0;
         const getData = () => {
-            getDelay(shareData.toId).then((res) => {
-                state.delays = res;
+            Promise.all([getDelay(shareData.toId), getConnects()]).then(([delays, connects]) => {
+                state.delays = delays;
+
+                try {
+                    let _connects = [];
+                    for (let j in connects) {
+                        _connects.push({
+                            Id: +j,
+                            Connects: connects[j]
+                        })
+                    }
+
+                    state.connects = _connects;
+                    state.starts = _connects
+                        .filter(c => c.Connects.filter(c => c.Id == state.start && c[state.type] == true).length > 0 && c.Connects.length > 1);
+
+                    console.log(fun(state.starts, [state.start], [state.start]));
+                } catch (e) {
+                    console.log(e);
+                }
+
                 timer = setTimeout(getData, 1000);
             }).catch(() => {
                 timer = setTimeout(getData, 1000);
-            })
+            });
+        }
+        const fun = (starts, exclude = [], path = [], result = []) => {
+            for (let i = 0; i < starts.length; i++) {
+
+                if (starts[i].Id == state.end) {
+                    path.push(starts[i].Id);
+                    if (path[0] == state.start) {
+                        result.push(path);
+                    }
+                    continue;
+                }
+
+                let _exclude = exclude.slice(0);
+                _exclude.push(starts[i].Id);
+                let _path = path.slice(0);
+                _path.push(starts[i].Id);
+
+                let lastIds = starts[i].Connects.filter(c => _exclude.indexOf(c.Id) == -1 && c[state.type] == true).map(c => c.Id);
+                let last = state.connects.filter(c => lastIds.indexOf(c.Id) >= 0);
+                if (last.length > 0) {
+                    fun(last, _exclude, _path, result);
+                } else {
+                    if (_path[_path.length - 1] == state.end) {
+                        result.push(_path);
+                    }
+                }
+            }
+            return result;
         }
         onMounted(() => {
             getData();

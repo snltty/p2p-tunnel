@@ -73,7 +73,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             };
             connectTcpCache.TryAdd(param.Id, ceche);
 
-            ceche.Step1Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 2000);
+            ceche.Step1Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 3000);
 
             await SendStep1(param);
 
@@ -160,6 +160,10 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     ips.AddRange(locals);
                 }
                 ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+                if ((TunnelDefaults)(arg.RawData.TunnelName) > TunnelDefaults.MAX)
+                {
+                    ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port + 1));
+                }
 
                 for (byte i = 0; i < times; i++)
                 {
@@ -187,7 +191,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
                         Logger.Instance.DebugDebug($"{ip} connect====================");
                         IAsyncResult result = targetSocket.BeginConnect(ip, null, null);
-                        result.AsyncWaitHandle.WaitOne(ip.IsLan() ? 100 : 2000, false);
+                        result.AsyncWaitHandle.WaitOne(ip.IsLan() ? 100 : 300, false);
 
                         if (result.IsCompleted)
                         {

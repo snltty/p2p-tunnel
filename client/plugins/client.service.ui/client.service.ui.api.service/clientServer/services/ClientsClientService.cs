@@ -4,6 +4,7 @@ using client.service.ui.api.clientServer;
 using common.libs.extends;
 using common.server;
 using common.server.model;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -57,6 +58,15 @@ namespace client.service.ui.api.service.clientServer.services
             return true;
         }
 
+        public async Task<ConcurrentDictionary<ulong, ConnectInfo[]>> Connects(ClientServiceParamsInfo arg)
+        {
+            return await clientsTransfer.Connects();
+        }
+        public async Task<bool> Routes(ClientServiceParamsInfo arg)
+        {
+            RoutesInfo routes = arg.Content.DeJson<RoutesInfo>();
+            return await clientsTransfer.Routes(routes);
+        }
         public async Task<Dictionary<ulong, int[]>> Delay(ClientServiceParamsInfo arg)
         {
             return await clientsTransfer.Delay(ulong.Parse(arg.Content));

@@ -77,7 +77,7 @@ namespace common.server
                     if (responseWrap.RelayId > 0)
                     {
                         //目的地连接对象
-                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, responseWrap.RelayId);
+                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, responseWrap.RelaySourceId, responseWrap.RelayId);
                         if (_connection == null) return;
 
                         //接下来的目的地是最终的节点
@@ -107,15 +107,17 @@ namespace common.server
 
                     if ((requestWrap.MessengerId >= (ushort)RelayMessengerIds.Min && requestWrap.MessengerId <= (ushort)RelayMessengerIds.Max) || relayValidator.Validate(connection))
                     {
-                        //目的地连接对象
-                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, requestWrap.RelayId);
-                        if (_connection == null) return;
                         //第一个节点收到中继数据，它知道是哪里来的，填写一下数据来源
                         if (requestWrap.RelaySourceId == 0)
                         {
                             requestWrap.RelaySourceId = connection.ConnectId;
                             MessageRequestWrap.WriteRelaySourceId(readReceive, connection.ConnectId);
                         }
+
+                        //目的地连接对象
+                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, requestWrap.RelaySourceId, requestWrap.RelayId);
+                        if (_connection == null) return;
+
                         //接下来的目的地是最终的节点
                         if (_connection.RelayConnectId == requestWrap.RelayId)
                         {
@@ -145,6 +147,7 @@ namespace common.server
                         Connection = connection,
                         RequestId = requestWrap.RequestId,
                         RelayId = requestWrap.RelaySourceId,
+                        RelaySourceId = requestWrap.RelayId,
                         Code = MessageResponeCodes.NOT_FOUND
                     }).ConfigureAwait(false);
                     return;
@@ -162,6 +165,7 @@ namespace common.server
                             Connection = connection,
                             RequestId = requestWrap.RequestId,
                             RelayId = requestWrap.RelaySourceId,
+                            RelaySourceId = requestWrap.RelayId,
                             Code = MessageResponeCodes.ERROR,
                             Payload = middleres.Item2
                         }).ConfigureAwait(false);
@@ -198,6 +202,7 @@ namespace common.server
                     Connection = connection,
                     Payload = resultObject,
                     RelayId = requestWrap.RelaySourceId,
+                    RelaySourceId = requestWrap.RelayId,
                     RequestId = requestWrap.RequestId
                 }).ConfigureAwait(false);
             }
@@ -208,6 +213,7 @@ namespace common.server
                 {
                     Connection = connection,
                     RelayId = requestWrap.RelaySourceId,
+                    RelaySourceId = requestWrap.RelayId,
                     RequestId = requestWrap.RequestId,
                     Code = MessageResponeCodes.ERROR
                 }).ConfigureAwait(false);

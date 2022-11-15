@@ -1,4 +1,6 @@
 ﻿using common.server;
+using common.server.model;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,6 +15,9 @@ namespace client.messengers.clients
         public void Reset(ulong id);
         public void ConnectStop(ulong id);
         public Task Ping();
+
+        public Task<ConcurrentDictionary<ulong, ConnectInfo[]>> Connects();
+        public Task<bool> Routes(RoutesInfo routes);
         public Task<Dictionary<ulong, int[]>> Delay(ulong toid);
         public Task Relay(ClientInfo client, IConnection sourceConnection, bool notify = false);
     }

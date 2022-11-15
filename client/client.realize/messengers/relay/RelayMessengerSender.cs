@@ -50,7 +50,8 @@ namespace client.realize.messengers.relay
             {
                 MessengerId = (ushort)RelayMessengerIds.Verify,
                 Connection = connection,
-                Payload = toid.ToBytes()
+                Payload = toid.ToBytes(),
+                Timeout = 1000,
             }).ConfigureAwait(false);
 
             return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
@@ -68,7 +69,7 @@ namespace client.realize.messengers.relay
             {
                 MessengerId = (ushort)RelayMessengerIds.Delay,
                 Connection = connection,
-                Timeout = 2000,
+                Timeout = 1000,
                 Payload = Helper.EmptyArray,
                 RelayId = toid
             }).ConfigureAwait(false);
@@ -85,13 +86,13 @@ namespace client.realize.messengers.relay
                 Payload = Helper.EmptyArray,
             }).ConfigureAwait(false);
         }
-        public async Task<bool> Connects(ConnectsInfo routes)
+        public async Task<bool> Connects(ConnectsInfo connects)
         {
             return await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)RelayMessengerIds.Connects,
                 Connection = registerStateInfo.OnlineConnection,
-                Payload = routes.ToBytes(),
+                Payload = connects.ToBytes(),
             }).ConfigureAwait(false);
         }
         public async Task<bool> Routes(RoutesInfo routes)

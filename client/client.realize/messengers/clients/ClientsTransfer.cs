@@ -3,6 +3,7 @@ using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using client.messengers.punchHole.udp;
 using client.messengers.register;
+using client.messengers.relay;
 using client.realize.messengers.heart;
 using client.realize.messengers.punchHole;
 using client.realize.messengers.relay;
@@ -11,6 +12,7 @@ using common.server;
 using common.server.model;
 using common.server.servers.rudp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,6 +32,7 @@ namespace client.realize.messengers.clients
         private readonly IUdpServer udpServer;
         private readonly HeartMessengerSender heartMessengerSender;
         private readonly RelayMessengerSender relayMessengerSender;
+        private readonly IConnecRouteCaching connecRouteCaching;
 
         private const byte TryReverseMaxValue = 2;
         private object lockObject = new();
@@ -37,7 +40,8 @@ namespace client.realize.messengers.clients
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
-            IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender, RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel
+            IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
+            RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IConnecRouteCaching connecRouteCaching
         )
         {
             this.punchHoleUdp = punchHoleUdp;
@@ -48,6 +52,7 @@ namespace client.realize.messengers.clients
             this.udpServer = udpServer;
             this.heartMessengerSender = heartMessengerSender;
             this.relayMessengerSender = relayMessengerSender;
+            this.connecRouteCaching = connecRouteCaching;
 
 
             punchHoleUdp.OnStep1Handler.Sub((e) =>
@@ -390,83 +395,7 @@ namespace client.realize.messengers.clients
                 }
             }
         }
-
-        public async Task<Dictionary<ulong, int[]>> Delay(ulong toid)
-        {
-            Dictionary<ulong, int[]> data = new Dictionary<ulong, int[]>();
-            bool res = false;
-            DateTime current;
-
-            foreach (var item in clientInfoCaching.All().Where(c => c.UseRelay && c.Id != toid && c.Id != registerState.ConnectId))
-            {
-                if (data.ContainsKey(item.Id)) continue;
-
-                int[] result = new int[] { -1, -1 };
-                data.Add(item.Id, result);
-
-                if (config.Client.UseTcp && item.UseTcp && item.TcpConnected && item.TcpConnectType != ClientConnectTypes.RelayServer)
-                {
-                    res = await relayMessengerSender.Verify(toid, item.TcpConnection);
-                    if (res)
-                    {
-                        current = DateTime.Now;
-                        res = await relayMessengerSender.Delay(toid, item.TcpConnection);
-                        if (res)
-                        {
-                            result[0] = (int)(DateTime.Now - current).TotalMilliseconds;
-                        }
-                    }
-                }
-
-                if (config.Client.UseUdp && item.UseUdp && item.UdpConnected && item.UdpConnectType != ClientConnectTypes.RelayServer)
-                {
-                    res = await relayMessengerSender.Verify(toid, item.UdpConnection);
-                    if (res)
-                    {
-                        current = DateTime.Now;
-                        res = await relayMessengerSender.Delay(toid, item.UdpConnection);
-                        if (res)
-                        {
-                            result[1] = (int)(DateTime.Now - current).TotalMilliseconds;
-                        }
-                    }
-                }
-            }
-
-
-            int[] resultServer = new int[] { -1, -1 };
-            data.Add(0, resultServer);
-
-            if (config.Client.UseTcp)
-            {
-                res = await relayMessengerSender.Verify(toid, registerState.TcpConnection);
-                if (res)
-                {
-                    current = DateTime.Now;
-                    res = await relayMessengerSender.Delay(toid, registerState.TcpConnection);
-                    if (res)
-                    {
-                        resultServer[0] = (int)(DateTime.Now - current).TotalMilliseconds;
-                    }
-                }
-            }
-            if (config.Client.UseUdp)
-            {
-                res = await relayMessengerSender.Verify(toid, registerState.UdpConnection);
-                if (res)
-                {
-                    current = DateTime.Now;
-                    res = await relayMessengerSender.Delay(toid, registerState.UdpConnection);
-                    if (res)
-                    {
-                        resultServer[1] = (int)(DateTime.Now - current).TotalMilliseconds;
-                    }
-                }
-            }
-
-
-            return data;
-        }
+       
 
         private void OnRegisterBind(bool state)
         {
@@ -553,6 +482,92 @@ namespace client.realize.messengers.clients
                 Logger.Instance.Error(ex);
             }
         }
+
+        public async Task<ConcurrentDictionary<ulong, ConnectInfo[]>> Connects()
+        {
+            await relayMessengerSender.AskConnects();
+            return connecRouteCaching.Connects;
+        }
+        public async Task<bool> Routes(RoutesInfo routes)
+        {
+          return  await relayMessengerSender.Routes(routes);
+        }
+        public async Task<Dictionary<ulong, int[]>> Delay(ulong toid)
+        {
+            Dictionary<ulong, int[]> data = new Dictionary<ulong, int[]>();
+            bool res = false;
+            DateTime current;
+
+            foreach (var item in clientInfoCaching.All().Where(c => c.UseRelay && c.Id != toid && c.Id != registerState.ConnectId))
+            {
+                if (data.ContainsKey(item.Id)) continue;
+
+                int[] result = new int[] { -1, -1 };
+                data.Add(item.Id, result);
+
+                if (config.Client.UseTcp && item.UseTcp && item.TcpConnected && item.TcpConnectType != ClientConnectTypes.RelayServer)
+                {
+                    res = await relayMessengerSender.Verify(toid, item.TcpConnection);
+                    if (res)
+                    {
+                        current = DateTime.Now;
+                        res = await relayMessengerSender.Delay(toid, item.TcpConnection);
+                        if (res)
+                        {
+                            result[0] = (int)(DateTime.Now - current).TotalMilliseconds;
+                        }
+                    }
+                }
+
+                if (config.Client.UseUdp && item.UseUdp && item.UdpConnected && item.UdpConnectType != ClientConnectTypes.RelayServer)
+                {
+                    res = await relayMessengerSender.Verify(toid, item.UdpConnection);
+                    if (res)
+                    {
+                        current = DateTime.Now;
+                        res = await relayMessengerSender.Delay(toid, item.UdpConnection);
+                        if (res)
+                        {
+                            result[1] = (int)(DateTime.Now - current).TotalMilliseconds;
+                        }
+                    }
+                }
+            }
+
+
+            int[] resultServer = new int[] { -1, -1 };
+            data.Add(0, resultServer);
+
+            if (config.Client.UseTcp)
+            {
+                res = await relayMessengerSender.Verify(toid, registerState.TcpConnection);
+                if (res)
+                {
+                    current = DateTime.Now;
+                    res = await relayMessengerSender.Delay(toid, registerState.TcpConnection);
+                    if (res)
+                    {
+                        resultServer[0] = (int)(DateTime.Now - current).TotalMilliseconds;
+                    }
+                }
+            }
+            if (config.Client.UseUdp)
+            {
+                res = await relayMessengerSender.Verify(toid, registerState.UdpConnection);
+                if (res)
+                {
+                    current = DateTime.Now;
+                    res = await relayMessengerSender.Delay(toid, registerState.UdpConnection);
+                    if (res)
+                    {
+                        resultServer[1] = (int)(DateTime.Now - current).TotalMilliseconds;
+                    }
+                }
+            }
+
+
+            return data;
+        }
         private async Task Relay(ClientInfo client, ServerType serverType, bool notify = false)
         {
             IConnection sourceConnection = serverType switch
@@ -575,7 +590,6 @@ namespace client.realize.messengers.clients
 
             await Relay(client, sourceConnection, notify);
         }
-
         public async Task Relay(ClientInfo client, IConnection sourceConnection, bool notify = false)
         {
             if (sourceConnection == null || sourceConnection.Connected == false) return;

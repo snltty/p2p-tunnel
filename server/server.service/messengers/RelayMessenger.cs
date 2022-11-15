@@ -3,6 +3,7 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.register;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -159,7 +160,7 @@ namespace server.service.messengers
             return connection;
         }
 
-        public IConnection SelectTarget(IConnection connection, ulong relayid)
+        public IConnection SelectTarget(IConnection connection, ulong fromid, ulong relayid)
         {
             if (relayid > 0)
             {
