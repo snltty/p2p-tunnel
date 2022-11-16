@@ -8,6 +8,19 @@ namespace common.server.model
 {
     public class MessageRequestWrap
     {
+        public const int RelayIdLengthPos = 5;
+        public const int RelayIdIndexPos = RelayIdLengthPos+1;
+        public const int RelayIdSize = 8;
+        public const int HeaderLength = 6;
+
+        /// <summary>
+        /// Relay + Reply + 111111
+        /// </summary>
+        public const byte RelayBit = 0b10000000;
+        public const byte ReplyBit = 0b01000000;
+        public const byte TypeBits = 0b00111111;
+       
+
         /// <summary>
         /// 用来读取数据，发送数据用下一层的FromConnection，来源连接，在中继时，数据来自服务器，但是真实来源是别的客户端，所以不能直接用这个来发送回复的数据
         /// </summary>
@@ -59,12 +72,13 @@ namespace common.server.model
                 + requestIdByte.Length
                 + messengerIdByte.Length
                 + Payload.Length;
-            if (RelayId.Length > 0)
+            if (Relay)
             {
-                length += RelayId.Length * 8 + 2;
+                length += RelayId.Length * RelayIdSize + 2; //length index
+                //不回复不需要开头的两个id和index，但是，需要一个来源id，把它放在最后
                 if (Reply == false)
                 {
-                    length -= 8 * 2;
+                    length -= RelayIdSize + 1;
                 }
             }
 
@@ -79,28 +93,37 @@ namespace common.server.model
             res[index] = (byte)MessageTypes.REQUEST;
             if (Relay == true)
             {
-                res[index] = (byte)(res[index] | 0x80);
+                res[index] = (byte)(res[index] | RelayBit);
             }
             if (Reply == true)
             {
-                res[index] = (byte)(res[index] | 0x40);
+                res[index] = (byte)(res[index] | ReplyBit);
             }
             index += 1;
 
             if (Relay)
             {
-                res[index] = (byte)(Reply ? 2 : 0);
-
-                index += 1;
-                res[index] = (byte)(RelayId.Length);
+                res[index] = (byte)(RelayId.Length); //length
                 index += 1;
 
-                int i = (Reply ? 0 : 2);
+                int i = 0;
+                if (Reply)
+                {
+                    res[index] = 2; //index
+                    i = 2;
+                    index += 1;
+                }
                 for (; i < RelayId.Length; i++)
                 {
                     byte[] relayidByte = RelayId[i].ToBytes();
                     Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
                     index += relayidByte.Length;
+                }
+                if(Reply == false)
+                {
+                    byte[] relayidByte = RelayId[0].ToBytes();
+                    Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
+                    index += RelayIdSize;
                 }
             }
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
@@ -124,18 +147,28 @@ namespace common.server.model
 
             int index = 0;
 
-            Relay = (span[index] & 0x80) == 0x80;
-            Reply = (span[index] & 0x40) == 0x40;
+            Relay = (span[index] & RelayBit) == RelayBit;
+            Reply = (span[index] & ReplyBit) == ReplyBit;
             index += 1;
 
             if (Relay)
             {
-                RelayIdIndex = span[index];
-                index += 1;
                 RelayIdLength = span[index];
                 index += 1;
-
-                RelayIds = memory.Slice(index, RelayIdLength * 8);
+                //不回复没有 index
+                if (Reply)
+                {
+                    RelayIdIndex = span[index];
+                    index += 1;
+                    RelayIds = memory.Slice(index, RelayIdLength * RelayIdSize);
+                    index+= RelayIdLength * RelayIdSize;
+                }
+                else
+                {
+                    RelayIdIndex = 0;
+                    RelayIds = memory.Slice(index, RelayIdLength * RelayIdSize + RelayIdSize);
+                    index += RelayIdLength * RelayIdSize + RelayIdSize;
+                }
             }
             else
             {
@@ -165,7 +198,6 @@ namespace common.server.model
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
         public uint RequestId { get; set; } = 0;
         public Memory<byte> RelayIds { get; set; } = Helper.EmptyArray;
-        public int RelayIdIndex { get; private set; }
         public byte RelayIdLength { get; private set; }
         public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
 
@@ -183,7 +215,8 @@ namespace common.server.model
                 + Payload.Length;
             if (RelayIds.Length > 0)
             {
-                length += RelayIds.Length - 8 * 2;
+                //不要头两个id
+                length += RelayIds.Length - MessageRequestWrap.RelayIdSize * 2;
             }
 
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
@@ -208,11 +241,12 @@ namespace common.server.model
 
             if (RelayIds.Length > 0)
             {
-                int len = RelayIds.Length / 8;
+                //倒叙放，request 过来的  ABCD 回去就是 BA  CD不需要
+                int len = RelayIds.Length / MessageRequestWrap.RelayIdSize;
                 for (int i = 0; i < len - 2; i++)
                 {
-                    RelayIds.Slice((len - 3 - i) * 8, 8).CopyTo(res.AsMemory(index, 8));
-                    index += 8;
+                    RelayIds.Slice((len - 3 - i) * MessageRequestWrap.RelayIdSize, MessageRequestWrap.RelayIdSize).CopyTo(res.AsMemory(index, MessageRequestWrap.RelayIdSize));
+                    index += MessageRequestWrap.RelayIdSize;
                 }
             }
 
@@ -243,9 +277,8 @@ namespace common.server.model
             index += 1;
             if (RelayIdLength > 0)
             {
-                RelayIdIndex = index;
-
-                RelayIds = memory.Slice(index, RelayIdLength * 8);
+                RelayIds = memory.Slice(index, RelayIdLength * MessageRequestWrap.RelayIdSize);
+                index += RelayIdLength * MessageRequestWrap.RelayIdSize;
             }
             else
             {

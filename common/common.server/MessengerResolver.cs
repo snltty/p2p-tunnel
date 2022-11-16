@@ -71,7 +71,7 @@ namespace common.server
             try
             {
                 //回复的消息
-                if ((MessageTypes)(readReceive.Span[0] & 0x3f) == MessageTypes.RESPONSE)
+                if ((MessageTypes)(readReceive.Span[0] & MessageRequestWrap.TypeBits) == MessageTypes.RESPONSE)
                 {
                     responseWrap.FromArray(readReceive);
                     //是中继的回复
@@ -82,11 +82,12 @@ namespace common.server
                         IConnection _connection = sourceConnectionSelector.SelectTarget(connection, currentRelayid);
                         if (_connection == null) return;
 
-                        //去掉一个id
-                        receive.Slice(0, 6).CopyTo(receive.Slice(8));
-                        receive.Span[5 + 8] = (byte)(responseWrap.RelayIdLength - 1);
+                        //去掉一个id   然后 length-1
+                        //0000 type length:2 11111111 00000000 ----> 00000000 0000 type length:1 00000000
+                        receive.Slice(0, MessageRequestWrap.HeaderLength).CopyTo(receive.Slice(MessageRequestWrap.RelayIdSize));
+                        receive.Span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize] = (byte)(responseWrap.RelayIdLength - 1);
                         //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                        await _connection.Send(receive.Slice(8)).ConfigureAwait(false);
+                        await _connection.Send(receive.Slice(MessageRequestWrap.RelayIdSize)).ConfigureAwait(false);
                     }
                     else
                     {
@@ -107,9 +108,12 @@ namespace common.server
                     //还在路上
                     if (requestWrap.RelayIdLength - 1 - requestWrap.RelayIdIndex >= 0)
                     {
-                        if ((requestWrap.MessengerId >= (ushort)RelayMessengerIds.Min && requestWrap.MessengerId <= (ushort)RelayMessengerIds.Max) || relayValidator.Validate(connection))
+                        if (relayValidator.Validate(connection))
                         {
-                            ulong currentRelayid = requestWrap.RelayIds.Span.Slice(requestWrap.RelayIdIndex * 8).ToUInt64();
+                            //需要等待回复则 有index， 不等待回复则没有，那么。同意这么计算偏移量，requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize
+                            //只需要 没有index时，默认为0即可
+                            ulong currentRelayid = requestWrap.RelayIds.Span.Slice(requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize).ToUInt64();
+
                             //目的地连接对象
                             IConnection _connection = sourceConnectionSelector.SelectTarget(connection, currentRelayid);
                             if (_connection == null) return;
@@ -117,18 +121,18 @@ namespace common.server
                             if (requestWrap.Reply)
                             {
                                 //RelayIdIndex 后移一位
-                                receive.Span[5]++;
-                                //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                                await _connection.Send(receive).ConfigureAwait(false);
+                                receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
                             }
                             else
                             {
-                                //去掉一个id
-                                receive.Slice(0,7).CopyTo(receive.Slice(8));
-                                receive.Span[6 + 8] = (byte)(requestWrap.RelayIdLength - 1);
-                                //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                                await _connection.Send(receive).ConfigureAwait(false);
+                                //去掉一个id   然后 length-1
+                                //0000 type length:2 11111111 00000000 ----> 00000000 0000 type length:1 00000000
+                                receive.Slice(0, MessageRequestWrap.HeaderLength).CopyTo(receive.Slice(MessageRequestWrap.RelayIdSize));
+                                receive.Span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize] -= 1;
+                                receive = receive.Slice(MessageRequestWrap.RelayIdSize);
                             }
+                            //中继数据不再次序列化，直接在原数据上更新数据然后发送
+                            await _connection.Send(receive.Slice(MessageRequestWrap.RelayIdSize)).ConfigureAwait(false);
                         }
                         return;
                     }
@@ -139,12 +143,12 @@ namespace common.server
                     requestWrap.Payload = connection.Crypto.Decode(requestWrap.Payload);
                 }
 
-                ulong relaySourceId = 0;
-                if (requestWrap.RelayIds.Length > 0)
+                connection.FromConnection = connection;
+                if (requestWrap.Relay)
                 {
-                    relaySourceId = requestWrap.RelayIds.Span.ToUInt64();
+                    connection.FromConnection = sourceConnectionSelector.SelectSource(connection, requestWrap.RelayIds.Span.ToUInt64());
                 }
-                connection.FromConnection = sourceConnectionSelector.SelectSource(connection, relaySourceId);
+               
 
                 //404,没这个插件
                 if (!messengers.ContainsKey(requestWrap.MessengerId))
