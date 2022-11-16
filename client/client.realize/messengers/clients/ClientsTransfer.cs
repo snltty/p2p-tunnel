@@ -548,6 +548,7 @@ namespace client.realize.messengers.clients
 
             return data;
         }
+
         private async Task Relay(ClientInfo client, ServerType serverType, bool notify = false)
         {
             if (registerState.RemoteInfo.Relay == false)
