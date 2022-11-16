@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server.middleware;
 using common.server.model;
 using System;
@@ -70,23 +71,22 @@ namespace common.server
             try
             {
                 //回复的消息
-                if ((MessageTypes)readReceive.Span[0] == MessageTypes.RESPONSE)
+                if ((MessageTypes)(readReceive.Span[0] & 0x3f) == MessageTypes.RESPONSE)
                 {
                     responseWrap.FromArray(readReceive);
                     //是中继的回复
-                    if (responseWrap.RelayId > 0)
+                    if (responseWrap.RelayIdLength > 0)
                     {
+                        ulong currentRelayid = responseWrap.RelayIds.Span.ToUInt64();
                         //目的地连接对象
-                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, responseWrap.RelaySourceId, responseWrap.RelayId);
+                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, currentRelayid);
                         if (_connection == null) return;
 
-                        //接下来的目的地是最终的节点
-                        if (_connection.RelayConnectId == responseWrap.RelayId)
-                        {
-                            MessageResponseWrap.WriteRelayId(readReceive, 0);
-                        }
+                        //去掉一个id
+                        receive.Slice(0, 6).CopyTo(receive.Slice(8));
+                        receive.Span[5 + 8] = (byte)(responseWrap.RelayIdLength - 1);
                         //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                        await _connection.Send(receive).ConfigureAwait(false);
+                        await _connection.Send(receive.Slice(8)).ConfigureAwait(false);
                     }
                     else
                     {
@@ -102,54 +102,65 @@ namespace common.server
                 //新的请求
                 requestWrap.FromArray(readReceive);
                 //是中继数据
-                if (requestWrap.RelayId > 0)
+                if (requestWrap.Relay)
                 {
-
-                    if ((requestWrap.MessengerId >= (ushort)RelayMessengerIds.Min && requestWrap.MessengerId <= (ushort)RelayMessengerIds.Max) || relayValidator.Validate(connection))
+                    //还在路上
+                    if (requestWrap.RelayIdLength - 1 - requestWrap.RelayIdIndex >= 0)
                     {
-                        //第一个节点收到中继数据，它知道是哪里来的，填写一下数据来源
-                        if (requestWrap.RelaySourceId == 0)
+                        if ((requestWrap.MessengerId >= (ushort)RelayMessengerIds.Min && requestWrap.MessengerId <= (ushort)RelayMessengerIds.Max) || relayValidator.Validate(connection))
                         {
-                            requestWrap.RelaySourceId = connection.ConnectId;
-                            MessageRequestWrap.WriteRelaySourceId(readReceive, connection.ConnectId);
-                        }
+                            ulong currentRelayid = requestWrap.RelayIds.Span.Slice(requestWrap.RelayIdIndex * 8).ToUInt64();
+                            //目的地连接对象
+                            IConnection _connection = sourceConnectionSelector.SelectTarget(connection, currentRelayid);
+                            if (_connection == null) return;
 
-                        //目的地连接对象
-                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, requestWrap.RelaySourceId, requestWrap.RelayId);
-                        if (_connection == null) return;
-
-                        //接下来的目的地是最终的节点
-                        if (_connection.RelayConnectId == requestWrap.RelayId)
-                        {
-                            MessageRequestWrap.WriteRelayId(readReceive, 0);
+                            if (requestWrap.Reply)
+                            {
+                                //RelayIdIndex 后移一位
+                                receive.Span[5]++;
+                                //中继数据不再次序列化，直接在原数据上更新数据然后发送
+                                await _connection.Send(receive).ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                //去掉一个id
+                                receive.Slice(0,7).CopyTo(receive.Slice(8));
+                                receive.Span[6 + 8] = (byte)(requestWrap.RelayIdLength - 1);
+                                //中继数据不再次序列化，直接在原数据上更新数据然后发送
+                                await _connection.Send(receive).ConfigureAwait(false);
+                            }
                         }
-                        //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                        await _connection.Send(receive).ConfigureAwait(false);
+                        return;
                     }
-                    return;
                 }
-
-
 
                 if (connection.EncodeEnabled)
                 {
                     requestWrap.Payload = connection.Crypto.Decode(requestWrap.Payload);
                 }
-                connection.FromConnection = sourceConnectionSelector.SelectSource(connection, requestWrap.RelaySourceId);
+
+                ulong relaySourceId = 0;
+                if (requestWrap.RelayIds.Length > 0)
+                {
+                    relaySourceId = requestWrap.RelayIds.Span.ToUInt64();
+                }
+                connection.FromConnection = sourceConnectionSelector.SelectSource(connection, relaySourceId);
 
                 //404,没这个插件
                 if (!messengers.ContainsKey(requestWrap.MessengerId))
                 {
 
                     Logger.Instance.Error($"{requestWrap.MessengerId},{receive.Length},{connection.ServerType}, not found");
-                    await messengerSender.ReplyOnly(new MessageResponseWrap
+                    if (requestWrap.Reply)
                     {
-                        Connection = connection,
-                        RequestId = requestWrap.RequestId,
-                        RelayId = requestWrap.RelaySourceId,
-                        RelaySourceId = requestWrap.RelayId,
-                        Code = MessageResponeCodes.NOT_FOUND
-                    }).ConfigureAwait(false);
+                        await messengerSender.ReplyOnly(new MessageResponseWrap
+                        {
+                            Connection = connection,
+                            RequestId = requestWrap.RequestId,
+                            RelayIds = requestWrap.RelayIds,
+                            Code = MessageResponeCodes.NOT_FOUND
+                        }).ConfigureAwait(false);
+                    }
                     return;
                 }
 
@@ -160,21 +171,24 @@ namespace common.server
                     var middleres = await middlewareTransfer.Execute(connection);
                     if (middleres.Item1 == false)
                     {
-                        await messengerSender.ReplyOnly(new MessageResponseWrap
+                        if (requestWrap.Reply)
                         {
-                            Connection = connection,
-                            RequestId = requestWrap.RequestId,
-                            RelayId = requestWrap.RelaySourceId,
-                            RelaySourceId = requestWrap.RelayId,
-                            Code = MessageResponeCodes.ERROR,
-                            Payload = middleres.Item2
-                        }).ConfigureAwait(false);
+                            await messengerSender.ReplyOnly(new MessageResponseWrap
+                            {
+                                Connection = connection,
+                                RequestId = requestWrap.RequestId,
+                                RelayIds = requestWrap.RelayIds,
+                                Code = MessageResponeCodes.ERROR,
+                                Payload = middleres.Item2
+                            }).ConfigureAwait(false);
+                        }
+
                         return;
                     }
                 }
                 object resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { connection });
                 //void的，task的 没有返回值，不回复，需要回复的可以返回任意类型
-                if (plugin.IsVoid)
+                if (plugin.IsVoid || requestWrap.Reply == false)
                 {
                     return;
                 }
@@ -197,26 +211,29 @@ namespace common.server
                 {
                     resultObject = resultAsync as byte[];
                 }
+
                 bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
                 {
                     Connection = connection,
                     Payload = resultObject,
-                    RelayId = requestWrap.RelaySourceId,
-                    RelaySourceId = requestWrap.RelayId,
+                    RelayIds = requestWrap.RelayIds,
                     RequestId = requestWrap.RequestId
                 }).ConfigureAwait(false);
+
             }
             catch (Exception ex)
             {
                 Logger.Instance.Error(ex);
-                await messengerSender.ReplyOnly(new MessageResponseWrap
+                if (requestWrap.Reply)
                 {
-                    Connection = connection,
-                    RelayId = requestWrap.RelaySourceId,
-                    RelaySourceId = requestWrap.RelayId,
-                    RequestId = requestWrap.RequestId,
-                    Code = MessageResponeCodes.ERROR
-                }).ConfigureAwait(false);
+                    await messengerSender.ReplyOnly(new MessageResponseWrap
+                    {
+                        Connection = connection,
+                        RelayIds = requestWrap.RelayIds,
+                        RequestId = requestWrap.RequestId,
+                        Code = MessageResponeCodes.ERROR
+                    }).ConfigureAwait(false);
+                }
             }
             finally
             {

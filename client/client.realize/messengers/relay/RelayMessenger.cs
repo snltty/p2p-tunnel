@@ -5,7 +5,6 @@ using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -120,14 +119,6 @@ namespace client.realize.messengers.relay
             ConnectsInfo connectInfo = new ConnectsInfo();
             connectInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
             connecRouteCaching.AddConnects(connectInfo);
-        }
-
-        [MessengerId((ushort)RelayMessengerIds.Routes)]
-        public void Routes(IConnection connection)
-        {
-            RoutesInfo routes = new RoutesInfo();
-            routes.DeBytes(connection.ReceiveRequestWrap.Payload);
-            connecRouteCaching.AddRoutes(routes);
         }
     }
 }

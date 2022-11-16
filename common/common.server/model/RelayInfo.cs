@@ -41,7 +41,6 @@ namespace common.server.model
         Delay = 503,
         AskConnects = 504,
         Connects = 505,
-        Routes = 506,
         Max = 600,
     }
 
@@ -117,71 +116,5 @@ namespace common.server.model
         public ulong Id { get; set; }
         public bool Tcp { get; set; }
         public bool Udp { get; set; }
-    }
-
-    public class RoutesInfo
-    {
-        public ulong ToId { get; set; }
-        public RouteInfo To { get; set; }
-        public RouteInfo Back { get; set; }
-
-        public static ulong ReadToId(Memory<byte> memory)
-        {
-            return memory.Span.ToUInt64();
-        }
-
-        public byte[] ToBytes()
-        {
-            byte[] res = new byte[8 + 2 * 24];
-            Span<byte> span = res.AsSpan();
-
-            ToId.ToBytes().CopyTo(span);
-
-            To.FromId.ToBytes().CopyTo(span.Slice(8));
-            To.ToId.ToBytes().CopyTo(span.Slice(16));
-            To.TargetId.ToBytes().CopyTo(span.Slice(24));
-
-            Back.FromId.ToBytes().CopyTo(span.Slice(32));
-            Back.ToId.ToBytes().CopyTo(span.Slice(40));
-            Back.TargetId.ToBytes().CopyTo(span.Slice(48));
-
-            return res;
-        }
-
-        public void DeBytes(Memory<byte> memory)
-        {
-            var span = memory.Span;
-
-            ToId = span.ToUInt64();
-
-            To = new RouteInfo
-            {
-                FromId = span.Slice(8).ToUInt64(),
-                ToId = span.Slice(16).ToUInt64(),
-                TargetId = span.Slice(24).ToUInt64(),
-            };
-
-            Back = new RouteInfo
-            {
-                FromId = span.Slice(32).ToUInt64(),
-                ToId = span.Slice(40).ToUInt64(),
-                TargetId = span.Slice(48).ToUInt64(),
-            };
-        }
-    }
-    public class RouteInfo
-    {
-        /// <summary>
-        /// 哪里来
-        /// </summary>
-        public ulong FromId { get; set; }
-        /// <summary>
-        /// 到哪里
-        /// </summary>
-        public ulong ToId { get; set; }
-        /// <summary>
-        /// 选择谁
-        /// </summary>
-        public ulong TargetId { get; set; }
     }
 }

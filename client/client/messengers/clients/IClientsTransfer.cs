@@ -17,7 +17,6 @@ namespace client.messengers.clients
         public Task Ping();
 
         public Task<ConcurrentDictionary<ulong, ConnectInfo[]>> Connects();
-        public Task<bool> Routes(RoutesInfo routes);
         public Task<Dictionary<ulong, int[]>> Delay(ulong toid);
         public Task Relay(ClientInfo client, IConnection sourceConnection, bool notify = false);
     }

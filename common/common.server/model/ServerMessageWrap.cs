@@ -28,27 +28,20 @@ namespace common.server.model
         public uint RequestId = 0;
 
         /// <summary>
-        /// 中继数据时，写明是谁发的中继数据，以便目标客户端回复给来源客户端，【只发发数据的话，不用填这里】
-        /// </summary>
-        public ulong RelaySourceId { get; set; } = 0;
-        /// <summary>
         /// 中继数据时，写明消息给谁，【只发发数据的话，不用填这里】
         /// </summary>
-        public ulong RelayId { get; set; } = 0;
+        public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
+
+        public Memory<byte> RelayIds { get; private set; } = Helper.EmptyArray;
+        public byte RelayIdLength { get; private set; }
+        public byte RelayIdIndex { get; private set; }
+        public bool Relay { get; set; }
+        public bool Reply { get; set; }
 
         /// <summary>
         /// 数据荷载
         /// </summary>
         public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
-
-        public static void WriteRelayId(Memory<byte> memory, ulong relayId)
-        {
-            relayId.ToBytes().CopyTo(memory.Slice(2));
-        }
-        public static void WriteRelaySourceId(Memory<byte> memory, ulong relaySourceId)
-        {
-            relaySourceId.ToBytes().CopyTo(memory.Slice(2 + 8));
-        }
 
         /// <summary>
         /// 转包
@@ -62,14 +55,17 @@ namespace common.server.model
             int index = 0;
 
             length = 4
-                + 1 // type
-                + 1 // RelayId
+                + 1 //Relay + Reply + type
                 + requestIdByte.Length
                 + messengerIdByte.Length
                 + Payload.Length;
-            if (RelayId > 0)
+            if (RelayId.Length > 0)
             {
-                length += 16;
+                length += RelayId.Length * 8 + 2;
+                if (Reply == false)
+                {
+                    length -= 8 * 2;
+                }
             }
 
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
@@ -81,21 +77,32 @@ namespace common.server.model
             index += 4;
 
             res[index] = (byte)MessageTypes.REQUEST;
-            index += 1;
-
-            res[index] = (byte)(RelayId > 0 ? 1 : 0);
-            index += 1;
-            if (RelayId > 0)
+            if (Relay == true)
             {
-                byte[] relayidByte = RelayId.ToBytes();
-                Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
-                index += relayidByte.Length;
-
-                byte[] relayidSorceByte = RelaySourceId.ToBytes();
-                Array.Copy(relayidSorceByte, 0, res, index, relayidSorceByte.Length);
-                index += relayidSorceByte.Length;
+                res[index] = (byte)(res[index] | 0x80);
             }
+            if (Reply == true)
+            {
+                res[index] = (byte)(res[index] | 0x40);
+            }
+            index += 1;
 
+            if (Relay)
+            {
+                res[index] = (byte)(Reply ? 2 : 0);
+
+                index += 1;
+                res[index] = (byte)(RelayId.Length);
+                index += 1;
+
+                int i = (Reply ? 0 : 2);
+                for (; i < RelayId.Length; i++)
+                {
+                    byte[] relayidByte = RelayId[i].ToBytes();
+                    Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
+                    index += relayidByte.Length;
+                }
+            }
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
             index += requestIdByte.Length;
 
@@ -114,21 +121,27 @@ namespace common.server.model
         public void FromArray(Memory<byte> memory)
         {
             var span = memory.Span;
-            int index = 1;
 
+            int index = 0;
+
+            Relay = (span[index] & 0x80) == 0x80;
+            Reply = (span[index] & 0x40) == 0x40;
             index += 1;
-            if (span[index - 1] == 1)
-            {
-                RelayId = span.Slice(index).ToUInt64();
-                index += 8;
 
-                RelaySourceId = span.Slice(index).ToUInt64();
-                index += 8;
+            if (Relay)
+            {
+                RelayIdIndex = span[index];
+                index += 1;
+                RelayIdLength = span[index];
+                index += 1;
+
+                RelayIds = memory.Slice(index, RelayIdLength * 8);
             }
             else
             {
-                RelayId = 0;
-                RelaySourceId = 0;
+                RelayIds = Helper.EmptyArray;
+                RelayIdIndex = 0;
+                RelayIdLength = 0;
             }
 
             RequestId = span.Slice(index).ToUInt32();
@@ -151,14 +164,10 @@ namespace common.server.model
         public IConnection Connection { get; set; }
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
         public uint RequestId { get; set; } = 0;
-        public ulong RelayId { get; set; } = 0;
-        public ulong RelaySourceId { get; set; } = 0;
+        public Memory<byte> RelayIds { get; set; } = Helper.EmptyArray;
+        public int RelayIdIndex { get; private set; }
+        public byte RelayIdLength { get; private set; }
         public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
-
-        public static void WriteRelayId(Memory<byte> memory, ulong relayId)
-        {
-            relayId.ToBytes().CopyTo(memory.Slice(3));
-        }
 
         /// <summary>
         /// 转包
@@ -168,13 +177,13 @@ namespace common.server.model
         {
             length = 4
                 + 1 //type
+                + 1 //relayid length
                 + 1 //code
-                + 1 //RelayId
                 + 4 //requestid
                 + Payload.Length;
-            if (RelayId > 0)
+            if (RelayIds.Length > 0)
             {
-                length += 16;
+                length += RelayIds.Length - 8 * 2;
             }
 
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
@@ -190,21 +199,25 @@ namespace common.server.model
             res[index] = (byte)MessageTypes.RESPONSE;
             index += 1;
 
+            res[index] = 0;
+            if (RelayIds.Length > 0)
+            {
+                res[index] = (byte)(RelayIds.Length - 2);
+            }
+            index += 1;
+
+            if (RelayIds.Length > 0)
+            {
+                int len = RelayIds.Length / 8;
+                for (int i = 0; i < len - 2; i++)
+                {
+                    RelayIds.Slice((len - 3 - i) * 8, 8).CopyTo(res.AsMemory(index, 8));
+                    index += 8;
+                }
+            }
+
             res[index] = (byte)Code;
             index += 1;
-
-            res[index] = (byte)(RelayId > 0 ? 1 : 0);
-            index += 1;
-            if (RelayId > 0)
-            {
-                byte[] relayidByte = RelayId.ToBytes();
-                Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
-                index += relayidByte.Length;
-
-                byte[] relayidSorceByte = RelaySourceId.ToBytes();
-                Array.Copy(relayidSorceByte, 0, res, index, relayidSorceByte.Length);
-                index += relayidSorceByte.Length;
-            }
 
             byte[] requestIdByte = RequestId.ToBytes();
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
@@ -226,23 +239,22 @@ namespace common.server.model
             var span = memory.Span;
             int index = 1;
 
-            Code = (MessageResponeCodes)span[index];
+            RelayIdLength = span[index];
             index += 1;
-
-            index += 1;
-            if (span[index - 1] == 1)
+            if (RelayIdLength > 0)
             {
-                RelayId = span.Slice(index).ToUInt64();
-                index += 8;
+                RelayIdIndex = index;
 
-                RelaySourceId = span.Slice(index).ToUInt64();
-                index += 8;
+                RelayIds = memory.Slice(index, RelayIdLength * 8);
             }
             else
             {
-                RelayId = 0;
-                RelaySourceId = 0;
+                RelayIds = Helper.EmptyArray;
             }
+
+
+            Code = (MessageResponeCodes)span[index];
+            index += 1;
 
             RequestId = span.Slice(index).ToUInt32();
             index += 4;

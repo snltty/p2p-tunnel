@@ -53,6 +53,7 @@ namespace common.server
         {
             try
             {
+                msg.Reply = msg.RequestId > 0;
                 if (msg.RequestId == 0)
                 {
                     Interlocked.CompareExchange(ref msg.RequestId, requestIdNumberSpace.Increment(), 0);
@@ -62,9 +63,10 @@ namespace common.server
                     return false;
                 }
 
-                if (msg.Connection.Relay && msg.RelayId == 0)
+                msg.Relay = msg.Connection.Relay;
+                if (msg.Connection.Relay && msg.RelayId.Length == 0)
                 {
-                    msg.RelayId = msg.Connection.ConnectId;
+                    msg.RelayId = msg.Connection.RelayId;
                 }
                 if (msg.Connection.EncodeEnabled)
                 {

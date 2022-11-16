@@ -122,21 +122,6 @@ namespace server.service.messengers
                 });
             }
         }
-
-        [MessengerId((ushort)RelayMessengerIds.Routes)]
-        public void Routes(IConnection connection)
-        {
-            ulong toid = RoutesInfo.ReadToId(connection.ReceiveRequestWrap.Payload);
-            if (clientRegisterCache.Get(toid, out RegisterCacheInfo client))
-            {
-                _ = messengerSender.SendOnly(new MessageRequestWrap
-                {
-                    Connection = client.OnLineConnection,
-                    MessengerId = (ushort)RelayMessengerIds.Routes,
-                    Payload = connection.ReceiveRequestWrap.Payload
-                });
-            }
-        }
     }
 
     public class SourceConnectionSelector : ISourceConnectionSelector
@@ -160,7 +145,7 @@ namespace server.service.messengers
             return connection;
         }
 
-        public IConnection SelectTarget(IConnection connection, ulong fromid, ulong relayid)
+        public IConnection SelectTarget(IConnection connection, ulong relayid)
         {
             if (relayid > 0)
             {

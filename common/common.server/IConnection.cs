@@ -22,7 +22,7 @@ namespace common.server
         /// <summary>
         /// 中继对象id，通过谁中继的，就是谁的id，直连的跟连接id一样
         /// </summary>
-        public ulong RelayConnectId { get; set; }
+        public ulong[] RelayId { get; set; }
         /// <summary>
         /// 来源客户端，中继时，数据来源可能不是给你发数据的那个
         /// </summary>
@@ -76,16 +76,12 @@ namespace common.server
             set
             {
                 connectId = value;
-                if(RelayConnectId == 0)
-                {
-                    RelayConnectId = connectId;
-                }
             }
         }
         public virtual bool Connected => false;
 
         public bool Relay { get; set; } = false;
-        public ulong RelayConnectId { get; set; } = 0;
+        public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
         public IConnection FromConnection { get; set; }
 
         public bool EncodeEnabled => Crypto != null;

@@ -1,7 +1,5 @@
 ﻿using client.messengers.register;
-using client.messengers.relay;
 using common.libs;
-using common.libs.extends;
 using common.server;
 using common.server.model;
 using System;
@@ -38,32 +36,14 @@ namespace client.realize.messengers.relay
             }).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// 验证对方是否可中继
-        /// </summary>
-        /// <param name="toid"></param>
-        /// <param name="connection">中继节点</param>
-        /// <returns></returns>
-        public async Task<bool> Verify(ulong toid, IConnection connection)
-        {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
-            {
-                MessengerId = (ushort)RelayMessengerIds.Verify,
-                Connection = connection,
-                Payload = toid.ToBytes(),
-                Timeout = 1000,
-            }).ConfigureAwait(false);
-
-            return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
-        }
-
+      
         /// <summary>
         /// 中继延迟
         /// </summary>
         /// <param name="toid"></param>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public async Task<bool> Delay(ulong toid, IConnection connection)
+        public async Task<bool> Delay(ulong[] toid, IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
@@ -93,15 +73,6 @@ namespace client.realize.messengers.relay
                 MessengerId = (ushort)RelayMessengerIds.Connects,
                 Connection = registerStateInfo.OnlineConnection,
                 Payload = connects.ToBytes(),
-            }).ConfigureAwait(false);
-        }
-        public async Task<bool> Routes(RoutesInfo routes)
-        {
-            return await messengerSender.SendOnly(new MessageRequestWrap
-            {
-                MessengerId = (ushort)RelayMessengerIds.Routes,
-                Connection = registerStateInfo.OnlineConnection,
-                Payload = routes.ToBytes(),
             }).ConfigureAwait(false);
         }
     }
