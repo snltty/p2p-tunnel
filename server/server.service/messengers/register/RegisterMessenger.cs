@@ -30,76 +30,52 @@ namespace server.service.messengers.register
         {
             RegisterParamsInfo model = new RegisterParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
+
             //验证key
             if (registerKeyValidator.Validate(model.GroupId) == false)
             {
                 return new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.KEY_VERIFY }.ToBytes();
             }
 
-            return connection.ServerType switch
-            {
-                ServerType.UDP => await Udp(connection, model),
-                ServerType.TCP => await Tcp(connection, model),
-                _ => new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.UNKNOW }.ToBytes()
-            };
-        }
-
-        private async Task<byte[]> Udp(IConnection connection, RegisterParamsInfo model)
-        {
             (RegisterResultInfo verify, RegisterCacheInfo client) = await VerifyAndAdd(model);
             if (verify != null)
             {
                 return verify.ToBytes();
             }
 
-            client.UpdateUdpInfo(connection);
+            client.UpdateConnection(connection);
             client.AddTunnel(new TunnelRegisterCacheInfo
             {
                 Port = connection.Address.Port,
                 LocalPort = model.LocalUdpPort,
-                Servertype = ServerType.UDP,
-                TunnelName = (ulong)TunnelDefaults.UDP,
+                Servertype = connection.ServerType,
+                TunnelName = (ulong)(connection.ServerType == ServerType.TCP ? TunnelDefaults.TCP : TunnelDefaults.UDP),
                 IsDefault = true,
             });
-
-            return new RegisterResultInfo
-            {
-                Id = client.Id,
-                Ip = connection.Address.Address,
-                UdpPort = (ushort)connection.Address.Port,
-                TcpPort =(ushort)(client.TcpConnection?.Address.Port ?? 0),
-                GroupId = client.GroupId,
-                Relay = relayValidator.Validate(connection)
-            }.ToBytes();
-        }
-        private async Task<byte[]> Tcp(IConnection connection, RegisterParamsInfo model)
-        {
-            (RegisterResultInfo verify, RegisterCacheInfo client) = await VerifyAndAdd(model);
-            if (verify != null)
-            {
-                return verify.ToBytes();
-            }
-
-            client.UpdateTcpInfo(connection);
-            client.AddTunnel(new TunnelRegisterCacheInfo
-            {
-                Port = connection.Address.Port,
-                LocalPort = model.LocalTcpPort,
-                Servertype = ServerType.TCP,
-                TunnelName = (ulong)TunnelDefaults.TCP,
-                IsDefault = true,
-            });
-
             return new RegisterResultInfo
             {
                 Id = client.Id,
                 Ip = connection.Address.Address,
                 UdpPort = (ushort)(client.UdpConnection?.Address.Port ?? 0),
-                TcpPort = (ushort)connection.Address.Port,
+                TcpPort = (ushort)(client.TcpConnection?.Address.Port ?? 0),
                 GroupId = client.GroupId,
-                Relay = relayValidator.Validate(connection),
+                Relay = relayValidator.Validate(connection)
             }.ToBytes();
+
         }
+
+        [MessengerId((ushort)RegisterMessengerIds.Notify)]
+        public void Notify(IConnection connection)
+        {
+            clientRegisterCache.Notify(connection);
+        }
+
+        [MessengerId((ushort)RegisterMessengerIds.SignOut)]
+        public void Exit(IConnection connection)
+        {
+            connection.Disponse();
+        }
+
         private async Task<(RegisterResultInfo, RegisterCacheInfo)> VerifyAndAdd(RegisterParamsInfo model)
         {
             RegisterResultInfo verify = null;
@@ -145,30 +121,16 @@ namespace server.service.messengers.register
             }
             return (verify, client);
         }
-
-        [MessengerId((ushort)RegisterMessengerIds.Notify)]
-        public void Notify(IConnection connection)
-        {
-            clientRegisterCache.Notify(connection);
-        }
-
         private async Task<bool> GetAlive(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
                 Payload = Helper.EmptyArray,
-                MessengerId =(ushort)HeartMessengerIds.Alive,
+                MessengerId = (ushort)HeartMessengerIds.Alive,
                 Timeout = 2000,
             });
             return resp.Code == MessageResponeCodes.OK && Helper.TrueArray.AsSpan().SequenceEqual(resp.Data.Span);
-        }
-
-
-        [MessengerId((ushort)RegisterMessengerIds.SignOut)]
-        public void Exit(IConnection connection)
-        {
-            connection.Disponse();
         }
     }
 }

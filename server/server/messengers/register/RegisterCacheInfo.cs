@@ -23,15 +23,17 @@ namespace server.messengers.register
         public IPAddress[] LocalIps { get; set; }
         public uint ClientAccess { get; set; } = 0;
 
-        public void UpdateUdpInfo(IConnection connection)
+        public void UpdateConnection(IConnection connection)
         {
-            UdpConnection = connection;
-            UdpConnection.ConnectId = Id;
-        }
-        public void UpdateTcpInfo(IConnection connection)
-        {
-            TcpConnection = connection;
-            TcpConnection.ConnectId = Id;
+            connection.ConnectId = Id;
+            if (connection.ServerType == ServerType.TCP)
+            {
+                TcpConnection = connection;
+            }
+            else
+            {
+                UdpConnection = connection;
+            }
         }
 
         private ConcurrentDictionary<ulong, TunnelRegisterCacheInfo> tunnels = new ConcurrentDictionary<ulong, TunnelRegisterCacheInfo>();

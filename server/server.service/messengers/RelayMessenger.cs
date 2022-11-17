@@ -17,13 +17,11 @@ namespace server.service.messengers
     {
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly MessengerSender messengerSender;
-        private readonly IRelayValidator relayValidator;
 
-        public RelayMessenger(IClientRegisterCaching clientRegisterCache, MessengerSender messengerSender, IRelayValidator relayValidator)
+        public RelayMessenger(IClientRegisterCaching clientRegisterCache, MessengerSender messengerSender)
         {
             this.clientRegisterCache = clientRegisterCache;
             this.messengerSender = messengerSender;
-            this.relayValidator = relayValidator;
         }
 
         [MessengerId((ushort)RelayMessengerIds.Delay)]
@@ -63,28 +61,16 @@ namespace server.service.messengers
         }
     }
 
-    public class SourceConnectionSelector : ISourceConnectionSelector
+    public class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
     {
         private readonly IClientRegisterCaching clientRegisterCaching;
 
-        public SourceConnectionSelector(IClientRegisterCaching clientRegisterCaching)
+        public RelaySourceConnectionSelector(IClientRegisterCaching clientRegisterCaching)
         {
             this.clientRegisterCaching = clientRegisterCaching;
         }
 
-        public IConnection SelectSource(IConnection connection, ulong relayid)
-        {
-            if (relayid > 0)
-            {
-                if (clientRegisterCaching.Get(relayid, out RegisterCacheInfo client))
-                {
-                    return client.OnLineConnection;
-                }
-            }
-            return connection;
-        }
-
-        public IConnection SelectTarget(IConnection connection, ulong relayid)
+        public IConnection Select(IConnection connection, ulong relayid)
         {
             if (relayid > 0)
             {

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace client.messengers.relay
 {
-    public interface IConnecRouteCaching
+    public interface IClientConnectsCaching
     {
         public ConcurrentDictionary<ulong, ulong[]> Connects { get; }
 

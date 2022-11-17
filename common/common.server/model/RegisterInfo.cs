@@ -32,11 +32,11 @@ namespace common.server.model
         /// <summary>
         /// 本机tcp端口
         /// </summary>
-        public int LocalTcpPort { get; set; } = 0;
+        public ushort LocalTcpPort { get; set; } = 0;
         /// <summary>
         /// 本机udp端口
         /// </summary>
-        public int LocalUdpPort { get; set; } = 0;
+        public ushort LocalUdpPort { get; set; } = 0;
 
         /// <summary>
         /// 客户端自定义的权限列表

@@ -140,8 +140,8 @@ namespace client.realize.messengers.register
         public string ClientName { get; set; } = string.Empty;
         public IPAddress[] LocalIps { get; set; } = Array.Empty<IPAddress>();
         public int Timeout { get; set; } = 15 * 1000;
-        public int LocalUdpPort { get; set; } = 0;
-        public int LocalTcpPort { get; set; } = 0;
+        public ushort LocalUdpPort { get; set; } = 0;
+        public ushort LocalTcpPort { get; set; } = 0;
         public EnumClientAccess ClientAccess { get; set; } = EnumClientAccess.None;
 
     }

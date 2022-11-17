@@ -60,7 +60,7 @@ namespace client.realize.messengers.register
                 return;
             }
 
-            Logger.Instance.Error($"{connection.ServerType} 断开~~~~");
+            Logger.Instance.DebugError($"{connection.ServerType} 断开~~~~");
             if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
             {
                 Register(true).ContinueWith((result) =>
@@ -124,7 +124,6 @@ namespace client.realize.messengers.register
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
                         config.Client.UseIpv6 = serverAddress.AddressFamily == AddressFamily.InterNetworkV6;
-
                         registerState.LocalInfo.UdpPort = registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort();
                         registerState.OnRegisterBind.Push(true);
 
@@ -154,7 +153,6 @@ namespace client.realize.messengers.register
 
                         //注册
                         RegisterResult result = await GetRegisterResult();
-                        //上线
                         config.Client.GroupId = result.Data.GroupId;
                         registerState.RemoteInfo.Relay = result.Data.Relay;
                         registerState.Online(result.Data.Id, result.Data.Ip, result.Data.UdpPort, result.Data.TcpPort);

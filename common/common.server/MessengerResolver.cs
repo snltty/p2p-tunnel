@@ -1,6 +1,5 @@
 ﻿using common.libs;
 using common.libs.extends;
-using common.server.middleware;
 using common.server.model;
 using System;
 using System.Collections.Generic;
@@ -17,16 +16,14 @@ namespace common.server
         private readonly ITcpServer tcpserver;
         private readonly IUdpServer udpserver;
         private readonly MessengerSender messengerSender;
-        private readonly MiddlewareTransfer middlewareTransfer;
-        private readonly ISourceConnectionSelector sourceConnectionSelector;
+        private readonly IRelaySourceConnectionSelector sourceConnectionSelector;
         private readonly IRelayValidator relayValidator;
 
-        public MessengerResolver(IUdpServer udpserver, ITcpServer tcpserver, MessengerSender messengerSender, MiddlewareTransfer middlewareTransfer, ISourceConnectionSelector sourceConnectionSelector, IRelayValidator relayValidator)
+        public MessengerResolver(IUdpServer udpserver, ITcpServer tcpserver, MessengerSender messengerSender, IRelaySourceConnectionSelector sourceConnectionSelector, IRelayValidator relayValidator)
         {
             this.tcpserver = tcpserver;
             this.udpserver = udpserver;
             this.messengerSender = messengerSender;
-            this.middlewareTransfer = middlewareTransfer;
 
             this.tcpserver.OnPacket = InputData;
             this.udpserver.OnPacket = InputData;
@@ -79,7 +76,7 @@ namespace common.server
                     {
                         ulong currentRelayid = responseWrap.RelayIds.Span.ToUInt64();
                         //目的地连接对象
-                        IConnection _connection = sourceConnectionSelector.SelectTarget(connection, currentRelayid);
+                        IConnection _connection = sourceConnectionSelector.Select(connection, currentRelayid);
                         if (_connection == null) return;
 
                         //去掉一个id   然后 length-1
@@ -115,7 +112,7 @@ namespace common.server
                             ulong currentRelayid = requestWrap.RelayIds.Span.Slice(requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize).ToUInt64();
 
                             //目的地连接对象
-                            IConnection _connection = sourceConnectionSelector.SelectTarget(connection, currentRelayid);
+                            IConnection _connection = sourceConnectionSelector.Select(connection, currentRelayid);
                             if (_connection == null) return;
 
                             if (requestWrap.Reply)
@@ -146,7 +143,7 @@ namespace common.server
                 connection.FromConnection = connection;
                 if (requestWrap.Relay)
                 {
-                    connection.FromConnection = sourceConnectionSelector.SelectSource(connection, requestWrap.RelayIds.Span.ToUInt64());
+                    connection.FromConnection = sourceConnectionSelector.Select(connection, requestWrap.RelayIds.Span.ToUInt64());
                 }
                
 

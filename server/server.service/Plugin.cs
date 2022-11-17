@@ -28,7 +28,7 @@ namespace server.service
             services.AddSingleton<IUdpServer, UdpServer>();
 
             services.AddSingleton<IClientRegisterCaching, ClientRegisterCaching>();
-            services.AddSingleton<ISourceConnectionSelector, messengers.SourceConnectionSelector>();
+            services.AddSingleton<IRelaySourceConnectionSelector, messengers.RelaySourceConnectionSelector>();
 
             services.AddSingleton<IRegisterKeyValidator, RegisterValidator>();
             services.AddSingleton<IServiceAccessValidator, JsonFileServiceAccessValidator>();

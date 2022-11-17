@@ -18,6 +18,9 @@ namespace common.server
         public ulong ConnectId { get; set; }
         public bool Connected { get; }
 
+        /// <summary>
+        /// 是否是中继
+        /// </summary>
         public bool Relay { get; set; }
         /// <summary>
         /// 中继对象id，通过谁中继的，就是谁的id，直连的跟连接id一样

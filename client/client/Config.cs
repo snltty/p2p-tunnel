@@ -129,6 +129,9 @@ namespace client
         }
     }
 
+    /// <summary>
+    /// 客户端权限类别
+    /// </summary>
     [Flags]
     public enum EnumClientAccess : uint
     {

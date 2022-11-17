@@ -32,7 +32,7 @@ namespace client.realize.messengers.clients
         private readonly IUdpServer udpServer;
         private readonly HeartMessengerSender heartMessengerSender;
         private readonly RelayMessengerSender relayMessengerSender;
-        private readonly IConnecRouteCaching connecRouteCaching;
+        private readonly IClientConnecsCaching connecRouteCaching;
 
         private const byte TryReverseMaxValue = 2;
         private object lockObject = new();
@@ -41,7 +41,7 @@ namespace client.realize.messengers.clients
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
             IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
-            RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IConnecRouteCaching connecRouteCaching
+            RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnecsCaching connecRouteCaching
         )
         {
             this.punchHoleUdp = punchHoleUdp;
@@ -186,6 +186,7 @@ namespace client.realize.messengers.clients
         {
             if (client.Id == registerState.ConnectId)
             {
+                Logger.Instance.Error($"canot rconnect you self");
                 return;
             }
             if (registerState.LocalInfo.IsConnecting)
@@ -485,6 +486,7 @@ namespace client.realize.messengers.clients
         {
             if (registerState.RemoteInfo.Relay == false)
             {
+                Logger.Instance.Error($"server relay not available");
                 return;
             }
 
@@ -506,7 +508,16 @@ namespace client.realize.messengers.clients
         /// <returns></returns>
         public async Task Relay(IConnection sourceConnection, ulong[] relayids, bool notify = false)
         {
-            if (sourceConnection == null || sourceConnection.Connected == false) return;
+            if (relayids.Length < 3)
+            {
+                Logger.Instance.Error($"relayids length least 3");
+                return;
+            };
+            if (sourceConnection == null || sourceConnection.Connected == false)
+            {
+                Logger.Instance.Error($"sourceConnection is null");
+                return;
+            }
 
             IConnection connection = sourceConnection.Clone();
             connection.Relay = true;

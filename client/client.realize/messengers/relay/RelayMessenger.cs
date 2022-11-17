@@ -18,19 +18,17 @@ namespace client.realize.messengers.relay
     public class RelayMessenger : IMessenger
     {
         private readonly IClientInfoCaching clientInfoCaching;
-        private readonly MessengerSender messengerSender;
         private readonly RelayMessengerSender relayMessengerSender;
         private readonly IRelayValidator relayValidator;
-        private readonly IConnecRouteCaching connecRouteCaching;
+        private readonly IClientConnecsCaching connecRouteCaching;
         private readonly RegisterStateInfo registerStateInfo;
         private readonly Config config;
 
-        public RelayMessenger(IClientInfoCaching clientInfoCaching, MessengerSender messengerSender,
+        public RelayMessenger(IClientInfoCaching clientInfoCaching, 
             RelayMessengerSender relayMessengerSender, IRelayValidator relayValidator,
-            IConnecRouteCaching connecRouteCaching, RegisterStateInfo registerStateInfo, Config config)
+            IClientConnecsCaching connecRouteCaching, RegisterStateInfo registerStateInfo, Config config)
         {
             this.clientInfoCaching = clientInfoCaching;
-            this.messengerSender = messengerSender;
             this.relayMessengerSender = relayMessengerSender;
             this.relayValidator = relayValidator;
             this.connecRouteCaching = connecRouteCaching;
