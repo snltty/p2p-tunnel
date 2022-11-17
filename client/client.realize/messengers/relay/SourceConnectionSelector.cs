@@ -1,5 +1,4 @@
 ﻿using client.messengers.clients;
-using client.messengers.register;
 using client.messengers.relay;
 using common.server;
 using common.server.model;
@@ -22,7 +21,7 @@ namespace client.realize.messengers.relay
             {
                 if (clientInfoCaching.Get(relayid, out ClientInfo client))
                 {
-                    return connection.ServerType == ServerType.TCP ? client.TcpConnection : client.UdpConnection;
+                    return client.Connection;
                 }
             }
             return connection;
@@ -34,7 +33,7 @@ namespace client.realize.messengers.relay
             {
                 if (clientInfoCaching.Get(relayid, out ClientInfo client))
                 {
-                    return connection.ServerType == ServerType.TCP ? client.TcpConnection : client.UdpConnection;
+                    return client.Connection;
                 }
             }
             return connection;
@@ -43,9 +42,9 @@ namespace client.realize.messengers.relay
 
     public class ConnecRouteCaching : IConnecRouteCaching
     {
-        ConcurrentDictionary<ulong, ConnectInfo[]> connectsDic = new ConcurrentDictionary<ulong, ConnectInfo[]>();
+        ConcurrentDictionary<ulong, ulong[]> connectsDic = new ConcurrentDictionary<ulong, ulong[]>();
 
-        public ConcurrentDictionary<ulong, ConnectInfo[]> Connects => connectsDic;
+        public ConcurrentDictionary<ulong, ulong[]> Connects => connectsDic;
         public void AddConnects(ConnectsInfo connects)
         {
             connectsDic.AddOrUpdate(connects.Id, connects.Connects, (a, b) => connects.Connects);

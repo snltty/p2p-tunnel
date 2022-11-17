@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-09 10:04:15
+ * @LastEditTime: 2022-11-17 15:02:30
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\socks5\Index.vue
@@ -24,14 +24,6 @@
                             <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                                 <el-form-item label="buffersize" prop="BufferSize">
                                     <el-input v-model="state.form.BufferSize"></el-input>
-                                </el-form-item>
-                            </el-col>
-                            <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                                <el-form-item label="通信通道" prop="TunnelType">
-                                    <el-select v-model="state.form.TunnelType" placeholder="选择类型">
-                                        <el-option v-for="(item,index) in shareData.tunnelTypes" :key="index" :label="item" :value="index">
-                                        </el-option>
-                                    </el-select>
                                 </el-form-item>
                             </el-col>
                             <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
@@ -126,7 +118,6 @@ export default {
                 state.form.ConnectEnable = res.ConnectEnable;
                 state.form.IsCustomPac = res.IsCustomPac;
                 state.form.IsPac = res.IsPac;
-                state.form.TunnelType = res.TunnelType.toString();
                 state.form.TargetName = res.TargetName;
             });
         }
@@ -162,7 +153,6 @@ export default {
                 IsPac: false,
                 IsCustomPac: false,
                 BufferSize: 8 * 1024,
-                TunnelType: '8',
                 TargetName: ''
             },
             rules: {
@@ -195,7 +185,6 @@ export default {
                 const json = JSON.parse(JSON.stringify(state.form));
                 json.ListenPort = Number(json.ListenPort);
                 json.BufferSize = Number(json.BufferSize);
-                json.TunnelType = Number(json.TunnelType);
 
                 console.log(json);
                 set(json).then(() => {

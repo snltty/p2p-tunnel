@@ -38,7 +38,6 @@ namespace client.service.vea
             config.TargetName = conf.TargetName;
             config.IP = conf.IP;
             config.LanIP = conf.LanIP;
-            config.TunnelType = conf.TunnelType;
             config.SocksPort = conf.SocksPort;
             config.BufferSize = conf.BufferSize;
             config.ConnectEnable = conf.ConnectEnable;
@@ -67,7 +66,7 @@ namespace client.service.vea
             var model = arg.Content.DeJson<ResetModel>();
             if (clientInfoCaching.Get(model.Id, out ClientInfo client))
             {
-                await veaMessengerSender.Reset(client.OnlineConnection, model.Id);
+                await veaMessengerSender.Reset(client.Connection, model.Id);
             }
             return true;
         }

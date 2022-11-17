@@ -12,7 +12,6 @@ namespace common.server.model
         public const int RelayIdIndexPos = RelayIdLengthPos+1;
         public const int RelayIdSize = 8;
         public const int HeaderLength = 6;
-
         /// <summary>
         /// Relay + Reply + 111111
         /// </summary>
@@ -31,7 +30,7 @@ namespace common.server.model
         public int Timeout { get; set; } = 15000;
 
         /// <summary>
-        /// 目标路径
+        /// 消息id
         /// </summary>
         public ushort MessengerId { get; set; } = 0;
 
@@ -41,14 +40,24 @@ namespace common.server.model
         public uint RequestId = 0;
 
         /// <summary>
-        /// 中继数据时，写明消息给谁，【只发发数据的话，不用填这里】
+        /// 中继节点id列表
         /// </summary>
         public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
 
+        /// <summary>
+        /// 中继节点id列表，读取用
+        /// </summary>
         public Memory<byte> RelayIds { get; private set; } = Helper.EmptyArray;
         public byte RelayIdLength { get; private set; }
         public byte RelayIdIndex { get; private set; }
+
+        /// <summary>
+        /// 是否中继
+        /// </summary>
         public bool Relay { get; set; }
+        /// <summary>
+        /// 是否等待回复
+        /// </summary>
         public bool Reply { get; set; }
 
         /// <summary>

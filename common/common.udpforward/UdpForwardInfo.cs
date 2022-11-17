@@ -89,19 +89,6 @@ namespace common.udpforward
         }
     }
 
-    [Flags]
-    public enum UdpForwardTunnelTypes : byte
-    {
-        [Description("只tcp")]
-        TCP = 1 << 1,
-        [Description("只udp")]
-        UDP = 1 << 2,
-        [Description("优先tcp")]
-        TCP_FIRST = 1 << 3,
-        [Description("优先udp")]
-        UDP_FIRST = 1 << 4,
-    }
-
 
     [Flags, MessengerIdEnum]
     public enum UdpForwardMessengerIds : ushort

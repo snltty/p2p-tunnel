@@ -18,7 +18,6 @@ namespace common.tcpforward
         public string TargetIp { get; set; } = IPAddress.Loopback.ToString();
         public ushort TargetPort { get; set; } = 8080;
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
-        public TcpForwardTunnelTypes TunnelType { get; set; } = TcpForwardTunnelTypes.TCP_FIRST;
 
         public byte[] ToBytes()
         {
@@ -30,14 +29,11 @@ namespace common.tcpforward
 
             byte[] tnameBytes = TargetName.ToBytes();
 
-            byte[] bytes = new byte[1 + 1 + 2 + 2 + 1 + sipBytes.Length + 1 + tipBytes.Length + 1 + tnameBytes.Length];
+            byte[] bytes = new byte[1 + 2 + 2 + 1 + sipBytes.Length + 1 + tipBytes.Length + 1 + tnameBytes.Length];
 
             int index = 0;
 
             bytes[index] = (byte)AliveType;
-            index += 1;
-
-            bytes[index] = (byte)TunnelType;
             index += 1;
 
             bytes[index] = sportBytes[0];
@@ -69,9 +65,6 @@ namespace common.tcpforward
             int index = 0;
 
             AliveType = (TcpForwardAliveTypes)span[index];
-            index += 1;
-
-            TunnelType = (TcpForwardTunnelTypes)span[index];
             index += 1;
 
             SourcePort = span.Slice(index, 2).ToUInt16();

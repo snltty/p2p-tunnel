@@ -100,7 +100,6 @@ namespace client.service.udpforward
                     oldPort.Port = param.Port;
                     oldPort.TargetIp = param.TargetIp;
                     oldPort.TargetPort = param.TargetPort;
-                    oldPort.TunnelType = param.TunnelType;
                     oldPort.Name = param.Name;
                     oldPort.Desc = param.Desc;
                     oldPort.Listening = param.Listening;
@@ -112,7 +111,6 @@ namespace client.service.udpforward
                     {
                         Port = param.Port,
                         ID = param.ID,
-                        TunnelType = param.TunnelType,
                         Name = param.Name,
                         Listening = param.Listening,
                         TargetIp = param.TargetIp,
@@ -124,7 +122,6 @@ namespace client.service.udpforward
                 udpForwardTargetCaching.Add(param.Port, new UdpForwardTargetCacheInfo
                 {
                     Name = param.Name,
-                    TunnelType = param.TunnelType,
                     Endpoint = NetworkHelper.EndpointToArray(param.TargetIp, param.TargetPort)
                 });
 
@@ -210,8 +207,7 @@ namespace client.service.udpforward
                     udpForwardTargetCaching.Add(listen.Port, new UdpForwardTargetCacheInfo
                     {
                         Endpoint = NetworkHelper.EndpointToArray(listen.TargetIp, listen.TargetPort),
-                        Name = listen.Name,
-                        TunnelType = listen.TunnelType
+                        Name = listen.Name
                     });
                 }
                 catch (Exception ex)
@@ -248,7 +244,6 @@ namespace client.service.udpforward
                 TargetIp = forward.LocalIp,
                 TargetPort = forward.LocalPort,
                 TargetName = clientConfig.Client.Name,
-                TunnelType = forward.TunnelType,
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
@@ -279,7 +274,6 @@ namespace client.service.udpforward
                 TargetIp = forwardInfo.LocalIp,
                 TargetPort = forwardInfo.LocalPort,
                 TargetName = clientConfig.Client.Name,
-                TunnelType = forwardInfo.TunnelType
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
@@ -348,7 +342,6 @@ namespace client.service.udpforward
                 TargetIp = item.LocalIp,
                 TargetPort = item.LocalPort,
                 TargetName = clientConfig.Client.Name,
-                TunnelType = item.TunnelType
             }).ContinueWith((result) =>
             {
                 PrintResult(item, result.Result);
@@ -397,7 +390,6 @@ namespace client.service.udpforward
         public ushort Port { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
         public bool Listening { get; set; } = false;
-        public UdpForwardTunnelTypes TunnelType { get; set; } = UdpForwardTunnelTypes.TCP_FIRST;
         public string TargetIp { get; set; } = string.Empty;
         public ushort TargetPort { get; set; } = 0;
         public string Desc { get; set; } = string.Empty;
@@ -413,7 +405,6 @@ namespace client.service.udpforward
         public ushort ServerPort { get; set; }
         public string LocalIp { get; set; }
         public ushort LocalPort { get; set; }
-        public UdpForwardTunnelTypes TunnelType { get; set; } = UdpForwardTunnelTypes.TCP_FIRST;
         public string Desc { get; set; } = string.Empty;
         public bool Listening { get; set; } = false;
     }

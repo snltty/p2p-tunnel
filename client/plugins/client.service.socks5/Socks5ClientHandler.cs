@@ -207,42 +207,17 @@ namespace client.service.socks5
             {
                 if (string.IsNullOrWhiteSpace(config.TargetName))
                 {
-                    connection = SelectConnection(registerStateInfo.TcpConnection, registerStateInfo.UdpConnection);
+                    connection = registerStateInfo.OnlineConnection;
                 }
                 else
                 {
                     var client = clientInfoCaching.GetByName(config.TargetName);
                     if (client != null)
                     {
-                        connection = SelectConnection(client);
+                        connection = client.Connection;
                     }
                 }
             }
         }
-        private IConnection SelectConnection(IConnection tcpconnection, IConnection udpconnection)
-        {
-            return config.TunnelType switch
-            {
-                TunnelTypes.TCP_FIRST => tcpconnection != null ? tcpconnection : udpconnection,
-                TunnelTypes.UDP_FIRST => udpconnection != null ? udpconnection : tcpconnection,
-                TunnelTypes.TCP => tcpconnection,
-                TunnelTypes.UDP => udpconnection,
-                _ => tcpconnection,
-            };
-        }
-
-        private IConnection SelectConnection(ClientInfo client)
-        {
-            return config.TunnelType switch
-            {
-                TunnelTypes.TCP_FIRST => client.TcpConnected ? client.TcpConnection : client.UdpConnection,
-                TunnelTypes.UDP_FIRST => client.UdpConnected ? client.UdpConnection : client.TcpConnection,
-                TunnelTypes.TCP => client.TcpConnection,
-                TunnelTypes.UDP => client.UdpConnection,
-                _ => client.TcpConnection,
-            };
-        }
-
-
     }
 }

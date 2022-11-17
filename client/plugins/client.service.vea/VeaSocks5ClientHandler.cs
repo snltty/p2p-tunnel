@@ -30,7 +30,6 @@ namespace client.service.vea
                 ConnectEnable = config.ConnectEnable,
                 NumConnections = config.NumConnections,
                 BufferSize = config.BufferSize,
-                TunnelType = config.TunnelType,
                 TargetName = config.TargetName,
             }, clientInfoCaching, socks5ClientListener)
         {
@@ -57,7 +56,7 @@ namespace client.service.vea
             var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
 
             target.TargetIp = targetEp.Address;
-          
+
             if (targetEp.Port == 0 || ipMemory.SequenceEqual(Helper.AnyIpArray))
             {
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
@@ -97,7 +96,7 @@ namespace client.service.vea
         {
             if (virtualEthernetAdapterTransfer.IPList.TryGetValue(target, out IPAddressCacheInfo cache))
             {
-                return SelectConnection(cache.Client);
+                return cache.Client.Connection;
             }
 
             if (target.IsLan())
@@ -105,29 +104,17 @@ namespace client.service.vea
                 int mask = virtualEthernetAdapterTransfer.GetIpMask(ipMemory);
                 if (virtualEthernetAdapterTransfer.LanIPList.TryGetValue(mask, out cache))
                 {
-                    return SelectConnection(cache.Client);
+                    return cache.Client.Connection;
                 }
             }
 ;
             var client = clientInfoCaching.GetByName(config.TargetName);
             if (client != null)
             {
-                return SelectConnection(client);
+                return client.Connection;
             }
             return null;
         }
-        private IConnection SelectConnection(ClientInfo client)
-        {
-            return config.TunnelType switch
-            {
-                TunnelTypes.TCP_FIRST => client.TcpConnected ? client.TcpConnection : client.UdpConnection,
-                TunnelTypes.UDP_FIRST => client.UdpConnected ? client.UdpConnection : client.TcpConnection,
-                TunnelTypes.TCP => client.TcpConnection,
-                TunnelTypes.UDP => client.UdpConnection,
-                _ => client.TcpConnection,
-            };
-        }
-
         class TagInfo
         {
             public IConnection Connection { get; set; }

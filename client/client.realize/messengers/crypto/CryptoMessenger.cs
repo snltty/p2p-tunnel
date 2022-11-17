@@ -58,8 +58,7 @@ namespace client.realize.messengers.crypto
         {
             if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
             {
-                client.UdpConnection.EncodeDisable();
-                client.TcpConnection.EncodeDisable();
+                client.Connection.EncodeDisable();
             }
             return true;
         }

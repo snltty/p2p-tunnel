@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 00:47:21
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-18 16:02:20
+ * @LastEditTime: 2022-11-17 15:03:53
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\udpforward\Index.vue
@@ -34,7 +34,7 @@
                                     </dt>
                                     <dd>{{item.Desc}}</dd>
                                     <dd>
-                                        【{{shareData.tunnelTypes[item.TunnelType]}}】【{{item.Name}}】{{item.TargetIp}}:{{item.TargetPort}}
+                                        【{{item.Name}}】{{item.TargetIp}}:{{item.TargetPort}}
                                     </dd>
                                     <dd class="btns t-r">
                                         <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(item)">

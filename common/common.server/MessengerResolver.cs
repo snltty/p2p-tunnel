@@ -85,7 +85,7 @@ namespace common.server
                         //去掉一个id   然后 length-1
                         //0000 type length:2 11111111 00000000 ----> 00000000 0000 type length:1 00000000
                         receive.Slice(0, MessageRequestWrap.HeaderLength).CopyTo(receive.Slice(MessageRequestWrap.RelayIdSize));
-                        receive.Span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize] = (byte)(responseWrap.RelayIdLength - 1);
+                        receive.Span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize] --;
                         //中继数据不再次序列化，直接在原数据上更新数据然后发送
                         await _connection.Send(receive.Slice(MessageRequestWrap.RelayIdSize)).ConfigureAwait(false);
                     }
@@ -128,7 +128,7 @@ namespace common.server
                                 //去掉一个id   然后 length-1
                                 //0000 type length:2 11111111 00000000 ----> 00000000 0000 type length:1 00000000
                                 receive.Slice(0, MessageRequestWrap.HeaderLength).CopyTo(receive.Slice(MessageRequestWrap.RelayIdSize));
-                                receive.Span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize] -= 1;
+                                receive.Span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize] --;
                                 receive = receive.Slice(MessageRequestWrap.RelayIdSize);
                             }
                             //中继数据不再次序列化，直接在原数据上更新数据然后发送
@@ -169,27 +169,6 @@ namespace common.server
                 }
 
                 MessengerCacheInfo plugin = messengers[requestWrap.MessengerId];
-
-                if (middlewareTransfer != null)
-                {
-                    var middleres = await middlewareTransfer.Execute(connection);
-                    if (middleres.Item1 == false)
-                    {
-                        if (requestWrap.Reply)
-                        {
-                            await messengerSender.ReplyOnly(new MessageResponseWrap
-                            {
-                                Connection = connection,
-                                RequestId = requestWrap.RequestId,
-                                RelayIds = requestWrap.RelayIds,
-                                Code = MessageResponeCodes.ERROR,
-                                Payload = middleres.Item2
-                            }).ConfigureAwait(false);
-                        }
-
-                        return;
-                    }
-                }
                 object resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { connection });
                 //void的，task的 没有返回值，不回复，需要回复的可以返回任意类型
                 if (plugin.IsVoid || requestWrap.Reply == false)
@@ -238,10 +217,6 @@ namespace common.server
                         Code = MessageResponeCodes.ERROR
                     }).ConfigureAwait(false);
                 }
-            }
-            finally
-            {
-                //requestWrap.Reset();
             }
         }
 

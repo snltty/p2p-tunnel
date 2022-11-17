@@ -20,9 +20,8 @@ namespace client.messengers.clients
         public ClientInfo GetByName(string name);
         public IEnumerable<ClientInfo> All();
         public IEnumerable<ulong> AllIds();
-        public void Connecting(ulong id,bool val, ServerType serverType);
+        public void SetConnecting(ulong id,bool val);
         public void Offline(ulong id);
-        public void Offline(ulong id,ServerType serverType);
         public void Online(ulong id, IConnection connection, ClientConnectTypes connectType);
         public void Remove(ulong id);
 

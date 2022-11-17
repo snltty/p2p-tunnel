@@ -52,14 +52,7 @@ namespace client.service.tcpforward
         {
             if (string.IsNullOrWhiteSpace(cacheInfo.Name))
             {
-                return cacheInfo.TunnelType switch
-                {
-                    TcpForwardTunnelTypes.TCP_FIRST => registerStateInfo.TcpConnection ?? registerStateInfo.UdpConnection,
-                    TcpForwardTunnelTypes.UDP_FIRST => registerStateInfo.UdpConnection ?? registerStateInfo.TcpConnection,
-                    TcpForwardTunnelTypes.TCP => registerStateInfo.TcpConnection,
-                    TcpForwardTunnelTypes.UDP => registerStateInfo.UdpConnection,
-                    _ => registerStateInfo.OnlineConnection,
-                };
+                return registerStateInfo.OnlineConnection;
             }
 
             ClientInfo client = clientInfoCaching.GetByName(cacheInfo.Name);
@@ -68,14 +61,7 @@ namespace client.service.tcpforward
                 return null;
             }
 
-            return cacheInfo.TunnelType switch
-            {
-                TcpForwardTunnelTypes.TCP_FIRST => client.TcpConnected ? client.TcpConnection : client.UdpConnection,
-                TcpForwardTunnelTypes.UDP_FIRST => client.UdpConnected ? client.UdpConnection : client.TcpConnection,
-                TcpForwardTunnelTypes.TCP => client.TcpConnection,
-                TcpForwardTunnelTypes.UDP => client.UdpConnection,
-                _ => client.TcpConnection,
-            };
+            return client.Connection;
         }
     }
 }

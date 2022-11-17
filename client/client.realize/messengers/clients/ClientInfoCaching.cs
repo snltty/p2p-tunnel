@@ -48,11 +48,11 @@ namespace client.realize.messengers.clients
             return clients.Keys;
         }
 
-        public void Connecting(ulong id, bool val, ServerType serverType)
+        public void SetConnecting(ulong id, bool val)
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
-                client.Connecting(val, serverType);
+                client.SetConnecting(val);
             }
         }
 
@@ -60,23 +60,14 @@ namespace client.realize.messengers.clients
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
-                client.OfflineUdp();
-                client.OfflineTcp();
-                OnOffline.Push(client);
-            }
-        }
-        public void Offline(ulong id, ServerType serverType)
-        {
-            if (clients.TryGetValue(id, out ClientInfo client))
-            {
-                client.Offline(serverType);
+                client.Offline();
                 OnOffline.Push(client);
             }
         }
 
         public void Remove(ulong id)
         {
-            if(clients.TryRemove(id, out ClientInfo client))
+            if (clients.TryRemove(id, out ClientInfo client))
             {
                 OnRemove.Push(client);
             }
@@ -131,8 +122,7 @@ namespace client.realize.messengers.clients
             var _clients = clients.Values;
             foreach (var item in _clients)
             {
-                item.OfflineUdp();
-                item.OfflineTcp();
+                item.Offline();
                 OnOffline.Push(item);
                 clients.TryRemove(item.Id, out _);
                 OnRemove.Push(item);

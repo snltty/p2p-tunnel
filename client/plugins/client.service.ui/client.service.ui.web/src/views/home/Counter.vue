@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-08 14:53:58
+ * @LastEditTime: 2022-11-17 15:06:41
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Counter.vue
@@ -152,36 +152,6 @@ export default {
             }
         });
 
-
-        const getSendBytesOption = () => {
-            return {
-                title: {
-                    text: '',
-                    left: 'center'
-                },
-                tooltip: {
-                    trigger: 'item'
-                },
-                series: [
-                    {
-                        name: '服务器已发送数据',
-                        type: 'pie',
-                        radius: '60%',
-                        data: [
-                            { value: state.tcp.send._bytes, name: 'TCP' },
-                            { value: state.udp.send._bytes, name: 'UDP' },
-                        ],
-                        emphasis: {
-                            itemStyle: {
-                                shadowBlur: 10,
-                                shadowOffsetX: 0,
-                                shadowColor: 'rgba(0, 0, 0, 0.5)'
-                            }
-                        }
-                    }
-                ]
-            }
-        }
         const updateData = () => {
             getCounter().then((res) => {
                 if (res) {

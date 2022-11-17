@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-18 16:22:39
+ * @LastEditTime: 2022-11-17 15:01:22
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\udpforward\AddListen.vue
@@ -18,12 +18,6 @@
             </el-form-item>
             <el-form-item label="本地端口" prop="LocalPort">
                 <el-input v-model="form.LocalPort"></el-input>
-            </el-form-item>
-            <el-form-item label="通信通道" prop="TunnelType">
-                <el-select v-model="form.TunnelType" placeholder="选择通信通道">
-                    <el-option v-for="(item,key) in shareData.tunnelTypes" :key="key" :label="item" :value="key">
-                    </el-option>
-                </el-select>
             </el-form-item>
             <el-form-item label="简单说明" prop="Desc">
                 <el-input v-model="form.Desc"></el-input>
@@ -59,7 +53,6 @@ export default {
                 LocalIp: addListenData.value.LocalIp || '127.0.0.1',
                 LocalPort: addListenData.value.LocalPort || '80',
                 Desc: addListenData.value.Desc || '',
-                TunnelType: (addListenData.value.TunnelType || 8) + '',
             },
             rules: {
                 ServerPort: [
@@ -101,7 +94,6 @@ export default {
                 json.ID = Number(json.ID);
                 json.ServerPort = Number(json.ServerPort);
                 json.LocalPort = Number(json.LocalPort);
-                json.TunnelType = Number(json.TunnelType);
                 AddServerForward(json).then((res) => {
                     state.loading = false;
                     if (res) {

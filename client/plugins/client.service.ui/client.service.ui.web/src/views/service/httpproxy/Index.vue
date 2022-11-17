@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-09 10:05:40
+ * @LastEditTime: 2022-11-17 15:02:01
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\httpproxy\Index.vue
@@ -19,14 +19,6 @@
                             <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                                 <el-form-item label="监听端口" prop="Port">
                                     <el-input v-model="state.form.Port"></el-input>
-                                </el-form-item>
-                            </el-col>
-                            <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                                <el-form-item label="通信通道" prop="TunnelType">
-                                    <el-select v-model="state.form.TunnelType" placeholder="选择类型">
-                                        <el-option v-for="(item,index) in shareData.tunnelTypes" :key="index" :label="item" :value="index">
-                                        </el-option>
-                                    </el-select>
                                 </el-form-item>
                             </el-col>
                             <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
@@ -110,7 +102,6 @@ export default {
                     ID: 0,
                     Port: 5412,
                     ForwardType: 2,
-                    TunnelType: '8',
                     AliveType: 2,
                     Name: '',
                     Listening: false,
@@ -120,8 +111,6 @@ export default {
                 };
                 state.form.ID = json.ID;
                 state.form.Port = json.Port;
-                //state.form.ForwardType = json.ForwardType;
-                state.form.TunnelType = json.TunnelType.toString();
                 state.form.AliveType = json.AliveType;
                 state.form.Name = json.Name;
                 state.form.Listening = json.Listening;
@@ -154,7 +143,6 @@ export default {
                 ID: 0,
                 Port: 5413,
                 ForwardType: 2,
-                TunnelType: '8',
                 AliveType: 2,
                 Name: '',
                 Listening: false,
@@ -182,7 +170,6 @@ export default {
                 state.loading = true;
                 const json = JSON.parse(JSON.stringify(state.form));
                 json.Port = Number(json.Port);
-                json.TunnelType = Number(json.TunnelType);
                 addListen(json).then(() => {
                     state.loading = false;
                     ElMessage.success('操作成功！');

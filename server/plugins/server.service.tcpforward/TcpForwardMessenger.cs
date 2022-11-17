@@ -120,8 +120,7 @@ namespace server.service.tcpforward
                             Name = source.Name,
                             Connection = connection,
                             Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort),
-                            ForwardType = TcpForwardTypes.FORWARD,
-                            TunnelType = TcpForwardTunnelTypes.TCP_FIRST
+                            ForwardType = TcpForwardTypes.FORWARD
                         });
                     }
                     //长连接转发注册，一个端口只能注册一次，被占用时不可再次注册
@@ -144,8 +143,7 @@ namespace server.service.tcpforward
                             Name = source.Name,
                             Connection = connection,
                             Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort),
-                            ForwardType = TcpForwardTypes.FORWARD,
-                            TunnelType = TcpForwardTunnelTypes.TCP_FIRST
+                            ForwardType = TcpForwardTypes.FORWARD
                         });
                         try
                         {

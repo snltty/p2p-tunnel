@@ -36,7 +36,6 @@ namespace client.service.socks5
             config.IsPac = _config.IsPac;
             config.IsCustomPac = _config.IsCustomPac;
             config.TargetName = _config.TargetName;
-            config.TunnelType = _config.TunnelType;
 
             await config.SaveConfig().ConfigureAwait(false);
             return string.Empty;

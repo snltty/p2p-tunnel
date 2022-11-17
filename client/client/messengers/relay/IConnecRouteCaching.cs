@@ -5,7 +5,7 @@ namespace client.messengers.relay
 {
     public interface IConnecRouteCaching
     {
-        public ConcurrentDictionary<ulong, ConnectInfo[]> Connects { get; }
+        public ConcurrentDictionary<ulong, ulong[]> Connects { get; }
 
         public void AddConnects(ConnectsInfo connects);
 

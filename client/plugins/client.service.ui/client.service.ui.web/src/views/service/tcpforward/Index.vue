@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 00:47:21
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-18 16:37:33
+ * @LastEditTime: 2022-11-17 15:03:18
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\tcpforward\Index.vue
@@ -41,7 +41,6 @@
                                                         <li>
                                                             <p class="flex"><span class="flex-1">访问</span><span>{{fitem.SourceIp}}:{{item.Port}}</span></p>
                                                             <p class="flex"><span class="flex-1">目标</span><span>【{{fitem.Name}}】{{fitem.TargetIp}}:{{fitem.TargetPort}}</span></p>
-                                                            <p class="flex"><span class="flex-1">通道</span><span>{{shareData.tunnelTypes[fitem.TunnelType]}}</span></p>
                                                             <p class="t-r">
                                                                 <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveForward(item,fitem)">
                                                                     <template #reference>

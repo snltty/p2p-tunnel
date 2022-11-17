@@ -15,7 +15,6 @@ namespace client.service.vea
                 ConnectEnable = config.ConnectEnable,
                 NumConnections = config.NumConnections,
                 BufferSize = config.BufferSize,
-                TunnelType = config.TunnelType,
                 TargetName = config.TargetName,
             }, wheelTimer, veaKeyValidator)
         {

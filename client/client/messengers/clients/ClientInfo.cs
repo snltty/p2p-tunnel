@@ -2,8 +2,6 @@
 using System;
 using System.Text.Json.Serialization;
 using common.server;
-using System.ComponentModel;
-using System.Net;
 
 namespace client.messengers.clients
 {
@@ -12,106 +10,53 @@ namespace client.messengers.clients
     /// </summary>
     public class ClientInfo
     {
-        public bool UdpConnecting { get; private set; } = false;
-        public bool TcpConnecting { get; private set; } = false;
-        public bool UdpConnected { get => UdpConnection != null && UdpConnection.Connected; }
-        public bool TcpConnected { get => TcpConnection != null && TcpConnection.Connected; }
+        public bool Connecting { get; private set; } = false;
+        public bool Connected { get => Connection != null && Connection.Connected; }
 
         public string Name { get; init; } = string.Empty;
-
-        private IPAddress ip = IPAddress.Any;
-        public IPAddress Ip { get => ip; }
-
         public ulong Id { get; init; } = 0;
         public bool UsePunchHole { get; init; } = false;
 
         public bool UseUdp { get; init; } = false;
         public bool UseTcp { get; init; } = false;
         public bool UseRelay { get; init; } = false;
-        public int UdpPing => UdpConnection?.RoundTripTime ?? -1;
-        public int TcpPing => TcpConnection?.RoundTripTime ?? -1;
-
-
-        public ClientConnectTypes UdpConnectType { get; private set; } = ClientConnectTypes.P2P;
-        public ClientConnectTypes TcpConnectType { get; private set; } = ClientConnectTypes.P2P;
+        public int Ping => Connection?.RoundTripTime ?? -1;
+        public ServerType ServerType => Connection?.ServerType ?? ServerType.TCPUDP;
+        public ClientConnectTypes ConnectType { get; private set; } = ClientConnectTypes.Unknow;
 
         [JsonIgnore]
         public byte TryReverseValue { get; set; } = 1;
         [JsonIgnore]
-        public IConnection TcpConnection { get; set; } = null;
-        [JsonIgnore]
-        public IConnection UdpConnection { get; set; } = null;
-        [JsonIgnore]
-        public IConnection OnlineConnection => TcpConnection ?? UdpConnection;
+        public IConnection Connection { get; set; } = null;
 
-        public void OfflineUdp()
+        public void Offline()
         {
-            UdpConnecting = false;
-            if (UdpConnection != null && UdpConnection.Relay == false)
+            Connecting = false;
+            if (Connection != null && Connection.Relay == false)
             {
-                UdpConnection.Disponse();
+                Connection.Disponse();
             }
-            UdpConnection = null;
+            Connection = null;
         }
-        public void OfflineTcp()
-        {
-            TcpConnecting = false;
-            if (TcpConnection != null && TcpConnection.Relay == false)
-            {
-                TcpConnection.Disponse();
-            }
-            TcpConnection = null;
-        }
-        public void Offline(ServerType serverType)
-        {
-            if ((serverType & ServerType.UDP) == ServerType.UDP)
-            {
-                OfflineUdp();
-            }
-            if ((serverType & ServerType.TCP) == ServerType.TCP)
-            {
-                OfflineTcp();
-            }
-        }
-
         public void Online(IConnection connection, ClientConnectTypes connectType)
         {
-            if (connection.ServerType == ServerType.UDP)
-            {
-                UdpConnection = connection;
-                ip = connection.Address.Address;
-                UdpConnectType = connectType;
-            }
-            else
-            {
-                TcpConnection = connection;
-                ip = connection.Address.Address;
-                TcpConnectType = connectType;
-            }
-            Connecting(false, connection.ServerType);
+            Connection = connection;
+            ConnectType = connectType;
+            SetConnecting(false);
         }
-
-        public void Connecting(bool val, IConnection connection)
+        public void SetConnecting(bool val)
         {
-            Connecting(val, connection.ServerType);
-        }
-
-        public void Connecting(bool val, ServerType serverType)
-        {
-            if ((serverType & ServerType.UDP) == ServerType.UDP)
-            {
-                UdpConnecting = val;
-            }
-            if ((serverType & ServerType.TCP) == ServerType.TCP)
-            {
-                TcpConnecting = val;
-            }
+            Connecting = val;
         }
     }
 
     [Flags]
     public enum ClientConnectTypes : byte
     {
+        /// <summary>
+        /// 未连接
+        /// </summary>
+        Unknow = 0,
         /// <summary>
         /// 打洞
         /// </summary>

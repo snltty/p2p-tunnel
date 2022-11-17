@@ -3,7 +3,7 @@
  * @Author: snltty
  * @Date: 2022-05-28 17:29:58
  * @LastEditors: snltty
- * @LastEditTime: 2022-05-28 17:32:19
+ * @LastEditTime: 2022-11-17 17:00:43
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\shareData.js
@@ -14,7 +14,8 @@ const shareDataKey = Symbol();
 export const provideShareData = () => {
     const state = reactive({
         aliveTypes: { 1: '长连接', 2: '短链接' },
-        tunnelTypes: { 2: '只tcp', 4: '只udp', 8: '优先tcp', 16: '优先udp' },
+        clientConnectTypes: { 0: '未连接', 1: '打洞', 2: '节点中继', 4: '服务器中继' },
+        serverTypes: { 1: 'TCP', 2: 'UDP', 3: '/' },
     });
     provide(shareDataKey, state);
 }

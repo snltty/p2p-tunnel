@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-18 14:34:11
+ * @LastEditTime: 2022-11-17 15:03:03
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\tcpforward\AddListen.vue
@@ -50,7 +50,6 @@ export default {
                 AliveType: (addListenData.value.AliveType || '1') + '',
                 Desc: addListenData.value.Desc || '',
                 ForwardType: 1,
-                TunnelType: 2
             },
             rules: {
                 Port: [
@@ -83,7 +82,6 @@ export default {
                 json.Port = Number(json.Port);
                 json.AliveType = Number(json.AliveType);
                 json.ForwardType = Number(json.ForwardType);
-                json.TunnelType = Number(json.TunnelType);
                 addListen(json).then(() => {
                     state.loading = false;
                     state.show = false;

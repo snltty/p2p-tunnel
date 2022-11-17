@@ -31,10 +31,7 @@ namespace client.service.wakeup
             });
             clientInfoCaching.OnOffline.Sub((client) =>
             {
-                if (client.UdpConnected == false && client.TcpConnected == false)
-                {
-                    macs.TryRemove(client.Name, out _);
-                }
+                macs.TryRemove(client.Name, out _);
             });
         }
 
@@ -56,7 +53,7 @@ namespace client.service.wakeup
         {
             foreach (var item in clientInfoCaching.All().Where(c => c.Id != registerStateInfo.ConnectId))
             {
-                var connection = item.OnlineConnection;
+                IConnection connection = item.Connection;
                 var client = item;
                 if (connection != null)
                 {
@@ -82,7 +79,7 @@ namespace client.service.wakeup
             }
             else
             {
-                await wakeUpMessengerSender.WakeUp(client.OnlineConnection, mac);
+                await wakeUpMessengerSender.WakeUp(client.Connection, mac);
             }
 
             return true;

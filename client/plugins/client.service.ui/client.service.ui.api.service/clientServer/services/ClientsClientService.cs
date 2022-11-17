@@ -1,9 +1,11 @@
 ﻿using client.messengers.clients;
 using client.messengers.register;
 using client.service.ui.api.clientServer;
+using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -31,18 +33,22 @@ namespace client.service.ui.api.service.clientServer.services
         public void Connect(ClientServiceParamsInfo arg)
         {
             ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
+            if (clientInfoCaching.Get(model.ID, out ClientInfo client) == false)
+            {
+                return;
+            }
+            clientInfoCaching.Offline(model.ID);
             clientsTransfer.ConnectClient(model.ID);
-        }
-
-        public void Offline(ClientServiceParamsInfo arg)
-        {
-            ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
-            clientInfoCaching.Offline(model.ID, model.Type);
         }
 
         public void ConnectReverse(ClientServiceParamsInfo arg)
         {
             ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
+            if (clientInfoCaching.Get(model.ID, out ClientInfo client) == false)
+            {
+                return;
+            }
+            clientInfoCaching.Offline(model.ID);
             clientsTransfer.ConnectReverse(model.ID);
         }
 
@@ -58,32 +64,38 @@ namespace client.service.ui.api.service.clientServer.services
             return true;
         }
 
-        public async Task<ConcurrentDictionary<ulong, ConnectInfo[]>> Connects(ClientServiceParamsInfo arg)
+        public async Task<ConcurrentDictionary<ulong, ulong[]>> Connects(ClientServiceParamsInfo arg)
         {
             return await clientsTransfer.Connects();
         }
-        public async Task<Dictionary<ulong, int[]>> Delay(ClientServiceParamsInfo arg)
+        public async Task<Dictionary<int, int>> Delay(ClientServiceParamsInfo arg)
         {
-            return await clientsTransfer.Delay(ulong.Parse(arg.Content));
+            return await clientsTransfer.Delay(arg.Content.DeJson<Dictionary<int, ulong[]>>());
         }
         public async Task<bool> Relay(ClientServiceParamsInfo arg)
         {
-            RelayParamsInfo model = arg.Content.DeJson<RelayParamsInfo>();
+            ulong[] relayids = arg.Content.DeJson<ulong[]>();
+            if (relayids.Length < 3) return false;
+
+            ulong connectId = relayids[1];
+            ulong targetId = relayids[^1];
 
             IConnection sourceConnection = null;
-            if (model.ID == 0)
+            if (connectId == 0)
             {
-                sourceConnection = model.Type == ServerType.TCP ? registerStateInfo.TcpConnection : registerStateInfo.UdpConnection;
+                sourceConnection = registerStateInfo.OnlineConnection;
             }
-            else if (clientInfoCaching.Get(model.ID, out ClientInfo sourceClient))
+            else if (clientInfoCaching.Get(connectId, out ClientInfo sourceClient))
             {
-                sourceConnection = model.Type == ServerType.TCP ? sourceClient.TcpConnection : sourceClient.UdpConnection;
+                sourceConnection = sourceClient.Connection;
+            }
+            if (sourceConnection == null)
+            {
+                return false;
             }
 
-            if (sourceConnection != null && sourceConnection.Connected && clientInfoCaching.Get(model.ToId, out ClientInfo targetClient))
-            {
-                await clientsTransfer.Relay(targetClient, sourceConnection, true);
-            }
+            clientInfoCaching.Offline(targetId);
+            await clientsTransfer.Relay(sourceConnection, relayids, true);
 
             return true;
         }
@@ -92,12 +104,10 @@ namespace client.service.ui.api.service.clientServer.services
     public class ConnectParamsInfo
     {
         public ulong ID { get; set; } = 0;
-        public ServerType Type { get; set; } = ServerType.TCP;
     }
     public class RelayParamsInfo
     {
-        public ulong ID { get; set; } = 0;
+        public ulong[] RelayIds { get; set; } = Helper.EmptyUlongArray;
         public ulong ToId { get; set; } = 0;
-        public ServerType Type { get; set; } = ServerType.TCP;
     }
 }

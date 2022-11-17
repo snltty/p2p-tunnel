@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-13 15:17:01
+ * @LastEditTime: 2022-11-17 15:19:56
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -15,25 +15,19 @@
                 <template v-for="(item,index) in clients" :key="index">
                     <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
                         <div class="item">
-                            <dl v-loading="item.loading">
+                            <dl v-loading="item.Connecting">
                                 <dt>{{item.Name}}</dt>
-                                <dd v-if="item.showUdp" :style="item.udpConnectTypeStyle" class="flex" @click="handleShowDelay(item)">
-                                    <span class="label">Udp</span>
-                                    <span>{{item.udpConnectTypeStr}}</span>
+                                <dd :style="item.connectTypeStyle" class="flex" @click="handleShowDelay(item)">
+                                    <span class="label">{{item.serverType}}</span>
+                                    <span>{{item.connectTypeStr}}</span>
                                     <span class="flex-1"></span>
-                                    <Signal :value="item.UdpPing"></Signal>
+                                    <Signal :value="item.Ping"></Signal>
 
-                                </dd>
-                                <dd v-if="item.showTcp" :style="item.tcpConnectTypeStyle" class="flex" @click="handleShowDelay(item)">
-                                    <span class="label">Tcp</span>
-                                    <span>{{item.tcpConnectTypeStr}}</span>
-                                    <span class="flex-1"></span>
-                                    <Signal :value="item.TcpPing"></Signal>
                                 </dd>
                                 <dd class="t-r">
                                     <el-button plain text bg size="small" @click="handleConnect(item)">连它</el-button>
                                     <el-button plain text bg size="small" @click="handleConnectReverse(item)">连我</el-button>
-                                    <el-button plain text bg :loading="item.loading" size="small" @click="handleConnectReset(item)">重启</el-button>
+                                    <el-button plain text bg :loading="item.Connecting" size="small" @click="handleConnectReset(item)">重启</el-button>
                                 </dd>
                             </dl>
                         </div>
@@ -49,7 +43,8 @@
 import { computed, reactive } from '@vue/reactivity';
 import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
-import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing, setRelay, sendClientOffline } from '../../apis/clients'
+import { injectShareData } from '../../states/shareData'
+import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing, setRelay } from '../../apis/clients'
 import Signal from './Signal.vue'
 import RelayView from './RelayView.vue'
 import { onMounted, onUnmounted, provide } from '@vue/runtime-core';
@@ -60,48 +55,30 @@ export default {
     setup () {
         const clientsState = injectClients();
         const registerState = injectRegister();
-        const connectTypeStrs = ['未连接', '打洞', '节点中继', '', '服务器中继'];
-        const connectTypeColors = ['color:#333;', 'color:#148727;font-weight:bold;', 'color:#148727;font-weight:bold;', '', 'color:#148727;font-weight:bold;'];
+        const shareDataState = injectShareData();
+        const connectTypeColors = {
+            0: 'color:#333;',
+            1: 'color:#148727;font-weight:bold;',
+            2: 'color:#148727;font-weight:bold;',
+            4: 'color:#148727;font-weight:bold;',
+        };
         const clients = computed(() => {
             clientsState.clients.forEach(c => {
-                c.showUdp = c.UseUdp && registerState.ClientConfig.UseUdp;
-                c.showTcp = c.UseTcp && registerState.ClientConfig.UseTcp;
-
-                c.udpConnectType = c.UdpConnected ? c.UdpConnectType : 0;
-                c.tcpConnectType = c.TcpConnected ? c.TcpConnectType : 0;
-
-                c.udpConnectTypeStr = connectTypeStrs[c.udpConnectType];
-                c.udpConnectTypeStyle = connectTypeColors[c.udpConnectType];
-
-                c.tcpConnectTypeStr = connectTypeStrs[c.tcpConnectType];
-                c.tcpConnectTypeStyle = connectTypeColors[c.tcpConnectType];
-
-                c.connectDisabled = false;
-                if (c.UseUdp || c.UseTcp) {
-                    c.connectDisabled = c.UdpConnected && c.TcpConnected;
-                } else if (c.UseUdp) {
-                    c.connectDisabled = c.UdpConnected;
-                } else if (c.UseTcp) {
-                    c.connectDisabled = c.TcpConnected;
-                }
-
-                c.online = c.UdpConnected || c.TcpConnected;
-
-                c.loading = c.UdpConnecting || c.TcpConnecting;
+                c.connectTypeStr = shareDataState.clientConnectTypes[c.ConnectType];
+                c.connectTypeStyle = connectTypeColors[c.ConnectType];
+                c.serverType = shareDataState.serverTypes[c.ServerType];
             });
             return clientsState.clients;
         });
 
         const handleConnect = (row) => {
-            if (row.UdpConnected || row.TcpConnected) {
+            if (row.Connected) {
                 ElMessageBox.confirm('已连接，是否确定重新连接', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning',
                 }).then(() => {
-                    sendClientOffline(row.Id).then(() => {
-                        sendClientConnect(row.Id);
-                    });
+                    sendClientConnect(row.Id);
                 }).catch(() => {
 
                 });
@@ -110,15 +87,13 @@ export default {
             }
         }
         const handleConnectReverse = (row) => {
-            if (row.UdpConnected || row.TcpConnected) {
+            if (row.Connected) {
                 ElMessageBox.confirm('已连接，是否确定重新连接', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning',
                 }).then(() => {
-                    sendClientOffline(row.Id).then(() => {
-                        sendClientConnectReverse(row.Id);
-                    });
+                    sendClientConnectReverse(row.Id);
                 }).catch(() => {
 
                 });
@@ -162,10 +137,8 @@ export default {
             state.toId = item.Id;
             state.showDelay = true;
         }
-        const handleOnRelay = (item) => {
-            sendClientOffline(item.toid, item.type).then(() => {
-                setRelay(item);
-            });
+        const handleOnRelay = (relayids) => {
+            setRelay(relayids);
         }
 
 

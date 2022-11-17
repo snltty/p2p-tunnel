@@ -35,7 +35,6 @@ namespace client.service.vea
             config.ProxyAll = _config.ProxyAll;
             config.TargetName = _config.TargetName;
             config.IP = _config.IP;
-            config.TunnelType = _config.TunnelType;
             config.SocksPort = _config.SocksPort;
             config.BufferSize = _config.BufferSize;
             config.ConnectEnable = _config.ConnectEnable;

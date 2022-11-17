@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-25 15:57:02
+ * @LastEditTime: 2022-11-17 17:37:51
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -28,14 +28,6 @@
                                 <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                                     <el-form-item label="buffersize" prop="BufferSize">
                                         <el-input v-model="state.form.BufferSize"></el-input>
-                                    </el-form-item>
-                                </el-col>
-                                <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="通信通道" prop="TunnelType">
-                                        <el-select v-model="state.form.TunnelType" placeholder="选择类型">
-                                            <el-option v-for="(item,index) in shareData.tunnelTypes" :key="index" :label="item" :value="index">
-                                            </el-option>
-                                        </el-select>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
@@ -90,7 +82,7 @@
                                 </el-col>
                                 <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
                                     <el-form-item label="局域网段" prop="LanIP">
-                                        <el-tooltip class="box-item" effect="dark" content="当前客户端的局域网段，各个客户端之间设置不一样的网段即可，192.168.x.0酱紫，0.0.0.0则不启用" placement="top-start">
+                                        <el-tooltip class="box-item" effect="dark" content="当前客户端的局域网段，各个客户端之间设置不一样的网段即可，192.168.x.0酱紫，为空不启用，多个网段用英文逗号间隔" placement="top-start">
                                             <el-input v-model="state.form.LanIP"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
@@ -112,20 +104,23 @@
         <div class="inner">
             <h3 class="title t-c">
                 <span>组网列表</span>
-                <el-button type="primary" size="small" :loading="loading" @click="handleUpdate">刷新列表</el-button>
+                <el-button type="primary" size="small" :loading="state.loading" @click="handleUpdate">刷新列表</el-button>
             </h3>
             <div>
                 <el-table size="small" border :data="showClients" style="width: 100%">
                     <el-table-column prop="Name" label="客户端">
                         <template #default="scope">
-                            <strong v-if="scope.row.online" style="color:green">{{scope.row.Name}}</strong>
+                            <strong v-if="scope.row.Connected" style="color:green">{{scope.row.Name}}</strong>
                             <span v-else>{{scope.row.Name}}</span>
                         </template>
                     </el-table-column>
                     <el-table-column prop="veaIp" label="虚拟ip">
                         <template #default="scope">
                             <p><strong>{{scope.row.veaIp.IP}}</strong></p>
-                            <p style="color:#999">{{scope.row.veaIp.LanIP}}</p>
+                            <template v-for="(item) in scope.row.veaIp.LanIP" :key="item">
+                                <p style="color:#999">{{item}}</p>
+                            </template>
+
                         </template>
                     </el-table-column>
                     <el-table-column prop="todo" label="操作">
@@ -168,8 +163,7 @@ export default {
                 ProxyAll: false,
                 TargetName: '',
                 IP: '',
-                LanIP: '0.0.0.0',
-                TunnelType: '8',
+                LanIP: '',
                 SocksPort: 5415,
                 BufferSize: 8 * 1024,
                 ConnectEnable: false
@@ -193,9 +187,6 @@ export default {
                 ],
                 IP: [
                     { required: true, message: '必填', trigger: 'blur' }
-                ],
-                LanIP: [
-                    { required: true, message: '必填', trigger: 'blur' }
                 ]
             },
             veaClients: {}
@@ -203,8 +194,8 @@ export default {
         const formDom = ref(null);
         const showClients = computed(() => {
             clientsState.clients.forEach(c => {
-                c.veaIp = state.veaClients[c.Id] || { IP: '', LanIP: '' };
-                c.online = c.UdpConnected || c.TcpConnected;
+                c.veaIp = JSON.parse(JSON.stringify(state.veaClients[c.Id] || { IP: '', LanIP: [] }));
+                c.veaIp.LanIP = c.veaIp.LanIP.filter(c => c.length > 0);
             });
             return clientsState.clients;
         });
@@ -215,8 +206,7 @@ export default {
                 state.form.ProxyAll = res.ProxyAll;
                 state.form.TargetName = res.TargetName;
                 state.form.IP = res.IP;
-                state.form.LanIP = res.LanIP;
-                state.form.TunnelType = res.TunnelType.toString();
+                state.form.LanIP = res.LanIP.join(',');
                 state.form.SocksPort = res.SocksPort;
                 state.form.BufferSize = res.BufferSize;
                 state.form.ConnectEnable = res.ConnectEnable;
@@ -254,8 +244,8 @@ export default {
 
                 const json = JSON.parse(JSON.stringify(state.form));
                 json.SocksPort = Number(json.SocksPort);
-                json.TunnelType = Number(json.TunnelType);
                 json.BufferSize = Number(json.BufferSize);
+                json.LanIP = json.LanIP.split(',').filter(c => c.length > 0);
                 setConfig(json).then((res) => {
                     state.loading = false;
                     if (json.IsPac) {

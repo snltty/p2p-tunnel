@@ -60,6 +60,5 @@ namespace common.udpforward
         public string Name { get; set; }
         public IConnection Connection { get; set; }
         public Memory<byte> Endpoint { get; set; }
-        public UdpForwardTunnelTypes TunnelType { get; set; } = UdpForwardTunnelTypes.TCP_FIRST;
     }
 }

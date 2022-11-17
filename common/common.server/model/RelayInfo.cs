@@ -1,28 +1,32 @@
-﻿using common.libs.extends;
+﻿using common.libs;
+using common.libs.extends;
 using System;
-using System.Reflection;
 
 namespace common.server.model
 {
     public class RelayInfo
     {
-        public ulong FromId { get; set; } = 0;
-        public ulong ToId { get; set; } = 0;
+        public ulong[] RelayIds { get; set; } = Helper.EmptyUlongArray;
         public byte[] ToBytes()
         {
-            var bytes = new byte[8 + 8];
+            var bytes = new byte[RelayIds.Length * MessageRequestWrap.RelayIdSize];
 
-            FromId.ToBytes().AsSpan().CopyTo(bytes.AsSpan(0));
-            ToId.ToBytes().AsSpan().CopyTo(bytes.AsSpan(8));
-
+            for (int i = 0; i < RelayIds.Length; i++)
+            {
+                RelayIds[i].ToBytes().AsSpan().CopyTo(bytes.AsSpan(i * MessageRequestWrap.RelayIdSize));
+            }
             return bytes;
         }
 
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
-            FromId = span.ToUInt64();
-            ToId = span.Slice(8).ToUInt64();
+            int length = data.Length / MessageRequestWrap.RelayIdSize;
+            RelayIds = new ulong[length];
+            for (int i = length - 1; i >= 0; i++)
+            {
+                RelayIds[length - 1 - i] = span.Slice(i * MessageRequestWrap.RelayIdSize).ToUInt64();
+            }
         }
 
         public static void ClearToId(Memory<byte> data)
@@ -36,11 +40,10 @@ namespace common.server.model
     public enum RelayMessengerIds : ushort
     {
         Min = 501,
-        Notify = 501,
-        Verify = 502,
-        Delay = 503,
-        AskConnects = 504,
-        Connects = 505,
+        Relay = 501,
+        Delay = 502,
+        AskConnects = 503,
+        Connects = 504,
         Max = 600,
     }
 
@@ -49,7 +52,7 @@ namespace common.server.model
     {
         public ulong Id { get; set; }
         public ulong ToId { get; set; }
-        public ConnectInfo[] Connects { get; set; }
+        public ulong[] Connects { get; set; }
 
         public static ulong ReadToId(Memory<byte> memory)
         {
@@ -58,7 +61,7 @@ namespace common.server.model
 
         public byte[] ToBytes()
         {
-            byte[] res = new byte[8 + 8 + 9 * Connects.Length];
+            byte[] res = new byte[8 + 8 + 8 * Connects.Length];
             Span<byte> span = res.AsSpan();
 
             int index = 0;
@@ -69,16 +72,10 @@ namespace common.server.model
             Id.ToBytes().CopyTo(span.Slice(index));
             index += 8;
 
-
-
             for (int i = 0; i < Connects.Length; i++)
             {
-                ConnectInfo item = Connects[i];
-
-                item.Id.ToBytes().CopyTo(span.Slice(index));
+                Connects[i].ToBytes().CopyTo(span.Slice(index));
                 index += 8;
-                span[index] = (byte)(((item.Tcp ? 1 : 0) << 1) | (item.Udp ? 1 : 0));
-                index += 1;
             }
             return res;
         }
@@ -96,25 +93,12 @@ namespace common.server.model
             index += 8;
 
             int len = (span.Length - 8) / 9;
-            Connects = new ConnectInfo[len];
+            Connects = new ulong[len];
             for (int i = 0; i < len; i++)
             {
-                Connects[i] = new ConnectInfo
-                {
-                    Id = span.Slice(index).ToUInt64(),
-                    Tcp = (span[index + 8] >> 1) == 1,
-                    Udp = (span[index + 8] & 0x1) == 1
-
-                };
-                index += 9;
+                Connects[i] = span.Slice(index).ToUInt64();
+                index += 8;
             };
         }
-    }
-
-    public class ConnectInfo
-    {
-        public ulong Id { get; set; }
-        public bool Tcp { get; set; }
-        public bool Udp { get; set; }
     }
 }

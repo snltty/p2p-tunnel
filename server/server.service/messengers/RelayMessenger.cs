@@ -26,67 +26,6 @@ namespace server.service.messengers
             this.relayValidator = relayValidator;
         }
 
-        [MessengerId((ushort)RelayMessengerIds.Notify)]
-        public async Task Notify(IConnection connection)
-        {
-            RelayInfo relayInfo = new RelayInfo();
-            relayInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
-            if (relayInfo.ToId > 0)
-            {
-                if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
-                {
-                    if (relayValidator.Validate(connection) == false)
-                    {
-                        return;
-                    }
-
-                    if (clientRegisterCache.Get(relayInfo.ToId, out RegisterCacheInfo target))
-                    {
-                        if (source.GroupId == target.GroupId)
-                        {
-                            IConnection online = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
-                            if (online == null || online.Connected == false)
-                            {
-                                online = target.OnLineConnection;
-                            }
-
-                            connection.ReceiveRequestWrap.Connection = online;
-                            RelayInfo.ClearToId(connection.ReceiveRequestWrap.Payload);
-                            await messengerSender.SendOnly(connection.ReceiveRequestWrap).ConfigureAwait(false);
-                        }
-                    }
-                }
-            }
-        }
-
-        [MessengerId((ushort)RelayMessengerIds.Verify)]
-        public byte[] Verify(IConnection connection)
-        {
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
-            {
-                if (relayValidator.Validate(connection) == false)
-                {
-                    return Helper.FalseArray;
-                }
-
-                ulong toid = connection.ReceiveRequestWrap.Payload.Span.ToUInt64();
-                if (clientRegisterCache.Get(toid, out RegisterCacheInfo target))
-                {
-                    if (source.GroupId == target.GroupId)
-                    {
-                        return connection.ServerType switch
-                        {
-                            ServerType.TCP => source.TcpConnection != null && source.TcpConnection.Connected ? Helper.TrueArray : Helper.FalseArray,
-                            ServerType.UDP => source.UdpConnection != null && source.UdpConnection.Connected ? Helper.TrueArray : Helper.FalseArray,
-                            _ => Helper.FalseArray,
-                        };
-                    }
-                }
-            }
-
-            return Helper.FalseArray;
-        }
-
         [MessengerId((ushort)RelayMessengerIds.Delay)]
         public byte[] Delay(IConnection connection)
         {
@@ -139,7 +78,7 @@ namespace server.service.messengers
             {
                 if (clientRegisterCaching.Get(relayid, out RegisterCacheInfo client))
                 {
-                    return connection.ServerType == ServerType.TCP ? client.TcpConnection : client.UdpConnection;
+                    return client.OnLineConnection;
                 }
             }
             return connection;
@@ -151,7 +90,7 @@ namespace server.service.messengers
             {
                 if (clientRegisterCaching.Get(relayid, out RegisterCacheInfo client))
                 {
-                    return connection.ServerType == ServerType.TCP ? client.TcpConnection : client.UdpConnection;
+                    return client.OnLineConnection;
                 }
             }
             return connection;

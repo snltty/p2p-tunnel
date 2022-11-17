@@ -10,7 +10,7 @@ namespace client.realize.messengers.relay
     public class RelayMessengerSender
     {
 
-        public SimpleSubPushHandler<OnRelayInfo> OnRelay { get; } = new SimpleSubPushHandler<OnRelayInfo>();
+        public SimpleSubPushHandler<RelayInfo> OnRelay { get; } = new SimpleSubPushHandler<RelayInfo>();
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerStateInfo;
 
@@ -26,24 +26,24 @@ namespace client.realize.messengers.relay
         /// <param name="toid"></param>
         /// <param name="connection">中继节点</param>
         /// <returns></returns>
-        public async Task Relay(ulong toid, IConnection connection)
+        public async Task Relay(ulong[] relayids, IConnection connection)
         {
             await messengerSender.SendOnly(new MessageRequestWrap
             {
-                MessengerId = (ushort)RelayMessengerIds.Notify,
+                MessengerId = (ushort)RelayMessengerIds.Relay,
                 Connection = connection,
-                Payload = new RelayInfo { FromId = registerStateInfo.ConnectId, ToId = toid }.ToBytes()
+                 RelayId = relayids,
+                Payload = new RelayInfo {  RelayIds = relayids }.ToBytes()
             }).ConfigureAwait(false);
         }
 
-      
         /// <summary>
         /// 中继延迟
         /// </summary>
         /// <param name="toid"></param>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public async Task<bool> Delay(ulong[] toid, IConnection connection)
+        public async Task<bool> Delay(ulong[] relayids, IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
@@ -51,7 +51,7 @@ namespace client.realize.messengers.relay
                 Connection = connection,
                 Timeout = 1000,
                 Payload = Helper.EmptyArray,
-                RelayId = toid
+                RelayId = relayids
             }).ConfigureAwait(false);
             return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
         }
@@ -75,11 +75,5 @@ namespace client.realize.messengers.relay
                 Payload = connects.ToBytes(),
             }).ConfigureAwait(false);
         }
-    }
-
-    public class OnRelayInfo
-    {
-        public IConnection Connection { get; set; }
-        public ulong FromId { get; set; }
     }
 }

@@ -127,7 +127,6 @@ namespace client.service.tcpforward
                     old.Port = param.Port;
                     old.AliveType = param.AliveType;
                     old.ForwardType = param.ForwardType;
-                    old.TunnelType = param.TunnelType;
                     old.Name = param.Name;
                     old.IsCustomPac = param.IsCustomPac;
                     old.IsPac = param.IsPac;
@@ -143,7 +142,6 @@ namespace client.service.tcpforward
                         ID = param.ID,
                         AliveType = param.AliveType,
                         ForwardType = param.ForwardType,
-                        TunnelType = param.TunnelType,
                         Name = param.Name,
                         Pac = param.Pac,
                         IsCustomPac = param.IsCustomPac,
@@ -164,7 +162,6 @@ namespace client.service.tcpforward
                     {
                         Endpoint = null,
                         Name = param.Name,
-                        TunnelType = param.TunnelType,
                         ForwardType = param.ForwardType
                     });
                 }
@@ -243,7 +240,6 @@ namespace client.service.tcpforward
                 saveInfo.TargetIp = forward.Forward.TargetIp;
                 saveInfo.TargetPort = forward.Forward.TargetPort;
                 saveInfo.Name = forward.Forward.Name;
-                saveInfo.TunnelType = forward.Forward.TunnelType;
             }
             else
             {
@@ -272,7 +268,6 @@ namespace client.service.tcpforward
                 {
                     Endpoint = NetworkHelper.EndpointToArray(forward.Forward.TargetIp, forward.Forward.TargetPort),
                     Name = forward.Forward.Name,
-                    TunnelType = forward.Forward.TunnelType,
                     ForwardType = TcpForwardTypes.FORWARD
                 });
             }
@@ -282,7 +277,6 @@ namespace client.service.tcpforward
                 {
                     Endpoint = NetworkHelper.EndpointToArray(forward.Forward.TargetIp, forward.Forward.TargetPort),
                     Name = forward.Forward.Name,
-                    TunnelType = forward.Forward.TunnelType,
                     ForwardType = TcpForwardTypes.FORWARD
                 });
             }
@@ -369,8 +363,7 @@ namespace client.service.tcpforward
                         tcpForwardTargetCaching.Add(forward.SourceIp, listen.Port, new TcpForwardTargetCacheInfo
                         {
                             Endpoint = NetworkHelper.EndpointToArray(forward.TargetIp, forward.TargetPort),
-                            Name = forward.Name,
-                            TunnelType = forward.TunnelType
+                            Name = forward.Name
                         });
                     }
                     catch (Exception)
@@ -388,8 +381,7 @@ namespace client.service.tcpforward
                         tcpForwardTargetCaching.Add(listen.Port, new TcpForwardTargetCacheInfo
                         {
                             Endpoint = NetworkHelper.EndpointToArray(forward.TargetIp, forward.TargetPort),
-                            Name = forward.Name,
-                            TunnelType = forward.TunnelType
+                            Name = forward.Name
                         });
                     }
                     catch (Exception)
@@ -438,7 +430,6 @@ namespace client.service.tcpforward
                 TargetIp = forward.LocalIp,
                 TargetPort = forward.LocalPort,
                 TargetName = clientConfig.Client.Name,
-                TunnelType = forward.TunnelType,
 
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
@@ -481,7 +472,6 @@ namespace client.service.tcpforward
                 TargetIp = forward.LocalIp,
                 TargetName = clientConfig.Client.Name,
                 TargetPort = forward.LocalPort,
-                TunnelType = forward.TunnelType
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
@@ -594,7 +584,6 @@ namespace client.service.tcpforward
                 TargetIp = item.LocalIp,
                 TargetPort = item.LocalPort,
                 TargetName = clientConfig.Client.Name,
-                TunnelType = item.TunnelType
             }).ContinueWith((result) =>
             {
                 PrintResult(item, result.Result, type);
@@ -698,12 +687,11 @@ namespace client.service.tcpforward
         public ushort Port { get; set; } = 0;
         public bool Listening { get; set; } = false;
         public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.FORWARD;
-        public string Name { get; set; } = String.Empty;
-        public TcpForwardTunnelTypes TunnelType { get; set; } = TcpForwardTunnelTypes.TCP_FIRST;
+        public string Name { get; set; } = string.Empty;
 
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
 
-        public string Desc { get; set; } = String.Empty;
+        public string Desc { get; set; } = string.Empty;
         public bool IsPac { get; set; } = false;
         public bool IsCustomPac { get; set; } = false;
         public string Pac { get; set; } = string.Empty;
@@ -743,10 +731,6 @@ namespace client.service.tcpforward
         /// <summary>
         /// 代理时填写
         /// </summary>
-        public TcpForwardTunnelTypes TunnelType { get; set; } = TcpForwardTunnelTypes.TCP_FIRST;
-        /// <summary>
-        /// 代理时填写
-        /// </summary>
         public string Name { get; set; } = String.Empty;
         /// <summary>
         /// 是否直接开始监听
@@ -776,7 +760,6 @@ namespace client.service.tcpforward
         public string TargetIp { get; set; } = string.Empty;
         public ushort TargetPort { get; set; } = 0;
         public string Desc { get; set; } = string.Empty;
-        public TcpForwardTunnelTypes TunnelType { get; set; } = TcpForwardTunnelTypes.TCP_FIRST;
     }
 
 
@@ -793,7 +776,6 @@ namespace client.service.tcpforward
         public ushort ServerPort { get; set; }
         public string LocalIp { get; set; }
         public ushort LocalPort { get; set; }
-        public TcpForwardTunnelTypes TunnelType { get; set; } = TcpForwardTunnelTypes.TCP_FIRST;
         public string Desc { get; set; } = string.Empty;
         public bool Listening { get; set; } = false;
     }

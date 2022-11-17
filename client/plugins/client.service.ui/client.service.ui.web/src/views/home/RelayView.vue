@@ -2,16 +2,16 @@
  * @Author: snltty
  * @Date: 2022-11-08 09:57:59
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-15 16:39:28
+ * @LastEditTime: 2022-11-17 17:36:53
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\RelayView.vue
 -->
 <template>
-    <el-dialog title="选择中继节点" v-model="state.show" draggable center :close-on-click-modal="false" top="1rem" append-to-body width="35rem">
-        <el-alert title="通过某节点与目标节点交换信息的延迟" description="-1为此节点未开启中继，或信息超时" show-icon type="info" effect="dark" :closable="false" />
+    <el-dialog title="选择中继线路" v-model="state.show" draggable center :close-on-click-modal="false" top="1rem" append-to-body width="35rem">
+        <el-alert title="只展示数据可连通线路" description="选择一个你喜欢的线路" show-icon type="info" effect="dark" :closable="false" />
         <ul>
-            <template v-for="(item,index) in clients" :key="index">
+            <!-- <template v-for="(item,index) in clients" :key="index">
                 <li>
                     <dl>
                         <dt>{{item.name}}</dt>
@@ -33,7 +33,7 @@
                         </dd>
                     </dl>
                 </li>
-            </template>
+            </template> -->
         </ul>
     </el-dialog>
 </template>
@@ -61,8 +61,7 @@ export default {
             connects: {},
             start: registerState.RemoteInfo.ConnectId,
             starts: [],
-            end: shareData.toId,
-            type: 'Tcp'
+            end: shareData.toId
 
         });
         watch(() => state.show, (val) => {
@@ -77,47 +76,45 @@ export default {
                 Name: '服务器',
                 Id: 0
             }]).filter(c => state.delays[c.Id]).map(c => {
-                let delay = state.delays[c.Id] || [-1, -1];
                 return {
                     name: c.Name,
                     id: c.Id,
-                    tcp: delay[0],
-                    udp: delay[1]
+                    delay: state.delays[c.Id] || -1
                 }
             });
         });
 
         let timer = 0;
         const getData = () => {
-            Promise.all([getDelay(shareData.toId), getConnects()]).then(([delays, connects]) => {
-                state.delays = delays;
+            getConnects().then((connects) => {
 
-                try {
-                    let _connects = [];
-                    for (let j in connects) {
-                        _connects.push({
-                            Id: +j,
-                            Connects: connects[j]
-                        })
-                    }
-
-                    state.connects = _connects;
-                    state.starts = _connects
-                        .filter(c => c.Connects.filter(c => c.Id == state.start && c[state.type] == true).length > 0 && c.Connects.length > 1);
-
-                    console.log(fun(state.starts, [state.start], [state.start]));
-                } catch (e) {
-                    console.log(e);
+                let _connects = [];
+                for (let j in connects) {
+                    _connects.push({
+                        Id: +j,
+                        Connects: connects[j]
+                    })
                 }
+                state.connects = _connects;
+                state.starts = _connects.filter(c => c.Connects.filter(c => c == state.start).length > 0 && c.Connects.length > 1);
+                let paths = fun(state.starts, [registerState.RemoteInfo.ConnectId], [registerState.RemoteInfo.ConnectId], []);
+
 
                 timer = setTimeout(getData, 1000);
+                // getDelay(shareData.toId).then((delays) => {
+
+                //     state.delays = delays;
+                //     timer = setTimeout(getData, 1000);
+                // }).catch(() => {
+                //     timer = setTimeout(getData, 1000);
+                // });
             }).catch(() => {
                 timer = setTimeout(getData, 1000);
             });
         }
         const fun = (starts, exclude = [], path = [], result = []) => {
-            for (let i = 0; i < starts.length; i++) {
 
+            for (let i = 0; i < starts.length; i++) {
                 if (starts[i].Id == state.end) {
                     path.push(starts[i].Id);
                     if (path[0] == state.start) {
@@ -131,7 +128,7 @@ export default {
                 let _path = path.slice(0);
                 _path.push(starts[i].Id);
 
-                let lastIds = starts[i].Connects.filter(c => _exclude.indexOf(c.Id) == -1 && c[state.type] == true).map(c => c.Id);
+                let lastIds = starts[i].Connects.filter(c => _exclude.indexOf(c.Id) == -1).map(c => c.Id);
                 let last = state.connects.filter(c => lastIds.indexOf(c.Id) >= 0);
                 if (last.length > 0) {
                     fun(last, _exclude, _path, result);

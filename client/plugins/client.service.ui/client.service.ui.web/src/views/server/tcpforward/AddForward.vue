@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-18 16:54:53
+ * @LastEditTime: 2022-11-17 15:00:22
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\tcpforward\AddForward.vue
@@ -18,12 +18,6 @@
             </el-form-item>
             <el-form-item label="本机端口" prop="LocalPort">
                 <el-input v-model="form.LocalPort"></el-input>
-            </el-form-item>
-            <el-form-item label="通信通道" prop="TunnelType">
-                <el-select v-model="form.TunnelType" placeholder="选择通信通道">
-                    <el-option v-for="(item,key) in shareData.tunnelTypes" :key="key" :label="item" :value="key">
-                    </el-option>
-                </el-select>
             </el-form-item>
             <el-form-item label="简单说明" prop="Desc">
                 <el-input v-model="form.Desc"></el-input>
@@ -61,8 +55,7 @@ export default {
                 Domain: registerState.ServerConfig.Ip,
                 Desc: '',
                 LocalIp: '127.0.0.1',
-                LocalPort: 80,
-                TunnelType: '2',
+                LocalPort: 80
             },
             rules: {
                 Domain: [{ required: true, message: '必填', trigger: 'blur' }],
@@ -104,7 +97,6 @@ export default {
                 let json = JSON.parse(JSON.stringify(state.form));
                 json.AliveType = Number(json.AliveType);
                 json.LocalPort = Number(json.LocalPort);
-                json.TunnelType = Number(json.TunnelType);
                 AddServerForward(json).then((res) => {
                     state.loading = false;
                     if (res) {

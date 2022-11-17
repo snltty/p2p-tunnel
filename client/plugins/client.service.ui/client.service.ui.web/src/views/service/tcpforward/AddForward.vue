@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-05-28 17:33:46
+ * @LastEditTime: 2022-11-17 15:02:42
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\tcpforward\AddForward.vue
@@ -41,22 +41,8 @@
                     </el-col>
                 </el-row>
             </el-form-item>
-            <el-form-item label="" label-width="0">
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="通信通道" prop="TunnelType">
-                            <el-select v-model="form.TunnelType" placeholder="选择通信通道">
-                                <el-option v-for="(item,key) in shareData.tunnelTypes" :key="key" :label="item" :value="key">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="简单说明" prop="Desc">
-                            <el-input v-model="form.Desc"></el-input>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
+            <el-form-item label="简单说明" prop="Desc">
+                <el-input v-model="form.Desc"></el-input>
             </el-form-item>
         </el-form>
         <div class="remark t-c" v-html="remark"></div>
@@ -83,8 +69,7 @@ export default {
             SourceIp: '0.0.0.0',
             Name: 'B客户端', TargetIp: '127.0.0.1', TargetPort: 80,
             AliveType: '1',
-            Desc: '',
-            TunnelType: '8'
+            Desc: ''
         };
         const clientsState = injectClients();
         const addForwardData = inject('add-forward-data');
@@ -98,8 +83,7 @@ export default {
                 Name: addForwardData.value.forward.Name || defaultForm.Name,
                 TargetIp: addForwardData.value.forward.TargetIp || defaultForm.TargetIp,
                 TargetPort: addForwardData.value.forward.TargetPort || defaultForm.TargetPort,
-                Desc: addForwardData.value.forward.Desc || defaultForm.Desc,
-                TunnelType: (addForwardData.value.forward.TunnelType || defaultForm.TunnelType) + '',
+                Desc: addForwardData.value.forward.Desc || defaultForm.Desc
             },
             rules: {
                 SourceIp: [{ required: true, message: '必填', trigger: 'blur' }],
@@ -143,7 +127,6 @@ export default {
                 state.loading = true;
 
                 state.form.TargetPort = Number(state.form.TargetPort);
-                state.form.TunnelType = Number(state.form.TunnelType);
                 const json = {
                     ListenID: addForwardData.value.currentLsiten.ID,
                     Forward: state.form

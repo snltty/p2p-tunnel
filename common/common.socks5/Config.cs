@@ -1,6 +1,4 @@
 ﻿using common.libs.database;
-using System;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
@@ -23,7 +21,6 @@ namespace common.socks5
             IsCustomPac = config.IsCustomPac;
             IsPac = config.IsPac;
             TargetName = config.TargetName;
-            TunnelType = config.TunnelType;
             NumConnections = config.NumConnections;
         }
 
@@ -34,7 +31,6 @@ namespace common.socks5
         public bool IsCustomPac { get; set; } = false;
         public bool IsPac { get; set; } = false;
         public string TargetName { get; set; } = string.Empty;
-        public TunnelTypes TunnelType { get; set; } = TunnelTypes.TCP_FIRST;
         public int NumConnections { get; set; } = 1000;
         
 
@@ -53,23 +49,9 @@ namespace common.socks5
             config.IsCustomPac = IsCustomPac;
             config.IsPac = IsPac;
             config.TargetName = TargetName;
-            config.TunnelType = TunnelType;
             config.NumConnections = NumConnections;
             
             await configDataProvider.Save(config).ConfigureAwait(false);
         }
-    }
-
-    [Flags]
-    public enum TunnelTypes : byte
-    {
-        [Description("只tcp")]
-        TCP = 1 << 1,
-        [Description("只udp")]
-        UDP = 1 << 2,
-        [Description("优先tcp")]
-        TCP_FIRST = 1 << 3,
-        [Description("优先udp")]
-        UDP_FIRST = 1 << 4,
     }
 }

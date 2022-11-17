@@ -1,5 +1,6 @@
 ﻿using common.libs.database;
 using common.socks5;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using System.Threading.Tasks;
@@ -22,7 +23,6 @@ namespace client.service.vea
             IP = config.IP;
             LanIP = config.LanIP;
             SocksPort = config.SocksPort;
-            TunnelType = config.TunnelType;
             BufferSize = config.BufferSize;
             NumConnections = config.NumConnections;
             ConnectEnable = config.ConnectEnable;
@@ -33,11 +33,10 @@ namespace client.service.vea
         public bool ProxyAll { get; set; } = false;
         public string TargetName { get; set; } = string.Empty;
         public IPAddress IP { get; set; } = IPAddress.Parse("192.168.54.1");
-        public IPAddress LanIP { get; set; } = IPAddress.Any;
+        public IPAddress[] LanIP { get; set; } = Array.Empty<IPAddress>();
 
         public int SocksPort { get; set; } = 5415;
         public int BufferSize { get; set; } = 8 * 1024;
-        public TunnelTypes TunnelType { get; set; } = TunnelTypes.TCP_FIRST;
         public int NumConnections { get; set; } = 1000;
         public bool ConnectEnable { get; set; } = false;
 
@@ -55,7 +54,6 @@ namespace client.service.vea
             config.IP = IP;
             config.LanIP = LanIP;
             config.SocksPort = SocksPort;
-            config.TunnelType = TunnelType;
             config.BufferSize = BufferSize;
             config.NumConnections = NumConnections;
             config.ConnectEnable = ConnectEnable;

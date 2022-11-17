@@ -114,8 +114,7 @@ namespace server.service.udpforward
                     {
                         Name = source.Name,
                         Connection = connection,
-                        Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort),
-                        TunnelType = UdpForwardTunnelTypes.TCP_FIRST
+                        Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort)
                     });
                     try
                     {

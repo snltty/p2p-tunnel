@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-28 16:09:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-09-13 23:13:08
+ * @LastEditTime: 2022-11-17 15:00:54
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\tcpforward\Index.vue
@@ -38,7 +38,6 @@
                                                         <li>
                                                             <p class="flex"><span class="flex-1">访问</span><span>{{fitem.sourceText}}</span></p>
                                                             <p class="flex"><span class="flex-1">目标</span><span>【本机】{{fitem.distText}}</span></p>
-                                                            <p class="flex"><span class="flex-1">通道</span><span>{{fitem.tunnelTypeText}}</span></p>
                                                             <p class="t-r">
                                                                 <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(item,fitem)">
                                                                     <template #reference>
@@ -119,10 +118,8 @@ export default {
                                 Desc: d.Desc,
                                 LocalIp: d.LocalIp,
                                 LocalPort: d.LocalPort,
-                                TunnelType: d.TunnelType,
                                 sourceText: `${d.Domain}:${d.ServerPort}`,
-                                distText: `${d.LocalIp}:${d.LocalPort}`,
-                                tunnelTypeText: shareData.tunnelTypes[d.TunnelType],
+                                distText: `${d.LocalIp}:${d.LocalPort}`
                             }
                         })
                     }
@@ -140,10 +137,8 @@ export default {
                                 Desc: d.Desc,
                                 LocalIp: d.LocalIp,
                                 LocalPort: d.LocalPort,
-                                TunnelType: d.TunnelType,
                                 sourceText: `${registerState.ServerConfig.Ip}:${d.ServerPort}`,
-                                distText: `${d.LocalIp}:${d.LocalPort}`,
-                                tunnelTypeText: shareData.tunnelTypes[d.TunnelType],
+                                distText: `${d.LocalIp}:${d.LocalPort}`
                             }
                         ]
                     }
@@ -159,8 +154,7 @@ export default {
                 Domain: forward.Domain,
                 ServerPort: listen.ServerPort,
                 LocalIp: forward.LocalIp,
-                LocalPort: forward.LocalPort,
-                TunnelType: forward.TunnelType,
+                LocalPort: forward.LocalPort
             }).then((res) => {
                 state.loading = false;
                 if (res) {
@@ -179,8 +173,7 @@ export default {
                 Domain: forward.Domain,
                 ServerPort: listen.ServerPort,
                 LocalIp: forward.LocalIp,
-                LocalPort: forward.LocalPort,
-                TunnelType: forward.TunnelType,
+                LocalPort: forward.LocalPort
             }).then((res) => {
                 state.loading = false;
                 if (res) {

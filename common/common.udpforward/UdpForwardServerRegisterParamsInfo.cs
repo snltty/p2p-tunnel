@@ -13,7 +13,6 @@ namespace common.udpforward
         public string TargetName { get; set; } = string.Empty;
         public string TargetIp { get; set; } = IPAddress.Loopback.ToString();
         public ushort TargetPort { get; set; } = 8080;
-        public UdpForwardTunnelTypes TunnelType { get; set; } = UdpForwardTunnelTypes.TCP_FIRST;
 
         public byte[] ToBytes()
         {
@@ -23,12 +22,9 @@ namespace common.udpforward
             byte[] tipBytes = TargetIp.ToBytes();
             byte[] tnameBytes = TargetName.ToBytes();
 
-            byte[] bytes = new byte[1 + 2 + 2 + 1 + tipBytes.Length + 1 + tnameBytes.Length];
+            byte[] bytes = new byte[2 + 2 + 1 + tipBytes.Length + 1 + tnameBytes.Length];
 
             int index = 0;
-
-            bytes[0] = (byte)TunnelType;
-            index += 1;
 
             bytes[index] = sportBytes[0];
             bytes[index + 1] = sportBytes[1];
@@ -54,9 +50,6 @@ namespace common.udpforward
         {
             var span = data.Span;
             int index = 0;
-
-            TunnelType = (UdpForwardTunnelTypes)span[index];
-            index += 1;
 
             SourcePort = span.Slice(index, 2).ToUInt16();
             index += 2;
