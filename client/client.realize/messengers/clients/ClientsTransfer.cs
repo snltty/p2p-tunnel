@@ -489,7 +489,7 @@ namespace client.realize.messengers.clients
             }
 
             IConnection connection = registerState.OnlineConnection;
-            if (client.Connection == null || client.Connection.Connected == true || connection.Connected == false)
+            if (client.Connected == true)
             {
                 return;
             }
