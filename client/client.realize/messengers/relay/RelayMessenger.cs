@@ -20,13 +20,13 @@ namespace client.realize.messengers.relay
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly RelayMessengerSender relayMessengerSender;
         private readonly IRelayValidator relayValidator;
-        private readonly IClientConnecsCaching connecRouteCaching;
+        private readonly IClientConnectsCaching connecRouteCaching;
         private readonly RegisterStateInfo registerStateInfo;
         private readonly Config config;
 
         public RelayMessenger(IClientInfoCaching clientInfoCaching, 
             RelayMessengerSender relayMessengerSender, IRelayValidator relayValidator,
-            IClientConnecsCaching connecRouteCaching, RegisterStateInfo registerStateInfo, Config config)
+            IClientConnectsCaching connecRouteCaching, RegisterStateInfo registerStateInfo, Config config)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.relayMessengerSender = relayMessengerSender;

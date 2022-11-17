@@ -32,7 +32,7 @@ namespace client.realize.messengers.clients
         private readonly IUdpServer udpServer;
         private readonly HeartMessengerSender heartMessengerSender;
         private readonly RelayMessengerSender relayMessengerSender;
-        private readonly IClientConnecsCaching connecRouteCaching;
+        private readonly IClientConnectsCaching connecRouteCaching;
 
         private const byte TryReverseMaxValue = 2;
         private object lockObject = new();
@@ -41,7 +41,7 @@ namespace client.realize.messengers.clients
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
             IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
-            RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnecsCaching connecRouteCaching
+            RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnectsCaching connecRouteCaching
         )
         {
             this.punchHoleUdp = punchHoleUdp;

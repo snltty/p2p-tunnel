@@ -8,7 +8,7 @@ namespace client.realize.messengers.relay
     {
         private readonly IClientInfoCaching clientInfoCaching;
 
-        public RelaySourceConnectionSelector(IClientInfoCaching clientInfoCaching, IClientConnecsCaching connecRouteCaching)
+        public RelaySourceConnectionSelector(IClientInfoCaching clientInfoCaching, IClientConnectsCaching connecRouteCaching)
         {
             this.clientInfoCaching = clientInfoCaching;
             clientInfoCaching.OnOffline.Sub((client) =>
