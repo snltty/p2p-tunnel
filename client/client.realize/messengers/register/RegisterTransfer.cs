@@ -205,16 +205,7 @@ namespace client.realize.messengers.register
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.TcpPort);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
-            if (config.Client.BindIp.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                try
-                {
-                    tcpSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-                }
-                catch (Exception)
-                {
-                }
-            }
+            tcpSocket.IPv6Only(config.Client.BindIp.AddressFamily, false);
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             registerState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;

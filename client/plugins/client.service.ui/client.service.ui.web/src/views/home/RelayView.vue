@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-11-08 09:57:59
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-18 21:40:35
+ * @LastEditTime: 2022-11-19 00:27:28
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\RelayView.vue
@@ -92,9 +92,11 @@ export default {
                         Connects: connects[j]
                     })
                 }
+                console.log(`_connects:${JSON.stringify(_connects)}`);
                 state.connects = _connects;
                 let starts = _connects.filter(c => c.Connects.filter(c => c == state.start).length > 0 && c.Connects.length > 1);
                 let paths = fun(starts, [state.start], [state.start], []);
+                console.log(`paths:${JSON.stringify(paths)}`);
                 //服务器开启了中继
                 if (registerState.RemoteInfo.Relay) {
                     paths.push([state.start, 0, state.end]);
@@ -106,6 +108,12 @@ export default {
                             json[current.Id] = current;
                             return json;
                         }, {});
+                        let clients1 = clientsState.clients.reduce((json, current, index) => {
+                            json[current.Id] = current.Name;
+                            return json;
+                        }, {});
+                        console.log(`clients1:${JSON.stringify(clients1)}`);
+
                         state.paths = paths.map((path, index) => {
                             return {
                                 delay: delays[index],
@@ -117,7 +125,7 @@ export default {
                                 })
                             }
                         });
-                        console.log(JSON.stringify(state.paths));
+                        console.log(`state.paths:${JSON.stringify(state.paths)}`);
                         timer = setTimeout(getData, 1000);
                     }).catch((e) => {
                         timer = setTimeout(getData, 1000);

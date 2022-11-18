@@ -124,16 +124,7 @@ namespace client.realize.messengers.clients
 
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, localport);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            if(bindEndpoint.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                try
-                {
-                    tcpSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-                }
-                catch (Exception)
-                {
-                }
-            }
+            tcpSocket.IPv6Only(bindEndpoint.AddressFamily, false);
             
             tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
             tcpSocket.ReuseBind(bindEndpoint);

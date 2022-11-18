@@ -56,8 +56,6 @@ namespace client.realize.messengers.clients
             this.relayMessengerSender = relayMessengerSender;
             this.connecRouteCaching = connecRouteCaching;
 
-
-
             PunchHoleSub();
 
             //调试注释
@@ -483,7 +481,7 @@ namespace client.realize.messengers.clients
         {
             if (registerState.RemoteInfo.Relay == false)
             {
-                Logger.Instance.Error($"server relay not available");
+                Logger.Instance.Warning($"server relay not available");
                 return;
             }
 

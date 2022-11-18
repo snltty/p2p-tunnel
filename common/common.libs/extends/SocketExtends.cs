@@ -8,6 +8,20 @@ namespace common.libs.extends
     public static class SocketExtends
     {
 
+        public static void IPv6Only(this Socket socket, AddressFamily family, bool val)
+        {
+            if (NetworkHelper.IPv6Support && family == AddressFamily.InterNetworkV6)
+            {
+                try
+                {
+                    socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, val);
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+
         public static void SafeClose(this Socket socket)
         {
             if (socket != null)

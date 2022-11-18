@@ -112,10 +112,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     using Socket targetSocket = new(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
-                        if (ip.Address.AddressFamily == AddressFamily.InterNetworkV6)
-                        {
-                            targetSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-                        }
+                        targetSocket.IPv6Only(ip.Address.AddressFamily, false);
                         targetSocket.Ttl = (short)(RouteLevel);
                         targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
                         _ = targetSocket.ConnectAsync(ip);
@@ -186,7 +183,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     Socket targetSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
-                        targetSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                        targetSocket.IPv6Only(ip.AddressFamily, false);
                         targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
                         targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
                         Logger.Instance.DebugDebug($"{ip} connect====================");
@@ -294,7 +291,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     {
                         IPEndPoint target = new IPEndPoint(e.Data.Ip, e.Data.Port);
                         targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                        targetSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                        targetSocket.IPv6Only(target.AddressFamily, false);
                         targetSocket.Ttl = (short)(RouteLevel + e.RawData.Index);
                         //targetSocket.Ttl = (short)(RouteLevel);
                         targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);

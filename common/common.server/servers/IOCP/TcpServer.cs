@@ -48,16 +48,7 @@ namespace common.server.servers.iocp
         {
             IPEndPoint localEndPoint = new IPEndPoint(NetworkHelper.IPv6Support ? IPAddress.IPv6Any : IPAddress.Any, port);
             Socket socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            if (NetworkHelper.IPv6Support && localEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                try
-                {
-                    socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-                }
-                catch (Exception)
-                {
-                }
-            }
+            socket.IPv6Only(localEndPoint.AddressFamily,false);
             socket.ReuseBind(localEndPoint);
             socket.Listen(int.MaxValue);
 
