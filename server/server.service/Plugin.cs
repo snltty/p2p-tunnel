@@ -54,10 +54,10 @@ namespace server.service
 
             var server = services.GetService<ITcpServer>();
             server.SetBufferSize(config.TcpBufferSize);
-            server.Start(IPAddress.Any,config.Tcp);
+            server.Start(config.Tcp);
             Logger.Instance.Info("TCP服务已开启");
 
-            services.GetService<IUdpServer>().Start(IPAddress.Any,services.GetService<Config>().Udp, timeout: config.TimeoutDelay);
+            services.GetService<IUdpServer>().Start(services.GetService<Config>().Udp, timeout: config.TimeoutDelay);
             Logger.Instance.Info("UDP服务已开启");
 
 

@@ -29,24 +29,24 @@ namespace common.server.servers.iocp
             this.bufferSize = bufferSize;
         }
 
-        public void Start1(IPAddress ip, int port)
+        public void Start1(int port)
         {
             isReceive = false;
-            Start(ip, port);
+            Start(port);
         }
-        public void Start(IPAddress ip, int port)
+        public void Start(int port)
         {
             if (socket == null)
             {
                 this.port = port;
                 cancellationTokenSource = new CancellationTokenSource();
-                socket = BindAccept(ip, port);
+                socket = BindAccept(port);
             }
         }
 
-        private Socket BindAccept(IPAddress ip, int port)
+        private Socket BindAccept(int port)
         {
-            IPEndPoint localEndPoint = new IPEndPoint(ip, port);
+            IPEndPoint localEndPoint = new IPEndPoint(NetworkHelper.IPv6Support ? IPAddress.IPv6Any : IPAddress.Any, port);
             Socket socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (NetworkHelper.IPv6Support && localEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
             {

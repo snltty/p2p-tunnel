@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-11-08 09:57:59
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-18 15:30:02
+ * @LastEditTime: 2022-11-18 21:40:35
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\RelayView.vue
@@ -93,7 +93,7 @@ export default {
                     })
                 }
                 state.connects = _connects;
-                let starts = _connects.filter(c => c.Connects.filter(c => c == state.start).length > 0 && c.Connects.length > 0);
+                let starts = _connects.filter(c => c.Connects.filter(c => c == state.start).length > 0 && c.Connects.length > 1);
                 let paths = fun(starts, [state.start], [state.start], []);
                 //服务器开启了中继
                 if (registerState.RemoteInfo.Relay) {

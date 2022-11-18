@@ -87,7 +87,7 @@ namespace client.realize.messengers.clients
                     OnDisConnect(_connection, registerState.UdpConnection);
                 }
             });
-            tempUdpServer.Start(config.Client.BindIp,localport, config.Client.TimeoutDelay);
+            tempUdpServer.Start(localport, config.Client.TimeoutDelay);
             tempUdpServer.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
             connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
             while (connection == null)
@@ -120,18 +120,21 @@ namespace client.realize.messengers.clients
                 tcpServer.BindReceive(socket, config.Client.TcpBufferSize);
                 tempTcpServer.Disponse();
             };
-            tempTcpServer.Start1(config.Client.BindIp,localport);
+            tempTcpServer.Start1(localport);
 
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, localport);
-
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            try
+            if(bindEndpoint.AddressFamily == AddressFamily.InterNetworkV6)
             {
-                tcpSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                try
+                {
+                    tcpSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                }
+                catch (Exception)
+                {
+                }
             }
-            catch (Exception)
-            {
-            }
+            
             tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));

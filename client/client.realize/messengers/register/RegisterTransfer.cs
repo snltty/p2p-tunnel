@@ -188,7 +188,7 @@ namespace client.realize.messengers.register
         private async Task UdpBind(IPAddress serverAddress)
         {
             //UDP 开始监听
-            udpServer.Start(config.Client.BindIp, registerState.LocalInfo.UdpPort, config.Client.TimeoutDelay);
+            udpServer.Start(registerState.LocalInfo.UdpPort, config.Client.TimeoutDelay);
             if (udpServer is UdpServer udp)
             {
                 udp.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
@@ -199,7 +199,7 @@ namespace client.realize.messengers.register
         {
             //TCP 本地开始监听
             tcpServer.SetBufferSize(config.Client.TcpBufferSize);
-            tcpServer.Start(config.Client.BindIp,registerState.LocalInfo.TcpPort);
+            tcpServer.Start(registerState.LocalInfo.TcpPort);
 
             //TCP 连接服务器
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.TcpPort);

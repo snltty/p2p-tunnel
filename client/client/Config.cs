@@ -81,7 +81,7 @@ namespace client
         /// <summary>
         /// 使用ipv6
         /// </summary>
-        public bool UseIpv6 { get; set; } = false;
+        public bool UseIpv6 { get; set; } = true;
 
         public int TcpBufferSize { get; set; } = 128 * 1024;
 
