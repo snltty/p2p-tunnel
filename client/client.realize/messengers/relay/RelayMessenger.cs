@@ -46,6 +46,7 @@ namespace client.realize.messengers.relay
             }
 
             RelayInfo relayInfo = new RelayInfo();
+            relayInfo.Connection = connection;
             relayInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
             relayMessengerSender.OnRelay.Push(relayInfo);
         }

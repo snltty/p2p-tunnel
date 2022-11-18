@@ -6,6 +6,7 @@ namespace common.server.model
 {
     public class RelayInfo
     {
+        public IConnection Connection { get; set; }
         public ulong[] RelayIds { get; set; } = Helper.EmptyUlongArray;
         public byte[] ToBytes()
         {

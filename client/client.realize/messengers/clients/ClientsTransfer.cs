@@ -23,6 +23,7 @@ namespace client.realize.messengers.clients
     {
         private BoolSpace firstClients = new BoolSpace(true);
 
+        private readonly ClientsMessengerSender clientsMessengerSender;
         private readonly IPunchHoleUdp punchHoleUdp;
         private readonly IPunchHoleTcp punchHoleTcp;
         private readonly RegisterStateInfo registerState;
@@ -44,6 +45,7 @@ namespace client.realize.messengers.clients
             RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnectsCaching connecRouteCaching
         )
         {
+            this.clientsMessengerSender = clientsMessengerSender;
             this.punchHoleUdp = punchHoleUdp;
             this.punchHoleTcp = punchHoleTcp;
             this.registerState = registerState;
@@ -55,6 +57,33 @@ namespace client.realize.messengers.clients
             this.connecRouteCaching = connecRouteCaching;
 
 
+
+            PunchHoleSub();
+
+            //调试注释
+            tcpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.TcpConnection));
+            udpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.UdpConnection));
+            clientsTunnel.OnDisConnect = Disconnect;
+
+            //中继连线
+            relayMessengerSender.OnRelay.Sub((param) =>
+            {
+                _ = Relay(param.Connection, param.RelayIds, false);
+            });
+
+            this.punchHoleMessengerSender = punchHoleMessengerSender;
+            //有人要求反向链接
+            punchHoleMessengerSender.OnReverse.Sub(OnReverse);
+            registerState.OnRegisterBind.Sub(OnRegisterBind);
+            //收到来自服务器的 在线客户端 数据
+            clientsMessengerSender.OnServerClientsData.Sub(OnServerSendClients);
+
+            Logger.Instance.Info("获取外网距离ing...");
+            registerState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();
+        }
+
+        private void PunchHoleSub()
+        {
             punchHoleUdp.OnStep1Handler.Sub((e) =>
             {
                 if (config.Client.UseUdp == true)
@@ -132,52 +161,7 @@ namespace client.realize.messengers.clients
                     _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
                 }
             });
-
-            //调试注释
-            tcpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.TcpConnection));
-            udpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.UdpConnection));
-            clientsTunnel.OnDisConnect = Disconnect;
-
-            //中继连线
-            relayMessengerSender.OnRelay.Sub((param) =>
-            {
-                if (param.RelayIds.Length >= 3)
-                {
-                    //连接谁
-                    ulong id = param.RelayIds[^1];
-                    //通过谁连
-                    ulong connectid = param.RelayIds[1];
-                    IConnection connection = null;
-                    if (connectid == 0)
-                    {
-                        connection = registerState.OnlineConnection;
-                    }
-                    else
-                    {
-                        if (clientInfoCaching.Get(connectid, out ClientInfo connectionClient))
-                        {
-                            connection = connectionClient.Connection;
-                        }
-                    }
-                    if (connection != null && connection.Connected)
-                    {
-                        _ = Relay(connection, param.RelayIds, false);
-                    }
-                }
-
-            });
-
-            this.punchHoleMessengerSender = punchHoleMessengerSender;
-            //有人要求反向链接
-            punchHoleMessengerSender.OnReverse.Sub(OnReverse);
-            registerState.OnRegisterBind.Sub(OnRegisterBind);
-            //收到来自服务器的 在线客户端 数据
-            clientsMessengerSender.OnServerClientsData.Sub(OnServerSendClients);
-
-            Logger.Instance.Info("获取外网距离ing...");
-            registerState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();
         }
-
         public void Disconnect(IConnection connection, IConnection regConnection)
         {
             if (ReferenceEquals(regConnection, connection))
