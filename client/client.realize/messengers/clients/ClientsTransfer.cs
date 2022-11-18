@@ -147,9 +147,21 @@ namespace client.realize.messengers.clients
                     ulong id = param.RelayIds[^1];
                     //通过谁连
                     ulong connectid = param.RelayIds[1];
-                    if (clientInfoCaching.Get(connectid, out ClientInfo connectionClient))
+                    IConnection connection = null;
+                    if (connectid == 0)
                     {
-                        _ = Relay(connectionClient.Connection, param.RelayIds, false);
+                        connection = registerState.OnlineConnection;
+                    }
+                    else
+                    {
+                        if (clientInfoCaching.Get(connectid, out ClientInfo connectionClient))
+                        {
+                            connection = connectionClient.Connection;
+                        }
+                    }
+                    if (connection != null && connection.Connected)
+                    {
+                        _ = Relay(connection, param.RelayIds, false);
                     }
                 }
 
@@ -479,7 +491,7 @@ namespace client.realize.messengers.clients
                     data[i] = (int)(DateTime.Now - current).TotalMilliseconds;
                 }
             }
-            
+
             return data;
         }
 
