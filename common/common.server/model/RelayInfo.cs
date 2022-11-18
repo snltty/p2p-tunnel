@@ -23,7 +23,7 @@ namespace common.server.model
             var span = data.Span;
             int length = data.Length / MessageRequestWrap.RelayIdSize;
             RelayIds = new ulong[length];
-            for (int i = length - 1; i >= 0; i++)
+            for (int i = length - 1; i >= 0; i--)
             {
                 RelayIds[length - 1 - i] = span.Slice(i * MessageRequestWrap.RelayIdSize).ToUInt64();
             }

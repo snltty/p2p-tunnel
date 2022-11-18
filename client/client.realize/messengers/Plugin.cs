@@ -48,7 +48,7 @@ namespace client.realize.messengers
 
             services.AddSingleton<IRelaySourceConnectionSelector, relay.RelaySourceConnectionSelector>();
             services.AddSingleton<IRelayValidator, RelayValidator>();
-            services.AddSingleton<IClientConnectsCaching,ClientConnecsCaching>();
+            services.AddSingleton<IClientConnectsCaching, ClientConnectsCaching>();
             
 
             services.AddSingleton<IIPv6AddressRequest, IPv6AddressRequest>();

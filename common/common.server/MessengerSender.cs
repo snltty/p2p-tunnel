@@ -53,7 +53,6 @@ namespace common.server
         {
             try
             {
-                msg.Reply = msg.RequestId > 0;
                 if (msg.RequestId == 0)
                 {
                     Interlocked.CompareExchange(ref msg.RequestId, requestIdNumberSpace.Increment(), 0);
@@ -63,7 +62,7 @@ namespace common.server
                     return false;
                 }
 
-                msg.Relay = msg.Connection.Relay;
+                msg.Relay = msg.Connection.Relay || msg.RelayId.Length > 0;
                 if (msg.Connection.Relay && msg.RelayId.Length == 0)
                 {
                     msg.RelayId = msg.Connection.RelayId;
@@ -126,6 +125,7 @@ namespace common.server
 
         private WheelTimerTimeout<TimeoutState> NewReply(MessageRequestWrap msg)
         {
+            msg.Reply = true;
             if (msg.Timeout <= 0)
             {
                 msg.Timeout = 15000;

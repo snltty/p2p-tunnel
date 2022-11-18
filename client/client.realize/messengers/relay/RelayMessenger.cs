@@ -5,6 +5,7 @@ using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -55,8 +56,6 @@ namespace client.realize.messengers.relay
             return Helper.TrueArray;
         }
 
-
-
         [MessengerId((ushort)RelayMessengerIds.AskConnects)]
         public void AskConnects(IConnection connection)
         {
@@ -67,7 +66,7 @@ namespace client.realize.messengers.relay
                 {
                     Id = registerStateInfo.ConnectId,
                     ToId = fromid,
-                    Connects = clientInfoCaching.All().Where(c => c.Connected && c.ConnectType != ClientConnectTypes.RelayServer).Select(c => c.Id).ToArray(),
+                    Connects = clientInfoCaching.All().Where(c => c.Connected && c.ConnectType == ClientConnectTypes.P2P).Select(c => c.Id).ToArray(),
                 });
             }
         }

@@ -74,17 +74,14 @@ namespace common.server
                     //是中继的回复
                     if (responseWrap.RelayIdLength > 0)
                     {
-                        ulong currentRelayid = responseWrap.RelayIds.Span.ToUInt64();
-                        //目的地连接对象
-                        IConnection _connection = sourceConnectionSelector.Select(connection, currentRelayid);
-                        if (_connection == null) return;
+                        ulong nextId = responseWrap.RelayIds.Span.ToUInt64();
 
-                        //去掉一个id   然后 length-1
-                        //0000 type length:2 11111111 00000000 ----> 00000000 0000 type length:1 00000000
-                        receive.Slice(0, MessageRequestWrap.HeaderLength).CopyTo(receive.Slice(MessageRequestWrap.RelayIdSize));
-                        receive.Span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize] --;
-                        //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                        await _connection.Send(receive.Slice(MessageRequestWrap.RelayIdSize)).ConfigureAwait(false);
+                        //目的地连接对象
+                        IConnection _connection = sourceConnectionSelector.Select(connection, nextId);
+                        if (_connection == null || ReferenceEquals(connection, _connection)) return;
+
+                        receive = MessageRequestWrap.DeleteFirstRelayid(receive);
+                        await _connection.Send(receive).ConfigureAwait(false);
                     }
                     else
                     {
@@ -109,27 +106,25 @@ namespace common.server
                         {
                             //需要等待回复则 有index， 不等待回复则没有，那么。同意这么计算偏移量，requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize
                             //只需要 没有index时，默认为0即可
-                            ulong currentRelayid = requestWrap.RelayIds.Span.Slice(requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize).ToUInt64();
+                            ulong nextId = requestWrap.RelayIds.Span.Slice(requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize).ToUInt64();
 
                             //目的地连接对象
-                            IConnection _connection = sourceConnectionSelector.Select(connection, currentRelayid);
-                            if (_connection == null) return;
+                            IConnection _connection = sourceConnectionSelector.Select(connection, nextId);
+                            if (_connection == null || ReferenceEquals(connection, _connection)) return;
 
+                            //需要回复的，不删除id，移动指针即可
                             if (requestWrap.Reply)
                             {
                                 //RelayIdIndex 后移一位
                                 receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
                             }
+                            //不需要回复的，直接删除id
                             else
                             {
-                                //去掉一个id   然后 length-1
-                                //0000 type length:2 11111111 00000000 ----> 00000000 0000 type length:1 00000000
-                                receive.Slice(0, MessageRequestWrap.HeaderLength).CopyTo(receive.Slice(MessageRequestWrap.RelayIdSize));
-                                receive.Span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize] --;
-                                receive = receive.Slice(MessageRequestWrap.RelayIdSize);
+                                receive = MessageRequestWrap.DeleteFirstRelayid(receive);
                             }
                             //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                            await _connection.Send(receive.Slice(MessageRequestWrap.RelayIdSize)).ConfigureAwait(false);
+                            await _connection.Send(receive).ConfigureAwait(false);
                         }
                         return;
                     }
@@ -145,7 +140,7 @@ namespace common.server
                 {
                     connection.FromConnection = sourceConnectionSelector.Select(connection, requestWrap.RelayIds.Span.ToUInt64());
                 }
-               
+
 
                 //404,没这个插件
                 if (!messengers.ContainsKey(requestWrap.MessengerId))

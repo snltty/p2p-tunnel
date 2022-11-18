@@ -68,9 +68,9 @@ namespace client.service.ui.api.service.clientServer.services
         {
             return await clientsTransfer.Connects();
         }
-        public async Task<Dictionary<int, int>> Delay(ClientServiceParamsInfo arg)
+        public async Task<int[]> Delay(ClientServiceParamsInfo arg)
         {
-            return await clientsTransfer.Delay(arg.Content.DeJson<Dictionary<int, ulong[]>>());
+            return await clientsTransfer.Delay(arg.Content.DeJson<ulong[][]>());
         }
         public async Task<bool> Relay(ClientServiceParamsInfo arg)
         {

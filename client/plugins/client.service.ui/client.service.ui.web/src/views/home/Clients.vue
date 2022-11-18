@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:19:56
+ * @LastEditTime: 2022-11-18 15:23:43
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -137,8 +137,8 @@ export default {
             state.toId = item.Id;
             state.showDelay = true;
         }
-        const handleOnRelay = (relayids) => {
-            setRelay(relayids);
+        const handleOnRelay = (relayPath) => {
+            setRelay(relayPath);
         }
 
 

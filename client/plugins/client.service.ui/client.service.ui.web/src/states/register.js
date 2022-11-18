@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:39:45
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-11 15:51:20
+ * @LastEditTime: 2022-11-18 15:16:44
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\register.js
@@ -55,6 +55,7 @@ export const provideRegister = () => {
             UdpPort: 0,
             TcpPort: 0,
             ConnectId: 0,
+            Relay: false
         }
     });
     provide(provideRegisterKey, state);
@@ -71,6 +72,7 @@ export const provideRegister = () => {
 
                 state.LocalInfo.connected = state.LocalInfo.UdpConnected || state.LocalInfo.TcpConnected;
 
+                state.ClientConfig.Name = json.ClientConfig.Name;
                 state.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
                 state.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
@@ -85,6 +87,7 @@ export const provideRegister = () => {
                 state.RemoteInfo.TcpPort = json.RemoteInfo.TcpPort;
                 state.RemoteInfo.Ip = json.RemoteInfo.Ip;
                 state.RemoteInfo.ConnectId = json.RemoteInfo.ConnectId;
+                state.RemoteInfo.Relay = json.RemoteInfo.Relay;
 
                 state.LocalInfo.IsConnecting = json.LocalInfo.IsConnecting;
                 state.LocalInfo.RouteLevel = json.LocalInfo.RouteLevel;

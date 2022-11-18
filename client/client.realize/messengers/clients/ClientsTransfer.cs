@@ -445,23 +445,24 @@ namespace client.realize.messengers.clients
             await relayMessengerSender.AskConnects();
             return connecRouteCaching.Connects;
         }
-        public async Task<Dictionary<int, int>> Delay(Dictionary<int, ulong[]> paths)
+        public async Task<int[]> Delay(ulong[][] paths)
         {
-            Dictionary<int, int> data = new Dictionary<int, int>();
+            int[] data = new int[paths.Length];
             DateTime current;
-
-            foreach (var item in paths)
+            for (int i = 0; i < paths.Length; i++)
             {
-                data.Add(item.Key, -1);
+                ulong[] item = paths[i];
+
+                data[i] = -1;
 
                 IConnection connection = null;
-                if (item.Value[1] == 0)
+                if (item[1] == 0)
                 {
                     connection = registerState.OnlineConnection;
                 }
                 else
                 {
-                    if (clientInfoCaching.Get(item.Value[1], out ClientInfo client))
+                    if (clientInfoCaching.Get(item[1], out ClientInfo client))
                     {
                         connection = client.Connection;
                     }
@@ -471,14 +472,14 @@ namespace client.realize.messengers.clients
                     continue;
                 }
 
-
                 current = DateTime.Now;
-                bool res = res = await relayMessengerSender.Delay(item.Value, connection);
+                bool res = await relayMessengerSender.Delay(item, connection);
                 if (res)
                 {
-                    data[item.Key] = (int)(DateTime.Now - current).TotalMilliseconds;
+                    data[i] = (int)(DateTime.Now - current).TotalMilliseconds;
                 }
             }
+            
             return data;
         }
 

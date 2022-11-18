@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-11-08 09:57:59
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 17:36:53
+ * @LastEditTime: 2022-11-18 15:30:02
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\RelayView.vue
@@ -11,29 +11,27 @@
     <el-dialog title="选择中继线路" v-model="state.show" draggable center :close-on-click-modal="false" top="1rem" append-to-body width="35rem">
         <el-alert title="只展示数据可连通线路" description="选择一个你喜欢的线路" show-icon type="info" effect="dark" :closable="false" />
         <ul>
-            <!-- <template v-for="(item,index) in clients" :key="index">
+            <template v-for="(item,index) in state.paths" :key="index">
                 <li>
                     <dl>
-                        <dt>{{item.name}}</dt>
-                        <dd class="flex">
-                            <div class="flex-1 flex"><span class="label">tcp</span>
-                                <Signal :value="item.tcp"></Signal>
+                        <dt class="flex">
+                            <Signal :value="item.delay"></Signal>
+                            <span class="flex-1"></span>
+                            <div>
+                                <el-button size="small" @click="handleSelect(item.path)">选择此线路</el-button>
                             </div>
-                            <div class="flex-1 flex"><span class="label">udp</span>
-                                <Signal :value="item.udp"></Signal>
-                            </div>
-                        </dd>
-                        <dd class="flex">
-                            <span class="flex-1">
-                                <el-button size="small" @click="handleSelect(item.id,1)" v-if="item.tcp >= 0">选择</el-button>
-                            </span>
-                            <span class="flex-1">
-                                <el-button size="small" @click="handleSelect(item.id,2)" v-if="item.udp >= 0">选择</el-button>
-                            </span>
+                        </dt>
+                        <dd>
+                            <template v-for="(p,pi) in item.pathName" :index="pi">
+                                <span class="label" v-if="pi>0">
+                                    &lt;--&gt;
+                                </span>
+                                <strong>{{p}}</strong>
+                            </template>
                         </dd>
                     </dl>
                 </li>
-            </template> -->
+            </template>
         </ul>
     </el-dialog>
 </template>
@@ -57,11 +55,10 @@ export default {
         const state = reactive({
             show: props.modelValue,
             loading: false,
-            delays: {},
             connects: {},
             start: registerState.RemoteInfo.ConnectId,
-            starts: [],
-            end: shareData.toId
+            end: shareData.toId,
+            paths: []
 
         });
         watch(() => state.show, (val) => {
@@ -96,18 +93,38 @@ export default {
                     })
                 }
                 state.connects = _connects;
-                state.starts = _connects.filter(c => c.Connects.filter(c => c == state.start).length > 0 && c.Connects.length > 1);
-                let paths = fun(state.starts, [registerState.RemoteInfo.ConnectId], [registerState.RemoteInfo.ConnectId], []);
+                let starts = _connects.filter(c => c.Connects.filter(c => c == state.start).length > 0 && c.Connects.length > 0);
+                let paths = fun(starts, [state.start], [state.start], []);
+                //服务器开启了中继
+                if (registerState.RemoteInfo.Relay) {
+                    paths.push([state.start, 0, state.end]);
+                }
+                if (paths.length > 0) {
+                    getDelay(paths).then((delays) => {
 
-
-                timer = setTimeout(getData, 1000);
-                // getDelay(shareData.toId).then((delays) => {
-
-                //     state.delays = delays;
-                //     timer = setTimeout(getData, 1000);
-                // }).catch(() => {
-                //     timer = setTimeout(getData, 1000);
-                // });
+                        let clients = clientsState.clients.reduce((json, current, index) => {
+                            json[current.Id] = current;
+                            return json;
+                        }, {});
+                        state.paths = paths.map((path, index) => {
+                            return {
+                                delay: delays[index],
+                                path: path,
+                                pathName: path.map(c => {
+                                    if (c == state.start) return registerState.ClientConfig.Name;
+                                    else if (c == 0) return '服务器';
+                                    return clients[c].Name;
+                                })
+                            }
+                        });
+                        console.log(JSON.stringify(state.paths));
+                        timer = setTimeout(getData, 1000);
+                    }).catch((e) => {
+                        timer = setTimeout(getData, 1000);
+                    });
+                } else {
+                    timer = setTimeout(getData, 1000);
+                }
             }).catch(() => {
                 timer = setTimeout(getData, 1000);
             });
@@ -128,7 +145,7 @@ export default {
                 let _path = path.slice(0);
                 _path.push(starts[i].Id);
 
-                let lastIds = starts[i].Connects.filter(c => _exclude.indexOf(c.Id) == -1).map(c => c.Id);
+                let lastIds = starts[i].Connects.filter(c => _exclude.indexOf(c) == -1);
                 let last = state.connects.filter(c => lastIds.indexOf(c.Id) >= 0);
                 if (last.length > 0) {
                     fun(last, _exclude, _path, result);
@@ -146,8 +163,8 @@ export default {
         onUnmounted(() => {
             clearTimeout(timer);
         });
-        const handleSelect = (id, type) => {
-            emit('success', { id: id, type: type, toid: shareData.toId });
+        const handleSelect = (path) => {
+            emit('success', path);
             state.show = false;
         }
 
@@ -160,7 +177,7 @@ export default {
 
 <style lang="stylus" scoped>
 li
-    padding: 1rem 0.6rem;
+    padding: 1rem 0;
 
     dl
         border: 1px solid #eee;
@@ -172,6 +189,7 @@ li
             font-size: 1.4rem;
             font-weight: 600;
             color: #555;
+            line-height: 2.4rem;
 
         dd
             cursor: pointer;

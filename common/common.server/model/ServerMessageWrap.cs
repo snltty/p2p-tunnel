@@ -9,7 +9,7 @@ namespace common.server.model
     public class MessageRequestWrap
     {
         public const int RelayIdLengthPos = 5;
-        public const int RelayIdIndexPos = RelayIdLengthPos+1;
+        public const int RelayIdIndexPos = RelayIdLengthPos + 1;
         public const int RelayIdSize = 8;
         public const int HeaderLength = 6;
         /// <summary>
@@ -18,7 +18,7 @@ namespace common.server.model
         public const byte RelayBit = 0b10000000;
         public const byte ReplyBit = 0b01000000;
         public const byte TypeBits = 0b00111111;
-       
+
 
         /// <summary>
         /// 用来读取数据，发送数据用下一层的FromConnection，来源连接，在中继时，数据来自服务器，但是真实来源是别的客户端，所以不能直接用这个来发送回复的数据
@@ -64,6 +64,20 @@ namespace common.server.model
         /// 数据荷载
         /// </summary>
         public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
+
+        public static Memory<byte> DeleteFirstRelayid(Memory<byte> memory)
+        {
+            var span = memory.Span;
+
+            int length = span.ToInt32() - MessageRequestWrap.RelayIdSize;
+            length.ToBytes().CopyTo(span);
+
+            span.Slice(0, MessageRequestWrap.HeaderLength).CopyTo(span.Slice(MessageRequestWrap.RelayIdSize));
+            span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize]--;
+
+
+            return memory.Slice(MessageRequestWrap.RelayIdSize);
+        }
 
         /// <summary>
         /// 转包
@@ -112,14 +126,15 @@ namespace common.server.model
 
             if (Relay)
             {
-                res[index] = (byte)(RelayId.Length); //length
+                int i = 2;
+                res[index] = (byte)(RelayId.Length - 2); //length
                 index += 1;
 
-                int i = 0;
                 if (Reply)
                 {
+                    res[index - 1] = (byte)(RelayId.Length);
                     res[index] = 2; //index
-                    i = 2;
+                    i = 0;
                     index += 1;
                 }
                 for (; i < RelayId.Length; i++)
@@ -128,7 +143,7 @@ namespace common.server.model
                     Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
                     index += relayidByte.Length;
                 }
-                if(Reply == false)
+                if (Reply == false)
                 {
                     byte[] relayidByte = RelayId[0].ToBytes();
                     Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
@@ -170,7 +185,7 @@ namespace common.server.model
                     RelayIdIndex = span[index];
                     index += 1;
                     RelayIds = memory.Slice(index, RelayIdLength * RelayIdSize);
-                    index+= RelayIdLength * RelayIdSize;
+                    index += RelayIdLength * RelayIdSize;
                 }
                 else
                 {
@@ -244,7 +259,7 @@ namespace common.server.model
             res[index] = 0;
             if (RelayIds.Length > 0)
             {
-                res[index] = (byte)(RelayIds.Length - 2);
+                res[index] = (byte)(RelayIds.Length / MessageRequestWrap.RelayIdSize - 2);
             }
             index += 1;
 
