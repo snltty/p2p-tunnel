@@ -20,11 +20,11 @@ namespace common.server.servers.rudp
         private NetManager server;
         private EventBasedNetListener listener;
 
-        public void Start(int port)
+        public void Start(IPAddress ip ,int port)
         {
-            Start(port, 20000);
+            Start(ip, port, 20000);
         }
-        public void Start(int port, int timeout = 20000)
+        public void Start(IPAddress ip, int port, int timeout = 20000)
         {
             listener = new EventBasedNetListener();
             server = new NetManager(listener);

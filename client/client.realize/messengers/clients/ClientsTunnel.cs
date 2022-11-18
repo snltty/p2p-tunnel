@@ -87,7 +87,7 @@ namespace client.realize.messengers.clients
                     OnDisConnect(_connection, registerState.UdpConnection);
                 }
             });
-            tempUdpServer.Start(localport, config.Client.TimeoutDelay);
+            tempUdpServer.Start(config.Client.BindIp,localport, config.Client.TimeoutDelay);
             tempUdpServer.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
             connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
             while (connection == null)
@@ -120,7 +120,7 @@ namespace client.realize.messengers.clients
                 tcpServer.BindReceive(socket, config.Client.TcpBufferSize);
                 tempTcpServer.Disponse();
             };
-            tempTcpServer.Start1(localport);
+            tempTcpServer.Start1(config.Client.BindIp,localport);
 
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, localport);
 

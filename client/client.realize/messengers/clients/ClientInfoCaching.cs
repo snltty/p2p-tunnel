@@ -63,6 +63,11 @@ namespace client.realize.messengers.clients
                 client.Offline();
                 OnOffline.Push(client);
             }
+            foreach (ClientInfo _client in clients.Values.Where(c=>c.Connected && c.ConnectType == ClientConnectTypes.RelayNode && c.Connection.RelayId.Contains(id)))
+            {
+                _client.Offline();
+                OnOffline.Push(_client);
+            }
         }
 
         public void Remove(ulong id)

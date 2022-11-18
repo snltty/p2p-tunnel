@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-11 15:51:11
+ * @LastEditTime: 2022-11-18 17:27:32
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -47,12 +47,21 @@
                         </el-col>
                     </el-row>
                 </el-form-item>
-                <!-- <el-form-item label="" label-width="0" class="w-100"> -->
                 <el-collapse>
                     <el-collapse-item title="可选和其它" name="1">
                         <el-form-item label="" label-width="0">
                             <el-row>
-                                <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                    <el-form-item label="ipv6" prop="UseIpv6">
+                                        <el-checkbox v-model="model.UseIpv6" disabled>使用ipv6</el-checkbox>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                    <el-form-item label="绑定ip" prop="BindIp">
+                                        <el-input v-model="model.BindIp" placeholder="绑定ip" readonly></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
                                     <el-form-item label="udp限速" prop="UdpUploadSpeedLimit">
                                         <el-tooltip class="box-item" effect="dark" content="udp发送速度限制（字节数,0不限制）" placement="top-start">
                                             <el-input v-model="model.UdpUploadSpeedLimit"></el-input>
@@ -69,21 +78,21 @@
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="次数" prop="AutoRegTimes" label-width="40">
+                                    <el-form-item label="次数" prop="AutoRegTimes">
                                         <el-tooltip class="box-item" effect="dark" content="如果自动注册失败，将要重试几次" placement="top-start">
                                             <el-input v-model="model.AutoRegTimes"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="间隔" prop="AutoRegInterval" label-width="40">
+                                    <el-form-item label="间隔" prop="AutoRegInterval">
                                         <el-tooltip class="box-item" effect="dark" content="间隔多久重试一次(ms)" placement="top-start">
                                             <el-input v-model="model.AutoRegInterval"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="延迟" prop="AutoRegDelay" label-width="40">
+                                    <el-form-item label="延迟" prop="AutoRegDelay">
                                         <el-tooltip class="box-item" effect="dark" content="断线后多久重试" placement="top-start">
                                             <el-input v-model="model.AutoRegDelay"></el-input>
                                         </el-tooltip>
@@ -93,28 +102,28 @@
                         </el-form-item>
                         <el-form-item label="" label-width="0">
                             <el-row>
-                                <el-col :xs="6" :sm="3" :md="3" :lg="3" :xl="3">
-                                    <el-form-item label="p2p加密" prop="ClientEncode" label-width="60">
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                    <el-form-item label="加密" prop="ClientEncode">
                                         <el-tooltip class="box-item" effect="dark" content="客户端之间通信使用加密" placement="top-start">
-                                            <el-switch v-model="model.ClientEncode" />
+                                            <el-checkbox v-model="model.ClientEncode">p2p加密</el-checkbox>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
-                                <el-col :xs="18" :sm="9" :md="9" :lg="9" :xl="9">
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
                                     <el-form-item label="密钥" prop="ClientEncodePassword">
                                         <el-tooltip class="box-item" effect="dark" content="加密密钥32位，为空则每次加密随机密钥，如果填写，则各客户端都填写" placement="top-start">
                                             <el-input type="password" show-password maxlength="32" show-word-limit v-model="model.ClientEncodePassword"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
-                                <el-col :xs="6" :sm="3" :md="3" :lg="3" :xl="3">
-                                    <el-form-item label="注册加密" prop="ServerEncode" label-width="60">
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                    <el-form-item label="加密" prop="ServerEncode">
                                         <el-tooltip class="box-item" effect="dark" content="客户端与服务端之间通信使用加密" placement="top-start">
-                                            <el-switch v-model="model.ServerEncode" />
+                                            <el-checkbox v-model="model.ServerEncode">注册加密</el-checkbox>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
-                                <el-col :xs="18" :sm="9" :md="9" :lg="9" :xl="9">
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
                                     <el-form-item label="密钥" prop="ServerEncodePassword">
                                         <el-tooltip class="box-item" effect="dark" content="加密密钥 32位，为空则每次加密随机密钥，使用p2p.snltty.com服务器则必须留空" placement="top-start">
                                             <el-input type="password" show-password maxlength="32" show-word-limit v-model="model.ServerEncodePassword"></el-input>
@@ -126,23 +135,23 @@
                         <el-form-item label="" label-width="0">
                             <el-row>
                                 <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="使用udp" prop="UseUdp" label-width="60">
+                                    <el-form-item label="udp" prop="UseUdp">
                                         <el-tooltip class="box-item" effect="dark" content="是否使用udp" placement="top-start">
-                                            <el-switch v-model="model.UseUdp" />
+                                            <el-checkbox v-model="model.UseUdp">使用udp</el-checkbox>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="使用tcp" prop="UseTcp" label-width="60">
+                                    <el-form-item label="tcp" prop="UseTcp">
                                         <el-tooltip class="box-item" effect="dark" content="是否使用tcp" placement="top-start">
-                                            <el-switch v-model="model.UseTcp" />
+                                            <el-checkbox v-model="model.UseTcp">使用tcp</el-checkbox>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                    <el-form-item label="原端口" prop="UseOriginPort" label-width="80">
+                                    <el-form-item label="原端口" prop="UseOriginPort">
                                         <el-tooltip class="box-item" effect="dark" content="是否使用原端口打洞" placement="top-start">
-                                            <el-switch v-model="model.UseOriginPort" />
+                                            <el-checkbox v-model="model.UseOriginPort">使用原端口</el-checkbox>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
@@ -155,41 +164,27 @@
                                 </el-col>
                             </el-row>
                         </el-form-item>
+                        <el-form-item label="" label-width="80">
+                            <el-row>
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                    <el-form-item label="自动打洞" prop="UsePunchHole">
+                                        <el-tooltip class="box-item" effect="dark" content="发现新客户端后是否自动打洞" placement="top-start">
+                                            <el-checkbox v-model="model.UsePunchHole">自动打洞</el-checkbox>
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
+                                    <el-form-item label="中继节点" prop="UseRelay">
+                                        <el-tooltip class="box-item" effect="dark" content="是否允许本客户端作为中继节点" placement="top-start">
+                                            <el-checkbox v-model="model.UseRelay">中继节点</el-checkbox>>
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </el-form-item>
                     </el-collapse-item>
                 </el-collapse>
-                <!-- </el-form-item> -->
-
-                <el-form-item label="" label-width="80">
-                    <div class="t-c">
-                        <el-row>
-                            <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                <el-form-item label="UDP" prop="UdpConnected">
-                                    <el-switch disabled v-model="registerState.LocalInfo.UdpConnected">UDP</el-switch>
-                                </el-form-item>
-                            </el-col>
-                            <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                <el-form-item label="TCP" prop="TcpConnected">
-                                    <el-switch disabled v-model="registerState.LocalInfo.TcpConnected">TCP</el-switch>
-                                </el-form-item>
-                            </el-col>
-                            <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                <el-form-item label="自动打洞" prop="UsePunchHole">
-                                    <el-tooltip class="box-item" effect="dark" content="发现新客户端后是否自动打洞" placement="top-start">
-                                        <el-switch v-model="model.UsePunchHole"></el-switch>
-                                    </el-tooltip>
-                                </el-form-item>
-                            </el-col>
-                            <el-col :xs="12" :sm="6" :md="6" :lg="6" :xl="6">
-                                <el-form-item label="作节点" prop="UseRelay">
-                                    <el-tooltip class="box-item" effect="dark" content="是否允许本客户端作为中继节点" placement="top-start">
-                                        <el-switch v-model="model.UseRelay"></el-switch>
-                                    </el-tooltip>
-                                </el-form-item>
-                            </el-col>
-                        </el-row>
-                    </div>
-                </el-form-item>
-                <el-form-item label="" label-width="0" class="t-c">
+                <el-form-item label="" label-width="0" class="t-c last">
                     <div class="t-c w-100">
                         <el-button type="primary" size="large" :loading="registerState.LocalInfo.IsConnecting" @click="handleSubmit">注册</el-button>
                         <el-button v-if="registerState.LocalInfo.UdpConnected || registerState.LocalInfo.TcpConnected" type="info" size="large" :loading="registerState.LocalInfo.IsConnecting" @click="handleExit">退出</el-button>
@@ -230,6 +225,9 @@ export default {
                 TimeoutDelay: 20000,
                 UseUdp: false,
                 UseTcp: false,
+                UseRelay: true,
+                UseIpv6: false,
+                BindIp: '0.0.0.0',
                 UseOriginPort: true,
                 UdpUploadSpeedLimit: 0
             },
@@ -308,6 +306,8 @@ export default {
             state.model.UsePunchHole = registerState.ClientConfig.UsePunchHole = json.ClientConfig.UsePunchHole;
             state.model.TimeoutDelay = registerState.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
 
+            state.model.UseIpv6 = registerState.ClientConfig.UseIpv6 = json.ClientConfig.UseIpv6;
+            state.model.BindIp = registerState.ClientConfig.BindIp = json.ClientConfig.BindIp;
             state.model.UseUdp = registerState.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
             state.model.UseTcp = registerState.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
             state.model.UseRelay = registerState.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
@@ -347,6 +347,8 @@ export default {
                         UseUdp: state.model.UseUdp,
                         UseTcp: state.model.UseTcp,
                         UseRelay: state.model.UseRelay,
+                        UseIpv6: state.model.UseIpv6,
+                        BindIp: state.model.BindIp,
                         UseOriginPort: state.model.UseOriginPort,
                         UdpUploadSpeedLimit: +state.model.UdpUploadSpeedLimit
                     },
@@ -384,6 +386,9 @@ export default {
 .el-row
     width: 100%;
 
+.el-form-item.last
+    margin-bottom: 0;
+
 .register-form
     padding: 2rem;
 
@@ -391,6 +396,9 @@ export default {
         border: 1px solid #eee;
         padding: 2rem;
         border-radius: 4px;
+
+.el-collapse
+    margin-bottom: 1rem;
 
 @media screen and (max-width: 768px)
     .el-col

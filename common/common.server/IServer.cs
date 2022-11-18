@@ -7,7 +7,7 @@ namespace common.server
 {
     public interface IServer
     {
-        public void Start(int port);
+        public void Start(IPAddress ip,int port);
 
         public void Stop();
         public void Disponse();
