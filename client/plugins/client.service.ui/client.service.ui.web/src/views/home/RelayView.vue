@@ -2,15 +2,15 @@
  * @Author: snltty
  * @Date: 2022-11-08 09:57:59
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-19 00:27:28
+ * @LastEditTime: 2022-11-19 13:46:56
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\RelayView.vue
 -->
 <template>
-    <el-dialog title="选择中继线路" v-model="state.show" draggable center :close-on-click-modal="false" top="1rem" append-to-body width="35rem">
+    <el-dialog title="选择中继线路" v-model="state.show" draggable center :close-on-click-modal="false" top="1rem" append-to-body width="50rem">
         <el-alert title="只展示数据可连通线路" description="选择一个你喜欢的线路" show-icon type="info" effect="dark" :closable="false" />
-        <ul>
+        <ul class="nodes-ul scrollbar">
             <template v-for="(item,index) in state.paths" :key="index">
                 <li>
                     <dl>
@@ -101,6 +101,8 @@ export default {
                 if (registerState.RemoteInfo.Relay) {
                     paths.push([state.start, 0, state.end]);
                 }
+                //直连的不要
+                paths = paths.filter(c => c.length > 2);
                 if (paths.length > 0) {
                     getDelay(paths).then((delays) => {
 
@@ -108,6 +110,7 @@ export default {
                             json[current.Id] = current;
                             return json;
                         }, {});
+
                         let clients1 = clientsState.clients.reduce((json, current, index) => {
                             json[current.Id] = current.Name;
                             return json;
@@ -140,17 +143,17 @@ export default {
         const fun = (starts, exclude = [], path = [], result = []) => {
 
             for (let i = 0; i < starts.length; i++) {
+                let _path = path.slice(0);
                 if (starts[i].Id == state.end) {
-                    path.push(starts[i].Id);
-                    if (path[0] == state.start) {
-                        result.push(path);
+                    _path.push(starts[i].Id);
+                    if (_path[0] == state.start) {
+                        result.push(_path);
                     }
                     continue;
                 }
 
                 let _exclude = exclude.slice(0);
                 _exclude.push(starts[i].Id);
-                let _path = path.slice(0);
                 _path.push(starts[i].Id);
 
                 let lastIds = starts[i].Connects.filter(c => _exclude.indexOf(c) == -1);
@@ -184,6 +187,13 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+.nodes-ul
+    min-height: 10rem;
+    max-height: 50rem;
+    border: 1px solid #eee;
+    padding: 0.6rem;
+    border-radius: 0.4rem;
+
 li
     padding: 1rem 0;
 
