@@ -122,6 +122,7 @@ namespace client.realize.messengers.punchHole.udp
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
                 }
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port+1));
 
                 await punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2Info>
                 {
@@ -278,6 +279,7 @@ namespace client.realize.messengers.punchHole.udp
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
                 }
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port+1));
             }
             await Task.CompletedTask;
         }

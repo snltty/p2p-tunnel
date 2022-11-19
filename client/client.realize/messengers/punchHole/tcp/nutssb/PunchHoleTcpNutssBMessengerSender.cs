@@ -97,6 +97,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             {
                 List<IPEndPoint> ips = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
                 ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+                ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port+1));
 
                 foreach (IPEndPoint ip in ips)
                 {
@@ -157,10 +158,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     ips.AddRange(locals);
                 }
                 ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
-                if ((TunnelDefaults)(arg.RawData.TunnelName) > TunnelDefaults.MAX)
-                {
-                    ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port + 1));
-                }
+                ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port + 1));
 
                 for (byte i = 0; i < times; i++)
                 {
