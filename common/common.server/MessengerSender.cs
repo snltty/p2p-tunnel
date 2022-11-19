@@ -72,7 +72,7 @@ namespace common.server
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
 
-                byte[] bytes = msg.ToArray(msg.Connection.ServerType, out int length);
+                byte[] bytes = msg.ToArray(out int length);
                 bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
                 msg.Return(bytes);
 
@@ -99,7 +99,7 @@ namespace common.server
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
 
-                byte[] bytes = msg.ToArray(msg.Connection.ServerType, out int length);
+                byte[] bytes = msg.ToArray(out int length);
                 bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
                 msg.Return(bytes);
                 return res;

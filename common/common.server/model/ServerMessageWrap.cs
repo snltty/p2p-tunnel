@@ -83,7 +83,7 @@ namespace common.server.model
         /// 转包
         /// </summary>
         /// <returns></returns>
-        public byte[] ToArray(ServerType type, out int length)
+        public byte[] ToArray(out int length)
         {
             byte[] requestIdByte = RequestId.ToBytes();
             byte[] messengerIdByte = MessengerId.ToBytes();
@@ -106,11 +106,8 @@ namespace common.server.model
             }
 
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
-            if (type == ServerType.TCP)
-            {
-                byte[] payloadLengthByte = (length - 4).ToBytes();
-                Array.Copy(payloadLengthByte, 0, res, index, payloadLengthByte.Length);
-            }
+            byte[] payloadLengthByte = (length - 4).ToBytes();
+            Array.Copy(payloadLengthByte, 0, res, index, payloadLengthByte.Length);
             index += 4;
 
             res[index] = (byte)MessageTypes.REQUEST;
@@ -229,7 +226,7 @@ namespace common.server.model
         /// 转包
         /// </summary>
         /// <returns></returns>
-        public byte[] ToArray(ServerType type, out int length)
+        public byte[] ToArray(out int length)
         {
             length = 4
                 + 1 //type
@@ -246,11 +243,8 @@ namespace common.server.model
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
 
             int index = 0;
-            if (type == ServerType.TCP)
-            {
-                byte[] payloadLengthByte = (length - 4).ToBytes();
-                Array.Copy(payloadLengthByte, 0, res, index, payloadLengthByte.Length);
-            }
+            byte[] payloadLengthByte = (length - 4).ToBytes();
+            Array.Copy(payloadLengthByte, 0, res, index, payloadLengthByte.Length);
             index += 4;
 
             res[index] = (byte)MessageTypes.RESPONSE;

@@ -255,7 +255,7 @@ namespace client.realize.messengers.clients
             }
             if ((config.Client.UseUdp & client.UseUdp) == false)
             {
-                return EnumConnectResult.BreakOff;
+                return EnumConnectResult.Fail;
             }
 
             clientInfoCaching.SetConnecting(client.Id, true);
@@ -298,7 +298,7 @@ namespace client.realize.messengers.clients
             }
             if ((config.Client.UseTcp & client.UseTcp) == false)
             {
-                return EnumConnectResult.BreakOff;
+                return EnumConnectResult.Fail;
             }
 
             clientInfoCaching.SetConnecting(client.Id, true);

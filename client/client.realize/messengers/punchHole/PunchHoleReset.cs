@@ -17,7 +17,7 @@ namespace client.realize.messengers.punchHole
 
         public void Execute(OnPunchHoleArg arg)
         {
-            _ = registerTransfer.Register();
+            _ = registerTransfer.Register(true);
         }
     }
 }

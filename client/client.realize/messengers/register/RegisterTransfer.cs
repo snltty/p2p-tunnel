@@ -24,6 +24,7 @@ namespace client.realize.messengers.register
         private readonly RegisterStateInfo registerState;
         private readonly CryptoSwap cryptoSwap;
         private readonly IIPv6AddressRequest iPv6AddressRequest;
+        private CancellationTokenSource cancellationToken = null;
         private int lockObject = 0;
 
         public RegisterTransfer(
@@ -72,6 +73,14 @@ namespace client.realize.messengers.register
 
         public void Exit()
         {
+            if (cancellationToken != null && cancellationToken.IsCancellationRequested == false)
+            {
+                cancellationToken.Cancel();
+            }
+            Exit1();
+        }
+        private void Exit1()
+        {
             registerMessageHelper.Exit().Wait();
             registerState.Offline();
             udpServer.Stop();
@@ -86,6 +95,7 @@ namespace client.realize.messengers.register
         /// <returns></returns>
         public async Task<CommonTaskResponseInfo<bool>> Register(bool autoReg = false)
         {
+            cancellationToken = new CancellationTokenSource();
             CommonTaskResponseInfo<bool> success = new CommonTaskResponseInfo<bool> { Data = false, ErrorMsg = string.Empty };
             if (registerState.LocalInfo.IsConnecting)
             {
@@ -113,13 +123,19 @@ namespace client.realize.messengers.register
                         }
 
                         //先退出
-                        Exit();
+                        Exit1();
                         Logger.Instance.Info($"开始注册");
 
                         registerState.LocalInfo.IsConnecting = true;
                         if (interval > 0)
                         {
-                            await Task.Delay(interval);
+                            await Task.Delay(interval, cancellationToken.Token);
+                        }
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            success.ErrorMsg = "已取消...";
+                            Logger.Instance.Error(success.ErrorMsg);
+                            break;
                         }
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
@@ -245,6 +261,7 @@ namespace client.realize.messengers.register
                 Timeout = 15 * 1000,
                 ClientAccess = config.Client.GetAccess()
             }).ConfigureAwait(false);
+
             if (result.NetState.Code != MessageResponeCodes.OK)
             {
                 throw new Exception($"注册失败，网络问题:{result.NetState.Code.GetDesc((byte)result.NetState.Code)}");

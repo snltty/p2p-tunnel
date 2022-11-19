@@ -30,7 +30,7 @@ namespace client.realize.messengers.clients
         [MessengerId((ushort)ClientsMessengerIds.Reset)]
         public async Task Reset(IConnection connection)
         {
-            await registerTransfer.Register().ConfigureAwait(false);
+            await registerTransfer.Register(true).ConfigureAwait(false);
         }
     }
 }
