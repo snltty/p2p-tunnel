@@ -38,6 +38,15 @@ namespace common.udpforward
             }
             return keys;
         }
+        public IEnumerable<ushort> Remove(ulong id)
+        {
+            var keys = cache.Where(c => c.Value.Id == id).Select(c => c.Key);
+            foreach (var key in keys)
+            {
+                cache.TryRemove(key, out _);
+            }
+            return keys;
+        }
 
         public void ClearConnection()
         {
@@ -53,10 +62,18 @@ namespace common.udpforward
                 item.Connection = null;
             }
         }
+        public void ClearConnection(ulong id)
+        {
+            foreach (var item in cache.Values.Where(c => c.Id == id))
+            {
+                item.Connection = null;
+            }
+        }
     }
 
     public class UdpForwardTargetCacheInfo
     {
+        public ulong Id { get; set; }
         public string Name { get; set; }
         public IConnection Connection { get; set; }
         public Memory<byte> Endpoint { get; set; }

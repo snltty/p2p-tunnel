@@ -17,7 +17,7 @@ namespace client.messengers.clients
         public SimpleSubPushHandler<ClientInfo> OnRemove { get; }
         public bool Add(ClientInfo client);
         public bool Get(ulong id, out ClientInfo client);
-        public ClientInfo GetByName(string name);
+        public bool GetByName(string name, out ClientInfo client);
         public IEnumerable<ClientInfo> All();
         public IEnumerable<ulong> AllIds();
         public void SetConnecting(ulong id,bool val);

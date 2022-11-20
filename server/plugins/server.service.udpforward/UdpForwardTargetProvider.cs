@@ -15,7 +15,7 @@ namespace server.service.udpforward
 
             clientRegisterCaching.OnOffline.Sub((client) =>
             {
-                udpForwardTargetCaching.ClearConnection(client.Name);
+                udpForwardTargetCaching.ClearConnection(client.Id);
             });
         }
 
@@ -25,9 +25,12 @@ namespace server.service.udpforward
 
             if (cacheInfo != null)
             {
-                if (cacheInfo.Connection == null || !cacheInfo.Connection.Connected)
+                if (cacheInfo.Connection == null || cacheInfo.Connection.Connected == false)
                 {
-                    cacheInfo.Connection = clientRegisterCaching.GetByName(cacheInfo.Name)?.OnLineConnection;
+                    if (clientRegisterCaching.Get(cacheInfo.Id, out RegisterCacheInfo client))
+                    {
+                        cacheInfo.Connection = client.OnLineConnection;
+                    }
                 }
                 info.Connection = cacheInfo.Connection;
                 info.TargetEndpoint = cacheInfo.Endpoint;

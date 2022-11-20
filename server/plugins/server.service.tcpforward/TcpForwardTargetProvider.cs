@@ -15,7 +15,7 @@ namespace server.service.tcpforward
 
             clientRegisterCaching.OnOffline.Sub((client) =>
             {
-                tcpForwardTargetCaching.ClearConnection(client.Name);
+                tcpForwardTargetCaching.ClearConnection(client.Id);
             });
         }
         public void Get(string host, TcpForwardInfo info)
@@ -31,9 +31,12 @@ namespace server.service.tcpforward
         {
             if (cacheInfo != null)
             {
-                if (cacheInfo.Connection == null || !cacheInfo.Connection.Connected)
+                if (cacheInfo.Connection == null || cacheInfo.Connection.Connected == false)
                 {
-                    cacheInfo.Connection = clientRegisterCaching.GetByName(cacheInfo.Name)?.OnLineConnection;
+                    if(clientRegisterCaching.Get(cacheInfo.Id,out RegisterCacheInfo client))
+                    {
+                        cacheInfo.Connection = client.OnLineConnection;
+                    }
                 }
                 info.Connection = cacheInfo.Connection;
                 info.TargetEndpoint = cacheInfo.Endpoint;

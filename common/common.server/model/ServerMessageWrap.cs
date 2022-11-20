@@ -11,7 +11,6 @@ namespace common.server.model
         public const int RelayIdLengthPos = 5;
         public const int RelayIdIndexPos = RelayIdLengthPos + 1;
         public const int RelayIdSize = 8;
-        public const int HeaderLength = 6;
         /// <summary>
         /// Relay + Reply + 111111
         /// </summary>
@@ -33,51 +32,34 @@ namespace common.server.model
         /// 消息id
         /// </summary>
         public ushort MessengerId { get; set; } = 0;
-
         /// <summary>
         /// 每条数据都有个id，【只发发数据的话，不用填这里】
         /// </summary>
         public uint RequestId = 0;
-
         /// <summary>
-        /// 中继节点id列表
+        /// 是否等待回复
         /// </summary>
-        public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
-
-        /// <summary>
-        /// 中继节点id列表，读取用
-        /// </summary>
-        public Memory<byte> RelayIds { get; private set; } = Helper.EmptyArray;
-        public byte RelayIdLength { get; private set; }
-        public byte RelayIdIndex { get; private set; }
+        public bool Reply { get; internal set; }
 
         /// <summary>
         /// 是否中继
         /// </summary>
         public bool Relay { get; set; }
         /// <summary>
-        /// 是否等待回复
+        /// 中继节点id列表
         /// </summary>
-        public bool Reply { get; set; }
+        public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
+        /// <summary>
+        /// 中继节点id列表，读取用
+        /// </summary>
+        public Memory<byte> RelayIds { get; private set; } = Helper.EmptyArray;
+        public byte RelayIdLength { get; private set; } = 0;
+        public byte RelayIdIndex { get; private set; } = 0;
 
         /// <summary>
         /// 数据荷载
         /// </summary>
         public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
-
-        public static Memory<byte> DeleteFirstRelayid(Memory<byte> memory)
-        {
-            var span = memory.Span;
-
-            int length = span.ToInt32() - MessageRequestWrap.RelayIdSize;
-            length.ToBytes().CopyTo(span);
-
-            span.Slice(0, MessageRequestWrap.HeaderLength).CopyTo(span.Slice(MessageRequestWrap.RelayIdSize));
-            span[MessageRequestWrap.RelayIdLengthPos + MessageRequestWrap.RelayIdSize]--;
-
-
-            return memory.Slice(MessageRequestWrap.RelayIdSize);
-        }
 
         /// <summary>
         /// 转包
@@ -98,11 +80,6 @@ namespace common.server.model
             if (Relay)
             {
                 length += RelayId.Length * RelayIdSize + 2; //length index
-                //不回复不需要开头的两个id和index，但是，需要一个来源id，把它放在最后
-                if (Reply == false)
-                {
-                    length -= RelayIdSize + 1;
-                }
             }
 
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
@@ -113,38 +90,26 @@ namespace common.server.model
             res[index] = (byte)MessageTypes.REQUEST;
             if (Relay == true)
             {
-                res[index] = (byte)(res[index] | RelayBit);
+                res[index] |= RelayBit;
             }
             if (Reply == true)
             {
-                res[index] = (byte)(res[index] | ReplyBit);
+                res[index] |= ReplyBit;
             }
             index += 1;
 
             if (Relay)
             {
-                int i = 2;
-                res[index] = (byte)(RelayId.Length - 2); //length
+                res[index] = (byte)(RelayId.Length); //length
                 index += 1;
 
-                if (Reply)
-                {
-                    res[index - 1] = (byte)(RelayId.Length);
-                    res[index] = 2; //index
-                    i = 0;
-                    index += 1;
-                }
-                for (; i < RelayId.Length; i++)
+                res[index] = 2; //index
+                index += 1;
+                for (int i = 0; i < RelayId.Length; i++)
                 {
                     byte[] relayidByte = RelayId[i].ToBytes();
                     Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
                     index += relayidByte.Length;
-                }
-                if (Reply == false)
-                {
-                    byte[] relayidByte = RelayId[0].ToBytes();
-                    Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
-                    index += RelayIdSize;
                 }
             }
             Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
@@ -176,20 +141,12 @@ namespace common.server.model
             {
                 RelayIdLength = span[index];
                 index += 1;
-                //不回复没有 index
-                if (Reply)
-                {
-                    RelayIdIndex = span[index];
-                    index += 1;
-                    RelayIds = memory.Slice(index, RelayIdLength * RelayIdSize);
-                    index += RelayIdLength * RelayIdSize;
-                }
-                else
-                {
-                    RelayIdIndex = 0;
-                    RelayIds = memory.Slice(index, RelayIdLength * RelayIdSize + RelayIdSize);
-                    index += RelayIdLength * RelayIdSize + RelayIdSize;
-                }
+
+                RelayIdIndex = span[index];
+                index += 1;
+
+                RelayIds = memory.Slice(index, RelayIdLength * RelayIdSize);
+                index += RelayIdLength * RelayIdSize;
             }
             else
             {
@@ -220,7 +177,9 @@ namespace common.server.model
         public uint RequestId { get; set; } = 0;
         public Memory<byte> RelayIds { get; set; } = Helper.EmptyArray;
         public byte RelayIdLength { get; private set; }
+        public byte RelayIdIndex { get; private set; }
         public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
+        public bool Relay { get;private set; }
 
         /// <summary>
         /// 转包
@@ -230,14 +189,15 @@ namespace common.server.model
         {
             length = 4
                 + 1 //type
-                + 1 //relayid length
                 + 1 //code
                 + 4 //requestid
                 + Payload.Length;
+
             if (RelayIds.Length > 0)
             {
+                RelayIdLength = (byte)(RelayIds.Length / MessageRequestWrap.RelayIdSize - 2);
                 //不要头两个id
-                length += RelayIds.Length - MessageRequestWrap.RelayIdSize * 2;
+                length += MessageRequestWrap.RelayIdSize * RelayIdLength + 2; //length + index
             }
 
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
@@ -250,20 +210,17 @@ namespace common.server.model
             res[index] = (byte)MessageTypes.RESPONSE;
             index += 1;
 
-            res[index] = 0;
-            if (RelayIds.Length > 0)
+            if (RelayIdLength > 0)
             {
-                res[index] = (byte)(RelayIds.Length / MessageRequestWrap.RelayIdSize - 2);
-            }
-            index += 1;
+                res[index - 1] |= MessageRequestWrap.RelayBit;
+                res[index] = RelayIdLength;
+                index += 1;
+                res[index] = 0;
+                index += 1;
 
-            if (RelayIds.Length > 0)
-            {
-                //倒叙放，request 过来的  ABCD 回去就是 BA  CD不需要
-                int len = RelayIds.Length / MessageRequestWrap.RelayIdSize;
-                for (int i = 0; i < len - 2; i++)
+                for (int i = 0; i < RelayIdLength; i++)
                 {
-                    RelayIds.Slice((len - 3 - i) * MessageRequestWrap.RelayIdSize, MessageRequestWrap.RelayIdSize).CopyTo(res.AsMemory(index, MessageRequestWrap.RelayIdSize));
+                    RelayIds.Slice((RelayIdLength - 1 - i) * MessageRequestWrap.RelayIdSize, MessageRequestWrap.RelayIdSize).CopyTo(res.AsMemory(index, MessageRequestWrap.RelayIdSize));
                     index += MessageRequestWrap.RelayIdSize;
                 }
             }
@@ -289,20 +246,27 @@ namespace common.server.model
         public void FromArray(Memory<byte> memory)
         {
             var span = memory.Span;
-            int index = 1;
+            int index = 0;
 
-            RelayIdLength = span[index];
+            Relay = (span[index] & MessageRequestWrap.RelayBit) == MessageRequestWrap.RelayBit;
             index += 1;
-            if (RelayIdLength > 0)
+
+            if (Relay)
             {
+                RelayIdLength = span[index];
+                index += 1;
+                RelayIdIndex = span[index];
+                index += 1;
+
                 RelayIds = memory.Slice(index, RelayIdLength * MessageRequestWrap.RelayIdSize);
                 index += RelayIdLength * MessageRequestWrap.RelayIdSize;
             }
             else
             {
+                RelayIdLength = 0;
+                RelayIdIndex = 0;
                 RelayIds = Helper.EmptyArray;
             }
-
 
             Code = (MessageResponeCodes)span[index];
             index += 1;

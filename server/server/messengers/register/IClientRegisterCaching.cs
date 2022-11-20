@@ -16,7 +16,6 @@ namespace server.messengers.register
         public IEnumerable<RegisterCacheInfo> GetBySameGroup(string groupid);
         public IEnumerable<RegisterCacheInfo> GetBySameGroup(string groupid, string name);
         public List<RegisterCacheInfo> GetAll();
-        public RegisterCacheInfo GetByName(string name);
         public void Remove(ulong id);
 
         public bool Notify(IConnection connection);

@@ -12,7 +12,9 @@ namespace common.udpforward
         bool Add(ushort port, T mdoel);
         bool Remove(ushort port);
         IEnumerable<ushort> Remove(string targetName);
+        IEnumerable<ushort> Remove(ulong id);
         void ClearConnection();
         void ClearConnection(string name);
+        void ClearConnection(ulong id);
     }
 }

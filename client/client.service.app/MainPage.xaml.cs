@@ -16,7 +16,7 @@ namespace client.service.app
 
         private void Button_Clicked(object sender, EventArgs e)
         {
-            Launcher.OpenAsync("https://snltty.gitee.io/p2p-tunnel");
+            Launcher.OpenAsync("http://127.0.0.1:5411");
 
         }
 

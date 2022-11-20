@@ -7,7 +7,7 @@ using System;
 
 namespace server.service.udpforward
 {
-    [MessengerIdRange((ushort)UdpForwardMessengerIds.Min,(ushort)UdpForwardMessengerIds.Max)]
+    [MessengerIdRange((ushort)UdpForwardMessengerIds.Min, (ushort)UdpForwardMessengerIds.Max)]
     public class UdpForwardMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -24,7 +24,7 @@ namespace server.service.udpforward
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.tcpForwardServer = tcpForwardServer;
-            this.udpForwardValidator = udpForwardValidator; 
+            this.udpForwardValidator = udpForwardValidator;
         }
 
         [MessengerId((ushort)UdpForwardMessengerIds.Request)]
@@ -68,7 +68,7 @@ namespace server.service.udpforward
                     }
 
                     UdpForwardTargetCacheInfo cache = tcpForwardTargetCaching.Get(port);
-                    if(cache != null && cache.Name == source.Name)
+                    if (cache != null && cache.Id == source.Id)
                     {
                         tcpForwardTargetCaching.Remove(port);
                         tcpForwardServer.Stop(port);
@@ -112,6 +112,7 @@ namespace server.service.udpforward
                     }
                     tcpForwardTargetCaching.Add(model.SourcePort, new UdpForwardTargetCacheInfo
                     {
+                        Id = source.Id,
                         Name = source.Name,
                         Connection = connection,
                         Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort)

@@ -1,3 +1,4 @@
+echo D|xcopy "../plugins/client.service.ui/client.service.ui.api.service/public/web" "public/web" /s /f /h /y
 xcopy "../client.realize/appsettings.json" "public" /f /y
 xcopy "../plugins/client.service.ftp/ftp-appsettings.json" "public" /f /y
 xcopy "../plugins/client.service.wakeup/wakeup-appsettings.json" "public" /f /y

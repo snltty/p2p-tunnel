@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace server.service.tcpforward
 {
-    [MessengerIdRange((ushort)TcpForwardMessengerIds.Min,(ushort)TcpForwardMessengerIds.Max)]
+    [MessengerIdRange((ushort)TcpForwardMessengerIds.Min, (ushort)TcpForwardMessengerIds.Max)]
     public class TcpForwardMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
@@ -67,7 +67,7 @@ namespace server.service.tcpforward
                 {
                     TcpForwardTargetCacheInfo cache = model.AliveType == TcpForwardAliveTypes.WEB ? tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort) : tcpForwardTargetCaching.Get(model.SourcePort);
 
-                    if (cache != null && cache.Name == source.Name)
+                    if (cache != null && cache.Id == source.Id)
                     {
                         if (model.AliveType == TcpForwardAliveTypes.WEB)
                         {
@@ -91,8 +91,6 @@ namespace server.service.tcpforward
         [MessengerId((ushort)TcpForwardMessengerIds.SignIn)]
         public byte[] SignIn(IConnection connection)
         {
-
-
             try
             {
                 TcpForwardRegisterParamsInfo model = new TcpForwardRegisterParamsInfo();
@@ -111,12 +109,13 @@ namespace server.service.tcpforward
                     {
                         TcpForwardTargetCacheInfo target = tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort);
                         //已存在相同的注册
-                        if (target != null && target.Name != source.Name)
+                        if (target != null && target.Id != source.Id)
                         {
                             return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes();
                         }
                         tcpForwardTargetCaching.AddOrUpdate(model.SourceIp, model.SourcePort, new TcpForwardTargetCacheInfo
                         {
+                            Id = source.Id,
                             Name = source.Name,
                             Connection = connection,
                             Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort),
@@ -134,12 +133,13 @@ namespace server.service.tcpforward
 
                         TcpForwardTargetCacheInfo target = tcpForwardTargetCaching.Get(model.SourcePort);
                         //已存在相同的注册
-                        if (target != null && target.Name != source.Name)
+                        if (target != null && target.Id != source.Id)
                         {
                             return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes();
                         }
                         tcpForwardTargetCaching.AddOrUpdate(model.SourcePort, new TcpForwardTargetCacheInfo
                         {
+                            Id = source.Id,
                             Name = source.Name,
                             Connection = connection,
                             Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort),

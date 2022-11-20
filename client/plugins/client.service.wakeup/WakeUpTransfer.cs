@@ -72,16 +72,14 @@ namespace client.service.wakeup
 
         public async Task<bool> WakeUp(string name, string mac)
         {
-            var client = clientInfoCaching.GetByName(name);
-            if (client == null)
-            {
-                WakeUp(mac);
-            }
-            else
+            if (clientInfoCaching.GetByName(name, out ClientInfo client))
             {
                 await wakeUpMessengerSender.WakeUp(client.Connection, mac);
             }
-
+            else
+            {
+                WakeUp(mac);
+            }
             return true;
         }
         public void WakeUp(string mac)

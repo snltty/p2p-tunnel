@@ -211,8 +211,7 @@ namespace client.service.socks5
                 }
                 else
                 {
-                    var client = clientInfoCaching.GetByName(config.TargetName);
-                    if (client != null)
+                    if (clientInfoCaching.GetByName(config.TargetName,out ClientInfo client))
                     {
                         connection = client.Connection;
                     }

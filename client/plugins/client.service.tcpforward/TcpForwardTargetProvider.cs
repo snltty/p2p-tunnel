@@ -55,13 +55,11 @@ namespace client.service.tcpforward
                 return registerStateInfo.OnlineConnection;
             }
 
-            ClientInfo client = clientInfoCaching.GetByName(cacheInfo.Name);
-            if (client == null)
+            if (clientInfoCaching.GetByName(cacheInfo.Name, out ClientInfo client))
             {
-                return null;
+                return client.Connection;
             }
-
-            return client.Connection;
+            return null;
         }
     }
 }

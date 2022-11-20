@@ -2,7 +2,6 @@
 using common.libs;
 using common.libs.extends;
 using common.server;
-using common.server.model;
 using common.server.servers.rudp;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,6 +12,7 @@ namespace client.realize.messengers.clients
     public class ClientInfoCaching : IClientInfoCaching
     {
         private readonly ConcurrentDictionary<ulong, ClientInfo> clients = new ConcurrentDictionary<ulong, ClientInfo>();
+        private readonly ConcurrentDictionary<string, ClientInfo> clientsByName = new ConcurrentDictionary<string, ClientInfo>();
         private readonly ConcurrentDictionary<ulong, int> tunnelPorts = new ConcurrentDictionary<ulong, int>();
         private readonly ConcurrentDictionary<ulong, UdpServer> udpservers = new ConcurrentDictionary<ulong, UdpServer>();
 
@@ -24,6 +24,11 @@ namespace client.realize.messengers.clients
         public bool Add(ClientInfo client)
         {
             bool result = clients.TryAdd(client.Id, client);
+            if (result)
+            {
+                clientsByName.TryAdd(client.Name,client);
+            }
+           
             OnAdd.Push(client);
             return result;
         }
@@ -33,9 +38,9 @@ namespace client.realize.messengers.clients
             return clients.TryGetValue(id, out client);
         }
 
-        public ClientInfo GetByName(string name)
+        public bool GetByName(string name,out ClientInfo client)
         {
-            return clients.Values.FirstOrDefault(c => c.Name == name);
+            return clientsByName.TryGetValue(name,out client);
         }
 
         public IEnumerable<ClientInfo> All()
@@ -63,7 +68,7 @@ namespace client.realize.messengers.clients
                 client.Offline();
                 OnOffline.Push(client);
             }
-            foreach (ClientInfo _client in clients.Values.Where(c=>c.Connected && c.ConnectType == ClientConnectTypes.RelayNode && c.Connection.RelayId.Contains(id)))
+            foreach (ClientInfo _client in clients.Values.Where(c => c.Connected && c.ConnectType == ClientConnectTypes.RelayNode && c.Connection.RelayId.Contains(id)))
             {
                 _client.Offline();
                 OnOffline.Push(_client);
@@ -74,6 +79,7 @@ namespace client.realize.messengers.clients
         {
             if (clients.TryRemove(id, out ClientInfo client))
             {
+                clientsByName.TryRemove(client.Name, out _);
                 OnRemove.Push(client);
             }
         }
@@ -133,6 +139,7 @@ namespace client.realize.messengers.clients
                 OnRemove.Push(item);
             }
             tunnelPorts.Clear();
+            clientsByName.Clear();
         }
     }
 }

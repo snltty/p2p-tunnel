@@ -36,10 +36,12 @@ namespace common.tcpforward
         bool Remove(string domain, ushort port);
         bool Remove(ushort port);
         IEnumerable<ushort> Remove(string targetName);
+        IEnumerable<ushort> Remove(ulong id);
         bool Contains(string domain, ushort port);
         bool Contains(ushort port);
 
         void ClearConnection();
         void ClearConnection(string name);
+        void ClearConnection(ulong id);
     }
 }

@@ -40,10 +40,6 @@ namespace server.service.messengers.register
             udpServer.OnConnected = AddConnectedTimeout;
         }
 
-        /// <summary>
-        /// 超时未注册
-        /// </summary>
-        /// <param name="connection"></param>
         private void AddConnectedTimeout(IConnection connection)
         {
             if (config.ConnectLimit > 0 && rateLimit.Try(connection.Address.Address, 1) == 0)
@@ -66,11 +62,6 @@ namespace server.service.messengers.register
                 connection.Disponse();
             }
         }
-
-        /// <summary>
-        /// 掉线
-        /// </summary>
-        /// <param name="connection"></param>
         private void Disconnected(IConnection connection)
         {
             if (connection.ConnectId > 0)
@@ -110,22 +101,15 @@ namespace server.service.messengers.register
         {
             return cache.Values.ToList();
         }
-        public RegisterCacheInfo GetByName(string name)
-        {
-            return cache.Values.FirstOrDefault(c => c.Name == name);
-        }
 
         public void Remove(ulong id)
         {
             if (cache.TryRemove(id, out RegisterCacheInfo client))
             {
-                if (client != null)
-                {
-                    client.UdpConnection?.Disponse();
-                    client.TcpConnection?.Disponse();
-                    OnChanged.Push(client);
-                    OnOffline.Push(client);
-                }
+                client.UdpConnection?.Disponse();
+                client.TcpConnection?.Disponse();
+                OnChanged.Push(client);
+                OnOffline.Push(client);
             }
         }
 

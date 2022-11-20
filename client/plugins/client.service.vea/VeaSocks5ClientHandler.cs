@@ -108,8 +108,7 @@ namespace client.service.vea
                 }
             }
 ;
-            var client = clientInfoCaching.GetByName(config.TargetName);
-            if (client != null)
+            if (clientInfoCaching.GetByName(config.TargetName, out ClientInfo client))
             {
                 return client.Connection;
             }

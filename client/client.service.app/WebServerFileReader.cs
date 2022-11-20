@@ -7,7 +7,8 @@ namespace client.service.app
     {
         public byte[] Read(string fileName)
         {
-            using Stream fileStream = FileSystem.Current.OpenAppPackageFileAsync($"public/{fileName}").Result;
+            fileName = Path.Join("public/web", fileName);
+            using Stream fileStream = FileSystem.Current.OpenAppPackageFileAsync(fileName).Result;
             using StreamReader reader = new StreamReader(fileStream);
             return reader.ReadToEnd().ToBytes();
         }

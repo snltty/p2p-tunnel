@@ -71,16 +71,16 @@ namespace common.server
                 if ((MessageTypes)(readReceive.Span[0] & MessageRequestWrap.TypeBits) == MessageTypes.RESPONSE)
                 {
                     responseWrap.FromArray(readReceive);
-                    //是中继的回复
-                    if (responseWrap.RelayIdLength > 0)
+                    if (responseWrap.Relay && responseWrap.RelayIdLength - 1 - responseWrap.RelayIdIndex >= 0)
                     {
-                        ulong nextId = responseWrap.RelayIds.Span.ToUInt64();
+                        ulong nextId = responseWrap.RelayIds.Span.Slice(responseWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize).ToUInt64();
 
                         //目的地连接对象
                         IConnection _connection = sourceConnectionSelector.Select(connection, nextId);
                         if (_connection == null || ReferenceEquals(connection, _connection)) return;
 
-                        receive = MessageRequestWrap.DeleteFirstRelayid(receive);
+                        //RelayIdIndex 后移一位
+                        receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
                         await _connection.Send(receive).ConfigureAwait(false);
                     }
                     else
@@ -112,17 +112,8 @@ namespace common.server
                             IConnection _connection = sourceConnectionSelector.Select(connection, nextId);
                             if (_connection == null || ReferenceEquals(connection, _connection)) return;
 
-                            //需要回复的，不删除id，移动指针即可
-                            if (requestWrap.Reply)
-                            {
-                                //RelayIdIndex 后移一位
-                                receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
-                            }
-                            //不需要回复的，直接删除id
-                            else
-                            {
-                                receive = MessageRequestWrap.DeleteFirstRelayid(receive);
-                            }
+                            //RelayIdIndex 后移一位
+                            receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
                             //中继数据不再次序列化，直接在原数据上更新数据然后发送
                             await _connection.Send(receive).ConfigureAwait(false);
                         }
