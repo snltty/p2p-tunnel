@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:39:45
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-18 15:16:44
+ * @LastEditTime: 2022-11-20 23:11:21
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\register.js
@@ -17,6 +17,7 @@ const provideRegisterKey = Symbol();
 export const provideRegister = () => {
     const state = reactive({
         ClientConfig: {
+            ShortId: 0,
             GroupId: '',
             Name: '',
             AutoReg: false,
@@ -72,6 +73,7 @@ export const provideRegister = () => {
 
                 state.LocalInfo.connected = state.LocalInfo.UdpConnected || state.LocalInfo.TcpConnected;
 
+                //state.ClientConfig.ShortId = json.ClientConfig.ShortId;
                 state.ClientConfig.Name = json.ClientConfig.Name;
                 state.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
@@ -91,6 +93,9 @@ export const provideRegister = () => {
 
                 state.LocalInfo.IsConnecting = json.LocalInfo.IsConnecting;
                 state.LocalInfo.RouteLevel = json.LocalInfo.RouteLevel;
+                if (state.ClientConfig.ShortId == 0) {
+                    state.ClientConfig.ShortId = json.ClientConfig.ShortId;
+                }
                 if (!state.ClientConfig.GroupId) {
                     state.ClientConfig.GroupId = json.ClientConfig.GroupId;
                 }

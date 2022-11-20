@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.register;
@@ -54,6 +55,7 @@ namespace server.service.messengers.register
             });
             return new RegisterResultInfo
             {
+                ShortId = client.ShortId,
                 Id = client.Id,
                 Ip = connection.Address.Address,
                 UdpPort = (ushort)(client.UdpConnection?.Address.Port ?? 0),
@@ -78,48 +80,54 @@ namespace server.service.messengers.register
 
         private async Task<(RegisterResultInfo, RegisterCacheInfo)> VerifyAndAdd(RegisterParamsInfo model)
         {
-            RegisterResultInfo verify = null;
-            RegisterCacheInfo client;
+            RegisterCacheInfo client = null;
             //不是第一次注册
             if (model.Id > 0)
             {
                 if (clientRegisterCache.Get(model.Id, out client) == false)
                 {
-                    verify = new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.VERIFY };
+                    return (new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.VERIFY }, client);
+                }
+                return (null, client);
+            }
+
+            if (string.IsNullOrWhiteSpace(model.GroupId))
+            {
+                model.GroupId = Guid.NewGuid().ToString().Md5();
+            }
+            if (model.ShortId > 0)
+            {
+                if (clientRegisterCache.Get(model.GroupId, model.ShortId, out client) == true)
+                {
+                    bool alive = await GetAlive(client.OnLineConnection);
+                    if (alive == true)
+                    {
+                        return (new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.SAME_SHORTID }, client);
+                    }
+                    clientRegisterCache.Remove(client.Id);
                 }
             }
             else
             {
-                //第一次注册，检查有没有重名
-                client = clientRegisterCache.GetBySameGroup(model.GroupId, model.Name).FirstOrDefault();
-                if (client != null)
-                {
-                    bool alive = await GetAlive(client.OnLineConnection);
-                    if (!alive)
-                    {
-                        clientRegisterCache.Remove(client.Id);
-                        client = null;
-                    }
-                }
-
-                if (client == null)
-                {
-                    client = new()
-                    {
-                        Name = model.Name,
-                        GroupId = model.GroupId,
-                        LocalIps = model.LocalIps,
-                        ClientAccess = model.ClientAccess,
-                        Id = 0
-                    };
-                    clientRegisterCache.Add(client);
-                }
-                else
-                {
-                    verify = new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.SAME_NAMES };
-                }
+                model.ShortId = clientRegisterCache.GetShortId(model.GroupId);
             }
-            return (verify, client);
+
+            if (model.ShortId == 0)
+            {
+                return (new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.ERROR_SHORTID }, client);
+            }
+
+            client = new()
+            {
+                Name = model.Name,
+                GroupId = model.GroupId,
+                LocalIps = model.LocalIps,
+                ClientAccess = model.ClientAccess,
+                Id = model.Id,
+                ShortId = model.ShortId,
+            };
+            clientRegisterCache.Add(client);
+            return (null, client);
         }
         private async Task<bool> GetAlive(IConnection connection)
         {

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-19 18:19:01
+ * @LastEditTime: 2022-11-20 23:12:32
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -14,12 +14,21 @@
             <el-form label-width="8rem" ref="formDom" :model="model" :rules="rules">
                 <el-form-item label="" label-width="0">
                     <el-row>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                        <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
                             <el-form-item label="名称" prop="ClientName">
                                 <el-input v-model="model.ClientName" maxlength="32" show-word-limit placeholder="设置你的注册名称"></el-input>
                             </el-form-item>
                         </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                        <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
+                            <el-form-item label="短id" prop="ShortId">
+                                <el-popover placement="top-start" title="短id" trigger="hover" content="分组内唯一编号，0-255，0则自动生成，分组内不冲突即可，这意味着，一个分组最多255个客户端">
+                                    <template #reference>
+                                        <el-input v-model="model.ShortId"></el-input>
+                                    </template>
+                                </el-popover>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
                             <el-form-item label="分组" prop="GroupId">
                                 <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top-start">
                                     <el-input type="password" show-password v-model="model.GroupId" maxlength="32" show-word-limit placeholder="设置你的分组编号"></el-input>
@@ -201,13 +210,14 @@ import { injectRegister } from '../states/register'
 import { sendRegisterMsg, getRegisterInfo, updateConfig, sendExit } from '../apis/register'
 
 import { ElMessage } from 'element-plus'
-import { watch } from '@vue/runtime-core';
+import { onMounted, watch } from '@vue/runtime-core';
 export default {
     setup () {
         const formDom = ref(null);
         const registerState = injectRegister();
         const state = reactive({
             model: {
+                ShortId: 0,
                 ClientName: '',
                 ServerIp: '',
                 ServerUdpPort: 0,
@@ -290,41 +300,55 @@ export default {
                         }
                     }
                 ],
+                ShortId: [
+                    { required: true, message: '必填', trigger: 'blur' },
+                    {
+                        type: 'number', min: 0, max: 255, message: '数字 0-255', trigger: 'blur', transform (value) {
+                            return Number(value)
+                        }
+                    }
+                ],
             }
         });
 
         //获取一下可修改的数据
-        getRegisterInfo().then((json) => {
-            state.model.ClientName = registerState.ClientConfig.Name = json.ClientConfig.Name;
-            state.model.GroupId = registerState.ClientConfig.GroupId = json.ClientConfig.GroupId;
-            state.model.AutoReg = registerState.ClientConfig.AutoReg = json.ClientConfig.AutoReg;
-            state.model.AutoRegTimes = registerState.ClientConfig.AutoRegTimes = json.ClientConfig.AutoRegTimes;
-            state.model.AutoRegInterval = registerState.ClientConfig.AutoRegInterval = json.ClientConfig.AutoRegInterval;
-            state.model.AutoRegDelay = registerState.ClientConfig.AutoRegDelay = json.ClientConfig.AutoRegDelay;
-            state.model.ClientEncode = registerState.ClientConfig.Encode = json.ClientConfig.Encode;
-            state.model.ClientEncodePassword = registerState.ClientConfig.ClientEncodePassword = json.ClientConfig.EncodePassword;
-            state.model.UsePunchHole = registerState.ClientConfig.UsePunchHole = json.ClientConfig.UsePunchHole;
-            state.model.TimeoutDelay = registerState.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
+        const loadConfig = () => {
+            getRegisterInfo().then((json) => {
+                state.model.ShortId = registerState.ClientConfig.ShortId = json.ClientConfig.ShortId;
+                state.model.ClientName = registerState.ClientConfig.Name = json.ClientConfig.Name;
+                state.model.GroupId = registerState.ClientConfig.GroupId = json.ClientConfig.GroupId;
+                state.model.AutoReg = registerState.ClientConfig.AutoReg = json.ClientConfig.AutoReg;
+                state.model.AutoRegTimes = registerState.ClientConfig.AutoRegTimes = json.ClientConfig.AutoRegTimes;
+                state.model.AutoRegInterval = registerState.ClientConfig.AutoRegInterval = json.ClientConfig.AutoRegInterval;
+                state.model.AutoRegDelay = registerState.ClientConfig.AutoRegDelay = json.ClientConfig.AutoRegDelay;
+                state.model.ClientEncode = registerState.ClientConfig.Encode = json.ClientConfig.Encode;
+                state.model.ClientEncodePassword = registerState.ClientConfig.ClientEncodePassword = json.ClientConfig.EncodePassword;
+                state.model.UsePunchHole = registerState.ClientConfig.UsePunchHole = json.ClientConfig.UsePunchHole;
+                state.model.TimeoutDelay = registerState.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
 
-            state.model.UseIpv6 = registerState.ClientConfig.UseIpv6 = json.ClientConfig.UseIpv6;
-            state.model.BindIp = registerState.ClientConfig.BindIp = json.ClientConfig.BindIp;
-            state.model.UseUdp = registerState.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
-            state.model.UseTcp = registerState.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
-            state.model.UseRelay = registerState.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
-            state.model.UseOriginPort = registerState.ClientConfig.UseOriginPort = json.ClientConfig.UseOriginPort;
-            state.model.UdpUploadSpeedLimit = registerState.ClientConfig.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
+                state.model.UseIpv6 = registerState.ClientConfig.UseIpv6 = json.ClientConfig.UseIpv6;
+                state.model.BindIp = registerState.ClientConfig.BindIp = json.ClientConfig.BindIp;
+                state.model.UseUdp = registerState.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
+                state.model.UseTcp = registerState.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
+                state.model.UseRelay = registerState.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
+                state.model.UseOriginPort = registerState.ClientConfig.UseOriginPort = json.ClientConfig.UseOriginPort;
+                state.model.UdpUploadSpeedLimit = registerState.ClientConfig.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
 
 
-            state.model.ServerIp = registerState.ServerConfig.Ip = json.ServerConfig.Ip;
-            state.model.ServerUdpPort = registerState.ServerConfig.UdpPort = json.ServerConfig.UdpPort;
-            state.model.ServerTcpPort = registerState.ServerConfig.TcpPort = json.ServerConfig.TcpPort;
-            state.model.ServerEncode = registerState.ServerConfig.Encode = json.ServerConfig.Encode;
-            state.model.ServerEncodePassword = registerState.ServerConfig.ServerEncodePassword = json.ServerConfig.EncodePassword;
-        }).catch((msg) => {
-            // ElMessage.error(msg);
-        });
+                state.model.ServerIp = registerState.ServerConfig.Ip = json.ServerConfig.Ip;
+                state.model.ServerUdpPort = registerState.ServerConfig.UdpPort = json.ServerConfig.UdpPort;
+                state.model.ServerTcpPort = registerState.ServerConfig.TcpPort = json.ServerConfig.TcpPort;
+                state.model.ServerEncode = registerState.ServerConfig.Encode = json.ServerConfig.Encode;
+                state.model.ServerEncodePassword = registerState.ServerConfig.ServerEncodePassword = json.ServerConfig.EncodePassword;
+            }).catch((msg) => {
+                // ElMessage.error(msg);
+            });
+        }
         watch(() => registerState.ClientConfig.GroupId, () => {
             state.model.GroupId = registerState.ClientConfig.GroupId;
+        });
+        watch(() => registerState.ClientConfig.ShortId, () => {
+            state.model.ShortId = registerState.ClientConfig.ShortId;
         });
 
         const handleSubmit = () => {
@@ -334,6 +358,7 @@ export default {
                 }
                 let data = {
                     ClientConfig: {
+                        ShortId: +state.model.ShortId,
                         Name: state.model.ClientName,
                         GroupId: state.model.GroupId,
                         AutoReg: state.model.AutoReg,
@@ -363,6 +388,7 @@ export default {
                 registerState.LocalInfo.IsConnecting = true;
                 updateConfig(data).then(() => {
                     sendRegisterMsg().then((res) => {
+                        loadConfig();
                     }).catch((msg) => {
                         ElMessage.error(msg);
                     });
@@ -374,6 +400,10 @@ export default {
         const handleExit = () => {
             sendExit();
         }
+
+        onMounted(() => {
+            loadConfig();
+        });
 
         return {
             ...toRefs(state), registerState, formDom, handleSubmit, handleExit

@@ -35,6 +35,7 @@ namespace client.realize.messengers.register
                     MessengerId = (ushort)RegisterMessengerIds.SignIn,
                     Payload = new RegisterParamsInfo
                     {
+                        ShortId = param.ShortId,
                         Id = id,
                         Name = param.ClientName,
                         GroupId = param.GroupId,
@@ -57,6 +58,7 @@ namespace client.realize.messengers.register
                     return regRes;
                 }
                 id = res.Id;
+                param.ShortId = res.ShortId;
             }
             if (config.Client.UseTcp)
             {
@@ -66,6 +68,7 @@ namespace client.realize.messengers.register
                     MessengerId = (ushort)RegisterMessengerIds.SignIn,
                     Payload = new RegisterParamsInfo
                     {
+                        ShortId = param.ShortId,
                         Id = id,
                         Name = param.ClientName,
                         GroupId = param.GroupId,
@@ -85,6 +88,7 @@ namespace client.realize.messengers.register
                 RegisterResultInfo tcpres = new RegisterResultInfo();
                 tcpres.DeBytes(tcpResult.Data);
                 regRes = new RegisterResult { NetState = tcpResult, Data = tcpres };
+                param.ShortId = tcpres.ShortId;
             }
             if (regRes != null)
             {
@@ -135,6 +139,7 @@ namespace client.realize.messengers.register
 
     public class RegisterParams
     {
+        public byte ShortId { get; set; } = 0;
         public string GroupId { get; set; } = string.Empty;
         public string ClientName { get; set; } = string.Empty;
         public IPAddress[] LocalIps { get; set; } = Array.Empty<IPAddress>();

@@ -59,6 +59,7 @@ namespace client
     /// </summary>
     public class ClientConfig
     {
+        public byte ShortId { get; set; }
         /// <summary>
         /// 分组编号
         /// </summary>

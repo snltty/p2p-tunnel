@@ -20,6 +20,7 @@ namespace common.server.model
         /// 连接id，因为分两次注册，第二次带上第一次的注册后获得的id
         /// </summary>
         public ulong Id { get; set; } = 0;
+        public byte ShortId { get; set; } = 0;
         /// <summary>
         /// 分组
         /// </summary>
@@ -56,7 +57,7 @@ namespace common.server.model
             length += 1;
 
             var idBytes = Id.ToBytes();
-            length += 8;
+            length += 9;
             var groupidBytes = GroupId.ToBytes();
             length += 1 + groupidBytes.Length;
             var nameBytes = Name.ToBytes();
@@ -82,6 +83,8 @@ namespace common.server.model
 
             Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
             index += 8;
+            bytes[index] = ShortId;
+            index += 1;
 
             bytes[index] = (byte)groupidBytes.Length;
             index += 1;
@@ -124,6 +127,8 @@ namespace common.server.model
 
             Id = span.Slice(index, 8).ToUInt64();
             index += 8;
+            ShortId = span[index];
+            index += 1;
 
             GroupId = span.Slice(index + 1, span[index]).GetString();
             index += 1 + span[index];
@@ -162,6 +167,7 @@ namespace common.server.model
         /// 连接id
         /// </summary>
         public ulong Id { get; set; } = 0;
+        public byte ShortId { get; set; } = 0;
         /// <summary>
         /// 连接ip
         /// </summary>
@@ -183,7 +189,7 @@ namespace common.server.model
                 1 //Code
                 + 1//Relay
                 + 2 + 2 //port
-                + 8 //id
+                + 9 //id
                 + 1 + ipBytes.Length
                 + groupIdBytes.Length];
 
@@ -204,6 +210,8 @@ namespace common.server.model
 
             Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
             index += 8;
+            bytes[index] = ShortId;
+            index += 1;
 
             bytes[index] = (byte)ipBytes.Length;
             Array.Copy(ipBytes, 0, bytes, index + 1, ipBytes.Length);
@@ -234,6 +242,8 @@ namespace common.server.model
 
             Id = span.Slice(index, 8).ToUInt64();
             index += 8;
+            ShortId = span[index];
+            index += 1;
 
 
             Ip = new IPAddress(span.Slice(index + 1, span[index]));
@@ -247,14 +257,16 @@ namespace common.server.model
         {
             [Description("成功")]
             OK = 1,
-            [Description("存在同名")]
-            SAME_NAMES = 2,
+            [Description("存在同名短id")]
+            SAME_SHORTID = 2,
+            [Description("短id获取失败")]
+            ERROR_SHORTID = 4,
             [Description("验证未通过")]
-            VERIFY = 4,
+            VERIFY = 8,
             [Description("key验证未通过")]
-            KEY_VERIFY = 8,
+            KEY_VERIFY = 16,
             [Description("出错")]
-            UNKNOW = 16
+            UNKNOW = 32
         }
     }
 
@@ -310,7 +322,7 @@ namespace common.server.model
     }
 
     [Flags, MessengerIdEnum]
-    public enum RegisterMessengerIds: ushort
+    public enum RegisterMessengerIds : ushort
     {
         Min = 0,
         SignIn = 0,

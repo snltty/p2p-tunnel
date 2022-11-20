@@ -169,6 +169,7 @@ namespace client.realize.messengers.register
 
                         //注册
                         RegisterResult result = await GetRegisterResult();
+                        config.Client.ShortId = result.Data.ShortId;
                         config.Client.GroupId = result.Data.GroupId;
                         registerState.RemoteInfo.Relay = result.Data.Relay;
                         registerState.Online(result.Data.Id, result.Data.Ip, result.Data.UdpPort, result.Data.TcpPort);
@@ -253,6 +254,7 @@ namespace client.realize.messengers.register
             //注册
             RegisterResult result = await registerMessageHelper.Register(new RegisterParams
             {
+                ShortId = config.Client.ShortId,
                 ClientName = config.Client.Name,
                 GroupId = config.Client.GroupId,
                 LocalUdpPort = registerState.LocalInfo.UdpPort,

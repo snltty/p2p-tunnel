@@ -8,14 +8,18 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace server.service.messengers.register
 {
     public class ClientRegisterCaching : IClientRegisterCaching
     {
+        private readonly IEnumerable<byte> shortIds = Enumerable.Range(1, 255).Select(c => (byte)c);
         private readonly ConcurrentDictionary<ulong, RegisterCacheInfo> cache = new();
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<byte, RegisterCacheInfo>> cacheGroups = new();
         private NumberSpace idNs = new NumberSpace(0);
         private readonly Config config;
+        private readonly object lockObject = new object();
 
         public SimpleSubPushHandler<RegisterCacheInfo> OnChanged { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
         public SimpleSubPushHandler<RegisterCacheInfo> OnOffline { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
@@ -70,18 +74,17 @@ namespace server.service.messengers.register
             }
         }
 
-
         public ulong Add(RegisterCacheInfo model)
         {
             if (model.Id == 0)
             {
                 model.Id = idNs.Increment();
             }
-            if (string.IsNullOrWhiteSpace(model.GroupId))
+            if (cacheGroups.TryGetValue(model.GroupId, out ConcurrentDictionary<byte, RegisterCacheInfo> value))
             {
-                model.GroupId = Guid.NewGuid().ToString().Md5();
+                value.TryAdd(model.ShortId, model);
             }
-            cache.AddOrUpdate(model.Id, model, (a, b) => model);
+            cache.TryAdd(model.Id, model);
             return model.Id;
         }
 
@@ -89,13 +92,39 @@ namespace server.service.messengers.register
         {
             return cache.TryGetValue(id, out client);
         }
+        public bool Get(string groupid, byte id, out RegisterCacheInfo client)
+        {
+            client = null;
+            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<byte, RegisterCacheInfo> value) == false)
+            {
+                return cache.TryGetValue(id, out client);
+            }
+            return false;
+        }
+        public byte GetShortId(string groupid)
+        {
+            lock (lockObject)
+            {
+                if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<byte, RegisterCacheInfo> value) == false)
+                {
+                    value = new ConcurrentDictionary<byte, RegisterCacheInfo>();
+                    cacheGroups.TryAdd(groupid, value);
+                }
+                if (value.Count == shortIds.Count())
+                {
+                    return 0;
+                }
+                return shortIds.Except(value.Keys).ElementAt(0);
+            }
+        }
+
         public IEnumerable<RegisterCacheInfo> GetBySameGroup(string groupid)
         {
-            return cache.Values.Where(c => c.GroupId == groupid);
-        }
-        public IEnumerable<RegisterCacheInfo> GetBySameGroup(string groupid, string name)
-        {
-            return cache.Values.Where(c => c.GroupId == groupid && c.Name == name);
+            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<byte, RegisterCacheInfo> value))
+            {
+                return value.Values;
+            }
+            return Enumerable.Empty<RegisterCacheInfo>();
         }
         public List<RegisterCacheInfo> GetAll()
         {
@@ -110,6 +139,15 @@ namespace server.service.messengers.register
                 client.TcpConnection?.Disponse();
                 OnChanged.Push(client);
                 OnOffline.Push(client);
+
+                if (cacheGroups.TryGetValue(client.GroupId, out ConcurrentDictionary<byte, RegisterCacheInfo> value))
+                {
+                    value.TryRemove(client.ShortId, out _);
+                    if (value.Count == 0)
+                    {
+                        cacheGroups.TryRemove(client.GroupId, out _);
+                    }
+                }
             }
         }
 

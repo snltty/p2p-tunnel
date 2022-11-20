@@ -17,6 +17,7 @@ namespace server.messengers.register
         public IConnection OnLineConnection => TcpConnection ?? UdpConnection;
 
         public ulong Id { get; set; }
+        public byte ShortId { get; set; }
         public string Name { get; set; }
         public string GroupId { get; set; }
         [JsonIgnore]
