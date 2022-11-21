@@ -2,15 +2,17 @@
  * @Author: snltty
  * @Date: 2021-08-22 14:09:03
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-23 18:41:43
+ * @LastEditTime: 2022-11-21 16:26:30
  * @version: v1.0.0
  * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.webd:\Desktop\p2p-tunnel\README.md
+ * @FilePath: \client.service.ui.webd:\desktop\p2p-tunnel\README.md
 -->
 <div align="center">
 
 # p2p-tunnel
 ## Visual Studio 2022 LTSC 17.4.0
+#### tcp,udp打洞、服务器中继、节点中继、服务器代理
+#### tun网卡组网、tcp转发、udp转发、http代理、socks5代理
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/snltty/p2p-tunnel?style=social)
 ![GitHub Repo forks](https://img.shields.io/github/forks/snltty/p2p-tunnel?style=social)
@@ -22,10 +24,9 @@
 1. **使用前请确保你已知其中风险，并且已做好承担风险的准备，本软件仅供学习交流，请勿用于违法犯罪**
 1. **使用前请确保你已知其中风险，并且已做好承担风险的准备，本软件仅供学习交流，请勿用于违法犯罪**
 1. **使用前请确保你已知其中风险，并且已做好承担风险的准备，本软件仅供学习交流，请勿用于违法犯罪**
-2. 包含、tcp,udp打洞、服务器中继、节点中继、服务器代理、tun网卡组网、tcp转发、udp转发、http代理、socks5代理
-3. 有任何想法，皆可进群(**1121552990**)了解
-4. <a href="http://snltty.gitee.io/p2p-tunnel/" target="_blank">在线web管理端</a>，<a href="https://update7.simplix.info/UpdatePack7R2.exe" target="_blank">win7不能运行.NET6的补丁</a>
-5. 用一台垃圾手机作为客户端放家里，就可以远程开机了
+2. 有任何想法，皆可进群(**1121552990**)了解
+3. <a href="https://update7.simplix.info/UpdatePack7R2.exe" target="_blank">win7不能运行.NET6的补丁</a>
+4. 用一台垃圾手机作为客户端放家里，就可以远程开机了
 
 ## 问个why？
 1. A、B 任一设备在NAT后面，没有公网ipv4，没有ipv6，无法直接通信，这种情况当然需要穿透
@@ -59,7 +60,7 @@
 - [x] 免费的打洞服务器
 - [x] 高效的打包解包，作死的全手写序列化
 - [x] 权限管理，可以只允许某些分组做某些事情
-- [x] 如果你有某个节点比较牛逼，可以允许某个节点作为中继节点，节省服务器带宽
+- [x] 如果你有某个节点比较牛逼，可以允许某个节点作为中继节点，节省服务器带宽，节点中继可以任意节点数，中继过程不参与打包解包，近网络消耗
 - [x] <a href="https://github.com/xjasonlyu/tun2socks" target="_blank">tun2socks</a>虚拟网卡组网，让你的多个不同内网客户端组成一个网络，通过其ip访问，更有局域网网段绑定，访问目标局域网任意设备(**暂时仅支持windows、linux、osx**)，如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
 
 ## 介个绍
