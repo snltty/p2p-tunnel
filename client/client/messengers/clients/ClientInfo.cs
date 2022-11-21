@@ -37,6 +37,7 @@ namespace client.messengers.clients
                 Connection.Disponse();
             }
             Connection = null;
+            ConnectType = ClientConnectTypes.Unknow;
         }
         public void Online(IConnection connection, ClientConnectTypes connectType)
         {
