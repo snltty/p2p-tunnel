@@ -80,6 +80,8 @@ namespace client.realize.messengers.clients
             if (clients.TryRemove(id, out ClientInfo client))
             {
                 clientsByName.TryRemove(client.Name, out _);
+                udpservers.TryRemove(id, out _);
+                tunnelPorts.TryRemove(id, out _);
                 OnRemove.Push(client);
             }
         }
@@ -138,6 +140,7 @@ namespace client.realize.messengers.clients
                 clients.TryRemove(item.Id, out _);
                 OnRemove.Push(item);
             }
+            udpservers.Clear();
             tunnelPorts.Clear();
             clientsByName.Clear();
         }

@@ -78,7 +78,7 @@ namespace server.service
 
             clientRegisterCache.OnChanged.Sub((changeClient) =>
             {
-                List<ClientsClientInfo> clients = clientRegisterCache.GetBySameGroup(changeClient.GroupId).Where(c => c.OnLineConnection != null && c.OnLineConnection.Connected).Select(c => new ClientsClientInfo
+                List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.OnLineConnection != null && c.OnLineConnection.Connected).Select(c => new ClientsClientInfo
                 {
                     Connection = c.OnLineConnection,
                     Id = c.Id,

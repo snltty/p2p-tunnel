@@ -257,16 +257,18 @@ namespace common.server.model
         {
             [Description("成功")]
             OK = 1,
+            [Description("存在同名客户端")]
+            SAME_NAMES = 2,
             [Description("存在同名短id")]
-            SAME_SHORTID = 2,
+            SAME_SHORTID = 4,
             [Description("短id获取失败")]
-            ERROR_SHORTID = 4,
+            ERROR_SHORTID = 8,
             [Description("验证未通过")]
-            VERIFY = 8,
+            VERIFY = 16,
             [Description("key验证未通过")]
-            KEY_VERIFY = 16,
+            KEY_VERIFY = 32,
             [Description("出错")]
-            UNKNOW = 32
+            UNKNOW = 128
         }
     }
 

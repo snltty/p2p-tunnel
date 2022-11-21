@@ -5,6 +5,7 @@ using common.libs.extends;
 using common.server;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -357,8 +358,21 @@ namespace client.service.vea
         {
             if (interfaceNumber > 0)
             {
-                string[] commands = ip.Select(c => $"route add {c} mask 255.255.255.0 {config.IP} metric 5 if {interfaceNumber}").ToArray();
-                Command.Execute("cmd.exe", string.Empty, commands);
+                List<string> commands = new List<string>(ip.Length);
+                foreach (var item in ip)
+                {
+                    if (item.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        byte[] mask = new byte[] { 255, 255, 255, 255 };
+                        byte[] ipBytes = item.GetAddressBytes();
+                        for (int i = 0; i < ipBytes.Length; i++)
+                        {
+                            if (ipBytes[i] == 0) mask[i] = 0;
+                        }
+                        commands.Add($"route add {item} mask {string.Join(".", mask)} {config.IP} metric 5 if {interfaceNumber}");
+                    }
+                }
+                Command.Execute("cmd.exe", string.Empty, commands.ToArray());
             }
         }
         private void AddRouteLinux(IPAddress[] ip)
@@ -368,8 +382,19 @@ namespace client.service.vea
         }
         private void AddRouteOsx(IPAddress[] ip)
         {
-            string[] commands = ip.Select(c => $"route add -net {c}/24 {config.IP}").ToArray();
-            Command.Execute("/bin/bash", string.Empty, commands);
+            List<string> commands = new List<string>(ip.Length);
+            foreach (var item in ip)
+            {
+                if (item.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    int num = item.GetAddressBytes().Count(c => c > 0);
+                    commands.Add($"route add -net {item}/{num * 8} {config.IP}");
+                }
+            }
+            if(commands.Count > 0)
+            {
+                Command.Execute("/bin/bash", string.Empty, commands.ToArray());
+            }
         }
 
         public int GetIpMask(IPAddress ip)

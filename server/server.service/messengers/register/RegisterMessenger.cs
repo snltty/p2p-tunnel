@@ -80,6 +80,51 @@ namespace server.service.messengers.register
 
         private async Task<(RegisterResultInfo, RegisterCacheInfo)> VerifyAndAdd(RegisterParamsInfo model)
         {
+            RegisterResultInfo verify = null;
+            RegisterCacheInfo client;
+            //不是第一次注册
+            if (model.Id > 0)
+            {
+                if (clientRegisterCache.Get(model.Id, out client) == false)
+                {
+                    verify = new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.VERIFY };
+                }
+            }
+            else
+            {
+                //第一次注册，检查有没有重名
+                if (clientRegisterCache.Get(model.GroupId, model.Name, out client))
+                {
+                    bool alive = await GetAlive(client.OnLineConnection);
+                    if (alive == false)
+                    {
+                        clientRegisterCache.Remove(client.Id);
+                        client = null;
+                    }
+                }
+                if (client == null)
+                {
+                    client = new()
+                    {
+                        Name = model.Name,
+                        GroupId = model.GroupId,
+                        LocalIps = model.LocalIps,
+                        ClientAccess = model.ClientAccess,
+                        Id = 0,
+                        ShortId = model.ShortId,
+                    };
+                    clientRegisterCache.Add(client);
+                }
+                else
+                {
+                    verify = new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.SAME_NAMES };
+                }
+            }
+            return (verify, client);
+        }
+        /*
+        private async Task<(RegisterResultInfo, RegisterCacheInfo)> VerifyAndAdd(RegisterParamsInfo model)
+        {
             RegisterCacheInfo client = null;
             //不是第一次注册
             if (model.Id > 0)
@@ -129,6 +174,7 @@ namespace server.service.messengers.register
             clientRegisterCache.Add(client);
             return (null, client);
         }
+        */
         private async Task<bool> GetAlive(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap

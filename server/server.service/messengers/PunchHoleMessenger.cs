@@ -52,10 +52,6 @@ namespace server.service.messengers
 
                         model.FromId = connection.ConnectId;
                         IConnection online = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
-                        if (online == null || online.Connected == false)
-                        {
-                            online = target.OnLineConnection;
-                        }
                         var res = await messengerSender.SendOnly(new MessageRequestWrap
                         {
                             Connection = online,

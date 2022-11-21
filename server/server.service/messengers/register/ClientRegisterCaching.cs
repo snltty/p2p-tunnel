@@ -8,7 +8,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 
 namespace server.service.messengers.register
 {
@@ -16,7 +15,7 @@ namespace server.service.messengers.register
     {
         private readonly IEnumerable<byte> shortIds = Enumerable.Range(1, 255).Select(c => (byte)c);
         private readonly ConcurrentDictionary<ulong, RegisterCacheInfo> cache = new();
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<byte, RegisterCacheInfo>> cacheGroups = new();
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, RegisterCacheInfo>> cacheGroups = new();
         private NumberSpace idNs = new NumberSpace(0);
         private readonly Config config;
         private readonly object lockObject = new object();
@@ -80,10 +79,16 @@ namespace server.service.messengers.register
             {
                 model.Id = idNs.Increment();
             }
-            if (cacheGroups.TryGetValue(model.GroupId, out ConcurrentDictionary<byte, RegisterCacheInfo> value))
+            if (string.IsNullOrWhiteSpace(model.GroupId))
             {
-                value.TryAdd(model.ShortId, model);
+                model.GroupId = Guid.NewGuid().ToString().Md5();
             }
+            if (cacheGroups.TryGetValue(model.GroupId, out ConcurrentDictionary<string, RegisterCacheInfo> value) == false)
+            {
+                value = new ConcurrentDictionary<string, RegisterCacheInfo>();
+                cacheGroups.TryAdd(model.GroupId, value);
+            }
+            value.TryAdd(model.Name, model);
             cache.TryAdd(model.Id, model);
             return model.Id;
         }
@@ -92,41 +97,24 @@ namespace server.service.messengers.register
         {
             return cache.TryGetValue(id, out client);
         }
-        public bool Get(string groupid, byte id, out RegisterCacheInfo client)
+        public bool Get(string groupid, string name, out RegisterCacheInfo client)
         {
             client = null;
-            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<byte, RegisterCacheInfo> value) == false)
+            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<string, RegisterCacheInfo> value))
             {
-                return cache.TryGetValue(id, out client);
+                return value.TryGetValue(name, out client);
             }
             return false;
         }
-        public byte GetShortId(string groupid)
+        public IEnumerable<RegisterCacheInfo> Get(string groupid)
         {
-            lock (lockObject)
-            {
-                if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<byte, RegisterCacheInfo> value) == false)
-                {
-                    value = new ConcurrentDictionary<byte, RegisterCacheInfo>();
-                    cacheGroups.TryAdd(groupid, value);
-                }
-                if (value.Count == shortIds.Count())
-                {
-                    return 0;
-                }
-                return shortIds.Except(value.Keys).ElementAt(0);
-            }
-        }
-
-        public IEnumerable<RegisterCacheInfo> GetBySameGroup(string groupid)
-        {
-            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<byte, RegisterCacheInfo> value))
+            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<string, RegisterCacheInfo> value))
             {
                 return value.Values;
             }
             return Enumerable.Empty<RegisterCacheInfo>();
         }
-        public List<RegisterCacheInfo> GetAll()
+        public List<RegisterCacheInfo> Get()
         {
             return cache.Values.ToList();
         }
@@ -140,9 +128,9 @@ namespace server.service.messengers.register
                 OnChanged.Push(client);
                 OnOffline.Push(client);
 
-                if (cacheGroups.TryGetValue(client.GroupId, out ConcurrentDictionary<byte, RegisterCacheInfo> value))
+                if (cacheGroups.TryGetValue(client.GroupId, out ConcurrentDictionary<string, RegisterCacheInfo> value))
                 {
-                    value.TryRemove(client.ShortId, out _);
+                    value.TryRemove(client.Name, out _);
                     if (value.Count == 0)
                     {
                         cacheGroups.TryRemove(client.GroupId, out _);

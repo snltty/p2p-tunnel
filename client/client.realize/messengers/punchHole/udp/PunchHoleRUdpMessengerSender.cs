@@ -140,6 +140,8 @@ namespace client.realize.messengers.punchHole.udp
             OnStep2Handler.Push(arg);
             await Task.Run(async () =>
             {
+                int localPort = arg.Data.LocalPort;
+                int port = arg.Data.Port;
                 if (connectCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache) == false)
                 {
                     return;
@@ -156,20 +158,20 @@ namespace client.realize.messengers.punchHole.udp
                     int times = cache.TryTimes;
                     if (UseLocalPort)
                     {
-                        var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
+                        var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, localPort)).ToList();
                         times += locals.Count;
                         ips.AddRange(locals);
                     }
                     if (IPv6Support())
                     {
-                        var locals = arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, arg.Data.Port)).ToList();
+                        var locals = arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, port)).ToList();
                         times += locals.Count;
                         ips.AddRange(locals);
                     }
-                    ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
+                    ips.Add(new IPEndPoint(arg.Data.Ip, port));
                     if((TunnelDefaults)(arg.RawData.TunnelName) > TunnelDefaults.MAX)
                     {
-                        ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port+1));
+                        ips.Add(new IPEndPoint(arg.Data.Ip, port + 1));
                     }
 
 

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-20 23:12:32
+ * @LastEditTime: 2022-11-21 10:53:22
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -21,9 +21,10 @@
                         </el-col>
                         <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
                             <el-form-item label="短id" prop="ShortId">
-                                <el-popover placement="top-start" title="短id" trigger="hover" content="分组内唯一编号，0-255，0则自动生成，分组内不冲突即可，这意味着，一个分组最多255个客户端">
+                                <el-popover placement="top-start" title="短id" trigger="hover" content="暂不可用">
+                                    <!-- 分组内唯一编号，0-255，0则自动生成，分组内不冲突即可，这意味着，一个分组最多255个客户端 -->
                                     <template #reference>
-                                        <el-input v-model="model.ShortId"></el-input>
+                                        <el-input v-model="model.ShortId" readonly></el-input>
                                     </template>
                                 </el-popover>
                             </el-form-item>

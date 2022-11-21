@@ -34,7 +34,7 @@ namespace server.service.messengers
         [MessengerId((ushort)RelayMessengerIds.AskConnects)]
         public void AskConnects(IConnection connection)
         {
-            foreach (var item in clientRegisterCache.GetAll().Where(c => c.Id != connection.ConnectId))
+            foreach (var item in clientRegisterCache.Get().Where(c => c.Id != connection.ConnectId))
             {
                 _ = messengerSender.SendOnly(new MessageRequestWrap
                 {

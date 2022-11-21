@@ -22,7 +22,7 @@ namespace server.service.messengers
                 Callback = (state) =>
                 {
                     proc.Refresh();
-                    var clients = clientRegisterCaching.GetAll();
+                    var clients = clientRegisterCaching.Get();
                     counterResultInfo.OnlineCount = clientRegisterCaching.Count;
                     counterResultInfo.Cpu = ProcessHelper.GetCpu(proc);
                     counterResultInfo.Memory = ProcessHelper.GetMemory(proc);

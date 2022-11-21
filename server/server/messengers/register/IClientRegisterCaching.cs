@@ -13,10 +13,9 @@ namespace server.messengers.register
         public ulong Add(RegisterCacheInfo model);
 
         public bool Get(ulong id, out RegisterCacheInfo client);
-        public bool Get(string groupid, byte id, out RegisterCacheInfo client);
-        public byte GetShortId(string groupid);
-        public IEnumerable<RegisterCacheInfo> GetBySameGroup(string groupid);
-        public List<RegisterCacheInfo> GetAll();
+        public bool Get(string groupid, string name, out RegisterCacheInfo client);
+        public IEnumerable<RegisterCacheInfo> Get(string groupid);
+        public List<RegisterCacheInfo> Get();
         public void Remove(ulong id);
 
         public bool Notify(IConnection connection);

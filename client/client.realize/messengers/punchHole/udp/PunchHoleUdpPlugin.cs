@@ -17,6 +17,8 @@ namespace client.realize.messengers.punchHole.udp
 
         public void Execute(OnPunchHoleArg arg)
         {
+            if (arg.Connection.ServerType != ServerType.UDP) return;
+
             PunchHoleUdpSteps step = (PunchHoleUdpSteps)arg.Data.PunchStep;
             switch (step)
             {
