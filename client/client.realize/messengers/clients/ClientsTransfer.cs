@@ -225,8 +225,10 @@ namespace client.realize.messengers.clients
         }
         private void OnReverse(OnPunchHoleArg arg)
         {
+            Logger.Instance.Warning($"收到:{arg.Data.FromId}的反向连接，");
             if (clientInfoCaching.Get(arg.Data.FromId, out ClientInfo client))
             {
+                Logger.Instance.Warning($"收到:{arg.Data.FromId}-{client.Name}的反向连接，");
                 PunchHoleReverseInfo model = new PunchHoleReverseInfo();
                 model.DeBytes(arg.Data.Data);
                 client.TryReverseValue = model.TryReverse;
