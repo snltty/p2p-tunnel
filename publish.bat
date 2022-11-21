@@ -7,7 +7,7 @@ rd /s /q public\\publish
 rd /s /q public\\publish-zip
 mkdir public\\publish-zip
 
-set DOTNET_TieredPGO=1
+rem set DOTNET_TieredPGO=1
 
 rem 托盘程序
 rem dotnet publish ./client/client.service.tray -c release -f net6.0-windows -o ./public/publish/tray-x64 -r win-x64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=true
@@ -15,7 +15,7 @@ rem dotnet publish ./client/client.service.tray -c release -f net6.0-windows -o 
 rem 客户端和服务端
 for %%f in (client,server) do (
 	for %%r in (win-x64,win-arm64,linux-x64,linux-arm64,linux-arm,osx-x64,osx-arm64) do (
-		dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/%%r-single/%%f  -r %%r -p:TieredPGO=true  --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebuggerSupport=false -p:EnableUnsafeBinaryFormatterSerialization=false -p:EnableUnsafeUTF7Encoding=false -p:HttpActivityPropagationSupport=false -p:InvariantGlobalization=true  -p:MetadataUpdaterSupport=false  -p:UseSystemResourceKeys=true
+		dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/%%r-single/%%f  -r %%r  --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -p:DebuggerSupport=false -p:EnableUnsafeBinaryFormatterSerialization=false -p:EnableUnsafeUTF7Encoding=false -p:HttpActivityPropagationSupport=false -p:InvariantGlobalization=true  -p:MetadataUpdaterSupport=false  -p:UseSystemResourceKeys=true
 	)
 	dotnet publish ./%%f/%%f.service -c release -f net6.0 -o ./public/publish/any/%%f 
 )
