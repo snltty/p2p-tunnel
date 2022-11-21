@@ -18,7 +18,7 @@ namespace client.service.vea
         public byte[] IP(IConnection connection)
         {
             veaTransfer.OnNotify(connection);
-            return new IPAddressInfo { IP = config.IP, LanIP = config.LanIP }.ToBytes();
+            return new IPAddressInfo { IP = config.IP, LanIP = config.LanIPs }.ToBytes();
         }
 
         [MessengerId((ushort)VeaSocks5MessengerIds.Reset)]

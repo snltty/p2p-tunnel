@@ -37,7 +37,7 @@ namespace client.service.vea
             config.ProxyAll = conf.ProxyAll;
             config.TargetName = conf.TargetName;
             config.IP = conf.IP;
-            config.LanIP = conf.LanIP;
+            config.LanIPs= conf.LanIPs;
             config.SocksPort = conf.SocksPort;
             config.BufferSize = conf.BufferSize;
             config.ConnectEnable = conf.ConnectEnable;
