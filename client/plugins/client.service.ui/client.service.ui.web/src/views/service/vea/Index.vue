@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 17:37:51
+ * @LastEditTime: 2022-11-21 16:35:03
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -81,9 +81,9 @@
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
-                                    <el-form-item label="局域网段" prop="LanIP">
+                                    <el-form-item label="局域网段" prop="LanIPs">
                                         <el-tooltip class="box-item" effect="dark" content="当前客户端的局域网段，各个客户端之间设置不一样的网段即可，192.168.x.0酱紫，为空不启用，多个网段用英文逗号间隔" placement="top-start">
-                                            <el-input v-model="state.form.LanIP"></el-input>
+                                            <el-input v-model="state.form.LanIPs"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
@@ -117,7 +117,7 @@
                     <el-table-column prop="veaIp" label="虚拟ip">
                         <template #default="scope">
                             <p><strong>{{scope.row.veaIp.IP}}</strong></p>
-                            <template v-for="(item) in scope.row.veaIp.LanIP" :key="item">
+                            <template v-for="(item) in scope.row.veaIp.LanIPs" :key="item">
                                 <p style="color:#999">{{item}}</p>
                             </template>
 
@@ -163,7 +163,7 @@ export default {
                 ProxyAll: false,
                 TargetName: '',
                 IP: '',
-                LanIP: '',
+                LanIPs: '',
                 SocksPort: 5415,
                 BufferSize: 8 * 1024,
                 ConnectEnable: false
@@ -194,8 +194,8 @@ export default {
         const formDom = ref(null);
         const showClients = computed(() => {
             clientsState.clients.forEach(c => {
-                c.veaIp = JSON.parse(JSON.stringify(state.veaClients[c.Id] || { IP: '', LanIP: [] }));
-                c.veaIp.LanIP = c.veaIp.LanIP.filter(c => c.length > 0);
+                c.veaIp = JSON.parse(JSON.stringify(state.veaClients[c.Id] || { IP: '', LanIPs: [] }));
+                c.veaIp.LanIPs = c.veaIp.LanIPs.filter(c => c.length > 0);
             });
             return clientsState.clients;
         });
@@ -206,7 +206,7 @@ export default {
                 state.form.ProxyAll = res.ProxyAll;
                 state.form.TargetName = res.TargetName;
                 state.form.IP = res.IP;
-                state.form.LanIP = res.LanIP.join(',');
+                state.form.LanIPs = res.LanIPs.join(',');
                 state.form.SocksPort = res.SocksPort;
                 state.form.BufferSize = res.BufferSize;
                 state.form.ConnectEnable = res.ConnectEnable;
@@ -245,7 +245,7 @@ export default {
                 const json = JSON.parse(JSON.stringify(state.form));
                 json.SocksPort = Number(json.SocksPort);
                 json.BufferSize = Number(json.BufferSize);
-                json.LanIP = json.LanIP.split(',').filter(c => c.length > 0);
+                json.LanIPs = json.LanIPs.split(',').filter(c => c.length > 0);
                 setConfig(json).then((res) => {
                     state.loading = false;
                     if (json.IsPac) {
