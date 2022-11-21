@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-22 14:09:03
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-21 16:26:30
+ * @LastEditTime: 2022-11-21 16:36:26
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.webd:\desktop\p2p-tunnel\README.md
@@ -21,12 +21,25 @@
 
 </div>
 
-1. **使用前请确保你已知其中风险，并且已做好承担风险的准备，本软件仅供学习交流，请勿用于违法犯罪**
-1. **使用前请确保你已知其中风险，并且已做好承担风险的准备，本软件仅供学习交流，请勿用于违法犯罪**
-1. **使用前请确保你已知其中风险，并且已做好承担风险的准备，本软件仅供学习交流，请勿用于违法犯罪**
-2. 有任何想法，皆可进群(**1121552990**)了解
-3. <a href="https://update7.simplix.info/UpdatePack7R2.exe" target="_blank">win7不能运行.NET6的补丁</a>
-4. 用一台垃圾手机作为客户端放家里，就可以远程开机了
+<div align="center">
+
+**使用前请确保你已知其中风险，本软件仅供学习交流，请勿用于违法犯罪**
+
+</div>
+<div align="center">
+
+**使用前请确保你已知其中风险，本软件仅供学习交流，请勿用于违法犯罪**
+
+</div>
+<div align="center">
+
+**使用前请确保你已知其中风险，本软件仅供学习交流，请勿用于违法犯罪**
+
+</div>
+
+1. 有任何想法，皆可进群(**1121552990**)了解
+2. <a href="https://update7.simplix.info/UpdatePack7R2.exe" target="_blank">win7不能运行.NET6的补丁</a>
+3. 用一台垃圾手机作为客户端放家里，就可以远程开机了
 
 ## 问个why？
 1. A、B 任一设备在NAT后面，没有公网ipv4，没有ipv6，无法直接通信，这种情况当然需要穿透
