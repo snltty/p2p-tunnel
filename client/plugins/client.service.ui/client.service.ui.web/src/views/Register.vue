@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-21 10:53:22
+ * @LastEditTime: 2022-11-21 14:35:15
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -345,13 +345,6 @@ export default {
                 // ElMessage.error(msg);
             });
         }
-        watch(() => registerState.ClientConfig.GroupId, () => {
-            state.model.GroupId = registerState.ClientConfig.GroupId;
-        });
-        watch(() => registerState.ClientConfig.ShortId, () => {
-            state.model.ShortId = registerState.ClientConfig.ShortId;
-        });
-
         const handleSubmit = () => {
             formDom.value.validate((valid) => {
                 if (!valid) {
