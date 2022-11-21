@@ -183,17 +183,14 @@ namespace client.realize.messengers.clients
             }
             if (registerState.LocalInfo.IsConnecting)
             {
-                Logger.Instance.Warning($"开始连接:{client.Name} LocalInfo.IsConnecting return");
                 return;
             }
             Task.Run(async () =>
             {
                 EnumConnectResult result = await ConnectTcp(client).ConfigureAwait(false);
-                Logger.Instance.Warning($"开始连接:{client.Name} tcp:{result}");
                 if (result == EnumConnectResult.Fail)
                 {
                     result = await ConnectUdp(client).ConfigureAwait(false);
-                    Logger.Instance.Warning($"开始连接:{client.Name} udp:{result}");
                 }
 
                 if (result == EnumConnectResult.Fail)
@@ -225,10 +222,8 @@ namespace client.realize.messengers.clients
         }
         private void OnReverse(OnPunchHoleArg arg)
         {
-            Logger.Instance.Warning($"收到:{arg.Data.FromId}的反向连接，");
             if (clientInfoCaching.Get(arg.Data.FromId, out ClientInfo client))
             {
-                Logger.Instance.Warning($"收到:{arg.Data.FromId}-{client.Name}的反向连接，");
                 PunchHoleReverseInfo model = new PunchHoleReverseInfo();
                 model.DeBytes(arg.Data.Data);
                 client.TryReverseValue = model.TryReverse;
@@ -414,12 +409,10 @@ namespace client.realize.messengers.clients
                             {
                                 if (registerState.LocalInfo.TcpPort == registerState.RemoteInfo.TcpPort || registerState.LocalInfo.UdpPort == registerState.RemoteInfo.UdpPort)
                                 {
-                                    Logger.Instance.Warning($"开始连接:{client.Name}");
                                     ConnectClient(client);
                                 }
                                 else
                                 {
-                                    Logger.Instance.Warning($"开始让:{client.Name} 连接我");
                                     ConnectReverse(client);
                                 }
                             }
