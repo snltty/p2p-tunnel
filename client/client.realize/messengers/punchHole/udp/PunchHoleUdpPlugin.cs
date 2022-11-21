@@ -1,6 +1,5 @@
 ﻿using client.messengers.punchHole;
 using client.messengers.punchHole.udp;
-using common.libs.extends;
 using common.server.model;
 
 namespace client.realize.messengers.punchHole.udp
@@ -17,7 +16,7 @@ namespace client.realize.messengers.punchHole.udp
 
         public void Execute(OnPunchHoleArg arg)
         {
-            if (arg.Connection.ServerType != ServerType.UDP) return;
+            //if (arg.Connection.ServerType != ServerType.UDP) return;
 
             PunchHoleUdpSteps step = (PunchHoleUdpSteps)arg.Data.PunchStep;
             switch (step)
