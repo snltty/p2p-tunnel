@@ -53,7 +53,7 @@ namespace client.service.vea
                 {
                     if (ips.TryRemove(value.Key, out IPAddressCacheInfo cache))
                     {
-                        RemoveLanMasks(cache.LanIP);
+                        RemoveLanMasks(cache.LanIPs);
                     }
                 }
             });
@@ -85,12 +85,12 @@ namespace client.service.vea
                 if (cache != null)
                 {
                     ips.TryRemove(cache.IP, out _);
-                    RemoveLanMasks(cache.LanIP);
+                    RemoveLanMasks(cache.LanIPs);
                 }
 
-                cache = new IPAddressCacheInfo { Client = client, IP = _ips.IP, LanIP = _ips.LanIP };
+                cache = new IPAddressCacheInfo { Client = client, IP = _ips.IP, LanIPs = _ips.LanIPs };
                 ips.AddOrUpdate(_ips.IP, cache, (a, b) => cache);
-                AddLanMasks(_ips.LanIP, cache);
+                AddLanMasks(_ips.LanIPs, cache);
             }
         }
         public void UpdateIp()
@@ -336,7 +336,7 @@ namespace client.service.vea
         {
             foreach (var item in lanips)
             {
-                AddRoute(item.Value.LanIP);
+                AddRoute(item.Value.LanIPs);
             }
         }
         private void AddRoute(IPAddress[] ip)
@@ -426,7 +426,7 @@ namespace client.service.vea
     public class IPAddressCacheInfo
     {
         public IPAddress IP { get; set; }
-        public IPAddress[] LanIP { get; set; }
+        public IPAddress[] LanIPs { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
         public ClientInfo Client { get; set; }
@@ -435,13 +435,13 @@ namespace client.service.vea
     public class IPAddressInfo
     {
         public IPAddress IP { get; set; }
-        public IPAddress[] LanIP { get; set; }
+        public IPAddress[] LanIPs { get; set; }
 
         public byte[] ToBytes()
         {
             var ip = IP.GetAddressBytes();
 
-            var bytes = new byte[1 + ip.Length + 1 + LanIP.Length * 4];
+            var bytes = new byte[1 + ip.Length + 1 + LanIPs.Length * 4];
 
             int index = 0;
             bytes[index] = (byte)ip.Length;
@@ -449,11 +449,11 @@ namespace client.service.vea
             Array.Copy(ip, 0, bytes, 1, ip.Length);
             index += ip.Length;
 
-            bytes[index] = (byte)LanIP.Length;
+            bytes[index] = (byte)LanIPs.Length;
             index += 1;
-            for (int i = 0; i < LanIP.Length; i++)
+            for (int i = 0; i < LanIPs.Length; i++)
             {
-                var lanip = LanIP[i].GetAddressBytes();
+                var lanip = LanIPs[i].GetAddressBytes();
                 Array.Copy(lanip, 0, bytes, index, lanip.Length);
                 index += lanip.Length;
             }
@@ -476,10 +476,10 @@ namespace client.service.vea
             byte lanipLength = span[index];
             index += 1;
 
-            LanIP = new IPAddress[lanipLength];
+            LanIPs = new IPAddress[lanipLength];
             for (int i = 0; i < lanipLength; i++)
             {
-                LanIP[i] = new IPAddress(span.Slice(index, 4));
+                LanIPs[i] = new IPAddress(span.Slice(index, 4));
                 index += 4;
             }
         }

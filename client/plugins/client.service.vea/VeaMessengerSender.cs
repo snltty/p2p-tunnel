@@ -26,7 +26,7 @@ namespace client.service.vea
             {
                 Connection = connection,
                 MessengerId = (ushort)VeaSocks5MessengerIds.Ip,
-                Payload = new IPAddressInfo { IP = config.IP, LanIP = config.LanIPs }.ToBytes(),
+                Payload = new IPAddressInfo { IP = config.IP, LanIPs = config.LanIPs }.ToBytes(),
                 Timeout = 1000
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
