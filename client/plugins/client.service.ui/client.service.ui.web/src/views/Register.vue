@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-21 14:35:15
+ * @LastEditTime: 2022-11-22 16:10:17
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -29,7 +29,7 @@
                                 </el-popover>
                             </el-form-item>
                         </el-col>
-                        <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
+                        <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                             <el-form-item label="分组" prop="GroupId">
                                 <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top-start">
                                     <el-input type="password" show-password v-model="model.GroupId" maxlength="32" show-word-limit placeholder="设置你的分组编号"></el-input>

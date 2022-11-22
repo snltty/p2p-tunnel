@@ -159,6 +159,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 }
                 ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
                 ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port + 1));
+                times += 1;
 
                 for (byte i = 0; i < times; i++)
                 {
@@ -228,11 +229,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         targetSocket.SafeClose();
                         targetSocket = null;
                         interval = 100;
-                        if (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
-                        {
-                            interval = 2000;
-                        }
-                        else if (ex.SocketErrorCode == SocketError.AddressNotAvailable)
+                        if (ex.SocketErrorCode == SocketError.AddressNotAvailable)
                         {
                             Logger.Instance.DebugError($"{ex.SocketErrorCode}:{ip}");
                         }

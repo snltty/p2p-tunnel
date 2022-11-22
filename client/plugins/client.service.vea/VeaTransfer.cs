@@ -391,7 +391,7 @@ namespace client.service.vea
                     commands.Add($"route add -net {item}/{num * 8} {config.IP}");
                 }
             }
-            if(commands.Count > 0)
+            if (commands.Count > 0)
             {
                 Command.Execute("/bin/bash", string.Empty, commands.ToArray());
             }

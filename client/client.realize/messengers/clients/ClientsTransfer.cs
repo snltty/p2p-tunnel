@@ -35,7 +35,6 @@ namespace client.realize.messengers.clients
         private readonly RelayMessengerSender relayMessengerSender;
         private readonly IClientConnectsCaching connecRouteCaching;
 
-        private const byte TryReverseMaxValue = 2;
         private object lockObject = new();
 
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
@@ -186,27 +185,64 @@ namespace client.realize.messengers.clients
                 return;
             }
             Task.Run(async () =>
-            {
-                EnumConnectResult result = await ConnectTcp(client).ConfigureAwait(false);
-                if (result == EnumConnectResult.Fail)
+            { 
+                /* 两边先试TCP，没成功，再两边都试试UDP
+                 *  
+                 * TryReverseTcpBit     0b00000010
+                 * TryReverseUdpBit     0b00000001
+                 * TryReverseTcpUdpBit  0b00000011
+                 * TryReverseDefault    0b00000000
+                 * 1、A 00 00 -> 00 10 -> B
+                 *      A 试了tcp没成功，让B试试
+                 * 2、B 00 10 -> 10 00 -> 10 10 -> A
+                 *      B 收到反连接请求，先交换保存状态，试试TCP，没成功，继续给A试试，
+                 * 3、A 10 10 -> 10 10 -> 10 11 -> B
+                 *      A 收到反连接请求，先交换保存状态，前面试过TCP了，试试UDP，没成功，继续让B试试
+                 * 4、B 10 11 -> 11 10 -> 11 11
+                 *      B 收到反链接请求，先交换保存状态，前面试过TCP了，试试UDP，成就成，没成就全部结束
+                 */ 
+                EnumConnectResult result = EnumConnectResult.Fail;
+                //tcp没试过，先试试tcp
+                if ((client.TryReverseValue & ClientInfo.TryReverseTcpBit) == ClientInfo.TryReverseDefault)
                 {
+                    client.TryReverseValue |= ClientInfo.TryReverseTcpBit;
+                    result = await ConnectTcp(client).ConfigureAwait(false);
+                }
+                //udp没试过，试试udp
+                else if ((client.TryReverseValue & ClientInfo.TryReverseUdpBit) == ClientInfo.TryReverseDefault)
+                {
+                    client.TryReverseValue |= ClientInfo.TryReverseUdpBit;
                     result = await ConnectUdp(client).ConfigureAwait(false);
                 }
 
+                //没成功
                 if (result == EnumConnectResult.Fail)
                 {
-                    if (client.TryReverseValue < TryReverseMaxValue)
+                    //对面有没试过的，让对面试试
+                    if ((client.TryReverseValue >> 2 & ClientInfo.TryReverseTcpUdpBit) != ClientInfo.TryReverseTcpUdpBit)
                     {
-                        client.TryReverseValue++;
                         ConnectReverse(client);
                     }
+                    //都试过了， 都不行，中继
                     else
                     {
                         _ = Relay(client, true);
                     }
                 }
-                client.TryReverseValue = 1;
+                client.TryReverseValue = ClientInfo.TryReverseDefault;
             });
+        }
+        //收到反连接请求
+        private void OnReverse(OnPunchHoleArg arg)
+        {
+            if (clientInfoCaching.Get(arg.Data.FromId, out ClientInfo client))
+            {
+                PunchHoleReverseInfo model = new PunchHoleReverseInfo();
+                model.DeBytes(arg.Data.Data);
+                //交换状态 , 11 01 -> 01 11
+                client.TryReverseValue = (byte)(((model.TryReverse & ClientInfo.TryReverseTcpUdpBit) << 2) | (model.TryReverse >> 2));
+                ConnectClient(client);
+            }
         }
 
         public void ConnectReverse(ulong id)
@@ -219,16 +255,6 @@ namespace client.realize.messengers.clients
         private void ConnectReverse(ClientInfo info)
         {
             punchHoleMessengerSender.SendReverse(info).ConfigureAwait(false);
-        }
-        private void OnReverse(OnPunchHoleArg arg)
-        {
-            if (clientInfoCaching.Get(arg.Data.FromId, out ClientInfo client))
-            {
-                PunchHoleReverseInfo model = new PunchHoleReverseInfo();
-                model.DeBytes(arg.Data.Data);
-                client.TryReverseValue = model.TryReverse;
-                ConnectClient(client);
-            }
         }
 
         public void Reset(ulong id)

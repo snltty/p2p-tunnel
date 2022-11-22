@@ -20,7 +20,7 @@ namespace server.service
             ThreadPool.SetMinThreads(150, 150);
             Logger.Instance.Info("正在启动...");
             LoggerConsole();
-
+             
             //加载插件程序集，当单文件发布或者动态加载dll外部插件时需要，否则如果本程序集没有显式的使用它的相关内容的话，会加载不出来
             //可以改为从dll文件加载
             Assembly[] assemblys = new Assembly[] {

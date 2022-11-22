@@ -16,16 +16,36 @@ namespace client.messengers.clients
         public string Name { get; init; } = string.Empty;
         public ulong Id { get; init; } = 0;
         public bool UsePunchHole { get; init; } = false;
-
         public bool UseUdp { get; init; } = false;
         public bool UseTcp { get; init; } = false;
         public bool UseRelay { get; init; } = false;
         public int Ping => Connection?.RoundTripTime ?? -1;
+
         public ServerType ServerType => Connection?.ServerType ?? ServerType.TCPUDP;
         public ClientConnectTypes ConnectType { get; private set; } = ClientConnectTypes.Unknow;
 
+        /// <summary>
+        /// tcp状态位
+        /// </summary>
         [JsonIgnore]
-        public byte TryReverseValue { get; set; } = 1;
+        public const byte TryReverseTcpBit = 0b00000010;
+        /// <summary>
+        /// udp状态位
+        /// </summary>
+        [JsonIgnore]
+        public const byte TryReverseUdpBit = 0b00000001;
+        /// <summary>
+        /// tcp+udp状态位
+        /// </summary>
+        [JsonIgnore]
+        public const byte TryReverseTcpUdpBit = TryReverseTcpBit | TryReverseUdpBit;
+        /// <summary>
+        /// 默认状态
+        /// </summary>
+        [JsonIgnore]
+        public const byte TryReverseDefault = 0;
+        [JsonIgnore]
+        public byte TryReverseValue { get; set; } = 0;
         [JsonIgnore]
         public IConnection Connection { get; set; } = null;
 
