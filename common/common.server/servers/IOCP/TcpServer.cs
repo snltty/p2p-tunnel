@@ -254,11 +254,8 @@ namespace common.server.servers.iocp
             {
                 token.Clear();
                 e.Dispose();
-                if (OnDisconnect != null)
-                {
-                    OnDisconnect.Push(token.Connection);
-                }
             }
+            OnDisconnect.Push(token.Connection);
         }
 
         public IConnection CreateConnection(Socket socket)
