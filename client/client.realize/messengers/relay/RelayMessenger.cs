@@ -25,7 +25,7 @@ namespace client.realize.messengers.relay
         private readonly RegisterStateInfo registerStateInfo;
         private readonly Config config;
 
-        public RelayMessenger(IClientInfoCaching clientInfoCaching, 
+        public RelayMessenger(IClientInfoCaching clientInfoCaching,
             RelayMessengerSender relayMessengerSender, IRelayValidator relayValidator,
             IClientConnectsCaching connecRouteCaching, RegisterStateInfo registerStateInfo, Config config)
         {
@@ -38,17 +38,19 @@ namespace client.realize.messengers.relay
         }
 
         [MessengerId((ushort)RelayMessengerIds.Relay)]
-        public void Relay(IConnection connection)
+        public byte[] Relay(IConnection connection)
         {
             if (relayValidator.Validate(connection) == false)
             {
-                return;
+                return Helper.FalseArray;
             }
 
             RelayInfo relayInfo = new RelayInfo();
             relayInfo.Connection = connection;
             relayInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
             relayMessengerSender.OnRelay.Push(relayInfo);
+
+            return Helper.TrueArray;
         }
 
         [MessengerId((ushort)RelayMessengerIds.Delay)]

@@ -26,15 +26,17 @@ namespace client.realize.messengers.relay
         /// <param name="toid"></param>
         /// <param name="connection">中继节点</param>
         /// <returns></returns>
-        public async Task Relay(ulong[] relayids, IConnection connection)
+        public async Task<bool> Relay(ulong[] relayids, IConnection connection)
         {
-            await messengerSender.SendOnly(new MessageRequestWrap
+            var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 MessengerId = (ushort)RelayMessengerIds.Relay,
                 Connection = connection,
                  RelayId = relayids,
                 Payload = new RelayInfo {  RelayIds = relayids }.ToBytes()
             }).ConfigureAwait(false);
+
+            return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
         }
 
         /// <summary>

@@ -185,7 +185,7 @@ namespace client.realize.messengers.clients
                 return;
             }
             Task.Run(async () =>
-            { 
+            {
                 /* 两边先试TCP，没成功，再两边都试试UDP
                  *  
                  * TryReverseTcpBit     0b00000010
@@ -200,7 +200,7 @@ namespace client.realize.messengers.clients
                  *      A 收到反连接请求，先交换保存状态，前面试过TCP了，试试UDP，没成功，继续让B试试
                  * 4、B 10 11 -> 11 10 -> 11 11
                  *      B 收到反链接请求，先交换保存状态，前面试过TCP了，试试UDP，成就成，没成就全部结束
-                 */ 
+                 */
                 EnumConnectResult result = EnumConnectResult.Fail;
                 //tcp没试过，先试试tcp
                 if ((client.TryReverseValue & ClientInfo.TryReverseTcpBit) == ClientInfo.TryReverseDefault)
@@ -215,7 +215,7 @@ namespace client.realize.messengers.clients
                     result = await ConnectUdp(client).ConfigureAwait(false);
                 }
 
-              
+
                 //没成功
                 if (result == EnumConnectResult.Fail)
                 {
@@ -227,7 +227,7 @@ namespace client.realize.messengers.clients
                     //都试过了， 都不行，中继 
                     else
                     {
-                        _ = Relay(client, true); 
+                        _ = Relay(client, true);
                     }
                 }
                 client.TryReverseValue = ClientInfo.TryReverseDefault;
@@ -270,14 +270,7 @@ namespace client.realize.messengers.clients
 
         private async Task<EnumConnectResult> ConnectUdp(ClientInfo client)
         {
-            if (client.Connected)
-            {
-                return EnumConnectResult.Success;
-            }
-            if (client.Connecting)
-            {
-                return EnumConnectResult.BreakOff;
-            }
+            clientInfoCaching.Offline(client.Id);
             if ((config.Client.UseUdp & client.UseUdp) == false)
             {
                 return EnumConnectResult.Fail;
@@ -313,14 +306,7 @@ namespace client.realize.messengers.clients
 
         private async Task<EnumConnectResult> ConnectTcp(ClientInfo client)
         {
-            if (client.Connected)
-            {
-                return EnumConnectResult.Success;
-            }
-            if (client.Connecting)
-            {
-                return EnumConnectResult.BreakOff;
-            }
+            clientInfoCaching.Offline(client.Id);
             if ((config.Client.UseTcp & client.UseTcp) == false)
             {
                 return EnumConnectResult.Fail;
@@ -375,7 +361,6 @@ namespace client.realize.messengers.clients
                 }
             }
         }
-
 
         private void OnRegisterBind(bool state)
         {
@@ -543,13 +528,18 @@ namespace client.realize.messengers.clients
             connection.Relay = true;
             connection.RelayId = relayids;
 
-            ClientConnectTypes relayType = relayids[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
-            clientInfoCaching.Online(relayids[^1], connection, relayType);
-
             if (notify)
             {
-                await relayMessengerSender.Relay(relayids, connection);
+                bool relayResult = await relayMessengerSender.Relay(relayids, connection);
+                if (relayResult == false)
+                {
+                    Logger.Instance.Error($"relay fail");
+                    return;
+                }
             }
+
+            ClientConnectTypes relayType = relayids[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
+            clientInfoCaching.Online(relayids[^1], connection, relayType);
         }
 
         [Flags]
