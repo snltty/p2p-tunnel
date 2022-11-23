@@ -419,20 +419,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         public SimpleSubPushHandler<ulong> OnSendStep2FailHandler => new SimpleSubPushHandler<ulong>();
         private async Task SendStep2Fail(OnStep2Params arg)
         {
-
-            if (connectTcpCache.TryRemove(arg.RawData.FromId, out ConnectCacheModel cache))
-            {
-                cache.Canceled = true;
-                cache.Tcs.SetResult(new ConnectResultModel
-                {
-                    State = false,
-                    Result = new ConnectFailModel
-                    {
-                        Msg = "tcp打洞失败",
-                        Type = ConnectFailType.ERROR
-                    }
-                });
-            }
             if (arg.Data.IsDefault)
             {
                 OnSendStep2FailHandler.Push(arg.RawData.FromId);
@@ -446,6 +432,20 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 }).ConfigureAwait(false);
                 Logger.Instance.DebugDebug($"after Send Step2Fail");
             }
+            if (connectTcpCache.TryRemove(arg.RawData.FromId, out ConnectCacheModel cache))
+            {
+                cache.Canceled = true;
+                cache.Tcs.SetResult(new ConnectResultModel
+                {
+                    State = false,
+                    Result = new ConnectFailModel
+                    {
+                        Msg = "tcp打洞失败",
+                        Type = ConnectFailType.ERROR
+                    }
+                });
+            }
+            
         }
         public async Task SendStep2Stop(ulong toid)
         {
@@ -474,15 +474,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 {
                     Logger.Instance.DebugDebug($"{toid} cache  timeout1");
                     cache.Canceled = true;
-                    cache.Tcs.SetResult(new ConnectResultModel
-                    {
-                        State = false,
-                        Result = new ConnectFailModel
-                        {
-                            Msg = "tcp打洞失败",
-                            Type = ConnectFailType.ERROR
-                        }
-                    });
 
                     OnSendStep2FailHandler.Push(toid);
                     punchHoleMessengerSender.Send(new SendPunchHoleArg<PunchHoleStep2FailInfo>
@@ -492,6 +483,16 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         ToId = toid,
                         Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL, PunchType = PunchHoleTypes.TCP_NUTSSB }
                     }).ConfigureAwait(false);
+
+                    cache.Tcs.SetResult(new ConnectResultModel
+                    {
+                        State = false,
+                        Result = new ConnectFailModel
+                        {
+                            Msg = "tcp打洞失败",
+                            Type = ConnectFailType.ERROR
+                        }
+                    });
                 }
 
             }

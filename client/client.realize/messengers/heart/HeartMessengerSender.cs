@@ -25,7 +25,7 @@ namespace client.realize.messengers.heart
                 Connection = connection,
                 MessengerId = (ushort)HeartMessengerIds.Alive,
                 Payload = Helper.EmptyArray,
-                Timeout = 1000
+                Timeout = 2000
             }).ConfigureAwait(false);
             return resp.Code == MessageResponeCodes.OK && Helper.TrueArray.AsSpan().SequenceEqual(resp.Data.Span);
         }

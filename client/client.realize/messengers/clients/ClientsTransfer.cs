@@ -215,6 +215,7 @@ namespace client.realize.messengers.clients
                     result = await ConnectUdp(client).ConfigureAwait(false);
                 }
 
+              
                 //没成功
                 if (result == EnumConnectResult.Fail)
                 {
@@ -226,7 +227,7 @@ namespace client.realize.messengers.clients
                     //都试过了， 都不行，中继 
                     else
                     {
-                        _ = Relay(client, true);
+                        _ = Relay(client, true); 
                     }
                 }
                 client.TryReverseValue = ClientInfo.TryReverseDefault;
