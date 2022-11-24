@@ -26,9 +26,9 @@ namespace client.realize.messengers.clients
             bool result = clients.TryAdd(client.Id, client);
             if (result)
             {
-                clientsByName.TryAdd(client.Name,client);
+                clientsByName.TryAdd(client.Name, client);
             }
-           
+
             OnAdd.Push(client);
             return result;
         }
@@ -38,9 +38,9 @@ namespace client.realize.messengers.clients
             return clients.TryGetValue(id, out client);
         }
 
-        public bool GetByName(string name,out ClientInfo client)
+        public bool GetByName(string name, out ClientInfo client)
         {
-            return clientsByName.TryGetValue(name,out client);
+            return clientsByName.TryGetValue(name, out client);
         }
 
         public IEnumerable<ClientInfo> All()
@@ -61,17 +61,23 @@ namespace client.realize.messengers.clients
             }
         }
 
-        public void Offline(ulong id)
+        public void Offline(ulong id, ClientOfflineTypes offlineType = ClientOfflineTypes.Manual)
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
-                client.Offline();
-                OnOffline.Push(client);
+                if (client.ConnectType != ClientConnectTypes.Unknow)
+                {
+                    client.Offline(offlineType);
+                    OnOffline.Push(client);
+                }
             }
             foreach (ClientInfo _client in clients.Values.Where(c => c.Connected && c.ConnectType == ClientConnectTypes.RelayNode && c.Connection.RelayId.Contains(id)))
             {
-                _client.Offline();
-                OnOffline.Push(_client);
+                if (client.ConnectType != ClientConnectTypes.Unknow)
+                {
+                    _client.Offline(offlineType);
+                    OnOffline.Push(_client);
+                }
             }
         }
 
@@ -86,12 +92,12 @@ namespace client.realize.messengers.clients
             }
         }
 
-        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType)
+        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType)
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
                 connection.ConnectId = id;
-                client.Online(connection, connectType);
+                client.Online(connection, connectType, onlineType);
                 OnOnline.Push(client);
             }
         }
@@ -135,7 +141,7 @@ namespace client.realize.messengers.clients
             var _clients = clients.Values;
             foreach (var item in _clients)
             {
-                item.Offline();
+                item.Offline(ClientOfflineTypes.Manual);
                 OnOffline.Push(item);
                 clients.TryRemove(item.Id, out _);
                 OnRemove.Push(item);

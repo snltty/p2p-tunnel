@@ -9,19 +9,21 @@ namespace client.messengers.punchHole
     public enum PunchHoleTypes : byte
     {
         [Description("UDP打洞")]
-        UDP,
+        UDP = 1,
         [Description("IP欺骗打洞")]
-        TCP_NUTSSA,
+        TCP_NUTSSA = 2,
         [Description("端口复用打洞")]
-        TCP_NUTSSB,
+        TCP_NUTSSB = 4,
         [Description("反向链接")]
-        REVERSE,
+        REVERSE = 8,
         [Description("重启")]
-        RESET,
+        RESET = 16,
         [Description("中继")]
-        Relay,
+        RELAY = 32,
         [Description("创建通道")]
-        Tunnel,
+        TUNNEL = 64,
+        [Description("掉线")]
+        OFFLINE = 128,
     }
 
 
@@ -200,6 +202,31 @@ namespace client.messengers.punchHole
         }
     }
 
+    public class PunchHoleOfflineInfo : IPunchHoleStepInfo
+    {
+        public PunchHoleTypes PunchType { get; private set; } = PunchHoleTypes.OFFLINE;
+
+        public PunchForwardTypes ForwardType { get; private set; } = PunchForwardTypes.FORWARD;
+
+        public byte Step { get; set; } = 0;
+
+        public byte[] ToBytes()
+        {
+            return new byte[] {
+                (byte)PunchType,
+                (byte)ForwardType,
+                Step,
+            };
+        }
+        public void DeBytes(ReadOnlyMemory<byte> data)
+        {
+            var span = data.Span;
+            PunchType = (PunchHoleTypes)span[0];
+            ForwardType = (PunchForwardTypes)span[1];
+            Step = span[2];
+        }
+    }
+
     public class PunchHoleResetInfo : IPunchHoleStepInfo
     {
         public PunchHoleTypes PunchType { get; private set; } = PunchHoleTypes.RESET;
@@ -227,7 +254,7 @@ namespace client.messengers.punchHole
 
     public class PunchHoleTunnelInfo : IPunchHoleStepInfo
     {
-        public PunchHoleTypes PunchType { get; private set; } = PunchHoleTypes.Tunnel;
+        public PunchHoleTypes PunchType { get; private set; } = PunchHoleTypes.TUNNEL;
 
         public PunchForwardTypes ForwardType { get; private set; } = PunchForwardTypes.FORWARD;
 
@@ -246,7 +273,7 @@ namespace client.messengers.punchHole
             bytes[2] = Step;
             bytes[3] = (byte)ServerType;
 
-            Array.Copy(tunnelNameBytes,0, bytes,4, tunnelNameBytes.Length);
+            Array.Copy(tunnelNameBytes, 0, bytes, 4, tunnelNameBytes.Length);
 
             return bytes;
         }

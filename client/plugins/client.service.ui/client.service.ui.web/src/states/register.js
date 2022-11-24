@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:39:45
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-20 23:11:21
+ * @LastEditTime: 2022-11-24 17:35:21
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\register.js
@@ -12,6 +12,7 @@
 import { provide, inject, reactive } from "vue";
 import { websocketState } from '../apis/request'
 import { getRegisterInfo } from '../apis/register'
+import { triggerEvent } from "element-plus/lib/utils";
 
 const provideRegisterKey = Symbol();
 export const provideRegister = () => {
@@ -32,6 +33,7 @@ export const provideRegister = () => {
             UseTcp: false,
             UseRelay: false,
             UseOriginPort: false,
+            UseReConnect: false,
             UdpUploadSpeedLimit: 0
         },
         ServerConfig: {

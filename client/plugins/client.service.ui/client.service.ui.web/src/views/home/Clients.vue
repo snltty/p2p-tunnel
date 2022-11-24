@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-19 13:49:18
+ * @LastEditTime: 2022-11-24 17:06:52
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -27,7 +27,8 @@
                                 <dd class="t-r">
                                     <el-button plain text bg size="small" @click="handleConnect(item)">连它</el-button>
                                     <el-button plain text bg size="small" @click="handleConnectReverse(item)">连我</el-button>
-                                    <el-button plain text bg :loading="item.Connecting" size="small" @click="handleConnectReset(item)">重启</el-button>
+                                    <el-button plain text bg size="small" @click="handleConnectReset(item)">重启</el-button>
+                                    <el-button plain text bg size="small" v-if="item.Connected" @click="handleConnectOffline(item)">断开</el-button>
                                 </dd>
                             </dl>
                         </div>
@@ -44,7 +45,7 @@ import { computed, reactive } from '@vue/reactivity';
 import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
 import { injectShareData } from '../../states/shareData'
-import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendPing, setRelay } from '../../apis/clients'
+import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendClientOffline, sendPing, setRelay } from '../../apis/clients'
 import Signal from './Signal.vue'
 import RelayView from './RelayView.vue'
 import { onMounted, onUnmounted, provide } from '@vue/runtime-core';
@@ -112,6 +113,17 @@ export default {
 
             });
         }
+        const handleConnectOffline = (row) => {
+            ElMessageBox.confirm('确定断开连接吗', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning',
+            }).then(() => {
+                sendClientOffline(row.Id);
+            }).catch(() => {
+            });
+        }
+
 
         let pingTimer = 0;
         onMounted(() => {
@@ -143,7 +155,7 @@ export default {
 
 
         return {
-            registerState, clients, handleConnect, handleConnectReverse, handleConnectReset,
+            registerState, clients, handleConnect, handleConnectReverse, handleConnectReset, handleConnectOffline,
             state, handleShowDelay, handleOnRelay
         }
 

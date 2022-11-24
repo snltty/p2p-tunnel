@@ -23,6 +23,8 @@ namespace client.messengers.clients
 
         public ServerType ServerType => Connection?.ServerType ?? ServerType.TCPUDP;
         public ClientConnectTypes ConnectType { get; private set; } = ClientConnectTypes.Unknow;
+        public ClientOnlineTypes OnlineType { get; private set; } = ClientOnlineTypes.Unknow;
+        public ClientOfflineTypes OfflineType { get; private set; } = ClientOfflineTypes.Unknow;
 
         /// <summary>
         /// tcp状态位
@@ -49,20 +51,22 @@ namespace client.messengers.clients
         [JsonIgnore]
         public IConnection Connection { get; set; } = null;
 
-        public void Offline()
+        public void Offline(ClientOfflineTypes offlineType = ClientOfflineTypes.Manual)
         {
             Connecting = false;
+            ConnectType = ClientConnectTypes.Unknow;
+            OfflineType = offlineType;
             if (Connection != null && Connection.Relay == false)
             {
                 Connection.Disponse();
             }
             Connection = null;
-            ConnectType = ClientConnectTypes.Unknow;
         }
-        public void Online(IConnection connection, ClientConnectTypes connectType)
+        public void Online(IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType)
         {
             Connection = connection;
             ConnectType = connectType;
+            OnlineType = onlineType;
             SetConnecting(false);
         }
         public void SetConnecting(bool val)
@@ -90,5 +94,35 @@ namespace client.messengers.clients
         /// 服务器中继
         /// </summary>
         RelayServer = 4
+    }
+
+    [Flags]
+    public enum ClientOnlineTypes : byte
+    {
+        /// <summary>
+        /// 未知的
+        /// </summary>
+        Unknow = 0,
+        /// <summary>
+        /// 主动的
+        /// </summary>
+        Active = 1,
+        /// <summary>
+        /// 被动的
+        /// </summary>
+        Passive = 2,
+    }
+
+    [Flags]
+    public enum ClientOfflineTypes : byte
+    {
+        /// <summary>
+        /// 未知的
+        /// </summary>
+        Unknow = 0,
+        /// <summary>
+        /// 主动的
+        /// </summary>
+        Manual = 1,
     }
 }

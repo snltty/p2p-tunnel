@@ -54,13 +54,15 @@ namespace client.realize.messengers.clients
             this.heartMessengerSender = heartMessengerSender;
             this.relayMessengerSender = relayMessengerSender;
             this.connecRouteCaching = connecRouteCaching;
+            this.punchHoleMessengerSender = punchHoleMessengerSender;
 
             PunchHoleSub();
 
-            //调试注释
-            tcpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.TcpConnection));
-            udpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.UdpConnection));
-            clientsTunnel.OnDisConnect = Disconnect;
+            //掉线的
+            tcpServer.OnDisconnect.Sub((connection) => OnDisconnect(connection, registerState.TcpConnection));
+            udpServer.OnDisconnect.Sub((connection) => OnDisconnect(connection, registerState.UdpConnection));
+            clientsTunnel.OnDisConnect = OnDisconnect;
+            clientInfoCaching.OnOffline.Sub(OnOffline);
 
             //中继连线
             relayMessengerSender.OnRelay.Sub((param) =>
@@ -68,10 +70,11 @@ namespace client.realize.messengers.clients
                 _ = Relay(param.Connection, param.RelayIds, false);
             });
 
-            this.punchHoleMessengerSender = punchHoleMessengerSender;
             //有人要求反向链接
             punchHoleMessengerSender.OnReverse.Sub(OnReverse);
+
             registerState.OnRegisterBind.Sub(OnRegisterBind);
+
             //收到来自服务器的 在线客户端 数据
             clientsMessengerSender.OnServerClientsData.Sub(OnServerSendClients);
 
@@ -104,7 +107,7 @@ namespace client.realize.messengers.clients
             });
             punchHoleUdp.OnStep3Handler.Sub((e) =>
             {
-                clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P);
+                clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive);
                 if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -113,7 +116,7 @@ namespace client.realize.messengers.clients
             });
             punchHoleUdp.OnStep4Handler.Sub((e) =>
             {
-                clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P);
+                clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
                 if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -139,31 +142,48 @@ namespace client.realize.messengers.clients
             });
             punchHoleTcp.OnStep3Handler.Sub((e) =>
             {
-                clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P);
-                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                if (clientInfoCaching.Get(e.Data.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+                    clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive);
+                    if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                    {
+                        clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
 
+                    }
                 }
+
             });
             punchHoleTcp.OnStep4Handler.Sub((e) =>
             {
-                clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P);
-                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                if (clientInfoCaching.Get(e.Data.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+                    clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
+                    if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                    {
+                        clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+                    }
                 }
             });
         }
-        public void Disconnect(IConnection connection, IConnection regConnection)
+
+        private void OnOffline(ClientInfo client)
+        {
+            punchHoleMessengerSender.SendOffline(client.Id).Wait();
+            //主动连接的，未知掉线信息的，去尝试重连一下
+            if (config.Client.UseReConnect && client.OnlineType == ClientOnlineTypes.Active && client.OfflineType == ClientOfflineTypes.Unknow)
+            {
+                ConnectClient(client);
+            }
+        }
+        private void OnDisconnect(IConnection connection, IConnection regConnection)
         {
             if (ReferenceEquals(regConnection, connection))
             {
                 return;
             }
-            clientInfoCaching.Offline(connection.ConnectId);
+            clientInfoCaching.Offline(connection.ConnectId, ClientOfflineTypes.Unknow);
         }
 
         public void ConnectClient(ulong id)
@@ -303,7 +323,6 @@ namespace client.realize.messengers.clients
             clientInfoCaching.Offline(client.Id);
             return EnumConnectResult.Fail;
         }
-
         private async Task<EnumConnectResult> ConnectTcp(ClientInfo client)
         {
             clientInfoCaching.Offline(client.Id);
@@ -539,7 +558,7 @@ namespace client.realize.messengers.clients
             }
 
             ClientConnectTypes relayType = relayids[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
-            clientInfoCaching.Online(relayids[^1], connection, relayType);
+            clientInfoCaching.Online(relayids[^1], connection, relayType, notify == false ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active);
         }
 
         [Flags]

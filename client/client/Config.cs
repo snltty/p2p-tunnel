@@ -97,6 +97,7 @@ namespace client
         public bool UseTcp { get; set; } = true;
         public bool UseRelay { get; set; } = true;
         public bool UseOriginPort { get; set; } = true;
+        public bool UseReConnect { get; set; } = true;
 
         public int UdpUploadSpeedLimit { get; set; } = 0;
 

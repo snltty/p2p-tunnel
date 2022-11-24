@@ -11,7 +11,7 @@ namespace client.realize.messengers.punchHole
             this.punchHoleMessengerSender = punchHoleMessengerSender;
         }
 
-        public PunchHoleTypes Type => PunchHoleTypes.Tunnel;
+        public PunchHoleTypes Type => PunchHoleTypes.TUNNEL;
 
         public void Execute(OnPunchHoleArg arg)
         {

@@ -57,6 +57,8 @@ namespace client.messengers.punchHole
         public WheelTimerTimeout<object> Step1Timeout { get; set; }
         public WheelTimerTimeout<object> Step3Timeout { get; set; }
 
+        public bool Success { get; set; } = false;
+
         public int LocalPort { get; set; } = 0;
     }
     public class ConnectResultModel

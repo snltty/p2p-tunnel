@@ -57,6 +57,11 @@ namespace client.service.ui.api.service.clientServer.services
             ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
             clientsTransfer.Reset(model.ID);
         }
+        public void Offline(ClientServiceParamsInfo arg)
+        {
+            ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
+            clientInfoCaching.Offline(model.ID);
+        }
 
         public async Task<bool> Ping(ClientServiceParamsInfo arg)
         {

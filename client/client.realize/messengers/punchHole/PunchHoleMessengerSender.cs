@@ -141,6 +141,20 @@ namespace client.realize.messengers.punchHole
                 Data = new PunchHoleResetInfo { }
             }).ConfigureAwait(false);
         }
+        /// <summary>
+        /// 通知其掉线
+        /// </summary>
+        /// <param name="toid"></param>
+        /// <returns></returns>
+        public async Task SendOffline(ulong toid)
+        {
+            await Send(new SendPunchHoleArg<PunchHoleOfflineInfo>
+            {
+                Connection = registerState.OnlineConnection,
+                ToId = toid,
+                Data = new PunchHoleOfflineInfo { }
+            }).ConfigureAwait(false);
+        }
     }
 
     public class SendPunchHoleArg<T>

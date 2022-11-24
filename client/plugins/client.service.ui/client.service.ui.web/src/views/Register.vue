@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-23 11:29:55
+ * @LastEditTime: 2022-11-24 17:36:36
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -184,12 +184,20 @@
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                                    <el-form-item label="重连" prop="UseReConnect">
+                                        <el-tooltip class="box-item" effect="dark" content="客户端之间掉线后，是否尝试重新连接" placement="top-start">
+                                            <el-checkbox v-model="model.UseReConnect">断线重连</el-checkbox>>
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                                     <el-form-item label="中继节点" prop="UseRelay">
                                         <el-tooltip class="box-item" effect="dark" content="是否允许本客户端作为中继节点" placement="top-start">
                                             <el-checkbox v-model="model.UseRelay">中继节点</el-checkbox>>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
+
                             </el-row>
                         </el-form-item>
                     </el-collapse-item>
@@ -240,6 +248,7 @@ export default {
                 UseIpv6: false,
                 BindIp: '0.0.0.0',
                 UseOriginPort: true,
+                UseReConnect: false,
                 UdpUploadSpeedLimit: 0
             },
             rules: {
@@ -325,6 +334,8 @@ export default {
                 state.model.ClientEncode = registerState.ClientConfig.Encode = json.ClientConfig.Encode;
                 state.model.ClientEncodePassword = registerState.ClientConfig.ClientEncodePassword = json.ClientConfig.EncodePassword;
                 state.model.UsePunchHole = registerState.ClientConfig.UsePunchHole = json.ClientConfig.UsePunchHole;
+                state.model.UseReConnect = registerState.ClientConfig.UseReConnect = json.ClientConfig.UseReConnect;
+
                 state.model.TimeoutDelay = registerState.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
 
                 state.model.UseIpv6 = registerState.ClientConfig.UseIpv6 = json.ClientConfig.UseIpv6;
@@ -369,6 +380,7 @@ export default {
                         UseIpv6: state.model.UseIpv6,
                         BindIp: state.model.BindIp,
                         UseOriginPort: state.model.UseOriginPort,
+                        UseReConnect: state.model.UseReConnect,
                         UdpUploadSpeedLimit: +state.model.UdpUploadSpeedLimit
                     },
                     ServerConfig: {
