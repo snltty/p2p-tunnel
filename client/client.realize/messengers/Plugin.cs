@@ -44,6 +44,7 @@ namespace client.realize.messengers
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<Config>();
+            services.AddSingleton<PunchHoleDirectionConfig>();
             services.AddTransient(typeof(IConfigDataProvider<>), typeof(ConfigDataFileProvider<>));
 
             services.AddSingleton<IRelaySourceConnectionSelector, relay.RelaySourceConnectionSelector>();

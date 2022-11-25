@@ -34,6 +34,7 @@ namespace client.realize.messengers.clients
         private readonly HeartMessengerSender heartMessengerSender;
         private readonly RelayMessengerSender relayMessengerSender;
         private readonly IClientConnectsCaching connecRouteCaching;
+        private readonly PunchHoleDirectionConfig punchHoleDirectionConfig;
 
         private object lockObject = new();
 
@@ -41,7 +42,8 @@ namespace client.realize.messengers.clients
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
             IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
-            RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnectsCaching connecRouteCaching
+            RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnectsCaching connecRouteCaching,
+            PunchHoleDirectionConfig punchHoleDirectionConfig
         )
         {
             this.clientsMessengerSender = clientsMessengerSender;
@@ -55,6 +57,7 @@ namespace client.realize.messengers.clients
             this.relayMessengerSender = relayMessengerSender;
             this.connecRouteCaching = connecRouteCaching;
             this.punchHoleMessengerSender = punchHoleMessengerSender;
+            this.punchHoleDirectionConfig = punchHoleDirectionConfig;
 
             PunchHoleSub();
 
@@ -116,11 +119,15 @@ namespace client.realize.messengers.clients
             });
             punchHoleUdp.OnStep4Handler.Sub((e) =>
             {
-                clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
-                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                if (clientInfoCaching.Get(e.Data.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+                    clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
+                    if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                    {
+                        clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+                    }
+                    punchHoleDirectionConfig.Add(client.Name);
                 }
             });
 
@@ -164,6 +171,7 @@ namespace client.realize.messengers.clients
                         clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
                         _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
                     }
+                    punchHoleDirectionConfig.Add(client.Name);
                 }
             });
         }
@@ -438,10 +446,12 @@ namespace client.realize.messengers.clients
                         {
                             if (config.Client.UsePunchHole && client.UsePunchHole)
                             {
-                                if (registerState.LocalInfo.TcpPort == registerState.RemoteInfo.TcpPort || registerState.LocalInfo.UdpPort == registerState.RemoteInfo.UdpPort)
+                                //主动打洞成功过
+                                if (punchHoleDirectionConfig.Contains(client.Name))
                                 {
                                     ConnectClient(client);
                                 }
+                                //否则让对方主动
                                 else
                                 {
                                     ConnectReverse(client);
