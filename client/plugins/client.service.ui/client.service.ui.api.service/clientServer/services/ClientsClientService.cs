@@ -1,4 +1,5 @@
 ﻿using client.messengers.clients;
+using client.messengers.punchHole;
 using client.messengers.register;
 using client.service.ui.api.clientServer;
 using common.libs;
@@ -38,7 +39,7 @@ namespace client.service.ui.api.service.clientServer.services
                 return;
             }
             clientInfoCaching.Offline(model.ID);
-            clientsTransfer.ConnectClient(model.ID);
+            clientsTransfer.ConnectClient(client);
         }
 
         public void ConnectReverse(ClientServiceParamsInfo arg)
@@ -49,7 +50,7 @@ namespace client.service.ui.api.service.clientServer.services
                 return;
             }
             clientInfoCaching.Offline(model.ID);
-            clientsTransfer.ConnectReverse(model.ID);
+            clientsTransfer.ConnectReverse(client);
         }
 
         public void Reset(ClientServiceParamsInfo arg)

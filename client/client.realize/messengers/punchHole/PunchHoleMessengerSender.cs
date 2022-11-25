@@ -61,7 +61,7 @@ namespace client.realize.messengers.punchHole
                 {
                     Data = msg.ToBytes(),
                     PunchForwardType = msg.ForwardType,
-                    FromId = arg.Connection.ConnectId,
+                    FromId = arg.Connection?.ConnectId ?? 0,
                     PunchStep = msg.Step,
                     PunchType = (byte)msg.PunchType,
                     ToId = arg.ToId,
@@ -81,7 +81,7 @@ namespace client.realize.messengers.punchHole
                 {
                     Data = msg.ToBytes(),
                     PunchForwardType = msg.ForwardType,
-                    FromId = arg.Connection.ConnectId,
+                    FromId = arg.Connection?.ConnectId ?? 0,
                     PunchStep = msg.Step,
                     PunchType = (byte)msg.PunchType,
                     ToId = arg.ToId,

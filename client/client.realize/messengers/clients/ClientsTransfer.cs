@@ -66,6 +66,7 @@ namespace client.realize.messengers.clients
             udpServer.OnDisconnect.Sub((connection) => OnDisconnect(connection, registerState.UdpConnection));
             clientsTunnel.OnDisConnect = OnDisconnect;
             clientInfoCaching.OnOffline.Sub(OnOffline);
+            clientInfoCaching.OnOfflineAfter.Sub(OnOfflineAfter);
 
             //中继连线
             relayMessengerSender.OnRelay.Sub((param) =>
@@ -179,9 +180,14 @@ namespace client.realize.messengers.clients
         private void OnOffline(ClientInfo client)
         {
             punchHoleMessengerSender.SendOffline(client.Id).Wait();
+        }
+        private void OnOfflineAfter(ClientInfo client)
+        {
+            //Logger.Instance.Warning($"OnOffline:{client.OnlineType}、{client.OfflineType}");
             //主动连接的，未知掉线信息的，去尝试重连一下
-            if (config.Client.UseReConnect && client.OnlineType == ClientOnlineTypes.Active && client.OfflineType == ClientOfflineTypes.Unknow)
+            if (config.Client.UseReConnect && client.OnlineType == ClientOnlineTypes.Active && client.OfflineType == ClientOfflineTypes.Disconnect)
             {
+                // Logger.Instance.Warning("ConnectClient");
                 ConnectClient(client);
             }
         }
@@ -191,7 +197,8 @@ namespace client.realize.messengers.clients
             {
                 return;
             }
-            clientInfoCaching.Offline(connection.ConnectId, ClientOfflineTypes.Unknow);
+            //Logger.Instance.Warning("disconnect");
+            clientInfoCaching.Offline(connection.ConnectId, ClientOfflineTypes.Disconnect);
         }
 
         public void ConnectClient(ulong id)
@@ -281,7 +288,7 @@ namespace client.realize.messengers.clients
                 ConnectReverse(client);
             }
         }
-        private void ConnectReverse(ClientInfo info)
+        public void ConnectReverse(ClientInfo info)
         {
             punchHoleMessengerSender.SendReverse(info).ConfigureAwait(false);
         }
@@ -298,7 +305,14 @@ namespace client.realize.messengers.clients
 
         private async Task<EnumConnectResult> ConnectUdp(ClientInfo client)
         {
-            clientInfoCaching.Offline(client.Id);
+            if (client.Connected)
+            {
+                return EnumConnectResult.Success;
+            }
+            if (client.Connecting)
+            {
+                return EnumConnectResult.BreakOff;
+            }
             if ((config.Client.UseUdp & client.UseUdp) == false)
             {
                 return EnumConnectResult.Fail;
@@ -333,7 +347,14 @@ namespace client.realize.messengers.clients
         }
         private async Task<EnumConnectResult> ConnectTcp(ClientInfo client)
         {
-            clientInfoCaching.Offline(client.Id);
+            if (client.Connected)
+            {
+                return EnumConnectResult.Success;
+            }
+            if (client.Connecting)
+            {
+                return EnumConnectResult.BreakOff;
+            }
             if ((config.Client.UseTcp & client.UseTcp) == false)
             {
                 return EnumConnectResult.Fail;

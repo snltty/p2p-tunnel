@@ -51,6 +51,7 @@ namespace client.messengers.clients
         [JsonIgnore]
         public IConnection Connection { get; set; } = null;
 
+
         public void Offline(ClientOfflineTypes offlineType = ClientOfflineTypes.Manual)
         {
             Connecting = false;
@@ -67,11 +68,11 @@ namespace client.messengers.clients
             Connection = connection;
             ConnectType = connectType;
             OnlineType = onlineType;
-            SetConnecting(false);
+            Connecting = false;
         }
         public void SetConnecting(bool val)
         {
-            Connecting = val;
+           Connecting = val;
         }
     }
 
@@ -121,8 +122,12 @@ namespace client.messengers.clients
         /// </summary>
         Unknow = 0,
         /// <summary>
+        /// 掉线
+        /// </summary>
+        Disconnect = 1,
+        /// <summary>
         /// 主动的
         /// </summary>
-        Manual = 1,
+        Manual = 2,
     }
 }

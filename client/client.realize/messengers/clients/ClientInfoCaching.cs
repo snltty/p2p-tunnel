@@ -5,7 +5,6 @@ using common.server;
 using common.server.servers.rudp;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace client.realize.messengers.clients
 {
@@ -17,6 +16,7 @@ namespace client.realize.messengers.clients
         private readonly ConcurrentDictionary<ulong, UdpServer> udpservers = new ConcurrentDictionary<ulong, UdpServer>();
 
         public SimpleSubPushHandler<ClientInfo> OnOffline { get; } = new SimpleSubPushHandler<ClientInfo>();
+        public SimpleSubPushHandler<ClientInfo> OnOfflineAfter { get; } = new SimpleSubPushHandler<ClientInfo>();
         public SimpleSubPushHandler<ClientInfo> OnOnline { get; } = new SimpleSubPushHandler<ClientInfo>();
         public SimpleSubPushHandler<ClientInfo> OnAdd { get; } = new SimpleSubPushHandler<ClientInfo>();
         public SimpleSubPushHandler<ClientInfo> OnRemove { get; } = new SimpleSubPushHandler<ClientInfo>();
@@ -65,20 +65,23 @@ namespace client.realize.messengers.clients
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
+                client.SetConnecting(false);
                 if (client.ConnectType != ClientConnectTypes.Unknow)
                 {
-                    client.Offline(offlineType);
                     OnOffline.Push(client);
+                    client.Offline();
+                    OnOfflineAfter.Push(client);
                 }
             }
-            foreach (ClientInfo _client in clients.Values.Where(c => c.Connected && c.ConnectType == ClientConnectTypes.RelayNode && c.Connection.RelayId.Contains(id)))
-            {
-                if (client.ConnectType != ClientConnectTypes.Unknow)
-                {
-                    _client.Offline(offlineType);
-                    OnOffline.Push(_client);
-                }
-            }
+            //经过这个客户端中继的，可以不离线，因为本客户端可能会重连，
+            //foreach (ClientInfo _client in clients.Values.Where(c => c.Connected && c.ConnectType == ClientConnectTypes.RelayNode && c.Connection.RelayId.Contains(id)))
+            //{
+            //    if (client.ConnectType != ClientConnectTypes.Unknow)
+            //    {
+            //        _client.Offline(offlineType);
+            //        OnOffline.Push(_client);
+            //    }
+            //}
         }
 
         public void Remove(ulong id)
@@ -141,8 +144,9 @@ namespace client.realize.messengers.clients
             var _clients = clients.Values;
             foreach (var item in _clients)
             {
-                item.Offline(ClientOfflineTypes.Manual);
                 OnOffline.Push(item);
+                item.Offline(ClientOfflineTypes.Manual);
+                OnOfflineAfter.Push(item);
                 clients.TryRemove(item.Id, out _);
                 OnRemove.Push(item);
             }

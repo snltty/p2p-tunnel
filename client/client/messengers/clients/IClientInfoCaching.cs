@@ -11,6 +11,7 @@ namespace client.messengers.clients
     public interface IClientInfoCaching
     {
         public SimpleSubPushHandler<ClientInfo> OnOffline { get; }
+        public SimpleSubPushHandler<ClientInfo> OnOfflineAfter { get; }
         public SimpleSubPushHandler<ClientInfo> OnOnline { get; }
         public SimpleSubPushHandler<ClientInfo> OnAdd { get; }
         public SimpleSubPushHandler<ClientInfo> OnRemove { get; }

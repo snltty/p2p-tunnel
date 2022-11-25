@@ -23,7 +23,14 @@
 		<Optimize>True</Optimize>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <None Remove="punchhole-direction.json" />
+	</ItemGroup>
+
   <ItemGroup>
+    <Content Include="punchhole-direction.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

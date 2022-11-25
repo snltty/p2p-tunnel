@@ -8,6 +8,7 @@ namespace client.messengers.clients
     {
         public void ConnectClient(ulong id);
         public void ConnectClient(ClientInfo info);
+        public void ConnectReverse(ClientInfo info);
         public void ConnectReverse(ulong id);
         public void Reset(ulong id);
         public void ConnectStop(ulong id);
