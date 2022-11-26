@@ -1,5 +1,6 @@
 ﻿using client.messengers.punchHole;
 using client.messengers.punchHole.udp;
+using common.libs;
 using common.server.model;
 
 namespace client.realize.messengers.punchHole.udp
@@ -19,6 +20,9 @@ namespace client.realize.messengers.punchHole.udp
             //if (arg.Connection.ServerType != ServerType.UDP) return;
 
             PunchHoleUdpSteps step = (PunchHoleUdpSteps)arg.Data.PunchStep;
+
+            Logger.Instance.DebugDebug($"udp {step}");
+
             switch (step)
             {
                 case PunchHoleUdpSteps.STEP_1:
@@ -83,7 +87,6 @@ namespace client.realize.messengers.punchHole.udp
             {
                 Connection = arg.Connection,
                 RawData = arg.Data,
-                //Data = arg.Data.Data.DeBytes<Step2FailModel>()
             });
         }
 

@@ -13,7 +13,7 @@ namespace client.messengers.punchHole
     }
     public class OnPunchHoleArg
     {
-        public PunchHoleParamsInfo Data { get; set; }
+        public PunchHoleRequestInfo Data { get; set; }
         public IConnection Connection { get; set; }
     }
 
@@ -28,7 +28,7 @@ namespace client.messengers.punchHole
     public class OnStepBaseParams
     {
         public IConnection Connection { get; set; }
-        public PunchHoleParamsInfo RawData { get; set; }
+        public PunchHoleRequestInfo RawData { get; set; }
         public PunchHoleNotifyInfo Data { get; set; }
     }
     public class OnStep1Params : OnStepBaseParams { }

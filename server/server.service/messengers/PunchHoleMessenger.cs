@@ -17,11 +17,43 @@ namespace server.service.messengers
             this.clientRegisterCache = clientRegisterCache;
             this.messengerSender = messengerSender;
         }
-
-        [MessengerId((ushort)PunchHoleMessengerIds.Execute)]
-        public async Task<byte[]> Execute(IConnection connection)
+        [MessengerId((ushort)PunchHoleMessengerIds.Response)]
+        public async Task Response(IConnection connection)
         {
-            PunchHoleParamsInfo model = new PunchHoleParamsInfo();
+            PunchHoleResponseInfo model = new PunchHoleResponseInfo();
+            model.DeBytes(connection.ReceiveRequestWrap.Payload);
+            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+            {
+                //B已注册
+                if (clientRegisterCache.Get(model.ToId, out RegisterCacheInfo target))
+                {
+                    //是否在同一个组
+                    if (source.GroupId == target.GroupId)
+                    {
+                       
+                        model.FromId = connection.ConnectId;
+                        IConnection online = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
+                        if (online == null || online.Connected == false)
+                        {
+                            online = target.OnLineConnection;
+                        }
+
+                        await messengerSender.SendOnly(new MessageRequestWrap
+                        {
+                            Connection = online,
+                            Payload = model.ToBytes(),
+                            MessengerId = connection.ReceiveRequestWrap.MessengerId,
+                            RequestId = connection.ReceiveRequestWrap.RequestId,
+                        }).ConfigureAwait(false);
+                    }
+                }
+            }
+        }
+
+        [MessengerId((ushort)PunchHoleMessengerIds.Request)]
+        public async Task Request(IConnection connection)
+        {
+            PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
             //A已注册
@@ -37,7 +69,7 @@ namespace server.service.messengers
                         {
                             if (source.GetTunnel(model.TunnelName, out TunnelRegisterCacheInfo tunnel) == false)
                             {
-                                return Helper.FalseArray;
+                                return;
                             }
                             model.Data = new PunchHoleNotifyInfo
                             {
@@ -57,18 +89,16 @@ namespace server.service.messengers
                             online = target.OnLineConnection;
                         }
 
-                        var res = await messengerSender.SendOnly(new MessageRequestWrap
+                        await messengerSender.SendOnly(new MessageRequestWrap
                         {
                             Connection = online,
                             Payload = model.ToBytes(),
                             MessengerId = connection.ReceiveRequestWrap.MessengerId,
                             RequestId = connection.ReceiveRequestWrap.RequestId,
                         }).ConfigureAwait(false);
-                        return res ? Helper.TrueArray : Helper.FalseArray;
                     }
                 }
             }
-            return Helper.FalseArray;
         }
     }
 }

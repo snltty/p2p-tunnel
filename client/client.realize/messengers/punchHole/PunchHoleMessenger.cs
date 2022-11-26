@@ -1,8 +1,7 @@
 ﻿using client.messengers.punchHole;
-using common.libs.extends;
 using common.server;
 using common.server.model;
-using System;
+using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole
 {
@@ -16,12 +15,23 @@ namespace client.realize.messengers.punchHole
             this.punchHoleMessengerSender = punchHoleMessengerSender;
         }
 
-        [MessengerId((ushort)PunchHoleMessengerIds.Execute)]
-        public void Execute(IConnection connection)
+        [MessengerId((ushort)PunchHoleMessengerIds.Response)]
+        public void Response(IConnection connection)
         {
-            PunchHoleParamsInfo model = new PunchHoleParamsInfo();
+            PunchHoleResponseInfo model = new PunchHoleResponseInfo();
 
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
+
+            punchHoleMessengerSender.OnResponse(model);
+        }
+
+        [MessengerId((ushort)PunchHoleMessengerIds.Request)]
+        public async Task Request(IConnection connection)
+        {
+            PunchHoleRequestInfo model = new PunchHoleRequestInfo();
+            model.DeBytes(connection.ReceiveRequestWrap.Payload);
+
+            await punchHoleMessengerSender.Response(connection, model);
 
             punchHoleMessengerSender.OnPunchHole(new OnPunchHoleArg
             {

@@ -113,18 +113,13 @@ namespace client.messengers.punchHole
         public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
         public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.FORWARD;
         public byte Step { get; set; } = 0;
-        public ulong FromId { get; set; } = 0;
 
         public byte[] ToBytes()
         {
-            var bytes = new byte[3 + 8];
+            var bytes = new byte[3];
             bytes[0] = (byte)PunchType;
             bytes[1] = (byte)ForwardType;
             bytes[2] = Step;
-
-            var fromidBytes = FromId.ToBytes();
-            Array.Copy(fromidBytes, 0, bytes, 3, fromidBytes.Length);
-
             return bytes;
         }
         public void DeBytes(ReadOnlyMemory<byte> data)
@@ -133,8 +128,6 @@ namespace client.messengers.punchHole
             PunchType = (PunchHoleTypes)span[0];
             ForwardType = (PunchForwardTypes)span[1];
             Step = span[2];
-
-            FromId = span.Slice(3, 8).ToUInt64();
         }
 
     }
@@ -145,7 +138,6 @@ namespace client.messengers.punchHole
         public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.FORWARD;
 
         public byte Step { get; set; } = 0;
-        public ulong FromId { get; set; } = 0;
 
         public byte[] ToBytes()
         {
@@ -153,9 +145,6 @@ namespace client.messengers.punchHole
             bytes[0] = (byte)PunchType;
             bytes[1] = (byte)ForwardType;
             bytes[2] = Step;
-
-            var fromidBytes = FromId.ToBytes();
-            Array.Copy(fromidBytes, 0, bytes, 3, fromidBytes.Length);
 
             return bytes;
         }
@@ -165,8 +154,6 @@ namespace client.messengers.punchHole
             PunchType = (PunchHoleTypes)span[0];
             ForwardType = (PunchForwardTypes)span[1];
             Step = span[2];
-
-            FromId = span.Slice(3, 8).ToUInt64();
         }
 
     }

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using client.messengers.clients;
+using System.Collections.Concurrent;
 
 namespace client.realize.messengers.punchHole
 {
@@ -19,6 +20,10 @@ namespace client.realize.messengers.punchHole
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerState;
         private readonly ServiceProvider serviceProvider;
+
+        private NumberSpace numberSpace = new NumberSpace();
+        private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
+        private ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>>();
 
         public PunchHoleMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerState, ServiceProvider serviceProvider)
         {
@@ -38,7 +43,6 @@ namespace client.realize.messengers.punchHole
                 }
             }
         }
-
         public void OnPunchHole(OnPunchHoleArg arg)
         {
             PunchHoleTypes type = (PunchHoleTypes)arg.Data.PunchType;
@@ -49,39 +53,41 @@ namespace client.realize.messengers.punchHole
                 plugin?.Execute(arg);
             }
         }
-
-        public async Task Send<T>(SendPunchHoleArg<T> arg) where T : IPunchHoleStepInfo
+        public void OnResponse(PunchHoleResponseInfo response)
         {
-            IPunchHoleStepInfo msg = arg.Data;
+            if (sends.TryRemove(response.RequestId, out WheelTimerTimeout<TimeoutState> timeout))
+            {
+                timeout.Task.State.Tcs.SetResult(true);
+            }
+        }
+
+        public async Task Response(IConnection connection, PunchHoleRequestInfo request)
+        {
             await messengerSender.SendOnly(new MessageRequestWrap
             {
-                Connection = arg.Connection,
-                MessengerId = (ushort)PunchHoleMessengerIds.Execute,
-                Payload = new PunchHoleParamsInfo
+                Connection = connection,
+                MessengerId = (ushort)PunchHoleMessengerIds.Response,
+                Payload = new PunchHoleResponseInfo
                 {
-                    Data = msg.ToBytes(),
-                    PunchForwardType = msg.ForwardType,
-                    FromId = arg.Connection?.ConnectId ?? 0,
-                    PunchStep = msg.Step,
-                    PunchType = (byte)msg.PunchType,
-                    ToId = arg.ToId,
-                    TunnelName = arg.TunnelName,
-                    Index = arg.Index,
+                    FromId = registerState.ConnectId,
+                    ToId = request.FromId,
+                    RequestId = request.RequestId
                 }.ToBytes()
             }).ConfigureAwait(false);
         }
-        public async Task<MessageResponeInfo> SendReply<T>(SendPunchHoleArg<T> arg) where T : IPunchHoleStepInfo
+        public async Task<bool> Request<T>(SendPunchHoleArg<T> arg, ulong requestid = 0) where T : IPunchHoleStepInfo
         {
             IPunchHoleStepInfo msg = arg.Data;
-            return await messengerSender.SendReply(new MessageRequestWrap
+            return await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = arg.Connection,
-                MessengerId = (ushort)PunchHoleMessengerIds.Execute,
-                Payload = new PunchHoleParamsInfo
+                MessengerId = (ushort)PunchHoleMessengerIds.Request,
+                Payload = new PunchHoleRequestInfo
                 {
+                    RequestId = requestid,
                     Data = msg.ToBytes(),
                     PunchForwardType = msg.ForwardType,
-                    FromId = arg.Connection?.ConnectId ?? 0,
+                    FromId = registerState.ConnectId,
                     PunchStep = msg.Step,
                     PunchType = (byte)msg.PunchType,
                     ToId = arg.ToId,
@@ -90,6 +96,33 @@ namespace client.realize.messengers.punchHole
                 }.ToBytes()
             }).ConfigureAwait(false);
         }
+        public async Task<bool> RequestReply<T>(SendPunchHoleArg<T> arg) where T : IPunchHoleStepInfo
+        {
+            ulong requestid = numberSpace.Increment();
+            TimeoutState timeoutState = new TimeoutState
+            {
+                RequestId = requestid,
+                Tcs = new TaskCompletionSource<bool>()
+            };
+            var timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<TimeoutState> { Callback = Callback, State = timeoutState }, 2000);
+            sends.TryAdd(requestid, timeout);
+
+            bool res = await Request(arg, requestid);
+            if (res == false)
+            {
+                timeoutState.Tcs.SetResult(false);
+            }
+
+            return await timeoutState.Tcs.Task.ConfigureAwait(false);
+        }
+        private void Callback(WheelTimerTimeout<TimeoutState> timeout)
+        {
+            if (sends.TryRemove(timeout.Task.State.RequestId, out _))
+            {
+                timeout.Task.State.Tcs.SetResult(false);
+            }
+        }
+
 
         public SimpleSubPushHandler<OnPunchHoleArg> OnReverse { get; } = new SimpleSubPushHandler<OnPunchHoleArg>();
         /// <summary>
@@ -101,7 +134,7 @@ namespace client.realize.messengers.punchHole
         public async Task SendReverse(ClientInfo info)
         {
             byte times = info.TryReverseValue;
-            await Send(new SendPunchHoleArg<PunchHoleReverseInfo>
+            await Request(new SendPunchHoleArg<PunchHoleReverseInfo>
             {
                 Connection = registerState.OnlineConnection,
                 ToId = info.Id,
@@ -119,7 +152,7 @@ namespace client.realize.messengers.punchHole
         /// <returns></returns>
         public async Task SendTunnel(ulong toid, ulong tunnelName, ServerType serverType)
         {
-            await SendReply(new SendPunchHoleArg<PunchHoleTunnelInfo>
+            await RequestReply(new SendPunchHoleArg<PunchHoleTunnelInfo>
             {
                 Connection = registerState.OnlineConnection,
                 ToId = toid,
@@ -134,7 +167,7 @@ namespace client.realize.messengers.punchHole
         /// <returns></returns>
         public async Task SendReset(ulong toid)
         {
-            await Send(new SendPunchHoleArg<PunchHoleResetInfo>
+            await Request(new SendPunchHoleArg<PunchHoleResetInfo>
             {
                 Connection = registerState.OnlineConnection,
                 ToId = toid,
@@ -148,7 +181,7 @@ namespace client.realize.messengers.punchHole
         /// <returns></returns>
         public async Task SendOffline(ulong toid)
         {
-            await Send(new SendPunchHoleArg<PunchHoleOfflineInfo>
+            await RequestReply(new SendPunchHoleArg<PunchHoleOfflineInfo>
             {
                 Connection = registerState.OnlineConnection,
                 ToId = toid,
@@ -168,5 +201,10 @@ namespace client.realize.messengers.punchHole
         public T Data { get; set; }
     }
 
+    public class TimeoutState
+    {
+        public ulong RequestId { get; set; }
+        public TaskCompletionSource<bool> Tcs { get; set; }
+    }
 
 }

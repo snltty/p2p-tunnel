@@ -9,9 +9,9 @@ namespace common.server.model
     /// <summary>
     /// 打洞数据交换
     /// </summary>
-    public class PunchHoleParamsInfo
+    public class PunchHoleRequestInfo
     {
-        public PunchHoleParamsInfo() { }
+        public PunchHoleRequestInfo() { }
         /// <summary>
         /// 数据交换分两种，一种是a让服务器把a的公网数据发给b，另一种是，a把一些数据通过服务器原样交给b
         /// </summary>
@@ -38,6 +38,7 @@ namespace common.server.model
         /// </summary>
         public ulong TunnelName { get; set; } = 0;
 
+        public ulong RequestId { get; set; } = 0;
 
         /// <summary>
         /// 携带的数
@@ -49,11 +50,13 @@ namespace common.server.model
             var fromidBytes = FromId.ToBytes();
             var toidBytes = ToId.ToBytes();
             var nameBytes = TunnelName.ToBytes();
+            var requestidBytes = RequestId.ToBytes();
 
             var bytes = new byte[
                 1 + 1 + 1 + 1
                 + 8 + 8
                 + nameBytes.Length + Data.Length
+                + 8
                 ];
             int index = 0;
 
@@ -67,12 +70,15 @@ namespace common.server.model
             index += 1;
 
             Array.Copy(fromidBytes, 0, bytes, index, fromidBytes.Length);
-            index += 8;
+            index += toidBytes.Length;
             Array.Copy(toidBytes, 0, bytes, index, toidBytes.Length);
-            index += 8;
+            index += toidBytes.Length;
 
             Array.Copy(nameBytes, 0, bytes, index, nameBytes.Length);
             index += nameBytes.Length;
+
+            Array.Copy(requestidBytes, 0, bytes, index, requestidBytes.Length);
+            index += requestidBytes.Length;
 
             Data.CopyTo(bytes.AsMemory(index));
 
@@ -102,8 +108,57 @@ namespace common.server.model
             TunnelName = span.Slice(index, 8).ToUInt64();
             index += 8;
 
+            RequestId = span.Slice(index, 8).ToUInt64();
+            index += 8;
+
             Data = data.Slice(index);
 
+        }
+    }
+
+    public class PunchHoleResponseInfo
+    {
+        public ulong RequestId { get; set; } = 0;
+        /// <summary>
+        /// 来自谁
+        /// </summary>
+        public ulong FromId { get; set; } = 0;
+        /// <summary>
+        /// 给谁
+        /// </summary>
+        public ulong ToId { get; set; } = 0;
+
+        public byte[] ToBytes()
+        {
+            var requestidBytes = RequestId.ToBytes();
+            var fromidBytes = FromId.ToBytes();
+            var toidBytes = ToId.ToBytes();
+
+            var bytes = new byte[24];
+            int index = 0;
+
+            Array.Copy(requestidBytes, 0, bytes, index, requestidBytes.Length);
+            index += 8;
+            Array.Copy(fromidBytes, 0, bytes, index, fromidBytes.Length);
+            index += 8;
+            Array.Copy(toidBytes, 0, bytes, index, toidBytes.Length);
+            index += 8;
+            return bytes;
+        }
+
+        public void DeBytes(ReadOnlyMemory<byte> data)
+        {
+            var span = data.Span;
+            int index = 0;
+
+            RequestId = span.Slice(index, 8).ToUInt64();
+            index += 8;
+
+            FromId = span.Slice(index, 8).ToUInt64();
+            index += 8;
+
+            ToId = span.Slice(index, 8).ToUInt64();
+            index += 8;
         }
     }
 
@@ -217,7 +272,8 @@ namespace common.server.model
     public enum PunchHoleMessengerIds : ushort
     {
         Min = 401,
-        Execute = 401,
+        Request = 401,
+        Response = 402,
         Max = 500,
     }
 }

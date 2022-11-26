@@ -65,7 +65,7 @@ namespace client.realize.messengers.clients
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
-                client.SetConnecting(false);
+                //client.SetConnecting(false);
                 if (client.ConnectType != ClientConnectTypes.Unknow)
                 {
                     OnOffline.Push(client);
@@ -73,15 +73,6 @@ namespace client.realize.messengers.clients
                     OnOfflineAfter.Push(client);
                 }
             }
-            //经过这个客户端中继的，可以不离线，因为本客户端可能会重连，
-            //foreach (ClientInfo _client in clients.Values.Where(c => c.Connected && c.ConnectType == ClientConnectTypes.RelayNode && c.Connection.RelayId.Contains(id)))
-            //{
-            //    if (client.ConnectType != ClientConnectTypes.Unknow)
-            //    {
-            //        _client.Offline(offlineType);
-            //        OnOffline.Push(_client);
-            //    }
-            //}
         }
 
         public void Remove(ulong id)

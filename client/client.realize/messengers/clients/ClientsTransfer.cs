@@ -99,7 +99,7 @@ namespace client.realize.messengers.clients
             {
                 if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.SetConnecting(e.RawData.FromId, false);
+                    client.SetConnecting(false);
                     if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                     {
                         clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -111,7 +111,7 @@ namespace client.realize.messengers.clients
             });
             punchHoleUdp.OnStep3Handler.Sub((e) =>
             {
-                clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive);
+                clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive);
                 if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -120,9 +120,9 @@ namespace client.realize.messengers.clients
             });
             punchHoleUdp.OnStep4Handler.Sub((e) =>
             {
-                if (clientInfoCaching.Get(e.Data.FromId, out ClientInfo client))
+                if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
+                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
                     if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                     {
                         clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -141,18 +141,21 @@ namespace client.realize.messengers.clients
             });
             punchHoleTcp.OnStep2FailHandler.Sub((e) =>
             {
-                clientInfoCaching.SetConnecting(e.RawData.FromId, false);
-                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+                    client.SetConnecting(false);
+                    if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                    {
+                        clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
+                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+                    }
                 }
             });
             punchHoleTcp.OnStep3Handler.Sub((e) =>
             {
-                if (clientInfoCaching.Get(e.Data.FromId, out ClientInfo client))
+                if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive);
+                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive);
                     if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                     {
                         clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -164,9 +167,9 @@ namespace client.realize.messengers.clients
             });
             punchHoleTcp.OnStep4Handler.Sub((e) =>
             {
-                if (clientInfoCaching.Get(e.Data.FromId, out ClientInfo client))
+                if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.Online(e.Data.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
+                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
                     if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                     {
                         clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -179,15 +182,17 @@ namespace client.realize.messengers.clients
 
         private void OnOffline(ClientInfo client)
         {
+            registerState.LocalInfo.IsConnecting = true;
+            client.SetConnecting(true);
             punchHoleMessengerSender.SendOffline(client.Id).Wait();
+            client.SetConnecting(false);
+            registerState.LocalInfo.IsConnecting = false;
         }
         private void OnOfflineAfter(ClientInfo client)
         {
-            //Logger.Instance.Warning($"OnOffline:{client.OnlineType}、{client.OfflineType}");
             //主动连接的，未知掉线信息的，去尝试重连一下
             if (config.Client.UseReConnect && client.OnlineType == ClientOnlineTypes.Active && client.OfflineType == ClientOfflineTypes.Disconnect)
             {
-                // Logger.Instance.Warning("ConnectClient");
                 ConnectClient(client);
             }
         }
@@ -197,7 +202,6 @@ namespace client.realize.messengers.clients
             {
                 return;
             }
-            //Logger.Instance.Warning("disconnect");
             clientInfoCaching.Offline(connection.ConnectId, ClientOfflineTypes.Disconnect);
         }
 
@@ -219,6 +223,7 @@ namespace client.realize.messengers.clients
             {
                 return;
             }
+
             Task.Run(async () =>
             {
                 /* 两边先试TCP，没成功，再两边都试试UDP
@@ -250,7 +255,6 @@ namespace client.realize.messengers.clients
                     result = await ConnectUdp(client).ConfigureAwait(false);
                 }
 
-
                 //没成功
                 if (result == EnumConnectResult.Fail)
                 {
@@ -264,6 +268,10 @@ namespace client.realize.messengers.clients
                     {
                         _ = Relay(client, true);
                     }
+                }
+                else if (result == EnumConnectResult.BreakOff)
+                {
+                    Logger.Instance.Error($"打洞被跳过，最大的可能是，【{client.Name}】的打洞失败消息比本消息“反向连接”来的晚，可以重新手动尝试");
                 }
                 client.TryReverseValue = ClientInfo.TryReverseDefault;
             });
@@ -318,7 +326,7 @@ namespace client.realize.messengers.clients
                 return EnumConnectResult.Fail;
             }
 
-            clientInfoCaching.SetConnecting(client.Id, true);
+            client.SetConnecting(true);
 
             ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.UDP, (ulong)TunnelDefaults.MIN };
             if (config.Client.UseOriginPort == false)
@@ -342,6 +350,7 @@ namespace client.realize.messengers.clients
                 Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
             }
 
+            client.SetConnecting(false);
             clientInfoCaching.Offline(client.Id);
             return EnumConnectResult.Fail;
         }
@@ -360,7 +369,7 @@ namespace client.realize.messengers.clients
                 return EnumConnectResult.Fail;
             }
 
-            clientInfoCaching.SetConnecting(client.Id, true);
+            client.SetConnecting(true);
 
             ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.TCP, (ulong)TunnelDefaults.MIN };
             if (config.Client.UseOriginPort == false)
@@ -383,6 +392,7 @@ namespace client.realize.messengers.clients
                 Logger.Instance.Error((result.Result as ConnectFailModel).Msg);
             }
 
+            client.SetConnecting(false);
             clientInfoCaching.Offline(client.Id);
             return EnumConnectResult.Fail;
         }
