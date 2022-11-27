@@ -22,6 +22,7 @@ namespace server.service.messengers
         {
             PunchHoleResponseInfo model = new PunchHoleResponseInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
+
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
                 //B已注册
