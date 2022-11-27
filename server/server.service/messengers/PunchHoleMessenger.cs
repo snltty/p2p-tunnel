@@ -55,6 +55,7 @@ namespace server.service.messengers
         {
             PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
+            if (model.Data.Length > 50) return;
 
             //A已注册
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))

@@ -104,8 +104,6 @@ namespace common.server
                     {
                         if (relayValidator.Validate(connection))
                         {
-                            //需要等待回复则 有index， 不等待回复则没有，那么。同意这么计算偏移量，requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize
-                            //只需要 没有index时，默认为0即可
                             ulong nextId = requestWrap.RelayIds.Span.Slice(requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize).ToUInt64();
 
                             //目的地连接对象
@@ -134,10 +132,9 @@ namespace common.server
 
 
                 //404,没这个插件
-                if (!messengers.ContainsKey(requestWrap.MessengerId))
+                if (messengers.ContainsKey(requestWrap.MessengerId) == false)
                 {
-
-                    Logger.Instance.Error($"{requestWrap.MessengerId},{receive.Length},{connection.ServerType}, not found");
+                    Logger.Instance.DebugError($"{requestWrap.MessengerId},{connection.ServerType}, not found");
                     if (requestWrap.Reply)
                     {
                         await messengerSender.ReplyOnly(new MessageResponseWrap

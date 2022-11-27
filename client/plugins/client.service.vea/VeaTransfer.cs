@@ -91,6 +91,8 @@ namespace client.service.vea
                 cache = new IPAddressCacheInfo { Client = client, IP = _ips.IP, LanIPs = _ips.LanIPs };
                 ips.AddOrUpdate(_ips.IP, cache, (a, b) => cache);
                 AddLanMasks(_ips.LanIPs, cache);
+
+                AddRoute();
             }
         }
         public void UpdateIp()
@@ -233,6 +235,29 @@ namespace client.service.vea
                 }
             }
         }
+        private int GetWindowsInterfaceNum()
+        {
+            string output = Command.Execute("cmd.exe", string.Empty, new string[] { "route print" });
+            foreach (var item in output.Split(Environment.NewLine))
+            {
+                if (item.Contains("WireGuard Tunnel"))
+                {
+                    return int.Parse(item.Substring(0, item.IndexOf('.')).Trim());
+                }
+            }
+            return 0;
+        }
+        private bool GetWindowsHasInterface(string name)
+        {
+            string output = Command.Execute("cmd.exe", string.Empty, new string[] { $"ipconfig | findstr \"{name}\"" });
+            return string.IsNullOrWhiteSpace(output) == false;
+        }
+        private bool GetWindowsHasIp(IPAddress ip)
+        {
+            string output = Command.Execute("cmd.exe", string.Empty, new string[] { $"ipconfig | findstr \"{ip}\"" });
+            return string.IsNullOrWhiteSpace(output) == false;
+        }
+
         private void RunLinux()
         {
             Command.Execute("/bin/bash", string.Empty, new string[] {
@@ -242,7 +267,29 @@ namespace client.service.vea
             });
             interfaceLinux = GetLinuxInterfaceNum();
             Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceLinux} -loglevel silent");
+
+            AddRoute();
         }
+        private string GetLinuxInterfaceNum()
+        {
+            string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ip route" });
+            foreach (var item in output.Split(Environment.NewLine))
+            {
+                if (item.StartsWith("default via"))
+                {
+                    var strs = item.Split(' ');
+                    for (int i = 0; i < strs.Length; i++)
+                    {
+                        if (strs[i] == "dev")
+                        {
+                            return strs[i + 1];
+                        }
+                    }
+                }
+            }
+            return string.Empty;
+        }
+
         private void RunOsx()
         {
             interfaceOsx = GetOsxInterfaceNum();
@@ -266,48 +313,8 @@ namespace client.service.vea
             var ip = config.IP.GetAddressBytes();
             ip[^1] = 0;
             Command.Execute("/bin/bash", string.Empty, new string[] { $"route add -net {new IPAddress(ip)}/24 {config.IP}" });
-        }
 
-        private int GetWindowsInterfaceNum()
-        {
-            string output = Command.Execute("cmd.exe", string.Empty, new string[] { "route print" });
-            foreach (var item in output.Split(Environment.NewLine))
-            {
-                if (item.Contains("WireGuard Tunnel"))
-                {
-                    return int.Parse(item.Substring(0, item.IndexOf('.')).Trim());
-                }
-            }
-            return 0;
-        }
-        private bool GetWindowsHasInterface(string name)
-        {
-            string output = Command.Execute("cmd.exe", string.Empty, new string[] { $"ipconfig | findstr \"{name}\"" });
-            return string.IsNullOrWhiteSpace(output) == false;
-        }
-        private bool GetWindowsHasIp(IPAddress ip)
-        {
-            string output = Command.Execute("cmd.exe", string.Empty, new string[] { $"ipconfig | findstr \"{ip}\"" });
-            return string.IsNullOrWhiteSpace(output) == false;
-        }
-        private string GetLinuxInterfaceNum()
-        {
-            string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ip route" });
-            foreach (var item in output.Split(Environment.NewLine))
-            {
-                if (item.StartsWith("default via"))
-                {
-                    var strs = item.Split(' ');
-                    for (int i = 0; i < strs.Length; i++)
-                    {
-                        if (strs[i] == "dev")
-                        {
-                            return strs[i + 1];
-                        }
-                    }
-                }
-            }
-            return string.Empty;
+            AddRoute();
         }
         private string GetOsxInterfaceNum()
         {

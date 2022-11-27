@@ -49,6 +49,7 @@ namespace client.service
                 typeof(VeaSocks5Messenger).Assembly,
                 typeof(WakeUpMessenger).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
+            //Assembly.LoadFile();
 
             ServiceCollection serviceCollection = new ServiceCollection();
             ServiceProvider serviceProvider = null;
