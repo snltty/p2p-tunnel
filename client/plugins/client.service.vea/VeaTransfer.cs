@@ -257,7 +257,6 @@ namespace client.service.vea
             string output = Command.Execute("cmd.exe", string.Empty, new string[] { $"ipconfig | findstr \"{ip}\"" });
             return string.IsNullOrWhiteSpace(output) == false;
         }
-
         private void RunLinux()
         {
             Command.Execute("/bin/bash", string.Empty, new string[] {
@@ -289,7 +288,6 @@ namespace client.service.vea
             }
             return string.Empty;
         }
-
         private void RunOsx()
         {
             interfaceOsx = GetOsxInterfaceNum();
@@ -384,7 +382,8 @@ namespace client.service.vea
         }
         private void AddRouteLinux(IPAddress[] ip)
         {
-            string[] commands = ip.Select(c => {
+            string[] commands = ip.Select(c =>
+            {
                 int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
                 return $"ip route add {c}/{mask} via {config.IP} dev {veaName} metric 1 ";
             }).ToArray();
@@ -392,16 +391,57 @@ namespace client.service.vea
         }
         private void AddRouteOsx(IPAddress[] ip)
         {
-            List<string> commands = new List<string>(ip.Length);
-            foreach (var item in ip)
+            string[] commands = ip.Select(c =>
             {
-                if (item.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                {
-                    int mask = item.GetAddressBytes().Count(c => c > 0)*8;
-                    commands.Add($"route add -net {item}/{mask} {config.IP}");
-                }
+                int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
+                return $"route add -net {c}/{mask} {config.IP}";
+            }).ToArray();
+            if (commands.Length > 0)
+            {
+                Command.Execute("/bin/bash", string.Empty, commands.ToArray());
             }
-            if (commands.Count > 0)
+        }
+
+        private void DelRoute(IPAddress[] ip)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                DelRouteWindows(ip);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                DelRouteLinux(ip);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                DelRouteOsx(ip);
+            }
+        }
+        private void DelRouteWindows(IPAddress[] ip)
+        {
+            if (interfaceNumber > 0)
+            {
+                string[] commands = ip.Select(c => $"route delete {c}").ToArray();
+                Command.Execute("cmd.exe", string.Empty, commands.ToArray());
+            }
+        }
+        private void DelRouteLinux(IPAddress[] ip)
+        {
+            string[] commands = ip.Select(c =>
+            {
+                int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
+                return $"ip route del {c}/{mask}";
+            }).ToArray();
+            Command.Execute("/bin/bash", string.Empty, commands);
+        }
+        private void DelRouteOsx(IPAddress[] ip)
+        {
+            string[] commands = ip.Select(c =>
+            {
+                int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
+                return $"route delete -net {c}/{mask}";
+            }).ToArray();
+            if (commands.Length > 0)
             {
                 Command.Execute("/bin/bash", string.Empty, commands.ToArray());
             }
@@ -422,6 +462,7 @@ namespace client.service.vea
             {
                 lanips.TryRemove(GetIpMask(item), out _);
             }
+            DelRoute(_lanips);
         }
         private void AddLanMasks(IPAddress[] _lanips, IPAddressCacheInfo cache)
         {

@@ -18,10 +18,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         public void Execute(OnPunchHoleArg arg)
         {
-            //if (arg.Connection.ServerType != ServerType.TCP) return;
-
-           
-
             PunchHoleTcpNutssBSteps step = (PunchHoleTcpNutssBSteps)arg.Data.PunchStep;
 
             Logger.Instance.DebugDebug($"tcp {step}");
