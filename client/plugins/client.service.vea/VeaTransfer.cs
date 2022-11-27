@@ -384,7 +384,10 @@ namespace client.service.vea
         }
         private void AddRouteLinux(IPAddress[] ip)
         {
-            string[] commands = ip.Select(c => $"ip route add {c} via {config.IP} dev {veaName} metric 1 ").ToArray();
+            string[] commands = ip.Select(c => {
+                int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
+                return $"ip route add {c}/{mask} via {config.IP} dev {veaName} metric 1 ";
+            }).ToArray();
             Command.Execute("/bin/bash", string.Empty, commands);
         }
         private void AddRouteOsx(IPAddress[] ip)
@@ -394,8 +397,8 @@ namespace client.service.vea
             {
                 if (item.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                 {
-                    int num = item.GetAddressBytes().Count(c => c > 0);
-                    commands.Add($"route add -net {item}/{num * 8} {config.IP}");
+                    int mask = item.GetAddressBytes().Count(c => c > 0)*8;
+                    commands.Add($"route add -net {item}/{mask} {config.IP}");
                 }
             }
             if (commands.Count > 0)
