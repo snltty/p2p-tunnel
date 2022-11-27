@@ -47,11 +47,6 @@ namespace common.libs
         {
             Debug(content, args);
         }
-        [Conditional("DEBUG")]
-        public void Debug(Exception ex)
-        {
-            Enqueue(new LoggerModel { Type = LoggerTypes.DEBUG, Content = ex + "" });
-        }
 
         public void Info(string content, params object[] args)
         {
@@ -79,10 +74,6 @@ namespace common.libs
             }
             Enqueue(new LoggerModel { Type = LoggerTypes.WARNING, Content = content });
         }
-        public void Warning(Exception ex)
-        {
-            Enqueue(new LoggerModel { Type = LoggerTypes.WARNING, Content = ex + "" });
-        }
 
         public void Error(string content, params object[] args)
         {
@@ -96,7 +87,6 @@ namespace common.libs
         {
             Enqueue(new LoggerModel { Type = LoggerTypes.ERROR, Content = ex + "" });
         }
-
         [Conditional("DEBUG")]
         public void DebugError(string content, params object[] args)
         {
