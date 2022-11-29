@@ -14,7 +14,7 @@ namespace common.udpforward
     {
         public UdpForwardInfo() { }
 
-        
+
         public ushort SourcePort { get; set; } = 0;
 
         /// <summary>
@@ -93,12 +93,14 @@ namespace common.udpforward
     [Flags, MessengerIdEnum]
     public enum UdpForwardMessengerIds : ushort
     {
-        Min = 701,
+        Min = 700,
         Request = 702,
         Response = 703,
         Ports = 704,
         SignIn = 705,
         SignOut = 706,
-        Max = 800,
+        GetSetting = 707,
+        Setting = 708,
+        Max = 799,
     }
 }

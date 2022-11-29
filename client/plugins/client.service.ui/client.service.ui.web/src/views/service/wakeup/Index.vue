@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-10-23 01:10:49
+ * @LastEditTime: 2022-11-29 15:42:41
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\wakeup\Index.vue
@@ -13,7 +13,7 @@
             <h3 class="title t-c">
                 <span>{{$route.meta.name}}</span>
                 <ConfigureModal className="WakeUpClientConfigure">
-                    <el-button size="small">配置插件</el-button>
+                    <el-button size="small">客户端配置</el-button>
                 </ConfigureModal>
                 <el-button type="primary" size="small" :loading="loading" @click="handleUpdate">刷新列表</el-button>
             </h3>

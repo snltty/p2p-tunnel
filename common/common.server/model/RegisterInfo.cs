@@ -330,7 +330,8 @@ namespace common.server.model
         SignIn = 0,
         Notify = 1,
         SignOut = 2,
-
-        Max = 100,
+        GetSetting = 3,
+        Setting = 4,
+        Max = 99,
     }
 }

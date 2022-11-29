@@ -20,32 +20,15 @@ namespace client.service.socks5
 
         public bool Enable => config.ConnectEnable;
 
-        public async Task<object> Load()
+        public async Task<string> Load()
         {
-            return await Task.FromResult(config).ConfigureAwait(false);
+            return await config.ReadString();
         }
 
         public async Task<string> Save(string jsonStr)
         {
-            var _config = jsonStr.DeJson< common.socks5.Config> ();
-
-            config.ListenEnable = _config.ListenEnable;
-            config.ConnectEnable = _config.ConnectEnable;
-            config.ListenPort = _config.ListenPort;
-            config.BufferSize = _config.BufferSize;
-            config.IsPac = _config.IsPac;
-            config.IsCustomPac = _config.IsCustomPac;
-            config.TargetName = _config.TargetName;
-
-            await config.SaveConfig().ConfigureAwait(false);
+            await config.SaveConfig(jsonStr).ConfigureAwait(false);
             return string.Empty;
-        }
-
-        public async Task<bool> SwitchEnable(bool enable)
-        {
-            config.ConnectEnable = enable;
-            await config.SaveConfig().ConfigureAwait(false);
-            return true;
         }
     }
 }

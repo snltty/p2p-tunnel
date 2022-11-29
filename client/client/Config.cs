@@ -42,15 +42,19 @@ namespace client
         {
             return await configDataProvider.Load();
         }
+        public async Task<string> ReadString()
+        {
+            return await configDataProvider.LoadString();
+        }
 
-        public async Task SaveConfig()
+        public async Task SaveConfig(string jsonStr)
         {
             Config config = await ReadConfig().ConfigureAwait(false);
 
             config.Client = Client;
             config.Server = Server;
 
-            await configDataProvider.Save(config).ConfigureAwait(false);
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
 

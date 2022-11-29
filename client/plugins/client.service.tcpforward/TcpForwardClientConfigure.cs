@@ -20,32 +20,15 @@ namespace client.service.tcpforward
 
         public bool Enable => config.ConnectEnable;
 
-        public async Task<object> Load()
+        public async Task<string> Load()
         {
-            return await Task.FromResult(config).ConfigureAwait(false);
+            return await config.ReadString();
         }
 
         public async Task<string> Save(string jsonStr)
         {
-            var _config = jsonStr.DeJson<common.tcpforward.Config>();
-
-            config. ConnectEnable = _config.ConnectEnable;
-            config.NumConnections = _config.NumConnections;
-            config.BufferSize = _config.BufferSize;
-            config.WebListens = _config.WebListens;
-            config.TunnelListenRange = _config.TunnelListenRange;
-            config.PortWhiteList = _config.PortWhiteList;
-            config.PortBlackList = _config.PortBlackList;
-
-            await config.SaveConfig().ConfigureAwait(false);
+            await config.SaveConfig(jsonStr).ConfigureAwait(false);
             return string.Empty;
-        }
-
-        public async Task<bool> SwitchEnable(bool enable)
-        {
-            config.ConnectEnable = enable;
-            await config.SaveConfig().ConfigureAwait(false);
-            return true;
         }
     }
 }

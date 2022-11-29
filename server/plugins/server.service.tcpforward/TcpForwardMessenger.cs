@@ -1,10 +1,14 @@
 ﻿using common.libs;
 using common.libs.extends;
 using common.server;
+using common.server.model;
 using common.tcpforward;
+using server.messengers;
 using server.messengers.register;
 using System;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace server.service.tcpforward
 {
@@ -14,20 +18,22 @@ namespace server.service.tcpforward
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly common.tcpforward.Config config;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;
-        private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
         private readonly ITcpForwardServer tcpForwardServer;
         private readonly ITcpForwardValidator tcpForwardValidator;
         private readonly TcpForwardResolver tcpForwardResolver;
+        private readonly IServiceAccessValidator serviceAccessValidator;
 
-        public TcpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.tcpforward.Config config, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, TcpForwardMessengerSender tcpForwardMessengerSender, ITcpForwardServer tcpForwardServer, ITcpForwardValidator tcpForwardValidator, TcpForwardResolver tcpForwardResolver)
+        public TcpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.tcpforward.Config config,
+            ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, ITcpForwardServer tcpForwardServer,
+            ITcpForwardValidator tcpForwardValidator, TcpForwardResolver tcpForwardResolver, IServiceAccessValidator serviceAccessValidator)
         {
             this.clientRegisterCache = clientRegisterCache;
             this.config = config;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
-            this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.tcpForwardServer = tcpForwardServer;
             this.tcpForwardValidator = tcpForwardValidator;
             this.tcpForwardResolver = tcpForwardResolver;
+            this.serviceAccessValidator = serviceAccessValidator;
         }
 
         [MessengerId((ushort)TcpForwardMessengerIds.Request)]
@@ -65,11 +71,11 @@ namespace server.service.tcpforward
 
                 if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
                 {
-                    TcpForwardTargetCacheInfo cache = model.AliveType == TcpForwardAliveTypes.WEB ? tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort) : tcpForwardTargetCaching.Get(model.SourcePort);
+                    TcpForwardTargetCacheInfo cache = model.AliveType == TcpForwardAliveTypes.Web ? tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort) : tcpForwardTargetCaching.Get(model.SourcePort);
 
                     if (cache != null && cache.Id == source.Id)
                     {
-                        if (model.AliveType == TcpForwardAliveTypes.WEB)
+                        if (model.AliveType == TcpForwardAliveTypes.Web)
                         {
                             tcpForwardTargetCaching.Remove(model.SourceIp, model.SourcePort);
                         }
@@ -105,7 +111,7 @@ namespace server.service.tcpforward
                     }
 
                     //短连接转发注册，一个 host:port组合只能注册一次，被占用时不可再次注册
-                    if (model.AliveType == TcpForwardAliveTypes.WEB)
+                    if (model.AliveType == TcpForwardAliveTypes.Web)
                     {
                         TcpForwardTargetCacheInfo target = tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort);
                         //已存在相同的注册
@@ -119,7 +125,7 @@ namespace server.service.tcpforward
                             Name = source.Name,
                             Connection = connection,
                             Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort),
-                            ForwardType = TcpForwardTypes.FORWARD
+                            ForwardType = TcpForwardTypes.Forward
                         });
                     }
                     //长连接转发注册，一个端口只能注册一次，被占用时不可再次注册
@@ -143,7 +149,7 @@ namespace server.service.tcpforward
                             Name = source.Name,
                             Connection = connection,
                             Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort),
-                            ForwardType = TcpForwardTypes.FORWARD
+                            ForwardType = TcpForwardTypes.Forward
                         });
                         try
                         {
@@ -162,5 +168,42 @@ namespace server.service.tcpforward
                 return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes();
             }
         }
+
+
+        [MessengerId((ushort)TcpForwardMessengerIds.GetSetting)]
+        public async Task<byte[]> GetSetting(IConnection connection)
+        {
+            string str = await config.ReadString();
+            return str.ToBytes();
+        }
+
+        [MessengerId((ushort)TcpForwardMessengerIds.Setting)]
+        public async Task<byte[]> Setting(IConnection connection)
+        {
+            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
+            {
+                return Helper.FalseArray;
+            }
+            if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
+            {
+                return Helper.FalseArray;
+            }
+
+            string jsonStr = connection.ReceiveRequestWrap.Payload.GetString();
+            for (int i = 0; i < config.WebListens.Length; i++)
+            {
+                tcpForwardServer.Stop(config.WebListens[i]);
+            }
+
+            await config.SaveConfig(jsonStr);
+
+            for (int i = 0; i < config.WebListens.Length; i++)
+            {
+                tcpForwardServer.Start(config.WebListens[i], TcpForwardAliveTypes.Web);
+            }
+
+            return Helper.TrueArray;
+        }
+
     }
 }

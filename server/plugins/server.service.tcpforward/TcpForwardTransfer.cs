@@ -39,7 +39,7 @@ namespace server.service.tcpforward
                 //转发监听
                 foreach (ushort port in config.WebListens)
                 {
-                    tcpForwardServer.Start(port, TcpForwardAliveTypes.WEB);
+                    tcpForwardServer.Start(port, TcpForwardAliveTypes.Web);
                     Logger.Instance.Warning($"TCP转发监听:{port}");
                 }
             }

@@ -1,7 +1,12 @@
-﻿using client.service.ui.api.clientServer;
+﻿using client.messengers.register;
+using client.service.ui.api.clientServer;
+using common.libs;
 using common.libs.extends;
+using common.server;
+using common.server.model;
 using common.socks5;
 using System;
+using System.Threading.Tasks;
 
 namespace client.service.socks5
 {
@@ -11,13 +16,18 @@ namespace client.service.socks5
         private readonly ISocks5ClientListener socks5ClientListener;
         private readonly Socks5Transfer socks5Transfer;
         private readonly ISocks5ClientHandler socks5ClientHandler;
+        private readonly MessengerSender messengerSender;
+        private readonly RegisterStateInfo registerStateInfo;
 
-        public Socks5ClientService(common.socks5.Config config, ISocks5ClientListener socks5ClientListener, Socks5Transfer socks5Transfer, ISocks5ClientHandler socks5ClientHandler)
+        public Socks5ClientService(common.socks5.Config config, ISocks5ClientListener socks5ClientListener,
+            Socks5Transfer socks5Transfer, ISocks5ClientHandler socks5ClientHandler, MessengerSender messengerSender, RegisterStateInfo registerStateInfo)
         {
             this.config = config;
             this.socks5ClientListener = socks5ClientListener;
             this.socks5Transfer = socks5Transfer;
             this.socks5ClientHandler = socks5ClientHandler;
+            this.messengerSender = messengerSender;
+            this.registerStateInfo = registerStateInfo;
         }
 
         public common.socks5.Config Get(ClientServiceParamsInfo arg)
@@ -26,7 +36,7 @@ namespace client.service.socks5
         }
 
         public void Set(ClientServiceParamsInfo arg)
-        {;
+        {
             var conf = arg.Content.DeJson<common.socks5.Config>();
 
             socks5ClientListener.Stop();
@@ -34,24 +44,14 @@ namespace client.service.socks5
             {
                 try
                 {
-                    socks5ClientListener.Start(conf.ListenPort,config.BufferSize);
+                    socks5ClientListener.Start(conf.ListenPort, config.BufferSize);
                 }
                 catch (Exception ex)
                 {
                     arg.SetCode(ClientServiceResponseCodes.Error, ex.Message);
                 }
             }
-
-            config.ListenEnable = conf.ListenEnable;
-            config.ConnectEnable = conf.ConnectEnable;
-            config.ListenPort = conf.ListenPort;
-            config.BufferSize = conf.BufferSize;
-            config.IsPac = conf.IsPac;
-            config.IsCustomPac = conf.IsCustomPac;
-            config.TargetName = conf.TargetName;
-            //config.NumConnections = conf.NumConnections;
-            
-            config.SaveConfig().Wait();
+            config.SaveConfig(arg.Content).Wait();
 
             socks5Transfer.ClearPac();
             socks5ClientHandler.Flush();
@@ -71,5 +71,7 @@ namespace client.service.socks5
                 arg.SetCode(ClientServiceResponseCodes.Error, msg);
             }
         }
+
+
     }
 }

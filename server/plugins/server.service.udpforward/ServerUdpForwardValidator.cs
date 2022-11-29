@@ -1,4 +1,5 @@
-﻿using common.udpforward;
+﻿using common.server.model;
+using common.udpforward;
 using server.messengers;
 
 namespace server.service.udpforward
@@ -15,7 +16,7 @@ namespace server.service.udpforward
         }
         public new bool Validate(string key)
         {
-            return config.ConnectEnable || serviceAccessProvider.Validate(key, EnumService.UdpForward);
+            return config.ConnectEnable || serviceAccessProvider.Validate(key, EnumServiceAccess.UdpForward);
         }
     }
 

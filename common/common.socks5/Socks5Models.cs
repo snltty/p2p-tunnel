@@ -260,10 +260,12 @@ namespace common.socks5
     [Flags, MessengerIdEnum]
     public enum Socks5MessengerIds : ushort
     {
-        Min = 801,
+        Min = 800,
         Request = 802,
         Response = 803,
-        Max = 900,
+        GetSetting = 804,
+        Setting = 805,
+        Max = 899,
     }
 
 }

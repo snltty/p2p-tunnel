@@ -31,16 +31,7 @@ namespace client.service.vea
         }
         public void Set(ClientServiceParamsInfo arg)
         {
-            var conf = arg.Content.DeJson<Config>();
-
-            config.Enable = conf.Enable;
-            config.ProxyAll = conf.ProxyAll;
-            config.TargetName = conf.TargetName;
-            config.IP = conf.IP;
-            config.LanIPs= conf.LanIPs;
-            config.SocksPort = conf.SocksPort;
-            config.BufferSize = conf.BufferSize;
-            config.ConnectEnable = conf.ConnectEnable;
+            config.SaveConfig(arg.Content).Wait();
 
             veaSocks5ServerHandler.UpdateConfig();
 
@@ -53,7 +44,7 @@ namespace client.service.vea
                 arg.SetCode(ClientServiceResponseCodes.Error, ex.Message);
             }
 
-            config.SaveConfig().Wait();
+           
         }
 
         public Dictionary<ulong, IPAddressCacheInfo> List(ClientServiceParamsInfo arg)

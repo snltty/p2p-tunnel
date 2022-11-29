@@ -22,29 +22,18 @@ namespace client.service.wakeup
 
         public bool Enable => true;
 
-        public async Task<object> Load()
+        public async Task<string> Load()
         {
-            return await Task.FromResult(config).ConfigureAwait(false);
+            return await config.ReadString();
         }
 
         public async Task<string> Save(string jsonStr)
         {
-            var _config = jsonStr.DeJson<Config>();
-
-            config.Items = _config.Items;
-
-            await config.SaveConfig().ConfigureAwait(false);
+            await config.SaveConfig(jsonStr).ConfigureAwait(false);
 
             wakeUpTransfer.UpdateMac();
 
             return string.Empty;
-        }
-
-        public async Task<bool> SwitchEnable(bool enable)
-        {
-            await config.SaveConfig().ConfigureAwait(false);
-            wakeUpTransfer.UpdateMac();
-            return true;
         }
     }
 }

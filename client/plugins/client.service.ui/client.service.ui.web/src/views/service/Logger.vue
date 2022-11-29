@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-10-02 14:16:32
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-18 13:26:45
+ * @LastEditTime: 2022-11-29 15:42:15
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\Logger.vue
@@ -22,7 +22,7 @@
             <el-button type="warning" size="small" :loading="loading" @click="clearData">清空</el-button>
             <span class="flex-1"></span>
             <ConfigureModal className="LoggerClientConfigure">
-                <el-button size="small">配置插件</el-button>
+                <el-button size="small">客户端配置</el-button>
             </ConfigureModal>
         </div>
         <div class="body flex-1 relative">

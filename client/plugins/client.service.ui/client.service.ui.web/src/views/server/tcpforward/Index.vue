@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-28 16:09:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:00:54
+ * @LastEditTime: 2022-11-29 15:39:04
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\tcpforward\Index.vue
@@ -15,6 +15,9 @@
                 <el-button type="primary" size="small" @click="handleAddListen">增加长连接端口</el-button>
                 <el-button size="small" @click="loadPorts">刷新列表</el-button>
                 <span class="flex-1"></span>
+                <ConfigureModal className="TcpForwardServerConfigure">
+                    <el-button size="small">服务端配置</el-button>
+                </ConfigureModal>
             </div>
             <div class="content">
                 <el-row>
@@ -80,8 +83,9 @@ import { injectRegister } from '../../../states/register'
 import { ElMessage } from 'element-plus';
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
+import ConfigureModal from '../../service/configure/ConfigureModal.vue'
 export default {
-    components: { AddForward, AddListen },
+    components: { AddForward, AddListen, ConfigureModal },
     setup () {
 
         const shareData = injectShareData();

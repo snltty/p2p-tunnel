@@ -40,12 +40,12 @@ namespace common.server.model
     [Flags, MessengerIdEnum]
     public enum RelayMessengerIds : ushort
     {
-        Min = 501,
+        Min = 500,
         Relay = 501,
         Delay = 502,
         AskConnects = 503,
         Connects = 504,
-        Max = 600,
+        Max = 599,
     }
 
 

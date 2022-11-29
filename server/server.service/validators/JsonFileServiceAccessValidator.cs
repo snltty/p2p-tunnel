@@ -1,18 +1,22 @@
 ﻿using common.libs.database;
+using common.server.model;
 using server.messengers;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks;
 
 namespace server.service.validators
 {
     [Table("service-auth-groups")]
     public class JsonFileServiceAccessValidator : IServiceAccessValidator
     {
-        public Dictionary<string, EnumService> Groups { get; init; } = new Dictionary<string, EnumService>();
+        public Dictionary<string, EnumServiceAccess> Groups { get; set; } = new Dictionary<string, EnumServiceAccess>();
 
+        private readonly IConfigDataProvider<JsonFileServiceAccessValidator> configDataProvider;
         public JsonFileServiceAccessValidator() { }
         public JsonFileServiceAccessValidator(IConfigDataProvider<JsonFileServiceAccessValidator> configDataProvider)
         {
+            this.configDataProvider = configDataProvider;
             JsonFileServiceAccessValidator config = configDataProvider.Load().Result;
             if (config != null)
             {
@@ -20,13 +24,26 @@ namespace server.service.validators
             }
         }
 
-        public bool Validate(string group, EnumService service)
+        public bool Validate(string group, EnumServiceAccess service)
         {
-            if (Groups.TryGetValue(group, out EnumService value))
+            if (Groups.TryGetValue(group, out EnumServiceAccess value))
             {
                 return (value & service) == service;
             }
             return false;
+        }
+        public async Task<string> ReadString()
+        {
+            return await configDataProvider.LoadString();
+        }
+
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this);
+        }
+        public async Task SaveConfig(string jsonStr)
+        {
+            await configDataProvider.Save(jsonStr);
         }
     }
 }

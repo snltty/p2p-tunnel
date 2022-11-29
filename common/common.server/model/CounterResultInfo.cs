@@ -88,8 +88,8 @@ namespace common.server.model
     [Flags, MessengerIdEnum]
     public enum CounterMessengerIds : ushort
     {
-        Min = 1101,
+        Min = 1100,
         Info = 1101,
-        Max = 1201,
+        Max = 1199,
     }
 }

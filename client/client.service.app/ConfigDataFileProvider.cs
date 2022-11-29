@@ -6,7 +6,7 @@ using System.Text;
 
 namespace client.service.app
 {
-    public class ConfigDataFileProvider<T> : IConfigDataProvider<T> where T : class,new()
+    public class ConfigDataFileProvider<T> : IConfigDataProvider<T> where T : class, new()
     {
         public async Task<T> Load()
         {
@@ -17,6 +17,16 @@ namespace client.service.app
             string content = File.ReadAllText(targetFile);
             return content.DeJson<T>();
         }
+        public async Task<string> LoadString()
+        {
+            string fileName = GetTableName(typeof(T));
+            await Move(fileName);
+
+            string targetFile = Path.Combine(FileSystem.Current.AppDataDirectory, fileName);
+            string content = File.ReadAllText(targetFile);
+            return content;
+        }
+
         private async Task Move(string fileName)
         {
             string targetFile = Path.Combine(FileSystem.Current.AppDataDirectory, fileName);
@@ -44,6 +54,15 @@ namespace client.service.app
 
             await Task.CompletedTask;
         }
+        public async Task Save(string jsonStr)
+        {
+            string fileName = GetTableName(typeof(T));
+            string targetFile = Path.Combine(FileSystem.Current.AppDataDirectory, fileName);
+
+            File.WriteAllText(targetFile, jsonStr, Encoding.UTF8);
+
+            await Task.CompletedTask;
+        }
 
         private string GetTableName(Type type)
         {
@@ -54,5 +73,9 @@ namespace client.service.app
             }
             return $"{type.Name}.json";
         }
+
+
+
+
     }
 }

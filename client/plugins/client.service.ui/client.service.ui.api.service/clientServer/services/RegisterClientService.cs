@@ -1,20 +1,20 @@
 ﻿using client.messengers.register;
 using client.service.ui.api.clientServer;
 using common.libs.extends;
-using System;
 using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
 {
     public class RegisterClientService : IClientService
     {
+
         private readonly IRegisterTransfer registerTransfer;
-        private readonly RegisterStateInfo registerState;
+        private readonly RegisterStateInfo registerStateInfo;
         private readonly client.Config config;
-        public RegisterClientService(IRegisterTransfer registerHelper, RegisterStateInfo registerState, client.Config config)
+        public RegisterClientService(IRegisterTransfer registerTransfer, RegisterStateInfo registerStateInfo, client.Config config)
         {
-            this.registerTransfer = registerHelper;
-            this.registerState = registerState;
+            this.registerTransfer = registerTransfer;
+            this.registerStateInfo = registerStateInfo;
             this.config = config;
         }
 
@@ -39,8 +39,8 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 ClientConfig = config.Client,
                 ServerConfig = config.Server,
-                LocalInfo = registerState.LocalInfo,
-                RemoteInfo = registerState.RemoteInfo,
+                LocalInfo = registerStateInfo.LocalInfo,
+                RemoteInfo = registerStateInfo.RemoteInfo,
             };
         }
 
@@ -51,8 +51,9 @@ namespace client.service.ui.api.service.clientServer.services
             config.Client = model.ClientConfig;
             config.Server = model.ServerConfig;
 
-            await config.SaveConfig().ConfigureAwait(false);
+            await config.SaveConfig(this.ToJson()).ConfigureAwait(false);
         }
+
     }
 
     public class ConfigureParamsInfo

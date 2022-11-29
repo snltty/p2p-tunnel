@@ -274,10 +274,7 @@ namespace common.server.model
             RequestId = span.Slice(index).ToUInt32();
             index += 4;
 
-            if (memory.Length - index > 0)
-            {
-                Payload = memory.Slice(index, memory.Length - index);
-            }
+            Payload = memory.Slice(index, memory.Length - index);
         }
 
         public void Return(byte[] array)

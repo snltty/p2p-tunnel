@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-24 17:36:36
+ * @LastEditTime: 2022-11-29 16:49:45
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -10,6 +10,14 @@
 <template>
     <div class="register-form">
         <h3 class="title t-c">将本客户端注册到服务器</h3>
+        <div class="t-c w-100" style="padding-bottom:.6rem">
+            <ConfigureModal className="ServerConfigure">
+                <el-button size="small">服务端配置</el-button>
+            </ConfigureModal>
+            <ConfigureModal className="ServiceAccessrConfigure">
+                <el-button size="small">服务端权限配置</el-button>
+            </ConfigureModal>
+        </div>
         <div class="inner">
             <el-form label-width="8rem" ref="formDom" :model="model" :rules="rules">
                 <el-form-item label="" label-width="0">
@@ -220,7 +228,9 @@ import { sendRegisterMsg, getRegisterInfo, updateConfig, sendExit } from '../api
 
 import { ElMessage } from 'element-plus'
 import { onMounted, watch } from '@vue/runtime-core';
+import ConfigureModal from './service/configure/ConfigureModal.vue'
 export default {
+    components: { ConfigureModal },
     setup () {
         const formDom = ref(null);
         const registerState = injectRegister();

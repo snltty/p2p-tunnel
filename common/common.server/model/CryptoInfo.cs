@@ -9,12 +9,12 @@ namespace common.server.model
     [Flags, MessengerIdEnum]
     public enum CryptoMessengerIds: ushort
     {
-        Min = 201,
+        Min = 200,
         Key = 201,
         Set = 202,
         Test = 203,
         Clear = 204,
 
-        Max = 300,
+        Max = 299,
     }
 }

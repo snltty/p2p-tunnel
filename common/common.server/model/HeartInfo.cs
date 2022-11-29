@@ -13,8 +13,8 @@ namespace common.server.model
     [Flags, MessengerIdEnum]
     public enum HeartMessengerIds : ushort
     {
-        Min = 301,
+        Min = 300,
         Alive = 301,
-        Max = 400,
+        Max = 399,
     }
 }

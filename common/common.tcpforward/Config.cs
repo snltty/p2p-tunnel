@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.libs.extends;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
@@ -38,19 +39,24 @@ namespace common.tcpforward
         {
             return await configDataProvider.Load();
         }
-
-        public async Task SaveConfig()
+        public async Task<string> ReadString()
         {
-            Config config = await ReadConfig().ConfigureAwait(false);
-            config.ConnectEnable = ConnectEnable;
-            config.NumConnections = NumConnections;
-            config.BufferSize = BufferSize;
-            config.WebListens = WebListens;
-            config.TunnelListenRange = TunnelListenRange;
-            config.PortWhiteList = PortWhiteList;
-            config.PortBlackList = PortBlackList;
+            return await configDataProvider.LoadString();
+        }
 
-            await configDataProvider.Save(config).ConfigureAwait(false);
+        public async Task SaveConfig(string jsonStr)
+        {
+            var _config = jsonStr.DeJson<Config>();
+
+            ConnectEnable = _config.ConnectEnable;
+            NumConnections = _config.NumConnections;
+            BufferSize = _config.BufferSize;
+            WebListens = _config.WebListens;
+            TunnelListenRange = _config.TunnelListenRange;
+            PortWhiteList = _config.PortWhiteList;
+            PortBlackList = _config.PortBlackList;
+
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
 
@@ -59,4 +65,5 @@ namespace common.tcpforward
         public ushort Min { get; set; } = 10000;
         public ushort Max { get; set; } = 60000;
     }
+
 }

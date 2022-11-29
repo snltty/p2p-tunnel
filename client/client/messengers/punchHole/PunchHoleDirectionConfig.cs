@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.libs.extends;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace client.messengers.punchHole
         {
             config.Names.Add(name);
             config.Names = config.Names.Distinct().ToList();
-            _ = SaveConfig();
+            _ = SaveConfig(config.ToJson());
         }
         public bool Contains(string name)
         {
@@ -35,11 +36,16 @@ namespace client.messengers.punchHole
         {
             return await configDataProvider.Load();
         }
-        private async Task SaveConfig()
+        public async Task<string> ReadString()
+        {
+            return await configDataProvider.LoadString();
+        }
+
+        private async Task SaveConfig(string jsonStr)
         {
             PunchHoleDirectionConfig1 _config = await ReadConfig().ConfigureAwait(false);
             _config.Names = config.Names;
-            await configDataProvider.Save(_config).ConfigureAwait(false);
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
 

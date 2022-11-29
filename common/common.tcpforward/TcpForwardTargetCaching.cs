@@ -144,6 +144,6 @@ namespace common.tcpforward
         public IConnection Connection { get; set; }
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Endpoint { get; set; }
-        public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.FORWARD;
+        public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.Forward;
     }
 }

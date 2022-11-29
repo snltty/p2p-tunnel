@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.libs.extends;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
@@ -26,14 +27,18 @@ namespace client.service.logger
         {
             return await configDataProvider.Load();
         }
-
-        public async Task SaveConfig()
+        public async Task<string> ReadString()
         {
-            Config config = await ReadConfig().ConfigureAwait(false);
-            config.Enable = Enable;
-            config.MaxLength = MaxLength;
+            return await configDataProvider.LoadString();
+        }
 
-            await configDataProvider.Save(config).ConfigureAwait(false);
+        public async Task SaveConfig(string jsonStr)
+        {
+            Config _config = jsonStr.DeJson<Config>();
+
+            Enable = _config.Enable;
+            MaxLength = _config.MaxLength;
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
 }

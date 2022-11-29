@@ -29,11 +29,11 @@ namespace client.service.vea
     [Flags, MessengerIdEnum]
     public enum VeaSocks5MessengerIds : ushort
     {
-        Min = 901,
+        Min = 900,
         Request = 902,
         Response = 903,
         Ip = 904,
         Reset = 905,
-        Max = 1000,
+        Max = 999,
     }
 }

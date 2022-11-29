@@ -8,8 +8,7 @@ namespace client.service.ui.api.clientServer
         string Author { get; }
         string Desc { get; }
         bool Enable { get; }
-        Task<bool> SwitchEnable(bool enable);
-        Task<object> Load();
+        Task<string> Load();
         Task<string> Save(string jsonStr);
     }
 }

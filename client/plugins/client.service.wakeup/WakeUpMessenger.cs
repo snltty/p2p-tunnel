@@ -36,9 +36,9 @@ namespace client.service.wakeup
     [Flags, MessengerIdEnum]
     public enum WakeUpMessengerIds : ushort
     {
-        Min = 1001,
+        Min = 1000,
         Macs = 1002,
         WakeUp = 1003,
-        Max = 1100,
+        Max = 1099,
     }
 }

@@ -17,7 +17,7 @@ namespace common.tcpforward
         public string TargetName { get; set; } = string.Empty;
         public string TargetIp { get; set; } = IPAddress.Loopback.ToString();
         public ushort TargetPort { get; set; } = 8080;
-        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
+        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
 
         public byte[] ToBytes()
         {
@@ -91,7 +91,7 @@ namespace common.tcpforward
 
         public string SourceIp { get; set; } = IPAddress.Any.ToString();
         public ushort SourcePort { get; set; } = 8080;
-        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
+        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
 
         public byte[] ToBytes()
         {

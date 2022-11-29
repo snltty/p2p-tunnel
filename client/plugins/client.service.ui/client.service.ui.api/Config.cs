@@ -43,8 +43,12 @@ namespace client.service.ui.api
         {
             return await configDataProvider.Load();
         }
+        public async Task<string> ReadString()
+        {
+            return await configDataProvider.LoadString();
+        }
 
-        public async Task SaveConfig()
+        public async Task SaveConfig(string jsonStr)
         {
             Config config = await ReadConfig().ConfigureAwait(false);
 
@@ -54,7 +58,7 @@ namespace client.service.ui.api
             config.Web = Web;
             config.Websocket = Websocket;
 
-            await configDataProvider.Save(config).ConfigureAwait(false);
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
 

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 00:47:21
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:03:53
+ * @LastEditTime: 2022-11-29 15:42:37
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\udpforward\Index.vue
@@ -16,7 +16,7 @@
                 <el-button size="small" @click="getData">刷新列表</el-button>
                 <span class="flex-1"></span>
                 <ConfigureModal className="UdpForwardClientConfigure">
-                    <el-button size="small">配置插件</el-button>
+                    <el-button size="small">客户端配置</el-button>
                 </ConfigureModal>
             </div>
             <div class="content">

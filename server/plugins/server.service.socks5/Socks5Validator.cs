@@ -5,6 +5,7 @@ using common.socks5;
 using server.messengers;
 using common.server;
 using server.messengers.register;
+using common.server.model;
 
 namespace server.service.socks5
 {
@@ -35,7 +36,7 @@ namespace server.service.socks5
 
             if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client))
             {
-                return config.ConnectEnable || serviceAccessProvider.Validate(client.GroupId, EnumService.Socks5);
+                return config.ConnectEnable || serviceAccessProvider.Validate(client.GroupId, EnumServiceAccess.Socks5);
             }
 
             return config.ConnectEnable;

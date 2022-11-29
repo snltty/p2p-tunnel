@@ -52,11 +52,11 @@ namespace client.service.tcpforward
 
         public IEnumerable<P2PListenInfo> List(ClientServiceParamsInfo arg)
         {
-            return tcpForwardTransfer.p2pListens.Where(c => c.ForwardType == common.tcpforward.TcpForwardTypes.FORWARD);
+            return tcpForwardTransfer.p2pListens.Where(c => c.ForwardType == common.tcpforward.TcpForwardTypes.Forward);
         }
         public IEnumerable<P2PListenInfo> ListProxy(ClientServiceParamsInfo arg)
         {
-            return tcpForwardTransfer.p2pListens.Where(c => c.ForwardType == common.tcpforward.TcpForwardTypes.PROXY);
+            return tcpForwardTransfer.p2pListens.Where(c => c.ForwardType == common.tcpforward.TcpForwardTypes.Proxy);
         }
         public string GetPac(ClientServiceParamsInfo arg)
         {
@@ -117,6 +117,7 @@ namespace client.service.tcpforward
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
             return await tcpForwardTransfer.RemoveServerForward(forward);
         }
+
 
     }
 

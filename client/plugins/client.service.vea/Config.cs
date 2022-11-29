@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.libs.extends;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
@@ -43,22 +44,25 @@ namespace client.service.vea
         {
             return await configDataProvider.Load();
         }
-
-        public async Task SaveConfig()
+        public async Task<string> ReadString()
         {
-            Config config = await ReadConfig().ConfigureAwait(false);
-            config.Enable = Enable;
-            config.ProxyAll = ProxyAll;
-            config.TargetName = TargetName;
-            config.IP = IP;
-            config.LanIPs = LanIPs;
-            config.SocksPort = SocksPort;
-            config.BufferSize = BufferSize;
-            config.NumConnections = NumConnections;
-            config.ConnectEnable = ConnectEnable;
+            return await configDataProvider.LoadString();
+        }
+
+        public async Task SaveConfig(string jsonStr)
+        {
+            var _config = jsonStr.DeJson<Config>();
+
+            Enable = _config.Enable;
+            ProxyAll = _config.ProxyAll;
+            TargetName = _config.TargetName;
+            IP = _config.IP;
+            SocksPort = _config.SocksPort;
+            BufferSize = _config.BufferSize;
+            ConnectEnable = _config.ConnectEnable;
 
 
-            await configDataProvider.Save(config).ConfigureAwait(false);
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
 }

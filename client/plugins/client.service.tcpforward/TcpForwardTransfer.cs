@@ -114,13 +114,13 @@ namespace client.service.tcpforward
                     return "已存在";
                 }
 
-                if (param.ForwardType == TcpForwardTypes.PROXY && p2pListens.Where(c => c.ForwardType == TcpForwardTypes.PROXY && c.ID != param.ID).Count() > 0)
+                if (param.ForwardType == TcpForwardTypes.Proxy && p2pListens.Where(c => c.ForwardType == TcpForwardTypes.Proxy && c.ID != param.ID).Count() > 0)
                 {
                     return "http代理仅能添加一条";
                 }
 
                 P2PListenInfo old = GetP2PByID(param.ID);
-                bool listening = param.ForwardType == TcpForwardTypes.PROXY ? param.Listening : (old.Listening || param.Listening);
+                bool listening = param.ForwardType == TcpForwardTypes.Proxy ? param.Listening : (old.Listening || param.Listening);
                 if (old.ID > 0)
                 {
                     StopP2PListen(old);
@@ -155,7 +155,7 @@ namespace client.service.tcpforward
                     StartP2P(param.ID);
                 }
 
-                if (param.ForwardType == TcpForwardTypes.PROXY)
+                if (param.ForwardType == TcpForwardTypes.Proxy)
                 {
                     tcpForwardTargetCaching.Remove(param.Port);
                     tcpForwardTargetCaching.Add(param.Port, new TcpForwardTargetCacheInfo
@@ -200,7 +200,7 @@ namespace client.service.tcpforward
             if (listen.ID > 0)
             {
                 tcpForwardServer.Stop(listen.Port);
-                if (listen.ForwardType == TcpForwardTypes.PROXY)
+                if (listen.ForwardType == TcpForwardTypes.Proxy)
                 {
                     ClearPac();
                 }
@@ -227,7 +227,7 @@ namespace client.service.tcpforward
             P2PForwardInfo saveInfo = listen.Forwards.FirstOrDefault(c => c.ID == forward.Forward.ID);
             if (saveInfo != null)
             {
-                if (listen.AliveType == TcpForwardAliveTypes.WEB)
+                if (listen.AliveType == TcpForwardAliveTypes.Web)
                 {
                     tcpForwardTargetCaching.Remove(saveInfo.SourceIp, listen.Port);
                 }
@@ -243,7 +243,7 @@ namespace client.service.tcpforward
             }
             else
             {
-                if (listen.AliveType == TcpForwardAliveTypes.WEB)
+                if (listen.AliveType == TcpForwardAliveTypes.Web)
                 {
                     if (listen.Forwards.FirstOrDefault(c => c.SourceIp == forward.Forward.SourceIp) != null)
                     {
@@ -262,13 +262,13 @@ namespace client.service.tcpforward
                 listen.Forwards.Add(forward.Forward);
             }
 
-            if (listen.AliveType == TcpForwardAliveTypes.WEB)
+            if (listen.AliveType == TcpForwardAliveTypes.Web)
             {
                 tcpForwardTargetCaching.Add(forward.Forward.SourceIp, listen.Port, new TcpForwardTargetCacheInfo
                 {
                     Endpoint = NetworkHelper.EndpointToArray(forward.Forward.TargetIp, forward.Forward.TargetPort),
                     Name = forward.Forward.Name,
-                    ForwardType = TcpForwardTypes.FORWARD
+                    ForwardType = TcpForwardTypes.Forward
                 });
             }
             else
@@ -277,7 +277,7 @@ namespace client.service.tcpforward
                 {
                     Endpoint = NetworkHelper.EndpointToArray(forward.Forward.TargetIp, forward.Forward.TargetPort),
                     Name = forward.Forward.Name,
-                    ForwardType = TcpForwardTypes.FORWARD
+                    ForwardType = TcpForwardTypes.Forward
                 });
             }
 
@@ -313,7 +313,7 @@ namespace client.service.tcpforward
             try
             {
                 tcpForwardServer.Start(listen.Port, listen.AliveType);
-                if (listen.ForwardType == TcpForwardTypes.PROXY)
+                if (listen.ForwardType == TcpForwardTypes.Proxy)
                 {
                     UpdatePac(listen);
                 }
@@ -355,7 +355,7 @@ namespace client.service.tcpforward
 
             foreach (var listen in config.Webs)
             {
-                listen.AliveType = TcpForwardAliveTypes.WEB;
+                listen.AliveType = TcpForwardAliveTypes.Web;
                 foreach (P2PForwardInfo forward in listen.Forwards)
                 {
                     try
@@ -373,7 +373,7 @@ namespace client.service.tcpforward
             }
             foreach (var listen in config.Tunnels)
             {
-                listen.AliveType = TcpForwardAliveTypes.TUNNEL;
+                listen.AliveType = TcpForwardAliveTypes.Tunnel;
                 foreach (P2PForwardInfo forward in listen.Forwards)
                 {
                     try
@@ -401,8 +401,8 @@ namespace client.service.tcpforward
         }
         private void SaveP2PConfig()
         {
-            p2PConfigInfo.Webs = p2pListens.Where(c => c.AliveType == TcpForwardAliveTypes.WEB).ToList();
-            p2PConfigInfo.Tunnels = p2pListens.Where(c => c.AliveType == TcpForwardAliveTypes.TUNNEL).ToList();
+            p2PConfigInfo.Webs = p2pListens.Where(c => c.AliveType == TcpForwardAliveTypes.Web).ToList();
+            p2PConfigInfo.Tunnels = p2pListens.Where(c => c.AliveType == TcpForwardAliveTypes.Tunnel).ToList();
 
             p2pConfigDataProvider.Save(p2PConfigInfo);
         }
@@ -452,7 +452,7 @@ namespace client.service.tcpforward
         public async Task<string> StartServerForward(ServerForwardItemInfo forward)
         {
             ServerForwardItemInfo forwardInfo;
-            if (forward.AliveType == TcpForwardAliveTypes.WEB)
+            if (forward.AliveType == TcpForwardAliveTypes.Web)
             {
                 forwardInfo = serverForwards.FirstOrDefault(c => c.Domain == forward.Domain && c.ServerPort == forward.ServerPort);
             }
@@ -484,7 +484,7 @@ namespace client.service.tcpforward
         public async Task<string> StopServerForward(ServerForwardItemInfo forward)
         {
             ServerForwardItemInfo forwardInfo;
-            if (forward.AliveType == TcpForwardAliveTypes.WEB)
+            if (forward.AliveType == TcpForwardAliveTypes.Web)
             {
                 forwardInfo = serverForwards.FirstOrDefault(c => c.Domain == forward.Domain && c.ServerPort == forward.ServerPort);
             }
@@ -513,7 +513,7 @@ namespace client.service.tcpforward
         public async Task<string> RemoveServerForward(ServerForwardItemInfo forward)
         {
             ServerForwardItemInfo forwardInfo;
-            if (forward.AliveType == TcpForwardAliveTypes.WEB)
+            if (forward.AliveType == TcpForwardAliveTypes.Web)
             {
                 forwardInfo = serverForwards.FirstOrDefault(c => c.Domain == forward.Domain && c.ServerPort == forward.ServerPort);
             }
@@ -547,19 +547,19 @@ namespace client.service.tcpforward
             var config = serverConfigDataProvider.Load().Result;
             foreach (var item in config.Webs)
             {
-                item.AliveType = TcpForwardAliveTypes.WEB;
+                item.AliveType = TcpForwardAliveTypes.Web;
             }
             foreach (var item in config.Tunnels)
             {
-                item.AliveType = TcpForwardAliveTypes.TUNNEL;
+                item.AliveType = TcpForwardAliveTypes.Tunnel;
             }
             serverForwards = config.Webs.Concat(config.Tunnels).ToList();
             return config;
         }
         private void SaveServerConfig()
         {
-            serverForwardConfigInfo.Webs = serverForwards.Where(c => c.AliveType == TcpForwardAliveTypes.WEB).ToArray();
-            serverForwardConfigInfo.Tunnels = serverForwards.Where(c => c.AliveType == TcpForwardAliveTypes.TUNNEL).ToArray();
+            serverForwardConfigInfo.Webs = serverForwards.Where(c => c.AliveType == TcpForwardAliveTypes.Web).ToArray();
+            serverForwardConfigInfo.Tunnels = serverForwards.Where(c => c.AliveType == TcpForwardAliveTypes.Tunnel).ToArray();
             serverConfigDataProvider.Save(serverForwardConfigInfo);
         }
 
@@ -567,11 +567,11 @@ namespace client.service.tcpforward
         {
             foreach (var item in serverForwardConfigInfo.Webs)
             {
-                SendRegister(item, TcpForwardAliveTypes.WEB);
+                SendRegister(item, TcpForwardAliveTypes.Web);
             }
             foreach (var item in serverForwardConfigInfo.Tunnels.Where(c => c.Listening == true))
             {
-                SendRegister(item, TcpForwardAliveTypes.TUNNEL);
+                SendRegister(item, TcpForwardAliveTypes.Tunnel);
             }
         }
         private void SendRegister(ServerForwardItemInfo item, TcpForwardAliveTypes type)
@@ -686,10 +686,10 @@ namespace client.service.tcpforward
         public uint ID { get; set; } = 0;
         public ushort Port { get; set; } = 0;
         public bool Listening { get; set; } = false;
-        public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.FORWARD;
+        public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.Forward;
         public string Name { get; set; } = string.Empty;
 
-        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
+        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
 
         public string Desc { get; set; } = string.Empty;
         public bool IsPac { get; set; } = false;
@@ -720,11 +720,11 @@ namespace client.service.tcpforward
         public uint ID { get; set; } = 0;
         public ushort Port { get; set; } = 0;
 
-        public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.FORWARD;
+        public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.Forward;
         /// <summary>
         /// 代理时 必须 TcpForwardAliveTypes.WEB
         /// </summary>
-        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
+        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
 
         public List<P2PForwardInfo> Forwards { get; set; } = new List<P2PForwardInfo>();
 
@@ -771,7 +771,7 @@ namespace client.service.tcpforward
     }
     public class ServerForwardItemInfo
     {
-        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.WEB;
+        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
         public string Domain { get; set; }
         public ushort ServerPort { get; set; }
         public string LocalIp { get; set; }

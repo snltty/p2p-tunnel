@@ -1,4 +1,5 @@
-﻿using common.tcpforward;
+﻿using common.server.model;
+using common.tcpforward;
 using server.messengers;
 
 namespace server.service.tcpforward
@@ -14,7 +15,7 @@ namespace server.service.tcpforward
         }
         public new bool Validate(string key)
         {
-            return config.ConnectEnable || serviceAccessProvider.Validate(key, EnumService.TcpForward);
+            return config.ConnectEnable || serviceAccessProvider.Validate(key, EnumServiceAccess.TcpForward);
         }
     }
 

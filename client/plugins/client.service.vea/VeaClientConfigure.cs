@@ -22,34 +22,18 @@ namespace client.service.vea
 
         public bool Enable => config.ConnectEnable;
 
-        public async Task<object> Load()
+        public async Task<string> Load()
         {
-            return await Task.FromResult(config).ConfigureAwait(false);
+            return await config.ReadString();
         }
 
         public async Task<string> Save(string jsonStr)
         {
-            var _config = jsonStr.DeJson<Config>();
-
-            config.Enable = _config.Enable;
-            config.ProxyAll = _config.ProxyAll;
-            config.TargetName = _config.TargetName;
-            config.IP = _config.IP;
-            config.SocksPort = _config.SocksPort;
-            config.BufferSize = _config.BufferSize;
-            config.ConnectEnable = _config.ConnectEnable;
+            await config.SaveConfig(jsonStr).ConfigureAwait(false);
 
             veaSocks5ServerHandler.UpdateConfig();
 
-            await config.SaveConfig().ConfigureAwait(false);
             return string.Empty;
-        }
-
-        public async Task<bool> SwitchEnable(bool enable)
-        {
-            config.ConnectEnable = enable;
-            await config.SaveConfig().ConfigureAwait(false);
-            return true;
         }
     }
 }

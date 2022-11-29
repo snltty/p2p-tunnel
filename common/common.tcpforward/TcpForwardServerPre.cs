@@ -116,7 +116,7 @@ namespace common.tcpforward
                     AliveType = acceptToken.Request.AliveType,
                     SourcePort = acceptToken.SourcePort,
                     Buffer = Helper.EmptyArray,
-                    DataType = TcpForwardDataTypes.CONNECT,
+                    DataType = TcpForwardDataTypes.Connect,
                     StateType = TcpForwardStateTypes.Success
                 },
                 SourcePort = acceptToken.SourcePort
@@ -134,7 +134,7 @@ namespace common.tcpforward
             readEventArgs.SetBuffer(token.PoolBuffer, 0, receiveBufferSize);
             readEventArgs.Completed += IO_Completed;
 
-            if (token.Request.AliveType == TcpForwardAliveTypes.TUNNEL)
+            if (token.Request.AliveType == TcpForwardAliveTypes.Tunnel)
             {
                 token.FirstPacket = false;
                 Receive(token, Helper.EmptyArray);
@@ -230,11 +230,11 @@ namespace common.tcpforward
             {
                 if (model.StateType == TcpForwardStateTypes.Success)
                 {
-                    if (token.Request.DataType == TcpForwardDataTypes.CONNECT)
+                    if (token.Request.DataType == TcpForwardDataTypes.Connect)
                     {
-                        token.Request.DataType = TcpForwardDataTypes.FORWARD;
+                        token.Request.DataType = TcpForwardDataTypes.Forward;
                         token.Request.TargetEndpoint = Helper.EmptyArray;
-                        if (token.Request.ForwardType == TcpForwardTypes.PROXY)
+                        if (token.Request.ForwardType == TcpForwardTypes.Proxy)
                         {
                             token.SourceSocket.Send(HttpConnectMethodHelper.ConnectSuccessMessage(), SocketFlags.None);
                         }
@@ -263,7 +263,7 @@ namespace common.tcpforward
                 }
                 else
                 {
-                    if (token.Request.ForwardType == TcpForwardTypes.PROXY)
+                    if (token.Request.ForwardType == TcpForwardTypes.Proxy)
                     {
                         token.SourceSocket.Send(HttpConnectMethodHelper.ConnectErrorMessage(), SocketFlags.None);
                     }

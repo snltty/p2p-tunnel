@@ -1,6 +1,7 @@
 ﻿using server.messengers;
 using common.server;
 using server.messengers.register;
+using common.server.model;
 
 namespace server.service.validators
 {
@@ -20,7 +21,7 @@ namespace server.service.validators
         {
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
-                return config.RelayEnable || serviceAccessProvider.Validate(source.GroupId, EnumService.Relay);
+                return config.RelayEnable || serviceAccessProvider.Validate(source.GroupId, EnumServiceAccess.Relay);
             }
 
             return false;

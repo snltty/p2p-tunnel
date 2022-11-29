@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 00:47:21
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:01:39
+ * @LastEditTime: 2022-11-29 15:39:12
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\udpforward\Index.vue
@@ -15,6 +15,9 @@
                 <el-button type="primary" size="small" @click="handleAddListen">增加转发监听</el-button>
                 <el-button size="small" @click="getData">刷新列表</el-button>
                 <span class="flex-1"></span>
+                <ConfigureModal className="UdpForwardServerConfigure">
+                    <el-button size="small">服务端配置</el-button>
+                </ConfigureModal>
             </div>
             <div class="content">
                 <el-row>
@@ -58,8 +61,9 @@ import { onMounted, provide } from '@vue/runtime-core'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../states/shareData'
 import { injectRegister } from '../../../states/register'
+import ConfigureModal from '../../service/configure/ConfigureModal.vue'
 export default {
-    components: { AddListen },
+    components: { AddListen, ConfigureModal },
     setup () {
 
         const shareData = injectShareData();

@@ -84,6 +84,9 @@ namespace client.service.udpforward
             ForwardSettingParamsInfo forward = arg.Content.DeJson<ForwardSettingParamsInfo>();
             return await udpForwardTransfer.RemoveServerForward(forward.Port);
         }
+
+
+     
     }
 
     public class ForwardSettingParamsInfo

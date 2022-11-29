@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:02:01
+ * @LastEditTime: 2022-11-29 15:42:22
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\httpproxy\Index.vue
@@ -68,7 +68,7 @@
                     <div class="w-100 t-c">
                         <el-button type="primary" :loading="state.loading" @click="handleSubmit" class="m-r-1">确 定</el-button>
                         <ConfigureModal className="TcpForwardClientConfigure">
-                            <el-button>配置插件</el-button>
+                            <el-button>客户端配置</el-button>
                         </ConfigureModal>
                     </div>
                 </el-form-item>

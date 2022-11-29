@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-09-24 14:36:58
  * @LastEditors: snltty
- * @LastEditTime: 2022-05-08 16:07:12
+ * @LastEditTime: 2022-11-29 16:50:57
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\configure\ConfigureModal.vue
@@ -16,7 +16,11 @@
     <el-dialog title="配置" v-model="showAdd" center :close-on-click-modal="false" append-to-body width="80rem">
         <el-form ref="formDom" :model="form" :rules="rules" label-width="0">
             <el-form-item label="" prop="Content" label-width="0">
-                <div id="editor" v-if="showAdd"></div>
+                <el-input type="textarea" v-model="form.Content" :autosize="{minRows:10,maxRows:30}" />
+                <!-- <div id="editor" v-if="showAdd"></div> -->
+            </el-form-item>
+            <el-form-item label="" label-width="0">
+                <div class="t-c w-100">无内容，或配置失败，为未注册或未拥有配置权限</div>
             </el-form-item>
         </el-form>
         <template #footer>
@@ -52,7 +56,7 @@ export default {
             state.showEditor = false;
             getConfigure(state.form.ClassName).then((res) => {
                 state.form.Content = res;
-                initEditor();
+                // initEditor();
             });
         }
 
@@ -75,11 +79,16 @@ export default {
                     return false;
                 }
                 state.loading = true;
-                saveConfigure(state.form.ClassName, JSON.stringify(editor.get())).then((res) => {
-                    state.loading = false;
-                    state.showAdd = false;
-                    ElMessage.success('已保存');
-                    emit('success');
+                //  saveConfigure(state.form.ClassName, JSON.stringify(editor.get())).then((res) => {
+                saveConfigure(state.form.ClassName, state.form.Content).then((res) => {
+                    if (res) {
+                        ElMessage.error(res);
+                    } else {
+                        state.loading = false;
+                        state.showAdd = false;
+                        ElMessage.success('已保存');
+                        emit('success');
+                    }
                 }).catch((e) => {
                     ElMessage.error(e);
                     state.loading = false;

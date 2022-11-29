@@ -1,4 +1,5 @@
 ﻿{
+  //以下为客户端配置
   "NumConnections": 10000, //支持连接数
   "ListenEnable": false, //是否开启监听
   "ListenPort": 5412, //监听端口
@@ -6,5 +7,7 @@
   "IsCustomPac": false, //是否自定义pac
   "IsPac": false, //是否设置pac
   "TargetName": "B客户端", //连接目标客户端名，为空表示代理到服务器
-  "ConnectEnable": false //是否允许被连接
+
+  //以下为客户端与服务端共有配置
+  "ConnectEnable": false //是否允许被连接，作为服务端时，表示是否开启socks5代理
 }

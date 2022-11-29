@@ -1,5 +1,4 @@
 ﻿using client.service.ui.api.clientServer;
-using common.libs.extends;
 using System.Threading.Tasks;
 
 namespace client.service.logger
@@ -20,27 +19,17 @@ namespace client.service.logger
 
         public bool Enable => config.Enable;
 
-        public async Task<object> Load()
+        public async Task<string> Load()
         {
-            return await Task.FromResult(config).ConfigureAwait(false);
+            return await config.ReadString();
         }
 
         public async Task<string> Save(string jsonStr)
         {
-            Config _config = jsonStr.DeJson<Config>();
-
-            config.Enable = _config.Enable;
-            config.MaxLength = _config.MaxLength;
-            await config.SaveConfig().ConfigureAwait(false);
+           
+            await config.SaveConfig(jsonStr).ConfigureAwait(false);
 
             return string.Empty;
-        }
-
-        public async Task<bool> SwitchEnable(bool enable)
-        {
-            config.Enable = enable;
-            await config.SaveConfig().ConfigureAwait(false);
-            return true;
         }
     }
 

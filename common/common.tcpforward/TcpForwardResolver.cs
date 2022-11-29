@@ -40,7 +40,7 @@ namespace common.tcpforward
             ConnectionKey key = new ConnectionKey(arg.Connection.ConnectId, arg.RequestId);
             if (arg.StateType == TcpForwardStateTypes.Success)
             {
-                if (arg.DataType == TcpForwardDataTypes.FORWARD)
+                if (arg.DataType == TcpForwardDataTypes.Forward)
                 {
                     if (connections.TryGetValue(key, out ConnectUserToken token))
                     {
@@ -63,7 +63,7 @@ namespace common.tcpforward
                     Receive(arg, Helper.EmptyArray);
 
                 }
-                else if (arg.DataType == TcpForwardDataTypes.CONNECT)
+                else if (arg.DataType == TcpForwardDataTypes.Connect)
                 {
                     Connect(arg);
                 }

@@ -116,7 +116,7 @@ namespace common.server.model
     [Flags, MessengerIdEnum]
     public enum ClientsMessengerIds : ushort
     {
-        Min = 101,
+        Min = 100,
         IP = 101,
         Port = 102,
         AddTunnel = 103,
@@ -124,6 +124,6 @@ namespace common.server.model
         Notify = 105,
         Reset = 106,
 
-        Max = 200,
+        Max = 199,
     }
 }

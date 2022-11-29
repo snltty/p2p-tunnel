@@ -39,7 +39,7 @@ namespace client.service.wakeup
                     Items.Add(item);
                 }
 
-                await SaveConfig();
+                await SaveConfig(this.ToJson());
 
                 return true;
             }
@@ -54,7 +54,7 @@ namespace client.service.wakeup
             {
                 Items.RemoveAt(index);
 
-                await SaveConfig();
+                await SaveConfig(this.ToJson());
 
                 return true;
             }
@@ -68,11 +68,16 @@ namespace client.service.wakeup
         {
             return await configDataProvider.Load();
         }
-        public async Task SaveConfig()
+        public async Task<string> ReadString()
         {
-            Config config = await ReadConfig().ConfigureAwait(false);
-            config.Items = Items;
-            await configDataProvider.Save(config).ConfigureAwait(false);
+            return await configDataProvider.LoadString();
+        }
+        public async Task SaveConfig(string jsonStr)
+        {
+            var _config = jsonStr.DeJson<Config>();
+            Items = _config.Items;
+
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
 
         public byte[] ToBytes()

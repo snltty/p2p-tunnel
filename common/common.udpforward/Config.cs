@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.libs.extends;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
@@ -31,16 +32,22 @@ namespace common.udpforward
         {
             return await configDataProvider.Load();
         }
-
-        public async Task SaveConfig()
+        public async Task<string> ReadString()
         {
-            Config config = await ReadConfig().ConfigureAwait(false);
-            config.ConnectEnable = ConnectEnable;
-            config.TunnelListenRange = TunnelListenRange;
-            config.PortWhiteList = PortWhiteList;
-            config.PortBlackList = PortBlackList;
+            return await configDataProvider.LoadString();
+        }
 
-            await configDataProvider.Save(config).ConfigureAwait(false);
+        public async Task SaveConfig(string jsonStr)
+        {
+            var _config = jsonStr.DeJson<Config>();
+
+            ConnectEnable = _config.ConnectEnable;
+            TunnelListenRange = _config.TunnelListenRange;
+            PortWhiteList = _config.PortWhiteList;
+            PortBlackList = _config.PortBlackList;
+
+
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
 

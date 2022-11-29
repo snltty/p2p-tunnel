@@ -271,9 +271,9 @@ namespace common.server.model
     [Flags, MessengerIdEnum]
     public enum PunchHoleMessengerIds : ushort
     {
-        Min = 401,
+        Min = 400,
         Request = 401,
         Response = 402,
-        Max = 500,
+        Max = 499,
     }
 }

@@ -1,4 +1,6 @@
 ﻿using common.libs.database;
+using common.libs.extends;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
@@ -38,10 +40,13 @@ namespace common.socks5
         {
             return await configDataProvider.Load();
         }
-
-        public async Task SaveConfig()
+        public async Task<string> ReadString()
         {
-            Config config = await ReadConfig().ConfigureAwait(false);
+            return await configDataProvider.LoadString();
+        }
+        public async Task SaveConfig(string jsonStr)
+        {
+            Config config = jsonStr.DeJson<Config>();
             config.ListenEnable = ListenEnable;
             config.ListenPort = ListenPort;
             config.BufferSize = BufferSize;
@@ -51,7 +56,8 @@ namespace common.socks5
             config.TargetName = TargetName;
             config.NumConnections = NumConnections;
             
-            await configDataProvider.Save(config).ConfigureAwait(false);
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
+
 }

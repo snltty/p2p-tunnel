@@ -33,7 +33,7 @@ namespace common.tcpforward
             if (request.Connection == null || request.Connection.Connected == false)
             {
                 request.StateType = TcpForwardStateTypes.Fail;
-                if (request.AliveType == TcpForwardAliveTypes.WEB)
+                if (request.AliveType == TcpForwardAliveTypes.Web)
                 {
                     request.Buffer = HttpParseHelper.BuildMessage("未选择转发对象，或者未与转发对象建立连接");
                 }
@@ -46,18 +46,18 @@ namespace common.tcpforward
 
         private void GetTarget(TcpForwardInfo request)
         {
-            request.ForwardType = TcpForwardTypes.FORWARD;
+            request.ForwardType = TcpForwardTypes.Forward;
             //缓存第一个包，等连接成功后发送
             request.Cache = request.Buffer;
             request.Buffer = Helper.EmptyArray;
 
             //短链接
-            if (request.AliveType == TcpForwardAliveTypes.WEB)
+            if (request.AliveType == TcpForwardAliveTypes.Web)
             {
                 //http1.1代理
                 if (HttpConnectMethodHelper.IsConnectMethod(request.Cache.Span))
                 {
-                    request.ForwardType = TcpForwardTypes.PROXY;
+                    request.ForwardType = TcpForwardTypes.Proxy;
                     tcpForwardTargetProvider?.Get(request.SourcePort, request);
                     request.TargetEndpoint = HttpConnectMethodHelper.GetHost(request.Cache);
                     //request.Buffer = Helper.EmptyArray;

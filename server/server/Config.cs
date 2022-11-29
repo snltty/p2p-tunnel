@@ -32,7 +32,7 @@ namespace server
         public int TimeoutDelay { get; set; } = 20 * 1000;
         public int RegisterTimeout { get; set; } = 5000;
 
-        
+
         public bool RegisterEnable { get; set; } = true;
         public bool RelayEnable { get; set; } = false;
         public string EncodePassword { get; set; } = string.Empty;
@@ -43,7 +43,12 @@ namespace server
             return await configDataProvider.Load();
         }
 
-        private async Task SaveConfig()
+        public async Task<string> ReadString()
+        {
+            return await configDataProvider.LoadString();
+        }
+
+        public async Task SaveConfig(string jsonStr)
         {
             Config config = await ReadConfig().ConfigureAwait(false);
 
@@ -57,7 +62,7 @@ namespace server
             config.RelayEnable = RelayEnable;
             config.EncodePassword = EncodePassword;
 
-            await configDataProvider.Save(config).ConfigureAwait(false);
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
 

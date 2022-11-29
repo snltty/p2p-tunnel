@@ -17,7 +17,7 @@ namespace client.service.ui.api.service.clientServer.services
         {
             return clientServer.GetConfigures();
         }
-        public async Task<object> Configure(ClientServiceParamsInfo arg)
+        public async Task<string> Configure(ClientServiceParamsInfo arg)
         {
             SaveParamsInfo model = arg.Content.DeJson<SaveParamsInfo>();
             var plugin = clientServer.GetConfigure(model.ClassName);
@@ -25,18 +25,9 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 return await plugin.Load().ConfigureAwait(false);
             }
-            return new { };
+            return string.Empty;
         }
-        public async Task<bool> Enable(ClientServiceParamsInfo arg)
-        {
-            EnableParamsInfo model = arg.Content.DeJson<EnableParamsInfo>();
-            var plugin = clientServer.GetConfigure(model.ClassName);
-            if (plugin != null)
-            {
-                return await plugin.SwitchEnable(model.Enable).ConfigureAwait(false);
-            }
-            return false;
-        }
+
         public async Task Save(ClientServiceParamsInfo arg)
         {
             SaveParamsInfo model = arg.Content.DeJson<SaveParamsInfo>();

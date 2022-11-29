@@ -1,5 +1,6 @@
 ﻿using server.messengers.register;
 using server.messengers;
+using common.server.model;
 
 namespace server.service.validators
 {
@@ -14,7 +15,7 @@ namespace server.service.validators
         }
         public bool Validate(string key)
         {
-            return config.RegisterEnable || serviceAccessProvider.Validate(key, EnumService.Register);
+            return config.RegisterEnable || serviceAccessProvider.Validate(key, EnumServiceAccess.Register);
         }
     }
 

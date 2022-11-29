@@ -137,11 +137,11 @@ namespace common.tcpforward
         /// <summary>
         /// 连接，
         /// </summary>
-        CONNECT = 1,
+        Connect = 1,
         /// <summary>
         /// 转发
         /// </summary>
-        FORWARD = 2
+        Forward = 2
     }
 
     [Flags]
@@ -165,29 +165,31 @@ namespace common.tcpforward
     public enum TcpForwardTypes : byte
     {
         [Description("转发")]
-        FORWARD = 1,
+        Forward = 1,
         [Description("代理")]
-        PROXY = 2
+        Proxy = 2
     }
 
     [Flags]
     public enum TcpForwardAliveTypes : byte
     {
         [Description("长连接")]
-        TUNNEL = 1,
+        Tunnel = 1,
         [Description("短连接")]
-        WEB = 2
+        Web = 2
     }
 
     [Flags, MessengerIdEnum]
     public enum TcpForwardMessengerIds : ushort
     {
-        Min = 601,
+        Min = 600,
         Request = 602,
         Response = 603,
         Ports = 604,
         SignIn = 605,
         SignOut = 606,
-        Max = 700,
+        GetSetting = 607,
+        Setting = 608,
+        Max = 699,
     }
 }
