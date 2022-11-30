@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ActiveDebugFramework>net7.0-ios</ActiveDebugFramework>
+    <ActiveDebugFramework>net7.0-android</ActiveDebugFramework>
     <IsFirstTimeProjectOpen>False</IsFirstTimeProjectOpen>
-    <ActiveDebugProfile>远程设备</ActiveDebugProfile>
-    <SelectedPlatformGroup>RemoteDevice</SelectedPlatformGroup>
+    <ActiveDebugProfile>OPPO PFDM00 (Android 12.0 - API 31)</ActiveDebugProfile>
+    <SelectedPlatformGroup>PhysicalDevice</SelectedPlatformGroup>
     <DefaultDevice>pixel_5_-_api_31</DefaultDevice>
     <SelectedDevice>pixel_5_-_api_31</SelectedDevice>
   </PropertyGroup>

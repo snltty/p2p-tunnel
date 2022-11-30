@@ -27,7 +27,7 @@ namespace client.service.app
 
             var builder = MauiApp.CreateBuilder();
             builder.UseMauiApp<App>();
-            //builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddMauiBlazorWebView();
 
             MauiApp app = builder.Build();
 

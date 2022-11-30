@@ -71,6 +71,7 @@ namespace client.service.ui.api.service.webServer
 
 
         private Dictionary<string, string> types = new Dictionary<string, string> {
+            { ".webp","image/webp"},
             { ".png","image/png"},
             { ".jpg","image/jpg"},
             { ".jpeg","image/jpeg"},
