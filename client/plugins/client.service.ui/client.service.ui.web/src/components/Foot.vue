@@ -2,14 +2,14 @@
  * @Author: snltty
  * @Date: 2022-08-18 13:02:18
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-30 17:28:41
+ * @LastEditTime: 2022-08-30 22:39:08
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\components\Foot.vue
 -->
 <template>
     <div class="copyright">
-
+        <span>@snltty、p2p-tunnel</span>
         <div class="menu-wrap hidden-sm-and-up">
             <el-row>
                 <el-col :span="8">

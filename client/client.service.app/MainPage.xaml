@@ -4,12 +4,14 @@
              xmlns:local="clr-namespace:client.service.app"
              x:Class="client.service.app.MainPage"
              BackgroundColor="#08743d">
-    <BlazorWebView x:Name="blazorWebView" HostPage="public/web/index.html">
+
+    <!--<WebView Margin="20" Source="https://snltty.gitee.io/p2p-tunnel/#/"></WebView>-->
+    <!--<BlazorWebView x:Name="blazorWebView" HostPage="public/web/index.html">
         <BlazorWebView.RootComponents>
             <RootComponent Selector="#app" ComponentType="{x:Type local:Main}" />
         </BlazorWebView.RootComponents>
-    </BlazorWebView>
-    <!--<Grid>
+    </BlazorWebView>-->
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="*"/>
@@ -36,5 +38,5 @@
             <Button WidthRequest="110" FontSize="12" Text="打开操作界面" BackgroundColor="White" TextColor="#333" Clicked="Button_Clicked" VerticalOptions="Center"></Button>
         </HorizontalStackLayout>
 
-    </Grid>-->
+    </Grid>
 </ContentPage>
