@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace client.realize.messengers.punchHole
 {
     [MessengerIdRange((ushort)PunchHoleMessengerIds.Min, (ushort)PunchHoleMessengerIds.Max)]
-    public class PunchHoleMessenger : IMessenger
+    public sealed class PunchHoleMessenger : IMessenger
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         public PunchHoleMessenger(PunchHoleMessengerSender punchHoleMessengerSender)

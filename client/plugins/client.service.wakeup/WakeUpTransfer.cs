@@ -2,7 +2,6 @@
 using client.messengers.register;
 using common.libs;
 using common.server;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace client.service.wakeup
 {
-    public class WakeUpTransfer
+    public sealed class WakeUpTransfer
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly WakeUpMessengerSender wakeUpMessengerSender;

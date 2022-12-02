@@ -3,12 +3,11 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.register;
-using System;
 
 namespace server.service.messengers
 {
     [MessengerIdRange((ushort)ClientsMessengerIds.Min, (ushort)ClientsMessengerIds.Max)]
-    public class ClientsMessenger : IMessenger
+    public sealed class ClientsMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly NumberSpace numberSpaceTunnelName = new NumberSpace((ulong)TunnelDefaults.MAX + 1);

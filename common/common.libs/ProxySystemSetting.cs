@@ -9,7 +9,7 @@ namespace common.libs
     /// <summary>
     /// 代理系统设置
     /// </summary>
-    public class ProxySystemSetting
+    public sealed class ProxySystemSetting
     {
         /// <summary>
         /// windows 下， “应用级”也就是直接运行exe时，可以直接修改当前用户的注册表

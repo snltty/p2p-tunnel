@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace client.service.vea
 {
     [Table("vea-appsettings")]
-    public class Config
+    public sealed class Config
     {
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;

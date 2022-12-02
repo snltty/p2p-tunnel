@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace server.service.socks5
 {
     [MessengerIdRange((ushort)Socks5MessengerIds.Min, (ushort)Socks5MessengerIds.Max)]
-    public class Socks5SettingMessenger : IMessenger
+    public sealed class Socks5SettingMessenger : IMessenger
     {
         private readonly common.socks5.Config config;
         private readonly IClientRegisterCaching clientRegisterCaching;

@@ -1,9 +1,8 @@
 ﻿using client.messengers.punchHole;
-using client.messengers.register;
 
 namespace client.realize.messengers.punchHole
 {
-    public class PunchHoleTunnel : IPunchHole
+    public sealed class PunchHoleTunnel : IPunchHole
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         public PunchHoleTunnel(PunchHoleMessengerSender punchHoleMessengerSender)

@@ -4,7 +4,7 @@ using common.server.model;
 
 namespace server.service.validators
 {
-    public class RegisterValidator : IRegisterKeyValidator
+    public sealed class RegisterValidator : IRegisterKeyValidator
     {
         private readonly Config config;
         private readonly IServiceAccessValidator serviceAccessProvider;

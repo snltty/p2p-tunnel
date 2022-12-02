@@ -1,4 +1,4 @@
-﻿using common.server;
+﻿ using common.server;
 
 namespace common.socks5
 {

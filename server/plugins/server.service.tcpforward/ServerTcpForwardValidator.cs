@@ -4,7 +4,7 @@ using server.messengers;
 
 namespace server.service.tcpforward
 {
-    public class ServerTcpForwardValidator : DefaultTcpForwardValidator, ITcpForwardValidator
+    public sealed class ServerTcpForwardValidator : DefaultTcpForwardValidator, ITcpForwardValidator
     {
         private readonly common.tcpforward.Config config;
         private readonly IServiceAccessValidator serviceAccessProvider;

@@ -1,10 +1,8 @@
 ﻿using client.messengers.punchHole;
-using common.libs;
-using System;
 
 namespace client.realize.messengers.punchHole
 {
-    public class PunchHoleReverse : IPunchHole
+    public sealed class PunchHoleReverse : IPunchHole
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         public PunchHoleReverse(PunchHoleMessengerSender punchHoleMessengerSender)

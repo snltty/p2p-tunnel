@@ -1,16 +1,13 @@
 ﻿using client.messengers.register;
 using client.service.ui.api.clientServer;
-using common.libs;
 using common.libs.extends;
 using common.server;
-using common.server.model;
 using common.socks5;
 using System;
-using System.Threading.Tasks;
 
 namespace client.service.socks5
 {
-    public class Socks5ClientService : IClientService
+    public sealed class Socks5ClientService : IClientService
     {
         private readonly common.socks5.Config config;
         private readonly ISocks5ClientListener socks5ClientListener;

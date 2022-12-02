@@ -8,7 +8,7 @@ using System.Net.Sockets;
 
 namespace common.udpforward
 {
-    public class UdpForwardServer : IUdpForwardServer
+    public sealed class UdpForwardServer : IUdpForwardServer
     {
         public SimpleSubPushHandler<UdpForwardInfo> OnRequest { get; } = new SimpleSubPushHandler<UdpForwardInfo>();
         public SimpleSubPushHandler<UdpforwardListenChangeInfo> OnListenChange { get; } = new SimpleSubPushHandler<UdpforwardListenChangeInfo>();

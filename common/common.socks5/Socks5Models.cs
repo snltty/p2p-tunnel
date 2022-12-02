@@ -6,7 +6,7 @@ using System.Net;
 
 namespace common.socks5
 {
-    public class Socks5Info
+    public sealed class Socks5Info
     {
         public object Tag { get; set; }
 

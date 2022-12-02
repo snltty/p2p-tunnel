@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace common.server
 {
-    public class MessengerResolver
+    public sealed class MessengerResolver
     {
 
         private readonly Dictionary<ushort, MessengerCacheInfo> messengers = new();

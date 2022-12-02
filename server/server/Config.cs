@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace server
 {
     [Table("appsettings")]
-    public class Config
+    public sealed class Config
     {
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;

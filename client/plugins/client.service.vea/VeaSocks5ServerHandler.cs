@@ -7,7 +7,7 @@ namespace client.service.vea
     {
         public void UpdateConfig();
     }
-    public class VeaSocks5ServerHandler : Socks5ServerHandler, IVeaSocks5ServerHandler
+    public sealed class VeaSocks5ServerHandler : Socks5ServerHandler, IVeaSocks5ServerHandler
     {
         private readonly Config _config;
         public VeaSocks5ServerHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, IVeaKeyValidator veaKeyValidator)

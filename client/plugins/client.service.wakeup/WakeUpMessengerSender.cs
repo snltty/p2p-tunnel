@@ -1,13 +1,12 @@
 ﻿using common.libs.extends;
 using common.server;
 using common.server.model;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace client.service.wakeup
 {
-    public class WakeUpMessengerSender
+    public sealed class WakeUpMessengerSender
     {
         private readonly MessengerSender messengerSender;
         private readonly Config config;

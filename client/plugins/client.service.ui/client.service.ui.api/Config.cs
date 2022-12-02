@@ -9,7 +9,7 @@ namespace client.service.ui.api
     /// 配置信息
     /// </summary>
     [Table("ui-appsettings")]
-    public class Config
+    public sealed class Config
     {
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;

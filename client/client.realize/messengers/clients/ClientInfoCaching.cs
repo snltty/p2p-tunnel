@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace client.realize.messengers.clients
 {
-    public class ClientInfoCaching : IClientInfoCaching
+    public sealed class ClientInfoCaching : IClientInfoCaching
     {
         private readonly ConcurrentDictionary<ulong, ClientInfo> clients = new ConcurrentDictionary<ulong, ClientInfo>();
         private readonly ConcurrentDictionary<string, ClientInfo> clientsByName = new ConcurrentDictionary<string, ClientInfo>();

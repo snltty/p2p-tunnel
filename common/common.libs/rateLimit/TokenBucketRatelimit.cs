@@ -7,7 +7,7 @@ namespace common.libs.rateLimit
     /// 令牌桶算法
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
-    public class TokenBucketRatelimit<TKey> : IRateLimit<TKey>
+    public sealed class TokenBucketRatelimit<TKey> : IRateLimit<TKey>
     {
         int rate = 0;
         double ms = 1000.0d;

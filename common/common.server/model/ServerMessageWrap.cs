@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace common.server.model
 {
-    public class MessageRequestWrap
+    public sealed class MessageRequestWrap
     {
         public const int RelayIdLengthPos = 5;
         public const int RelayIdIndexPos = RelayIdLengthPos + 1;
@@ -170,7 +170,7 @@ namespace common.server.model
         }
     }
 
-    public class MessageResponseWrap
+    public sealed class MessageResponseWrap
     {
         public IConnection Connection { get; set; }
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;

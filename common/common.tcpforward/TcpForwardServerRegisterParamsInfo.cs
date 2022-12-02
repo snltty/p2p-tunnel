@@ -8,7 +8,7 @@ namespace common.tcpforward
     /// <summary>
     /// Tcp转发
     /// </summary>
-    public class TcpForwardRegisterParamsInfo
+    public sealed class TcpForwardRegisterParamsInfo
     {
         public TcpForwardRegisterParamsInfo() { }
 

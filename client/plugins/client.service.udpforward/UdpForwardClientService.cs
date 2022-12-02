@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace client.service.udpforward
 {
-    public class UdpForwardClientService : IClientService
+    public sealed class UdpForwardClientService : IClientService
     {
         private readonly UdpForwardTransfer udpForwardTransfer;
         public UdpForwardClientService(UdpForwardTransfer udpForwardTransfer)
@@ -89,7 +89,7 @@ namespace client.service.udpforward
      
     }
 
-    public class ForwardSettingParamsInfo
+    public sealed class ForwardSettingParamsInfo
     {
         public ushort Port { get; set; } = 0;
         public string Content { get; set; } = string.Empty;

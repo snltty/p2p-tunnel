@@ -10,7 +10,7 @@ using System.Net.Sockets;
 
 namespace common.udpforward
 {
-    public class UdpForwardResolver
+    public sealed class UdpForwardResolver
     {
         private ConcurrentDictionary<ConnectionKeyUdp, UdpToken> connections = new(new ConnectionKeyUdpComparer());
         private readonly UdpForwardMessengerSender udpForwardMessengerSender;

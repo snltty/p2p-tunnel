@@ -2,6 +2,7 @@
 using System;
 using System.Text.Json.Serialization;
 using common.server;
+using System.Net;
 
 namespace client.messengers.clients
 {
@@ -12,6 +13,7 @@ namespace client.messengers.clients
     {
         public bool Connecting { get; private set; } = false;
         public bool Connected { get => Connection != null && Connection.Connected; }
+        public IPAddress IPAddress { get => Connection?.Address.Address ?? IPAddress.Any; }
 
         public string Name { get; init; } = string.Empty;
         public ulong Id { get; init; } = 0;
@@ -72,7 +74,7 @@ namespace client.messengers.clients
         }
         public void SetConnecting(bool val)
         {
-           Connecting = val;
+            Connecting = val;
         }
     }
 

@@ -5,7 +5,7 @@ using common.tcpforward;
 
 namespace client.service.tcpforward
 {
-    internal class TcpForwardTargetProvider : ITcpForwardTargetProvider
+    internal sealed class TcpForwardTargetProvider : ITcpForwardTargetProvider
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;

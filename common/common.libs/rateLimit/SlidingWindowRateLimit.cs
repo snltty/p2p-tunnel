@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace common.libs.rateLimit
 {
-    public class SlidingWindowRateLimit<TKey> : IRateLimit<TKey>
+    public sealed class SlidingWindowRateLimit<TKey> : IRateLimit<TKey>
     {
         private readonly ConcurrentDictionary<TKey, SlidingRateInfo> limits = new ConcurrentDictionary<TKey, SlidingRateInfo>();
         private int rate = 0;

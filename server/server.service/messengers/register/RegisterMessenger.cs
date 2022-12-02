@@ -1,5 +1,4 @@
 ﻿using common.libs;
-using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.register;
@@ -11,7 +10,7 @@ namespace server.service.messengers.register
 {
 
     [MessengerIdRange((ushort)RegisterMessengerIds.Min, (ushort)RegisterMessengerIds.Max)]
-    public class RegisterMessenger : IMessenger
+    public sealed class RegisterMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly IRegisterKeyValidator registerKeyValidator;

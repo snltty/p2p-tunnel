@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace client.service.tcpforward
 {
-    public class TcpForwardClientService : IClientService
+    public sealed class TcpForwardClientService : IClientService
     {
         private readonly TcpForwardTransfer tcpForwardTransfer;
         public TcpForwardClientService(TcpForwardTransfer tcpForwardTransfer)

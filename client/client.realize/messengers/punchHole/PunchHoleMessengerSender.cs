@@ -13,7 +13,7 @@ using System.Collections.Concurrent;
 
 namespace client.realize.messengers.punchHole
 {
-    public class PunchHoleMessengerSender
+    public sealed class PunchHoleMessengerSender
     {
         private Dictionary<PunchHoleTypes, IPunchHole> plugins = new Dictionary<PunchHoleTypes, IPunchHole>();
 

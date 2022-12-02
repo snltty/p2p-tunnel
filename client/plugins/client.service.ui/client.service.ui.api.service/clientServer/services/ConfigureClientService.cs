@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
 {
-    public class ConfigureClientService : IClientService
+    public sealed class ConfigureClientService : IClientService
     {
         private readonly IClientServer clientServer;
         public ConfigureClientService(IClientServer clientServer)

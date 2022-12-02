@@ -5,7 +5,7 @@ using System.Net;
 
 namespace common.udpforward
 {
-    public class UdpForwardRegisterParamsInfo
+    public sealed class UdpForwardRegisterParamsInfo
     {
         public UdpForwardRegisterParamsInfo() { }
 

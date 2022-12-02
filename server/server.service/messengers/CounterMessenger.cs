@@ -9,7 +9,7 @@ using System.Linq;
 namespace server.service.messengers
 {
     [MessengerIdRange((ushort)CounterMessengerIds.Min, (ushort)CounterMessengerIds.Max)]
-    public class CounterMessenger : IMessenger
+    public sealed class CounterMessenger : IMessenger
     {
         private readonly Process proc = ProcessHelper.GetCurrentProcess();
         private readonly DateTime startTime = DateTime.Now;

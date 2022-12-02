@@ -4,7 +4,6 @@ using common.server.model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using common.server;
 using common.server.servers.iocp;
 using common.server.servers.rudp;
@@ -17,7 +16,7 @@ using server.service.validators;
 
 namespace server.service
 {
-    public class Plugin : IPlugin
+    public sealed class Plugin : IPlugin
     {
 
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)

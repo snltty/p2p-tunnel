@@ -18,7 +18,7 @@ namespace client.service.udpforward
     /// <summary>
     /// tcp转发中转器和入口
     /// </summary>
-    public class UdpForwardTransfer : UdpForwardTransferBase
+    public sealed class UdpForwardTransfer : UdpForwardTransferBase
     {
         private readonly IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching;
         private readonly IUdpForwardServer udpForwardServer;

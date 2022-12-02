@@ -8,7 +8,7 @@ namespace common.libs
     /// <summary>
     /// 时间轮延时任务
     /// </summary>
-    public class WheelTimer<T>
+    public sealed class WheelTimer<T>
     {
         //流转次数，
         long ticks = 0;

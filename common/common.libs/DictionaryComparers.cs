@@ -6,7 +6,7 @@ using System.Net;
 namespace common.libs
 {
 
-    public class MemoryByteDictionaryComparer : IEqualityComparer<ReadOnlyMemory<byte>>
+    public sealed class MemoryByteDictionaryComparer : IEqualityComparer<ReadOnlyMemory<byte>>
     {
         public bool Equals(ReadOnlyMemory<byte> x, ReadOnlyMemory<byte> y)
         {
@@ -19,7 +19,7 @@ namespace common.libs
         }
     }
 
-    public class IPEndPointDictionaryComparer : IEqualityComparer<IPEndPoint>
+    public sealed class IPEndPointDictionaryComparer : IEqualityComparer<IPEndPoint>
     {
         public bool Equals(IPEndPoint x, IPEndPoint y)
         {

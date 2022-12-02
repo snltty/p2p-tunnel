@@ -7,7 +7,7 @@ namespace common.server
         public bool Validate(IConnection connection);
     }
 
-    public class DefaultRelayValidator : IRelayValidator
+    public sealed class DefaultRelayValidator : IRelayValidator
     {
         public DefaultRelayValidator()
         {

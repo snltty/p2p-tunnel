@@ -1,10 +1,9 @@
 ﻿using client.service.ui.api.clientServer;
-using common.libs.extends;
 using System.Threading.Tasks;
 
 namespace client.service.wakeup
 {
-    public class WakeUpClientConfigure : IClientConfigure
+    public sealed class WakeUpClientConfigure : IClientConfigure
     {
         private Config config;
         private readonly WakeUpTransfer wakeUpTransfer;

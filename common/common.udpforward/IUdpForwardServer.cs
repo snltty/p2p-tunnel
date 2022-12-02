@@ -16,7 +16,7 @@ namespace common.udpforward
         public SimpleSubPushHandler<UdpforwardListenChangeInfo> OnListenChange { get; }
     }
    
-    public class UdpforwardListenChangeInfo
+    public sealed class UdpforwardListenChangeInfo
     {
         public int Port { get; set; }
         public bool State { get; set; }

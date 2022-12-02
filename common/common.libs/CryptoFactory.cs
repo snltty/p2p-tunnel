@@ -21,7 +21,7 @@ namespace common.libs
         /// <returns></returns>
         public IAsymmetricCrypto CreateAsymmetric(RsaKey key);
     }
-    public class CryptoFactory : ICryptoFactory
+    public sealed class CryptoFactory : ICryptoFactory
     {
         public ISymmetricCrypto CreateSymmetric(string password)
         {
@@ -48,7 +48,7 @@ namespace common.libs
     {
         public RsaKey Key { get; }
     }
-    public class RsaCrypto : IAsymmetricCrypto
+    public sealed class RsaCrypto : IAsymmetricCrypto
     {
         RsaKey key = new RsaKey();
 
@@ -170,7 +170,7 @@ namespace common.libs
         }
 
     }
-    public class RsaKey
+    public sealed class RsaKey
     {
         public string PrivateKey { get; set; }
         public string PublicKey { get; set; }
@@ -182,7 +182,7 @@ namespace common.libs
     public interface ISymmetricCrypto : ICrypto
     {
     }
-    public class AesCrypto : ISymmetricCrypto
+    public sealed class AesCrypto : ISymmetricCrypto
     {
         private ICryptoTransform encryptoTransform;
         private ICryptoTransform decryptoTransform;

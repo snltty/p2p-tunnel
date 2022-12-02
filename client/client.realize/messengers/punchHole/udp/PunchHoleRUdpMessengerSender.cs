@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole.udp
 {
-    public class PunchHoleRUdpMessengerSender : IPunchHoleUdp
+    public sealed class PunchHoleRUdpMessengerSender : IPunchHoleUdp
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly RegisterStateInfo registerState;

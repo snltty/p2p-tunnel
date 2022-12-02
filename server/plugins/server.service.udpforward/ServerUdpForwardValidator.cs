@@ -4,7 +4,7 @@ using server.messengers;
 
 namespace server.service.udpforward
 {
-    public class ServerUdpForwardValidator : DefaultUdpForwardValidator, IUdpForwardValidator
+    public sealed class ServerUdpForwardValidator : DefaultUdpForwardValidator, IUdpForwardValidator
     {
         private readonly common.udpforward.Config config;
         private readonly IServiceAccessValidator serviceAccessProvider;

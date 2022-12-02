@@ -2,7 +2,7 @@
 
 namespace client.realize.messengers.relay
 {
-    public class RelayValidator : IRelayValidator
+    public sealed class RelayValidator : IRelayValidator
     {
         private readonly Config config;
         public RelayValidator(Config config)

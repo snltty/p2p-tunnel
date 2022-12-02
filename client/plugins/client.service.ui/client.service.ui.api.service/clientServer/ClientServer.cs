@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer
 {
-    public class ClientServer : IClientServer
+    public sealed class ClientServer : IClientServer
     {
         private readonly Dictionary<string, PluginPathCacheInfo> plugins = new();
         private readonly Dictionary<string, IClientConfigure> settingPlugins = new();

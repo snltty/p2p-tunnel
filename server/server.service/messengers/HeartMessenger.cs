@@ -5,7 +5,7 @@ using common.server.model;
 namespace server.service.messengers
 {
     [MessengerIdRange((ushort)HeartMessengerIds.Min, (ushort)HeartMessengerIds.Max)]
-    public class HeartMessenger : IMessenger
+    public sealed class HeartMessenger : IMessenger
     {
         public HeartMessenger()
         {

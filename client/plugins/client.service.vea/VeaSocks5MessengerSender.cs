@@ -9,7 +9,7 @@ namespace client.service.vea
 
     }
 
-    public class VeaSocks5MessengerSender : Socks5MessengerSender, IVeaSocks5MessengerSender
+    public sealed class VeaSocks5MessengerSender : Socks5MessengerSender, IVeaSocks5MessengerSender
     {
         protected override ushort TargetRequest { get; } = (ushort)VeaSocks5MessengerIds.Request;
         protected override ushort TargetResponse { get; } = (ushort)VeaSocks5MessengerIds.Response;

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace server.service.tcpforward
 {
     [MessengerIdRange((ushort)TcpForwardMessengerIds.Min, (ushort)TcpForwardMessengerIds.Max)]
-    public class TcpForwardMessenger : IMessenger
+    public sealed class TcpForwardMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly common.tcpforward.Config config;

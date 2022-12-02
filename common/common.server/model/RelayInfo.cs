@@ -4,7 +4,7 @@ using System;
 
 namespace common.server.model
 {
-    public class RelayInfo
+    public sealed class RelayInfo
     {
         public IConnection Connection { get; set; }
         public ulong[] RelayIds { get; set; } = Helper.EmptyUlongArray;
@@ -49,7 +49,7 @@ namespace common.server.model
     }
 
 
-    public class ConnectsInfo
+    public sealed class ConnectsInfo
     {
         public ulong Id { get; set; }
         public ulong ToId { get; set; }

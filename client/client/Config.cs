@@ -12,7 +12,7 @@ namespace client
     /// 配置信息
     /// </summary>
     [Table("appsettings")]
-    public class Config
+    public sealed class Config
     {
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
@@ -61,7 +61,7 @@ namespace client
     /// <summary>
     /// 客户端配置
     /// </summary>
-    public class ClientConfig
+    public sealed class ClientConfig
     {
         public byte ShortId { get; set; }
         /// <summary>
@@ -152,7 +152,7 @@ namespace client
     /// <summary>
     /// 服务器配置
     /// </summary>
-    public class ServerConfig
+    public sealed class ServerConfig
     {
         public string Ip { get; set; } = string.Empty;
         public int UdpPort { get; set; } = 8099;

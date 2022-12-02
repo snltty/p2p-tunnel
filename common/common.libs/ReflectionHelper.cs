@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace common.libs
 {
-    public class ReflectionHelper
+    public sealed class ReflectionHelper
     {
         public static IEnumerable<Type> GetInterfaceSchieves(Type type)
         {

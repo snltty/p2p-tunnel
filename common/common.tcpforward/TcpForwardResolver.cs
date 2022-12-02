@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace common.tcpforward
 {
-    public class TcpForwardResolver
+    public sealed class TcpForwardResolver
     {
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
         private readonly Config config;

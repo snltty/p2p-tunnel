@@ -8,7 +8,7 @@ namespace client.realize.messengers.heart
     /// 心跳包
     /// </summary>
     [MessengerIdRange((ushort)HeartMessengerIds.Min, (ushort)HeartMessengerIds.Max)]
-    public class HeartMessenger : IMessenger
+    public sealed class HeartMessenger : IMessenger
     {
         public HeartMessenger()
         {

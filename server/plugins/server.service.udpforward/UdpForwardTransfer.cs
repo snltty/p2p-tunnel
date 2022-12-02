@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace server.service.udpforward
 {
-    public class UdpForwardTransfer : UdpForwardTransferBase
+    public sealed class UdpForwardTransfer : UdpForwardTransferBase
     {
         public UdpForwardTransfer(
 

@@ -1,10 +1,9 @@
 ﻿using client.service.ui.api.clientServer;
-using common.libs.extends;
 using System.Threading.Tasks;
 
 namespace client.service.vea
 {
-    public class VeaClientConfigure : IClientConfigure
+    public sealed class VeaClientConfigure : IClientConfigure
     {
         private Config config;
         private IVeaSocks5ServerHandler veaSocks5ServerHandler;

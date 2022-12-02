@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace common.tcpforward
 {
-    public class TcpForwardTargetCaching : ITcpForwardTargetCaching<TcpForwardTargetCacheInfo>
+    public sealed class TcpForwardTargetCaching : ITcpForwardTargetCaching<TcpForwardTargetCacheInfo>
     {
         private readonly ConcurrentDictionary<string, TcpForwardTargetCacheInfo> cacheHost = new();
         private readonly ConcurrentDictionary<ushort, TcpForwardTargetCacheInfo> cache = new();

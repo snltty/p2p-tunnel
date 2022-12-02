@@ -4,7 +4,7 @@ using System.Net;
 
 namespace common.server.model
 {
-    public class ClientsInfo
+    public sealed class ClientsInfo
     {
         public ClientsInfo() { }
 
@@ -58,11 +58,13 @@ namespace common.server.model
 
     }
 
-    public class ClientsClientInfo
+    public sealed class ClientsClientInfo
     {
         public ulong Id { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
         public uint ClientAccess { get; set; } = 0;
+
+
 
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; } = null;

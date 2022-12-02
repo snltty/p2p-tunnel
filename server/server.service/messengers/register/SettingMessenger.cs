@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace server.service.messengers.register
 {
     [MessengerIdRange((ushort)RegisterMessengerIds.Min, (ushort)RegisterMessengerIds.Max)]
-    public class SettingMessenger : IMessenger
+    public sealed class SettingMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;

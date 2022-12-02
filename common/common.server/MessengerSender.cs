@@ -1,8 +1,6 @@
 ﻿using common.libs;
-using common.libs.extends;
 using common.server.model;
 using System;
-using System.Buffers;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +10,7 @@ namespace common.server
     /// <summary>
     /// 消息发送器
     /// </summary>
-    public class MessengerSender
+    public sealed class MessengerSender
     {
         public NumberSpaceUInt32 requestIdNumberSpace = new NumberSpaceUInt32(0);
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
@@ -145,13 +143,13 @@ namespace common.server
         }
     }
 
-    public class MessageResponeInfo
+    public sealed class MessageResponeInfo
     {
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
         public ReadOnlyMemory<byte> Data { get; set; } = Helper.EmptyArray;
     }
 
-    public class TimeoutState
+    public sealed class TimeoutState
     {
         public uint RequestId { get; set; }
         public TaskCompletionSource<MessageResponeInfo> Tcs { get; set; }

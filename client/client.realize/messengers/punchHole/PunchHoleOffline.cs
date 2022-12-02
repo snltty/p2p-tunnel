@@ -3,7 +3,7 @@ using client.messengers.punchHole;
 
 namespace client.realize.messengers.punchHole
 {
-    public class PunchHoleOffline : IPunchHole
+    public sealed class PunchHoleOffline : IPunchHole
     {
         private readonly IClientInfoCaching clientInfoCaching;
         public PunchHoleOffline(IClientInfoCaching clientInfoCaching)

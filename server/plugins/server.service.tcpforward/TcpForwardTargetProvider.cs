@@ -3,7 +3,7 @@ using server.messengers.register;
 
 namespace server.service.tcpforward
 {
-    internal class TcpForwardTargetProvider : ITcpForwardTargetProvider
+    internal sealed class TcpForwardTargetProvider : ITcpForwardTargetProvider
     {
         private readonly IClientRegisterCaching clientRegisterCaching;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;

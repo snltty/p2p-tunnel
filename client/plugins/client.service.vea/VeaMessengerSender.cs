@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace client.service.vea
 {
-    public class VeaMessengerSender
+    public sealed class VeaMessengerSender
     {
         private readonly MessengerSender messengerSender;
         private readonly Config config;

@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace common.libs.jsonConverters
 {
-    public class IPAddressJsonConverter : JsonConverter<IPAddress>
+    public sealed class IPAddressJsonConverter : JsonConverter<IPAddress>
     {
         public override IPAddress Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

@@ -8,7 +8,7 @@ namespace common.server.model
     /// <summary>
     /// 客户端注册数据
     /// </summary>
-    public class RegisterParamsInfo
+    public sealed class RegisterParamsInfo
     {
         public RegisterParamsInfo() { }
 
@@ -149,7 +149,7 @@ namespace common.server.model
     /// <summary>
     /// 客户端注册服务器返回的数据
     /// </summary>
-    public class RegisterResultInfo
+    public sealed class RegisterResultInfo
     {
         public RegisterResultInfo() { }
 
@@ -273,7 +273,7 @@ namespace common.server.model
     }
 
 
-    public class TunnelRegisterInfo
+    public sealed class TunnelRegisterInfo
     {
         public TunnelRegisterInfo() { }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace common.libs
 {
-    public class SimpleSubPushHandler<T>
+    public sealed class SimpleSubPushHandler<T>
     {
         List<Action<T>> actions = new List<Action<T>>();
 

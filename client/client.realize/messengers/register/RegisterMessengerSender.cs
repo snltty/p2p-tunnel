@@ -9,7 +9,7 @@ using static common.server.model.RegisterResultInfo;
 
 namespace client.realize.messengers.register
 {
-    public class RegisterMessengerSender
+    public sealed class RegisterMessengerSender
     {
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerState;

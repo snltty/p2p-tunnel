@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace server.service.messengers
 {
     [MessengerIdRange((ushort)PunchHoleMessengerIds.Min, (ushort)PunchHoleMessengerIds.Max)]
-    public class PunchHoleMessenger : IMessenger
+    public sealed class PunchHoleMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly MessengerSender messengerSender;

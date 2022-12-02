@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.relay
 {
-    public class RelayMessengerSender
+    public sealed class RelayMessengerSender
     {
 
         public SimpleSubPushHandler<RelayInfo> OnRelay { get; } = new SimpleSubPushHandler<RelayInfo>();

@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace common.libs.jsonConverters
 {
-    public class IPEndpointJsonConverter : JsonConverter<IPEndPoint>
+    public sealed class IPEndpointJsonConverter : JsonConverter<IPEndPoint>
     {
         public override IPEndPoint Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

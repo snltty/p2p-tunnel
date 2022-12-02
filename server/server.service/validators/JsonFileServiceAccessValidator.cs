@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace server.service.validators
 {
     [Table("service-auth-groups")]
-    public class JsonFileServiceAccessValidator : IServiceAccessValidator
+    public sealed class JsonFileServiceAccessValidator : IServiceAccessValidator
     {
         public Dictionary<string, EnumServiceAccess> Groups { get; set; } = new Dictionary<string, EnumServiceAccess>();
 

@@ -2,7 +2,7 @@
 
 namespace common.libs
 {
-    public class NumberSpace
+    public sealed class NumberSpace
     {
         private ulong num;
 
@@ -34,7 +34,7 @@ namespace common.libs
         }
     }
 
-    public class NumberSpaceUInt32
+    public sealed class NumberSpaceUInt32
     {
         private uint num = 0;
 
@@ -66,7 +66,7 @@ namespace common.libs
         }
     }
 
-    public class BoolSpace
+    public sealed class BoolSpace
     {
         bool _default;
         private bool value;

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace client.service.udpforward
 {
-    public class Socks5ServerConfigure : IClientConfigure
+    public sealed class Socks5ServerConfigure : IClientConfigure
     {
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerStateInfo;

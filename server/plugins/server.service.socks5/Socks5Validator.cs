@@ -9,7 +9,7 @@ using common.server.model;
 
 namespace server.service.socks5
 {
-    public class Socks5Validator : ISocks5Validator
+    public sealed class Socks5Validator : ISocks5Validator
     {
         private readonly IServiceAccessValidator serviceAccessProvider;
         private readonly common.socks5.Config config;

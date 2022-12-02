@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-24 17:06:52
+ * @LastEditTime: 2022-12-02 10:36:13
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
@@ -17,12 +17,11 @@
                         <div class="item">
                             <dl v-loading="item.Connecting">
                                 <dt>{{item.Name}}</dt>
-                                <dd :style="item.connectTypeStyle" class="flex" @click="handleShowDelay(item)">
+                                <dd :style="item.connectTypeStyle" :title="item.IPAddress" class="flex" @click="handleShowDelay(item)">
                                     <span class="label">{{item.serverType}}</span>
                                     <span>{{item.connectTypeStr}}</span>
                                     <span class="flex-1"></span>
                                     <Signal :value="item.Ping"></Signal>
-
                                 </dd>
                                 <dd class="t-r">
                                     <el-button plain text bg size="small" @click="handleConnect(item)">连它</el-button>

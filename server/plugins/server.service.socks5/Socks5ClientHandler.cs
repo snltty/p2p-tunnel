@@ -3,7 +3,7 @@ using common.socks5;
 
 namespace server.service.socks5
 {
-    public class Socks5ClientHandler : ISocks5ClientHandler
+    public sealed class Socks5ClientHandler : ISocks5ClientHandler
     {
         public Socks5ClientHandler()
         {

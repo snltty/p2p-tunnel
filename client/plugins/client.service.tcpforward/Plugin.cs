@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace client.service.tcpforward
 {
-    public class Plugin : IPlugin
+    public sealed class Plugin : IPlugin
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {

@@ -4,7 +4,7 @@ using common.tcpforward;
 namespace client.service.tcpforward
 {
     [MessengerIdRange((ushort)TcpForwardMessengerIds.Min, (ushort)TcpForwardMessengerIds.Max)]
-    public class TcpForwardMessenger : IMessenger
+    public sealed class TcpForwardMessenger : IMessenger
     {
         private readonly TcpForwardResolver tcpForwardResolver;
         private readonly ITcpForwardServer tcpForwardServer;

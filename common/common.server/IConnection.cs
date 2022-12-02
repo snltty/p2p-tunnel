@@ -137,7 +137,7 @@ namespace common.server
         public abstract IConnection CloneFull();
     }
 
-    public class RudpConnection : Connection
+    public sealed class RudpConnection : Connection
     {
         public RudpConnection(NetPeer peer, IPEndPoint address)
         {
@@ -238,7 +238,7 @@ namespace common.server
         }
     }
 
-    public class TcpConnection : Connection
+    public sealed class TcpConnection : Connection
     {
         public TcpConnection(Socket tcpSocket)
         {

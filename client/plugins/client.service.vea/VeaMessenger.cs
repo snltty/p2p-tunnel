@@ -4,7 +4,7 @@ using common.server;
 namespace client.service.vea
 {
     [MessengerIdRange((ushort)VeaSocks5MessengerIds.Min,(ushort)VeaSocks5MessengerIds.Max)]
-    public class VeaMessenger : IMessenger
+    public sealed class VeaMessenger : IMessenger
     {
         private readonly VeaTransfer veaTransfer;
         private readonly Config config;

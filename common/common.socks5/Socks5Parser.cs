@@ -10,7 +10,7 @@ namespace common.socks5
     /// <summary>
     /// socks5 数据包解析和组装
     /// </summary>
-    public class Socks5Parser
+    public sealed class Socks5Parser
     {
 
         /// <summary>

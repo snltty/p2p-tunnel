@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace client.service.udpforward
 {
-    public class ServiceAccessrConfigure : IClientConfigure
+    public sealed class ServiceAccessrConfigure : IClientConfigure
     {
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerStateInfo;

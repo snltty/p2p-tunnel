@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.register
 {
-    public class RegisterTransfer : IRegisterTransfer
+    public sealed class RegisterTransfer : IRegisterTransfer
     {
         private readonly RegisterMessengerSender registerMessageHelper;
         private readonly ITcpServer tcpServer;

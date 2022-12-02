@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,7 +18,7 @@ namespace client.service.tcpforward
     /// <summary>
     /// tcp转发中转器和入口
     /// </summary>
-    public class TcpForwardTransfer : TcpForwardTransferBase
+    public sealed class TcpForwardTransfer : TcpForwardTransferBase
     {
         private readonly P2PConfigInfo p2PConfigInfo;
         public List<P2PListenInfo> p2pListens = new List<P2PListenInfo>();

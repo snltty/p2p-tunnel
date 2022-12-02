@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace common.udpforward
 {
-    public class UdpForwardTargetCaching : IUdpForwardTargetCaching<UdpForwardTargetCacheInfo>
+    public sealed class UdpForwardTargetCaching : IUdpForwardTargetCaching<UdpForwardTargetCacheInfo>
     {
         private readonly ConcurrentDictionary<ushort, UdpForwardTargetCacheInfo> cache = new();
 

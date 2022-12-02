@@ -5,7 +5,7 @@ using common.server.model;
 
 namespace server.service.validators
 {
-    public class RelayValidator : IRelayValidator
+    public sealed class RelayValidator : IRelayValidator
     {
 
         private readonly Config config;

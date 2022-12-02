@@ -1,12 +1,11 @@
 ﻿using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using common.libs;
-using common.libs.extends;
 using common.server.model;
 
 namespace client.realize.messengers.punchHole.tcp.nutssb
 {
-    public class PunchHoleTcpNutssB : IPunchHole
+    public sealed class PunchHoleTcpNutssB : IPunchHole
     {
         private readonly IPunchHoleTcp punchHoleTcp;
         public PunchHoleTcpNutssB(IPunchHoleTcp punchHoleTcp)

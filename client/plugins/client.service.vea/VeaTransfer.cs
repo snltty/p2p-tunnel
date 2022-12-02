@@ -14,7 +14,7 @@ using System.Security.Principal;
 
 namespace client.service.vea
 {
-    public class VeaTransfer
+    public sealed class VeaTransfer
     {
         Process Tun2SocksProcess;
         int interfaceNumber = 0;
@@ -90,7 +90,7 @@ namespace client.service.vea
 
                 cache = new IPAddressCacheInfo { Client = client, IP = _ips.IP, LanIPs = _ips.LanIPs };
                 ips.AddOrUpdate(_ips.IP, cache, (a, b) => cache);
-                AddLanMasks(_ips.LanIPs, cache);
+                AddLanMasks(_ips.LanIPs, cache, client);
 
                 AddRoute();
             }
@@ -341,7 +341,8 @@ namespace client.service.vea
         {
             foreach (var item in lanips)
             {
-                AddRoute(item.Value.LanIPs);
+                IPAddress[] _lanips = ExcludeLanIP(item.Value.LanIPs, item.Value.Client);
+                AddRoute(_lanips);
             }
         }
         private void AddRoute(IPAddress[] ip)
@@ -368,12 +369,7 @@ namespace client.service.vea
                 {
                     if (item.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     {
-                        byte[] mask = new byte[] { 255, 255, 255, 255 };
-                        byte[] ipBytes = item.GetAddressBytes();
-                        for (int i = 0; i < ipBytes.Length; i++)
-                        {
-                            if (ipBytes[i] == 0) mask[i] = 0;
-                        }
+                        byte[] mask = GetIPMask(item);
                         commands.Add($"route add {item} mask {string.Join(".", mask)} {config.IP} metric 5 if {interfaceNumber}");
                     }
                 }
@@ -447,34 +443,56 @@ namespace client.service.vea
             }
         }
 
-        public int GetIpMask(IPAddress ip)
-        {
-            return GetIpMask(ip.GetAddressBytes());
-        }
-        public int GetIpMask(Span<byte> ip)
-        {
-            return ip.ToInt32() & 0xffffff;
-        }
-
         private void RemoveLanMasks(IPAddress[] _lanips)
         {
             foreach (var item in _lanips)
             {
-                lanips.TryRemove(GetIpMask(item), out _);
+                lanips.TryRemove(item.GetAddressBytes().ToInt32(), out _);
             }
             DelRoute(_lanips);
         }
-        private void AddLanMasks(IPAddress[] _lanips, IPAddressCacheInfo cache)
+
+        private void AddLanMasks(IPAddress[] _lanips, IPAddressCacheInfo cache, ClientInfo client)
         {
+            _lanips = ExcludeLanIP(_lanips, client);
             foreach (var item in _lanips)
             {
-                lanips.AddOrUpdate(GetIpMask(item), cache, (a, b) => cache);
+                lanips.AddOrUpdate(item.GetAddressBytes().ToInt32(), cache, (a, b) => cache);
             }
+        }
+
+        private IPAddress[] ExcludeLanIP(IPAddress[] _lanips, ClientInfo client)
+        {
+            IPAddress ip = client.IPAddress;
+
+            //跟目标客户端是局域网连接，则排除连接的ip网段
+            if (client.ConnectType == ClientConnectTypes.P2P && ip.IsLan())
+            {
+                _lanips = _lanips.Where(c =>
+                {
+                    int mask = GetIPMask(c).ToInt32();
+                    int _lanip = c.GetAddressBytes().ToInt32() & mask;
+                    int _ip = ip.GetAddressBytes().ToInt32() & mask;
+                    return _lanip != _ip;
+                }).ToArray();
+            }
+            return _lanips;
+        }
+
+        private byte[] GetIPMask(IPAddress ip)
+        {
+            byte[] mask = new byte[] { 255, 255, 255, 255 };
+            byte[] ipBytes = ip.GetAddressBytes();
+            for (int i = 0; i < ipBytes.Length; i++)
+            {
+                if (ipBytes[i] == 0) mask[i] = 0;
+            }
+            return mask;
         }
 
     }
 
-    public class IPAddressCacheInfo
+    public sealed class IPAddressCacheInfo
     {
         public IPAddress IP { get; set; }
         public IPAddress[] LanIPs { get; set; }
@@ -483,7 +501,7 @@ namespace client.service.vea
         public ClientInfo Client { get; set; }
     }
 
-    public class IPAddressInfo
+    public sealed class IPAddressInfo
     {
         public IPAddress IP { get; set; }
         public IPAddress[] LanIPs { get; set; }

@@ -13,7 +13,7 @@ using common.libs.extends;
 
 namespace client.realize.messengers.clients
 {
-    public class ClientsTunnel : IClientsTunnel
+    public sealed class ClientsTunnel : IClientsTunnel
     {
         private readonly RegisterStateInfo registerState;
         private readonly IClientInfoCaching clientInfoCaching;
@@ -125,7 +125,7 @@ namespace client.realize.messengers.clients
             IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, localport);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             tcpSocket.IPv6Only(bindEndpoint.AddressFamily, false);
-            
+
             tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));

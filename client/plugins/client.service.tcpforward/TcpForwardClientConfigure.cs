@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace client.service.tcpforward
 {
-    public class TcpForwardClientConfigure : IClientConfigure
+    public sealed class TcpForwardClientConfigure : IClientConfigure
     {
         private common.tcpforward.Config config;
         public TcpForwardClientConfigure(common.tcpforward.Config config)

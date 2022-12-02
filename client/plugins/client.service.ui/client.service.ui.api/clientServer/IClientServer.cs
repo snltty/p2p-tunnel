@@ -15,7 +15,7 @@ namespace client.service.ui.api.clientServer
         public void Notify(ClientServiceResponseInfo resp);
     }
 
-    public class ClientServiceConfigureInfo
+    public sealed class ClientServiceConfigureInfo
     {
         public string Name { get; set; } = string.Empty;
         public string ClassName { get; set; } = string.Empty;

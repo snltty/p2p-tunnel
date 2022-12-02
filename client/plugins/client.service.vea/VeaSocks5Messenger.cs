@@ -5,7 +5,7 @@ using System;
 namespace client.service.vea
 {
     [MessengerIdRange((ushort)VeaSocks5MessengerIds.Min,(ushort)VeaSocks5MessengerIds.Max)]
-    public class VeaSocks5Messenger : Socks5Messenger
+    public sealed class VeaSocks5Messenger : Socks5Messenger
     {
         public VeaSocks5Messenger(IVeaSocks5ClientHandler socks5ClientHandler, IVeaSocks5ServerHandler socks5ServerHandler)
             : base(socks5ClientHandler, socks5ServerHandler)

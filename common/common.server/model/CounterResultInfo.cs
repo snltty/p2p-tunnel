@@ -3,7 +3,7 @@ using System;
 
 namespace common.server.model
 {
-    public class CounterResultInfo
+    public sealed class CounterResultInfo
     {
         public int OnlineCount { get; set; } = 0;
         public double Cpu { get; set; } = 0;

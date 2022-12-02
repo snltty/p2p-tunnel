@@ -24,7 +24,7 @@ using client.messengers.relay;
 
 namespace client.realize.messengers
 {
-    public class Plugin : IPlugin
+    public sealed class Plugin : IPlugin
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {

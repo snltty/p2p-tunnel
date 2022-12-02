@@ -1,12 +1,11 @@
-﻿using client.messengers.register;
-using client.service.ui.api.clientServer;
+﻿using client.service.ui.api.clientServer;
 using common.libs.extends;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace client.service.wakeup
 {
-    public class WakeUpClientService : IClientService
+    public sealed class WakeUpClientService : IClientService
     {
         private readonly Config config;
         private readonly WakeUpTransfer wakeUpTransfer;
@@ -50,19 +49,19 @@ namespace client.service.wakeup
         }
     }
 
-    public class WakeUpModel
+    public sealed class WakeUpModel
     {
         public string Name { get; set; }
         public string Mac { get; set; }
     }
 
-    public class AddModel
+    public sealed class AddModel
     {
         public int Index { get; set; }
         public ConfigItem Item { get; set; }
     }
 
-    public class RemoveModel
+    public sealed class RemoveModel
     {
         public int Index { get; set; }
     }

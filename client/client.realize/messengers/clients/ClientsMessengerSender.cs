@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.clients
 {
-    public class ClientsMessengerSender
+    public sealed class ClientsMessengerSender
     {
         private readonly MessengerSender messengerSender;
         public ClientsMessengerSender(MessengerSender messengerSender)

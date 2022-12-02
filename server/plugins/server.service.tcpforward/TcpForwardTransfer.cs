@@ -8,7 +8,7 @@ namespace server.service.tcpforward
     /// <summary>
     /// tcp转发中转和入口
     /// </summary>
-    public class TcpForwardTransfer : TcpForwardTransferBase
+    public sealed class TcpForwardTransfer : TcpForwardTransferBase
     {
         public TcpForwardTransfer(
 

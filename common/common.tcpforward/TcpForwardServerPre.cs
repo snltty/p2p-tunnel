@@ -9,7 +9,7 @@ using System.Net.Sockets;
 
 namespace common.tcpforward
 {
-    public class TcpForwardServerPre : ITcpForwardServer
+    public sealed class TcpForwardServerPre : ITcpForwardServer
     {
         public Func<TcpForwardInfo, bool> OnRequest { get; set; } = (info) => true;
         public SimpleSubPushHandler<ListeningChangeInfo> OnListeningChange { get; } = new SimpleSubPushHandler<ListeningChangeInfo>();

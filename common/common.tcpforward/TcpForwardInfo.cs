@@ -11,7 +11,7 @@ namespace common.tcpforward
         public bool State { get; set; }
     }
 
-    public class TcpForwardInfo
+    public sealed class TcpForwardInfo
     {
         public TcpForwardInfo() { }
         /// <summary>

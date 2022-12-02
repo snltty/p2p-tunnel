@@ -15,7 +15,7 @@ namespace client.service.vea
     {
     }
 
-    public class VeaSocks5ClientHandler : Socks5ClientHandler, IVeaSocks5ClientHandler
+    public sealed class VeaSocks5ClientHandler : Socks5ClientHandler, IVeaSocks5ClientHandler
     {
         private readonly IVeaSocks5MessengerSender socks5MessengerSender;
         private readonly Config config;
@@ -67,6 +67,7 @@ namespace client.service.vea
                 return true;
             }
             target.Connection = GetConnection(target.TargetIp, ipMemory);
+
             return socks5MessengerSender.Request(data, target.Connection);
         }
         protected override bool HndleForward(Socks5Info data)
@@ -92,6 +93,7 @@ namespace client.service.vea
         {
         }
 
+        private int[] Masks = new int[] { 0xffffff, 0xffff, 0xff };
         private IConnection GetConnection(IPAddress target, Span<byte> ipMemory)
         {
             if (virtualEthernetAdapterTransfer.IPList.TryGetValue(target, out IPAddressCacheInfo cache))
@@ -101,10 +103,13 @@ namespace client.service.vea
 
             if (target.IsLan())
             {
-                int mask = virtualEthernetAdapterTransfer.GetIpMask(ipMemory);
-                if (virtualEthernetAdapterTransfer.LanIPList.TryGetValue(mask, out cache))
+                int ip = ipMemory.ToInt32();
+                for (int i = 0; i < Masks.Length; i++)
                 {
-                    return cache.Client.Connection;
+                    if (virtualEthernetAdapterTransfer.LanIPList.TryGetValue(ip & Masks[i], out cache))
+                    {
+                        return cache.Client.Connection;
+                    }
                 }
             }
 ;
@@ -114,7 +119,7 @@ namespace client.service.vea
             }
             return null;
         }
-        class TagInfo
+        sealed class TagInfo
         {
             public IConnection Connection { get; set; }
             public IPAddress TargetIp { get; set; }

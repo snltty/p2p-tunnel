@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace common.socks5
 {
     [Table("socks5-appsettings")]
-    public class Config
+    public sealed class Config
     {
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;

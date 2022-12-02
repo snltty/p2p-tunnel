@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
 {
-    public class CounterClientService : IClientService
+    public sealed class CounterClientService : IClientService
     {
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerState;

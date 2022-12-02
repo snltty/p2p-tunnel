@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace server.messengers.register
 {
-    public class RegisterCacheInfo
+    public sealed class RegisterCacheInfo
     {
         [JsonIgnore]
         public IConnection TcpConnection { get; private set; }

@@ -1,11 +1,10 @@
 ﻿using common.server;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Reflection;
 
 namespace client.service.wakeup
 {
-    public class Plugin : IPlugin
+    public sealed class Plugin : IPlugin
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {

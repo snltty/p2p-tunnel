@@ -8,17 +8,15 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.crypto
 {
-    public class CryptoSwap
+    public sealed class CryptoSwap
     {
         private readonly MessengerSender messengerSender;
         private readonly ICryptoFactory cryptoFactory;
-        private readonly Config config;
 
-        public CryptoSwap(MessengerSender messengerSender, ICryptoFactory cryptoFactory, Config config)
+        public CryptoSwap(MessengerSender messengerSender, ICryptoFactory cryptoFactory)
         {
             this.messengerSender = messengerSender;
             this.cryptoFactory = cryptoFactory;
-            this.config = config;
         }
 
         public async Task<ICrypto> Swap(IConnection tcp, IConnection udp, string password)

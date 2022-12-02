@@ -3,7 +3,7 @@ using server.messengers.register;
 
 namespace server.service.udpforward
 {
-    internal class UdpForwardTargetProvider : IUdpForwardTargetProvider
+    internal sealed class UdpForwardTargetProvider : IUdpForwardTargetProvider
     {
         private readonly IClientRegisterCaching clientRegisterCaching;
         private readonly IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching;

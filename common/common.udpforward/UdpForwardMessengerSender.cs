@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace common.udpforward
 {
-    public class UdpForwardMessengerSender
+    public sealed class UdpForwardMessengerSender
     {
         private readonly MessengerSender messengerSender;
         public UdpForwardMessengerSender(MessengerSender messengerSender)

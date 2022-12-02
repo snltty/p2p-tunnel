@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace server.service.socks5
 {
     [MessengerIdRange((ushort)ServiceAccessValidatorMessengerIds.Min, (ushort)ServiceAccessValidatorMessengerIds.Max)]
-    public class ServiceAccessMessenger : IMessenger
+    public sealed class ServiceAccessMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;

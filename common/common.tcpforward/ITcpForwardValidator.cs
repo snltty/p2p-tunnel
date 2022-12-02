@@ -9,7 +9,7 @@ namespace common.tcpforward
         public bool Validate(string key);
     }
 
-    public class DefaultTcpForwardValidator : ITcpForwardValidator
+    public  class DefaultTcpForwardValidator : ITcpForwardValidator
     {
         private readonly Config config;
         public DefaultTcpForwardValidator(Config config)

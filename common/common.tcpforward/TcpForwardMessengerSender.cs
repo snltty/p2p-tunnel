@@ -1,13 +1,11 @@
 ﻿using common.libs;
-using common.libs.extends;
 using common.server;
 using common.server.model;
-using System;
 using System.Threading.Tasks;
 
 namespace common.tcpforward
 {
-    public class TcpForwardMessengerSender
+    public sealed class TcpForwardMessengerSender
     {
         private readonly MessengerSender messengerSender;
         public TcpForwardMessengerSender(MessengerSender messengerSender)

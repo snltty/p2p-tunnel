@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
 {
-    public class RegisterClientService : IClientService
+    public sealed class RegisterClientService : IClientService
     {
 
         private readonly IRegisterTransfer registerTransfer;

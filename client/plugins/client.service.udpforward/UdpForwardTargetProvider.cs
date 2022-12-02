@@ -5,7 +5,7 @@ using common.udpforward;
 
 namespace client.service.udpforward
 {
-    internal class UdpForwardTargetProvider : IUdpForwardTargetProvider
+    internal sealed class UdpForwardTargetProvider : IUdpForwardTargetProvider
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching;

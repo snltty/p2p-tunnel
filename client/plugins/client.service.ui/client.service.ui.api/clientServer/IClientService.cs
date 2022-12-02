@@ -2,7 +2,7 @@
 {
     public interface IClientService { }
 
-    public class ClientServiceResponseInfo
+    public sealed class ClientServiceResponseInfo
     {
         public string Path { get; set; } = string.Empty;
         public long RequestId { get; set; } = 0;
@@ -10,14 +10,14 @@
         public object Content { get; set; } = string.Empty;
     }
 
-    public class ClientServiceRequestInfo
+    public sealed class ClientServiceRequestInfo
     {
         public string Path { get; set; } = string.Empty;
         public uint RequestId { get; set; } = 0;
         public string Content { get; set; } = string.Empty;
     }
 
-    public class ClientServiceParamsInfo
+    public sealed class ClientServiceParamsInfo
     {
         public uint RequestId { get; set; } = 0;
         public string Content { get; set; } = string.Empty;

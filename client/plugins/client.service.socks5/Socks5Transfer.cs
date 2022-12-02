@@ -4,7 +4,7 @@ using System.IO;
 
 namespace client.service.socks5
 {
-    public class Socks5Transfer
+    public sealed class Socks5Transfer
     {
         private readonly common.socks5.Config config;
         private readonly ui.api.Config uiconfig;

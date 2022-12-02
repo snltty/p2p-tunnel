@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.heart
 {
-    public class HeartMessengerSender
+    public sealed class HeartMessengerSender
     {
         private readonly MessengerSender messengerSender;
         public HeartMessengerSender(MessengerSender messengerSender)

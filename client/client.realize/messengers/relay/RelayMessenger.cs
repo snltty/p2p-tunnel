@@ -16,7 +16,7 @@ namespace client.realize.messengers.relay
     /// </summary>
 
     [MessengerIdRange((ushort)RelayMessengerIds.Min, (ushort)RelayMessengerIds.Max)]
-    public class RelayMessenger : IMessenger
+    public sealed class RelayMessenger : IMessenger
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly RelayMessengerSender relayMessengerSender;

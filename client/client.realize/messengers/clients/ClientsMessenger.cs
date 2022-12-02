@@ -9,7 +9,7 @@ namespace client.realize.messengers.clients
     /// 服务器发来的客户端列表
     /// </summary>
     [MessengerIdRange((ushort)ClientsMessengerIds.Min, (ushort)ClientsMessengerIds.Max)]
-    public class ClientsMessenger : IMessenger
+    public sealed class ClientsMessenger : IMessenger
     {
         private readonly ClientsMessengerSender clientsMessengerSender;
         private readonly IRegisterTransfer registerTransfer;

@@ -11,7 +11,7 @@ namespace server.service.messengers
     /// 中继
     /// </summary>
     [MessengerIdRange((ushort)RelayMessengerIds.Min, (ushort)RelayMessengerIds.Max)]
-    public class RelayMessenger : IMessenger
+    public sealed class RelayMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly MessengerSender messengerSender;

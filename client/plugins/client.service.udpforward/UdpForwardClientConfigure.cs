@@ -1,10 +1,9 @@
 ﻿using client.service.ui.api.clientServer;
-using common.libs.extends;
 using System.Threading.Tasks;
 
 namespace client.service.udpforward
 {
-    public class UdpForwardClientConfigure : IClientConfigure
+    public sealed class UdpForwardClientConfigure : IClientConfigure
     {
         private common.udpforward.Config config;
         public UdpForwardClientConfigure(common.udpforward.Config config)

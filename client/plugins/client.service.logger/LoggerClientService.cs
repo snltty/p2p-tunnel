@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace client.service.logger
 {
-    public class LoggerClientService : IClientService
+    public sealed class LoggerClientService : IClientService
     {
         public List<LoggerModel> Data { get; } = new List<LoggerModel>();
 

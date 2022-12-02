@@ -9,7 +9,7 @@ namespace common.server.model
     /// <summary>
     /// 打洞数据交换
     /// </summary>
-    public class PunchHoleRequestInfo
+    public sealed class PunchHoleRequestInfo
     {
         public PunchHoleRequestInfo() { }
         /// <summary>
@@ -116,7 +116,7 @@ namespace common.server.model
         }
     }
 
-    public class PunchHoleResponseInfo
+    public sealed class PunchHoleResponseInfo
     {
         public ulong RequestId { get; set; } = 0;
         /// <summary>
@@ -171,7 +171,7 @@ namespace common.server.model
         FORWARD
     }
 
-    public class PunchHoleNotifyInfo
+    public sealed class PunchHoleNotifyInfo
     {
         public PunchHoleNotifyInfo() { }
 

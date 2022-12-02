@@ -4,7 +4,7 @@ using common.server;
 
 namespace client.realize.messengers.relay
 {
-    public class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
+    public sealed class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
     {
         private readonly IClientInfoCaching clientInfoCaching;
 

@@ -4,7 +4,7 @@ using common.udpforward;
 namespace client.service.udpforward
 {
     [MessengerIdRange((ushort)UdpForwardMessengerIds.Min, (ushort)UdpForwardMessengerIds.Max)]
-    public class UdpForwardMessenger : IMessenger
+    public sealed class UdpForwardMessenger : IMessenger
     {
         private readonly UdpForwardMessengerSender udpForwardMessengerSender;
         public UdpForwardMessenger(UdpForwardMessengerSender udpForwardMessengerSender)

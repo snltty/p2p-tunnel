@@ -10,7 +10,7 @@ namespace common.udpforward
     /// <summary>
     /// udp转发数据
     /// </summary>
-    public class UdpForwardInfo
+    public sealed class UdpForwardInfo
     {
         public UdpForwardInfo() { }
 

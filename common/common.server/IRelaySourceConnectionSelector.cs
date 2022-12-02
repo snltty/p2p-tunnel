@@ -14,7 +14,7 @@
         public IConnection Select(IConnection connection, ulong clientid);
     }
 
-    public class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
+    public sealed class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
     {
         public IConnection Select(IConnection connection, ulong clientid) { return connection; }
     }

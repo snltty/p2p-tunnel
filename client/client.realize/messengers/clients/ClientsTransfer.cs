@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.clients
 {
-    public class ClientsTransfer : IClientsTransfer
+    public sealed class ClientsTransfer : IClientsTransfer
     {
         private BoolSpace firstClients = new BoolSpace(true);
 

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace client.service.logger
 {
-    public class LoggerClientConfigure : IClientConfigure
+    public sealed class LoggerClientConfigure : IClientConfigure
     {
         private readonly Config config;
         public LoggerClientConfigure(Config config)

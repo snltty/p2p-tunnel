@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
 {
-    public class ClientsClientService : IClientService
+    public sealed class ClientsClientService : IClientService
     {
         private readonly IClientsTransfer clientsTransfer;
         private readonly IClientInfoCaching clientInfoCaching;

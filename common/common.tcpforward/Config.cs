@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace common.tcpforward
 {
     [Table("tcpforward-appsettings")]
-    public class Config
+    public sealed class Config
     {
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;

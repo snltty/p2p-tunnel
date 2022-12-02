@@ -5,7 +5,7 @@ using common.server.model;
 
 namespace client.realize.messengers.punchHole.udp
 {
-    public class PunchHoleUdp : IPunchHole
+    public sealed class PunchHoleUdp : IPunchHole
     {
         private readonly IPunchHoleUdp punchHoleUdp;
         public PunchHoleUdp(IPunchHoleUdp punchHoleUdp)

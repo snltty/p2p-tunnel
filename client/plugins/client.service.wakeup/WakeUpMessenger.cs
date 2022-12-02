@@ -5,7 +5,7 @@ using System;
 namespace client.service.wakeup
 {
     [MessengerIdRange((ushort)WakeUpMessengerIds.Min, (ushort)WakeUpMessengerIds.Max)]
-    public class WakeUpMessenger : IMessenger
+    public sealed class WakeUpMessenger : IMessenger
     {
         private readonly WakeUpTransfer wakeUpTransfer;
         private readonly Config config;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace client.service.vea
 {
-    public class VeaClientService : IClientService
+    public sealed class VeaClientService : IClientService
     {
         private readonly Config config;
         private readonly VeaTransfer VeaTransfer;

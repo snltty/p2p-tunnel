@@ -9,7 +9,7 @@ using System.Text;
 namespace client.realize.messengers.crypto
 {
     [MessengerIdRange((ushort)CryptoMessengerIds.Min,(ushort)CryptoMessengerIds.Max)]
-    public class CryptoMessenger : IMessenger
+    public sealed class CryptoMessenger : IMessenger
     {
         private readonly IAsymmetricCrypto asymmetricCrypto;
         private readonly ICryptoFactory cryptoFactory;

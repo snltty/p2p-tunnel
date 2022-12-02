@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole.tcp.nutssb
 {
-    public class PunchHoleTcpNutssBMessengerSender : IPunchHoleTcp
+    public sealed class PunchHoleTcpNutssBMessengerSender : IPunchHoleTcp
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly ITcpServer tcpServer;

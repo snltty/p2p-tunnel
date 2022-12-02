@@ -11,14 +11,12 @@ using System.Net;
 
 namespace server.service.messengers.register
 {
-    public class ClientRegisterCaching : IClientRegisterCaching
+    public sealed class ClientRegisterCaching : IClientRegisterCaching
     {
-        private readonly IEnumerable<byte> shortIds = Enumerable.Range(1, 255).Select(c => (byte)c);
         private readonly ConcurrentDictionary<ulong, RegisterCacheInfo> cache = new();
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, RegisterCacheInfo>> cacheGroups = new();
         private NumberSpace idNs = new NumberSpace(0);
         private readonly Config config;
-        private readonly object lockObject = new object();
 
         public SimpleSubPushHandler<RegisterCacheInfo> OnChanged { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
         public SimpleSubPushHandler<RegisterCacheInfo> OnOffline { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();

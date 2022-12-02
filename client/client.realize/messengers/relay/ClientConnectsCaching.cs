@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace client.realize.messengers.relay
 {
-    public class ClientConnectsCaching : IClientConnectsCaching
+    public sealed class ClientConnectsCaching : IClientConnectsCaching
     {
         ConcurrentDictionary<ulong, ulong[]> connectsDic = new ConcurrentDictionary<ulong, ulong[]>();
 

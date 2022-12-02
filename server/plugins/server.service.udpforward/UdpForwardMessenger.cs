@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace server.service.udpforward
 {
     [MessengerIdRange((ushort)UdpForwardMessengerIds.Min, (ushort)UdpForwardMessengerIds.Max)]
-    public class UdpForwardMessenger : IMessenger
+    public sealed class UdpForwardMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly common.udpforward.Config config;
