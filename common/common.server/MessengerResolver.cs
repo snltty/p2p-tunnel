@@ -187,6 +187,7 @@ namespace common.server
             catch (Exception ex)
             {
                 Logger.Instance.Error(ex);
+                Logger.Instance.Error($"数据内容:{string.Join(",", receive.ToArray())}");
                 if (requestWrap.Reply)
                 {
                     await messengerSender.ReplyOnly(new MessageResponseWrap

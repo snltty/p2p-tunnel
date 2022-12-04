@@ -2,14 +2,14 @@
  * @Author: snltty
  * @Date: 2022-08-18 13:02:18
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-30 22:39:08
+ * @LastEditTime: 2022-12-04 17:53:05
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\components\Foot.vue
 -->
 <template>
-    <div class="copyright">
-        <span>@snltty、p2p-tunnel</span>
+    <div class="copyright" :style="isPhone?'padding-top:0':''">
+        <span v-if="isPhone == false">@snltty、p2p-tunnel</span>
         <div class="menu-wrap hidden-sm-and-up">
             <el-row>
                 <el-col :span="8">
@@ -57,6 +57,7 @@
 import { injectRegister } from '../states/register'
 import { injectWebsocket } from '../states/websocket'
 import { useRoute, useRouter } from 'vue-router'
+import { computed } from '@vue/reactivity'
 export default {
     setup () {
         const registerState = injectRegister();
@@ -77,9 +78,12 @@ export default {
             }
         }));
 
+        const isPhone = computed(() => {
+            return window.location.href.indexOf('p=1') >= 0;
+        });
 
         return {
-            registerState, websocketState, servicesMenus
+            registerState, websocketState, servicesMenus, isPhone
         }
     }
 }

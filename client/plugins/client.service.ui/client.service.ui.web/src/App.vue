@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-19 00:15:46
+ * @LastEditTime: 2022-12-04 17:41:09
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\App.vue
@@ -40,6 +40,7 @@ export default {
         provideWebsocket();
         provideClients();
         provideShareData();
+
         return {
             locale: zhCn
         }

@@ -1,4 +1,5 @@
-﻿namespace client.service.app
+﻿
+namespace client.service.app
 {
     public partial class App : Application
     {

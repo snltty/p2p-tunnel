@@ -26,8 +26,10 @@ namespace client.service.app
             ThreadPool.SetMinThreads(150, 150);
 
             var builder = MauiApp.CreateBuilder();
-            builder.UseMauiApp<App>();
-            builder.Services.AddMauiBlazorWebView();
+            builder.UseMauiApp<App>().ConfigureMauiHandlers(handlers =>
+            {
+            });
+           // builder.Services.AddMauiBlazorWebView();
 
             MauiApp app = builder.Build();
 
@@ -40,19 +42,6 @@ namespace client.service.app
         static ServiceProvider serviceProvider = null;
         public static void Start()
         {
-            IPEndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 59411);
-            UdpClient udp = new UdpClient();
-            Logger.Instance.OnLogger.Sub((logger) =>
-            {
-                try
-                {
-                    udp.Send(logger.ToJson().ToBytes(), endpoint);
-                }
-                catch (Exception)
-                {
-                }
-            });
-
             Logger.Instance.PaddingWidth = 10;
             Logger.Instance.Info("正在启动...");
 

@@ -3,40 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:client.service.app"
              x:Class="client.service.app.MainPage"
-             BackgroundColor="#08743d">
-
-    <!--<WebView Margin="20" Source="https://snltty.gitee.io/p2p-tunnel/#/"></WebView>-->
-    <!--<BlazorWebView x:Name="blazorWebView" HostPage="public/web/index.html">
-        <BlazorWebView.RootComponents>
-            <RootComponent Selector="#app" ComponentType="{x:Type local:Main}" />
-        </BlazorWebView.RootComponents>
-    </BlazorWebView>-->
+             BackgroundColor="#42936c">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
-
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
-        <HorizontalStackLayout Grid.Row="1" Grid.Column="1" HorizontalOptions="Fill"    >
-            <Image  WidthRequest="50" HeightRequest="50"  Margin="0,0,10,0"  Source="appiconfg.svg" ></Image>
-            <Label Text="p2p-tunnel app" HeightRequest="20"></Label>
-        </HorizontalStackLayout>
-        <Frame CornerRadius="4" Grid.Row="2" Grid.Column="1">
-            <ScrollView>
-                <VerticalStackLayout  BackgroundColor="#fff" x:Name="loggerBox">
-                </VerticalStackLayout>
-            </ScrollView>
+        <Frame  Margin="6,42,6,6" Padding="0" CornerRadius="4">
+            <WebView BackgroundColor="#fff" VerticalOptions="Fill" HorizontalOptions="Fill" x:Name="webview"></WebView>
         </Frame>
-        <HorizontalStackLayout Grid.Row="3" Grid.Column="1" HorizontalOptions="Center">
-            <Button WidthRequest="110" FontSize="12" Text="打开操作界面" BackgroundColor="White" TextColor="#333" Clicked="Button_Clicked" VerticalOptions="Center"></Button>
+        <HorizontalStackLayout  Grid.Row="1" HorizontalOptions="Center">
+            <Button WidthRequest="110" FontSize="12" Text="内置加载" BackgroundColor="White" TextColor="#333" Clicked="Button_Clicked_Inside"  VerticalOptions="Center" Margin="0,0,6,0"></Button>
+            <Button WidthRequest="110" FontSize="12" Text="外部打开" BackgroundColor="White" TextColor="#333" Clicked="Button_Clicked" VerticalOptions="Center"></Button>
         </HorizontalStackLayout>
-
+      
     </Grid>
 </ContentPage>

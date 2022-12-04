@@ -10,6 +10,7 @@ using server.service.socks5;
 using server.service.udpforward;
 using System.Threading;
 using common.server;
+using System.IO;
 
 namespace server.service
 {
@@ -20,7 +21,7 @@ namespace server.service
             ThreadPool.SetMinThreads(150, 150);
             Logger.Instance.Info("正在启动...");
             LoggerConsole();
-             
+
             //加载插件程序集，当单文件发布或者动态加载dll外部插件时需要，否则如果本程序集没有显式的使用它的相关内容的话，会加载不出来
             //可以改为从dll文件加载
             Assembly[] assemblys = new Assembly[] {
@@ -51,6 +52,11 @@ namespace server.service
 
         static void LoggerConsole()
         {
+            if (Directory.Exists("log") == false)
+            {
+                Directory.CreateDirectory("log");
+            }
+
             Logger.Instance.OnLogger.Sub((model) =>
             {
                 ConsoleColor currentForeColor = Console.ForegroundColor;
@@ -71,8 +77,14 @@ namespace server.service
                     default:
                         break;
                 }
-                Console.WriteLine($"[{model.Type.ToString().PadRight(7)}][{model.Time:yyyy-MM-dd HH:mm:ss}]:{model.Content}");
+
+                string line = $"[{model.Type,-7}][{model.Time:yyyy-MM-dd HH:mm:ss}]:{model.Content}";
+                Console.WriteLine(line);
                 Console.ForegroundColor = currentForeColor;
+
+                using StreamWriter sw = File.AppendText(Path.Combine("log", $"{DateTime.Now:yyyy-MM-dd}.log"));
+                sw.WriteLine(line);
+                sw.Flush();
             });
         }
     }

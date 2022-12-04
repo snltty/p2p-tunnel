@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:05:47
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-18 12:59:51
+ * @LastEditTime: 2022-12-04 15:52:38
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\components\Menu.vue
@@ -10,7 +10,7 @@
 <template>
     <div class="menu-wrap flex">
         <div class="logo">
-            <img src="@/assets/logo.svg" alt="">
+            <img src="@/assets/logo.svg" @click="window.location.reload()" alt="">
         </div>
         <div class="navs flex-1">
             <div class="hidden-xs-only">
