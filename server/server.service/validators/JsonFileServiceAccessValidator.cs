@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.libs.extends;
 using common.server.model;
 using server.messengers;
 using System.Collections.Generic;
@@ -43,6 +44,9 @@ namespace server.service.validators
         }
         public async Task SaveConfig(string jsonStr)
         {
+            JsonFileServiceAccessValidator _config = jsonStr.DeJson<JsonFileServiceAccessValidator>();
+            Groups = _config.Groups;
+
             await configDataProvider.Save(jsonStr);
         }
     }

@@ -11,7 +11,6 @@
   "LanIPs": [ /*"192.168.66.0"*/ ],
   "SocksPort": 5415, //代理端口，无所谓，填写一个未被占用的端口即可
   "BufferSize": 8192,
-  "TunnelType": 8, //优先tcp
   "NumConnections": 1000, //支持连接数
   "ConnectEnable": false //是否允许被连接
 }
