@@ -36,8 +36,7 @@ namespace client.service.ui.api.service.clientServer.services
         /// <returns></returns>
         public async Task<string> Configure(ClientServiceParamsInfo arg)
         {
-            SaveParamsInfo model = arg.Content.DeJson<SaveParamsInfo>();
-            var plugin = clientServer.GetConfigure(model.ClassName);
+            var plugin = clientServer.GetConfigure(arg.Content);
             if (plugin != null)
             {
                 return await plugin.Load().ConfigureAwait(false);

@@ -45,21 +45,22 @@ namespace client.service.ui.api.service.clientServer.services
         /// 连它
         /// </summary>
         /// <param name="arg"></param>
-        public void Connect(ClientServiceParamsInfo arg)
+        public bool Connect(ClientServiceParamsInfo arg)
         {
             ulong id = ulong.Parse(arg.Content);
             if (clientInfoCaching.Get(id, out ClientInfo client) == false)
             {
-                return;
+                return false;
             }
             clientInfoCaching.Offline(id);
             clientsTransfer.ConnectClient(client);
+            return true;
         }
         /// <summary>
         /// 连我
         /// </summary>
         /// <param name="arg"></param>
-        public void ConnectReverse(ClientServiceParamsInfo arg)
+        public bool ConnectReverse(ClientServiceParamsInfo arg)
         {
             ulong id = ulong.Parse(arg.Content);
             if (clientInfoCaching.Get(id, out ClientInfo client) == false)
@@ -68,23 +69,26 @@ namespace client.service.ui.api.service.clientServer.services
             }
             clientInfoCaching.Offline(id);
             clientsTransfer.ConnectReverse(client);
+            return true;
         }
 
         /// <summary>
         /// 重启
         /// </summary>
         /// <param name="arg"></param>
-        public void Reset(ClientServiceParamsInfo arg)
+        public bool Reset(ClientServiceParamsInfo arg)
         {
             clientsTransfer.Reset(ulong.Parse(arg.Content));
+            return true;
         }
         /// <summary>
         /// 断开
         /// </summary>
         /// <param name="arg"></param>
-        public void Offline(ClientServiceParamsInfo arg)
+        public bool Offline(ClientServiceParamsInfo arg)
         {
             clientInfoCaching.Offline(ulong.Parse(arg.Content));
+            return true;
         }
 
         /// <summary>
