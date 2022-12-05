@@ -101,6 +101,7 @@ namespace client.messengers.clients
         [JsonIgnore]
         public IConnection Connection { get; set; } = null;
 
+        public ulong TunnelName { get; set; } = (ulong)TunnelDefaults.MIN;
         /// <summary>
         /// 下线
         /// </summary>
@@ -122,12 +123,13 @@ namespace client.messengers.clients
         /// <param name="connection"></param>
         /// <param name="connectType"></param>
         /// <param name="onlineType"></param>
-        public void Online(IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType)
+        public void Online(IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType, ulong tunnelName)
         {
             Connection = connection;
             ConnectType = connectType;
             OnlineType = onlineType;
             Connecting = false;
+            TunnelName = tunnelName;
         }
         /// <summary>
         /// 设置连接中状态

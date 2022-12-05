@@ -13,6 +13,7 @@ using common.server.middleware;
 using common.socks5;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -77,6 +78,10 @@ namespace client.service
 
         static void LoggerConsole()
         {
+            if (Directory.Exists("log") == false)
+            {
+                Directory.CreateDirectory("log");
+            }
             Logger.Instance.OnLogger.Sub((model) =>
              {
                  ConsoleColor currentForeColor = Console.ForegroundColor;
@@ -97,8 +102,13 @@ namespace client.service
                      default:
                          break;
                  }
-                 Console.WriteLine($"[{model.Type.ToString().PadRight(7)}][{model.Time:yyyy-MM-dd HH:mm:ss}]:{model.Content}");
+                 string line = $"[{model.Type,-7}][{model.Time:yyyy-MM-dd HH:mm:ss}]:{model.Content}";
+                 Console.WriteLine(line);
                  Console.ForegroundColor = currentForeColor;
+
+                 using StreamWriter sw = File.AppendText(Path.Combine("log", $"{DateTime.Now:yyyy-MM-dd}.log"));
+                 sw.WriteLine(line);
+                 sw.Flush();
              });
         }
     }

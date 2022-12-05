@@ -131,7 +131,7 @@ namespace client.realize.messengers.clients
             });
             punchHoleUdp.OnStep3Handler.Sub((e) =>
             {
-                clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive);
+                clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive, e.RawData.TunnelName);
                 if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                 {
                     clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -142,7 +142,7 @@ namespace client.realize.messengers.clients
             {
                 if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
+                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active, e.RawData.TunnelName);
                     if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                     {
                         clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -175,7 +175,7 @@ namespace client.realize.messengers.clients
             {
                 if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive);
+                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive, e.RawData.TunnelName);
                     if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                     {
                         clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -189,7 +189,7 @@ namespace client.realize.messengers.clients
             {
                 if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active);
+                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active, e.RawData.TunnelName);
                     if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                     {
                         clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
@@ -210,6 +210,7 @@ namespace client.realize.messengers.clients
         }
         private void OnOfflineAfter(ClientInfo client)
         {
+            Logger.Instance.Error($"{client.Name} 掉线,OnlineType:{client.OnlineType},OfflineType:{client.OfflineType}");
             //主动连接的，未知掉线信息的，去尝试重连一下
             if (config.Client.UseReConnect && client.OnlineType == ClientOnlineTypes.Active && client.OfflineType == ClientOfflineTypes.Disconnect)
             {
@@ -221,6 +222,10 @@ namespace client.realize.messengers.clients
             if (ReferenceEquals(regConnection, connection))
             {
                 return;
+            }
+            if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
+            {
+                Logger.Instance.Error($"{client.Name} 掉线:{connection.ServerType}");
             }
             clientInfoCaching.Offline(connection.ConnectId, ClientOfflineTypes.Disconnect);
         }
@@ -481,7 +486,7 @@ namespace client.realize.messengers.clients
             else
             {
                 clientInfoCaching.RemoveTunnelPort((ulong)TunnelDefaults.UDP);
-                clientInfoCaching.RemoveUdpserver((ulong)TunnelDefaults.UDP);
+                clientInfoCaching.RemoveUdpserver((ulong)TunnelDefaults.UDP, true);
                 clientInfoCaching.RemoveTunnelPort((ulong)TunnelDefaults.TCP);
             }
         }
@@ -655,7 +660,7 @@ namespace client.realize.messengers.clients
             }
 
             ClientConnectTypes relayType = relayids[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
-            clientInfoCaching.Online(relayids[^1], connection, relayType, notify == false ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active);
+            clientInfoCaching.Online(relayids[^1], connection, relayType, notify == false ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active, (ulong)TunnelDefaults.MIN);
         }
 
         /// <summary>

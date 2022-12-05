@@ -490,7 +490,7 @@ namespace LiteNetLib
         ///     MTU - headerSize bytes for Unreliable<para/>
         ///     Fragment count exceeded ushort.MaxValue<para/>
         /// </exception>
-        public void Send (ReadOnlyMemory<byte> data, DeliveryMethod deliveryMethod)
+        public void Send(ReadOnlyMemory<byte> data, DeliveryMethod deliveryMethod)
         {
             SendInternal(data, 0, data.Length, 0, deliveryMethod, null);
         }
@@ -645,7 +645,7 @@ namespace LiteNetLib
                     p.MarkFragmented();
 
                     data.Slice(start + partIdx * packetDataSize, sendLength).CopyTo(p.RawData.AsMemory(NetConstants.FragmentedHeaderTotalSize));
-                   // Buffer.BlockCopy(data, start + partIdx * packetDataSize, p.RawData, NetConstants.FragmentedHeaderTotalSize, sendLength);
+                    // Buffer.BlockCopy(data, start + partIdx * packetDataSize, p.RawData, NetConstants.FragmentedHeaderTotalSize, sendLength);
                     channel.AddToQueue(p);
 
                     length -= sendLength;
@@ -1291,7 +1291,10 @@ namespace LiteNetLib
                 if (_pingTimer.IsRunning)
                     UpdateRoundTripTime((int)_pingTimer.ElapsedMilliseconds);
                 _pingTimer.Restart();
-                NetManager.SendRaw(_pingPacket, _remoteEndPoint);
+                if (NetManager.SendRaw(_pingPacket, _remoteEndPoint) > 0)
+                {
+                    Interlocked.Exchange(ref _timeSinceLastPacket, 0);
+                }
             }
 
             //RTT - round trip time
