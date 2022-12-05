@@ -7,24 +7,32 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.relay
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class RelayMessengerSender
     {
-
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<RelayInfo> OnRelay { get; } = new SimpleSubPushHandler<RelayInfo>();
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerStateInfo;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messengerSender"></param>
+        /// <param name="registerStateInfo"></param>
         public RelayMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerStateInfo)
         {
             this.messengerSender = messengerSender;
             this.registerStateInfo = registerStateInfo;
         }
-
         /// <summary>
         /// 通知其要使用中继
         /// </summary>
-        /// <param name="toid"></param>
-        /// <param name="connection">中继节点</param>
+        /// <param name="relayids"></param>
+        /// <param name="connection"></param>
         /// <returns></returns>
         public async Task<bool> Relay(ulong[] relayids, IConnection connection)
         {
@@ -42,7 +50,7 @@ namespace client.realize.messengers.relay
         /// <summary>
         /// 中继延迟
         /// </summary>
-        /// <param name="toid"></param>
+        /// <param name="relayids"></param>
         /// <param name="connection"></param>
         /// <returns></returns>
         public async Task<bool> Delay(ulong[] relayids, IConnection connection)
@@ -58,7 +66,10 @@ namespace client.realize.messengers.relay
             return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> AskConnects()
         {
             return await messengerSender.SendOnly(new MessageRequestWrap
@@ -68,6 +79,11 @@ namespace client.realize.messengers.relay
                 Payload = Helper.EmptyArray,
             }).ConfigureAwait(false);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connects"></param>
+        /// <returns></returns>
         public async Task<bool> Connects(ConnectsInfo connects)
         {
             return await messengerSender.SendOnly(new MessageRequestWrap

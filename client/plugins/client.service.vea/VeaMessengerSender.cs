@@ -7,10 +7,18 @@ using System.Threading.Tasks;
 
 namespace client.service.vea
 {
+    /// <summary>
+    /// 组网消息发送
+    /// </summary>
     public sealed class VeaMessengerSender
     {
         private readonly MessengerSender messengerSender;
         private readonly Config config;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messengerSender"></param>
+        /// <param name="config"></param>
         public VeaMessengerSender(MessengerSender messengerSender, Config config)
         {
             this.messengerSender = messengerSender;
@@ -19,7 +27,8 @@ namespace client.service.vea
         /// <summary>
         /// 获取ip
         /// </summary>
-        /// <param name="arg"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         public async Task<IPAddressInfo> IP(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
@@ -41,6 +50,12 @@ namespace client.service.vea
             return null;
         }
 
+        /// <summary>
+        /// 重装其网卡
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<bool> Reset(IConnection connection, ulong id)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap

@@ -10,6 +10,9 @@ using System.Net.Sockets;
 
 namespace common.socks5
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Socks5ServerHandler : ISocks5ServerHandler
     {
         private ConcurrentDictionary<ConnectionKey, AsyncServerUserToken> connections = new(new ConnectionKeyComparer());
@@ -17,10 +20,20 @@ namespace common.socks5
         private readonly Dictionary<Socks5EnumStep, Action<IConnection>> handles = new Dictionary<Socks5EnumStep, Action<IConnection>>();
 
         private readonly ISocks5MessengerSender socks5MessengerSender;
+        /// <summary>
+        /// 
+        /// </summary>
         protected Config config { get; }
         private readonly WheelTimer<object> wheelTimer;
         private readonly ISocks5Validator socks5Validator;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="socks5MessengerSender"></param>
+        /// <param name="config"></param>
+        /// <param name="wheelTimer"></param>
+        /// <param name="socks5Validator"></param>
         public Socks5ServerHandler(ISocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, ISocks5Validator socks5Validator)
         {
             this.socks5MessengerSender = socks5MessengerSender;
@@ -40,6 +53,10 @@ namespace common.socks5
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         public void InputData(IConnection connection)
         {
             Socks5EnumStep step = (Socks5EnumStep)(byte)(connection.ReceiveRequestWrap.Payload.Span[0] >> 4);
@@ -390,16 +407,38 @@ namespace common.socks5
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class AsyncServerUserToken
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public ConnectionKey Key { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public IConnection Connection { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Socket TargetSocket { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Socks5Info Data { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsClosed { get; set; } = false;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public byte[] PoolBuffer { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Clear()
         {
             TargetSocket?.SafeClose();
@@ -410,23 +449,49 @@ namespace common.socks5
             GC.SuppressFinalize(this);
         }
     }
+    /// <summary>
+    /// 
+    /// </summary>
     public class ConnectionKeyComparer : IEqualityComparer<ConnectionKey>
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public bool Equals(ConnectionKey x, ConnectionKey y)
         {
             return x.RequestId == y.RequestId && x.ConnectId == y.ConnectId;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public int GetHashCode(ConnectionKey obj)
         {
             return obj.RequestId.GetHashCode() ^ obj.ConnectId.GetHashCode();
         }
     }
+    /// <summary>
+    /// 
+    /// </summary>
     public readonly struct ConnectionKey
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public readonly uint RequestId { get; }
+        /// <summary>
+        /// 
+        /// </summary>
         public readonly ulong ConnectId { get; }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connectId"></param>
+        /// <param name="requestId"></param>
         public ConnectionKey(ulong connectId, uint requestId)
         {
             ConnectId = connectId;
@@ -434,16 +499,38 @@ namespace common.socks5
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class UdpToken
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public IConnection Connection { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Socket TargetSocket { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Socks5Info Data { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public byte[] PoolBuffer { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public long LastTime { get; set; } = DateTimeHelper.GetTimeStamp();
+        /// <summary>
+        /// 
+        /// </summary>
         public EndPoint TempRemoteEP = new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort);
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Clear()
         {
             TargetSocket?.SafeClose();
@@ -451,29 +538,57 @@ namespace common.socks5
             GC.Collect();
             GC.SuppressFinalize(this);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Update()
         {
             LastTime = DateTimeHelper.GetTimeStamp();
         }
     }
+    /// <summary>
+    /// 
+    /// </summary>
     public class ConnectionKeyUdpComparer : IEqualityComparer<ConnectionKeyUdp>
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public bool Equals(ConnectionKeyUdp x, ConnectionKeyUdp y)
         {
             return x.Endpoint.Equals(y.Endpoint) && x.ConnectId == y.ConnectId;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public int GetHashCode(ConnectionKeyUdp obj)
         {
             return obj.Endpoint.GetHashCode() ^ obj.ConnectId.GetHashCode();
         }
     }
+    /// <summary>
+    /// 
+    /// </summary>
     public readonly struct ConnectionKeyUdp
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public readonly IPEndPoint Endpoint { get; }
+        /// <summary>
+        /// 
+        /// </summary>
         public readonly ulong ConnectId { get; }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connectId"></param>
+        /// <param name="endpoint"></param>
         public ConnectionKeyUdp(ulong connectId, IPEndPoint endpoint)
         {
             ConnectId = connectId;

@@ -6,16 +6,34 @@ using System.ComponentModel;
 
 namespace common.server.model
 {
+    /// <summary>
+    /// 请求消息包
+    /// </summary>
     public sealed class MessageRequestWrap
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public const int RelayIdLengthPos = 5;
+        /// <summary>
+        /// 
+        /// </summary>
         public const int RelayIdIndexPos = RelayIdLengthPos + 1;
+        /// <summary>
+        /// 
+        /// </summary>
         public const int RelayIdSize = 8;
         /// <summary>
         /// Relay + Reply + 111111
         /// </summary>
         public const byte RelayBit = 0b10000000;
+        /// <summary>
+        /// 
+        /// </summary>
         public const byte ReplyBit = 0b01000000;
+        /// <summary>
+        /// 
+        /// </summary>
         public const byte TypeBits = 0b00111111;
 
 
@@ -53,7 +71,13 @@ namespace common.server.model
         /// 中继节点id列表，读取用
         /// </summary>
         public Memory<byte> RelayIds { get; private set; } = Helper.EmptyArray;
+        /// <summary>
+        /// 
+        /// </summary>
         public byte RelayIdLength { get; private set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public byte RelayIdIndex { get; private set; } = 0;
 
         /// <summary>
@@ -126,7 +150,7 @@ namespace common.server.model
         /// <summary>
         /// 解包
         /// </summary>
-        /// <param name="bytes"></param>
+        /// <param name="memory"></param>
         public void FromArray(Memory<byte> memory)
         {
             var span = memory.Span;
@@ -163,22 +187,52 @@ namespace common.server.model
 
             Payload = memory.Slice(index, memory.Length - index);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
         public void Return(byte[] array)
         {
             ArrayPool<byte>.Shared.Return(array);
         }
     }
 
+    /// <summary>
+    /// 回执消息包
+    /// </summary>
     public sealed class MessageResponseWrap
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public IConnection Connection { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
+        /// <summary>
+        /// 
+        /// </summary>
         public uint RequestId { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> RelayIds { get; set; } = Helper.EmptyArray;
+        /// <summary>
+        /// 
+        /// </summary>
         public byte RelayIdLength { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public byte RelayIdIndex { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
+        /// <summary>
+        /// 
+        /// </summary>
         public bool Relay { get;private set; }
 
         /// <summary>
@@ -242,7 +296,7 @@ namespace common.server.model
         /// <summary>
         /// 解包
         /// </summary>
-        /// <param name="bytes"></param>
+        /// <param name="memory"></param>
         public void FromArray(Memory<byte> memory)
         {
             var span = memory.Span;
@@ -277,11 +331,18 @@ namespace common.server.model
             Payload = memory.Slice(index, memory.Length - index);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
         public void Return(byte[] array)
         {
             ArrayPool<byte>.Shared.Return(array);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Reset()
         {
             Payload = Helper.EmptyArray;
@@ -289,26 +350,53 @@ namespace common.server.model
         }
     }
 
+    /// <summary>
+    /// 消息状态
+    /// </summary>
     [Flags]
     public enum MessageResponeCodes : byte
     {
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("成功")]
         OK = 0,
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("网络未连接")]
         NOT_CONNECT = 1,
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("网络资源未找到")]
         NOT_FOUND = 2,
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("网络超时")]
         TIMEOUT = 3,
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("程序错误")]
         ERROR = 4,
     }
 
+    /// <summary>
+    /// 消息类别
+    /// </summary>
     [Flags]
     public enum MessageTypes : byte
     {
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("请求")]
         REQUEST = 0,
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("回复")]
         RESPONSE = 1
     }

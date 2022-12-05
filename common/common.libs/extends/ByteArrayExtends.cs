@@ -4,8 +4,16 @@ using System.IO.Compression;
 
 namespace common.libs.extends
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class ByteArrayExtends
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public static byte[] ToBytes(this int[] obj)
         {
             var bytes = new byte[obj.Length * 4];
@@ -17,6 +25,11 @@ namespace common.libs.extends
             }
             return bytes;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static int[] DeBytes2IntArray(this ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -30,7 +43,11 @@ namespace common.libs.extends
             return res;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public static byte[] ToBytes(this ushort[] obj)
         {
             var bytes = new byte[obj.Length * 2];
@@ -42,6 +59,11 @@ namespace common.libs.extends
             }
             return bytes;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static ushort[] DeBytes2UInt16Array(this ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -55,7 +77,11 @@ namespace common.libs.extends
             return res;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
         public static byte[] GZip(this byte[] bytes)
         {
             using MemoryStream compressStream = new MemoryStream();
@@ -64,6 +90,11 @@ namespace common.libs.extends
             zipStream.Close();//不先关闭会有 解压结果为0的bug
             return compressStream.ToArray();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
         public static byte[] UnGZip(this byte[] bytes)
         {
             using var compressStream = new MemoryStream(bytes);

@@ -7,11 +7,13 @@ using server.messengers;
 using server.messengers.register;
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace server.service.tcpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [MessengerIdRange((ushort)TcpForwardMessengerIds.Min, (ushort)TcpForwardMessengerIds.Max)]
     public sealed class TcpForwardMessenger : IMessenger
     {
@@ -22,7 +24,16 @@ namespace server.service.tcpforward
         private readonly ITcpForwardValidator tcpForwardValidator;
         private readonly TcpForwardResolver tcpForwardResolver;
         private readonly IServiceAccessValidator serviceAccessValidator;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCache"></param>
+        /// <param name="config"></param>
+        /// <param name="tcpForwardTargetCaching"></param>
+        /// <param name="tcpForwardServer"></param>
+        /// <param name="tcpForwardValidator"></param>
+        /// <param name="tcpForwardResolver"></param>
+        /// <param name="serviceAccessValidator"></param>
         public TcpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.tcpforward.Config config,
             ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, ITcpForwardServer tcpForwardServer,
             ITcpForwardValidator tcpForwardValidator, TcpForwardResolver tcpForwardResolver, IServiceAccessValidator serviceAccessValidator)
@@ -35,13 +46,19 @@ namespace server.service.tcpforward
             this.tcpForwardResolver = tcpForwardResolver;
             this.serviceAccessValidator = serviceAccessValidator;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)TcpForwardMessengerIds.Request)]
         public void Request(IConnection connection)
         {
             tcpForwardResolver.InputData(connection);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)TcpForwardMessengerIds.Response)]
         public void Response(IConnection connection)
         {
@@ -51,6 +68,11 @@ namespace server.service.tcpforward
             tcpForwardServer.Response(data);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)TcpForwardMessengerIds.Ports)]
         public byte[] Ports(IConnection connection)
         {
@@ -61,6 +83,11 @@ namespace server.service.tcpforward
                 }).ToArray().ToBytes();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)TcpForwardMessengerIds.SignOut)]
         public byte[] SignOut(IConnection connection)
         {
@@ -94,6 +121,11 @@ namespace server.service.tcpforward
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)TcpForwardMessengerIds.SignIn)]
         public byte[] SignIn(IConnection connection)
         {
@@ -169,14 +201,22 @@ namespace server.service.tcpforward
             }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)TcpForwardMessengerIds.GetSetting)]
         public async Task<byte[]> GetSetting(IConnection connection)
         {
             string str = await config.ReadString();
             return str.ToBytes();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)TcpForwardMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {

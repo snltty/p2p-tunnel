@@ -6,8 +6,16 @@ using System.Reflection;
 
 namespace client.service.socks5
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class Plugin : IPlugin
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             common.socks5.Config config = services.GetService<common.socks5.Config>();
@@ -39,6 +47,11 @@ namespace client.service.socks5
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<Socks5Transfer>();

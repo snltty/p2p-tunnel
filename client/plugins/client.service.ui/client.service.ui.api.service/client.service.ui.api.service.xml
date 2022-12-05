@@ -1,0 +1,504 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>client.service.ui.api.service</name>
+    </assembly>
+    <members>
+        <member name="T:client.service.ui.api.service.clientServer.ClientServer">
+            <summary>
+            前段接口服务
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.ClientServer.#ctor(client.service.ui.api.Config,Microsoft.Extensions.DependencyInjection.ServiceProvider)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="serviceProvider"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.ClientServer.LoadPlugins(System.Reflection.Assembly[])">
+            <summary>
+            加载插件
+            </summary>
+            <param name="assemblys"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.ClientServer.Websocket">
+            <summary>
+            开启websockt
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.ClientServer.GetConfigure(System.String)">
+            <summary>
+            获取插件配置列表
+            </summary>
+            <param name="className"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.ClientServer.GetConfigures">
+            <summary>
+            获取某个插件配置
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.ClientServer.GetServices">
+            <summary>
+            获取服务列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.ClientServer.Notify(client.service.ui.api.clientServer.ClientServiceResponseInfo)">
+            <summary>
+            发送通知
+            </summary>
+            <param name="resp"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.ClientServer.OnMessage(client.service.ui.api.clientServer.ClientServiceRequestInfo)">
+            <summary>
+            收到消息
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.ClientServer.NamedPipe">
+            <summary>
+            开启具名管道
+            </summary>
+        </member>
+        <member name="T:client.service.ui.api.service.clientServer.PluginPathCacheInfo">
+            <summary>
+            前段接口缓存
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.PluginPathCacheInfo.Target">
+            <summary>
+            对象
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.PluginPathCacheInfo.Method">
+            <summary>
+            方法
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.PluginPathCacheInfo.IsVoid">
+            <summary>
+            是否void
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.PluginPathCacheInfo.IsTask">
+            <summary>
+            是否task
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.PluginPathCacheInfo.IsTaskResult">
+            <summary>
+            是否task result
+            </summary>
+        </member>
+        <member name="T:client.service.ui.api.service.clientServer.services.ClientsClientService">
+            <summary>
+            客户端列表
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.#ctor(client.messengers.clients.IClientsTransfer,client.messengers.clients.IClientInfoCaching,client.messengers.register.RegisterStateInfo)">
+            <summary>
+            
+            </summary>
+            <param name="clientsTransfer"></param>
+            <param name="clientInfoCaching"></param>
+            <param name="registerStateInfo"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.List(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            客户端列表
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.Connect(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            连它
+            </summary>
+            <param name="arg"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.ConnectReverse(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            连我
+            </summary>
+            <param name="arg"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.Reset(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            重启
+            </summary>
+            <param name="arg"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.Offline(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            断开
+            </summary>
+            <param name="arg"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.Ping(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            ping
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.Connects(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取所有客户端的连接情况
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.Delay(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取可用于中继的线路的延迟
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ClientsClientService.Relay(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            中继
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.ui.api.service.clientServer.services.RelayParamsInfo">
+            <summary>
+            中继参数
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.RelayParamsInfo.RelayIds">
+            <summary>
+            中继线路id列表
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.RelayParamsInfo.ToId">
+            <summary>
+            目标是谁
+            </summary>
+        </member>
+        <member name="T:client.service.ui.api.service.clientServer.services.ConfigureClientService">
+            <summary>
+            前端配置文件修改接口
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ConfigureClientService.#ctor(client.service.ui.api.clientServer.IClientServer)">
+            <summary>
+            
+            </summary>
+            <param name="clientServer"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ConfigureClientService.Configures(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取配置列表
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ConfigureClientService.Configure(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取配置
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ConfigureClientService.Save(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            保存配置
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.ConfigureClientService.Services(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取服务列表
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.ui.api.service.clientServer.services.SaveParamsInfo">
+            <summary>
+            保存
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.SaveParamsInfo.ClassName">
+            <summary>
+            类名
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.SaveParamsInfo.Content">
+            <summary>
+            配置内容
+            </summary>
+        </member>
+        <member name="T:client.service.ui.api.service.clientServer.services.CounterClientService">
+            <summary>
+            服务端信息
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.CounterClientService.#ctor(common.server.MessengerSender,client.messengers.register.RegisterStateInfo)">
+            <summary>
+            
+            </summary>
+            <param name="messengerSender"></param>
+            <param name="registerState"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.CounterClientService.Info(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取服务端信息
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.ui.api.service.clientServer.services.RegisterClientService">
+            <summary>
+            注册
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.RegisterClientService.#ctor(client.messengers.register.IRegisterTransfer,client.messengers.register.RegisterStateInfo,client.Config)">
+            <summary>
+            
+            </summary>
+            <param name="registerTransfer"></param>
+            <param name="registerStateInfo"></param>
+            <param name="config"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.RegisterClientService.Start(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            注册
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.RegisterClientService.Exit(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            退出
+            </summary>
+            <param name="arg"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.RegisterClientService.Info(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取配置文件和信息
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.ui.api.service.clientServer.services.RegisterClientService.Config(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            更新配置文件
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.ui.api.service.clientServer.services.ConfigureParamsInfo">
+            <summary>
+            配置信息
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.ConfigureParamsInfo.ClientConfig">
+            <summary>
+            客户端配置信息
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.ConfigureParamsInfo.ServerConfig">
+            <summary>
+            服务端配置信息
+            </summary>
+        </member>
+        <member name="T:client.service.ui.api.service.clientServer.services.RegisterInfo">
+            <summary>
+            注册信息
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.RegisterInfo.ClientConfig">
+            <summary>
+            客户端配置
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.RegisterInfo.ServerConfig">
+            <summary>
+            服务端配置
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.RegisterInfo.LocalInfo">
+            <summary>
+            本地数据
+            </summary>
+        </member>
+        <member name="P:client.service.ui.api.service.clientServer.services.RegisterInfo.RemoteInfo">
+            <summary>
+            远程数据
+            </summary>
+        </member>
+        <member name="T:client.service.ui.api.service.Plugin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.Plugin.LoadAfter(Microsoft.Extensions.DependencyInjection.ServiceProvider,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.Plugin.LoadBefore(Microsoft.Extensions.DependencyInjection.ServiceCollection,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="T:client.service.ui.api.service.webServer.IWebServer">
+            <summary>
+            web服务
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.webServer.IWebServer.Start">
+            <summary>
+            开始
+            </summary>
+        </member>
+        <member name="T:client.service.ui.api.service.webServer.IWebServerFileReader">
+            <summary>
+            web服务文件读取器
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.webServer.IWebServerFileReader.Read(System.String)">
+            <summary>
+            读取
+            </summary>
+            <param name="fileName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.ui.api.service.webServer.WebServerFileReader">
+            <summary>
+            web服务文件读取器
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.webServer.WebServerFileReader.#ctor(client.service.ui.api.Config)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.webServer.WebServerFileReader.Read(System.String)">
+            <summary>
+            读取
+            </summary>
+            <param name="fileName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.ui.api.service.webServer.WebServer">
+            <summary>
+            本地web管理端服务器
+            </summary>
+        </member>
+        <member name="M:client.service.ui.api.service.webServer.WebServer.#ctor(client.service.ui.api.Config,client.service.ui.api.service.webServer.IWebServerFileReader)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="webServerFileReader"></param>
+        </member>
+        <member name="M:client.service.ui.api.service.webServer.WebServer.Start">
+            <summary>
+            开启web
+            </summary>
+        </member>
+        <member name="T:client.service.udpforward.ServerConfigure">
+            <summary>
+            服务端主配置文件
+            </summary>
+        </member>
+        <member name="M:client.service.udpforward.ServerConfigure.#ctor(common.server.MessengerSender,client.messengers.register.RegisterStateInfo)">
+            <summary>
+            
+            </summary>
+            <param name="messengerSender"></param>
+            <param name="registerStateInfo"></param>
+        </member>
+        <member name="P:client.service.udpforward.ServerConfigure.Name">
+            <summary>
+            名字
+            </summary>
+        </member>
+        <member name="P:client.service.udpforward.ServerConfigure.Author">
+            <summary>
+            作者
+            </summary>
+        </member>
+        <member name="P:client.service.udpforward.ServerConfigure.Desc">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:client.service.udpforward.ServerConfigure.Enable">
+            <summary>
+            启用
+            </summary>
+        </member>
+        <member name="M:client.service.udpforward.ServerConfigure.Load">
+            <summary>
+            加载
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.udpforward.ServerConfigure.Save(System.String)">
+            <summary>
+            保存
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.udpforward.ServiceAccessrConfigure">
+            <summary>
+            服务端权限配置文件
+            </summary>
+        </member>
+        <member name="M:client.service.udpforward.ServiceAccessrConfigure.#ctor(common.server.MessengerSender,client.messengers.register.RegisterStateInfo)">
+            <summary>
+            
+            </summary>
+            <param name="messengerSender"></param>
+            <param name="registerStateInfo"></param>
+        </member>
+        <member name="P:client.service.udpforward.ServiceAccessrConfigure.Name">
+            <summary>
+            名字
+            </summary>
+        </member>
+        <member name="P:client.service.udpforward.ServiceAccessrConfigure.Author">
+            <summary>
+            作者
+            </summary>
+        </member>
+        <member name="P:client.service.udpforward.ServiceAccessrConfigure.Desc">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:client.service.udpforward.ServiceAccessrConfigure.Enable">
+            <summary>
+            启用
+            </summary>
+        </member>
+        <member name="M:client.service.udpforward.ServiceAccessrConfigure.Load">
+            <summary>
+            加载
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.udpforward.ServiceAccessrConfigure.Save(System.String)">
+            <summary>
+            保存
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

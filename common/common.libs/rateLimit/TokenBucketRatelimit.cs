@@ -15,11 +15,20 @@ namespace common.libs.rateLimit
         private readonly ConcurrentDictionary<TKey, TokenBucketRateInfo> limits = new ConcurrentDictionary<TKey, TokenBucketRateInfo>();
         private readonly WheelTimer<TKey> wheelTimer = new WheelTimer<TKey>();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rate"></param>
         public TokenBucketRatelimit(int rate)
         {
             this.rate = rate;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="rate"></param>
         public void SetRate(TKey key, int rate)
         {
             if (limits.TryGetValue(key, out TokenBucketRateInfo info) == false)
@@ -36,6 +45,12 @@ namespace common.libs.rateLimit
             }
             info.Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<TKey> { State = key, Callback = Timeout }, 1000, true);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="num"></param>
+        /// <returns></returns>
         public int Try(TKey key, int num)
         {
             TokenBucketRateInfo info = Get(key);
@@ -49,6 +64,10 @@ namespace common.libs.rateLimit
             info.CurrentRate -= canEat;
             return canEat;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
         public void Remove(TKey key)
         {
             if (limits.TryRemove(key, out TokenBucketRateInfo info))
@@ -56,6 +75,9 @@ namespace common.libs.rateLimit
                 info.Timeout.Cancel();
             };
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void Clear()
         {
             foreach (var item in limits.Values)

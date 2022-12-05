@@ -12,10 +12,16 @@ namespace common.server
     /// </summary>
     public sealed class MessengerSender
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public NumberSpaceUInt32 requestIdNumberSpace = new NumberSpaceUInt32(0);
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
         private ConcurrentDictionary<uint, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<uint, WheelTimerTimeout<TimeoutState>>();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public MessengerSender()
         {
         }
@@ -23,7 +29,6 @@ namespace common.server
         /// <summary>
         /// 发送并等待回复
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="msg"></param>
         /// <returns></returns>
         public async Task<MessageResponeInfo> SendReply(MessageRequestWrap msg)
@@ -44,7 +49,6 @@ namespace common.server
         /// <summary>
         /// 只发送，不等回复
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="msg"></param>
         /// <returns></returns>
         public async Task<bool> SendOnly(MessageRequestWrap msg)
@@ -143,15 +147,33 @@ namespace common.server
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class MessageResponeInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
+        /// <summary>
+        /// 
+        /// </summary>
         public ReadOnlyMemory<byte> Data { get; set; } = Helper.EmptyArray;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class TimeoutState
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public uint RequestId { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public TaskCompletionSource<MessageResponeInfo> Tcs { get; set; }
     }
 }

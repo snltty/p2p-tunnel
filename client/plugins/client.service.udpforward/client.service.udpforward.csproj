@@ -6,7 +6,8 @@
 	</PropertyGroup>
 	<PropertyGroup>
 		<TargetFrameworks>net7.0;net6.0</TargetFrameworks>
-		<TieredPGO>true</TieredPGO><PublishAot>false</PublishAot>
+		<TieredPGO>true</TieredPGO>
+		<PublishAot>false</PublishAot>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -24,12 +25,6 @@
 		<DebugSymbols>false</DebugSymbols>
 		<Optimize>True</Optimize>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <None Remove="p2p-udp-forwards.json" />
-	  <None Remove="server-udp-forwards.json" />
-	</ItemGroup>
-
 	<ItemGroup>
 	  <Content Include="p2p-udp-forwards.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>

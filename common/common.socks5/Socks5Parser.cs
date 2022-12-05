@@ -30,7 +30,11 @@ namespace common.socks5
             }
             return res;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
         public static (string username, string password) GetPasswordAuthInfo(Span<byte> span)
         {
             /*
@@ -42,6 +46,11 @@ namespace common.socks5
             return (username, password);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static int GetRemotePort(Memory<byte> data)
         {
             ushort int16Port = 0;
@@ -59,7 +68,12 @@ namespace common.socks5
             };
             return BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(int16Port) : int16Port;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="ipMemory"></param>
+        /// <returns></returns>
         public static IPEndPoint GetRemoteEndPoint(Memory<byte> data, out Span<byte> ipMemory)
         {
             ipMemory = Helper.EmptyArray;
@@ -99,6 +113,12 @@ namespace common.socks5
 
             return new IPEndPoint(ip, port);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public static Memory<byte> GetUdpData(Memory<byte> span)
         {
             //RSV FRAG ATYPE DST.ADDR DST.PORT DATA
@@ -112,7 +132,12 @@ namespace common.socks5
                 _ => throw new NotImplementedException(),
             };
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="remoteEndPoint"></param>
+        /// <param name="responseCommand"></param>
+        /// <returns></returns>
         public static byte[] MakeConnectResponse(IPEndPoint remoteEndPoint, byte responseCommand)
         {
             //VER REP  RSV ATYPE BND.ADDR BND.PORT
@@ -134,7 +159,12 @@ namespace common.socks5
 
             return res;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="remoteEndPoint"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static Memory<byte> MakeUdpResponse(IPEndPoint remoteEndPoint, Memory<byte> data)
         {
             //RSV FRAG ATYPE DST.ADDR DST.PORT DATA

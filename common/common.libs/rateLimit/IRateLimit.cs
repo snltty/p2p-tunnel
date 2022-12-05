@@ -1,12 +1,16 @@
 ﻿namespace common.libs.rateLimit
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
     public interface IRateLimit<TKey>
     {
         /// <summary>
         /// 单独设置某个对象的速率
         /// </summary>
         /// <param name="key"></param>
-        /// <param name="num"></param>
+        /// <param name="rate"></param>
         void SetRate(TKey key, int rate);
 
         /// <summary>

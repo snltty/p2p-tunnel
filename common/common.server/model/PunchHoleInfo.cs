@@ -11,6 +11,9 @@ namespace common.server.model
     /// </summary>
     public sealed class PunchHoleRequestInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public PunchHoleRequestInfo() { }
         /// <summary>
         /// 数据交换分两种，一种是a让服务器把a的公网数据发给b，另一种是，a把一些数据通过服务器原样交给b
@@ -24,6 +27,9 @@ namespace common.server.model
         /// 打洞类别，tcp udp 或者其它
         /// </summary>
         public byte PunchType { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public byte Index { get; set; } = 0;
         /// <summary>
         /// 来自谁
@@ -37,7 +43,9 @@ namespace common.server.model
         /// 通道名，可能会有多个通道
         /// </summary>
         public ulong TunnelName { get; set; } = 0;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public ulong RequestId { get; set; } = 0;
 
         /// <summary>
@@ -45,6 +53,10 @@ namespace common.server.model
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public ReadOnlyMemory<byte> Data { get; set; } = Helper.EmptyArray;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var fromidBytes = FromId.ToBytes();
@@ -85,6 +97,10 @@ namespace common.server.model
             return bytes;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -116,8 +132,14 @@ namespace common.server.model
         }
     }
 
+    /// <summary>
+    /// 打洞消息回执
+    /// </summary>
     public sealed class PunchHoleResponseInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public ulong RequestId { get; set; } = 0;
         /// <summary>
         /// 来自谁
@@ -128,6 +150,10 @@ namespace common.server.model
         /// </summary>
         public ulong ToId { get; set; } = 0;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var requestidBytes = RequestId.ToBytes();
@@ -146,6 +172,10 @@ namespace common.server.model
             return bytes;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -162,26 +192,63 @@ namespace common.server.model
         }
     }
 
+    /// <summary>
+    /// 打洞消息类型
+    /// </summary>
     [Flags]
     public enum PunchForwardTypes : byte
     {
+        /// <summary>
+        /// 通知
+        /// </summary>
         [Description("通知A的数据给B")]
         NOTIFY,
+        /// <summary>
+        /// 转发
+        /// </summary>
         [Description("原样转发")]
         FORWARD
     }
 
+    /// <summary>
+    /// 打洞消息通知数据
+    /// </summary>
     public sealed class PunchHoleNotifyInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public PunchHoleNotifyInfo() { }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public IPAddress[] LocalIps { get; set; } = Array.Empty<IPAddress>();
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsDefault { get; set; } = false;
+        /// <summary>
+        /// 
+        /// </summary>
         public byte Index { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public IPAddress Ip { get; set; } = IPAddress.Any;
+        /// <summary>
+        /// 
+        /// </summary>
         public int Port { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public int LocalPort { get; set; } = 0;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             int length = 0;
@@ -237,6 +304,10 @@ namespace common.server.model
             return bytes;
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -267,13 +338,27 @@ namespace common.server.model
         }
     }
 
-
+    /// <summary>
+    /// 打洞相关消息id
+    /// </summary>
     [Flags, MessengerIdEnum]
     public enum PunchHoleMessengerIds : ushort
     {
+        /// <summary>
+        /// 
+        /// </summary>
         Min = 400,
+        /// <summary>
+        /// 发送
+        /// </summary>
         Request = 401,
+        /// <summary>
+        /// 回执
+        /// </summary>
         Response = 402,
+        /// <summary>
+        /// 
+        /// </summary>
         Max = 499,
     }
 }

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:03:35
+ * @LastEditTime: 2022-12-05 10:01:24
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\udpforward\AddListen.vue
@@ -116,10 +116,12 @@ export default {
                 json.ID = Number(json.ID);
                 json.Port = Number(json.Port);
                 json.TargetPort = Number(json.TargetPort);
-                addListen(json).then(() => {
+                addListen(json).then((res) => {
                     state.loading = false;
-                    state.show = false;
-                    emit('success');
+                    if (res) {
+                        state.show = false;
+                        emit('success');
+                    }
                 }).catch((e) => {
                     state.loading = false;
                 });

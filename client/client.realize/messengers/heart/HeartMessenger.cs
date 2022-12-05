@@ -10,10 +10,18 @@ namespace client.realize.messengers.heart
     [MessengerIdRange((ushort)HeartMessengerIds.Min, (ushort)HeartMessengerIds.Max)]
     public sealed class HeartMessenger : IMessenger
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public HeartMessenger()
         {
         }
 
+        /// <summary>
+        /// 活着
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)HeartMessengerIds.Alive)]
         public byte[] Alive(IConnection connection)
         {

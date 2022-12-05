@@ -5,9 +5,17 @@ using System.Runtime.InteropServices;
 
 namespace common.libs.extends
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class SocketExtends
     {
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="socket"></param>
+        /// <param name="family"></param>
+        /// <param name="val"></param>
         public static void IPv6Only(this Socket socket, AddressFamily family, bool val)
         {
             if (NetworkHelper.IPv6Support && family == AddressFamily.InterNetworkV6)
@@ -21,7 +29,10 @@ namespace common.libs.extends
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="socket"></param>
         public static void SafeClose(this Socket socket)
         {
             if (socket != null)
@@ -41,10 +52,20 @@ namespace common.libs.extends
                 }
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="socket"></param>
+        /// <param name="reuse"></param>
         public static void Reuse(this Socket socket, bool reuse = true)
         {
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, reuse);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="socket"></param>
+        /// <param name="ip"></param>
         public static void ReuseBind(this Socket socket, IPEndPoint ip)
         {
             socket.Reuse(true);
@@ -65,6 +86,10 @@ namespace common.libs.extends
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, time);
         }
         private static byte[] keepaliveData = null;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static byte[] GetKeepAliveData()
         {
             if (keepaliveData == null)

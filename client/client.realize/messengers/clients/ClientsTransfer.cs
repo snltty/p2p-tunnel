@@ -19,6 +19,9 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.clients
 {
+    /// <summary>
+    /// 客户端操作类
+    /// </summary>
     public sealed class ClientsTransfer : IClientsTransfer
     {
         private BoolSpace firstClients = new BoolSpace(true);
@@ -38,6 +41,23 @@ namespace client.realize.messengers.clients
 
         private object lockObject = new();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientsMessengerSender"></param>
+        /// <param name="punchHoleUdp"></param>
+        /// <param name="punchHoleTcp"></param>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="registerState"></param>
+        /// <param name="punchHoleMessengerSender"></param>
+        /// <param name="config"></param>
+        /// <param name="udpServer"></param>
+        /// <param name="tcpServer"></param>
+        /// <param name="heartMessengerSender"></param>
+        /// <param name="relayMessengerSender"></param>
+        /// <param name="clientsTunnel"></param>
+        /// <param name="connecRouteCaching"></param>
+        /// <param name="punchHoleDirectionConfig"></param>
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
@@ -205,6 +225,10 @@ namespace client.realize.messengers.clients
             clientInfoCaching.Offline(connection.ConnectId, ClientOfflineTypes.Disconnect);
         }
 
+        /// <summary>
+        /// 连它
+        /// </summary>
+        /// <param name="id"></param>
         public void ConnectClient(ulong id)
         {
             if (clientInfoCaching.Get(id, out ClientInfo client))
@@ -212,6 +236,10 @@ namespace client.realize.messengers.clients
                 ConnectClient(client);
             }
         }
+        /// <summary>
+        /// 连它
+        /// </summary>
+        /// <param name="client"></param>
         public void ConnectClient(ClientInfo client)
         {
             if (client.Id == registerState.ConnectId)
@@ -284,11 +312,15 @@ namespace client.realize.messengers.clients
                 PunchHoleReverseInfo model = new PunchHoleReverseInfo();
                 model.DeBytes(arg.Data.Data);
                 //交换状态 , 11 01 -> 01 11
-                client.TryReverseValue = (byte)(((model.TryReverse & ClientInfo.TryReverseTcpUdpBit) << 2) | (model.TryReverse >> 2));
+                client.TryReverseValue = (byte)(((model.Value & ClientInfo.TryReverseTcpUdpBit) << 2) | (model.Value >> 2));
                 ConnectClient(client);
             }
         }
 
+        /// <summary>
+        /// 连我
+        /// </summary>
+        /// <param name="id"></param>
         public void ConnectReverse(ulong id)
         {
             if (clientInfoCaching.Get(id, out ClientInfo client))
@@ -296,16 +328,28 @@ namespace client.realize.messengers.clients
                 ConnectReverse(client);
             }
         }
+        /// <summary>
+        /// 连我
+        /// </summary>
+        /// <param name="info"></param>
         public void ConnectReverse(ClientInfo info)
         {
             punchHoleMessengerSender.SendReverse(info).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// 重启
+        /// </summary>
+        /// <param name="id"></param>
         public void Reset(ulong id)
         {
             punchHoleMessengerSender.SendReset(id).ConfigureAwait(false);
 
         }
+        /// <summary>
+        /// 停止连接
+        /// </summary>
+        /// <param name="id"></param>
         public void ConnectStop(ulong id)
         {
             punchHoleTcp.SendStep2Stop(id);
@@ -397,6 +441,10 @@ namespace client.realize.messengers.clients
             return EnumConnectResult.Fail;
         }
 
+        /// <summary>
+        /// ping
+        /// </summary>
+        /// <returns></returns>
         public async Task Ping()
         {
             foreach (var item in clientInfoCaching.All())
@@ -462,7 +510,7 @@ namespace client.realize.messengers.clients
 
                     foreach (ClientsClientInfo item in upLineClients)
                     {
-                        EnumClientAccess enumClientAccess = (EnumClientAccess)item.ClientAccess;
+                        EnumClientAccess enumClientAccess = (EnumClientAccess)item.Access;
                         ClientInfo client = new ClientInfo
                         {
                             Id = item.Id,
@@ -504,11 +552,20 @@ namespace client.realize.messengers.clients
             }
         }
 
+        /// <summary>
+        /// 获取各个客户端的连接状态
+        /// </summary>
+        /// <returns></returns>
         public async Task<ConcurrentDictionary<ulong, ulong[]>> Connects()
         {
             await relayMessengerSender.AskConnects();
             return connecRouteCaching.Connects;
         }
+        /// <summary>
+        /// 各个线路的延迟
+        /// </summary>
+        /// <param name="paths"></param>
+        /// <returns></returns>
         public async Task<int[]> Delay(ulong[][] paths)
         {
             int[] data = new int[paths.Length];
@@ -564,12 +621,11 @@ namespace client.realize.messengers.clients
         }
 
         /// <summary>
-        /// 
+        /// 中继
         /// </summary>
-        /// <param name="targetId">连接谁</param>
-        /// <param name="sourceConnection">通过谁连</param>
-        /// <param name="relayids">中继路径</param>
-        /// <param name="notify">是否通知目标端</param>
+        /// <param name="sourceConnection"></param>
+        /// <param name="relayids"></param>
+        /// <param name="notify"></param>
         /// <returns></returns>
         public async Task Relay(IConnection sourceConnection, ulong[] relayids, bool notify = false)
         {
@@ -602,11 +658,23 @@ namespace client.realize.messengers.clients
             clientInfoCaching.Online(relayids[^1], connection, relayType, notify == false ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active);
         }
 
+        /// <summary>
+        /// 打洞结果
+        /// </summary>
         [Flags]
         enum EnumConnectResult : byte
         {
+            /// <summary>
+            /// 失败
+            /// </summary>
             Fail = 1,
+            /// <summary>
+            /// 成功
+            /// </summary>
             Success = 2,
+            /// <summary>
+            /// 跳过
+            /// </summary>
             BreakOff = 4
         }
     }

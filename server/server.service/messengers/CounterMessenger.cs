@@ -8,6 +8,9 @@ using System.Linq;
 
 namespace server.service.messengers
 {
+    /// <summary>
+    /// 服务器信息
+    /// </summary>
     [MessengerIdRange((ushort)CounterMessengerIds.Min, (ushort)CounterMessengerIds.Max)]
     public sealed class CounterMessenger : IMessenger
     {
@@ -15,6 +18,11 @@ namespace server.service.messengers
         private readonly DateTime startTime = DateTime.Now;
         private CounterResultInfo counterResultInfo = new CounterResultInfo();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCaching"></param>
+        /// <param name="wheelTimer"></param>
         public CounterMessenger(IClientRegisterCaching clientRegisterCaching, WheelTimer<object> wheelTimer)
         {
             wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object>
@@ -35,6 +43,11 @@ namespace server.service.messengers
             }, 1000, true);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)CounterMessengerIds.Info)]
         public byte[] Info(IConnection connection)
         {

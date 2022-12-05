@@ -10,6 +10,9 @@ namespace common.server.model
     /// </summary>
     public sealed class RegisterParamsInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public RegisterParamsInfo() { }
 
         /// <summary>
@@ -20,6 +23,9 @@ namespace common.server.model
         /// 连接id，因为分两次注册，第二次带上第一次的注册后获得的id
         /// </summary>
         public ulong Id { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public byte ShortId { get; set; } = 0;
         /// <summary>
         /// 分组
@@ -44,6 +50,10 @@ namespace common.server.model
         /// </summary>
         public uint ClientAccess { get; set; } = 0;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             int length = 0;
@@ -111,6 +121,10 @@ namespace common.server.model
             return bytes;
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -151,8 +165,14 @@ namespace common.server.model
     /// </summary>
     public sealed class RegisterResultInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public RegisterResultInfo() { }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public RegisterResultInfoCodes Code { get; set; } = RegisterResultInfoCodes.OK;
 
         /// <summary>
@@ -160,13 +180,22 @@ namespace common.server.model
         /// </summary>
         public bool Relay { get; set; } = false;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort UdpPort { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort TcpPort { get; set; } = 0;
 
         /// <summary>
         /// 连接id
         /// </summary>
         public ulong Id { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public byte ShortId { get; set; } = 0;
         /// <summary>
         /// 连接ip
@@ -177,6 +206,10 @@ namespace common.server.model
         /// </summary>
         public string GroupId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var udpPortBytes = UdpPort.ToBytes();
@@ -223,6 +256,10 @@ namespace common.server.model
             return bytes;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -252,35 +289,78 @@ namespace common.server.model
             GroupId = span.Slice(index).GetString();
         }
 
+        /// <summary>
+        /// 注册结果类别
+        /// </summary>
         [Flags]
         public enum RegisterResultInfoCodes : byte
         {
+            /// <summary>
+            /// 
+            /// </summary>
             [Description("成功")]
             OK = 1,
+            /// <summary>
+            /// 
+            /// </summary>
             [Description("存在同名客户端")]
             SAME_NAMES = 2,
+            /// <summary>
+            /// 
+            /// </summary>
             [Description("存在同名短id")]
             SAME_SHORTID = 4,
+            /// <summary>
+            /// 
+            /// </summary>
             [Description("短id获取失败")]
             ERROR_SHORTID = 8,
+            /// <summary>
+            /// 
+            /// </summary>
             [Description("验证未通过")]
             VERIFY = 16,
+            /// <summary>
+            /// 
+            /// </summary>
             [Description("key验证未通过")]
             KEY_VERIFY = 32,
+            /// <summary>
+            /// 
+            /// </summary>
             [Description("出错")]
             UNKNOW = 128
         }
     }
 
 
+    /// <summary>
+    /// 端口注册
+    /// </summary>
     public sealed class TunnelRegisterInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public TunnelRegisterInfo() { }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public ulong TunnelName { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort LocalPort { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort Port { get; set; } = 0;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var bytes = new byte[12];
@@ -302,6 +382,10 @@ namespace common.server.model
 
             return bytes;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             int index = 0;
@@ -315,23 +399,62 @@ namespace common.server.model
         }
     }
 
+    /// <summary>
+    /// 通道默认值
+    /// </summary>
     public enum TunnelDefaults : ulong
     {
+        /// <summary>
+        /// 使用此值，则生成新的值
+        /// </summary>
         MIN = 0,
+        /// <summary>
+        /// 
+        /// </summary>
         UDP = 1,
+        /// <summary>
+        /// 
+        /// </summary>
         TCP = 2,
+        /// <summary>
+        /// 
+        /// </summary>
         MAX = 2,
     }
 
+    /// <summary>
+    /// 注册相关的消息id
+    /// </summary>
     [Flags, MessengerIdEnum]
     public enum RegisterMessengerIds : ushort
     {
+        /// <summary>
+        /// 
+        /// </summary>
         Min = 0,
+        /// <summary>
+        /// 注册
+        /// </summary>
         SignIn = 0,
+        /// <summary>
+        /// 通知
+        /// </summary>
         Notify = 1,
+        /// <summary>
+        /// 退出
+        /// </summary>
         SignOut = 2,
+        /// <summary>
+        /// 获取配置
+        /// </summary>
         GetSetting = 3,
+        /// <summary>
+        /// 配置
+        /// </summary>
         Setting = 4,
+        /// <summary>
+        /// 
+        /// </summary>
         Max = 99,
     }
 }

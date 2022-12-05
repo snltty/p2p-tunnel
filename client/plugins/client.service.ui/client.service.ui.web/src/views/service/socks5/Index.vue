@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-29 15:32:30
+ * @LastEditTime: 2022-12-05 11:00:19
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\socks5\Index.vue
@@ -113,15 +113,18 @@ export default {
 
         const clientsState = injectClients();
         const shareData = injectShareData();
+
+        let josn = {};
         const loadConfig = () => {
             get().then((res) => {
-                state.form.ListenEnable = res.ListenEnable;
-                state.form.ListenPort = res.ListenPort;
-                state.form.BufferSize = res.BufferSize;
-                state.form.ConnectEnable = res.ConnectEnable;
-                state.form.IsCustomPac = res.IsCustomPac;
-                state.form.IsPac = res.IsPac;
-                state.form.TargetName = res.TargetName;
+                josn = res;
+                state.form.ListenEnable = josn.ListenEnable;
+                state.form.ListenPort = josn.ListenPort;
+                state.form.BufferSize = josn.BufferSize;
+                state.form.ConnectEnable = josn.ConnectEnable;
+                state.form.IsCustomPac = josn.IsCustomPac;
+                state.form.IsPac = josn.IsPac;
+                state.form.TargetName = josn.TargetName;
             });
         }
         const loadPac = () => {
@@ -185,14 +188,18 @@ export default {
                 }
                 state.loading = true;
 
-                const json = JSON.parse(JSON.stringify(state.form));
-                json.ListenPort = Number(json.ListenPort);
-                json.BufferSize = Number(json.BufferSize);
+                const _json = JSON.parse(JSON.stringify(josn));
+                _json.ListenEnable = state.form.ListenEnable;
+                _json.ListenPort = +state.form.ListenPort;
+                _json.BufferSize = +state.form.BufferSize;
+                _json.ConnectEnable = state.form.ConnectEnable;
+                _json.IsCustomPac = state.form.IsCustomPac;
+                _json.IsPac = state.form.IsPac;
+                _json.TargetName = state.form.TargetName;
 
-                console.log(json);
-                set(json).then(() => {
+                set(_json).then(() => {
                     state.loading = false;
-                    if (json.IsPac) {
+                    if (_json.IsPac) {
                         savePac();
                     }
                     ElMessage.success('操作成功！');

@@ -10,6 +10,9 @@ using System.Threading;
 
 namespace common.tcpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class TcpForwardResolver
     {
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
@@ -17,16 +20,23 @@ namespace common.tcpforward
         private readonly ITcpForwardValidator tcpForwardValidator;
         private ConcurrentDictionary<ConnectionKey, ConnectUserToken> connections = new ConcurrentDictionary<ConnectionKey, ConnectUserToken>(new ConnectionComparer());
 
-        Semaphore maxNumberAcceptedClients;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tcpForwardMessengerSender"></param>
+        /// <param name="config"></param>
+        /// <param name="tcpForwardValidator"></param>
         public TcpForwardResolver(TcpForwardMessengerSender tcpForwardMessengerSender, Config config, ITcpForwardValidator tcpForwardValidator)
         {
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.config = config;
 
-            maxNumberAcceptedClients = new Semaphore(config.NumConnections, config.NumConnections);
             this.tcpForwardValidator = tcpForwardValidator;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         public void InputData(IConnection connection)
         {
             TcpForwardInfo data = new TcpForwardInfo();
@@ -223,7 +233,7 @@ namespace common.tcpforward
         }
     }
 
-    public class ConnectUserToken
+    sealed class ConnectUserToken
     {
         public Socket TargetSocket { get; set; }
         public ConnectionKey Key { get; set; }
@@ -243,7 +253,7 @@ namespace common.tcpforward
         }
     }
 
-    public class ConnectionComparer : IEqualityComparer<ConnectionKey>
+    sealed class ConnectionComparer : IEqualityComparer<ConnectionKey>
     {
         public bool Equals(ConnectionKey x, ConnectionKey y)
         {
@@ -255,7 +265,7 @@ namespace common.tcpforward
             return obj.RequestId.GetHashCode() ^ obj.ConnectId.GetHashCode();
         }
     }
-    public readonly struct ConnectionKey
+    readonly struct ConnectionKey
     {
         public readonly uint RequestId { get; }
         public readonly ulong ConnectId { get; }

@@ -6,10 +6,18 @@ using System.Threading.Tasks;
 
 namespace client.service.wakeup
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class WakeUpMessengerSender
     {
         private readonly MessengerSender messengerSender;
         private readonly Config config;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messengerSender"></param>
+        /// <param name="config"></param>
         public WakeUpMessengerSender(MessengerSender messengerSender, Config config)
         {
             this.messengerSender = messengerSender;
@@ -18,7 +26,8 @@ namespace client.service.wakeup
         /// <summary>
         /// 获取mac
         /// </summary>
-        /// <param name="arg"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         public async Task<List<ConfigItem>> Mac(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
@@ -37,6 +46,12 @@ namespace client.service.wakeup
             }
             return new List<ConfigItem>();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="mac"></param>
+        /// <returns></returns>
         public async Task<bool> WakeUp(IConnection connection, string mac)
         {
             return await messengerSender.SendOnly(new MessageRequestWrap

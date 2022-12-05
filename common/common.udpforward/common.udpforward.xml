@@ -1,0 +1,681 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>common.udpforward</name>
+    </assembly>
+    <members>
+        <member name="T:common.udpforward.Config">
+            <summary>
+            udp转发配置文件
+            </summary>
+        </member>
+        <member name="M:common.udpforward.Config.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.Config.#ctor(common.libs.database.IConfigDataProvider{common.udpforward.Config})">
+            <summary>
+            
+            </summary>
+            <param name="configDataProvider"></param>
+        </member>
+        <member name="P:common.udpforward.Config.PortWhiteList">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.Config.PortBlackList">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.Config.ConnectEnable">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.Config.TunnelListenRange">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.Config.ReadConfig">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.Config.ReadString">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.Config.SaveConfig(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.udpforward.TunnelListenRangeInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.TunnelListenRangeInfo.Min">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.TunnelListenRangeInfo.Max">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.udpforward.IUdpForwardServer">
+            <summary>
+            tcp转发监听服务
+            </summary>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardServer.Start(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="sourcePort"></param>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardServer.Response(common.udpforward.UdpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="model"></param>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardServer.Stop(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="sourcePort"></param>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardServer.Stop">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.IUdpForwardServer.OnRequest">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.IUdpForwardServer.OnListenChange">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.udpforward.UdpforwardListenChangeInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpforwardListenChangeInfo.Port">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpforwardListenChangeInfo.State">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.udpforward.IUdpForwardTargetProvider">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardTargetProvider.Get(System.UInt16,common.udpforward.UdpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="sourcePort"></param>
+            <param name="info"></param>
+        </member>
+        <member name="T:common.udpforward.IUdpForwardTargetCaching`1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardTargetCaching`1.Get(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardTargetCaching`1.Add(System.UInt16,`0)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardTargetCaching`1.Remove(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardTargetCaching`1.Remove(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="targetName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardTargetCaching`1.Remove(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardTargetCaching`1.ClearConnection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardTargetCaching`1.ClearConnection(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardTargetCaching`1.ClearConnection(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+        </member>
+        <member name="T:common.udpforward.IUdpForwardValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardValidator.Validate(common.udpforward.UdpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="info"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.IUdpForwardValidator.Validate(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.udpforward.DefaultUdpForwardValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.DefaultUdpForwardValidator.#ctor(common.udpforward.Config)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="M:common.udpforward.DefaultUdpForwardValidator.Validate(common.udpforward.UdpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="info"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.DefaultUdpForwardValidator.Validate(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.udpforward.UdpForwardInfo">
+            <summary>
+            udp转发数据
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardInfo.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardInfo.SourcePort">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardInfo.SourceEndpoint">
+            <summary>
+            来源地址，是谁发的数据，目标端回复的时候知道回复给谁
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardInfo.TargetEndpoint">
+            <summary>
+            目标地址，发给谁
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardInfo.Buffer">
+            <summary>
+            发送的数据
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardInfo.Connection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardInfo.ToBytes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardInfo.DeBytes(System.Memory{System.Byte}@)">
+            <summary>
+            
+            </summary>
+            <param name="memory"></param>
+        </member>
+        <member name="T:common.udpforward.UdpForwardMessengerIds">
+            <summary>
+            udp转发相关消息id
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardMessengerIds.Min">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardMessengerIds.Request">
+            <summary>
+            请求
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardMessengerIds.Response">
+            <summary>
+            回执
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardMessengerIds.Ports">
+            <summary>
+            端口
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardMessengerIds.SignIn">
+            <summary>
+            注册
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardMessengerIds.SignOut">
+            <summary>
+            退出
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardMessengerIds.GetSetting">
+            <summary>
+            获取配置
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardMessengerIds.Setting">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardMessengerIds.Max">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.udpforward.UdpForwardMessengerSender">
+            <summary>
+            udp转发消息发送
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardMessengerSender.#ctor(common.server.MessengerSender)">
+            <summary>
+            
+            </summary>
+            <param name="messengerSender"></param>
+        </member>
+        <member name="P:common.udpforward.UdpForwardMessengerSender.OnRequestHandler">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardMessengerSender.SendRequest(common.udpforward.UdpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardMessengerSender.OnRequest(common.udpforward.UdpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="P:common.udpforward.UdpForwardMessengerSender.OnResponseHandler">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardMessengerSender.SendResponse(common.udpforward.UdpForwardInfo,common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="arg"></param>
+            <param name="Connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardMessengerSender.OnResponse(common.udpforward.UdpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="M:common.udpforward.UdpForwardMessengerSender.GetPorts(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="Connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardMessengerSender.SignOut(common.server.IConnection,System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="Connection"></param>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardMessengerSender.SignIn(common.server.IConnection,common.udpforward.UdpForwardRegisterParamsInfo)">
+            <summary>
+            
+            </summary>
+            <param name="Connection"></param>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.udpforward.UdpForwardResolver">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardResolver.#ctor(common.udpforward.UdpForwardMessengerSender,common.libs.WheelTimer{System.Object},common.udpforward.IUdpForwardValidator)">
+            <summary>
+            
+            </summary>
+            <param name="udpForwardMessengerSender"></param>
+            <param name="wheelTimer"></param>
+            <param name="udpForwardValidator"></param>
+        </member>
+        <member name="T:common.udpforward.UdpToken">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.udpforward.UdpForwardServer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardServer.OnRequest">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardServer.OnListenChange">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardServer.#ctor(common.libs.WheelTimer{System.Object})">
+            <summary>
+            
+            </summary>
+            <param name="wheelTimer"></param>
+        </member>
+        <member name="M:common.udpforward.UdpForwardServer.Start(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="sourcePort"></param>
+        </member>
+        <member name="M:common.udpforward.UdpForwardServer.Response(common.udpforward.UdpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="model"></param>
+        </member>
+        <member name="M:common.udpforward.UdpForwardServer.Stop(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="sourcePort"></param>
+        </member>
+        <member name="M:common.udpforward.UdpForwardServer.Stop">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.udpforward.UdpForwardRegisterParamsInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardRegisterParamsInfo.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardRegisterParamsInfo.SourcePort">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardRegisterParamsInfo.TargetName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardRegisterParamsInfo.TargetIp">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardRegisterParamsInfo.TargetPort">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardRegisterParamsInfo.ToBytes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardRegisterParamsInfo.DeBytes(System.Memory{System.Byte})">
+            <summary>
+            
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="T:common.udpforward.UdpForwardRegisterResult">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardRegisterResult.Code">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardRegisterResult.ID">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardRegisterResult.Msg">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardRegisterResult.ToBytes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardRegisterResult.DeBytes(System.ReadOnlyMemory{System.Byte})">
+            <summary>
+            
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="T:common.udpforward.UdpForwardRegisterResultCodes">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardRegisterResultCodes.OK">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardRegisterResultCodes.DISABLED">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardRegisterResultCodes.EXISTS">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardRegisterResultCodes.OUT_RANGE">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.udpforward.UdpForwardRegisterResultCodes.UNKNOW">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.udpforward.UdpForwardTargetCaching">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTargetCaching.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTargetCaching.Get(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTargetCaching.Add(System.UInt16,common.udpforward.UdpForwardTargetCacheInfo)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTargetCaching.Remove(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTargetCaching.Remove(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="targetName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTargetCaching.Remove(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTargetCaching.ClearConnection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTargetCaching.ClearConnection(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTargetCaching.ClearConnection(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+        </member>
+        <member name="T:common.udpforward.UdpForwardTargetCacheInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardTargetCacheInfo.Id">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardTargetCacheInfo.Name">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardTargetCacheInfo.Connection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.udpforward.UdpForwardTargetCacheInfo.Endpoint">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.udpforward.UdpForwardTransferBase">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.udpforward.UdpForwardTransferBase.#ctor(common.udpforward.IUdpForwardServer,common.udpforward.UdpForwardMessengerSender,common.udpforward.IUdpForwardTargetProvider)">
+            <summary>
+            
+            </summary>
+            <param name="udpForwardServer"></param>
+            <param name="udpForwardMessengerSender"></param>
+            <param name="udpForwardTargetProvider"></param>
+        </member>
+    </members>
+</doc>

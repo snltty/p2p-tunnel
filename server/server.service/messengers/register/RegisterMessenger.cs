@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 namespace server.service.messengers.register
 {
 
+    /// <summary>
+    /// 注册
+    /// </summary>
     [MessengerIdRange((ushort)RegisterMessengerIds.Min, (ushort)RegisterMessengerIds.Max)]
     public sealed class RegisterMessenger : IMessenger
     {
@@ -17,6 +20,13 @@ namespace server.service.messengers.register
         private readonly MessengerSender messengerSender;
         private readonly IRelayValidator relayValidator;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCache"></param>
+        /// <param name="registerKeyValidator"></param>
+        /// <param name="messengerSender"></param>
+        /// <param name="relayValidator"></param>
         public RegisterMessenger(IClientRegisterCaching clientRegisterCache, IRegisterKeyValidator registerKeyValidator, MessengerSender messengerSender, IRelayValidator relayValidator)
         {
             this.clientRegisterCache = clientRegisterCache;
@@ -25,8 +35,13 @@ namespace server.service.messengers.register
             this.relayValidator = relayValidator;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)RegisterMessengerIds.SignIn)]
-        public async Task<byte[]> Execute(IConnection connection)
+        public async Task<byte[]> SignIn(IConnection connection)
         {
             RegisterParamsInfo model = new RegisterParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
@@ -65,14 +80,22 @@ namespace server.service.messengers.register
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)RegisterMessengerIds.Notify)]
         public void Notify(IConnection connection)
         {
             clientRegisterCache.Notify(connection);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)RegisterMessengerIds.SignOut)]
-        public void Exit(IConnection connection)
+        public void SignOut(IConnection connection)
         {
             connection.Disponse();
         }
@@ -121,61 +144,10 @@ namespace server.service.messengers.register
             }
             return (verify, client);
         }
-        /*
-        private async Task<(RegisterResultInfo, RegisterCacheInfo)> VerifyAndAdd(RegisterParamsInfo model)
-        {
-            RegisterCacheInfo client = null;
-            //不是第一次注册
-            if (model.Id > 0)
-            {
-                if (clientRegisterCache.Get(model.Id, out client) == false)
-                {
-                    return (new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.VERIFY }, client);
-                }
-                return (null, client);
-            }
-
-            if (string.IsNullOrWhiteSpace(model.GroupId))
-            {
-                model.GroupId = Guid.NewGuid().ToString().Md5();
-            }
-            if (model.ShortId > 0)
-            {
-                if (clientRegisterCache.Get(model.GroupId, model.ShortId, out client) == true)
-                {
-                    bool alive = await GetAlive(client.OnLineConnection);
-                    if (alive == true)
-                    {
-                        return (new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.SAME_SHORTID }, client);
-                    }
-                    clientRegisterCache.Remove(client.Id);
-                }
-            }
-            else
-            {
-                model.ShortId = clientRegisterCache.GetShortId(model.GroupId);
-            }
-
-            if (model.ShortId == 0)
-            {
-                return (new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.ERROR_SHORTID }, client);
-            }
-
-            client = new()
-            {
-                Name = model.Name,
-                GroupId = model.GroupId,
-                LocalIps = model.LocalIps,
-                ClientAccess = model.ClientAccess,
-                Id = model.Id,
-                ShortId = model.ShortId,
-            };
-            clientRegisterCache.Add(client);
-            return (null, client);
-        }
-        */
         private async Task<bool> GetAlive(IConnection connection)
         {
+            if (connection != null && connection.ServerType == ServerType.UDP) return false;
+
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,

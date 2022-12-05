@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-29 16:49:45
+ * @LastEditTime: 2022-12-05 10:57:00
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -227,7 +227,7 @@ import { injectRegister } from '../states/register'
 import { sendRegisterMsg, getRegisterInfo, updateConfig, sendExit } from '../apis/register'
 
 import { ElMessage } from 'element-plus'
-import { onMounted, watch } from '@vue/runtime-core';
+import { onMounted } from '@vue/runtime-core';
 import ConfigureModal from './service/configure/ConfigureModal.vue'
 export default {
     components: { ConfigureModal },
@@ -331,9 +331,11 @@ export default {
             }
         });
 
+        let json = {};
         //获取一下可修改的数据
         const loadConfig = () => {
-            getRegisterInfo().then((json) => {
+            getRegisterInfo().then((_json) => {
+                json = _json;
                 state.model.ShortId = registerState.ClientConfig.ShortId = json.ClientConfig.ShortId;
                 state.model.ClientName = registerState.ClientConfig.Name = json.ClientConfig.Name;
                 state.model.GroupId = registerState.ClientConfig.GroupId = json.ClientConfig.GroupId;
@@ -371,38 +373,36 @@ export default {
                 if (!valid) {
                     return false;
                 }
-                let data = {
-                    ClientConfig: {
-                        ShortId: +state.model.ShortId,
-                        Name: state.model.ClientName,
-                        GroupId: state.model.GroupId,
-                        AutoReg: state.model.AutoReg,
-                        AutoRegTimes: +state.model.AutoRegTimes,
-                        AutoRegInterval: +state.model.AutoRegInterval,
-                        AutoRegDelay: +state.model.AutoRegDelay,
-                        Encode: state.model.ClientEncode,
-                        EncodePassword: state.model.ClientEncodePassword,
-                        UsePunchHole: state.model.UsePunchHole,
-                        TimeoutDelay: +state.model.TimeoutDelay,
-                        UseUdp: state.model.UseUdp,
-                        UseTcp: state.model.UseTcp,
-                        UseRelay: state.model.UseRelay,
-                        UseIpv6: state.model.UseIpv6,
-                        BindIp: state.model.BindIp,
-                        UseOriginPort: state.model.UseOriginPort,
-                        UseReConnect: state.model.UseReConnect,
-                        UdpUploadSpeedLimit: +state.model.UdpUploadSpeedLimit
-                    },
-                    ServerConfig: {
-                        Ip: state.model.ServerIp,
-                        UdpPort: +state.model.ServerUdpPort,
-                        TcpPort: +state.model.ServerTcpPort,
-                        Encode: state.model.ServerEncode,
-                        EncodePassword: state.model.ServerEncodePassword
-                    }
-                };
+
+                let _json = JSON.parse(JSON.stringify(json));
+
+                _json.ClientConfig.ShortId = +state.model.ShortId;
+                _json.ClientConfig.Name = state.model.Name;
+                _json.ClientConfig.GroupId = state.model.GroupId;
+                _json.ClientConfig.AutoReg = state.model.AutoReg;
+                _json.ClientConfig.AutoRegTimes = +state.model.AutoRegTimes;
+                _json.ClientConfig.AutoRegInterval = +state.model.AutoRegInterval;
+                _json.ClientConfig.AutoRegDelay = +state.model.AutoRegDelay;
+                _json.ClientConfig.Encode = state.model.ClientEncode;
+                _json.ClientConfig.EncodePassword = state.model.ClientEncodePassword;
+                _json.ClientConfig.UsePunchHole = state.model.UsePunchHole;
+                _json.ClientConfig.TimeoutDelay = +state.model.TimeoutDelay;
+                _json.ClientConfig.UseUdp = state.model.UseUdp;
+                _json.ClientConfig.UseTcp = state.model.UseTcp;
+                _json.ClientConfig.UseRelay = state.model.UseRelay;
+                _json.ClientConfig.UseIpv6 = state.model.UseIpv6;
+                _json.ClientConfig.BindIp = state.model.BindIp;
+                _json.ClientConfig.UseOriginPort = state.model.UseOriginPort;
+                _json.ClientConfig.UseReConnect = state.model.UseReConnect;
+                _json.ClientConfig.UdpUploadSpeedLimit = +state.model.UdpUploadSpeedLimit;
+
+                _json.ServerConfig.Ip = state.model.ServerIp;
+                _json.ServerConfig.UdpPort = +state.model.ServerUdpPort;
+                _json.ServerConfig.TcpPort = +state.model.ServerTcpPort;
+                _json.ServerConfig.Encode = state.model.ServerEncode;
+                _json.ServerConfig.EncodePassword = state.model.ServerEncodePassword;
                 registerState.LocalInfo.IsConnecting = true;
-                updateConfig(data).then(() => {
+                updateConfig(_json).then(() => {
                     sendRegisterMsg().then((res) => {
                         loadConfig();
                     }).catch((msg) => {

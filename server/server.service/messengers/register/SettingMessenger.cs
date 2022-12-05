@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace server.service.messengers.register
 {
+    /// <summary>
+    /// 服务端配置
+    /// </summary>
     [MessengerIdRange((ushort)RegisterMessengerIds.Min, (ushort)RegisterMessengerIds.Max)]
     public sealed class SettingMessenger : IMessenger
     {
@@ -15,6 +18,12 @@ namespace server.service.messengers.register
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly Config config;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCaching"></param>
+        /// <param name="serviceAccessValidator"></param>
+        /// <param name="config"></param>
         public SettingMessenger(IClientRegisterCaching clientRegisterCaching, IServiceAccessValidator serviceAccessValidator, Config config)
         {
             this.clientRegisterCaching = clientRegisterCaching;
@@ -22,6 +31,11 @@ namespace server.service.messengers.register
             this.config = config;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)RegisterMessengerIds.GetSetting)]
         public async Task<byte[]> GetSetting(IConnection connection)
         {
@@ -36,6 +50,11 @@ namespace server.service.messengers.register
             return (await config.ReadString()).ToBytes();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)RegisterMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {

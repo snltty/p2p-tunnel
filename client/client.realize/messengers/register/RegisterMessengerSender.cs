@@ -9,20 +9,32 @@ using static common.server.model.RegisterResultInfo;
 
 namespace client.realize.messengers.register
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class RegisterMessengerSender
     {
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerState;
         private readonly Config config;
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messengerSender"></param>
+        /// <param name="registerState"></param>
+        /// <param name="config"></param>
         public RegisterMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerState, Config config)
         {
             this.messengerSender = messengerSender;
             this.registerState = registerState;
             this.config = config;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public async Task<RegisterResult> Register(RegisterParams param)
         {
             ulong id = 0;
@@ -104,6 +116,10 @@ namespace client.realize.messengers.register
                 }
             };
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> Notify()
         {
             return await messengerSender.SendOnly(new MessageRequestWrap
@@ -113,6 +129,10 @@ namespace client.realize.messengers.register
                 MessengerId = (ushort)RegisterMessengerIds.Notify,
             }).ConfigureAwait(false);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task Exit()
         {
             await messengerSender.SendOnly(new MessageRequestWrap
@@ -127,32 +147,85 @@ namespace client.realize.messengers.register
 
     }
 
-    public class TunnelRegisterParams
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class TunnelRegisterParams
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public TunnelRegisterParams() { }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public int TunnelName { get; set; } = -1;
+        /// <summary>
+        /// 
+        /// </summary>
         public int LocalPort { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public int Port { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public IConnection Connection { get; set; }
     }
 
-    public class RegisterParams
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class RegisterParams
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public byte ShortId { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public string GroupId { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
         public string ClientName { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
         public IPAddress[] LocalIps { get; set; } = Array.Empty<IPAddress>();
+        /// <summary>
+        /// 
+        /// </summary>
         public int Timeout { get; set; } = 15 * 1000;
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort LocalUdpPort { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort LocalTcpPort { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public EnumClientAccess ClientAccess { get; set; } = EnumClientAccess.None;
 
     }
 
-    public class RegisterResult
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class RegisterResult
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public MessageResponeInfo NetState { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public RegisterResultInfo Data { get; set; }
     }
 }

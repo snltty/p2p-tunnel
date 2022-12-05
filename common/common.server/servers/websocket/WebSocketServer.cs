@@ -10,6 +10,9 @@ using System.Text;
 
 namespace common.server.servers.websocket
 {
+    /// <summary>
+    /// websocket服务端
+    /// </summary>
     public class WebSocketServer
     {
         private Socket socket;
@@ -56,7 +59,9 @@ namespace common.server.servers.websocket
         /// 非控制帧，保留的非控制帧，可以自定义处理
         /// </summary>
         public Action<WebsocketConnection, WebSocketFrameInfo> OnUnControll = (connection, frame) => { };
-
+        /// <summary>
+        /// 
+        /// </summary>
         public IEnumerable<WebsocketConnection> Connections
         {
             get
@@ -64,7 +69,9 @@ namespace common.server.servers.websocket
                 return connections.Values.Select(c => c.Connectrion);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public WebSocketServer()
         {
             handles = new Dictionary<WebSocketFrameInfo.EnumOpcode, Action<AsyncUserToken>> {
@@ -80,7 +87,11 @@ namespace common.server.servers.websocket
                 { WebSocketFrameInfo.EnumOpcode.Pong,HandlePong},
             };
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bindip"></param>
+        /// <param name="port"></param>
         public void Start(IPAddress bindip, int port)
         {
             IPEndPoint localEndPoint = new IPEndPoint(bindip, port);
@@ -227,6 +238,9 @@ namespace common.server.servers.websocket
             }
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void Stop()
         {
             socket?.SafeClose();
@@ -372,31 +386,68 @@ namespace common.server.servers.websocket
 
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class WebsocketConnection
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public uint Id { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Socket Socket { get; init; }
+        /// <summary>
+        /// 
+        /// </summary>
         public bool Connected { get; set; } = false;
-        private bool Closed = false;
 
+        private bool Closed = false;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="header"></param>
+        /// <returns></returns>
         public int ConnectResponse(WebsocketHeaderInfo header)
         {
             var data = WebSocketParser.BuildConnectResponseData(header);
             return SendRaw(data);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
         public int SendRaw(byte[] buffer)
         {
             return Socket.Send(buffer);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="remark"></param>
+        /// <returns></returns>
         public int SendFrame(WebSocketFrameRemarkInfo remark)
         {
             var frame = WebSocketParser.BuildFrameData(remark);
             return SendRaw(frame);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="txt"></param>
+        /// <returns></returns>
         public int SendFrameText(string txt)
         {
             return SendFrameText(txt.ToBytes());
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
         public int SendFrameText(byte[] buffer)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -405,6 +456,11 @@ namespace common.server.servers.websocket
                 Data = buffer
             });
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
         public int SendFrameBinary(byte[] buffer)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -413,10 +469,19 @@ namespace common.server.servers.websocket
                 Data = buffer
             });
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public int SendFramePong()
         {
             return SendRaw(WebSocketParser.BuildPongData());
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
         public int SendFrameClose(WebSocketFrameInfo.EnumCloseStatus status)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -425,7 +490,9 @@ namespace common.server.servers.websocket
                 Data = ((short)status).ToBytes()
             });
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Close()
         {
             if (!Closed)
@@ -437,8 +504,14 @@ namespace common.server.servers.websocket
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class AsyncUserToken
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public WebsocketConnection Connectrion { get; set; }
 
         /// <summary>
@@ -457,9 +530,17 @@ namespace common.server.servers.websocket
         /// 当前帧的数据类型
         /// </summary>
         public WebSocketFrameInfo.EnumOpcode Opcode { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public byte[] PoolBuffer { get; set; }
+        /// <summary>
+        ///
+        /// </summary>
         public bool Disposabled { get; private set; } = false;
+        /// <summary>
+        /// 
+        /// </summary>
         public void Clear()
         {
             Disposabled = true;

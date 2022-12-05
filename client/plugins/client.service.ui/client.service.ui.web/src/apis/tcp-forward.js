@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-21 13:58:43
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-06 15:42:26
+ * @LastEditTime: 2022-12-05 10:43:33
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\apis\tcp-forward.js
@@ -10,9 +10,7 @@
 import { sendWebsocketMsg } from "./request";
 
 export const get = (id) => {
-    return sendWebsocketMsg(`tcpforward/get`, {
-        ID: id
-    });
+    return sendWebsocketMsg(`tcpforward/get`, id);
 }
 export const getList = () => {
     return sendWebsocketMsg(`tcpforward/list`);
@@ -25,42 +23,27 @@ export const getPac = () => {
 }
 
 export const startListen = (id) => {
-    return sendWebsocketMsg(`tcpforward/start`, {
-        ID: id
-    });
+    return sendWebsocketMsg(`tcpforward/start`, id);
 }
 
 export const stopListen = (id) => {
-    return sendWebsocketMsg(`tcpforward/stop`, {
-        ID: id
-    });
+    return sendWebsocketMsg(`tcpforward/stop`, id);
 }
 
 export const addListen = (model) => {
-    return sendWebsocketMsg(`tcpforward/AddListen`, {
-        ID: model.ID,
-        Content: JSON.stringify(model)
-    });
+    return sendWebsocketMsg(`tcpforward/AddListen`, model);
 }
 export const removeListen = (id) => {
-    return sendWebsocketMsg(`tcpforward/RemoveListen`, {
-        ID: id
-    });
+    return sendWebsocketMsg(`tcpforward/RemoveListen`, id);
 }
 
 export const addForward = (model) => {
-    return sendWebsocketMsg(`tcpforward/AddForward`, {
-        ID: model.Forward.ID,
-        Content: JSON.stringify(model)
-    });
+    return sendWebsocketMsg(`tcpforward/AddForward`, model);
 }
 export const removeForward = (listenid, forwardid) => {
     return sendWebsocketMsg(`tcpforward/RemoveForward`, {
-        ID: forwardid,
-        Content: JSON.stringify({
-            ListenID: listenid,
-            ForwardID: forwardid
-        })
+        ListenID: listenid,
+        ForwardID: forwardid
     });
 }
 

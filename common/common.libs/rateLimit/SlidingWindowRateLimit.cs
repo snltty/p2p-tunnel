@@ -3,6 +3,10 @@ using System.Collections.Concurrent;
 
 namespace common.libs.rateLimit
 {
+    /// <summary>
+    /// 滑动窗口算法
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
     public sealed class SlidingWindowRateLimit<TKey> : IRateLimit<TKey>
     {
         private readonly ConcurrentDictionary<TKey, SlidingRateInfo> limits = new ConcurrentDictionary<TKey, SlidingRateInfo>();
@@ -11,11 +15,20 @@ namespace common.libs.rateLimit
         private int mask = 1000 / 20;
         private Func<long> timeFunc = DateTimeHelper.GetTimeStamp;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rate"></param>
         public SlidingWindowRateLimit(int rate)
         {
             this.rate = rate;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="rate"></param>
         public void SetRate(TKey key, int rate)
         {
             if (limits.TryGetValue(key, out SlidingRateInfo info) == false)
@@ -29,6 +42,12 @@ namespace common.libs.rateLimit
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="num"></param>
+        /// <returns></returns>
         public int Try(TKey key, int num)
         {
             SlidingRateInfo info = Get(key);
@@ -84,10 +103,17 @@ namespace common.libs.rateLimit
             return info;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
         public void Remove(TKey key)
         {
             limits.TryRemove(key, out _);
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void Clear()
         {
             limits.Clear();

@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace client.service.vea
 {
+    /// <summary>
+    /// 组网前端接口
+    /// </summary>
     public sealed class VeaClientService : IClientService
     {
         private readonly Config config;
@@ -16,6 +19,14 @@ namespace client.service.vea
         private readonly VeaMessengerSender veaMessengerSender;
         private readonly IClientInfoCaching clientInfoCaching;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="VeaTransfer"></param>
+        /// <param name="veaSocks5ServerHandler"></param>
+        /// <param name="veaMessengerSender"></param>
+        /// <param name="clientInfoCaching"></param>
         public VeaClientService(Config config, VeaTransfer VeaTransfer, IVeaSocks5ServerHandler veaSocks5ServerHandler, VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
         {
             this.config = config;
@@ -25,10 +36,20 @@ namespace client.service.vea
             this.clientInfoCaching = clientInfoCaching;
         }
 
+        /// <summary>
+        /// 获取配置
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public Config Get(ClientServiceParamsInfo arg)
         {
             return config;
         }
+
+        /// <summary>
+        /// 保存配置
+        /// </summary>
+        /// <param name="arg"></param>
         public void Set(ClientServiceParamsInfo arg)
         {
             config.SaveConfig(arg.Content).Wait();
@@ -43,25 +64,37 @@ namespace client.service.vea
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, ex.Message);
             }
-
-           
         }
-
+        /// <summary>
+        /// 各个客户端
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public Dictionary<ulong, IPAddressCacheInfo> List(ClientServiceParamsInfo arg)
         {
             return VeaTransfer.IPList.ToDictionary(c => c.Value.Client.Id, d => d.Value);
         }
 
+        /// <summary>
+        /// 重装其网卡
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task<bool> Reset(ClientServiceParamsInfo arg)
         {
-            var model = arg.Content.DeJson<ResetModel>();
-            if (clientInfoCaching.Get(model.Id, out ClientInfo client))
+            ulong id = ulong.Parse(arg.Content);
+            if (clientInfoCaching.Get(id, out ClientInfo client))
             {
-                await veaMessengerSender.Reset(client.Connection, model.Id);
+                await veaMessengerSender.Reset(client.Connection, id);
             }
             return true;
         }
 
+        /// <summary>
+        /// 刷新ip列表
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public bool Update(ClientServiceParamsInfo arg)
         {
             VeaTransfer.UpdateIp();
@@ -69,8 +102,4 @@ namespace client.service.vea
         }
     }
 
-    class ResetModel
-    {
-        public ulong Id { get; set; }
-    }
 }

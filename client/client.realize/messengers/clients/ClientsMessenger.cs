@@ -13,24 +13,27 @@ namespace client.realize.messengers.clients
     {
         private readonly ClientsMessengerSender clientsMessengerSender;
         private readonly IRegisterTransfer registerTransfer;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientsMessengerSender"></param>
+        /// <param name="registerTransfer"></param>
         public ClientsMessenger(ClientsMessengerSender clientsMessengerSender, IRegisterTransfer registerTransfer)
         {
             this.clientsMessengerSender = clientsMessengerSender;
             this.registerTransfer = registerTransfer;
         }
 
+        /// <summary>
+        /// 通知信息
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)ClientsMessengerIds.Notify)]
         public void Notify(IConnection connection)
         {
             ClientsInfo res = new ClientsInfo();
             res.DeBytes(connection.ReceiveRequestWrap.Payload);
             clientsMessengerSender.OnServerClientsData.Push(res);
-        }
-
-        [MessengerId((ushort)ClientsMessengerIds.Reset)]
-        public async Task Reset(IConnection connection)
-        {
-            await registerTransfer.Register(true).ConfigureAwait(false);
         }
     }
 }

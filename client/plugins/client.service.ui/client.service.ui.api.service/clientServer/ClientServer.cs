@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer
 {
+    /// <summary>
+    /// 前段接口服务
+    /// </summary>
     public sealed class ClientServer : IClientServer
     {
         private readonly Dictionary<string, PluginPathCacheInfo> plugins = new();
@@ -21,12 +24,21 @@ namespace client.service.ui.api.service.clientServer
         private readonly ServiceProvider serviceProvider;
         private WebSocketServer server;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="serviceProvider"></param>
         public ClientServer(Config config, ServiceProvider serviceProvider)
         {
             this.config = config;
             this.serviceProvider = serviceProvider;
         }
 
+        /// <summary>
+        /// 加载插件
+        /// </summary>
+        /// <param name="assemblys"></param>
         public void LoadPlugins(Assembly[] assemblys)
         {
 
@@ -59,6 +71,9 @@ namespace client.service.ui.api.service.clientServer
                     settingPlugins.Add(item.Name, (IClientConfigure)serviceProvider.GetService(item));
             }
         }
+        /// <summary>
+        /// 开启websockt
+        /// </summary>
         public void Websocket()
         {
             server = new();
@@ -74,11 +89,20 @@ namespace client.service.ui.api.service.clientServer
             };
         }
 
+        /// <summary>
+        /// 获取插件配置列表
+        /// </summary>
+        /// <param name="className"></param>
+        /// <returns></returns>
         public IClientConfigure GetConfigure(string className)
         {
             settingPlugins.TryGetValue(className, out IClientConfigure plugin);
             return plugin;
         }
+        /// <summary>
+        /// 获取某个插件配置
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<ClientServiceConfigureInfo> GetConfigures()
         {
             return settingPlugins.Select(c => new ClientServiceConfigureInfo
@@ -90,11 +114,19 @@ namespace client.service.ui.api.service.clientServer
                 Enable = c.Value.Enable
             });
         }
+        /// <summary>
+        /// 获取服务列表
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<string> GetServices()
         {
             return plugins.Select(c => c.Value.Target.GetType().Name).Distinct();
         }
 
+        /// <summary>
+        /// 发送通知
+        /// </summary>
+        /// <param name="resp"></param>
         public void Notify(ClientServiceResponseInfo resp)
         {
             byte[] msg = resp.ToJson().ToBytes();
@@ -103,6 +135,12 @@ namespace client.service.ui.api.service.clientServer
                 item.SendFrameText(msg);
             }
         }
+
+        /// <summary>
+        /// 收到消息
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         public async Task<ClientServiceResponseInfo> OnMessage(ClientServiceRequestInfo model)
         {
             model.Path = model.Path.ToLower();
@@ -123,9 +161,7 @@ namespace client.service.ui.api.service.clientServer
                 ClientServiceParamsInfo param = new ClientServiceParamsInfo
                 {
                     RequestId = model.RequestId,
-                    Content = model.Content,
-                    Path = model.Path,
-                    //Connection = connection
+                    Content = model.Content
                 };
                 dynamic resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { param });
                 object resultObject = null;
@@ -146,10 +182,10 @@ namespace client.service.ui.api.service.clientServer
                 }
                 return new ClientServiceResponseInfo
                 {
+                    Code = param.Code,
                     Content = param.Code != ClientServiceResponseCodes.Error ? resultObject : param.ErrorMessage,
-                    RequestId = param.RequestId,
-                    Path = param.Path,
-                    Code = param.Code
+                    RequestId = model.RequestId,
+                    Path = model.Path,
                 };
             }
             catch (Exception ex)
@@ -167,6 +203,9 @@ namespace client.service.ui.api.service.clientServer
 
 
         private const string pipeName = "client.cmd";
+        /// <summary>
+        /// 开启具名管道
+        /// </summary>
         public void NamedPipe()
         {
             PipelineServer pipelineServer = new PipelineServer(pipeName, (string message) =>
@@ -177,13 +216,30 @@ namespace client.service.ui.api.service.clientServer
         }
     }
 
-
+    /// <summary>
+    /// 前段接口缓存
+    /// </summary>
     public struct PluginPathCacheInfo
     {
+        /// <summary>
+        /// 对象
+        /// </summary>
         public object Target { get; set; }
+        /// <summary>
+        /// 方法
+        /// </summary>
         public MethodInfo Method { get; set; }
+        /// <summary>
+        /// 是否void
+        /// </summary>
         public bool IsVoid { get; set; }
+        /// <summary>
+        /// 是否task
+        /// </summary>
         public bool IsTask { get; set; }
+        /// <summary>
+        /// 是否task result
+        /// </summary>
         public bool IsTaskResult { get; set; }
     }
 }

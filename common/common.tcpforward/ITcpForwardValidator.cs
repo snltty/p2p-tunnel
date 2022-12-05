@@ -3,19 +3,44 @@ using System.Linq;
 
 namespace common.tcpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface ITcpForwardValidator
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public bool Validate(TcpForwardInfo arg);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public bool Validate(string key);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public  class DefaultTcpForwardValidator : ITcpForwardValidator
     {
         private readonly Config config;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
         public DefaultTcpForwardValidator(Config config)
         {
             this.config = config;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public bool Validate(TcpForwardInfo arg)
         {
             if (config.ConnectEnable == false)
@@ -34,6 +59,11 @@ namespace common.tcpforward
             }
             return true;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public bool Validate(string key)
         {
             return true;

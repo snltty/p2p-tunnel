@@ -8,6 +8,9 @@ using System.Net.Sockets;
 
 namespace common.server.servers.websocket
 {
+    /// <summary>
+    /// wensocket客户端
+    /// </summary>
     public class WebSocketClient : IDisposable
     {
         private int bufferSize = 4 * 1024;
@@ -16,7 +19,7 @@ namespace common.server.servers.websocket
         private bool connecSuccess = false;
 
 
-        // <summary>
+        /// <summary>
         /// 连接中，false表示失败，会关闭连接
         /// </summary>
         public Func<WebsocketHeaderInfo, bool> OnConnecting = (header) => { return true; };
@@ -24,16 +27,16 @@ namespace common.server.servers.websocket
         /// 连接失败
         /// </summary>
         public Action<string> OnConnectFail { get; set; } = (msg) => { };
-        // <summary>
+        /// <summary>
         /// 已断开连接,未收到关闭帧
         /// </summary>
         public Action OnDisConnectd = () => { };
 
-        // <summary>
+        /// <summary>
         /// 已连接
         /// </summary>
         public Action<WebsocketHeaderInfo> OnOpen = (header) => { };
-        // <summary>
+        /// <summary>
         /// 已断开连接,收到关闭帧
         /// </summary>
         public Action OnClose = () => { };
@@ -55,7 +58,9 @@ namespace common.server.servers.websocket
         /// 非控制帧
         /// </summary>
         public Action<WebSocketFrameInfo> OnUnControll = (frame) => { };
-
+        /// <summary>
+        /// 
+        /// </summary>
         public WebSocketClient()
         {
             handles = new Dictionary<WebSocketFrameInfo.EnumOpcode, Action<AsyncServerUserToken>> {
@@ -72,10 +77,20 @@ namespace common.server.servers.websocket
             };
         }
 
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <param name="ip"></param>
+       /// <param name="port"></param>
         public void Connect(IPAddress ip, int port)
         {
             Connect(new IPEndPoint(ip, port));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ep"></param>
+        /// <exception cref="Exception"></exception>
         public void Connect(IPEndPoint ep)
         {
             if (connected)
@@ -235,6 +250,9 @@ namespace common.server.servers.websocket
         {
             CloseClientSocket(readEventArgs);
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void Close()
         {
             CloseClientSocket();
@@ -367,11 +385,20 @@ namespace common.server.servers.websocket
             connecSuccess = true;
             OnOpen(header);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
         public int SendRaw(byte[] buffer)
         {
             return (readEventArgs.UserToken as AsyncServerUserToken).TargetSocket.Send(buffer);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="remark"></param>
+        /// <returns></returns>
         public int SendFrame(WebSocketFrameRemarkInfo remark)
         {
             remark.Mask = WebSocketFrameInfo.EnumMask.Mask;
@@ -379,10 +406,20 @@ namespace common.server.servers.websocket
             var frame = WebSocketParser.BuildFrameData(remark);
             return SendRaw(frame);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="txt"></param>
+        /// <returns></returns>
         public int SendFrameText(string txt)
         {
             return SendFrameText(txt.ToBytes());
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
         public int SendFrameText(byte[] buffer)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -391,6 +428,11 @@ namespace common.server.servers.websocket
                 Data = buffer
             });
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
         public int SendFrameBinary(byte[] buffer)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -399,14 +441,27 @@ namespace common.server.servers.websocket
                 Data = buffer
             });
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public int SendFramePoing()
         {
             return SendRaw(WebSocketParser.BuildPingData());
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public int SendFramePong()
         {
             return SendRaw(WebSocketParser.BuildPongData());
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
         public int SendFrameClose(WebSocketFrameInfo.EnumCloseStatus status)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -415,7 +470,9 @@ namespace common.server.servers.websocket
                 Data = ((short)status).ToBytes()
             });
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             CloseClientSocket();
@@ -423,9 +480,14 @@ namespace common.server.servers.websocket
             GC.SuppressFinalize(this);
         }
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class AsyncServerUserToken
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Socket TargetSocket { get; set; }
 
         /// <summary>
@@ -444,12 +506,18 @@ namespace common.server.servers.websocket
         /// 当前帧的数据类型
         /// </summary>
         public WebSocketFrameInfo.EnumOpcode Opcode { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> SecWebSocketKey { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public byte[] PoolBuffer { get; set; }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Clear()
         {
             TargetSocket?.SafeClose();

@@ -1,7 +1,6 @@
 ﻿using common.libs;
 using common.libs.extends;
 using System;
-using System.Buffers;
 using System.Buffers.Binary;
 using System.Net;
 using System.Security.Cryptography;
@@ -9,6 +8,9 @@ using System.Text;
 
 namespace common.server.servers.websocket
 {
+    /// <summary>
+    /// websocket解析器
+    /// </summary>
     public static class WebSocketParser
     {
         private readonly static SHA1 sha1 = SHA1.Create();
@@ -255,7 +257,9 @@ namespace common.server.servers.websocket
             return resultStr;
         }
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class WebSocketFrameRemarkInfo
     {
         /// <summary>
@@ -307,7 +311,13 @@ namespace common.server.servers.websocket
         /// 保留位
         /// </summary>
         public EnumRsv1 Rsv1 { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public EnumRsv2 Rsv2 { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public EnumRsv3 Rsv3 { get; set; }
 
         /// <summary>
@@ -412,52 +422,148 @@ namespace common.server.servers.websocket
             };
             return true;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public enum EnumFin : byte
         {
+            /// <summary>
+            /// 
+            /// </summary>
             None = 0x0,
+            /// <summary>
+            /// 
+            /// </summary>
             Fin = 0b10000000,
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public enum EnumMask : byte
         {
+            /// <summary>
+            /// 
+            /// </summary>
             None = 0x0,
+            /// <summary>
+            /// 
+            /// </summary>
             Mask = 0b10000000,
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public enum EnumRsv1 : byte
         {
+            /// <summary>
+            /// 
+            /// </summary>
             None = 0x0,
+            /// <summary>
+            /// 
+            /// </summary>
             Rsv = 0b01000000,
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public enum EnumRsv2 : byte
         {
+            /// <summary>
+            /// 
+            /// </summary>
             None = 0x0,
+            /// <summary>
+            /// 
+            /// </summary>
             Rsv = 0b00100000,
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public enum EnumRsv3 : byte
         {
+            /// <summary>
+            /// 
+            /// </summary>
             None = 0x0,
+            /// <summary>
+            /// 
+            /// </summary>
             Rsv = 0b00010000,
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public enum EnumOpcode : byte
         {
+            /// <summary>
+            /// 
+            /// </summary>
             Data = 0x0,
+            /// <summary>
+            /// 
+            /// </summary>
             Text = 0x1,
+            /// <summary>
+            /// 
+            /// </summary>
             Binary = 0x2,
+            /// <summary>
+            /// 
+            /// </summary>
             UnControll3 = 0x3,
+            /// <summary>
+            /// 
+            /// </summary>
             UnControll4 = 0x4,
+            /// <summary>
+            /// 
+            /// </summary>
             UnControll5 = 0x5,
+            /// <summary>
+            /// 
+            /// </summary>
             UnControll6 = 0x6,
+            /// <summary>
+            /// 
+            /// </summary>
             UnControll7 = 0x7,
+            /// <summary>
+            /// 
+            /// </summary>
             Close = 0x8,
+            /// <summary>
+            /// 
+            /// </summary>
             Ping = 0x9,
+            /// <summary>
+            /// 
+            /// </summary>
             Pong = 0xa,
+            /// <summary>
+            /// 
+            /// </summary>
             Controll11 = 0xb,
+            /// <summary>
+            /// 
+            /// </summary>
             Controll12 = 0xc,
+            /// <summary>
+            /// 
+            /// </summary>
             Controll13 = 0xd,
+            /// <summary>
+            /// 
+            /// </summary>
             Controll14 = 0xe,
+            /// <summary>
+            /// 
+            /// </summary>
             Controll15 = 0xf,
+            /// <summary>
+            /// 
+            /// </summary>
             Last = 0xf,
         }
 
@@ -538,8 +644,13 @@ namespace common.server.servers.websocket
         };
         static byte[] httpBytes = "HTTP/".ToBytes();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.SwitchingProtocols;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> Method { get; private set; }
 
         private string _pathSet { get; set; }
@@ -562,16 +673,44 @@ namespace common.server.servers.websocket
         /// 如果 仅1个字符，那就是 /
         /// </summary>
         public Memory<byte> Path { get; private set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> Connection { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> Upgrade { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> Origin { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> SecWebSocketVersion { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> SecWebSocketKey { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> SecWebSocketExtensions { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> SecWebSocketProtocol { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Memory<byte> SecWebSocketAccept { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="header"></param>
+        /// <returns></returns>
         public static WebsocketHeaderInfo Parse(Memory<byte> header)
         {
             Span<byte> span = header.Span;

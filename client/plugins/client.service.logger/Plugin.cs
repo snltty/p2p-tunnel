@@ -5,8 +5,16 @@ using System.Reflection;
 
 namespace client.service.logger
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class Plugin : IPlugin
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             LoggerClientService plugin = services.GetService<LoggerClientService>();
@@ -25,7 +33,11 @@ namespace client.service.logger
 
             Logger.Instance.Debug("日志收集插件已加载");
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<Config>();

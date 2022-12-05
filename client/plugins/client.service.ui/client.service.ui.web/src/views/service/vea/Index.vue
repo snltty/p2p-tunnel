@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-29 15:42:35
+ * @LastEditTime: 2022-12-05 11:19:12
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\vea\Index.vue
@@ -200,16 +200,18 @@ export default {
             return clientsState.clients;
         });
 
+        let json = {};
         const loadConfig = () => {
             getConfig().then((res) => {
-                state.form.Enable = res.Enable;
-                state.form.ProxyAll = res.ProxyAll;
-                state.form.TargetName = res.TargetName;
-                state.form.IP = res.IP;
-                state.form.LanIPs = res.LanIPs.join(',');
-                state.form.SocksPort = res.SocksPort;
-                state.form.BufferSize = res.BufferSize;
-                state.form.ConnectEnable = res.ConnectEnable;
+                json = res;
+                state.form.Enable = json.Enable;
+                state.form.ProxyAll = json.ProxyAll;
+                state.form.TargetName = json.TargetName;
+                state.form.IP = json.IP;
+                state.form.LanIPs = json.LanIPs.join(',');
+                state.form.SocksPort = json.SocksPort;
+                state.form.BufferSize = json.BufferSize;
+                state.form.ConnectEnable = json.ConnectEnable;
             });
         }
 
@@ -242,13 +244,18 @@ export default {
                 }
                 state.loading = true;
 
-                const json = JSON.parse(JSON.stringify(state.form));
-                json.SocksPort = Number(json.SocksPort);
-                json.BufferSize = Number(json.BufferSize);
-                json.LanIPs = json.LanIPs.split(',').filter(c => c.length > 0);
-                setConfig(json).then((res) => {
+                const _json = JSON.parse(JSON.stringify(json));
+                _json.Enable = state.form.Enable;
+                _json.ProxyAll = state.form.ProxyAll;
+                _json.TargetName = state.form.TargetName;
+                _json.IP = state.form.IP;
+                _json.LanIPs = state.form.LanIPs.split(',').filter(c => c.length > 0);
+                _json.SocksPort = +state.form.SocksPort;
+                _json.BufferSize = +state.form.BufferSize;
+                _json.ConnectEnable = state.form.ConnectEnable;
+                setConfig(_json).then((res) => {
                     state.loading = false;
-                    if (json.IsPac) {
+                    if (_json.IsPac) {
                         savePac();
                     }
                     ElMessage.success('操作成功！');
@@ -259,7 +266,7 @@ export default {
         }
         const handleResetVea = (row) => {
             state.loading = true;
-            reset({ id: row.Id }).then((res) => {
+            reset(row.Id).then((res) => {
                 state.loading = false;
                 if (res) {
                     ElMessage.success('成功');

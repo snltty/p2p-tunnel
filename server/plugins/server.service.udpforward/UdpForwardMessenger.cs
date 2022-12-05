@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace server.service.udpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [MessengerIdRange((ushort)UdpForwardMessengerIds.Min, (ushort)UdpForwardMessengerIds.Max)]
     public sealed class UdpForwardMessenger : IMessenger
     {
@@ -21,6 +24,16 @@ namespace server.service.udpforward
         private readonly IUdpForwardValidator udpForwardValidator;
         private readonly IServiceAccessValidator serviceAccessValidator;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCache"></param>
+        /// <param name="config"></param>
+        /// <param name="udpForwardTargetCaching"></param>
+        /// <param name="tcpForwardMessengerSender"></param>
+        /// <param name="tcpForwardServer"></param>
+        /// <param name="udpForwardValidator"></param>
+        /// <param name="serviceAccessValidator"></param>
         public UdpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.udpforward.Config config, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching,
             UdpForwardMessengerSender tcpForwardMessengerSender, IUdpForwardServer tcpForwardServer, IUdpForwardValidator udpForwardValidator, IServiceAccessValidator serviceAccessValidator)
         {
@@ -33,6 +46,10 @@ namespace server.service.udpforward
             this.serviceAccessValidator = serviceAccessValidator;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)UdpForwardMessengerIds.Request)]
         public void Request(IConnection connection)
         {
@@ -42,6 +59,10 @@ namespace server.service.udpforward
             tcpForwardMessengerSender.OnRequest(data);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)UdpForwardMessengerIds.Response)]
         public void Response(IConnection connection)
         {
@@ -51,6 +72,11 @@ namespace server.service.udpforward
             tcpForwardMessengerSender.OnResponse(data);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.Ports)]
         public byte[] Ports(IConnection connection)
         {
@@ -60,6 +86,11 @@ namespace server.service.udpforward
                 }.ToBytes();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.SignOut)]
         public byte[] SignOut(IConnection connection)
         {
@@ -88,6 +119,11 @@ namespace server.service.udpforward
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.SignIn)]
         public byte[] SignIn(IConnection connection)
         {
@@ -140,13 +176,22 @@ namespace server.service.udpforward
             }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.GetSetting)]
         public async Task<byte[]> GetSetting(IConnection connection)
         {
             return (await config.ReadString()).ToBytes();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {

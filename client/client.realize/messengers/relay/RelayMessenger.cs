@@ -5,9 +5,7 @@ using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace client.realize.messengers.relay
 {
@@ -25,6 +23,15 @@ namespace client.realize.messengers.relay
         private readonly RegisterStateInfo registerStateInfo;
         private readonly Config config;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="relayMessengerSender"></param>
+        /// <param name="relayValidator"></param>
+        /// <param name="connecRouteCaching"></param>
+        /// <param name="registerStateInfo"></param>
+        /// <param name="config"></param>
         public RelayMessenger(IClientInfoCaching clientInfoCaching,
             RelayMessengerSender relayMessengerSender, IRelayValidator relayValidator,
             IClientConnectsCaching connecRouteCaching, RegisterStateInfo registerStateInfo, Config config)
@@ -37,6 +44,11 @@ namespace client.realize.messengers.relay
             this.config = config;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)RelayMessengerIds.Relay)]
         public byte[] Relay(IConnection connection)
         {
@@ -53,12 +65,21 @@ namespace client.realize.messengers.relay
             return Helper.TrueArray;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)RelayMessengerIds.Delay)]
         public byte[] Delay(IConnection connection)
         {
             return Helper.TrueArray;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)RelayMessengerIds.AskConnects)]
         public void AskConnects(IConnection connection)
         {
@@ -72,7 +93,13 @@ namespace client.realize.messengers.relay
                     Connects = clientInfoCaching.All().Where(c => c.Connected && c.ConnectType == ClientConnectTypes.P2P).Select(c => c.Id).ToArray(),
                 });
             }
+
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)RelayMessengerIds.Connects)]
         public void Connects(IConnection connection)
         {

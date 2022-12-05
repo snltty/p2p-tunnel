@@ -8,6 +8,9 @@ using System.Text;
 
 namespace client.realize.messengers.crypto
 {
+    /// <summary>
+    /// 加密
+    /// </summary>
     [MessengerIdRange((ushort)CryptoMessengerIds.Min,(ushort)CryptoMessengerIds.Max)]
     public sealed class CryptoMessenger : IMessenger
     {
@@ -16,6 +19,13 @@ namespace client.realize.messengers.crypto
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly Config config;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="asymmetricCrypto"></param>
+        /// <param name="cryptoFactory"></param>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="config"></param>
         public CryptoMessenger(IAsymmetricCrypto asymmetricCrypto, ICryptoFactory cryptoFactory, IClientInfoCaching clientInfoCaching, Config config)
         {
             this.asymmetricCrypto = asymmetricCrypto;
@@ -24,12 +34,22 @@ namespace client.realize.messengers.crypto
             this.config = config;
         }
 
+        /// <summary>
+        /// 获取key
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Key)]
         public byte[] Key(IConnection connection)
         {
             return asymmetricCrypto.Key.PublicKey.ToBytes();
         }
 
+        /// <summary>
+        /// 设置密码
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Set)]
         public byte[] Set(IConnection connection)
         {
@@ -53,6 +73,11 @@ namespace client.realize.messengers.crypto
             return true.ToBytes();
         }
 
+        /// <summary>
+        /// 清除
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Clear)]
         public bool Clear(IConnection connection)
         {
@@ -63,6 +88,11 @@ namespace client.realize.messengers.crypto
             return true;
         }
 
+        /// <summary>
+        /// 测试一下
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Test)]
         public bool Test(IConnection connection)
         {

@@ -6,15 +6,30 @@ using System.Threading.Tasks;
 
 namespace common.udpforward
 {
+    /// <summary>
+    /// udp转发消息发送
+    /// </summary>
     public sealed class UdpForwardMessengerSender
     {
         private readonly MessengerSender messengerSender;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messengerSender"></param>
         public UdpForwardMessengerSender(MessengerSender messengerSender)
         {
             this.messengerSender = messengerSender;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<UdpForwardInfo> OnRequestHandler { get; } = new SimpleSubPushHandler<UdpForwardInfo>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task SendRequest(UdpForwardInfo arg)
         {
             var res = messengerSender.SendOnly(new MessageRequestWrap
@@ -25,12 +40,25 @@ namespace common.udpforward
             }).ConfigureAwait(false);
             await res;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void OnRequest(UdpForwardInfo data)
         {
             OnRequestHandler.Push(data);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<UdpForwardInfo> OnResponseHandler { get; } = new SimpleSubPushHandler<UdpForwardInfo>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <param name="Connection"></param>
+        /// <returns></returns>
         public async Task SendResponse(UdpForwardInfo arg, IConnection Connection)
         {
             var res = messengerSender.SendOnly(new MessageRequestWrap
@@ -41,11 +69,20 @@ namespace common.udpforward
             }).ConfigureAwait(false);
             await res;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void OnResponse(UdpForwardInfo data)
         {
             OnResponseHandler.Push(data);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Connection"></param>
+        /// <returns></returns>
         public async Task<MessageResponeInfo> GetPorts(IConnection Connection)
         {
             return await messengerSender.SendReply(new MessageRequestWrap
@@ -56,7 +93,13 @@ namespace common.udpforward
             }).ConfigureAwait(false);
         }
 
-        public async Task<MessageResponeInfo> UnRegister(IConnection Connection, ushort port)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Connection"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public async Task<MessageResponeInfo> SignOut(IConnection Connection, ushort port)
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
@@ -65,7 +108,13 @@ namespace common.udpforward
                 Payload = port.ToBytes()
             }).ConfigureAwait(false);
         }
-        public async Task<MessageResponeInfo> Register(IConnection Connection, UdpForwardRegisterParamsInfo param)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Connection"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<MessageResponeInfo> SignIn(IConnection Connection, UdpForwardRegisterParamsInfo param)
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {

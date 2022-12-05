@@ -4,12 +4,25 @@ using System.Net;
 
 namespace common.server.model
 {
+    /// <summary>
+    /// 客户端列表
+    /// </summary>
     public sealed class ClientsInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public ClientsInfo() { }
 
+        /// <summary>
+        /// 客户端列表
+        /// </summary>
         public ClientsClientInfo[] Clients { get; set; } = Array.Empty<ClientsClientInfo>();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             int length = 0, dataLength = Clients.Length;
@@ -38,7 +51,10 @@ namespace common.server.model
             return bytes;
 
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -58,22 +74,39 @@ namespace common.server.model
 
     }
 
+    /// <summary>
+    /// 客户端
+    /// </summary>
     public sealed class ClientsClientInfo
     {
+        /// <summary>
+        /// id
+        /// </summary>
         public ulong Id { get; set; } = 0;
+        /// <summary>
+        /// 名字
+        /// </summary>
         public string Name { get; set; } = string.Empty;
-        public uint ClientAccess { get; set; } = 0;
+        /// <summary>
+        /// 权限
+        /// </summary>
+        public uint Access { get; set; } = 0;
 
-
-
+        /// <summary>
+        /// 连接对象
+        /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; } = null;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var idBytes = Id.ToBytes();
             var nameBytes = Name.ToBytes();
-            var clientAccessBytes = ClientAccess.ToBytes();
+            var clientAccessBytes = Access.ToBytes();
 
             var bytes = new byte[
                 4
@@ -96,12 +129,17 @@ namespace common.server.model
             return bytes;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public int DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
             int index = 0;
 
-            ClientAccess = span.Slice(index, 4).ToUInt32();
+            Access = span.Slice(index, 4).ToUInt32();
             index += 4;
 
             Id = span.Slice(index, 8).ToUInt64();
@@ -115,17 +153,39 @@ namespace common.server.model
     }
 
 
+    /// <summary>
+    /// 客户端相关的消息id
+    /// </summary>
     [Flags, MessengerIdEnum]
     public enum ClientsMessengerIds : ushort
     {
+        /// <summary>
+        /// 
+        /// </summary>
         Min = 100,
+        /// <summary>
+        /// 获取id
+        /// </summary>
         IP = 101,
+        /// <summary>
+        /// 获取端口
+        /// </summary>
         Port = 102,
+        /// <summary>
+        /// 添加通道
+        /// </summary>
         AddTunnel = 103,
+        /// <summary>
+        /// 删除通道
+        /// </summary>
         RemoveTunnel = 104,
+        /// <summary>
+        /// 通知
+        /// </summary>
         Notify = 105,
-        Reset = 106,
-
+        /// <summary>
+        /// 
+        /// </summary>
         Max = 199,
     }
 }

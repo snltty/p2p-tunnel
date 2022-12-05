@@ -5,6 +5,9 @@ using common.udpforward;
 
 namespace client.service.udpforward
 {
+    /// <summary>
+    /// udp转发目标提供
+    /// </summary>
     internal sealed class UdpForwardTargetProvider : IUdpForwardTargetProvider
     {
         private readonly IClientInfoCaching clientInfoCaching;
@@ -26,6 +29,11 @@ namespace client.service.udpforward
             });
         }
 
+        /// <summary>
+        /// 根据端口获取目标连接
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="info"></param>
         public void Get(ushort port, UdpForwardInfo info)
         {
             UdpForwardTargetCacheInfo cacheInfo = udpForwardTargetCaching.Get(port);

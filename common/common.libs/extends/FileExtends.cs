@@ -1,14 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace common.libs.extends
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class FileExtends
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static bool TryDeleteFile(this string path)
         {
             if (File.Exists(path))

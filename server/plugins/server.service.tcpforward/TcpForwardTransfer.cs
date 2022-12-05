@@ -10,6 +10,15 @@ namespace server.service.tcpforward
     /// </summary>
     public sealed class TcpForwardTransfer : TcpForwardTransferBase
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="clientRegisterCaching"></param>
+        /// <param name="tcpForwardTargetCaching"></param>
+        /// <param name="tcpForwardServer"></param>
+        /// <param name="tcpForwardMessengerSender"></param>
+        /// <param name="tcpForwardTargetProvider"></param>
         public TcpForwardTransfer(
 
             common.tcpforward.Config config, IClientRegisterCaching clientRegisterCaching,

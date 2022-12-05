@@ -17,6 +17,9 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole.udp
 {
+    /// <summary>
+    /// rudp打洞
+    /// </summary>
     public sealed class PunchHoleRUdpMessengerSender : IPunchHoleUdp
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
@@ -27,6 +30,16 @@ namespace client.realize.messengers.punchHole.udp
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly IClientsTunnel clientsTunnel;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="punchHoleMessengerSender"></param>
+        /// <param name="registerState"></param>
+        /// <param name="cryptoSwap"></param>
+        /// <param name="config"></param>
+        /// <param name="wheelTimer"></param>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="clientsTunnel"></param>
         public PunchHoleRUdpMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching, IClientsTunnel clientsTunnel)
         {
             this.punchHoleMessengerSender = punchHoleMessengerSender;
@@ -46,7 +59,15 @@ namespace client.realize.messengers.punchHole.udp
 
         private readonly ConcurrentDictionary<ulong, ConnectCacheModel> connectCache = new();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<ConnectParams> OnSendHandler => new SimpleSubPushHandler<ConnectParams>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public async Task<ConnectResultModel> Send(ConnectParams param)
         {
             if (param.TunnelName == (ulong)TunnelDefaults.MIN)
@@ -97,7 +118,15 @@ namespace client.realize.messengers.punchHole.udp
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep1Params> OnStep1Handler { get; } = new SimpleSubPushHandler<OnStep1Params>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task OnStep1(OnStep1Params arg)
         {
             if (arg.Data.IsDefault)
@@ -133,7 +162,15 @@ namespace client.realize.messengers.punchHole.udp
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; } = new SimpleSubPushHandler<OnStep2Params>();
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <param name="arg"></param>
+       /// <returns></returns>
         public async Task OnStep2(OnStep2Params arg)
         {
             OnStep2Handler.Push(arg);
@@ -265,7 +302,15 @@ namespace client.realize.messengers.punchHole.udp
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep21Params> OnStep21Handler { get; } = new SimpleSubPushHandler<OnStep21Params>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task OnStep21(OnStep21Params arg)
         {
             if (arg.Data.IsDefault)
@@ -288,13 +333,28 @@ namespace client.realize.messengers.punchHole.udp
             await Task.CompletedTask;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep2FailParams> OnStep2FailHandler { get; } = new SimpleSubPushHandler<OnStep2FailParams>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
         public void OnStep2Fail(OnStep2FailParams arg)
         {
             OnStep2FailHandler.Push(arg);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep3Params> OnStep3Handler { get; } = new SimpleSubPushHandler<OnStep3Params>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task OnStep3(OnStep3Params arg)
         {
             OnStep3Handler.Push(arg);
@@ -311,8 +371,14 @@ namespace client.realize.messengers.punchHole.udp
             }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep4Params> OnStep4Handler { get; } = new SimpleSubPushHandler<OnStep4Params>();
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
         public void OnStep4(OnStep4Params arg)
         {
             if (connectCache.TryRemove(arg.RawData.FromId, out ConnectCacheModel cache))

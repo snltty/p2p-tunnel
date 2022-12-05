@@ -5,16 +5,30 @@ using common.server.model;
 
 namespace client.realize.messengers.punchHole.udp
 {
+    /// <summary>
+    /// udp打洞消息
+    /// </summary>
     public sealed class PunchHoleUdp : IPunchHole
     {
         private readonly IPunchHoleUdp punchHoleUdp;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="punchHoleUdp"></param>
         public PunchHoleUdp(IPunchHoleUdp punchHoleUdp)
         {
             this.punchHoleUdp = punchHoleUdp;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public PunchHoleTypes Type => PunchHoleTypes.UDP;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
         public void Execute(OnPunchHoleArg arg)
         {
             PunchHoleUdpSteps step = (PunchHoleUdpSteps)arg.Data.PunchStep;

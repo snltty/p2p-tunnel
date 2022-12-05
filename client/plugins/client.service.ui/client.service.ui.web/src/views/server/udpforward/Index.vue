@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 00:47:21
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-29 15:39:12
+ * @LastEditTime: 2022-12-05 10:00:51
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\udpforward\Index.vue
@@ -92,7 +92,7 @@ export default {
             });
         }
         const onListeningChange = (row) => {
-            if (!row.Listening) {
+            if (row.Listening == false) {
                 stopServerForward(row.ServerPort).then(getData).catch(getData);
             } else {
                 startServerForward(row.ServerPort).then(getData).catch(getData);

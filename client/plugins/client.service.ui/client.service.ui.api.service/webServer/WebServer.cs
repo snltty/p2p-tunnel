@@ -14,14 +14,20 @@ namespace client.service.ui.api.service.webServer
     {
         private readonly Config config;
         private readonly IWebServerFileReader webServerFileReader;
-        Semaphore maxNumberAcceptedClients;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="webServerFileReader"></param>
         public WebServer(Config config, IWebServerFileReader webServerFileReader)
         {
             this.config = config;
             this.webServerFileReader = webServerFileReader;
-            maxNumberAcceptedClients = new Semaphore(10, 10);
         }
 
+        /// <summary>
+        /// 开启web
+        /// </summary>
         public void Start()
         {
             HttpListener http = new HttpListener();

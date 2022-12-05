@@ -6,8 +6,16 @@ using System.Reflection;
 
 namespace client.service.udpforward
 {
+    /// <summary>
+    /// udp插件
+    /// </summary>
     public sealed class Plugin : IPlugin
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             services.GetService<UdpForwardTransfer>();
@@ -29,6 +37,11 @@ namespace client.service.udpforward
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<common.udpforward.Config>();

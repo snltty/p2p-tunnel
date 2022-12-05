@@ -5,8 +5,16 @@ using System.Reflection;
 
 namespace client.service.vea
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class Plugin : IPlugin
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             var transfer = services.GetService<VeaTransfer>();
@@ -22,6 +30,11 @@ namespace client.service.vea
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<Config>();

@@ -10,6 +10,9 @@ using System.Net.Sockets;
 
 namespace common.udpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class UdpForwardResolver
     {
         private ConcurrentDictionary<ConnectionKeyUdp, UdpToken> connections = new(new ConnectionKeyUdpComparer());
@@ -18,6 +21,12 @@ namespace common.udpforward
         private readonly WheelTimer<object> wheelTimer;
         private readonly IUdpForwardValidator udpForwardValidator;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="udpForwardMessengerSender"></param>
+        /// <param name="wheelTimer"></param>
+        /// <param name="udpForwardValidator"></param>
         public UdpForwardResolver(UdpForwardMessengerSender udpForwardMessengerSender, WheelTimer<object> wheelTimer, IUdpForwardValidator udpForwardValidator)
         {
             //B接收到A的请求
@@ -101,7 +110,10 @@ namespace common.udpforward
         }
     }
 
-    public class UdpToken
+    /// <summary>
+    /// 
+    /// </summary>
+    sealed class UdpToken
     {
         public IConnection Connection { get; set; }
         public Socket TargetSocket { get; set; }
@@ -127,7 +139,7 @@ namespace common.udpforward
             LastTime = DateTimeHelper.GetTimeStamp();
         }
     }
-    public class ConnectionKeyUdpComparer : IEqualityComparer<ConnectionKeyUdp>
+    sealed class ConnectionKeyUdpComparer : IEqualityComparer<ConnectionKeyUdp>
     {
         public bool Equals(ConnectionKeyUdp x, ConnectionKeyUdp y)
         {
@@ -139,7 +151,7 @@ namespace common.udpforward
             return obj.Endpoint.GetHashCode() ^ obj.ConnectId.GetHashCode();
         }
     }
-    public readonly struct ConnectionKeyUdp
+    readonly struct ConnectionKeyUdp
     {
         public readonly IPEndPoint Endpoint { get; }
         public readonly ulong ConnectId { get; }

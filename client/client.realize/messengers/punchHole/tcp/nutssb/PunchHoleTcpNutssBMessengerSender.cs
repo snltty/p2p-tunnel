@@ -17,6 +17,9 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole.tcp.nutssb
 {
+    /// <summary>
+    /// tcp打洞
+    /// </summary>
     public sealed class PunchHoleTcpNutssBMessengerSender : IPunchHoleTcp
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
@@ -28,6 +31,17 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly IClientsTunnel clientsTunnel;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="punchHoleMessengerSender"></param>
+        /// <param name="tcpServer"></param>
+        /// <param name="registerState"></param>
+        /// <param name="cryptoSwap"></param>
+        /// <param name="config"></param>
+        /// <param name="wheelTimer"></param>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="clientsTunnel"></param>
         public PunchHoleTcpNutssBMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, ITcpServer tcpServer,
             RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching, IClientsTunnel clientsTunnel)
         {
@@ -51,8 +65,15 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 #endif
         private readonly ConcurrentDictionary<ulong, ConnectCacheModel> connectTcpCache = new();
 
-
+       /// <summary>
+       /// 
+       /// </summary>
         public SimpleSubPushHandler<ConnectParams> OnSendHandler => new SimpleSubPushHandler<ConnectParams>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public async Task<ConnectResultModel> Send(ConnectParams param)
         {
             if (param.TunnelName == (ulong)TunnelDefaults.MIN)
@@ -79,7 +100,15 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             return await tcs.Task.ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep1Params> OnStep1Handler { get; } = new SimpleSubPushHandler<OnStep1Params>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task OnStep1(OnStep1Params arg)
         {
             if (arg.Data.IsDefault)
@@ -126,7 +155,15 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; } = new SimpleSubPushHandler<OnStep2Params>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task OnStep2(OnStep2Params arg)
         {
             await Task.CompletedTask;
@@ -266,7 +303,14 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep2RetryParams> OnStep2RetryHandler { get; } = new SimpleSubPushHandler<OnStep2RetryParams>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="e"></param>
         public void OnStep2Retry(OnStep2RetryParams e)
         {
             if (connectTcpCache.TryGetValue(e.RawData.FromId, out ConnectCacheModel cache) == false || cache.Success)
@@ -311,12 +355,23 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep2FailParams> OnStep2FailHandler { get; } = new SimpleSubPushHandler<OnStep2FailParams>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
         public void OnStep2Fail(OnStep2FailParams arg)
         {
             OnStep2FailHandler.Push(arg);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="e"></param>
         public void OnStep2Stop(OnStep2StopParams e)
         {
             Cancel(e.RawData.FromId);
@@ -338,14 +393,29 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep3Params> OnStep3Handler { get; } = new SimpleSubPushHandler<OnStep3Params>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task OnStep3(OnStep3Params arg)
         {
             OnStep3Handler.Push(arg);
             await SendStep4(arg);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<OnStep4Params> OnStep4Handler { get; } = new SimpleSubPushHandler<OnStep4Params>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
         public void OnStep4(OnStep4Params arg)
         {
             if (connectTcpCache.TryRemove(arg.RawData.FromId, out ConnectCacheModel cache))
@@ -359,6 +429,11 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             OnStep4Handler.Push(arg);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public async Task SendStep1(ConnectParams param)
         {
             await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep1Info>
@@ -391,6 +466,11 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task SendStep2(OnStep1Params arg)
         {
             await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep2Info>
@@ -412,6 +492,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 Data = new PunchHoleStep2TryInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_TRY, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<ulong> OnSendStep2FailHandler => new SimpleSubPushHandler<ulong>();
         private async Task SendStep2Fail(OnStep2Params arg)
         {
@@ -441,6 +524,11 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="toid"></param>
+        /// <returns></returns>
         public async Task SendStep2Stop(ulong toid)
         {
             if (connectTcpCache.TryGetValue(toid, out ConnectCacheModel cache))

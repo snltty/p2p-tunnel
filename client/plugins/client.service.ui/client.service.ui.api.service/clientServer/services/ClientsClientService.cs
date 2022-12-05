@@ -10,12 +10,20 @@ using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
 {
+    /// <summary>
+    /// 客户端列表
+    /// </summary>
     public sealed class ClientsClientService : IClientService
     {
         private readonly IClientsTransfer clientsTransfer;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly RegisterStateInfo registerStateInfo;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientsTransfer"></param>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="registerStateInfo"></param>
         public ClientsClientService(IClientsTransfer clientsTransfer, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerStateInfo)
         {
             this.clientsTransfer = clientsTransfer;
@@ -23,58 +31,96 @@ namespace client.service.ui.api.service.clientServer.services
             this.registerStateInfo = registerStateInfo;
         }
 
+        /// <summary>
+        /// 客户端列表
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public IEnumerable<ClientInfo> List(ClientServiceParamsInfo arg)
         {
             return clientInfoCaching.All();
         }
 
+        /// <summary>
+        /// 连它
+        /// </summary>
+        /// <param name="arg"></param>
         public void Connect(ClientServiceParamsInfo arg)
         {
-            ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
-            if (clientInfoCaching.Get(model.ID, out ClientInfo client) == false)
+            ulong id = ulong.Parse(arg.Content);
+            if (clientInfoCaching.Get(id, out ClientInfo client) == false)
             {
                 return;
             }
-            clientInfoCaching.Offline(model.ID);
+            clientInfoCaching.Offline(id);
             clientsTransfer.ConnectClient(client);
         }
-
+        /// <summary>
+        /// 连我
+        /// </summary>
+        /// <param name="arg"></param>
         public void ConnectReverse(ClientServiceParamsInfo arg)
         {
-            ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
-            if (clientInfoCaching.Get(model.ID, out ClientInfo client) == false)
+            ulong id = ulong.Parse(arg.Content);
+            if (clientInfoCaching.Get(id, out ClientInfo client) == false)
             {
                 return;
             }
-            clientInfoCaching.Offline(model.ID);
+            clientInfoCaching.Offline(id);
             clientsTransfer.ConnectReverse(client);
         }
 
+        /// <summary>
+        /// 重启
+        /// </summary>
+        /// <param name="arg"></param>
         public void Reset(ClientServiceParamsInfo arg)
         {
-            ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
-            clientsTransfer.Reset(model.ID);
+            clientsTransfer.Reset(ulong.Parse(arg.Content));
         }
+        /// <summary>
+        /// 断开
+        /// </summary>
+        /// <param name="arg"></param>
         public void Offline(ClientServiceParamsInfo arg)
         {
-            ConnectParamsInfo model = arg.Content.DeJson<ConnectParamsInfo>();
-            clientInfoCaching.Offline(model.ID);
+            clientInfoCaching.Offline(ulong.Parse(arg.Content));
         }
 
+        /// <summary>
+        /// ping
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task<bool> Ping(ClientServiceParamsInfo arg)
         {
             await clientsTransfer.Ping();
             return true;
         }
 
+        /// <summary>
+        /// 获取所有客户端的连接情况
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task<ConcurrentDictionary<ulong, ulong[]>> Connects(ClientServiceParamsInfo arg)
         {
             return await clientsTransfer.Connects();
         }
+        /// <summary>
+        /// 获取可用于中继的线路的延迟
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task<int[]> Delay(ClientServiceParamsInfo arg)
         {
             return await clientsTransfer.Delay(arg.Content.DeJson<ulong[][]>());
         }
+        /// <summary>
+        /// 中继
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task<bool> Relay(ClientServiceParamsInfo arg)
         {
             ulong[] relayids = arg.Content.DeJson<ulong[]>();
@@ -104,13 +150,18 @@ namespace client.service.ui.api.service.clientServer.services
         }
 
     }
-    public class ConnectParamsInfo
-    {
-        public ulong ID { get; set; } = 0;
-    }
+    /// <summary>
+    /// 中继参数
+    /// </summary>
     public class RelayParamsInfo
     {
+        /// <summary>
+        /// 中继线路id列表
+        /// </summary>
         public ulong[] RelayIds { get; set; } = Helper.EmptyUlongArray;
+        /// <summary>
+        /// 目标是谁
+        /// </summary>
         public ulong ToId { get; set; } = 0;
     }
 }

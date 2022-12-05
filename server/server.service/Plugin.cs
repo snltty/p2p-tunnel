@@ -16,9 +16,16 @@ using server.service.validators;
 
 namespace server.service
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class Plugin : IPlugin
     {
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddTransient(typeof(IConfigDataProvider<>), typeof(ConfigDataFileProvider<>));
@@ -45,7 +52,11 @@ namespace server.service
                 services.AddSingleton(item);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             var config = services.GetService<Config>();
@@ -82,7 +93,7 @@ namespace server.service
                     Connection = c.OnLineConnection,
                     Id = c.Id,
                     Name = c.Name,
-                    ClientAccess = c.ClientAccess,
+                    Access = c.ClientAccess,
                 }).ToList();
                 if (clients.Any())
                 {

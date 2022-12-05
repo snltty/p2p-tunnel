@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace common.server.servers.iocp
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class TcpServer : ITcpServer
     {
         private int bufferSize = 8 * 1024;
@@ -16,24 +19,47 @@ namespace common.server.servers.iocp
         private Socket socket;
         private CancellationTokenSource cancellationTokenSource;
         bool isReceive = true;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public Func<IConnection, Task> OnPacket { get; set; } = async (connection) => { await Task.CompletedTask; };
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<IConnection> OnDisconnect { get; private set; } = new SimpleSubPushHandler<IConnection>();
+        /// <summary>
+        /// 
+        /// </summary>
         public Action<IConnection> OnConnected { get; set; } = (connection) => { };
+        /// <summary>
+        /// 
+        /// </summary>
         public Action<Socket> OnConnected1 { get; set; } = (socket) => { };
-
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpServer() { }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bufferSize"></param>
         public void SetBufferSize(int bufferSize = 8 * 1024)
         {
             this.bufferSize = bufferSize;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
         public void Start1(int port)
         {
             isReceive = false;
             Start(port);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
         public void Start(int port)
         {
             if (socket == null)
@@ -115,7 +141,12 @@ namespace common.server.servers.iocp
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="socket"></param>
+        /// <param name="bufferSize"></param>
+        /// <returns></returns>
         public IConnection BindReceive(Socket socket, int bufferSize = 8 * 1024)
         {
             try
@@ -257,7 +288,11 @@ namespace common.server.servers.iocp
             }
             OnDisconnect.Push(token.Connection);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="socket"></param>
+        /// <returns></returns>
         public IConnection CreateConnection(Socket socket)
         {
             return new TcpConnection(socket)
@@ -266,7 +301,9 @@ namespace common.server.servers.iocp
                 ReceiveResponseWrap = new MessageResponseWrap()
             };
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Stop()
         {
             cancellationTokenSource?.Cancel();
@@ -274,11 +311,19 @@ namespace common.server.servers.iocp
             socket = null;
             port = 0;
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void Disponse()
         {
             Stop();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         public async Task InputData(IConnection connection)
         {
             if (OnPacket != null)
@@ -288,15 +333,34 @@ namespace common.server.servers.iocp
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class AsyncUserToken
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public IConnection Connection { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Socket Socket { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public ReceiveDataBuffer DataBuffer { get; set; } = new ReceiveDataBuffer();
+        /// <summary>
+        /// 
+        /// </summary>
         public int Port { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public byte[] PoolBuffer { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Clear()
         {
             Socket?.SafeClose();

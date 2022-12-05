@@ -6,8 +6,14 @@ using System.Net;
 
 namespace common.socks5
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class Socks5Info
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public object Tag { get; set; }
 
         /// <summary>
@@ -26,6 +32,9 @@ namespace common.socks5
         /// 来源地址，数据从目标端回来的时候回给谁
         /// </summary>
         public IPEndPoint SourceEP { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public IPEndPoint TargetEP { get; set; }
 
         /// <summary>
@@ -34,8 +43,15 @@ namespace common.socks5
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Data { get; set; } = Helper.EmptyArray;
 
+        /// <summary>
+        /// 
+        /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public byte[] Response { get; set; } = new byte[1];
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             byte[] idBytes = Id.ToBytes();
@@ -96,7 +112,10 @@ namespace common.socks5
             }
             return bytes;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bytes"></param>
         public void DeBytes(Memory<byte> bytes)
         {
             var span = bytes.Span;
@@ -130,7 +149,11 @@ namespace common.socks5
 
             Data = bytes.Slice(index);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static Socks5Info Debytes(Memory<byte> data)
         {
             Socks5Info info = new Socks5Info();
@@ -159,6 +182,9 @@ namespace common.socks5
         /// 转发
         /// </summary>
         Forward = 4,
+        /// <summary>
+        /// 
+        /// </summary>
         ForwardUdp = 5,
     }
 
@@ -167,8 +193,17 @@ namespace common.socks5
     /// </summary>
     public enum Socks5EnumAddressType : byte
     {
+        /// <summary>
+        /// 
+        /// </summary>
         IPV4 = 1,
+        /// <summary>
+        /// 
+        /// </summary>
         Domain = 3,
+        /// <summary>
+        /// 
+        /// </summary>
         IPV6 = 4
     }
 
@@ -177,11 +212,29 @@ namespace common.socks5
     /// </summary>
     public enum Socks5EnumAuthType : byte
     {
+        /// <summary>
+        /// 
+        /// </summary>
         NoAuth = 0x00,
+        /// <summary>
+        /// 
+        /// </summary>
         GSSAPI = 0x01,
+        /// <summary>
+        /// 
+        /// </summary>
         Password = 0x02,
+        /// <summary>
+        /// 
+        /// </summary>
         IANA = 0x03,
+        /// <summary>
+        /// 
+        /// </summary>
         UnKnow = 0x80,
+        /// <summary>
+        /// 
+        /// </summary>
         NotSupported = 0xff,
     }
     /// <summary>
@@ -189,7 +242,13 @@ namespace common.socks5
     /// </summary>
     public enum Socks5EnumAuthState : byte
     {
+        /// <summary>
+        /// 
+        /// </summary>
         Success = 0x00,
+        /// <summary>
+        /// 
+        /// </summary>
         UnKnow = 0xff,
     }
     /// <summary>
@@ -256,15 +315,35 @@ namespace common.socks5
         /// </summary>
         Unknow = 8,
     }
-
+    /// <summary>
+    /// socks5相关的消息id
+    /// </summary>
     [Flags, MessengerIdEnum]
     public enum Socks5MessengerIds : ushort
     {
+        /// <summary>
+        /// 
+        /// </summary>
         Min = 800,
+        /// <summary>
+        /// 
+        /// </summary>
         Request = 802,
+        /// <summary>
+        /// 
+        /// </summary>
         Response = 803,
+        /// <summary>
+        /// 
+        /// </summary>
         GetSetting = 804,
+        /// <summary>
+        /// 
+        /// </summary>
         Setting = 805,
+        /// <summary>
+        /// 
+        /// </summary>
         Max = 899,
     }
 

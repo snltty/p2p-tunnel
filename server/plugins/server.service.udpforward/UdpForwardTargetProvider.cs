@@ -3,6 +3,9 @@ using server.messengers.register;
 
 namespace server.service.udpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     internal sealed class UdpForwardTargetProvider : IUdpForwardTargetProvider
     {
         private readonly IClientRegisterCaching clientRegisterCaching;
@@ -19,6 +22,11 @@ namespace server.service.udpforward
             });
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourcePort"></param>
+        /// <param name="info"></param>
         public void Get(ushort sourcePort, UdpForwardInfo info)
         {
             UdpForwardTargetCacheInfo cacheInfo = udpForwardTargetCaching.Get(sourcePort);

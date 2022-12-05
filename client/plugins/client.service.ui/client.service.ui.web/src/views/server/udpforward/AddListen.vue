@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:01:22
+ * @LastEditTime: 2022-12-05 10:00:23
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\udpforward\AddListen.vue
@@ -97,12 +97,9 @@ export default {
                 AddServerForward(json).then((res) => {
                     state.loading = false;
                     if (res) {
-                        ElMessage.error(res);
-                    } else {
                         state.show = false;
                         emit('success');
                     }
-
                 }).catch((e) => {
                     state.loading = false;
                 });

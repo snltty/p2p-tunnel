@@ -4,10 +4,18 @@ using System.IO;
 
 namespace client.service.socks5
 {
+    /// <summary>
+    /// socks5
+    /// </summary>
     public sealed class Socks5Transfer
     {
         private readonly common.socks5.Config config;
         private readonly ui.api.Config uiconfig;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="uiconfig"></param>
         public Socks5Transfer(common.socks5.Config config, ui.api.Config uiconfig)
         {
             this.config = config;
@@ -18,6 +26,10 @@ namespace client.service.socks5
             //Console.CancelKeyPress += (s, e) => ClearPac();
         }
 
+        /// <summary>
+        /// 获取pac
+        /// </summary>
+        /// <returns></returns>
         public string GetPac()
         {
             try
@@ -30,6 +42,11 @@ namespace client.service.socks5
             return String.Empty;
         }
 
+        /// <summary>
+        /// 更新pac
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public string UpdatePac(PacSetParamsInfo param)
         {
             try
@@ -73,20 +90,36 @@ namespace client.service.socks5
             }
         }
 
+        /// <summary>
+        /// 更新pac
+        /// </summary>
+        /// <param name="url"></param>
         public void SetPac(string url)
         {
             ProxySystemSetting.Set(url);
         }
 
+        /// <summary>
+        /// 清除pac
+        /// </summary>
         public void ClearPac()
         {
             ProxySystemSetting.Clear();
         }
     }
 
+    /// <summary>
+    /// 设置pac
+    /// </summary>
     public class PacSetParamsInfo
     {
+        /// <summary>
+        /// 是否自定义
+        /// </summary>
         public bool IsCustom { get; set; } = false;
+        /// <summary>
+        /// pac内容
+        /// </summary>
         public string Pac { get; set; } = string.Empty;
     }
 }

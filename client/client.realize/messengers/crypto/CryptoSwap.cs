@@ -8,17 +8,32 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.crypto
 {
+    /// <summary>
+    /// 秘钥交换
+    /// </summary>
     public sealed class CryptoSwap
     {
         private readonly MessengerSender messengerSender;
         private readonly ICryptoFactory cryptoFactory;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messengerSender"></param>
+        /// <param name="cryptoFactory"></param>
         public CryptoSwap(MessengerSender messengerSender, ICryptoFactory cryptoFactory)
         {
             this.messengerSender = messengerSender;
             this.cryptoFactory = cryptoFactory;
         }
 
+        /// <summary>
+        /// 交换秘钥
+        /// </summary>
+        /// <param name="tcp"></param>
+        /// <param name="udp"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public async Task<ICrypto> Swap(IConnection tcp, IConnection udp, string password)
         {
             try
@@ -81,6 +96,11 @@ namespace client.realize.messengers.crypto
             }
         }
 
+        /// <summary>
+        /// 测试加密
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         public async Task<bool> Test(IConnection connection)
         {
             MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap

@@ -4,6 +4,9 @@ using System.Net;
 
 namespace common.libs.extends
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class EndPointExtends
     {
         static Memory<byte> ipv6Loopback = IPAddress.IPv6Loopback.GetAddressBytes();
@@ -20,6 +23,11 @@ namespace common.libs.extends
             return endPoint.Address.IsLan();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="adress"></param>
+        /// <returns></returns>
         public static bool IsLan(this IPAddress adress)
         {
             if (adress == null) return false;
@@ -38,6 +46,11 @@ namespace common.libs.extends
                 || (bytes[0] == ipv6Local.Span[0] && bytes[1] == ipv6Local.Span[1]);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ep"></param>
+        /// <returns></returns>
         public static byte[] GetAddressBytes(this IPEndPoint ep)
         {
             var addressBytes = ep.Address.GetAddressBytes();

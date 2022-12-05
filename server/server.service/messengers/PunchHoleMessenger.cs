@@ -6,17 +6,30 @@ using System.Threading.Tasks;
 
 namespace server.service.messengers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [MessengerIdRange((ushort)PunchHoleMessengerIds.Min, (ushort)PunchHoleMessengerIds.Max)]
     public sealed class PunchHoleMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly MessengerSender messengerSender;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCache"></param>
+        /// <param name="messengerSender"></param>
         public PunchHoleMessenger(IClientRegisterCaching clientRegisterCache, MessengerSender messengerSender)
         {
             this.clientRegisterCache = clientRegisterCache;
             this.messengerSender = messengerSender;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)PunchHoleMessengerIds.Response)]
         public async Task Response(IConnection connection)
         {
@@ -50,7 +63,11 @@ namespace server.service.messengers
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)PunchHoleMessengerIds.Request)]
         public async Task Request(IConnection connection)
         {

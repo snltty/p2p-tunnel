@@ -9,9 +9,18 @@ using System.Net.Sockets;
 
 namespace common.tcpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class TcpForwardServerPre : ITcpForwardServer
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Func<TcpForwardInfo, bool> OnRequest { get; set; } = (info) => true;
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<ListeningChangeInfo> OnListeningChange { get; } = new SimpleSubPushHandler<ListeningChangeInfo>();
         private readonly ServersManager serversManager = new ServersManager();
         private readonly ClientsManager clientsManager = new ClientsManager();
@@ -20,14 +29,26 @@ namespace common.tcpforward
 
         private int receiveBufferSize = 8 * 1024;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardServerPre()
         {
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="numConnections"></param>
+        /// <param name="receiveBufferSize"></param>
         public void Init(int numConnections, int receiveBufferSize)
         {
             this.receiveBufferSize = receiveBufferSize;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="aliveType"></param>
         public void Start(ushort port, TcpForwardAliveTypes aliveType)
         {
             if (serversManager.Contains(port))
@@ -223,7 +244,10 @@ namespace common.tcpforward
                 OnRequest(token.Request);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
         public void Response(TcpForwardInfo model)
         {
             if (clientsManager.TryGetValue(model.RequestId, out ForwardAsyncUserToken token))
@@ -275,7 +299,10 @@ namespace common.tcpforward
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourcePort"></param>
         public void Stop(ushort sourcePort)
         {
             if (serversManager.TryRemove(sourcePort, out ServerInfo model))
@@ -289,6 +316,9 @@ namespace common.tcpforward
                 clientsManager.Clear(model.SourcePort);
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void Stop()
         {
             serversManager.Clear();
@@ -297,7 +327,7 @@ namespace common.tcpforward
         }
     }
 
-    public class ForwardAsyncUserToken
+    sealed class ForwardAsyncUserToken
     {
         public Socket SourceSocket { get; set; }
         public ushort SourcePort { get; set; } = 0;
@@ -307,7 +337,7 @@ namespace common.tcpforward
 
         public byte[] PoolBuffer { get; set; }
     }
-    public class ClientsManager
+    sealed class ClientsManager
     {
         private ConcurrentDictionary<ulong, ForwardAsyncUserToken> clients = new();
 
@@ -358,7 +388,7 @@ namespace common.tcpforward
         }
     }
 
-    public class ServersManager
+    sealed class ServersManager
     {
         public ConcurrentDictionary<int, ServerInfo> services = new();
         public bool TryAdd(ServerInfo model)
@@ -408,7 +438,7 @@ namespace common.tcpforward
         }
 
     }
-    public class ServerInfo
+    sealed class ServerInfo
     {
         public ushort SourcePort { get; set; } = 0;
         public Socket Socket { get; set; }

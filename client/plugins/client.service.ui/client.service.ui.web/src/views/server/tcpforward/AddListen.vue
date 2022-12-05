@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:00:33
+ * @LastEditTime: 2022-12-05 10:51:02
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\tcpforward\AddListen.vue
@@ -37,7 +37,6 @@ import { inject, watch } from '@vue/runtime-core';
 import { AddServerForward } from '../../../apis/tcp-forward'
 import { injectShareData } from '../../../states/shareData'
 import { injectRegister } from '../../../states/register'
-import { ElMessage } from 'element-plus/lib/components';
 export default {
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],
@@ -109,8 +108,6 @@ export default {
                 AddServerForward(json).then((res) => {
                     state.loading = false;
                     if (res) {
-                        ElMessage.error(res);
-                    } else {
                         state.show = false;
                         emit('success');
                     }

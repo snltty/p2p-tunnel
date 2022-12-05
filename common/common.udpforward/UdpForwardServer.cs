@@ -8,14 +8,27 @@ using System.Net.Sockets;
 
 namespace common.udpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class UdpForwardServer : IUdpForwardServer
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<UdpForwardInfo> OnRequest { get; } = new SimpleSubPushHandler<UdpForwardInfo>();
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<UdpforwardListenChangeInfo> OnListenChange { get; } = new SimpleSubPushHandler<UdpforwardListenChangeInfo>();
 
         private readonly ServersManager serversManager = new ServersManager();
         private readonly ClientsManager clientsManager = new ClientsManager();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="wheelTimer"></param>
         public UdpForwardServer(WheelTimer<object> wheelTimer)
         {
             wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object>
@@ -25,6 +38,10 @@ namespace common.udpforward
             }, 1000, true);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourcePort"></param>
         public void Start(ushort sourcePort)
         {
             if (serversManager.Contains(sourcePort))
@@ -63,7 +80,10 @@ namespace common.udpforward
             {
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
         public void Response(UdpForwardInfo model)
         {
             if (clientsManager.TryGetValue(model.SourceEndpoint, out ForwardAsyncUserToken token))
@@ -86,7 +106,10 @@ namespace common.udpforward
                 }
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourcePort"></param>
         public void Stop(ushort sourcePort)
         {
             if (serversManager.TryRemove(sourcePort, out ForwardAsyncServerToken model))
@@ -96,6 +119,9 @@ namespace common.udpforward
             }
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void Stop()
         {
             serversManager.Clear();
@@ -105,13 +131,13 @@ namespace common.udpforward
 
     }
 
-    public class ForwardAsyncUserToken
+    sealed class ForwardAsyncUserToken
     {
         public UdpClient ServerUdpClient { get; set; }
         public long LastTime { get; set; } = DateTimeHelper.GetTimeStamp();
         public UdpForwardInfo Request { get; set; } = new UdpForwardInfo();
     }
-    public class ClientsManager
+    sealed class ClientsManager
     {
         private ConcurrentDictionary<IPEndPoint, ForwardAsyncUserToken> clients = new(new IPEndPointDictionaryComparer());
 
@@ -158,13 +184,13 @@ namespace common.udpforward
             }
         }
     }
-    public class ForwardAsyncServerToken
+    sealed class ForwardAsyncServerToken
     {
         public ushort SourcePort { get; set; }
         public IPEndPoint TempRemoteEP = new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort);
         public UdpClient UdpClient { get; set; }
     }
-    public class ServersManager
+    sealed class ServersManager
     {
         public ConcurrentDictionary<ushort, ForwardAsyncServerToken> services = new();
         public bool TryAdd(ForwardAsyncServerToken model)

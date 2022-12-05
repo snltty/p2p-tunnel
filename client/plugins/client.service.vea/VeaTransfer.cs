@@ -14,6 +14,9 @@ using System.Security.Principal;
 
 namespace client.service.vea
 {
+    /// <summary>
+    /// 组网
+    /// </summary>
     public sealed class VeaTransfer
     {
         Process Tun2SocksProcess;
@@ -25,7 +28,13 @@ namespace client.service.vea
 
         private readonly ConcurrentDictionary<IPAddress, IPAddressCacheInfo> ips = new ConcurrentDictionary<IPAddress, IPAddressCacheInfo>();
         private readonly ConcurrentDictionary<int, IPAddressCacheInfo> lanips = new ConcurrentDictionary<int, IPAddressCacheInfo>();
+        /// <summary>
+        /// 
+        /// </summary>
         public ConcurrentDictionary<IPAddress, IPAddressCacheInfo> IPList => ips;
+        /// <summary>
+        /// 
+        /// </summary>
         public ConcurrentDictionary<int, IPAddressCacheInfo> LanIPList => lanips;
 
         private readonly Config config;
@@ -34,6 +43,14 @@ namespace client.service.vea
         private readonly VeaMessengerSender veaMessengerSender;
         private readonly RegisterStateInfo registerStateInfo;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="veaMessengerSender"></param>
+        /// <param name="socks5ClientListener"></param>
+        /// <param name="registerStateInfo"></param>
         public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener, RegisterStateInfo registerStateInfo)
         {
             this.config = config;
@@ -61,6 +78,10 @@ namespace client.service.vea
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) => Stop();
         }
 
+        /// <summary>
+        /// 收到通知
+        /// </summary>
+        /// <param name="connection"></param>
         public void OnNotify(IConnection connection)
         {
             if (connection.FromConnection != null)
@@ -95,6 +116,9 @@ namespace client.service.vea
                 AddRoute();
             }
         }
+        /// <summary>
+        /// 更新ip
+        /// </summary>
         public void UpdateIp()
         {
             foreach (var item in clientInfoCaching.All().Where(c => c.Id != registerStateInfo.ConnectId))
@@ -111,6 +135,9 @@ namespace client.service.vea
             }
         }
 
+        /// <summary>
+        /// 开启
+        /// </summary>
         public void Run()
         {
             Stop();
@@ -121,6 +148,9 @@ namespace client.service.vea
             }
             UpdateIp();
         }
+        /// <summary>
+        /// 停止
+        /// </summary>
         public void Stop()
         {
             socks5ClientListener.Stop();
@@ -190,7 +220,7 @@ namespace client.service.vea
                 Tun2SocksProcess = null;
             }
 
-            Command.Execute("/bin/bash", string.Empty, new string[] { $"ip tuntap del mode tun dev {veaName}" });
+            Command.Linux(string.Empty, new string[] { $"ip tuntap del mode tun dev {veaName}" });
         }
         private void KillOsx()
         {
@@ -203,7 +233,7 @@ namespace client.service.vea
             }
             var ip = config.IP.GetAddressBytes();
             ip[^1] = 0;
-            Command.Execute("/bin/bash", string.Empty, new string[] { $"route delete -net {new IPAddress(ip)}/24 {config.IP}" });
+            Command.Osx(string.Empty, new string[] { $"route delete -net {new IPAddress(ip)}/24 {config.IP}" });
         }
 
         private void RunWindows()
@@ -217,7 +247,7 @@ namespace client.service.vea
                     interfaceNumber = GetWindowsInterfaceNum();
                     if (interfaceNumber > 0)
                     {
-                        Command.Execute("cmd.exe", string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
+                        Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
                         if (GetWindowsHasIp(config.IP))
                         {
                             AddRoute();
@@ -237,7 +267,7 @@ namespace client.service.vea
         }
         private int GetWindowsInterfaceNum()
         {
-            string output = Command.Execute("cmd.exe", string.Empty, new string[] { "route print" });
+            string output = Command.Windows(string.Empty, new string[] { "route print" });
             foreach (var item in output.Split(Environment.NewLine))
             {
                 if (item.Contains("WireGuard Tunnel"))
@@ -249,17 +279,17 @@ namespace client.service.vea
         }
         private bool GetWindowsHasInterface(string name)
         {
-            string output = Command.Execute("cmd.exe", string.Empty, new string[] { $"ipconfig | findstr \"{name}\"" });
+            string output = Command.Windows(string.Empty, new string[] { $"ipconfig | findstr \"{name}\"" });
             return string.IsNullOrWhiteSpace(output) == false;
         }
         private bool GetWindowsHasIp(IPAddress ip)
         {
-            string output = Command.Execute("cmd.exe", string.Empty, new string[] { $"ipconfig | findstr \"{ip}\"" });
+            string output = Command.Windows(string.Empty, new string[] { $"ipconfig | findstr \"{ip}\"" });
             return string.IsNullOrWhiteSpace(output) == false;
         }
         private void RunLinux()
         {
-            Command.Execute("/bin/bash", string.Empty, new string[] {
+            Command.Linux(string.Empty, new string[] {
                 $"ip tuntap add mode tun dev {veaName}",
                 $"ip addr add {config.IP}/24 dev {veaName}",
                 $"ip link set dev {veaName} up"
@@ -271,7 +301,7 @@ namespace client.service.vea
         }
         private string GetLinuxInterfaceNum()
         {
-            string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ip route" });
+            string output = Command.Linux(string.Empty, new string[] { "ip route" });
             foreach (var item in output.Split(Environment.NewLine))
             {
                 if (item.StartsWith("default via"))
@@ -295,7 +325,7 @@ namespace client.service.vea
 
             for (int i = 0; i < 60; i++)
             {
-                string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ifconfig" });
+                string output = Command.Osx(string.Empty, new string[] { "ifconfig" });
                 if (output.Contains(veaNameOsx))
                 {
                     break;
@@ -306,17 +336,17 @@ namespace client.service.vea
                 }
             }
 
-            Command.Execute("/bin/bash", string.Empty, new string[] { $"ifconfig {veaNameOsx} {config.IP} {config.IP} up" });
+            Command.Osx(string.Empty, new string[] { $"ifconfig {veaNameOsx} {config.IP} {config.IP} up" });
 
             var ip = config.IP.GetAddressBytes();
             ip[^1] = 0;
-            Command.Execute("/bin/bash", string.Empty, new string[] { $"route add -net {new IPAddress(ip)}/24 {config.IP}" });
+            Command.Osx(string.Empty, new string[] { $"route add -net {new IPAddress(ip)}/24 {config.IP}" });
 
             AddRoute();
         }
         private string GetOsxInterfaceNum()
         {
-            string output = Command.Execute("/bin/bash", string.Empty, new string[] { "ifconfig" });
+            string output = Command.Osx(string.Empty, new string[] { "ifconfig" });
             var arr = output.Split(Environment.NewLine);
             for (int i = 0; i < arr.Length; i++)
             {
@@ -373,7 +403,7 @@ namespace client.service.vea
                         commands.Add($"route add {item} mask {string.Join(".", mask)} {config.IP} metric 5 if {interfaceNumber}");
                     }
                 }
-                Command.Execute("cmd.exe", string.Empty, commands.ToArray());
+                Command.Windows(string.Empty, commands.ToArray());
             }
         }
         private void AddRouteLinux(IPAddress[] ip)
@@ -383,7 +413,7 @@ namespace client.service.vea
                 int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
                 return $"ip route add {c}/{mask} via {config.IP} dev {veaName} metric 1 ";
             }).ToArray();
-            Command.Execute("/bin/bash", string.Empty, commands);
+            Command.Linux(string.Empty, commands);
         }
         private void AddRouteOsx(IPAddress[] ip)
         {
@@ -394,7 +424,7 @@ namespace client.service.vea
             }).ToArray();
             if (commands.Length > 0)
             {
-                Command.Execute("/bin/bash", string.Empty, commands.ToArray());
+                Command.Osx(string.Empty, commands.ToArray());
             }
         }
 
@@ -418,7 +448,7 @@ namespace client.service.vea
             if (interfaceNumber > 0)
             {
                 string[] commands = ip.Select(c => $"route delete {c}").ToArray();
-                Command.Execute("cmd.exe", string.Empty, commands.ToArray());
+                Command.Windows(string.Empty, commands.ToArray());
             }
         }
         private void DelRouteLinux(IPAddress[] ip)
@@ -428,7 +458,7 @@ namespace client.service.vea
                 int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
                 return $"ip route del {c}/{mask}";
             }).ToArray();
-            Command.Execute("/bin/bash", string.Empty, commands);
+            Command.Linux(string.Empty, commands);
         }
         private void DelRouteOsx(IPAddress[] ip)
         {
@@ -439,7 +469,7 @@ namespace client.service.vea
             }).ToArray();
             if (commands.Length > 0)
             {
-                Command.Execute("/bin/bash", string.Empty, commands.ToArray());
+                Command.Osx(string.Empty, commands.ToArray());
             }
         }
 
@@ -492,20 +522,45 @@ namespace client.service.vea
 
     }
 
+    /// <summary>
+    /// ip缓存
+    /// </summary>
     public sealed class IPAddressCacheInfo
     {
+        /// <summary>
+        /// ip
+        /// </summary>
         public IPAddress IP { get; set; }
+        /// <summary>
+        /// 局域网网段
+        /// </summary>
         public IPAddress[] LanIPs { get; set; }
+        /// <summary>
+        /// 客户端
+        /// </summary>
 
         [System.Text.Json.Serialization.JsonIgnore]
         public ClientInfo Client { get; set; }
     }
 
+    /// <summary>
+    /// ip更新消息模型
+    /// </summary>
     public sealed class IPAddressInfo
     {
+        /// <summary>
+        /// ip
+        /// </summary>
         public IPAddress IP { get; set; }
+        /// <summary>
+        /// 局域网网段
+        /// </summary>
         public IPAddress[] LanIPs { get; set; }
 
+        /// <summary>
+        /// 序列化
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var ip = IP.GetAddressBytes();
@@ -530,6 +585,10 @@ namespace client.service.vea
             return bytes;
         }
 
+        /// <summary>
+        /// 反序列化
+        /// </summary>
+        /// <param name="memory"></param>
         public void DeBytes(ReadOnlyMemory<byte> memory)
         {
             var span = memory.Span;

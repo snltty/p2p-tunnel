@@ -5,6 +5,9 @@ using common.tcpforward;
 
 namespace client.service.tcpforward
 {
+    /// <summary>
+    /// tcp转发目标提供
+    /// </summary>
     internal sealed class TcpForwardTargetProvider : ITcpForwardTargetProvider
     {
         private readonly IClientInfoCaching clientInfoCaching;
@@ -26,10 +29,20 @@ namespace client.service.tcpforward
             });
         }
 
+        /// <summary>
+        /// 根据host获取目标连接
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="info"></param>
         public void Get(string domain, TcpForwardInfo info)
         {
             GetTarget(tcpForwardTargetCaching.Get(domain), info);
         }
+        /// <summary>
+        /// 根据端口获取目标连接
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="info"></param>
         public void Get(ushort port, TcpForwardInfo info)
         {
             GetTarget(tcpForwardTargetCaching.Get(port), info);

@@ -1,0 +1,238 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>server</name>
+    </assembly>
+    <members>
+        <member name="T:server.Config">
+            <summary>
+            服务端配置文件
+            </summary>
+        </member>
+        <member name="M:server.Config.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.Config.#ctor(common.libs.database.IConfigDataProvider{server.Config})">
+            <summary>
+            
+            </summary>
+            <param name="configDataProvider"></param>
+        </member>
+        <member name="P:server.Config.Udp">
+            <summary>
+            udp端口
+            </summary>
+        </member>
+        <member name="P:server.Config.Tcp">
+            <summary>
+            tcp端口
+            </summary>
+        </member>
+        <member name="P:server.Config.ConnectLimit">
+            <summary>
+            连接频率每秒
+            </summary>
+        </member>
+        <member name="P:server.Config.TcpBufferSize">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.Config.TimeoutDelay">
+            <summary>
+            掉线超时
+            </summary>
+        </member>
+        <member name="P:server.Config.RegisterTimeout">
+            <summary>
+            注册超时
+            </summary>
+        </member>
+        <member name="P:server.Config.RegisterEnable">
+            <summary>
+            允许注册
+            </summary>
+        </member>
+        <member name="P:server.Config.RelayEnable">
+            <summary>
+            允许中继
+            </summary>
+        </member>
+        <member name="P:server.Config.EncodePassword">
+            <summary>
+            加密密码
+            </summary>
+        </member>
+        <member name="M:server.Config.ReadConfig">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:server.Config.ReadString">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:server.Config.SaveConfig(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.messengers.IServiceAccessValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.IServiceAccessValidator.Groups">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.messengers.IServiceAccessValidator.Validate(System.String,common.server.model.EnumServiceAccess)">
+            <summary>
+            
+            </summary>
+            <param name="group"></param>
+            <param name="service"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.messengers.IServiceAccessValidator.ReadString">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:server.messengers.IServiceAccessValidator.SaveConfig">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:server.messengers.IServiceAccessValidator.SaveConfig(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.messengers.register.RegisterCacheInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.RegisterCacheInfo.TcpConnection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.RegisterCacheInfo.UdpConnection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.RegisterCacheInfo.OnLineConnection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.RegisterCacheInfo.Id">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.RegisterCacheInfo.ShortId">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.RegisterCacheInfo.Name">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.RegisterCacheInfo.GroupId">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.RegisterCacheInfo.LocalIps">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.RegisterCacheInfo.ClientAccess">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.messengers.register.RegisterCacheInfo.UpdateConnection(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:server.messengers.register.RegisterCacheInfo.AddTunnel(server.messengers.register.TunnelRegisterCacheInfo)">
+            <summary>
+            
+            </summary>
+            <param name="model"></param>
+        </member>
+        <member name="M:server.messengers.register.RegisterCacheInfo.RemoveTunnel(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="tunnameName"></param>
+        </member>
+        <member name="M:server.messengers.register.RegisterCacheInfo.TunnelExists(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="tunnelName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.messengers.register.RegisterCacheInfo.GetTunnel(System.UInt64,server.messengers.register.TunnelRegisterCacheInfo@)">
+            <summary>
+            
+            </summary>
+            <param name="tunnelName"></param>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.messengers.register.TunnelRegisterCacheInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.TunnelRegisterCacheInfo.TunnelName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.TunnelRegisterCacheInfo.Port">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.TunnelRegisterCacheInfo.LocalPort">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.TunnelRegisterCacheInfo.Servertype">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.messengers.register.TunnelRegisterCacheInfo.IsDefault">
+            <summary>
+            
+            </summary>
+        </member>
+    </members>
+</doc>

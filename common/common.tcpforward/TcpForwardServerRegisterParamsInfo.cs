@@ -10,15 +10,39 @@ namespace common.tcpforward
     /// </summary>
     public sealed class TcpForwardRegisterParamsInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardRegisterParamsInfo() { }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string SourceIp { get; set; } = IPAddress.Any.ToString();
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort SourcePort { get; set; } = 8080;
+        /// <summary>
+        /// 
+        /// </summary>
         public string TargetName { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
         public string TargetIp { get; set; } = IPAddress.Loopback.ToString();
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort TargetPort { get; set; } = 8080;
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             byte[] sportBytes = SourcePort.ToBytes();
@@ -59,6 +83,10 @@ namespace common.tcpforward
             return bytes;
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(Memory<byte> data)
         {
             var span = data.Span;
@@ -84,15 +112,31 @@ namespace common.tcpforward
         }
 
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class TcpForwardUnRegisterParamsInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardUnRegisterParamsInfo() { }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public string SourceIp { get; set; } = IPAddress.Any.ToString();
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort SourcePort { get; set; } = 8080;
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             byte[] ipBytes = SourceIp.ToBytes();
@@ -113,7 +157,10 @@ namespace common.tcpforward
 
             return bytes;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(Memory<byte> data)
         {
             var span = data.Span;
@@ -128,12 +175,27 @@ namespace common.tcpforward
             SourceIp = span.Slice(index).GetString();
         }
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class TcpForwardRegisterResult
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardRegisterResultCodes Code { get; set; } = TcpForwardRegisterResultCodes.OK;
+        /// <summary>
+        /// 
+        /// </summary>
         public ulong ID { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public string Msg { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var idBytes = ID.ToBytes();
@@ -154,6 +216,10 @@ namespace common.tcpforward
 
             return bytes;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -169,17 +235,35 @@ namespace common.tcpforward
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     [Flags]
     public enum TcpForwardRegisterResultCodes : byte
     {
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("成功")]
         OK = 1,
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("插件未开启")]
         DISABLED = 2,
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("已存在")]
         EXISTS = 4,
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("端口超出范围")]
         OUT_RANGE = 8,
+        /// <summary>
+        /// 
+        /// </summary>
         [Description("未知")]
         UNKNOW = 16,
     }

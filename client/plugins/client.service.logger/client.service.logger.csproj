@@ -6,7 +6,8 @@
 	</PropertyGroup>
 	<PropertyGroup>
 		<TargetFrameworks>net7.0;net6.0</TargetFrameworks>
-		<TieredPGO>true</TieredPGO><PublishAot>false</PublishAot>
+		<TieredPGO>true</TieredPGO>
+		<PublishAot>false</PublishAot>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DefineConstants>DEBUG;TRACE</DefineConstants>

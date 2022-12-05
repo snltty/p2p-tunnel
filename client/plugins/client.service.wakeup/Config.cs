@@ -8,11 +8,21 @@ using System.Threading.Tasks;
 
 namespace client.service.wakeup
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Table("wakeup-appsettings")]
     public sealed class Config
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="configDataProvider"></param>
         public Config(IConfigDataProvider<Config> configDataProvider)
         {
             this.configDataProvider = configDataProvider;
@@ -21,9 +31,16 @@ namespace client.service.wakeup
             Items = config.Items;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public List<ConfigItem> Items { get; set; } = new List<ConfigItem>();
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public async Task<bool> Add(int index, ConfigItem item)
         {
             try
@@ -48,6 +65,11 @@ namespace client.service.wakeup
                 return false;
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public async Task<bool> Remove(int index)
         {
             try
@@ -64,14 +86,27 @@ namespace client.service.wakeup
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<Config> ReadConfig()
         {
             return await configDataProvider.Load();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> ReadString()
         {
             return await configDataProvider.LoadString();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jsonStr"></param>
+        /// <returns></returns>
         public async Task SaveConfig(string jsonStr)
         {
             var _config = jsonStr.DeJson<Config>();
@@ -79,7 +114,10 @@ namespace client.service.wakeup
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             List<byte> bytes = new List<byte>(64);
@@ -95,7 +133,11 @@ namespace client.service.wakeup
             }
             return bytes.ToArray();
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
         public static List<ConfigItem> DeBytes(ReadOnlyMemory<byte> memory)
         {
             var span = memory.Span;
@@ -116,9 +158,18 @@ namespace client.service.wakeup
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class ConfigItem
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public string Mac { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
         public string Name { get; set; } = string.Empty;
     }
 }

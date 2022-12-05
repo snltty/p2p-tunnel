@@ -11,10 +11,16 @@ using System.Net;
 
 namespace client.service.vea
 {
+    /// <summary>
+    /// 组网socks5客户端
+    /// </summary>
     public interface IVeaSocks5ClientHandler : ISocks5ClientHandler
     {
     }
 
+    /// <summary>
+    /// 组网socks5客户端
+    /// </summary>
     public sealed class VeaSocks5ClientHandler : Socks5ClientHandler, IVeaSocks5ClientHandler
     {
         private readonly IVeaSocks5MessengerSender socks5MessengerSender;
@@ -23,7 +29,15 @@ namespace client.service.vea
         private readonly VeaTransfer virtualEthernetAdapterTransfer;
         IVeaSocks5ClientListener socks5ClientListener;
 
-
+        /// <summary>
+        /// 组网socks5客户端
+        /// </summary>
+        /// <param name="socks5MessengerSender"></param>
+        /// <param name="registerStateInfo"></param>
+        /// <param name="config"></param>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="socks5ClientListener"></param>
+        /// <param name="virtualEthernetAdapterTransfer"></param>
         public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, RegisterStateInfo registerStateInfo, Config config, IClientInfoCaching clientInfoCaching, IVeaSocks5ClientListener socks5ClientListener, VeaTransfer virtualEthernetAdapterTransfer)
             : base(socks5MessengerSender, registerStateInfo, new common.socks5.Config
             {
@@ -39,6 +53,11 @@ namespace client.service.vea
             this.socks5ClientListener = socks5ClientListener;
             this.virtualEthernetAdapterTransfer = virtualEthernetAdapterTransfer;
         }
+
+        /// <summary>
+        /// 收到关闭
+        /// </summary>
+        /// <param name="info"></param>
         protected override void OnClose(Socks5Info info)
         {
             if (info.Tag is TagInfo target)
@@ -46,6 +65,12 @@ namespace client.service.vea
                 socks5MessengerSender.RequestClose(info.Id, target.Connection);
             }
         }
+
+        /// <summary>
+        /// 命令
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         protected override bool HandleCommand(Socks5Info data)
         {
             if ((data.Tag is TagInfo target) == false)
@@ -70,6 +95,12 @@ namespace client.service.vea
 
             return socks5MessengerSender.Request(data, target.Connection);
         }
+
+        /// <summary>
+        /// 转发
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         protected override bool HndleForward(Socks5Info data)
         {
             TagInfo target = data.Tag as TagInfo;
@@ -82,13 +113,21 @@ namespace client.service.vea
             return socks5MessengerSender.Request(data, target.Connection);
         }
 
-
+        /// <summary>
+        /// udp转发
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         protected override bool HndleForwardUdp(Socks5Info data)
         {
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
             IConnection connection = GetConnection(remoteEndPoint.Address, ipMemory);
             return socks5MessengerSender.Request(data, connection);
         }
+
+        /// <summary>
+        /// 刷新
+        /// </summary>
         public override void Flush()
         {
         }

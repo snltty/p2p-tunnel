@@ -8,13 +8,26 @@ using System.Threading.Tasks;
 
 namespace server.service.validators
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Table("service-auth-groups")]
     public sealed class JsonFileServiceAccessValidator : IServiceAccessValidator
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Dictionary<string, EnumServiceAccess> Groups { get; set; } = new Dictionary<string, EnumServiceAccess>();
 
         private readonly IConfigDataProvider<JsonFileServiceAccessValidator> configDataProvider;
+        /// <summary>
+        /// 
+        /// </summary>
         public JsonFileServiceAccessValidator() { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="configDataProvider"></param>
         public JsonFileServiceAccessValidator(IConfigDataProvider<JsonFileServiceAccessValidator> configDataProvider)
         {
             this.configDataProvider = configDataProvider;
@@ -24,7 +37,12 @@ namespace server.service.validators
                 Groups = config.Groups;
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="service"></param>
+        /// <returns></returns>
         public bool Validate(string group, EnumServiceAccess service)
         {
             if (Groups.TryGetValue(group, out EnumServiceAccess value))
@@ -33,15 +51,28 @@ namespace server.service.validators
             }
             return false;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> ReadString()
         {
             return await configDataProvider.LoadString();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task SaveConfig()
         {
             await configDataProvider.Save(this);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jsonStr"></param>
+        /// <returns></returns>
         public async Task SaveConfig(string jsonStr)
         {
             JsonFileServiceAccessValidator _config = jsonStr.DeJson<JsonFileServiceAccessValidator>();

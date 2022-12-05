@@ -7,31 +7,45 @@ using System;
 
 namespace client.service.socks5
 {
+    /// <summary>
+    /// socks5
+    /// </summary>
     public sealed class Socks5ClientService : IClientService
     {
         private readonly common.socks5.Config config;
         private readonly ISocks5ClientListener socks5ClientListener;
         private readonly Socks5Transfer socks5Transfer;
         private readonly ISocks5ClientHandler socks5ClientHandler;
-        private readonly MessengerSender messengerSender;
-        private readonly RegisterStateInfo registerStateInfo;
 
-        public Socks5ClientService(common.socks5.Config config, ISocks5ClientListener socks5ClientListener,
-            Socks5Transfer socks5Transfer, ISocks5ClientHandler socks5ClientHandler, MessengerSender messengerSender, RegisterStateInfo registerStateInfo)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="socks5ClientListener"></param>
+        /// <param name="socks5Transfer"></param>
+        /// <param name="socks5ClientHandler"></param>
+        public Socks5ClientService(common.socks5.Config config, ISocks5ClientListener socks5ClientListener, Socks5Transfer socks5Transfer, ISocks5ClientHandler socks5ClientHandler)
         {
             this.config = config;
             this.socks5ClientListener = socks5ClientListener;
             this.socks5Transfer = socks5Transfer;
             this.socks5ClientHandler = socks5ClientHandler;
-            this.messengerSender = messengerSender;
-            this.registerStateInfo = registerStateInfo;
         }
 
+        /// <summary>
+        /// 获取配置
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public common.socks5.Config Get(ClientServiceParamsInfo arg)
         {
             return config;
         }
 
+        /// <summary>
+        /// 设置配置
+        /// </summary>
+        /// <param name="arg"></param>
         public void Set(ClientServiceParamsInfo arg)
         {
             var conf = arg.Content.DeJson<common.socks5.Config>();
@@ -54,11 +68,20 @@ namespace client.service.socks5
             socks5ClientHandler.Flush();
         }
 
+        /// <summary>
+        /// 获取pac
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public string GetPac(ClientServiceParamsInfo arg)
         {
             return socks5Transfer.GetPac();
         }
 
+        /// <summary>
+        /// 设置pac
+        /// </summary>
+        /// <param name="arg"></param>
         public void SetPac(ClientServiceParamsInfo arg)
         {
             PacSetParamsInfo model = arg.Content.DeJson<PacSetParamsInfo>();

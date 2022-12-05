@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace common.server.servers.pipeLine
 {
+    /// <summary>
+    /// 具名管道服务端
+    /// </summary>
     public class PipelineServer
     {
         private NamedPipeServerStream Server { get; set; }
@@ -14,7 +17,11 @@ namespace common.server.servers.pipeLine
         private Func<string, string> Action { get; set; }
         private string PipeName { get; set; }
         private static int maxNumberAcceptedClients = 5;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pipeName"></param>
+        /// <param name="action"></param>
         public PipelineServer(string pipeName, Func<string, string> action)
         {
             Server = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 254);
@@ -25,6 +32,9 @@ namespace common.server.servers.pipeLine
 
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void BeginAccept()
         {
             IAsyncResult result = Server.BeginWaitForConnection(ProcessAccept, null);
@@ -64,7 +74,9 @@ namespace common.server.servers.pipeLine
                 BeginAccept();
             });
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             Server.Dispose();

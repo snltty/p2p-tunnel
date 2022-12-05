@@ -24,11 +24,22 @@ namespace common.libs
         ConcurrentQueue<WheelTimerTimeout<T>> timeouts = new ConcurrentQueue<WheelTimerTimeout<T>>();
         AutoResetEvent autoReset = new AutoResetEvent(true);
 
+        /// <summary>
+        /// 
+        /// </summary>
         public WheelTimer()
         {
             CreateBuckets();
             Worker();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="delayMs"></param>
+        /// <param name="reuse"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public WheelTimerTimeout<T> NewTimeout(WheelTimerTimeoutTask<T> task, int delayMs, bool reuse = false)
         {
             if (task == null)
@@ -162,41 +173,92 @@ namespace common.libs
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class WheelTimerBucket<T>
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public LinkedList<WheelTimerTimeout<T>> List { get; private set; } = new LinkedList<WheelTimerTimeout<T>>();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="timeout"></param>
         public void AddTimeout(WheelTimerTimeout<T> timeout)
         {
             List.AddLast(timeout);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
         public void Remove(LinkedListNode<WheelTimerTimeout<T>> node)
         {
             List.Remove(node);
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class WheelTimerTimeout<T>
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public int Delay { get; init; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public int Rounds { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public bool Reuse { get; init; } = false;
+        /// <summary>
+        /// 
+        /// </summary>
         public WheelTimerTimeoutTask<T> Task { get; init; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public TimeoutState State { get; private set; } = TimeoutState.Normal;
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsCanceled => State == TimeoutState.Canceld;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Cancel()
         {
             State = TimeoutState.Canceld;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public enum TimeoutState
         {
+            /// <summary>
+            /// 
+            /// </summary>
             Normal = 1 << 0,
+            /// <summary>
+            /// 
+            /// </summary>
             Canceld = 1 << 1,
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class WheelTimerTimeoutTask<T>
     {
         /// <summary>

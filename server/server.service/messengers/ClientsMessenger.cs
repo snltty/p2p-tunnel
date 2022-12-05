@@ -6,27 +6,49 @@ using server.messengers.register;
 
 namespace server.service.messengers
 {
+    /// <summary>
+    /// 客户端
+    /// </summary>
     [MessengerIdRange((ushort)ClientsMessengerIds.Min, (ushort)ClientsMessengerIds.Max)]
     public sealed class ClientsMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly NumberSpace numberSpaceTunnelName = new NumberSpace((ulong)TunnelDefaults.MAX + 1);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCache"></param>
         public ClientsMessenger(IClientRegisterCaching clientRegisterCache)
         {
             this.clientRegisterCache = clientRegisterCache;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)ClientsMessengerIds.IP)]
         public byte[] Ip(IConnection connection)
         {
             return connection.Address.Address.GetAddressBytes();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)ClientsMessengerIds.Port)]
         public byte[] Port(IConnection connection)
         {
             return ((ushort)connection.Address.Port).ToBytes();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)ClientsMessengerIds.AddTunnel)]
         public byte[] AddTunnel(IConnection connection)
         {
@@ -51,6 +73,10 @@ namespace server.service.messengers
             return model.TunnelName.ToBytes();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)ClientsMessengerIds.RemoveTunnel)]
         public void RemoveTunnel(IConnection connection)
         {

@@ -10,12 +10,20 @@ using System.Text;
 
 namespace common.libs
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class NetworkHelper
     {
         [DllImport("ws2_32.dll")]
         private static extern int inet_addr(string cp);
         [DllImport("IPHLPAPI.dll")]
         private static extern int SendARP(Int32 DestIP, Int32 SrcIP, ref Int64 pMacAddr, ref Int32 PhyAddrLen);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="hostip"></param>
+        /// <returns></returns>
         public static string GetMacAddress(string hostip)
         {
             string mac;
@@ -67,6 +75,11 @@ namespace common.libs
             }
             return 0;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="hostNameOrAddress"></param>
+        /// <returns></returns>
         public static IEnumerable<IPAddress> GetTraceRoute(string hostNameOrAddress)
         {
             return GetTraceRoute(hostNameOrAddress, 1);
@@ -109,7 +122,12 @@ namespace common.libs
             }
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
         public static bool Ping(IPAddress address, int timeout = 100)
         {
             try
@@ -255,7 +273,11 @@ namespace common.libs
             return new IPEndPoint(GetDomainIp(ip), port);
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mac"></param>
+        /// <returns></returns>
         public static byte[] Mac2Bytes(string mac)
         {
             mac = mac.Replace("-", "").Replace(":", "");
@@ -266,6 +288,11 @@ namespace common.libs
             }
             return res;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mac"></param>
+        /// <returns></returns>
         public static byte[] MagicPacket(string mac)
         {
             var macBytes = Mac2Bytes(mac);
@@ -295,6 +322,9 @@ namespace common.libs
            public static bool   IPv6Support = Socket.SupportsIPv6;
 #pragma warning restore 618
 #else
+        /// <summary>
+        /// 
+        /// </summary>
         public static bool IPv6Support = Socket.OSSupportsIPv6;
 #endif
     }

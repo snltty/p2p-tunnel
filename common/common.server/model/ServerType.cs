@@ -1,7 +1,21 @@
 ﻿namespace common.server.model
 {
+    /// <summary>
+    /// 服务类型
+    /// </summary>
     public enum ServerType : byte
     {
-        TCP = 1, UDP = 2, TCPUDP = TCP | UDP
+        /// <summary>
+        /// 
+        /// </summary>
+        TCP = 1,
+        /// <summary>
+        /// 
+        /// </summary>
+        UDP = 2, 
+        /// <summary>
+        /// 
+        /// </summary>
+        TCPUDP = TCP | UDP
     }
 }

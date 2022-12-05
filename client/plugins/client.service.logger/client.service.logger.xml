@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>client.service.logger</name>
+    </assembly>
+    <members>
+        <member name="T:client.service.logger.Config">
+            <summary>
+            日志配置文件
+            </summary>
+        </member>
+        <member name="M:client.service.logger.Config.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:client.service.logger.Config.#ctor(common.libs.database.IConfigDataProvider{client.service.logger.Config})">
+            <summary>
+            
+            </summary>
+            <param name="configDataProvider"></param>
+        </member>
+        <member name="P:client.service.logger.Config.Enable">
+            <summary>
+            开启
+            </summary>
+        </member>
+        <member name="P:client.service.logger.Config.MaxLength">
+            <summary>
+            行数
+            </summary>
+        </member>
+        <member name="M:client.service.logger.Config.ReadConfig">
+            <summary>
+            读取
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.logger.Config.ReadString">
+            <summary>
+            读取
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.logger.Config.SaveConfig(System.String)">
+            <summary>
+            保存
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.logger.LoggerClientConfigure">
+            <summary>
+            日志配置文件
+            </summary>
+        </member>
+        <member name="M:client.service.logger.LoggerClientConfigure.#ctor(client.service.logger.Config)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="P:client.service.logger.LoggerClientConfigure.Name">
+            <summary>
+            名字
+            </summary>
+        </member>
+        <member name="P:client.service.logger.LoggerClientConfigure.Author">
+            <summary>
+            作者
+            </summary>
+        </member>
+        <member name="P:client.service.logger.LoggerClientConfigure.Desc">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:client.service.logger.LoggerClientConfigure.Enable">
+            <summary>
+            启用
+            </summary>
+        </member>
+        <member name="M:client.service.logger.LoggerClientConfigure.Load">
+            <summary>
+            读取
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.logger.LoggerClientConfigure.Save(System.String)">
+            <summary>
+            保存
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.logger.LoggerClientService">
+            <summary>
+            日志
+            </summary>
+        </member>
+        <member name="P:client.service.logger.LoggerClientService.Data">
+            <summary>
+            日志
+            </summary>
+        </member>
+        <member name="M:client.service.logger.LoggerClientService.List(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取日志列表
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.logger.LoggerClientService.Clear(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            清除日志
+            </summary>
+            <param name="arg"></param>
+        </member>
+        <member name="T:client.service.logger.PageParamsInfo">
+            <summary>
+            日志分页参数
+            </summary>
+        </member>
+        <member name="P:client.service.logger.PageParamsInfo.PageIndex">
+            <summary>
+            当前页
+            </summary>
+        </member>
+        <member name="P:client.service.logger.PageParamsInfo.PageSize">
+            <summary>
+            页大小
+            </summary>
+        </member>
+        <member name="P:client.service.logger.PageParamsInfo.Type">
+            <summary>
+            日志类型
+            </summary>
+        </member>
+        <member name="T:client.service.logger.PageInfo">
+            <summary>
+            日志分页返回
+            </summary>
+        </member>
+        <member name="P:client.service.logger.PageInfo.PageIndex">
+            <summary>
+            当前页
+            </summary>
+        </member>
+        <member name="P:client.service.logger.PageInfo.PageSize">
+            <summary>
+            页大小
+            </summary>
+        </member>
+        <member name="P:client.service.logger.PageInfo.Count">
+            <summary>
+            总数
+            </summary>
+        </member>
+        <member name="P:client.service.logger.PageInfo.Data">
+            <summary>
+            数据
+            </summary>
+        </member>
+        <member name="T:client.service.logger.Plugin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:client.service.logger.Plugin.LoadAfter(Microsoft.Extensions.DependencyInjection.ServiceProvider,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="M:client.service.logger.Plugin.LoadBefore(Microsoft.Extensions.DependencyInjection.ServiceCollection,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+    </members>
+</doc>

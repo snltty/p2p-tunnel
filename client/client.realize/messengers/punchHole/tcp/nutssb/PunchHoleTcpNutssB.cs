@@ -5,16 +5,30 @@ using common.server.model;
 
 namespace client.realize.messengers.punchHole.tcp.nutssb
 {
+    /// <summary>
+    /// tcp打洞消息
+    /// </summary>
     public sealed class PunchHoleTcpNutssB : IPunchHole
     {
         private readonly IPunchHoleTcp punchHoleTcp;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="punchHoleTcp"></param>
         public PunchHoleTcpNutssB(IPunchHoleTcp punchHoleTcp)
         {
             this.punchHoleTcp = punchHoleTcp;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public PunchHoleTypes Type => PunchHoleTypes.TCP_NUTSSB;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
         public void Execute(OnPunchHoleArg arg)
         {
             PunchHoleTcpNutssBSteps step = (PunchHoleTcpNutssBSteps)arg.Data.PunchStep;

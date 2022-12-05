@@ -21,6 +21,9 @@ namespace client.service.tcpforward
     public sealed class TcpForwardTransfer : TcpForwardTransferBase
     {
         private readonly P2PConfigInfo p2PConfigInfo;
+        /// <summary>
+        /// 监听列表
+        /// </summary>
         public List<P2PListenInfo> p2pListens = new List<P2PListenInfo>();
         private readonly IConfigDataProvider<P2PConfigInfo> p2pConfigDataProvider;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;
@@ -29,6 +32,9 @@ namespace client.service.tcpforward
         NumberSpaceUInt32 forwardNS = new NumberSpaceUInt32();
 
         private readonly ServerForwardConfigInfo serverForwardConfigInfo;
+        /// <summary>
+        /// 服务器转发列表
+        /// </summary>
         public List<ServerForwardItemInfo> serverForwards = new List<ServerForwardItemInfo>();
         private readonly IConfigDataProvider<ServerForwardConfigInfo> serverConfigDataProvider;
 
@@ -38,6 +44,19 @@ namespace client.service.tcpforward
 
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="p2pConfigDataProvider"></param>
+        /// <param name="tcpForwardTargetCaching"></param>
+        /// <param name="tcpForwardServer"></param>
+        /// <param name="serverConfigDataProvider"></param>
+        /// <param name="config"></param>
+        /// <param name="clientConfig"></param>
+        /// <param name="registerStateInfo"></param>
+        /// <param name="tcpForwardMessengerSender"></param>
+        /// <param name="tcpForwardTargetProvider"></param>
+        /// <param name="uiconfig"></param>
         public TcpForwardTransfer(
             IConfigDataProvider<P2PConfigInfo> p2pConfigDataProvider,
             ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching,
@@ -102,6 +121,11 @@ namespace client.service.tcpforward
 
         #region p2p
 
+        /// <summary>
+        /// 添加监听
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public string AddP2PListen(P2PListenAddParams param)
         {
             try
@@ -172,6 +196,10 @@ namespace client.service.tcpforward
             }
             return string.Empty;
         }
+        /// <summary>
+        /// 删除监听
+        /// </summary>
+        /// <param name="listenid"></param>
         public void RemoveP2PListen(uint listenid)
         {
             RemoveP2PListen(GetP2PByID(listenid));
@@ -190,6 +218,10 @@ namespace client.service.tcpforward
             }
         }
 
+        /// <summary>
+        /// 停止监听
+        /// </summary>
+        /// <param name="listenid"></param>
         public void StopP2PListen(uint listenid)
         {
             StopP2PListen(GetP2PByID(listenid));
@@ -206,6 +238,11 @@ namespace client.service.tcpforward
             }
         }
 
+        /// <summary>
+        /// 获取监听
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public P2PListenInfo GetP2PByID(uint id)
         {
             return p2pListens.FirstOrDefault(c => c.ID == id) ?? new P2PListenInfo { };
@@ -215,6 +252,11 @@ namespace client.service.tcpforward
             return p2pListens.FirstOrDefault(c => c.Port == port) ?? new P2PListenInfo { };
         }
 
+        /// <summary>
+        /// 添加转发
+        /// </summary>
+        /// <param name="forward"></param>
+        /// <returns></returns>
         public string AddP2PForward(P2PForwardAddParams forward)
         {
             P2PListenInfo listen = GetP2PByID(forward.ListenID);
@@ -284,6 +326,10 @@ namespace client.service.tcpforward
 
             return string.Empty;
         }
+        /// <summary>
+        /// 删除转发
+        /// </summary>
+        /// <param name="forward"></param>
         public void RemoveP2PForward(P2PForwardRemoveParams forward)
         {
             P2PListenInfo listen = GetP2PByID(forward.ListenID);
@@ -303,11 +349,16 @@ namespace client.service.tcpforward
             SaveP2PConfig();
         }
 
+        /// <summary>
+        /// 开启监听
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public string StartP2P(uint id)
         {
             return StartP2P(GetP2PByID(id));
         }
-        public string StartP2P(P2PListenInfo listen)
+        private string StartP2P(P2PListenInfo listen)
         {
             try
             {
@@ -325,7 +376,11 @@ namespace client.service.tcpforward
             }
             return string.Empty;
         }
-
+        /// <summary>
+        /// 停止监听
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public string StopP2P(uint id)
         {
             StopP2PListen(GetP2PByID(id));
@@ -409,6 +464,10 @@ namespace client.service.tcpforward
 
         #region 服务器代理
 
+        /// <summary>
+        /// 获取服务器端口
+        /// </summary>
+        /// <returns></returns>
         public async Task<ushort[]> GetServerPorts()
         {
             var resp = await tcpForwardMessengerSender.GetPorts(registerStateInfo.OnlineConnection);
@@ -419,6 +478,11 @@ namespace client.service.tcpforward
 
             return Array.Empty<ushort>();
         }
+        /// <summary>
+        /// 添加服务器转发
+        /// </summary>
+        /// <param name="forward"></param>
+        /// <returns></returns>
         public async Task<string> AddServerForward(ServerForwardItemInfo forward)
         {
             var resp = await tcpForwardMessengerSender.Register(registerStateInfo.OnlineConnection, new TcpForwardRegisterParamsInfo
@@ -448,6 +512,11 @@ namespace client.service.tcpforward
             SaveServerConfig();
             return string.Empty;
         }
+        /// <summary>
+        /// 开启服务器转发
+        /// </summary>
+        /// <param name="forward"></param>
+        /// <returns></returns>
         public async Task<string> StartServerForward(ServerForwardItemInfo forward)
         {
             ServerForwardItemInfo forwardInfo;
@@ -480,6 +549,11 @@ namespace client.service.tcpforward
             SaveServerConfig();
             return string.Empty;
         }
+        /// <summary>
+        /// 停止服务器转发
+        /// </summary>
+        /// <param name="forward"></param>
+        /// <returns></returns>
         public async Task<string> StopServerForward(ServerForwardItemInfo forward)
         {
             ServerForwardItemInfo forwardInfo;
@@ -509,6 +583,11 @@ namespace client.service.tcpforward
             SaveServerConfig();
             return string.Empty;
         }
+        /// <summary>
+        /// 删除服务器转发
+        /// </summary>
+        /// <param name="forward"></param>
+        /// <returns></returns>
         public async Task<string> RemoveServerForward(ServerForwardItemInfo forward)
         {
             ServerForwardItemInfo forwardInfo;
@@ -617,6 +696,10 @@ namespace client.service.tcpforward
 
         #endregion
 
+        /// <summary>
+        /// 获取pac
+        /// </summary>
+        /// <returns></returns>
         public string GetPac()
         {
             try
@@ -628,6 +711,11 @@ namespace client.service.tcpforward
             }
             return string.Empty;
         }
+        /// <summary>
+        /// 更新pac
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public string UpdatePac(P2PListenInfo param)
         {
             try
@@ -670,61 +758,141 @@ namespace client.service.tcpforward
                 return ex.Message;
             }
         }
+        /// <summary>
+        /// 设置系统pac
+        /// </summary>
+        /// <param name="url"></param>
         public void SetPac(string url)
         {
             ProxySystemSetting.Set(url);
         }
+        /// <summary>
+        /// 清除pac
+        /// </summary>
         public void ClearPac()
         {
             ProxySystemSetting.Clear();
         }
     }
 
-    public class P2PListenAddParams
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class P2PListenAddParams
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public uint ID { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort Port { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public bool Listening { get; set; } = false;
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.Forward;
+        /// <summary>
+        /// 
+        /// </summary>
         public string Name { get; set; } = string.Empty;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public string Desc { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsPac { get; set; } = false;
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsCustomPac { get; set; } = false;
+        /// <summary>
+        /// 
+        /// </summary>
         public string Pac { get; set; } = string.Empty;
     }
-    public class P2PForwardAddParams
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class P2PForwardAddParams
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public uint ListenID { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public P2PForwardInfo Forward { get; set; } = new P2PForwardInfo();
     }
-    public class P2PForwardRemoveParams
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class P2PForwardRemoveParams
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public uint ListenID { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public uint ForwardID { get; set; } = 0;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     [Table("p2p-tcp-forwards")]
-    public class P2PConfigInfo
+    public sealed class P2PConfigInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public P2PConfigInfo() { }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public List<P2PListenInfo> Webs { get; set; } = new List<P2PListenInfo>();
+        /// <summary>
+        /// 
+        /// </summary>
         public List<P2PListenInfo> Tunnels { get; set; } = new List<P2PListenInfo>();
     }
-    public class P2PListenInfo
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class P2PListenInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public uint ID { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort Port { get; set; } = 0;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardTypes ForwardType { get; set; } = TcpForwardTypes.Forward;
         /// <summary>
         /// 代理时 必须 TcpForwardAliveTypes.WEB
         /// </summary>
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public List<P2PForwardInfo> Forwards { get; set; } = new List<P2PForwardInfo>();
 
         /// <summary>
@@ -735,7 +903,9 @@ namespace client.service.tcpforward
         /// 是否直接开始监听
         /// </summary>
         public bool Listening { get; set; } = false;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public string Desc { get; set; } = string.Empty;
 
         /// <summary>
@@ -751,31 +921,84 @@ namespace client.service.tcpforward
         /// </summary>
         public string Pac { get; set; } = string.Empty;
     }
-    public class P2PForwardInfo
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class P2PForwardInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public uint ID { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public string Name { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
         public string SourceIp { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
         public string TargetIp { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort TargetPort { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public string Desc { get; set; } = string.Empty;
     }
 
-
+    /// <summary>
+    /// 
+    /// </summary>
     [Table("server-tcp-forwards")]
-    public class ServerForwardConfigInfo
+    public sealed class ServerForwardConfigInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public ServerForwardItemInfo[] Webs { get; set; } = Array.Empty<ServerForwardItemInfo>();
+        /// <summary>
+        /// 
+        /// </summary>
         public ServerForwardItemInfo[] Tunnels { get; set; } = Array.Empty<ServerForwardItemInfo>();
     }
-    public class ServerForwardItemInfo
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class ServerForwardItemInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
+        /// <summary>
+        /// 
+        /// </summary>
         public string Domain { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort ServerPort { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public string LocalIp { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort LocalPort { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public string Desc { get; set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
         public bool Listening { get; set; } = false;
     }
 }

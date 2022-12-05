@@ -1,0 +1,321 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>client.service.socks5</name>
+    </assembly>
+    <members>
+        <member name="T:client.service.socks5.Plugin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:client.service.socks5.Plugin.LoadAfter(Microsoft.Extensions.DependencyInjection.ServiceProvider,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="M:client.service.socks5.Plugin.LoadBefore(Microsoft.Extensions.DependencyInjection.ServiceCollection,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="T:client.service.socks5.Socks5ClientConfigure">
+            <summary>
+            socks5配置文件
+            </summary>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientConfigure.#ctor(common.socks5.Config)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="P:client.service.socks5.Socks5ClientConfigure.Name">
+            <summary>
+            名字
+            </summary>
+        </member>
+        <member name="P:client.service.socks5.Socks5ClientConfigure.Author">
+            <summary>
+            作者
+            </summary>
+        </member>
+        <member name="P:client.service.socks5.Socks5ClientConfigure.Desc">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:client.service.socks5.Socks5ClientConfigure.Enable">
+            <summary>
+            启用
+            </summary>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientConfigure.Load">
+            <summary>
+            加载
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientConfigure.Save(System.String)">
+            <summary>
+            保存
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:client.service.socks5.Socks5ClientHandler">
+            <summary>
+            socks5客户端
+            </summary>
+        </member>
+        <member name="F:client.service.socks5.Socks5ClientHandler.handles">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:client.service.socks5.Socks5ClientHandler.buildHandles">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.#ctor(common.socks5.ISocks5MessengerSender,client.messengers.register.RegisterStateInfo,common.socks5.Config,client.messengers.clients.IClientInfoCaching,common.socks5.ISocks5ClientListener)">
+            <summary>
+            
+            </summary>
+            <param name="socks5MessengerSender"></param>
+            <param name="registerStateInfo"></param>
+            <param name="config"></param>
+            <param name="clientInfoCaching"></param>
+            <param name="socks5ClientListener"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.InputData(common.server.IConnection)">
+            <summary>
+            输入数据
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.OnData(common.socks5.Socks5Info)">
+            <summary>
+            接收到数据
+            </summary>
+            <param name="info"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.OnClose(common.socks5.Socks5Info)">
+            <summary>
+            收到关闭
+            </summary>
+            <param name="info"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.RequestResponseData(common.socks5.Socks5Info)">
+            <summary>
+            构建request回复数据
+            </summary>
+            <param name="info"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.AuthResponseData(common.socks5.Socks5Info)">
+            <summary>
+            构建验证response数据
+            </summary>
+            <param name="info"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.CommandResponseData(common.socks5.Socks5Info)">
+            <summary>
+            构建命令response数据
+            </summary>
+            <param name="info"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.ForwardResponseData(common.socks5.Socks5Info)">
+            <summary>
+            构建转发回复数据
+            </summary>
+            <param name="info"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.ForwardUdpResponseData(common.socks5.Socks5Info)">
+            <summary>
+            构建udp转发回复数据
+            </summary>
+            <param name="info"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.HandleRequest(common.socks5.Socks5Info)">
+            <summary>
+            收到request
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.HandleAuth(common.socks5.Socks5Info)">
+            <summary>
+            收到auth
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.HandleCommand(common.socks5.Socks5Info)">
+            <summary>
+            收到command
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.HndleForward(common.socks5.Socks5Info)">
+            <summary>
+            收到转发
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.HndleForwardUdp(common.socks5.Socks5Info)">
+            <summary>
+            收到udp转发
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientHandler.Flush">
+            <summary>
+            刷新
+            </summary>
+        </member>
+        <member name="T:client.service.socks5.Socks5ClientService">
+            <summary>
+            socks5
+            </summary>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientService.#ctor(common.socks5.Config,common.socks5.ISocks5ClientListener,client.service.socks5.Socks5Transfer,common.socks5.ISocks5ClientHandler)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="socks5ClientListener"></param>
+            <param name="socks5Transfer"></param>
+            <param name="socks5ClientHandler"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientService.Get(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取配置
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientService.Set(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            设置配置
+            </summary>
+            <param name="arg"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientService.GetPac(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            获取pac
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5ClientService.SetPac(client.service.ui.api.clientServer.ClientServiceParamsInfo)">
+            <summary>
+            设置pac
+            </summary>
+            <param name="arg"></param>
+        </member>
+        <member name="T:client.service.socks5.Socks5Transfer">
+            <summary>
+            socks5
+            </summary>
+        </member>
+        <member name="M:client.service.socks5.Socks5Transfer.#ctor(common.socks5.Config,client.service.ui.api.Config)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="uiconfig"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5Transfer.GetPac">
+            <summary>
+            获取pac
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5Transfer.UpdatePac(client.service.socks5.PacSetParamsInfo)">
+            <summary>
+            更新pac
+            </summary>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.socks5.Socks5Transfer.SetPac(System.String)">
+            <summary>
+            更新pac
+            </summary>
+            <param name="url"></param>
+        </member>
+        <member name="M:client.service.socks5.Socks5Transfer.ClearPac">
+            <summary>
+            清除pac
+            </summary>
+        </member>
+        <member name="T:client.service.socks5.PacSetParamsInfo">
+            <summary>
+            设置pac
+            </summary>
+        </member>
+        <member name="P:client.service.socks5.PacSetParamsInfo.IsCustom">
+            <summary>
+            是否自定义
+            </summary>
+        </member>
+        <member name="P:client.service.socks5.PacSetParamsInfo.Pac">
+            <summary>
+            pac内容
+            </summary>
+        </member>
+        <member name="T:client.service.udpforward.Socks5ServerConfigure">
+            <summary>
+            socks5服务端配置文件
+            </summary>
+        </member>
+        <member name="M:client.service.udpforward.Socks5ServerConfigure.#ctor(common.server.MessengerSender,client.messengers.register.RegisterStateInfo)">
+            <summary>
+            
+            </summary>
+            <param name="messengerSender"></param>
+            <param name="registerStateInfo"></param>
+        </member>
+        <member name="P:client.service.udpforward.Socks5ServerConfigure.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:client.service.udpforward.Socks5ServerConfigure.Author">
+            <summary>
+            作者
+            </summary>
+        </member>
+        <member name="P:client.service.udpforward.Socks5ServerConfigure.Desc">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:client.service.udpforward.Socks5ServerConfigure.Enable">
+            <summary>
+            启用
+            </summary>
+        </member>
+        <member name="M:client.service.udpforward.Socks5ServerConfigure.Load">
+            <summary>
+            加载
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:client.service.udpforward.Socks5ServerConfigure.Save(System.String)">
+            <summary>
+            保存
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

@@ -7,37 +7,88 @@ using System.Net.Sockets;
 
 namespace common.socks5
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface ISocks5ClientListener
     {
+        /// <summary>
+        /// 
+        /// </summary>
         IPEndPoint DistEndpoint { get; }
+        /// <summary>
+        /// 
+        /// </summary>
         byte Version { get; }
+        /// <summary>
+        /// 
+        /// </summary>
         Func<Socks5Info, bool> OnData { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         Action<Socks5Info> OnClose { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="bufferSize"></param>
         void Start(int port, int bufferSize);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="info"></param>
         void Response(Socks5Info info);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
         void Close(ulong id);
+        /// <summary>
+        /// 
+        /// </summary>
         void Stop();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class Socks5ClientListener : ISocks5ClientListener
     {
         private Socket socket;
         private UdpClient udpClient;
         private int bufferSize = 8 * 1024;
+        /// <summary>
+        /// 
+        /// </summary>
         public IPEndPoint DistEndpoint { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public byte Version { get; private set; } = 5;
 
 
         private readonly ConcurrentDictionary<ulong, AsyncUserToken> connections = new();
         private readonly NumberSpaceUInt32 numberSpace = new NumberSpaceUInt32(0);
-
+        /// <summary>
+        /// 
+        /// </summary>
         public Func<Socks5Info, bool> OnData { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Action<Socks5Info> OnClose { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public Socks5ClientListener()
         {
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="bufferSize"></param>
         public void Start(int port, int bufferSize)
         {
             this.bufferSize = bufferSize;
@@ -217,7 +268,10 @@ namespace common.socks5
                 CloseClientSocket(e);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="info"></param>
         public void Response(Socks5Info info)
         {
             if (connections.TryGetValue(info.Id, out AsyncUserToken token))
@@ -269,11 +323,17 @@ namespace common.socks5
                 token.Clear();
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
         public void Close(ulong id)
         {
             CloseClientSocket(id);
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void Stop()
         {
             socket?.SafeClose();
@@ -286,15 +346,30 @@ namespace common.socks5
         }
     }
 
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class AsyncUserToken
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Socket Socket { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public byte[] PoolBuffer { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Socks5Info DataWrap { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public bool Disposabled { get; private set; } = false;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Clear()
         {
             Socket?.SafeClose();

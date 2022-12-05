@@ -12,9 +12,14 @@ namespace common.udpforward
     /// </summary>
     public sealed class UdpForwardInfo
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public UdpForwardInfo() { }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public ushort SourcePort { get; set; } = 0;
 
         /// <summary>
@@ -30,8 +35,15 @@ namespace common.udpforward
         /// </summary>
         public Memory<byte> Buffer { get; set; } = Helper.EmptyArray;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public IConnection Connection { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var sourceIpBytes = SourceEndpoint.Address.GetAddressBytes();
@@ -64,7 +76,10 @@ namespace common.udpforward
             index += Buffer.Length;
             return bytes;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
         public void DeBytes(in Memory<byte> memory)
         {
             var span = memory.Span;
@@ -90,17 +105,47 @@ namespace common.udpforward
     }
 
 
+    /// <summary>
+    /// udp转发相关消息id
+    /// </summary>
     [Flags, MessengerIdEnum]
     public enum UdpForwardMessengerIds : ushort
     {
+        /// <summary>
+        /// 
+        /// </summary>
         Min = 700,
+        /// <summary>
+        /// 请求
+        /// </summary>
         Request = 702,
+        /// <summary>
+        /// 回执
+        /// </summary>
         Response = 703,
+        /// <summary>
+        /// 端口
+        /// </summary>
         Ports = 704,
+        /// <summary>
+        /// 注册
+        /// </summary>
         SignIn = 705,
+        /// <summary>
+        /// 退出
+        /// </summary>
         SignOut = 706,
+        /// <summary>
+        /// 获取配置
+        /// </summary>
         GetSetting = 707,
+        /// <summary>
+        /// 配置
+        /// </summary>
         Setting = 708,
+        /// <summary>
+        /// 
+        /// </summary>
         Max = 799,
     }
 }

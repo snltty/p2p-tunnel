@@ -1,0 +1,470 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>server.service</name>
+    </assembly>
+    <members>
+        <member name="T:server.service.messengers.ClientsMessenger">
+            <summary>
+            客户端
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.ClientsMessenger.#ctor(server.messengers.register.IClientRegisterCaching)">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCache"></param>
+        </member>
+        <member name="M:server.service.messengers.ClientsMessenger.Ip(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.ClientsMessenger.Port(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.ClientsMessenger.AddTunnel(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.ClientsMessenger.RemoveTunnel(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="T:server.service.messengers.CounterMessenger">
+            <summary>
+            服务器信息
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.CounterMessenger.#ctor(server.messengers.register.IClientRegisterCaching,common.libs.WheelTimer{System.Object})">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCaching"></param>
+            <param name="wheelTimer"></param>
+        </member>
+        <member name="M:server.service.messengers.CounterMessenger.Info(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.messengers.CryptoMessenger">
+            <summary>
+            加密
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.CryptoMessenger.#ctor(common.libs.IAsymmetricCrypto,common.libs.ICryptoFactory,server.messengers.register.IClientRegisterCaching,server.Config)">
+            <summary>
+            
+            </summary>
+            <param name="asymmetricCrypto"></param>
+            <param name="cryptoFactory"></param>
+            <param name="clientRegisterCache"></param>
+            <param name="config"></param>
+        </member>
+        <member name="M:server.service.messengers.CryptoMessenger.Key(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.CryptoMessenger.Set(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.CryptoMessenger.Test(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.CryptoMessenger.Clear(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.messengers.HeartMessenger">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.HeartMessenger.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.HeartMessenger.Alive(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.messengers.PunchHoleMessenger">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.PunchHoleMessenger.#ctor(server.messengers.register.IClientRegisterCaching,common.server.MessengerSender)">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCache"></param>
+            <param name="messengerSender"></param>
+        </member>
+        <member name="M:server.service.messengers.PunchHoleMessenger.Response(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.PunchHoleMessenger.Request(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.messengers.register.ClientRegisterCaching">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.service.messengers.register.ClientRegisterCaching.OnChanged">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.service.messengers.register.ClientRegisterCaching.OnOffline">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.service.messengers.register.ClientRegisterCaching.Count">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.register.ClientRegisterCaching.#ctor(server.Config,common.server.IUdpServer,common.server.ITcpServer)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="udpServer"></param>
+            <param name="tcpServer"></param>
+        </member>
+        <member name="M:server.service.messengers.register.ClientRegisterCaching.Add(server.messengers.register.RegisterCacheInfo)">
+            <summary>
+            
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.register.ClientRegisterCaching.Get(System.UInt64,server.messengers.register.RegisterCacheInfo@)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+            <param name="client"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.register.ClientRegisterCaching.Get(System.String,System.String,server.messengers.register.RegisterCacheInfo@)">
+            <summary>
+            
+            </summary>
+            <param name="groupid"></param>
+            <param name="name"></param>
+            <param name="client"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.register.ClientRegisterCaching.Get(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="groupid"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.register.ClientRegisterCaching.Get">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.register.ClientRegisterCaching.Remove(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+        </member>
+        <member name="M:server.service.messengers.register.ClientRegisterCaching.Notify(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.messengers.register.RegisterMessenger">
+            <summary>
+            注册
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.register.RegisterMessenger.#ctor(server.messengers.register.IClientRegisterCaching,server.messengers.register.IRegisterKeyValidator,common.server.MessengerSender,common.server.IRelayValidator)">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCache"></param>
+            <param name="registerKeyValidator"></param>
+            <param name="messengerSender"></param>
+            <param name="relayValidator"></param>
+        </member>
+        <member name="M:server.service.messengers.register.RegisterMessenger.SignIn(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.register.RegisterMessenger.Notify(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:server.service.messengers.register.RegisterMessenger.SignOut(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="T:server.service.messengers.register.SettingMessenger">
+            <summary>
+            服务端配置
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.register.SettingMessenger.#ctor(server.messengers.register.IClientRegisterCaching,server.messengers.IServiceAccessValidator,server.Config)">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCaching"></param>
+            <param name="serviceAccessValidator"></param>
+            <param name="config"></param>
+        </member>
+        <member name="M:server.service.messengers.register.SettingMessenger.GetSetting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.register.SettingMessenger.Setting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.messengers.RelayMessenger">
+            <summary>
+            中继
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.RelayMessenger.#ctor(server.messengers.register.IClientRegisterCaching,common.server.MessengerSender)">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCache"></param>
+            <param name="messengerSender"></param>
+        </member>
+        <member name="M:server.service.messengers.RelayMessenger.Delay(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.messengers.RelayMessenger.AskConnects(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:server.service.messengers.RelayMessenger.Connects(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="T:server.service.messengers.RelaySourceConnectionSelector">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.messengers.RelaySourceConnectionSelector.#ctor(server.messengers.register.IClientRegisterCaching)">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCaching"></param>
+        </member>
+        <member name="M:server.service.messengers.RelaySourceConnectionSelector.Select(common.server.IConnection,System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <param name="relayid"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.socks5.ServiceAccessMessenger">
+            <summary>
+            服务端权限配置
+            </summary>
+        </member>
+        <member name="M:server.service.socks5.ServiceAccessMessenger.#ctor(server.messengers.register.IClientRegisterCaching,server.messengers.IServiceAccessValidator)">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCaching"></param>
+            <param name="serviceAccessValidator"></param>
+        </member>
+        <member name="M:server.service.socks5.ServiceAccessMessenger.GetSetting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.socks5.ServiceAccessMessenger.Setting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.Plugin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.Plugin.LoadBefore(Microsoft.Extensions.DependencyInjection.ServiceCollection,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="M:server.service.Plugin.LoadAfter(Microsoft.Extensions.DependencyInjection.ServiceProvider,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="T:server.service.validators.JsonFileServiceAccessValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:server.service.validators.JsonFileServiceAccessValidator.Groups">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.validators.JsonFileServiceAccessValidator.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.validators.JsonFileServiceAccessValidator.#ctor(common.libs.database.IConfigDataProvider{server.service.validators.JsonFileServiceAccessValidator})">
+            <summary>
+            
+            </summary>
+            <param name="configDataProvider"></param>
+        </member>
+        <member name="M:server.service.validators.JsonFileServiceAccessValidator.Validate(System.String,common.server.model.EnumServiceAccess)">
+            <summary>
+            
+            </summary>
+            <param name="group"></param>
+            <param name="service"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.validators.JsonFileServiceAccessValidator.ReadString">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.validators.JsonFileServiceAccessValidator.SaveConfig">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.validators.JsonFileServiceAccessValidator.SaveConfig(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.validators.RegisterValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.validators.RegisterValidator.#ctor(server.Config,server.messengers.IServiceAccessValidator)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="serviceAccessProvider"></param>
+        </member>
+        <member name="M:server.service.validators.RegisterValidator.Validate(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.validators.RelayValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.validators.RelayValidator.#ctor(server.Config,server.messengers.IServiceAccessValidator,server.messengers.register.IClientRegisterCaching)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="serviceAccessProvider"></param>
+            <param name="clientRegisterCache"></param>
+        </member>
+        <member name="M:server.service.validators.RelayValidator.Validate(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

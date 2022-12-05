@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace common.server
 {
+    /// <summary>
+    /// 消息处理总线
+    /// </summary>
     public sealed class MessengerResolver
     {
 
@@ -19,6 +22,14 @@ namespace common.server
         private readonly IRelaySourceConnectionSelector sourceConnectionSelector;
         private readonly IRelayValidator relayValidator;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="udpserver"></param>
+        /// <param name="tcpserver"></param>
+        /// <param name="messengerSender"></param>
+        /// <param name="sourceConnectionSelector"></param>
+        /// <param name="relayValidator"></param>
         public MessengerResolver(IUdpServer udpserver, ITcpServer tcpserver, MessengerSender messengerSender, IRelaySourceConnectionSelector sourceConnectionSelector, IRelayValidator relayValidator)
         {
             this.tcpserver = tcpserver;
@@ -31,6 +42,11 @@ namespace common.server
             this.relayValidator = relayValidator;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="obj"></param>
         public void LoadMessenger(Type type, object obj)
         {
             Type voidType = typeof(void);
@@ -57,6 +73,11 @@ namespace common.server
             }
         }
 
+        /// <summary>
+        /// 收到消息
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         public async Task InputData(IConnection connection)
         {
             var receive = connection.ReceiveData;
@@ -201,12 +222,30 @@ namespace common.server
             }
         }
 
+        /// <summary>
+        /// 消息插件缓存
+        /// </summary>
         private struct MessengerCacheInfo
         {
+            /// <summary>
+            /// 对象
+            /// </summary>
             public object Target { get; set; }
+            /// <summary>
+            /// 方法
+            /// </summary>
             public MethodInfo Method { get; set; }
+            /// <summary>
+            /// 是否void
+            /// </summary>
             public bool IsVoid { get; set; }
+            /// <summary>
+            /// 是否task
+            /// </summary>
             public bool IsTask { get; set; }
+            /// <summary>
+            /// 是否task 带result
+            /// </summary>
             public bool IsTaskResult { get; set; }
         }
     }

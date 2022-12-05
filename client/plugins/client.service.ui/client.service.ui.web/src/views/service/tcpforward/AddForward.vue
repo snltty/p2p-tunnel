@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:02:42
+ * @LastEditTime: 2022-12-05 10:52:05
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\tcpforward\AddForward.vue
@@ -131,7 +131,6 @@ export default {
                     ListenID: addForwardData.value.currentLsiten.ID,
                     Forward: state.form
                 }
-                console.log(json)
                 addForward(json).then(() => {
                     state.loading = false;
                     state.show = false;

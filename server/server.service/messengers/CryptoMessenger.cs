@@ -7,6 +7,9 @@ using System.Text;
 
 namespace server.service.messengers
 {
+    /// <summary>
+    /// 加密
+    /// </summary>
     [MessengerIdRange((ushort)CryptoMessengerIds.Min,(ushort)CryptoMessengerIds.Max)]
     public sealed class CryptoMessenger : IMessenger
     {
@@ -14,6 +17,13 @@ namespace server.service.messengers
         private readonly ICryptoFactory cryptoFactory;
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly Config config;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="asymmetricCrypto"></param>
+        /// <param name="cryptoFactory"></param>
+        /// <param name="clientRegisterCache"></param>
+        /// <param name="config"></param>
         public CryptoMessenger(IAsymmetricCrypto asymmetricCrypto, ICryptoFactory cryptoFactory, IClientRegisterCaching clientRegisterCache, Config config)
         {
             this.asymmetricCrypto = asymmetricCrypto;
@@ -22,12 +32,22 @@ namespace server.service.messengers
             this.config = config;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Key)]
         public byte[] Key(IConnection connection)
         {
             return asymmetricCrypto.Key.PublicKey.ToBytes();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Set)]
         public byte[] Set(IConnection connection)
         {
@@ -51,6 +71,11 @@ namespace server.service.messengers
             return Helper.TrueArray;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Test)]
         public byte[] Test(IConnection connection)
         {
@@ -58,6 +83,11 @@ namespace server.service.messengers
             return Helper.TrueArray;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Clear)]
         public byte[] Clear(IConnection connection)
         {

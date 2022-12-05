@@ -5,6 +5,9 @@ using System.Text;
 
 namespace common.tcpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class HttpParseHelper
     {
         private static byte[] hostBytes = Encoding.ASCII.GetBytes("host: ");

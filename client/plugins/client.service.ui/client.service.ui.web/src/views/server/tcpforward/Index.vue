@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-28 16:09:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-29 15:39:04
+ * @LastEditTime: 2022-12-05 10:51:18
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\tcpforward\Index.vue
@@ -80,7 +80,6 @@ import { onMounted, provide, reactive, ref } from '@vue/runtime-core';
 import { getServerPorts, getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../apis/tcp-forward'
 import { injectShareData } from '../../../states/shareData'
 import { injectRegister } from '../../../states/register'
-import { ElMessage } from 'element-plus';
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
 import ConfigureModal from '../../service/configure/ConfigureModal.vue'
@@ -162,8 +161,6 @@ export default {
             }).then((res) => {
                 state.loading = false;
                 if (res) {
-                    ElMessage.error(res);
-                } else {
                     loadPorts();
                 }
             }).catch(() => {
@@ -181,8 +178,6 @@ export default {
             }).then((res) => {
                 state.loading = false;
                 if (res) {
-                    ElMessage.error(res);
-                } else {
                     loadPorts();
                 }
             }).catch(() => {

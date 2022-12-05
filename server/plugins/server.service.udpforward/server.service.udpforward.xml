@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>server.service.udpforward</name>
+    </assembly>
+    <members>
+        <member name="T:server.service.udpforward.Plugin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.udpforward.Plugin.LoadAfter(Microsoft.Extensions.DependencyInjection.ServiceProvider,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="M:server.service.udpforward.Plugin.LoadBefore(Microsoft.Extensions.DependencyInjection.ServiceCollection,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="T:server.service.udpforward.ServerUdpForwardValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.udpforward.ServerUdpForwardValidator.#ctor(common.udpforward.Config,server.messengers.IServiceAccessValidator)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="serviceAccessProvider"></param>
+        </member>
+        <member name="M:server.service.udpforward.ServerUdpForwardValidator.Validate(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.udpforward.UdpForwardMessenger">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardMessenger.#ctor(server.messengers.register.IClientRegisterCaching,common.udpforward.Config,common.udpforward.IUdpForwardTargetCaching{common.udpforward.UdpForwardTargetCacheInfo},common.udpforward.UdpForwardMessengerSender,common.udpforward.IUdpForwardServer,common.udpforward.IUdpForwardValidator,server.messengers.IServiceAccessValidator)">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCache"></param>
+            <param name="config"></param>
+            <param name="udpForwardTargetCaching"></param>
+            <param name="tcpForwardMessengerSender"></param>
+            <param name="tcpForwardServer"></param>
+            <param name="udpForwardValidator"></param>
+            <param name="serviceAccessValidator"></param>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardMessenger.Request(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardMessenger.Response(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardMessenger.Ports(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardMessenger.SignOut(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardMessenger.SignIn(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardMessenger.GetSetting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardMessenger.Setting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.udpforward.UdpForwardTargetProvider">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardTargetProvider.Get(System.UInt16,common.udpforward.UdpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="sourcePort"></param>
+            <param name="info"></param>
+        </member>
+        <member name="T:server.service.udpforward.UdpForwardTransfer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.udpforward.UdpForwardTransfer.#ctor(common.udpforward.Config,server.messengers.register.IClientRegisterCaching,common.udpforward.IUdpForwardTargetCaching{common.udpforward.UdpForwardTargetCacheInfo},common.udpforward.IUdpForwardServer,common.udpforward.UdpForwardMessengerSender,common.udpforward.IUdpForwardTargetProvider)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="clientRegisterCaching"></param>
+            <param name="udpForwardTargetCaching"></param>
+            <param name="udpForwardServer"></param>
+            <param name="udpForwardMessengerSender"></param>
+            <param name="udpForwardTargetProvider"></param>
+        </member>
+    </members>
+</doc>

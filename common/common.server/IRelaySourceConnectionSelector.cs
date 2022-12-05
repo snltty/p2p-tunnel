@@ -14,8 +14,17 @@
         public IConnection Select(IConnection connection, ulong clientid);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
         public IConnection Select(IConnection connection, ulong clientid) { return connection; }
     }
 }

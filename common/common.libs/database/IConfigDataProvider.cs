@@ -7,16 +7,46 @@ using System.Threading.Tasks;
 
 namespace common.libs.database
 {
+    /// <summary>
+    /// 配置文件缓存
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IConfigDataProvider<T> where T : class, new()
     {
+        /// <summary>
+        /// 加载
+        /// </summary>
+        /// <returns></returns>
         Task<T> Load();
+        /// <summary>
+        /// 加载
+        /// </summary>
+        /// <returns></returns>
         Task<string> LoadString();
+        /// <summary>
+        /// 保存
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         Task Save(T model);
+        /// <summary>
+        /// 保存
+        /// </summary>
+        /// <param name="jsonStr"></param>
+        /// <returns></returns>
         Task Save(string jsonStr);
     }
 
+    /// <summary>
+    /// 配置文件的文件缓存
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class ConfigDataFileProvider<T> : IConfigDataProvider<T> where T : class, new()
     {
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <returns></returns>
         public async Task<T> Load()
         {
             string fileName = GetTableName(typeof(T));
@@ -28,6 +58,10 @@ namespace common.libs.database
             }
             return default;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> LoadString()
         {
             string fileName = GetTableName(typeof(T));
@@ -38,13 +72,21 @@ namespace common.libs.database
             }
             return string.Empty;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         public async Task Save(T model)
         {
             string fileName = GetTableName(typeof(T));
             await File.WriteAllTextAsync(fileName, model.ToJson(), Encoding.UTF8).ConfigureAwait(false);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jsonStr"></param>
+        /// <returns></returns>
         public async Task Save(string jsonStr)
         {
             string fileName = GetTableName(typeof(T));

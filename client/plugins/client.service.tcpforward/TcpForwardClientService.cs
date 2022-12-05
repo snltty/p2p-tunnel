@@ -6,124 +6,207 @@ using System.Threading.Tasks;
 
 namespace client.service.tcpforward
 {
+    /// <summary>
+    /// tcp转发
+    /// </summary>
     public sealed class TcpForwardClientService : IClientService
     {
         private readonly TcpForwardTransfer tcpForwardTransfer;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tcpForwardTransfer"></param>
         public TcpForwardClientService(TcpForwardTransfer tcpForwardTransfer)
         {
             this.tcpForwardTransfer = tcpForwardTransfer;
         }
-
-        public void AddListen(ClientServiceParamsInfo arg)
+        /// <summary>
+        /// 添加监听
+        /// </summary>
+        /// <param name="arg"></param>
+        public bool AddListen(ClientServiceParamsInfo arg)
         {
-            ForwardSettingParamsInfo model = arg.Content.DeJson<ForwardSettingParamsInfo>();
-
-            P2PListenAddParams fmodel = model.Content.DeJson<P2PListenAddParams>();
+            P2PListenAddParams fmodel = arg.Content.DeJson<P2PListenAddParams>();
 
             string errmsg = tcpForwardTransfer.AddP2PListen(fmodel);
-            if (!string.IsNullOrWhiteSpace(errmsg))
+            if (string.IsNullOrWhiteSpace(errmsg) == false)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, errmsg);
             }
+            return true;
         }
-        public void RemoveListen(ClientServiceParamsInfo arg)
+        /// <summary>
+        /// 删除监听
+        /// </summary>
+        /// <param name="arg"></param>
+        public bool RemoveListen(ClientServiceParamsInfo arg)
         {
-            ForwardSettingParamsInfo model = arg.Content.DeJson<ForwardSettingParamsInfo>();
-            tcpForwardTransfer.RemoveP2PListen(model.ID);
+            tcpForwardTransfer.RemoveP2PListen(uint.Parse(arg.Content));
+            return true;
         }
-
+        /// <summary>
+        /// 添加转发
+        /// </summary>
+        /// <param name="arg"></param>
         public void AddForward(ClientServiceParamsInfo arg)
         {
-            ForwardSettingParamsInfo model = arg.Content.DeJson<ForwardSettingParamsInfo>();
-
-            P2PForwardAddParams fmodel = model.Content.DeJson<P2PForwardAddParams>();
+            P2PForwardAddParams fmodel = arg.Content.DeJson<P2PForwardAddParams>();
             string errmsg = tcpForwardTransfer.AddP2PForward(fmodel);
-            if (!string.IsNullOrWhiteSpace(errmsg))
+            if (string.IsNullOrWhiteSpace(errmsg) == false)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, errmsg);
             }
         }
+        /// <summary>
+        /// 删除转发
+        /// </summary>
+        /// <param name="arg"></param>
         public void RemoveForward(ClientServiceParamsInfo arg)
         {
-            ForwardSettingParamsInfo model = arg.Content.DeJson<ForwardSettingParamsInfo>();
-            P2PForwardRemoveParams fmodel = model.Content.DeJson<P2PForwardRemoveParams>();
+            P2PForwardRemoveParams fmodel = arg.Content.DeJson<P2PForwardRemoveParams>();
             tcpForwardTransfer.RemoveP2PForward(fmodel);
         }
-
+        /// <summary>
+        /// 监听列表
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public IEnumerable<P2PListenInfo> List(ClientServiceParamsInfo arg)
         {
             return tcpForwardTransfer.p2pListens.Where(c => c.ForwardType == common.tcpforward.TcpForwardTypes.Forward);
         }
-        public IEnumerable<P2PListenInfo> ListProxy(ClientServiceParamsInfo arg)
+        /// <summary>
+        /// 代理
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public P2PListenInfo ListProxy(ClientServiceParamsInfo arg)
         {
-            return tcpForwardTransfer.p2pListens.Where(c => c.ForwardType == common.tcpforward.TcpForwardTypes.Proxy);
+            return tcpForwardTransfer.p2pListens.FirstOrDefault(c => c.ForwardType == common.tcpforward.TcpForwardTypes.Proxy);
         }
+        /// <summary>
+        /// 获取pac
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public string GetPac(ClientServiceParamsInfo arg)
         {
             return tcpForwardTransfer.GetPac();
         }
-
+        /// <summary>
+        /// 获取监听
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public P2PListenInfo Get(ClientServiceParamsInfo arg)
         {
-            ForwardSettingParamsInfo model = arg.Content.DeJson<ForwardSettingParamsInfo>();
-            return tcpForwardTransfer.GetP2PByID(model.ID);
+            return tcpForwardTransfer.GetP2PByID(uint.Parse(arg.Content));
         }
-
-        public void Start(ClientServiceParamsInfo arg)
+        /// <summary>
+        /// 开启监听
+        /// </summary>
+        /// <param name="arg"></param>
+        public bool Start(ClientServiceParamsInfo arg)
         {
-            ForwardSettingParamsInfo model = arg.Content.DeJson<ForwardSettingParamsInfo>();
-            string errmsg = tcpForwardTransfer.StartP2P(model.ID);
-            if (!string.IsNullOrWhiteSpace(errmsg))
+            string errmsg = tcpForwardTransfer.StartP2P(uint.Parse(arg.Content));
+            if (string.IsNullOrWhiteSpace(errmsg) == false)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, errmsg);
             }
+            return true;
         }
-        public void Stop(ClientServiceParamsInfo arg)
+        /// <summary>
+        /// 停止监听
+        /// </summary>
+        /// <param name="arg"></param>
+        public bool Stop(ClientServiceParamsInfo arg)
         {
-            ForwardSettingParamsInfo model = arg.Content.DeJson<ForwardSettingParamsInfo>();
-            string errmsg = tcpForwardTransfer.StopP2P(model.ID);
-            if (!string.IsNullOrWhiteSpace(errmsg))
+            string errmsg = tcpForwardTransfer.StopP2P(uint.Parse(arg.Content));
+            if (string.IsNullOrWhiteSpace(errmsg) == false)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, errmsg);
             }
+            return true;
         }
 
 
+        /// <summary>
+        /// 服务器转发
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public List<ServerForwardItemInfo> ServerForwards(ClientServiceParamsInfo arg)
         {
             return tcpForwardTransfer.serverForwards;
         }
+        /// <summary>
+        /// 服务器端口
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task<ushort[]> ServerPorts(ClientServiceParamsInfo arg)
         {
             return await tcpForwardTransfer.GetServerPorts();
         }
-        public async Task<string> AddServerForward(ClientServiceParamsInfo arg)
+        /// <summary>
+        /// 服务器转发添加
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public async Task<bool> AddServerForward(ClientServiceParamsInfo arg)
         {
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
-            return await tcpForwardTransfer.AddServerForward(forward);
+            string res = await tcpForwardTransfer.AddServerForward(forward);
+            if (string.IsNullOrWhiteSpace(res) == false)
+            {
+                arg.SetErrorMessage(res);
+            }
+            return true;
         }
-        public async Task<string> StartServerForward(ClientServiceParamsInfo arg)
+        /// <summary>
+        /// 服务器转发开启
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public async Task<bool> StartServerForward(ClientServiceParamsInfo arg)
         {
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
-            return await tcpForwardTransfer.StartServerForward(forward);
+            string res = await tcpForwardTransfer.StartServerForward(forward);
+            if (string.IsNullOrWhiteSpace(res) == false)
+            {
+                arg.SetErrorMessage(res);
+            }
+            return true;
         }
-        public async Task<string> StopServerForward(ClientServiceParamsInfo arg)
+        /// <summary>
+        /// 服务器转发停止
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public async Task<bool> StopServerForward(ClientServiceParamsInfo arg)
         {
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
-            return await tcpForwardTransfer.StopServerForward(forward);
+            string res = await tcpForwardTransfer.StopServerForward(forward);
+            if (string.IsNullOrWhiteSpace(res) == false)
+            {
+                arg.SetErrorMessage(res);
+            }
+            return true;
         }
-        public async Task<string> RemoveServerForward(ClientServiceParamsInfo arg)
+        /// <summary>
+        /// 服务器转发删除
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public async Task<bool> RemoveServerForward(ClientServiceParamsInfo arg)
         {
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
-            return await tcpForwardTransfer.RemoveServerForward(forward);
+            string res = await tcpForwardTransfer.RemoveServerForward(forward);
+            if (string.IsNullOrWhiteSpace(res) == false)
+            {
+                arg.SetErrorMessage(res);
+            }
+            return true;
         }
-
-
-    }
-
-    public class ForwardSettingParamsInfo
-    {
-        public uint ID { get; set; } = 0;
-        public string Content { get; set; } = string.Empty;
     }
 }

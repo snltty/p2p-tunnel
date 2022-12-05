@@ -5,8 +5,20 @@ using System.Linq;
 
 namespace server.service.udpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class UdpForwardTransfer : UdpForwardTransferBase
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="clientRegisterCaching"></param>
+        /// <param name="udpForwardTargetCaching"></param>
+        /// <param name="udpForwardServer"></param>
+        /// <param name="udpForwardMessengerSender"></param>
+        /// <param name="udpForwardTargetProvider"></param>
         public UdpForwardTransfer(
 
             common.udpforward.Config config, IClientRegisterCaching clientRegisterCaching,

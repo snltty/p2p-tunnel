@@ -5,18 +5,35 @@ using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
 {
+    /// <summary>
+    /// 前端配置文件修改接口
+    /// </summary>
     public sealed class ConfigureClientService : IClientService
     {
         private readonly IClientServer clientServer;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientServer"></param>
         public ConfigureClientService(IClientServer clientServer)
         {
             this.clientServer = clientServer;
         }
 
+        /// <summary>
+        /// 获取配置列表
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public IEnumerable<ClientServiceConfigureInfo> Configures(ClientServiceParamsInfo arg)
         {
             return clientServer.GetConfigures();
         }
+        /// <summary>
+        /// 获取配置
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task<string> Configure(ClientServiceParamsInfo arg)
         {
             SaveParamsInfo model = arg.Content.DeJson<SaveParamsInfo>();
@@ -27,7 +44,11 @@ namespace client.service.ui.api.service.clientServer.services
             }
             return string.Empty;
         }
-
+        /// <summary>
+        /// 保存配置
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task Save(ClientServiceParamsInfo arg)
         {
             SaveParamsInfo model = arg.Content.DeJson<SaveParamsInfo>();
@@ -41,22 +62,28 @@ namespace client.service.ui.api.service.clientServer.services
                 }
             }
         }
-
+        /// <summary>
+        /// 获取服务列表
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public IEnumerable<string> Services(ClientServiceParamsInfo arg)
         {
             return clientServer.GetServices();
         }
     }
-
+    /// <summary>
+    /// 保存
+    /// </summary>
     public class SaveParamsInfo
     {
+        /// <summary>
+        /// 类名
+        /// </summary>
         public string ClassName { get; set; }
+        /// <summary>
+        /// 配置内容
+        /// </summary>
         public string Content { get; set; }
-    }
-
-    public class EnableParamsInfo
-    {
-        public string ClassName { get; set; }
-        public bool Enable { get; set; }
     }
 }

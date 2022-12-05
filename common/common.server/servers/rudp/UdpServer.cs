@@ -8,10 +8,22 @@ using System.Threading.Tasks;
 
 namespace common.server.servers.rudp
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class UdpServer : IUdpServer
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Func<IConnection, Task> OnPacket { get; set; } = async (connection) => { await Task.CompletedTask; };
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<IConnection> OnDisconnect { get; private set; } = new SimpleSubPushHandler<IConnection>();
+        /// <summary>
+        /// 
+        /// </summary>
         public Action<IConnection> OnConnected { get; set; } = (IConnection connection) => { };
 
         Semaphore maxNumberConnectings = new Semaphore(1, 1);
@@ -20,10 +32,19 @@ namespace common.server.servers.rudp
         private NetManager server;
         private EventBasedNetListener listener;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
         public void Start(int port)
         {
             Start(port, 20000);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="timeout"></param>
         public void Start(int port, int timeout = 20000)
         {
             listener = new EventBasedNetListener();
@@ -77,7 +98,9 @@ namespace common.server.servers.rudp
                 }
             };
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Stop()
         {
             if (listener != null)
@@ -94,6 +117,9 @@ namespace common.server.servers.rudp
             }
             Release();
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public void Disponse()
         {
             Stop();
@@ -103,13 +129,21 @@ namespace common.server.servers.rudp
             maxNumberConnectings.Dispose();
             maxNumberConnectingNumberSpace = null;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         public async Task InputData(IConnection connection)
         {
             if (OnPacket != null)
                 await OnPacket(connection);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
         public async Task<IConnection> CreateConnection(IPEndPoint address)
         {
             maxNumberConnectings.WaitOne();
@@ -138,11 +172,20 @@ namespace common.server.servers.rudp
                 Release();
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="address"></param>
+        /// <returns></returns>
         public bool SendUnconnectedMessage(byte[] message, IPEndPoint address)
         {
             return server.SendUnconnectedMessage(message, address);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="limit"></param>
         public void SetSpeedLimit(int limit)
         {
             if (server != null)

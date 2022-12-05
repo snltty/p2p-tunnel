@@ -10,12 +10,18 @@ using System.Threading.Tasks;
 
 namespace common.server
 {
+    /// <summary>
+    /// 连接对象
+    /// </summary>
     public interface IConnection
     {
         /// <summary>
         /// 连接id
         /// </summary>
         public ulong ConnectId { get; set; }
+        /// <summary>
+        /// 已连接
+        /// </summary>
         public bool Connected { get; }
 
         /// <summary>
@@ -31,13 +37,35 @@ namespace common.server
         /// </summary>
         public IConnection FromConnection { get; set; }
 
+        /// <summary>
+        /// 加密
+        /// </summary>
         public bool EncodeEnabled { get; }
+        /// <summary>
+        /// 加密对象
+        /// </summary>
         public ICrypto Crypto { get; }
+        /// <summary>
+        /// 启用加密
+        /// </summary>
+        /// <param name="crypto"></param>
         public void EncodeEnable(ICrypto crypto);
+        /// <summary>
+        /// 移除加密
+        /// </summary>
         public void EncodeDisable();
 
+        /// <summary>
+        /// 错误
+        /// </summary>
         public SocketError SocketError { get; set; }
+        /// <summary>
+        /// 地址
+        /// </summary>
         public IPEndPoint Address { get; }
+        /// <summary>
+        /// 连接类型
+        /// </summary>
         public ServerType ServerType { get; }
 
         /// <summary>
@@ -53,23 +81,55 @@ namespace common.server
         /// </summary>
         public Memory<byte> ReceiveData { get; set; }
 
+        /// <summary>
+        /// 已发送字节
+        /// </summary>
         public long SendBytes { get; set; }
+        /// <summary>
+        /// 已接收字节
+        /// </summary>
         public long ReceiveBytes { get; set; }
+        /// <summary>
+        /// rtt
+        /// </summary>
         public int RoundTripTime { get; set; }
 
+        /// <summary>
+        /// 发送
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public ValueTask<bool> Send(ReadOnlyMemory<byte> data);
+        /// <summary>
+        /// 发送
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public ValueTask<bool> Send(byte[] data, int length);
 
+        /// <summary>
+        /// 销毁
+        /// </summary>
         public void Disponse();
 
+        /// <summary>
+        /// 克隆，主要用于中继
+        /// </summary>
+        /// <returns></returns>
         public IConnection Clone();
-        public IConnection CloneFull();
 
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public abstract class Connection : IConnection
     {
         private ulong connectId = 0;
+        /// <summary>
+        /// 连接id
+        /// </summary>
         public ulong ConnectId
         {
             get
@@ -81,32 +141,76 @@ namespace common.server
                 connectId = value;
             }
         }
+        /// <summary>
+        /// 已连接
+        /// </summary>
         public virtual bool Connected => false;
 
+        /// <summary>
+        /// 已中继
+        /// </summary>
         public bool Relay { get; set; } = false;
+        /// <summary>
+        /// 中继路线
+        /// </summary>
         public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
+        /// <summary>
+        /// 来源连接
+        /// </summary>
         public IConnection FromConnection { get; set; }
 
+        /// <summary>
+        /// 启用加密
+        /// </summary>
         public bool EncodeEnabled => Crypto != null;
+        /// <summary>
+        /// 加密类
+        /// </summary>
         public ICrypto Crypto { get; private set; }
+        /// <summary>
+        /// 启用加密
+        /// </summary>
+        /// <param name="crypto"></param>
         public void EncodeEnable(ICrypto crypto)
         {
             Crypto = crypto;
         }
+        /// <summary>
+        /// 移除加密
+        /// </summary>
         public void EncodeDisable()
         {
             Crypto = null;
         }
 
+        /// <summary>
+        /// 错误
+        /// </summary>
         public SocketError SocketError { get; set; } = SocketError.Success;
 
+        /// <summary>
+        /// 地址
+        /// </summary>
         public IPEndPoint Address { get; protected set; }
+        /// <summary>
+        /// 连接类型
+        /// </summary>
         public virtual ServerType ServerType => ServerType.UDP;
 
+        /// <summary>
+        /// 接收请求数据
+        /// </summary>
         public MessageRequestWrap ReceiveRequestWrap { get; set; }
+        /// <summary>
+        /// 接收回执数据
+        /// </summary>
         public MessageResponseWrap ReceiveResponseWrap { get; set; }
 
+
         private Memory<byte> receiveData = Helper.EmptyArray;
+        /// <summary>
+        /// 接收数据
+        /// </summary>
         public Memory<byte> ReceiveData
         {
             get
@@ -120,25 +224,59 @@ namespace common.server
             }
         }
 
+        /// <summary>
+        /// 已发送字节
+        /// </summary>
         public long SendBytes { get; set; } = 0;
+        /// <summary>
+        /// 已接收字节
+        /// </summary>
         public long ReceiveBytes { get; set; } = 0;
+        /// <summary>
+        /// rtt
+        /// </summary>
         public virtual int RoundTripTime { get; set; } = 0;
 
+        /// <summary>
+        /// 发送
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public abstract ValueTask<bool> Send(ReadOnlyMemory<byte> data);
+        /// <summary>
+        /// 发送
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public abstract ValueTask<bool> Send(byte[] data, int length);
 
+        /// <summary>
+        /// 销毁
+        /// </summary>
         public virtual void Disponse()
         {
             ReceiveRequestWrap = null;
             ReceiveResponseWrap = null;
         }
 
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
         public abstract IConnection Clone();
-        public abstract IConnection CloneFull();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class RudpConnection : Connection
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="peer"></param>
+        /// <param name="address"></param>
         public RudpConnection(NetPeer peer, IPEndPoint address)
         {
             NetPeer = peer;
@@ -151,12 +289,29 @@ namespace common.server
             Address = address;
         }
 
+        /// <summary>
+        /// 已连接
+        /// </summary>
         public override bool Connected => NetPeer != null;
-
+        /// <summary>
+        /// 连接对象
+        /// </summary>
         public NetPeer NetPeer { get; private set; }
+        /// <summary>
+        /// 连接类型
+        /// </summary>
         public override ServerType ServerType => ServerType.UDP;
+        /// <summary>
+        /// rtt
+        /// </summary>
         public override int RoundTripTime { get; set; } = 0;
 
+        /// <summary>
+        /// 发送
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public override async ValueTask<bool> Send(byte[] data, int length)
         {
             return await Send(data.AsMemory(0, length));
@@ -164,6 +319,11 @@ namespace common.server
 
 
         SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        /// <summary>
+        /// 发送
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
         {
             if (Connected)
@@ -202,6 +362,9 @@ namespace common.server
             return false;
         }
 
+        /// <summary>
+        /// 销毁
+        /// </summary>
         public override void Disponse()
         {
             base.Disponse();
@@ -216,6 +379,10 @@ namespace common.server
             semaphore.Dispose();
         }
 
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
         public override IConnection Clone()
         {
             RudpConnection clone = new RudpConnection(NetPeer, Address);
@@ -224,22 +391,17 @@ namespace common.server
             clone.ReceiveResponseWrap = ReceiveResponseWrap;
             return clone;
         }
-        public override IConnection CloneFull()
-        {
-            RudpConnection clone = new RudpConnection(NetPeer, Address);
-            clone.EncodeEnable(Crypto);
-            clone.ReceiveRequestWrap = ReceiveRequestWrap;
-            clone.ReceiveResponseWrap = ReceiveResponseWrap;
-            clone.ConnectId = ConnectId;
-            clone.Relay = Relay;
-            clone.SendBytes = SendBytes;
-            clone.ReceiveBytes = ReceiveBytes;
-            return clone;
-        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class TcpConnection : Connection
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tcpSocket"></param>
         public TcpConnection(Socket tcpSocket)
         {
             TcpSocket = tcpSocket;
@@ -252,12 +414,29 @@ namespace common.server
             Address = address;
         }
 
+        /// <summary>
+        /// 已连接
+        /// </summary>
         public override bool Connected => TcpSocket != null && TcpSocket.Connected;
 
+        /// <summary>
+        /// socket
+        /// </summary>
         public Socket TcpSocket { get; private set; }
+        /// <summary>
+        /// 连接类型
+        /// </summary>
         public override ServerType ServerType => ServerType.TCP;
+        /// <summary>
+        /// rtt
+        /// </summary>
         public override int RoundTripTime { get; set; } = 0;
 
+        /// <summary>
+        /// 发送
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
         {
             if (Connected)
@@ -275,11 +454,19 @@ namespace common.server
             }
             return false;
         }
+        /// <summary>
+        /// 发送
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public override ValueTask<bool> Send(byte[] data, int length)
         {
             return Send(data.AsMemory(0, length));
         }
-
+        /// <summary>
+        /// 销毁
+        /// </summary>
         public override void Disponse()
         {
             base.Disponse();
@@ -289,7 +476,10 @@ namespace common.server
                 TcpSocket.Dispose();
             }
         }
-
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
         public override IConnection Clone()
         {
             TcpConnection clone = new TcpConnection(TcpSocket);
@@ -298,19 +488,5 @@ namespace common.server
             clone.ReceiveResponseWrap = ReceiveResponseWrap;
             return clone;
         }
-
-        public override IConnection CloneFull()
-        {
-            TcpConnection clone = new TcpConnection(TcpSocket);
-            clone.EncodeEnable(Crypto);
-            clone.ReceiveRequestWrap = ReceiveRequestWrap;
-            clone.ReceiveResponseWrap = ReceiveResponseWrap;
-            clone.ConnectId = ConnectId;
-            clone.Relay = Relay;
-            clone.SendBytes = SendBytes;
-            clone.ReceiveBytes = ReceiveBytes;
-            return clone;
-        }
-
     }
 }

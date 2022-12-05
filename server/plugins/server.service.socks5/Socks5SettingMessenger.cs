@@ -9,13 +9,21 @@ using System.Threading.Tasks;
 
 namespace server.service.socks5
 {
+    /// <summary>
+    /// socks5服务端配置
+    /// </summary>
     [MessengerIdRange((ushort)Socks5MessengerIds.Min, (ushort)Socks5MessengerIds.Max)]
     public sealed class Socks5SettingMessenger : IMessenger
     {
         private readonly common.socks5.Config config;
         private readonly IClientRegisterCaching clientRegisterCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="clientRegisterCaching"></param>
+        /// <param name="serviceAccessValidator"></param>
         public Socks5SettingMessenger(common.socks5.Config config, IClientRegisterCaching clientRegisterCaching, IServiceAccessValidator serviceAccessValidator)
         {
             this.config = config;
@@ -23,12 +31,22 @@ namespace server.service.socks5
             this.serviceAccessValidator = serviceAccessValidator;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)Socks5MessengerIds.GetSetting)]
         public async Task<byte[]> GetSetting(IConnection connection)
         {
             return (await config.ReadString()).ToBytes();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)Socks5MessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {

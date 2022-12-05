@@ -1,0 +1,1012 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>common.tcpforward</name>
+    </assembly>
+    <members>
+        <member name="T:common.tcpforward.Config">
+            <summary>
+            tcp转发配置文件
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.Config.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.Config.#ctor(common.libs.database.IConfigDataProvider{common.tcpforward.Config})">
+            <summary>
+            
+            </summary>
+            <param name="configDataProvider"></param>
+        </member>
+        <member name="P:common.tcpforward.Config.PortWhiteList">
+            <summary>
+            端口白名单
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.Config.PortBlackList">
+            <summary>
+            端口黑名单
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.Config.ConnectEnable">
+            <summary>
+            允许连接
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.Config.NumConnections">
+            <summary>
+            连接数
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.Config.BufferSize">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.Config.WebListens">
+            <summary>
+            短连接端口
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.Config.TunnelListenRange">
+            <summary>
+            长链接端口范围
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.Config.ReadConfig">
+            <summary>
+            读取
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.Config.ReadString">
+            <summary>
+            读取
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.Config.SaveConfig(System.String)">
+            <summary>
+            保存
+            </summary>
+            <param name="jsonStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.tcpforward.TunnelListenRangeInfo">
+            <summary>
+            长链接端口范围
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TunnelListenRangeInfo.Min">
+            <summary>
+            最小
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TunnelListenRangeInfo.Max">
+            <summary>
+            最大
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.HttpConnectMethodHelper">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.HttpConnectMethodHelper.ConnectSuccessMessage">
+            <summary>
+            http connect 成功报文
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.HttpConnectMethodHelper.ConnectErrorMessage">
+            <summary>
+            http connect 失败报文
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.HttpConnectMethodHelper.IsConnectMethod(System.Span{System.Byte}@)">
+            <summary>
+            判断http报文是否是connect方法
+            </summary>
+            <param name="span"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.HttpConnectMethodHelper.GetHost(System.Memory{System.Byte}@)">
+            <summary>
+            获取 http connect方法中的host
+            </summary>
+            <param name="memory"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.tcpforward.HttpParseHelper">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.HttpParseHelper.GetHost(System.Span{System.Byte}@)">
+            <summary>
+            从http报文中获取host
+            </summary>
+            <param name="span"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.HttpParseHelper.BuildMessage(System.String)">
+            <summary>
+            构造一条简单的http消息
+            </summary>
+            <param name="msg"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.tcpforward.ITcpForwardServer">
+            <summary>
+            tcp转发监听服务
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardServer.Init(System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="numConnections"></param>
+            <param name="receiveBufferSize"></param>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardServer.Start(System.UInt16,common.tcpforward.TcpForwardAliveTypes)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <param name="aliveType"></param>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardServer.Response(common.tcpforward.TcpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="model"></param>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardServer.Stop(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="sourcePort"></param>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardServer.Stop">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.ITcpForwardServer.OnRequest">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.ITcpForwardServer.OnListeningChange">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.ITcpForwardTargetProvider">
+            <summary>
+            目标提供适配器，根据 host:port 或者 port查询目标对象，应该发送给谁
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetProvider.Get(System.String,common.tcpforward.TcpForwardInfo)">
+            <summary>
+            web
+            </summary>
+            <param name="domain"></param>
+            <param name="info"></param>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetProvider.Get(System.UInt16,common.tcpforward.TcpForwardInfo)">
+            <summary>
+            tunnel
+            </summary>
+            <param name="port"></param>
+            <param name="info"></param>
+        </member>
+        <member name="T:common.tcpforward.ITcpForwardTargetCaching`1">
+            <summary>
+            目标缓存器，缓存注册的监听和转发信息，以提供后续查询
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Get(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="host"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Get(System.String,System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Get(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Add(System.String,System.UInt16,`0)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Add(System.UInt16,`0)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.AddOrUpdate(System.String,System.UInt16,`0)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.AddOrUpdate(System.UInt16,`0)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Remove(System.String,System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Remove(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Remove(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="targetName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Remove(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Contains(System.String,System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.Contains(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.ClearConnection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.ClearConnection(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardTargetCaching`1.ClearConnection(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+        </member>
+        <member name="T:common.tcpforward.ITcpForwardValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardValidator.Validate(common.tcpforward.TcpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.ITcpForwardValidator.Validate(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.tcpforward.DefaultTcpForwardValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.DefaultTcpForwardValidator.#ctor(common.tcpforward.Config)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="M:common.tcpforward.DefaultTcpForwardValidator.Validate(common.tcpforward.TcpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.DefaultTcpForwardValidator.Validate(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.tcpforward.ListeningChangeInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.ListeningChangeInfo.Port">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.ListeningChangeInfo.State">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardInfo.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.SourcePort">
+            <summary>
+            监听的端口
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.AliveType">
+            <summary>
+            短链接还是长连接
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.ForwardType">
+            <summary>
+            转发类型，是转发还是代理
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.DataType">
+            <summary>
+            数据类型，步骤
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.StateType">
+            <summary>
+            状态
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.RequestId">
+            <summary>
+            请求id
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.TargetEndpoint">
+            <summary>
+            目标地址
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.Buffer">
+            <summary>
+            转发的数据
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.Cache">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardInfo.Connection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardInfo.ToBytes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardInfo.DeBytes(System.Memory{System.Byte}@)">
+            <summary>
+            
+            </summary>
+            <param name="memory"></param>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardDataTypes">
+            <summary>
+            数据类型，也是步骤
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardDataTypes.Connect">
+            <summary>
+            连接，
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardDataTypes.Forward">
+            <summary>
+            转发
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardStateTypes">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardStateTypes.Success">
+            <summary>
+            成功，
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardStateTypes.Fail">
+            <summary>
+            失败
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardStateTypes.Close">
+            <summary>
+            关闭
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardTypes">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardTypes.Forward">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardTypes.Proxy">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardAliveTypes">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardAliveTypes.Tunnel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardAliveTypes.Web">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardMessengerIds">
+            <summary>
+            tcp转发相关的消息id
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardMessengerIds.Min">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardMessengerIds.Request">
+            <summary>
+            请求
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardMessengerIds.Response">
+            <summary>
+            回执
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardMessengerIds.Ports">
+            <summary>
+            获取端口
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardMessengerIds.SignIn">
+            <summary>
+            注册
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardMessengerIds.SignOut">
+            <summary>
+            退出
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardMessengerIds.GetSetting">
+            <summary>
+            获取配置
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardMessengerIds.Setting">
+            <summary>
+            配置
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardMessengerIds.Max">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardMessengerSender">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardMessengerSender.#ctor(common.server.MessengerSender)">
+            <summary>
+            
+            </summary>
+            <param name="messengerSender"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardMessengerSender.SendRequest(common.tcpforward.TcpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardMessengerSender.SendResponse(common.tcpforward.TcpForwardInfo,common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="arg"></param>
+            <param name="connection"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardMessengerSender.GetPorts(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="Connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardMessengerSender.UnRegister(common.server.IConnection,common.tcpforward.TcpForwardUnRegisterParamsInfo)">
+            <summary>
+            
+            </summary>
+            <param name="Connection"></param>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardMessengerSender.Register(common.server.IConnection,common.tcpforward.TcpForwardRegisterParamsInfo)">
+            <summary>
+            
+            </summary>
+            <param name="Connection"></param>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardResolver">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardResolver.#ctor(common.tcpforward.TcpForwardMessengerSender,common.tcpforward.Config,common.tcpforward.ITcpForwardValidator)">
+            <summary>
+            
+            </summary>
+            <param name="tcpForwardMessengerSender"></param>
+            <param name="config"></param>
+            <param name="tcpForwardValidator"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardResolver.InputData(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardServerPre">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardServerPre.OnRequest">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardServerPre.OnListeningChange">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardServerPre.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardServerPre.Init(System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="numConnections"></param>
+            <param name="receiveBufferSize"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardServerPre.Start(System.UInt16,common.tcpforward.TcpForwardAliveTypes)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <param name="aliveType"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardServerPre.Response(common.tcpforward.TcpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="model"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardServerPre.Stop(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="sourcePort"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardServerPre.Stop">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardRegisterParamsInfo">
+            <summary>
+            Tcp转发
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardRegisterParamsInfo.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardRegisterParamsInfo.SourceIp">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardRegisterParamsInfo.SourcePort">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardRegisterParamsInfo.TargetName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardRegisterParamsInfo.TargetIp">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardRegisterParamsInfo.TargetPort">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardRegisterParamsInfo.AliveType">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardRegisterParamsInfo.ToBytes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardRegisterParamsInfo.DeBytes(System.Memory{System.Byte})">
+            <summary>
+            
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardUnRegisterParamsInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardUnRegisterParamsInfo.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardUnRegisterParamsInfo.SourceIp">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardUnRegisterParamsInfo.SourcePort">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardUnRegisterParamsInfo.AliveType">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardUnRegisterParamsInfo.ToBytes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardUnRegisterParamsInfo.DeBytes(System.Memory{System.Byte})">
+            <summary>
+            
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardRegisterResult">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardRegisterResult.Code">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardRegisterResult.ID">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardRegisterResult.Msg">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardRegisterResult.ToBytes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardRegisterResult.DeBytes(System.ReadOnlyMemory{System.Byte})">
+            <summary>
+            
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardRegisterResultCodes">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardRegisterResultCodes.OK">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardRegisterResultCodes.DISABLED">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardRegisterResultCodes.EXISTS">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardRegisterResultCodes.OUT_RANGE">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:common.tcpforward.TcpForwardRegisterResultCodes.UNKNOW">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardTargetCaching">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Get(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="host"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Get(System.String,System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Get(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Add(System.String,System.UInt16,common.tcpforward.TcpForwardTargetCacheInfo)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Add(System.UInt16,common.tcpforward.TcpForwardTargetCacheInfo)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.AddOrUpdate(System.String,System.UInt16,common.tcpforward.TcpForwardTargetCacheInfo)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.AddOrUpdate(System.UInt16,common.tcpforward.TcpForwardTargetCacheInfo)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <param name="mdoel"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Remove(System.String,System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Remove(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Remove(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="targetName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Remove(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Contains(System.String,System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="domain"></param>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.Contains(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.ClearConnection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.ClearConnection(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTargetCaching.ClearConnection(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardTargetCacheInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardTargetCacheInfo.Id">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardTargetCacheInfo.Name">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardTargetCacheInfo.Connection">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardTargetCacheInfo.Endpoint">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:common.tcpforward.TcpForwardTargetCacheInfo.ForwardType">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:common.tcpforward.TcpForwardTransferBase">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:common.tcpforward.TcpForwardTransferBase.#ctor(common.tcpforward.ITcpForwardServer,common.tcpforward.TcpForwardMessengerSender,common.tcpforward.ITcpForwardTargetProvider)">
+            <summary>
+            
+            </summary>
+            <param name="tcpForwardServer"></param>
+            <param name="tcpForwardMessengerSender"></param>
+            <param name="tcpForwardTargetProvider"></param>
+        </member>
+    </members>
+</doc>

@@ -5,8 +5,17 @@ using System.Reflection;
 
 namespace common.server.middleware
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class ServiceCollectionExtends
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
+        /// <returns></returns>
         public static ServiceCollection AddMiddleware(this ServiceCollection services, Assembly[] assemblys)
         {
 
@@ -19,6 +28,12 @@ namespace common.server.middleware
             return services;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="assemblys"></param>
+        /// <returns></returns>
         public static ServiceProvider UseMiddleware(this ServiceProvider services, Assembly[] assemblys)
         {
             MiddlewareTransfer transfer = services.GetService<MiddlewareTransfer>();

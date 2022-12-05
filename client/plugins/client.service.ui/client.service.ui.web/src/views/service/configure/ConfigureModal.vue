@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-09-24 14:36:58
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-29 16:50:57
+ * @LastEditTime: 2022-12-05 11:06:23
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\configure\ConfigureModal.vue
@@ -17,7 +17,6 @@
         <el-form ref="formDom" :model="form" :rules="rules" label-width="0">
             <el-form-item label="" prop="Content" label-width="0">
                 <el-input type="textarea" v-model="form.Content" :autosize="{minRows:10,maxRows:30}" />
-                <!-- <div id="editor" v-if="showAdd"></div> -->
             </el-form-item>
             <el-form-item label="" label-width="0">
                 <div class="t-c w-100">无内容，或配置失败，为未注册或未拥有配置权限</div>
@@ -34,8 +33,6 @@
 import { toRefs, reactive, ref } from '@vue/reactivity';
 import { getConfigure, saveConfigure } from '../../../apis/configure'
 import { ElMessage } from 'element-plus'
-import { nextTick } from '@vue/runtime-core';
-import JSONEditor from 'jsoneditor'
 export default {
     props: ['className'],
     emits: ['success'],
@@ -56,19 +53,6 @@ export default {
             state.showEditor = false;
             getConfigure(state.form.ClassName).then((res) => {
                 state.form.Content = res;
-                // initEditor();
-            });
-        }
-
-        let editor = null;
-        const initEditor = () => {
-            nextTick(() => {
-                const container = document.getElementById("editor");
-                const options = {
-                    mode: 'code'
-                }
-                editor = new JSONEditor(container, options);
-                editor.set(state.form.Content);
             });
         }
 
@@ -97,7 +81,7 @@ export default {
         }
 
         return {
-            ...toRefs(state), formDom, editor, handleEdit, handleSubmit
+            ...toRefs(state), formDom, handleEdit, handleSubmit
         }
     }
 }

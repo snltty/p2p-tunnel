@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>server.service.socks5</name>
+    </assembly>
+    <members>
+        <member name="T:server.service.socks5.Plugin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.socks5.Plugin.LoadAfter(Microsoft.Extensions.DependencyInjection.ServiceProvider,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="M:server.service.socks5.Plugin.LoadBefore(Microsoft.Extensions.DependencyInjection.ServiceCollection,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="T:server.service.socks5.Socks5ClientHandler">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.socks5.Socks5ClientHandler.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.socks5.Socks5ClientHandler.Flush">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.socks5.Socks5ClientHandler.InputData(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
+        <member name="T:server.service.socks5.Socks5SettingMessenger">
+            <summary>
+            socks5服务端配置
+            </summary>
+        </member>
+        <member name="M:server.service.socks5.Socks5SettingMessenger.#ctor(common.socks5.Config,server.messengers.register.IClientRegisterCaching,server.messengers.IServiceAccessValidator)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="clientRegisterCaching"></param>
+            <param name="serviceAccessValidator"></param>
+        </member>
+        <member name="M:server.service.socks5.Socks5SettingMessenger.GetSetting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.socks5.Socks5SettingMessenger.Setting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.socks5.Socks5Validator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.socks5.Socks5Validator.#ctor(server.messengers.IServiceAccessValidator,common.socks5.Config,server.messengers.register.IClientRegisterCaching)">
+            <summary>
+            
+            </summary>
+            <param name="serviceAccessProvider"></param>
+            <param name="config"></param>
+            <param name="clientRegisterCaching"></param>
+        </member>
+        <member name="M:server.service.socks5.Socks5Validator.Validate(common.server.IConnection,common.socks5.Socks5Info)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <param name="info"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.socks5.Socks5Validator.Validate(common.server.IConnection,common.socks5.Socks5Info,common.socks5.Config)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <param name="info"></param>
+            <param name="config"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

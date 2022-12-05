@@ -13,6 +13,9 @@ using common.libs.extends;
 
 namespace client.realize.messengers.clients
 {
+    /// <summary>
+    /// 客户端打洞通道
+    /// </summary>
     public sealed class ClientsTunnel : IClientsTunnel
     {
         private readonly RegisterStateInfo registerState;
@@ -22,8 +25,20 @@ namespace client.realize.messengers.clients
         private readonly ITcpServer tcpServer;
         private readonly ClientsMessengerSender clientsMessengerSender;
 
+        /// <summary>
+        /// 断开
+        /// </summary>
         public Action<IConnection, IConnection> OnDisConnect { get; set; } = (IConnection connection, IConnection connection1) => { };
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientsMessengerSender"></param>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="registerState"></param>
+        /// <param name="config"></param>
+        /// <param name="udpServer"></param>
+        /// <param name="tcpServer"></param>
         public ClientsTunnel(ClientsMessengerSender clientsMessengerSender, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerState, Config config, IUdpServer udpServer, ITcpServer tcpServer
         )
         {

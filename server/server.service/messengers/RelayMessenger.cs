@@ -16,19 +16,32 @@ namespace server.service.messengers
         private readonly IClientRegisterCaching clientRegisterCache;
         private readonly MessengerSender messengerSender;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCache"></param>
+        /// <param name="messengerSender"></param>
         public RelayMessenger(IClientRegisterCaching clientRegisterCache, MessengerSender messengerSender)
         {
             this.clientRegisterCache = clientRegisterCache;
             this.messengerSender = messengerSender;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)RelayMessengerIds.Delay)]
         public byte[] Delay(IConnection connection)
         {
             return Helper.TrueArray;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)RelayMessengerIds.AskConnects)]
         public void AskConnects(IConnection connection)
         {
@@ -42,7 +55,10 @@ namespace server.service.messengers
                 });
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)RelayMessengerIds.Connects)]
         public void Connects(IConnection connection)
         {
@@ -58,16 +74,27 @@ namespace server.service.messengers
             }
         }
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
     {
         private readonly IClientRegisterCaching clientRegisterCaching;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCaching"></param>
         public RelaySourceConnectionSelector(IClientRegisterCaching clientRegisterCaching)
         {
             this.clientRegisterCaching = clientRegisterCaching;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="relayid"></param>
+        /// <returns></returns>
         public IConnection Select(IConnection connection, ulong relayid)
         {
             if (relayid > 0)

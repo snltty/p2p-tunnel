@@ -6,6 +6,9 @@ using System.Text;
 
 namespace common.tcpforward
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class HttpConnectMethodHelper
     {
         /// <summary>

@@ -7,10 +7,21 @@ using System.Linq;
 
 namespace client.service.logger
 {
+    /// <summary>
+    /// 日志
+    /// </summary>
     public sealed class LoggerClientService : IClientService
     {
+        /// <summary>
+        /// 日志
+        /// </summary>
         public List<LoggerModel> Data { get; } = new List<LoggerModel>();
 
+        /// <summary>
+        /// 获取日志列表
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public PageInfo List(ClientServiceParamsInfo arg)
         {
             PageParamsInfo model = arg.Content.DeJson<PageParamsInfo>();
@@ -30,23 +41,54 @@ namespace client.service.logger
             };
         }
 
+        /// <summary>
+        /// 清除日志
+        /// </summary>
+        /// <param name="arg"></param>
         public void Clear(ClientServiceParamsInfo arg)
         {
             Data.Clear();
         }
     }
 
+    /// <summary>
+    /// 日志分页参数
+    /// </summary>
     public class PageParamsInfo
     {
+        /// <summary>
+        /// 当前页
+        /// </summary>
         public int PageIndex { get; set; } = 1;
+        /// <summary>
+        /// 页大小
+        /// </summary>
         public int PageSize { get; set; } = 10;
+        /// <summary>
+        /// 日志类型
+        /// </summary>
         public int Type { get; set; } = -1;
     }
+    /// <summary>
+    /// 日志分页返回
+    /// </summary>
     public class PageInfo
     {
+        /// <summary>
+        /// 当前页
+        /// </summary>
         public int PageIndex { get; set; } = 1;
+        /// <summary>
+        /// 页大小
+        /// </summary>
         public int PageSize { get; set; } = 10;
+        /// <summary>
+        /// 总数
+        /// </summary>
         public int Count { get; set; } = 10;
+        /// <summary>
+        /// 数据
+        /// </summary>
         public IEnumerable<LoggerModel> Data { get; set; } = Array.Empty<LoggerModel>();
     }
 

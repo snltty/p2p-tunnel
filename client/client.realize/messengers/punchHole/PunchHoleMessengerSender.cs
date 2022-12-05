@@ -13,6 +13,9 @@ using System.Collections.Concurrent;
 
 namespace client.realize.messengers.punchHole
 {
+    /// <summary>
+    /// 打洞消息
+    /// </summary>
     public sealed class PunchHoleMessengerSender
     {
         private Dictionary<PunchHoleTypes, IPunchHole> plugins = new Dictionary<PunchHoleTypes, IPunchHole>();
@@ -25,6 +28,12 @@ namespace client.realize.messengers.punchHole
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
         private ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>>();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messengerSender"></param>
+        /// <param name="registerState"></param>
+        /// <param name="serviceProvider"></param>
         public PunchHoleMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerState, ServiceProvider serviceProvider)
         {
             this.messengerSender = messengerSender;
@@ -32,6 +41,10 @@ namespace client.realize.messengers.punchHole
             this.serviceProvider = serviceProvider;
         }
 
+        /// <summary>
+        /// 加载插件
+        /// </summary>
+        /// <param name="assemblys"></param>
         public void LoadPlugins(Assembly[] assemblys)
         {
             foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IPunchHole)))
@@ -43,6 +56,10 @@ namespace client.realize.messengers.punchHole
                 }
             }
         }
+        /// <summary>
+        /// 收到打洞消息
+        /// </summary>
+        /// <param name="arg"></param>
         public void OnPunchHole(OnPunchHoleArg arg)
         {
             PunchHoleTypes type = (PunchHoleTypes)arg.Data.PunchType;
@@ -53,6 +70,10 @@ namespace client.realize.messengers.punchHole
                 plugin?.Execute(arg);
             }
         }
+        /// <summary>
+        /// 收到回执
+        /// </summary>
+        /// <param name="response"></param>
         public void OnResponse(PunchHoleResponseInfo response)
         {
             if (sends.TryRemove(response.RequestId, out WheelTimerTimeout<TimeoutState> timeout))
@@ -61,6 +82,12 @@ namespace client.realize.messengers.punchHole
             }
         }
 
+        /// <summary>
+        /// 发送回执
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public async Task Response(IConnection connection, PunchHoleRequestInfo request)
         {
             await messengerSender.SendOnly(new MessageRequestWrap
@@ -75,6 +102,13 @@ namespace client.realize.messengers.punchHole
                 }.ToBytes()
             }).ConfigureAwait(false);
         }
+        /// <summary>
+        /// 发送请求
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="arg"></param>
+        /// <param name="requestid"></param>
+        /// <returns></returns>
         public async Task<bool> Request<T>(SendPunchHoleArg<T> arg, ulong requestid = 0) where T : IPunchHoleStepInfo
         {
             IPunchHoleStepInfo msg = arg.Data;
@@ -96,6 +130,12 @@ namespace client.realize.messengers.punchHole
                 }.ToBytes()
             }).ConfigureAwait(false);
         }
+        /// <summary>
+        /// 发送等待回执的请求
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task<bool> RequestReply<T>(SendPunchHoleArg<T> arg) where T : IPunchHoleStepInfo
         {
             ulong requestid = numberSpace.Increment();
@@ -123,13 +163,14 @@ namespace client.realize.messengers.punchHole
             }
         }
 
-
+        /// <summary>
+        /// 收到反向连接
+        /// </summary>
         public SimpleSubPushHandler<OnPunchHoleArg> OnReverse { get; } = new SimpleSubPushHandler<OnPunchHoleArg>();
         /// <summary>
         /// 通知其反向连接
         /// </summary>
-        /// <param name="toid"></param>
-        /// <param name="tryreverse"></param>
+        /// <param name="info"></param>
         /// <returns></returns>
         public async Task SendReverse(ClientInfo info)
         {
@@ -138,25 +179,27 @@ namespace client.realize.messengers.punchHole
             {
                 Connection = registerState.OnlineConnection,
                 ToId = info.Id,
-                Data = new PunchHoleReverseInfo { TryReverse = times }
+                Data = new PunchHoleReverseInfo { Value = times }
             }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<PunchHoleTunnelInfo> OnTunnel { get; } = new SimpleSubPushHandler<PunchHoleTunnelInfo>();
         /// <summary>
         /// 通知其开启新通道
         /// </summary>
         /// <param name="toid"></param>
         /// <param name="tunnelName"></param>
-        /// <param name="serverType"></param>
         /// <returns></returns>
-        public async Task SendTunnel(ulong toid, ulong tunnelName, ServerType serverType)
+        public async Task SendTunnel(ulong toid, ulong tunnelName)
         {
             await RequestReply(new SendPunchHoleArg<PunchHoleTunnelInfo>
             {
                 Connection = registerState.OnlineConnection,
                 ToId = toid,
-                Data = new PunchHoleTunnelInfo { TunnelName = tunnelName, ServerType = serverType }
+                Data = new PunchHoleTunnelInfo { TunnelName = tunnelName, }
             }).ConfigureAwait(false);
         }
 
@@ -190,20 +233,47 @@ namespace client.realize.messengers.punchHole
         }
     }
 
+    /// <summary>
+    /// 发送打洞消息的参数
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class SendPunchHoleArg<T>
     {
+        /// <summary>
+        /// 连接
+        /// </summary>
         public IConnection Connection { get; set; }
-
+        /// <summary>
+        /// 给谁
+        /// </summary>
         public ulong ToId { get; set; }
+        /// <summary>
+        /// 通道
+        /// </summary>
         public ulong TunnelName { get; set; } = 0;
+        /// <summary>
+        /// 次数
+        /// </summary>
         public byte Index { get; set; } = 0;
 
+        /// <summary>
+        /// 数据
+        /// </summary>
         public T Data { get; set; }
     }
 
+    /// <summary>
+    /// 请求消息超时缓存
+    /// </summary>
     public class TimeoutState
     {
+        /// <summary>
+        /// 请求id
+        /// </summary>
         public ulong RequestId { get; set; }
+        /// <summary>
+        /// task
+        /// </summary>
         public TaskCompletionSource<bool> Tcs { get; set; }
     }
 

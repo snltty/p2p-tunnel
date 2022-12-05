@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>server.service.tcpforward</name>
+    </assembly>
+    <members>
+        <member name="T:server.service.tcpforward.Plugin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.tcpforward.Plugin.LoadAfter(Microsoft.Extensions.DependencyInjection.ServiceProvider,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="M:server.service.tcpforward.Plugin.LoadBefore(Microsoft.Extensions.DependencyInjection.ServiceCollection,System.Reflection.Assembly[])">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="assemblys"></param>
+        </member>
+        <member name="T:server.service.tcpforward.ServerTcpForwardValidator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.tcpforward.ServerTcpForwardValidator.#ctor(common.tcpforward.Config,server.messengers.IServiceAccessValidator)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="serviceAccessProvider"></param>
+        </member>
+        <member name="M:server.service.tcpforward.ServerTcpForwardValidator.Validate(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.tcpforward.TcpForwardMessenger">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardMessenger.#ctor(server.messengers.register.IClientRegisterCaching,common.tcpforward.Config,common.tcpforward.ITcpForwardTargetCaching{common.tcpforward.TcpForwardTargetCacheInfo},common.tcpforward.ITcpForwardServer,common.tcpforward.ITcpForwardValidator,common.tcpforward.TcpForwardResolver,server.messengers.IServiceAccessValidator)">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCache"></param>
+            <param name="config"></param>
+            <param name="tcpForwardTargetCaching"></param>
+            <param name="tcpForwardServer"></param>
+            <param name="tcpForwardValidator"></param>
+            <param name="tcpForwardResolver"></param>
+            <param name="serviceAccessValidator"></param>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardMessenger.Request(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardMessenger.Response(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardMessenger.Ports(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardMessenger.SignOut(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardMessenger.SignIn(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardMessenger.GetSetting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardMessenger.Setting(common.server.IConnection)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <returns></returns>
+        </member>
+        <member name="T:server.service.tcpforward.TcpForwardTargetProvider">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardTargetProvider.#ctor(server.messengers.register.IClientRegisterCaching,common.tcpforward.ITcpForwardTargetCaching{common.tcpforward.TcpForwardTargetCacheInfo})">
+            <summary>
+            
+            </summary>
+            <param name="clientRegisterCaching"></param>
+            <param name="tcpForwardTargetCaching"></param>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardTargetProvider.Get(System.String,common.tcpforward.TcpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="host"></param>
+            <param name="info"></param>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardTargetProvider.Get(System.UInt16,common.tcpforward.TcpForwardInfo)">
+            <summary>
+            
+            </summary>
+            <param name="port"></param>
+            <param name="info"></param>
+        </member>
+        <member name="T:server.service.tcpforward.TcpForwardTransfer">
+            <summary>
+            tcp转发中转和入口
+            </summary>
+        </member>
+        <member name="M:server.service.tcpforward.TcpForwardTransfer.#ctor(common.tcpforward.Config,server.messengers.register.IClientRegisterCaching,common.tcpforward.ITcpForwardTargetCaching{common.tcpforward.TcpForwardTargetCacheInfo},common.tcpforward.ITcpForwardServer,common.tcpforward.TcpForwardMessengerSender,common.tcpforward.ITcpForwardTargetProvider)">
+            <summary>
+            
+            </summary>
+            <param name="config"></param>
+            <param name="clientRegisterCaching"></param>
+            <param name="tcpForwardTargetCaching"></param>
+            <param name="tcpForwardServer"></param>
+            <param name="tcpForwardMessengerSender"></param>
+            <param name="tcpForwardTargetProvider"></param>
+        </member>
+    </members>
+</doc>

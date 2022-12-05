@@ -4,14 +4,25 @@ using System.Net.Sockets;
 
 namespace common.server.servers.iocp
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class SocketAsyncEventArgsPool
     {
         Stack<SocketAsyncEventArgs> pool;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="capacity"></param>
         public SocketAsyncEventArgsPool(int capacity)
         {
             pool = new Stack<SocketAsyncEventArgs>(capacity);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public void Push(SocketAsyncEventArgs item)
         {
             if (item == null) { throw new ArgumentNullException("Items added to a SocketAsyncEventArgsPool cannot be null"); }
@@ -20,7 +31,10 @@ namespace common.server.servers.iocp
                 pool.Push(item);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public SocketAsyncEventArgs Pop()
         {
             lock (pool)
@@ -28,6 +42,9 @@ namespace common.server.servers.iocp
                 return pool.Pop();
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public int Count
         {
             get { return pool.Count; }

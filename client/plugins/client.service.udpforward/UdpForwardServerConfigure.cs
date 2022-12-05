@@ -10,25 +10,46 @@ using System.Threading.Tasks;
 
 namespace client.service.udpforward
 {
+    /// <summary>
+    /// udp转发服务端配置文件
+    /// </summary>
     public sealed class UdpForwardServerConfigure : IClientConfigure
     {
         private readonly MessengerSender messengerSender;
         private readonly RegisterStateInfo registerStateInfo;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messengerSender"></param>
+        /// <param name="registerStateInfo"></param>
         public UdpForwardServerConfigure(MessengerSender messengerSender, RegisterStateInfo registerStateInfo)
         {
             this.messengerSender = messengerSender;
             this.registerStateInfo = registerStateInfo;
         }
 
+        /// <summary>
+        /// 名字
+        /// </summary>
         public string Name => "Udp转发服务端";
-
+        /// <summary>
+        /// 作者
+        /// </summary>
         public string Author => "snltty";
-
+        /// <summary>
+        /// 描述
+        /// </summary>
         public string Desc => "白名单不为空时只允许白名单内端口";
-
+        /// <summary>
+        /// 启用
+        /// </summary>
         public bool Enable => true;
 
+        /// <summary>
+        /// 加载
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> Load()
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
@@ -44,6 +65,11 @@ namespace client.service.udpforward
             return string.Empty;
         }
 
+        /// <summary>
+        /// 保存
+        /// </summary>
+        /// <param name="jsonStr"></param>
+        /// <returns></returns>
         public async Task<string> Save(string jsonStr)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap

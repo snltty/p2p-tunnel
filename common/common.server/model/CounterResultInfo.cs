@@ -3,17 +3,48 @@ using System;
 
 namespace common.server.model
 {
+    /// <summary>
+    /// 服务器信息
+    /// </summary>
     public sealed class CounterResultInfo
     {
+        /// <summary>
+        /// 在线人数
+        /// </summary>
         public int OnlineCount { get; set; } = 0;
+        /// <summary>
+        /// cpu使用率
+        /// </summary>
         public double Cpu { get; set; } = 0;
+        /// <summary>
+        /// 内存
+        /// </summary>
         public double Memory { get; set; } = 0;
+        /// <summary>
+        /// 运行时间
+        /// </summary>
         public int RunTime { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public long TcpSendBytes { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public long TcpReceiveBytes { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public long UdpSendBytes { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public long UdpReceiveBytes { get; set; } = 0;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var bytes = new byte[4 + 8 + 8 + 4 + 8 + 8 + 8 + 8];
@@ -53,6 +84,10 @@ namespace common.server.model
 
             return bytes;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -85,11 +120,23 @@ namespace common.server.model
         }
     }
 
+    /// <summary>
+    /// 服务器信息相关消息id
+    /// </summary>
     [Flags, MessengerIdEnum]
     public enum CounterMessengerIds : ushort
     {
+        /// <summary>
+        /// 
+        /// </summary>
         Min = 1100,
+        /// <summary>
+        /// 获取信息
+        /// </summary>
         Info = 1101,
+        /// <summary>
+        /// 
+        /// </summary>
         Max = 1199,
     }
 }

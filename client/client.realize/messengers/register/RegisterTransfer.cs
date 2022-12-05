@@ -15,6 +15,9 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.register
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class RegisterTransfer : IRegisterTransfer
     {
         private readonly RegisterMessengerSender registerMessageHelper;
@@ -26,7 +29,17 @@ namespace client.realize.messengers.register
         private readonly IIPv6AddressRequest iPv6AddressRequest;
         private CancellationTokenSource cancellationToken = null;
         private int lockObject = 0;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="registerMessageHelper"></param>
+        /// <param name="clientInfoCaching"></param>
+        /// <param name="tcpServer"></param>
+        /// <param name="udpServer"></param>
+        /// <param name="config"></param>
+        /// <param name="registerState"></param>
+        /// <param name="cryptoSwap"></param>
+        /// <param name="iPv6AddressRequest"></param>
         public RegisterTransfer(
             RegisterMessengerSender registerMessageHelper, IClientInfoCaching clientInfoCaching,
             ITcpServer tcpServer, IUdpServer udpServer,
@@ -70,7 +83,9 @@ namespace client.realize.messengers.register
                 });
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Exit()
         {
             if (cancellationToken != null && cancellationToken.IsCancellationRequested == false)

@@ -8,18 +8,31 @@ using System.Threading.Tasks;
 
 namespace server.service.socks5
 {
+    /// <summary>
+    /// 服务端权限配置
+    /// </summary>
     [MessengerIdRange((ushort)ServiceAccessValidatorMessengerIds.Min, (ushort)ServiceAccessValidatorMessengerIds.Max)]
     public sealed class ServiceAccessMessenger : IMessenger
     {
         private readonly IClientRegisterCaching clientRegisterCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientRegisterCaching"></param>
+        /// <param name="serviceAccessValidator"></param>
         public ServiceAccessMessenger(IClientRegisterCaching clientRegisterCaching, IServiceAccessValidator serviceAccessValidator)
         {
             this.clientRegisterCaching = clientRegisterCaching;
             this.serviceAccessValidator = serviceAccessValidator;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)ServiceAccessValidatorMessengerIds.GetSetting)]
         public async Task<byte[]> GetSetting(IConnection connection)
         {
@@ -34,6 +47,11 @@ namespace server.service.socks5
             return (await serviceAccessValidator.ReadString()).ToBytes();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)ServiceAccessValidatorMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
