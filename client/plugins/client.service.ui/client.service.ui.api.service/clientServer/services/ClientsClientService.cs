@@ -65,7 +65,7 @@ namespace client.service.ui.api.service.clientServer.services
             ulong id = ulong.Parse(arg.Content);
             if (clientInfoCaching.Get(id, out ClientInfo client) == false)
             {
-                return;
+                return false;
             }
             clientInfoCaching.Offline(id);
             clientsTransfer.ConnectReverse(client);
