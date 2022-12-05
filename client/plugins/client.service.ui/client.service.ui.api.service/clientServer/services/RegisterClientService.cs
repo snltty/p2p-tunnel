@@ -76,7 +76,7 @@ namespace client.service.ui.api.service.clientServer.services
             config.Client = model.ClientConfig;
             config.Server = model.ServerConfig;
 
-            await config.SaveConfig(this.ToJson()).ConfigureAwait(false);
+            await config.SaveConfig(config).ConfigureAwait(false);
         }
 
     }
