@@ -6,6 +6,7 @@ using common.libs.extends;
 using common.server;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
@@ -52,6 +53,7 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 return false;
             }
+            Logger.Instance.Error($"{client.Name},offline:5");
             clientInfoCaching.Offline(id);
             clientsTransfer.ConnectClient(client);
             return true;
@@ -67,6 +69,7 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 return false;
             }
+            Logger.Instance.Error($"{client.Name},offline:6");
             clientInfoCaching.Offline(id);
             clientsTransfer.ConnectReverse(client);
             return true;
@@ -87,6 +90,11 @@ namespace client.service.ui.api.service.clientServer.services
         /// <param name="arg"></param>
         public bool Offline(ClientServiceParamsInfo arg)
         {
+            ulong id = ulong.Parse(arg.Content);
+            if (clientInfoCaching.Get(id, out ClientInfo client))
+            {
+                Logger.Instance.Error($"{client.Name},offline:7");
+            }
             clientInfoCaching.Offline(ulong.Parse(arg.Content));
             return true;
         }
@@ -147,6 +155,11 @@ namespace client.service.ui.api.service.clientServer.services
                 return false;
             }
 
+            if (clientInfoCaching.Get(targetId, out ClientInfo client))
+            {
+                Logger.Instance.Error($"{client.Name},offline:8");
+            }
+            Logger.Instance.Error($"offline:8");
             clientInfoCaching.Offline(targetId);
             await clientsTransfer.Relay(sourceConnection, relayids, true);
 

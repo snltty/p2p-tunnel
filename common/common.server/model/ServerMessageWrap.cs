@@ -82,6 +82,8 @@ namespace common.server.model
         public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
         #endregion
 
+        public IConnection Connection { get; set; }
+
         /// <summary>
         /// 转包
         /// </summary>

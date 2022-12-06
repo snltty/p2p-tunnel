@@ -400,6 +400,8 @@ namespace client.realize.messengers.clients
             }
 
             client.SetConnecting(false);
+
+            Logger.Instance.Error($"{client.Name},offline:1");
             clientInfoCaching.Offline(client.Id);
             return EnumConnectResult.Fail;
         }
@@ -442,6 +444,7 @@ namespace client.realize.messengers.clients
             }
 
             client.SetConnecting(false);
+            Logger.Instance.Error($"{client.Name},offline:2");
             clientInfoCaching.Offline(client.Id);
             return EnumConnectResult.Fail;
         }
@@ -506,6 +509,10 @@ namespace client.realize.messengers.clients
                     IEnumerable<ulong> offlines = clientInfoCaching.AllIds().Except(remoteIds).Where(c => c != registerState.ConnectId);
                     foreach (ulong offid in offlines)
                     {
+                        if (clientInfoCaching.Get(offid, out ClientInfo client))
+                        {
+                            Logger.Instance.Error($"{client.Name},offline:3");
+                        }
                         clientInfoCaching.Offline(offid);
                         clientInfoCaching.Remove(offid);
                     }
