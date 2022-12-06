@@ -62,8 +62,6 @@ namespace client.messengers.punchHole
         }
         private async Task SaveConfig(string jsonStr)
         {
-            PunchHoleDirectionConfig1 _config = await ReadConfig().ConfigureAwait(false);
-            _config.Names = config.Names;
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
