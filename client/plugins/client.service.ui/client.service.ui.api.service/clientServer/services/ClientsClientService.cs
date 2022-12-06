@@ -53,8 +53,7 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 return false;
             }
-            Logger.Instance.Error($"{client.Name},offline:5");
-            clientInfoCaching.Offline(id);
+            clientInfoCaching.Offline(id,5);
             clientsTransfer.ConnectClient(client);
             return true;
         }
@@ -69,8 +68,7 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 return false;
             }
-            Logger.Instance.Error($"{client.Name},offline:6");
-            clientInfoCaching.Offline(id);
+            clientInfoCaching.Offline(id,6);
             clientsTransfer.ConnectReverse(client);
             return true;
         }
@@ -90,12 +88,7 @@ namespace client.service.ui.api.service.clientServer.services
         /// <param name="arg"></param>
         public bool Offline(ClientServiceParamsInfo arg)
         {
-            ulong id = ulong.Parse(arg.Content);
-            if (clientInfoCaching.Get(id, out ClientInfo client))
-            {
-                Logger.Instance.Error($"{client.Name},offline:7");
-            }
-            clientInfoCaching.Offline(ulong.Parse(arg.Content));
+            clientInfoCaching.Offline(ulong.Parse(arg.Content),7);
             return true;
         }
 
@@ -155,12 +148,7 @@ namespace client.service.ui.api.service.clientServer.services
                 return false;
             }
 
-            if (clientInfoCaching.Get(targetId, out ClientInfo client))
-            {
-                Logger.Instance.Error($"{client.Name},offline:8");
-            }
-            Logger.Instance.Error($"offline:8");
-            clientInfoCaching.Offline(targetId);
+            clientInfoCaching.Offline(targetId,8);
             await clientsTransfer.Relay(sourceConnection, relayids, true);
 
             return true;

@@ -227,7 +227,7 @@ namespace client.realize.messengers.clients
             {
                 Logger.Instance.Error($"{client.Name} 掉线:{connection.ServerType}");
             }
-            clientInfoCaching.Offline(connection.ConnectId, ClientOfflineTypes.Disconnect);
+            clientInfoCaching.Offline(connection.ConnectId, 9, ClientOfflineTypes.Disconnect);
         }
 
         /// <summary>
@@ -401,8 +401,7 @@ namespace client.realize.messengers.clients
 
             client.SetConnecting(false);
 
-            Logger.Instance.Error($"{client.Name},offline:1");
-            clientInfoCaching.Offline(client.Id);
+            clientInfoCaching.Offline(client.Id, 1);
             return EnumConnectResult.Fail;
         }
         private async Task<EnumConnectResult> ConnectTcp(ClientInfo client)
@@ -444,8 +443,7 @@ namespace client.realize.messengers.clients
             }
 
             client.SetConnecting(false);
-            Logger.Instance.Error($"{client.Name},offline:2");
-            clientInfoCaching.Offline(client.Id);
+            clientInfoCaching.Offline(client.Id, 2);
             return EnumConnectResult.Fail;
         }
 
@@ -509,11 +507,7 @@ namespace client.realize.messengers.clients
                     IEnumerable<ulong> offlines = clientInfoCaching.AllIds().Except(remoteIds).Where(c => c != registerState.ConnectId);
                     foreach (ulong offid in offlines)
                     {
-                        if (clientInfoCaching.Get(offid, out ClientInfo client))
-                        {
-                            Logger.Instance.Error($"{client.Name},offline:3");
-                        }
-                        clientInfoCaching.Offline(offid);
+                        clientInfoCaching.Offline(offid, 3);
                         clientInfoCaching.Remove(offid);
                     }
                     //新上线的
