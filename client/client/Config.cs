@@ -75,6 +75,10 @@ namespace client
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
+        public async Task SaveConfig(Config config)
+        {
+            await configDataProvider.Save(config).ConfigureAwait(false);
+        }
     }
 
     /// <summary>

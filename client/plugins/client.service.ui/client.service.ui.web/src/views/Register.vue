@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-05 10:57:00
+ * @LastEditTime: 2022-12-05 21:38:23
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -23,8 +23,8 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                            <el-form-item label="名称" prop="ClientName">
-                                <el-input v-model="model.ClientName" maxlength="32" show-word-limit placeholder="设置你的注册名称"></el-input>
+                            <el-form-item label="名称" prop="Name">
+                                <el-input v-model="model.Name" maxlength="32" show-word-limit placeholder="设置你的注册名称"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
@@ -237,7 +237,7 @@ export default {
         const state = reactive({
             model: {
                 ShortId: 0,
-                ClientName: '',
+                Name: '',
                 ServerIp: '',
                 ServerUdpPort: 0,
                 ServerTcpPort: 0,
@@ -262,7 +262,7 @@ export default {
                 UdpUploadSpeedLimit: 0
             },
             rules: {
-                ClientName: [{ required: true, message: '必填', trigger: 'blur' }],
+                Name: [{ required: true, message: '必填', trigger: 'blur' }],
                 ServerIp: [{ required: true, message: '必填', trigger: 'blur' }],
                 AutoRegTimes: [
                     { required: true, message: '必填', trigger: 'blur' },
@@ -337,7 +337,7 @@ export default {
             getRegisterInfo().then((_json) => {
                 json = _json;
                 state.model.ShortId = registerState.ClientConfig.ShortId = json.ClientConfig.ShortId;
-                state.model.ClientName = registerState.ClientConfig.Name = json.ClientConfig.Name;
+                state.model.Name = registerState.ClientConfig.Name = json.ClientConfig.Name;
                 state.model.GroupId = registerState.ClientConfig.GroupId = json.ClientConfig.GroupId;
                 state.model.AutoReg = registerState.ClientConfig.AutoReg = json.ClientConfig.AutoReg;
                 state.model.AutoRegTimes = registerState.ClientConfig.AutoRegTimes = json.ClientConfig.AutoRegTimes;

@@ -12,16 +12,14 @@ namespace client.realize.messengers.clients
     public sealed class ClientsMessenger : IMessenger
     {
         private readonly ClientsMessengerSender clientsMessengerSender;
-        private readonly IRegisterTransfer registerTransfer;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="clientsMessengerSender"></param>
         /// <param name="registerTransfer"></param>
-        public ClientsMessenger(ClientsMessengerSender clientsMessengerSender, IRegisterTransfer registerTransfer)
+        public ClientsMessenger(ClientsMessengerSender clientsMessengerSender)
         {
             this.clientsMessengerSender = clientsMessengerSender;
-            this.registerTransfer = registerTransfer;
         }
 
         /// <summary>

@@ -148,12 +148,14 @@ namespace client.realize.messengers.clients
         /// <param name="connection"></param>
         /// <param name="connectType"></param>
         /// <param name="onlineType"></param>
-        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType)
+        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType, ulong tunnelName)
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
                 connection.ConnectId = id;
-                client.Online(connection, connectType, onlineType);
+                client.Online(connection, connectType, onlineType, tunnelName);
+                RemoveTunnelPort(tunnelName);
+                RemoveUdpserver(tunnelName);
                 OnOnline.Push(client);
             }
         }
