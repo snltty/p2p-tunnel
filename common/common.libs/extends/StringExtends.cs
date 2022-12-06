@@ -46,6 +46,17 @@ namespace common.libs.extends
         /// 
         /// </summary>
         /// <param name="str"></param>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static int ToBytes(this string str, Memory<byte> bytes)
+        {
+            return Encoding.UTF8.GetBytes(str, bytes.Span);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
         /// <returns></returns>
         public static byte[] ToBytes(this string str)
         {

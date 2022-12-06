@@ -11,6 +11,7 @@ namespace common.server.model
     /// </summary>
     public sealed class MessageRequestWrap
     {
+        #region 字段
         /// <summary>
         /// 
         /// </summary>
@@ -36,11 +37,6 @@ namespace common.server.model
         /// </summary>
         public const byte TypeBits = 0b00111111;
 
-
-        /// <summary>
-        /// 用来读取数据，发送数据用下一层的FromConnection，来源连接，在中继时，数据来自服务器，但是真实来源是别的客户端，所以不能直接用这个来发送回复的数据
-        /// </summary>
-        public IConnection Connection { get; set; }
         /// <summary>
         /// 超时时间，发送待回复时设置
         /// </summary>
@@ -84,6 +80,7 @@ namespace common.server.model
         /// 数据荷载
         /// </summary>
         public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
+        #endregion
 
         /// <summary>
         /// 转包
@@ -91,27 +88,23 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToArray(out int length)
         {
-            byte[] requestIdByte = RequestId.ToBytes();
-            byte[] messengerIdByte = MessengerId.ToBytes();
-
             int index = 0;
 
             length = 4
                 + 1 //Relay + Reply + type
-                + requestIdByte.Length
-                + messengerIdByte.Length
+                + 4
+                + 2
                 + Payload.Length;
             if (Relay)
             {
                 length += RelayId.Length * RelayIdSize + 2; //length index
             }
-
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
-            byte[] payloadLengthByte = (length - 4).ToBytes();
-            Array.Copy(payloadLengthByte, 0, res, index, payloadLengthByte.Length);
+
+            ((uint)length - 4).ToBytes(res);
             index += 4;
 
-            res[index] = (byte)MessageTypes.REQUEST;
+            res[index] = 0;
             if (Relay == true)
             {
                 res[index] |= RelayBit;
@@ -129,18 +122,16 @@ namespace common.server.model
 
                 res[index] = 2; //index
                 index += 1;
-                for (int i = 0; i < RelayId.Length; i++)
-                {
-                    byte[] relayidByte = RelayId[i].ToBytes();
-                    Array.Copy(relayidByte, 0, res, index, relayidByte.Length);
-                    index += relayidByte.Length;
-                }
-            }
-            Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
-            index += requestIdByte.Length;
 
-            messengerIdByte.CopyTo(res.AsMemory(index, messengerIdByte.Length));
-            index += messengerIdByte.Length;
+                RelayId.ToBytes(res.AsMemory(index));
+                index += RelayId.Length * RelayIdSize;
+            }
+
+            RequestId.ToBytes(res.AsMemory(index));
+            index += 4;
+
+            MessengerId.ToBytes(res.AsMemory(index));
+            index += 2;
 
             Payload.CopyTo(res.AsMemory(index, Payload.Length));
             index += Payload.Length;
@@ -151,7 +142,7 @@ namespace common.server.model
         /// 解包
         /// </summary>
         /// <param name="memory"></param>
-        public void FromArray(Memory<byte> memory)
+        public unsafe void FromArray(Memory<byte> memory)
         {
             var span = memory.Span;
 
@@ -179,10 +170,11 @@ namespace common.server.model
                 RelayIdLength = 0;
             }
 
+
             RequestId = span.Slice(index).ToUInt32();
             index += 4;
 
-            MessengerId = span.Slice(index, 2).ToUInt16();
+            MessengerId = span.Slice(index).ToUInt16();
             index += 2;
 
             Payload = memory.Slice(index, memory.Length - index);
@@ -195,6 +187,7 @@ namespace common.server.model
         {
             ArrayPool<byte>.Shared.Return(array);
         }
+
     }
 
     /// <summary>
@@ -233,7 +226,7 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public bool Relay { get;private set; }
+        public bool Relay { get; private set; }
 
         /// <summary>
         /// 转包
@@ -257,8 +250,7 @@ namespace common.server.model
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
 
             int index = 0;
-            byte[] payloadLengthByte = (length - 4).ToBytes();
-            Array.Copy(payloadLengthByte, 0, res, index, payloadLengthByte.Length);
+            ((uint)length - 4).ToBytes(res);
             index += 4;
 
             res[index] = (byte)MessageTypes.RESPONSE;
@@ -282,9 +274,8 @@ namespace common.server.model
             res[index] = (byte)Code;
             index += 1;
 
-            byte[] requestIdByte = RequestId.ToBytes();
-            Array.Copy(requestIdByte, 0, res, index, requestIdByte.Length);
-            index += requestIdByte.Length;
+            RequestId.ToBytes(res.AsMemory(index));
+            index += 4;
 
             if (Payload.Length > 0)
             {
@@ -338,15 +329,6 @@ namespace common.server.model
         public void Return(byte[] array)
         {
             ArrayPool<byte>.Shared.Return(array);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void Reset()
-        {
-            Payload = Helper.EmptyArray;
-            Payload = Helper.EmptyArray;
         }
     }
 

@@ -404,8 +404,8 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         /// <returns></returns>
         public async Task OnStep3(OnStep3Params arg)
         {
-            OnStep3Handler.Push(arg);
             await SendStep4(arg);
+            OnStep3Handler.Push(arg);
         }
 
         /// <summary>
@@ -608,7 +608,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         }
         private async Task SendStep4(OnStep3Params arg)
         {
-            await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep4Info>
+            await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep4Info>
             {
                 TunnelName = arg.RawData.TunnelName,
                 Connection = arg.Connection,

@@ -357,9 +357,7 @@ namespace client.realize.messengers.punchHole.udp
         /// <returns></returns>
         public async Task OnStep3(OnStep3Params arg)
         {
-            OnStep3Handler.Push(arg);
-
-            await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep4Info>
+            await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep4Info>
             {
                 Connection = arg.Connection,
                 TunnelName = arg.RawData.TunnelName,
@@ -369,6 +367,7 @@ namespace client.realize.messengers.punchHole.udp
                     PunchType = PunchHoleTypes.UDP
                 }
             }).ConfigureAwait(false);
+            OnStep3Handler.Push(arg);
         }
 
         /// <summary>
