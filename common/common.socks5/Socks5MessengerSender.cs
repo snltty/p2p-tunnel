@@ -64,10 +64,9 @@ namespace common.socks5
         /// <param name="connection"></param>
         public void ResponseClose(uint id, IConnection connection)
         {
-            Response(new Socks5Info { Id = id, Data = Helper.EmptyArray, Socks5Step = Socks5EnumStep.Forward }, connection);
+            Response(new Socks5Info { Id = id, Socks5Step = Socks5EnumStep.Forward }, connection);
         }
 
-        Socks5Info requestClose = new Socks5Info { Id = 0, Data = Helper.EmptyArray, Socks5Step = Socks5EnumStep.Forward };
         /// <summary>
         /// 
         /// </summary>
@@ -75,7 +74,7 @@ namespace common.socks5
         /// <param name="connection"></param>
         public void RequestClose(uint id, IConnection connection)
         {
-            Request(new Socks5Info { Id = id, Data = Helper.EmptyArray, Socks5Step = Socks5EnumStep.Forward }, connection);
+            Request(new Socks5Info { Id = id,Socks5Step = Socks5EnumStep.Forward }, connection);
         }
     }
 }

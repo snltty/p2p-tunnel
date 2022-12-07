@@ -223,10 +223,6 @@ namespace client.realize.messengers.clients
             {
                 return;
             }
-            if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
-            {
-                Logger.Instance.Error($"{client.Name} 掉线:{connection.ServerType}");
-            }
             clientInfoCaching.Offline(connection.ConnectId, 9, ClientOfflineTypes.Disconnect);
         }
 

@@ -57,8 +57,7 @@ namespace common.tcpforward
             return await messengerSender.SendReply(new MessageRequestWrap
             {
                 MessengerId = (ushort)TcpForwardMessengerIds.Ports,
-                Connection = Connection,
-                Payload = Helper.EmptyArray
+                Connection = Connection
             }).ConfigureAwait(false);
         }
         /// <summary>

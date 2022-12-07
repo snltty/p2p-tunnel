@@ -136,7 +136,6 @@ namespace common.tcpforward
                     RequestId = id,
                     AliveType = acceptToken.Request.AliveType,
                     SourcePort = acceptToken.SourcePort,
-                    Buffer = Helper.EmptyArray,
                     DataType = TcpForwardDataTypes.Connect,
                     StateType = TcpForwardStateTypes.Success
                 },

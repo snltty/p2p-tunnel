@@ -290,12 +290,12 @@ namespace common.server.servers.websocket
         /// <summary>
         /// 掩码key 4字节
         /// </summary>
-        public Memory<byte> MaskData { get; set; } = Helper.EmptyArray;
+        public Memory<byte> MaskData { get; set; }
 
         /// <summary>
         /// payload data
         /// </summary>
-        public Memory<byte> Data { get; set; } = Helper.EmptyArray;
+        public Memory<byte> Data { get; set; }
     }
 
     /// <summary>

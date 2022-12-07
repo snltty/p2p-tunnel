@@ -52,7 +52,7 @@ namespace common.server.model
         /// 携带的数
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
-        public ReadOnlyMemory<byte> Data { get; set; } = Helper.EmptyArray;
+        public ReadOnlyMemory<byte> Data { get; set; }
         /// <summary>
         /// 
         /// </summary>
