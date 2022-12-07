@@ -66,6 +66,8 @@ namespace common.socks5
         {
             Response(new Socks5Info { Id = id, Data = Helper.EmptyArray, Socks5Step = Socks5EnumStep.Forward }, connection);
         }
+
+        Socks5Info requestClose = new Socks5Info { Id = 0, Data = Helper.EmptyArray, Socks5Step = Socks5EnumStep.Forward };
         /// <summary>
         /// 
         /// </summary>

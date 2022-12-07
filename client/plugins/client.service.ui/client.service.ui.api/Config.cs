@@ -61,31 +61,7 @@ namespace client.service.ui.api
         {
             return await configDataProvider.Load();
         }
-        /// <summary>
-        /// 读取配置
-        /// </summary>
-        /// <returns></returns>
-        public async Task<string> ReadString()
-        {
-            return await configDataProvider.LoadString();
-        }
-        /// <summary>
-        /// 保存
-        /// </summary>
-        /// <param name="jsonStr"></param>
-        /// <returns></returns>
-        public async Task SaveConfig(string jsonStr)
-        {
-            Config config = await ReadConfig().ConfigureAwait(false);
-
-            config.EnableWeb = EnableWeb;
-            config.EnableCommand = EnableCommand;
-            config.EnableApi = EnableApi;
-            config.Web = Web;
-            config.Websocket = Websocket;
-
-            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
-        }
+       
     }
 
     /// <summary>

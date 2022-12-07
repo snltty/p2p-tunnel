@@ -54,31 +54,26 @@ namespace common.socks5
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            byte[] idBytes = Id.ToBytes();
-            int length = 1 + idBytes.Length + 1 + 1 + Data.Length, index = 1;
+            int length = 1 + 4 + 1 + 1 + Data.Length, index = 1;
             byte[] ipBytes = Helper.EmptyArray;
-            byte[] portBytes = Helper.EmptyArray;
             if (SourceEP != null)
             {
                 ipBytes = SourceEP.Address.GetAddressBytes();
-                portBytes = SourceEP.Port.ToBytes();
                 length += ipBytes.Length + 2;
             }
 
             byte[] targetipBytes = Helper.EmptyArray;
-            byte[] targetportBytes = Helper.EmptyArray;
             if (TargetEP != null)
             {
                 targetipBytes = TargetEP.Address.GetAddressBytes();
-                targetportBytes = TargetEP.Port.ToBytes();
                 length += targetipBytes.Length + 2;
             }
 
             byte[] bytes = new byte[length];
             bytes[0] = (byte)((byte)Socks5Step << 4 | Version);
 
-            Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
-            index += idBytes.Length;
+            Id.ToBytes(bytes.AsMemory(index));
+            index += 4;
 
             bytes[index] = 0;
             index += 1;
@@ -88,8 +83,7 @@ namespace common.socks5
                 Array.Copy(ipBytes, 0, bytes, index, ipBytes.Length);
                 index += ipBytes.Length;
 
-                bytes[index] = portBytes[0];
-                bytes[index + 1] = portBytes[1];
+                ((ushort)SourceEP.Port).ToBytes(bytes.AsMemory(index));
                 index += 2;
             }
 
@@ -101,8 +95,7 @@ namespace common.socks5
                 Array.Copy(targetipBytes, 0, bytes, index, targetipBytes.Length);
                 index += targetipBytes.Length;
 
-                bytes[index] = targetportBytes[0];
-                bytes[index + 1] = targetportBytes[1];
+                ((ushort)TargetEP.Port).ToBytes(bytes.AsMemory(index));
                 index += 2;
             }
 

@@ -229,7 +229,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             }
 
                             targetSocket.EndConnect(result);
-                            Logger.Instance.DebugWarning($"tcp {ip} connect success");
+                            Logger.Instance.Warning($"tcp {ip} connect success");
                             cache.Success = true;
 
                             if (arg.Data.IsDefault)

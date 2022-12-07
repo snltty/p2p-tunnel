@@ -121,7 +121,7 @@ namespace client.realize.messengers.clients
                 if (client.ConnectType != ClientConnectTypes.Unknow)
                 {
                     OnOffline.Push(client);
-                    client.Offline();
+                    client.Offline(offlineType);
                     OnOfflineAfter.Push(client);
                 }
             }

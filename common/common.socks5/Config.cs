@@ -68,7 +68,7 @@ namespace common.socks5
         /// 
         /// </summary>
         public int NumConnections { get; set; } = 1000;
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -93,15 +93,15 @@ namespace common.socks5
         public async Task SaveConfig(string jsonStr)
         {
             Config config = jsonStr.DeJson<Config>();
-            config.ListenEnable = ListenEnable;
-            config.ListenPort = ListenPort;
-            config.BufferSize = BufferSize;
-            config.ConnectEnable = ConnectEnable;
-            config.IsCustomPac = IsCustomPac;
-            config.IsPac = IsPac;
-            config.TargetName = TargetName;
-            config.NumConnections = NumConnections;
-            
+            ListenEnable = config.ListenEnable;
+            ListenPort = config.ListenPort;
+            BufferSize = config.BufferSize;
+            ConnectEnable = config.ConnectEnable;
+            IsCustomPac = config.IsCustomPac;
+            IsPac = config.IsPac;
+            TargetName = config.TargetName;
+            NumConnections = config.NumConnections;
+
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }

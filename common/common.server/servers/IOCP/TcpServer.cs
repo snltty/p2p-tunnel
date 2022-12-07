@@ -186,7 +186,7 @@ namespace common.server.servers.iocp
             }
             return null;
         }
-        private async void ProcessReceive(SocketAsyncEventArgs e)
+        private void ProcessReceive(SocketAsyncEventArgs e)
         {
             try
             {
@@ -195,7 +195,7 @@ namespace common.server.servers.iocp
                 {
                     int offset = e.Offset;
                     int length = e.BytesTransferred;
-                    await ReadPacket(token, e.Buffer, offset, length);
+                    ReadPacket(token, e.Buffer, offset, length);
 
                     if (token.Socket.Available > 0)
                     {
@@ -204,7 +204,7 @@ namespace common.server.servers.iocp
                             length = token.Socket.Receive(e.Buffer);
                             if (length > 0)
                             {
-                                await ReadPacket(token, e.Buffer, 0, length);
+                                ReadPacket(token, e.Buffer, 0, length);
                             }
                             else
                             {
@@ -239,7 +239,7 @@ namespace common.server.servers.iocp
                 CloseClientSocket(e);
             }
         }
-        private async Task ReadPacket(AsyncUserToken token, byte[] data, int offset, int length)
+        private void ReadPacket(AsyncUserToken token, byte[] data, int offset, int length)
         {
             if (token.Port != port) return;
 
@@ -251,10 +251,7 @@ namespace common.server.servers.iocp
                 if (packageLen == length - 4)
                 {
                     token.Connection.ReceiveData = data.AsMemory(offset, packageLen + 4);
-                    if (OnPacket != null)
-                    {
-                        await OnPacket(token.Connection);
-                    }
+                    OnPacket(token.Connection).Wait();
                     return;
                 }
             }
@@ -269,10 +266,7 @@ namespace common.server.servers.iocp
                     break;
                 }
                 token.Connection.ReceiveData = token.DataBuffer.Data.Slice(0, packageLen + 4);
-                if (OnPacket != null)
-                {
-                    await OnPacket(token.Connection);
-                }
+                OnPacket(token.Connection).Wait();
 
                 token.DataBuffer.RemoveRange(0, packageLen + 4);
             } while (token.DataBuffer.Size > 4);

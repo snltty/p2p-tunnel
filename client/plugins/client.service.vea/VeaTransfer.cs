@@ -241,13 +241,14 @@ namespace client.service.vea
             for (int i = 0; i < 20; i++)
             {
                 Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
-                System.Threading.Thread.Sleep(3000);
+                System.Threading.Thread.Sleep(1000);
                 if (GetWindowsHasInterface(veaName))
                 {
                     interfaceNumber = GetWindowsInterfaceNum();
                     if (interfaceNumber > 0)
                     {
                         Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
+                        System.Threading.Thread.Sleep(1000);
                         if (GetWindowsHasIp(config.IP))
                         {
                             AddRoute();
@@ -259,10 +260,7 @@ namespace client.service.vea
                         }
                     }
                 }
-                else
-                {
-                    KillWindows();
-                }
+                KillWindows();
             }
         }
         private int GetWindowsInterfaceNum()

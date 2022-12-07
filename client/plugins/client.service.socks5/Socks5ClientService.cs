@@ -48,22 +48,21 @@ namespace client.service.socks5
         /// <param name="arg"></param>
         public void Set(ClientServiceParamsInfo arg)
         {
-            var conf = arg.Content.DeJson<common.socks5.Config>();
+            config.SaveConfig(arg.Content).Wait();
 
             socks5ClientListener.Stop();
-            if (conf.ListenEnable)
+            if (config.ListenEnable)
             {
                 try
                 {
-                    socks5ClientListener.Start(conf.ListenPort, config.BufferSize);
+                    socks5ClientListener.Start(config.ListenPort, config.BufferSize);
                 }
                 catch (Exception ex)
                 {
                     arg.SetCode(ClientServiceResponseCodes.Error, ex.Message);
                 }
             }
-            config.SaveConfig(arg.Content).Wait();
-
+            
             socks5Transfer.ClearPac();
             socks5ClientHandler.Flush();
         }

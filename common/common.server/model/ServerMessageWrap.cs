@@ -2,14 +2,24 @@
 using common.libs.extends;
 using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 
 namespace common.server.model
 {
+    public interface IMessage
+    {
+        public IConnection Connection { get; set; }
+        public Memory<byte> Payload { get; set; }
+        public uint RequestId { get; set; }
+        public ulong[] RelayId { get; set; }
+        public Memory<byte> RelayIds { get; set; }
+    }
+
     /// <summary>
     /// 请求消息包
     /// </summary>
-    public sealed class MessageRequestWrap
+    public sealed class MessageRequestWrap : IMessage
     {
         #region 字段
         /// <summary>
@@ -49,7 +59,7 @@ namespace common.server.model
         /// <summary>
         /// 每条数据都有个id，【只发发数据的话，不用填这里】
         /// </summary>
-        public uint RequestId = 0;
+        public uint RequestId { get; set; } = 0;
         /// <summary>
         /// 是否等待回复
         /// </summary>
@@ -66,7 +76,7 @@ namespace common.server.model
         /// <summary>
         /// 中继节点id列表，读取用
         /// </summary>
-        public Memory<byte> RelayIds { get; private set; } = Helper.EmptyArray;
+        public Memory<byte> RelayIds { get; set; } = Helper.EmptyArray;
         /// <summary>
         /// 
         /// </summary>
@@ -195,7 +205,7 @@ namespace common.server.model
     /// <summary>
     /// 回执消息包
     /// </summary>
-    public sealed class MessageResponseWrap
+    public sealed class MessageResponseWrap : IMessage
     {
         /// <summary>
         /// 
@@ -209,6 +219,11 @@ namespace common.server.model
         /// 
         /// </summary>
         public uint RequestId { get; set; } = 0;
+
+        /// <summary>
+        /// 不可用
+        /// </summary>
+        public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
         /// <summary>
         /// 
         /// </summary>
@@ -224,7 +239,7 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public ReadOnlyMemory<byte> Payload { get; set; } = Helper.EmptyArray;
+        public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
         /// <summary>
         /// 
         /// </summary>
@@ -385,4 +400,33 @@ namespace common.server.model
         RESPONSE = 1
     }
 
+
+    public class ObjectPool
+    {
+        private readonly ConcurrentBag<IMessage> _objects;
+        private readonly Func<IMessage> _objectGenerator;
+
+        public ObjectPool(Func<IMessage> objectGenerator)
+        {
+            _objectGenerator = objectGenerator ?? throw new ArgumentNullException(nameof(objectGenerator));
+            _objects = new ConcurrentBag<IMessage>();
+        }
+
+        public IMessage Get() => _objects.TryTake(out IMessage item) ? item : _objectGenerator();
+
+        public void Return(IMessage item)
+        {
+
+            if (_objects.Count < 100)
+            {
+                item.RelayIds = Helper.EmptyArray;
+                item.RelayId = Helper.EmptyUlongArray;
+                item.Connection = null;
+                item.Payload = Helper.EmptyArray;
+                item.RequestId = 0;
+
+                _objects.Add(item);
+            }
+        }
+    }
 }

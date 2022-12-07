@@ -53,28 +53,6 @@ namespace client
         {
             return await configDataProvider.Load();
         }
-        /// <summary>
-        /// 读取
-        /// </summary>
-        /// <returns></returns>
-        public async Task<string> ReadString()
-        {
-            return await configDataProvider.LoadString();
-        }
-        /// <summary>
-        /// 保存
-        /// </summary>
-        /// <param name="jsonStr"></param>
-        /// <returns></returns>
-        public async Task SaveConfig(string jsonStr)
-        {
-            Config config = await ReadConfig().ConfigureAwait(false);
-
-            config.Client = Client;
-            config.Server = Server;
-
-            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
-        }
         public async Task SaveConfig(Config config)
         {
             await configDataProvider.Save(config).ConfigureAwait(false);
