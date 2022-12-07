@@ -41,7 +41,7 @@ namespace common.socks5
         /// 携带的数据
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
-        public Memory<byte> Data { get; set; } = Helper.EmptyArray;
+        public Memory<byte> Data { get; set; }
 
         /// <summary>
         /// 
