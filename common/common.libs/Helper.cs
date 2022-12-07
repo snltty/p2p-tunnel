@@ -16,10 +16,6 @@ namespace common.libs
         /// <summary>
         /// 
         /// </summary>
-        public static ulong[] EmptyUlongArray = Array.Empty<ulong>();
-        /// <summary>
-        /// 
-        /// </summary>
         public static byte[] TrueArray = new byte[] { 1 };
         /// <summary>
         /// 
