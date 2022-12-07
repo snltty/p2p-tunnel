@@ -38,7 +38,6 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 var resp = await messengerSender.SendReply(new MessageRequestWrap
                 {
-                    Payload = Helper.EmptyArray,
                     MessengerId = (ushort)CounterMessengerIds.Info,
                     Connection = registerState.OnlineConnection,
                     Timeout = 15000

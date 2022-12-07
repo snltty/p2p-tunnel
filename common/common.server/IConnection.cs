@@ -31,7 +31,7 @@ namespace common.server
         /// <summary>
         /// 中继对象id，通过谁中继的，就是谁的id，直连的跟连接id一样
         /// </summary>
-        public ulong[] RelayId { get; set; }
+        public Memory<ulong> RelayId { get; set; }
         /// <summary>
         /// 来源客户端，中继时，数据来源可能不是给你发数据的那个
         /// </summary>
@@ -153,7 +153,7 @@ namespace common.server
         /// <summary>
         /// 中继路线
         /// </summary>
-        public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
+        public Memory<ulong> RelayId { get; set; }
         /// <summary>
         /// 来源连接
         /// </summary>
@@ -207,7 +207,7 @@ namespace common.server
         public MessageResponseWrap ReceiveResponseWrap { get; set; }
 
 
-        private Memory<byte> receiveData = Helper.EmptyArray;
+        private Memory<byte> receiveData;
         /// <summary>
         /// 接收数据
         /// </summary>
@@ -227,15 +227,15 @@ namespace common.server
         /// <summary>
         /// 已发送字节
         /// </summary>
-        public long SendBytes { get; set; } = 0;
+        public long SendBytes { get; set; }
         /// <summary>
         /// 已接收字节
         /// </summary>
-        public long ReceiveBytes { get; set; } = 0;
+        public long ReceiveBytes { get; set; }
         /// <summary>
         /// rtt
         /// </summary>
-        public virtual int RoundTripTime { get; set; } = 0;
+        public virtual int RoundTripTime { get; set; }
 
         /// <summary>
         /// 发送
@@ -304,7 +304,7 @@ namespace common.server
         /// <summary>
         /// rtt
         /// </summary>
-        public override int RoundTripTime { get; set; } = 0;
+        public override int RoundTripTime { get; set; }
 
         /// <summary>
         /// 发送
@@ -430,7 +430,7 @@ namespace common.server
         /// <summary>
         /// rtt
         /// </summary>
-        public override int RoundTripTime { get; set; } = 0;
+        public override int RoundTripTime { get; set; }
 
         /// <summary>
         /// 发送

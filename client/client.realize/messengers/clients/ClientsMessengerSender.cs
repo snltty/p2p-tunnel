@@ -36,7 +36,6 @@ namespace client.realize.messengers.clients
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Payload = Helper.EmptyArray,
                 MessengerId = (ushort)ClientsMessengerIds.Port,
                 Timeout = 2000
             }).ConfigureAwait(false);

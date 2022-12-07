@@ -54,7 +54,6 @@ namespace client.service.udpforward
             {
                 MessengerId = (ushort)ServiceAccessValidatorMessengerIds.GetSetting,
                 Connection = registerStateInfo.OnlineConnection,
-                Payload = Helper.EmptyArray
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
             {

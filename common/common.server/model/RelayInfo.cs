@@ -16,7 +16,7 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public ulong[] RelayIds { get; set; } = Helper.EmptyUlongArray;
+        public Memory<ulong> RelayIds { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -24,11 +24,7 @@ namespace common.server.model
         public byte[] ToBytes()
         {
             var bytes = new byte[RelayIds.Length * MessageRequestWrap.RelayIdSize];
-
-            for (int i = 0; i < RelayIds.Length; i++)
-            {
-                RelayIds[i].ToBytes().AsSpan().CopyTo(bytes.AsSpan(i * MessageRequestWrap.RelayIdSize));
-            }
+            RelayIds.ToBytes(bytes);
             return bytes;
         }
 
@@ -41,9 +37,10 @@ namespace common.server.model
             var span = data.Span;
             int length = data.Length / MessageRequestWrap.RelayIdSize;
             RelayIds = new ulong[length];
+            var idspan = RelayIds.Span;
             for (int i = length - 1; i >= 0; i--)
             {
-                RelayIds[length - 1 - i] = span.Slice(i * MessageRequestWrap.RelayIdSize).ToUInt64();
+                idspan[length - 1 - i] = span.Slice(i * MessageRequestWrap.RelayIdSize).ToUInt64();
             }
         }
     }

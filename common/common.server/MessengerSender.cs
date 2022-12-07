@@ -35,7 +35,7 @@ namespace common.server
         {
             if (msg.RequestId == 0)
             {
-                uint id = 0;
+                uint id = msg.RequestId;
                 Interlocked.CompareExchange(ref id, requestIdNumberSpace.Increment(), 0);
                 msg.RequestId = id;
             }
@@ -59,7 +59,7 @@ namespace common.server
             {
                 if (msg.RequestId == 0)
                 {
-                    uint id = 0;
+                    uint id = msg.RequestId;
                     Interlocked.CompareExchange(ref id, requestIdNumberSpace.Increment(), 0);
                     msg.RequestId = id;
                 }
@@ -159,11 +159,11 @@ namespace common.server
         /// <summary>
         /// 
         /// </summary>
-        public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
+        public MessageResponeCodes Code { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ReadOnlyMemory<byte> Data { get; set; } = Helper.EmptyArray;
+        public ReadOnlyMemory<byte> Data { get; set; }
     }
 
     /// <summary>

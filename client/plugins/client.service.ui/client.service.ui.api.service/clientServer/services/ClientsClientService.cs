@@ -155,18 +155,4 @@ namespace client.service.ui.api.service.clientServer.services
         }
 
     }
-    /// <summary>
-    /// 中继参数
-    /// </summary>
-    public class RelayParamsInfo
-    {
-        /// <summary>
-        /// 中继线路id列表
-        /// </summary>
-        public ulong[] RelayIds { get; set; } = Helper.EmptyUlongArray;
-        /// <summary>
-        /// 目标是谁
-        /// </summary>
-        public ulong ToId { get; set; } = 0;
-    }
 }

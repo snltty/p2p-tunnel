@@ -89,7 +89,6 @@ namespace common.udpforward
             {
                 MessengerId = (ushort)UdpForwardMessengerIds.Ports,
                 Connection = Connection,
-                Payload = Helper.EmptyArray
             }).ConfigureAwait(false);
         }
 

@@ -7,19 +7,10 @@ using System.ComponentModel;
 
 namespace common.server.model
 {
-    public interface IMessage
-    {
-        public IConnection Connection { get; set; }
-        public Memory<byte> Payload { get; set; }
-        public uint RequestId { get; set; }
-        public ulong[] RelayId { get; set; }
-        public Memory<byte> RelayIds { get; set; }
-    }
-
     /// <summary>
     /// 请求消息包
     /// </summary>
-    public sealed class MessageRequestWrap : IMessage
+    public sealed class MessageRequestWrap
     {
         #region 字段
         /// <summary>
@@ -50,16 +41,16 @@ namespace common.server.model
         /// <summary>
         /// 超时时间，发送待回复时设置
         /// </summary>
-        public int Timeout { get; set; } = 15000;
+        public int Timeout { get; set; }
 
         /// <summary>
         /// 消息id
         /// </summary>
-        public ushort MessengerId { get; set; } = 0;
+        public ushort MessengerId { get; set; }
         /// <summary>
         /// 每条数据都有个id，【只发发数据的话，不用填这里】
         /// </summary>
-        public uint RequestId { get; set; } = 0;
+        public uint RequestId { get; set; }
         /// <summary>
         /// 是否等待回复
         /// </summary>
@@ -72,24 +63,24 @@ namespace common.server.model
         /// <summary>
         /// 中继节点id列表
         /// </summary>
-        public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
+        public Memory<ulong> RelayId { get; set; }
         /// <summary>
         /// 中继节点id列表，读取用
         /// </summary>
-        public Memory<byte> RelayIds { get; set; } = Helper.EmptyArray;
+        public Memory<byte> RelayIds { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public byte RelayIdLength { get; private set; } = 0;
+        public byte RelayIdLength { get; private set; }
         /// <summary>
         /// 
         /// </summary>
-        public byte RelayIdIndex { get; private set; } = 0;
+        public byte RelayIdIndex { get; private set; }
 
         /// <summary>
         /// 数据荷载
         /// </summary>
-        public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
+        public Memory<byte> Payload { get; set; }
         #endregion
 
         public IConnection Connection { get; set; }
@@ -205,7 +196,7 @@ namespace common.server.model
     /// <summary>
     /// 回执消息包
     /// </summary>
-    public sealed class MessageResponseWrap : IMessage
+    public sealed class MessageResponseWrap
     {
         /// <summary>
         /// 
@@ -214,20 +205,16 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public MessageResponeCodes Code { get; set; } = MessageResponeCodes.OK;
+        public MessageResponeCodes Code { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public uint RequestId { get; set; } = 0;
+        public uint RequestId { get; set; }
 
         /// <summary>
-        /// 不可用
-        /// </summary>
-        public ulong[] RelayId { get; set; } = Helper.EmptyUlongArray;
-        /// <summary>
         /// 
         /// </summary>
-        public Memory<byte> RelayIds { get; set; } = Helper.EmptyArray;
+        public Memory<byte> RelayIds { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -239,7 +226,7 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public Memory<byte> Payload { get; set; } = Helper.EmptyArray;
+        public Memory<byte> Payload { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -400,33 +387,70 @@ namespace common.server.model
         RESPONSE = 1
     }
 
-
-    public class ObjectPool
+    /*
+    public class ObjectPool<T> where T : class
     {
-        private readonly ConcurrentBag<IMessage> _objects;
-        private readonly Func<IMessage> _objectGenerator;
+        private readonly ConcurrentBag<T> _objects;
+        private readonly Func<T> _objectGenerator;
 
-        public ObjectPool(Func<IMessage> objectGenerator)
+        public ObjectPool(Func<T> objectGenerator)
         {
             _objectGenerator = objectGenerator ?? throw new ArgumentNullException(nameof(objectGenerator));
-            _objects = new ConcurrentBag<IMessage>();
+            _objects = new ConcurrentBag<T>();
         }
 
-        public IMessage Get() => _objects.TryTake(out IMessage item) ? item : _objectGenerator();
+        public T Get() => _objects.TryTake(out T item) ? item : _objectGenerator();
 
-        public void Return(IMessage item)
+        public virtual void Return(T item)
         {
-
             if (_objects.Count < 100)
             {
-                item.RelayIds = Helper.EmptyArray;
-                item.RelayId = Helper.EmptyUlongArray;
-                item.Connection = null;
-                item.Payload = Helper.EmptyArray;
-                item.RequestId = 0;
-
                 _objects.Add(item);
             }
         }
     }
+
+    public class ObjectPoolRequest : ObjectPool<MessageRequestWrap>
+    {
+        public ObjectPoolRequest() : base(() =>
+        {
+            return new MessageRequestWrap();
+        })
+        {
+        }
+
+        public override void Return(MessageRequestWrap item)
+        {
+            item.RelayIds = Helper.EmptyArray;
+            item.RelayId = Helper.EmptyUlongArray;
+            item.Connection = null;
+            item.Payload = Helper.EmptyArray;
+            item.RequestId = 0;
+            item.MessengerId = 0;
+            item.Reply = false;
+            base.Return(item);
+        }
+    }
+
+    public class ObjectPoolResponse : ObjectPool<MessageResponseWrap>
+    {
+        public ObjectPoolResponse() : base(() =>
+        {
+            return new MessageResponseWrap();
+        })
+        {
+        }
+
+        public override void Return(MessageResponseWrap item)
+        {
+            item.RelayIds = Helper.EmptyArray;
+            item.Connection = null;
+            item.Payload = Helper.EmptyArray;
+            item.Code = MessageResponeCodes.OK;
+            item.RequestId = 0;
+            base.Return(item);
+        }
+    }
+    */
 }
+

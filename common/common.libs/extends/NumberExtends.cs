@@ -99,6 +99,18 @@ namespace common.libs.extends
                 new Span<byte>(p, value.Length * 8).CopyTo(memory.Span);
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="memory"></param>
+        public static unsafe void ToBytes(this Memory<ulong> value, Memory<byte> memory)
+        {
+            fixed (void* p = &value.Span[0])
+            {
+                new Span<byte>(p, value.Length * 8).CopyTo(memory.Span);
+            }
+        }
 
         /// <summary>
         /// 

@@ -45,7 +45,6 @@ namespace client.realize.messengers.crypto
                     {
                         Connection = tcp ?? udp,
                         MessengerId = (ushort)CryptoMessengerIds.Key,
-                        Payload = Helper.EmptyArray
                     }).ConfigureAwait(false);
                     if (publicKeyResponse.Code != MessageResponeCodes.OK)
                     {

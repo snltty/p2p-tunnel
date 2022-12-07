@@ -177,7 +177,7 @@ namespace common.server
                     return;
                 }
 
-                byte[] resultObject = Helper.EmptyArray;
+                Memory<byte> resultObject = null;
                 if (plugin.IsTask)
                 {
                     if (plugin.IsTaskResult)

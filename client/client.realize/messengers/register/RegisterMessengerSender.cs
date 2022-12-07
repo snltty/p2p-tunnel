@@ -125,7 +125,6 @@ namespace client.realize.messengers.register
             return await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = registerState.OnlineConnection,
-                Payload = Helper.EmptyArray,
                 MessengerId = (ushort)RegisterMessengerIds.Notify,
             }).ConfigureAwait(false);
         }
@@ -138,7 +137,6 @@ namespace client.realize.messengers.register
             await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = registerState.OnlineConnection,
-                Payload = Helper.EmptyArray,
                 MessengerId = (ushort)RegisterMessengerIds.SignOut,
                 Timeout = 2000
             }).ConfigureAwait(false);

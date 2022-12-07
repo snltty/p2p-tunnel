@@ -7,7 +7,7 @@ namespace common.libs
     /// </summary>
     public sealed class ReceiveDataBuffer
     {
-        private Memory<byte> items { get; set; } = Helper.EmptyArray.AsMemory();
+        private Memory<byte> items { get; set; }
         private int size = 0;
         /// <summary>
         /// 

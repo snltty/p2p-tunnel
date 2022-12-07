@@ -60,7 +60,6 @@ namespace client.realize.messengers.relay
                 MessengerId = (ushort)RelayMessengerIds.Delay,
                 Connection = connection,
                 Timeout = 1000,
-                Payload = Helper.EmptyArray,
                 RelayId = relayids
             }).ConfigureAwait(false);
             return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
@@ -75,8 +74,7 @@ namespace client.realize.messengers.relay
             return await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)RelayMessengerIds.AskConnects,
-                Connection = registerStateInfo.OnlineConnection,
-                Payload = Helper.EmptyArray,
+                Connection = registerStateInfo.OnlineConnection
             }).ConfigureAwait(false);
         }
         /// <summary>
