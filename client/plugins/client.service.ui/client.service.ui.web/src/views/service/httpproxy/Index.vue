@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-05 10:47:32
+ * @LastEditTime: 2022-12-08 09:52:44
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\httpproxy\Index.vue
@@ -101,7 +101,7 @@ export default {
                 const json = res || {
                     ID: 0,
                     Port: 5412,
-                    ForwardType: 2,
+                    ForwardType: 1,
                     AliveType: 2,
                     Name: '',
                     Listening: false,
@@ -142,7 +142,7 @@ export default {
             form: {
                 ID: 0,
                 Port: 5413,
-                ForwardType: 2,
+                ForwardType: 1,
                 AliveType: 2,
                 Name: '',
                 Listening: false,

@@ -2,7 +2,6 @@
 using common.libs.extends;
 using common.server;
 using System;
-using System.ComponentModel;
 using System.Net;
 
 namespace common.udpforward
@@ -20,7 +19,7 @@ namespace common.udpforward
         /// <summary>
         /// 
         /// </summary>
-        public ushort SourcePort { get; set; } = 0;
+        public ushort SourcePort { get; set; }
 
         /// <summary>
         /// 来源地址，是谁发的数据，目标端回复的时候知道回复给谁
@@ -33,7 +32,7 @@ namespace common.udpforward
         /// <summary>
         /// 发送的数据
         /// </summary>
-        public Memory<byte> Buffer { get; set; } = Helper.EmptyArray;
+        public Memory<byte> Buffer { get; set; }
 
         /// <summary>
         /// 
@@ -46,33 +45,32 @@ namespace common.udpforward
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var sourceIpBytes = SourceEndpoint.Address.GetAddressBytes();
-            var sourcePortBytes = SourceEndpoint.Port.ToBytes();
+            int ipLength = SourceEndpoint.Address.Length();
 
             var bytes = new byte[
-                1 + sourceIpBytes.Length + 2 + // endpoint
+                1 + ipLength + 2 + // endpoint
                 1 + TargetEndpoint.Length + // endpoint
                 Buffer.Length
             ];
+            var memory = bytes.AsMemory();
 
             int index = 0;
 
-            bytes[index] = (byte)sourceIpBytes.Length;
+            bytes[index] = (byte)ipLength;
             index++;
 
-            Array.Copy(sourceIpBytes, 0, bytes, index, sourceIpBytes.Length);
-            index += sourceIpBytes.Length;
+            SourceEndpoint.Address.TryWriteBytes(memory.Slice(index).Span,out _);
+            index += ipLength;
 
-            bytes[index] = sourcePortBytes[0];
-            bytes[index + 1] = sourcePortBytes[1];
+            SourceEndpoint.Port.ToBytes(memory.Slice(index));
             index += 2;
 
             bytes[index] = (byte)TargetEndpoint.Length;
             index++;
-            TargetEndpoint.CopyTo(bytes.AsMemory(index, TargetEndpoint.Length));
+            TargetEndpoint.CopyTo(memory.Slice(index));
             index += TargetEndpoint.Length;
 
-            Buffer.CopyTo(bytes.AsMemory(index, Buffer.Length));
+            Buffer.CopyTo(memory.Slice(index));
             index += Buffer.Length;
             return bytes;
         }

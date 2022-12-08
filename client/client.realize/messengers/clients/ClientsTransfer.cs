@@ -629,7 +629,7 @@ namespace client.realize.messengers.clients
         /// <param name="relayids"></param>
         /// <param name="notify"></param>
         /// <returns></returns>
-        public async Task Relay(IConnection sourceConnection, ulong[] relayids, bool notify = false)
+        public async Task Relay(IConnection sourceConnection, Memory<ulong> relayids, bool notify = false)
         {
             if (relayids.Length < 3)
             {
@@ -656,8 +656,8 @@ namespace client.realize.messengers.clients
                 }
             }
 
-            ClientConnectTypes relayType = relayids[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
-            clientInfoCaching.Online(relayids[^1], connection, relayType, notify == false ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active, (ulong)TunnelDefaults.MIN);
+            ClientConnectTypes relayType = relayids.Span[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
+            clientInfoCaching.Online(relayids.Span[^1], connection, relayType, notify == false ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active, (ulong)TunnelDefaults.MIN);
         }
 
         /// <summary>

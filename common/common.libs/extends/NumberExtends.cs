@@ -255,6 +255,7 @@ namespace common.libs.extends
             }
         }
 
+        #region 反序列化
 
         /// <summary>
         /// 
@@ -452,6 +453,6 @@ namespace common.libs.extends
         {
             return BitConverter.ToUInt16(span);
         }
-
+        #endregion
     }
 }

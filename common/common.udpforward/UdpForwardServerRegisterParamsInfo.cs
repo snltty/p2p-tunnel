@@ -18,19 +18,19 @@ namespace common.udpforward
         /// <summary>
         /// 
         /// </summary>
-        public ushort SourcePort { get; set; } = 8080;
+        public ushort SourcePort { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public string TargetName { get; set; } = string.Empty;
+        public string TargetName { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public string TargetIp { get; set; } = IPAddress.Loopback.ToString();
+        public string TargetIp { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ushort TargetPort { get; set; } = 8080;
+        public ushort TargetPort { get; set; }
 
         /// <summary>
         /// 
@@ -38,22 +38,18 @@ namespace common.udpforward
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            byte[] sportBytes = SourcePort.ToBytes();
-            byte[] tportBytes = TargetPort.ToBytes();
-
             byte[] tipBytes = TargetIp.ToBytes();
             byte[] tnameBytes = TargetName.ToBytes();
 
             byte[] bytes = new byte[2 + 2 + 1 + tipBytes.Length + 1 + tnameBytes.Length];
+            var memory = bytes.AsMemory();
 
             int index = 0;
 
-            bytes[index] = sportBytes[0];
-            bytes[index + 1] = sportBytes[1];
+            SourcePort.ToBytes(memory.Slice(index));
             index += 2;
 
-            bytes[index] = tportBytes[0];
-            bytes[index + 1] = tportBytes[1];
+            TargetPort.ToBytes(memory.Slice(index));
             index += 2;
 
 
@@ -103,11 +99,11 @@ namespace common.udpforward
         /// <summary>
         /// 
         /// </summary>
-        public ulong ID { get; set; } = 0;
+        public ulong ID { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public string Msg { get; set; } = string.Empty;
+        public string Msg { get; set; }
 
         /// <summary>
         /// 
@@ -115,16 +111,20 @@ namespace common.udpforward
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var idBytes = ID.ToBytes();
             var msgBytes = Msg.ToBytes();
-            var bytes = new byte[1 + 8 + 1 + msgBytes.Length];
+            var bytes = new byte[
+                1
+                + 8
+                + 1 + msgBytes.Length
+            ];
+            var memory = bytes.AsMemory();
 
             int index = 0;
 
             bytes[index] = (byte)Code;
             index += 1;
 
-            Array.Copy(idBytes, 0, bytes, index, msgBytes.Length);
+            ID.ToBytes(memory.Slice(index));
             index += 8;
 
             bytes[index] = (byte)msgBytes.Length;

@@ -23,11 +23,11 @@ namespace common.socks5
         /// <summary>
         /// 版本
         /// </summary>
-        public byte Version { get; set; } = 0;
+        public byte Version { get; set; }
         /// <summary>
         /// 请求id
         /// </summary>
-        public uint Id { get; set; } = 0;
+        public uint Id { get; set; }
         /// <summary>
         /// 来源地址，数据从目标端回来的时候回给谁
         /// </summary>
@@ -55,45 +55,43 @@ namespace common.socks5
         public byte[] ToBytes()
         {
             int length = 1 + 4 + 1 + 1 + Data.Length, index = 1;
-            byte[] ipBytes = Helper.EmptyArray;
+            int sepLength = 0, tepLength = 0;
             if (SourceEP != null)
             {
-                ipBytes = SourceEP.Address.GetAddressBytes();
-                length += ipBytes.Length + 2;
+                sepLength = SourceEP.Address.Length();
+                length += sepLength + 2;
             }
 
-            byte[] targetipBytes = Helper.EmptyArray;
             if (TargetEP != null)
             {
-                targetipBytes = TargetEP.Address.GetAddressBytes();
-                length += targetipBytes.Length + 2;
+                tepLength = TargetEP.Address.Length();
+                length += tepLength + 2;
             }
 
             byte[] bytes = new byte[length];
+            var span = bytes.AsSpan();
             bytes[0] = (byte)((byte)Socks5Step << 4 | Version);
 
             Id.ToBytes(bytes.AsMemory(index));
             index += 4;
 
-            bytes[index] = 0;
+            bytes[index] = (byte)(sepLength + 2);
             index += 1;
-            if (ipBytes.Length > 0)
+            if (sepLength >0 )
             {
-                bytes[index - 1] = (byte)(ipBytes.Length + 2);
-                Array.Copy(ipBytes, 0, bytes, index, ipBytes.Length);
-                index += ipBytes.Length;
+                SourceEP.Address.TryWriteBytes(span.Slice(index), out _);
+                index += sepLength;
 
                 ((ushort)SourceEP.Port).ToBytes(bytes.AsMemory(index));
                 index += 2;
             }
 
-            bytes[index] = 0;
+            bytes[index] = (byte)(tepLength + 2);
             index += 1;
-            if (targetipBytes.Length > 0)
+            if (tepLength > 0)
             {
-                bytes[index - 1] = (byte)(targetipBytes.Length + 2);
-                Array.Copy(targetipBytes, 0, bytes, index, targetipBytes.Length);
-                index += targetipBytes.Length;
+                TargetEP.Address.TryWriteBytes(span.Slice(index),out _);
+                index += tepLength;
 
                 ((ushort)TargetEP.Port).ToBytes(bytes.AsMemory(index));
                 index += 2;

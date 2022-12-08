@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-17 15:03:03
+ * @LastEditTime: 2022-12-08 09:52:35
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\tcpforward\AddListen.vue
@@ -49,7 +49,7 @@ export default {
                 Port: addListenData.value.Port || 0,
                 AliveType: (addListenData.value.AliveType || '1') + '',
                 Desc: addListenData.value.Desc || '',
-                ForwardType: 1,
+                ForwardType: 0,
             },
             rules: {
                 Port: [

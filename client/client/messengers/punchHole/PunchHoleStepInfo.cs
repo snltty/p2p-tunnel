@@ -15,42 +15,42 @@ namespace client.messengers.punchHole
         /// 
         /// </summary>
         [Description("UDP打洞")]
-        UDP = 1,
+        UDP = 0,
         /// <summary>
         /// 
         /// </summary>
         [Description("IP欺骗打洞")]
-        TCP_NUTSSA = 2,
+        TCP_NUTSSA = 1,
         /// <summary>
         /// 
         /// </summary>
         [Description("端口复用打洞")]
-        TCP_NUTSSB = 4,
+        TCP_NUTSSB = 2,
         /// <summary>
         /// 
         /// </summary>
         [Description("反向链接")]
-        REVERSE = 8,
+        REVERSE = 4,
         /// <summary>
         /// 
         /// </summary>
         [Description("重启")]
-        RESET = 16,
+        RESET = 8,
         /// <summary>
         /// 
         /// </summary>
         [Description("中继")]
-        RELAY = 32,
+        RELAY = 16,
         /// <summary>
         /// 
         /// </summary>
         [Description("创建通道")]
-        TUNNEL = 64,
+        TUNNEL = 32,
         /// <summary>
         /// 
         /// </summary>
         [Description("掉线")]
-        OFFLINE = 128,
+        OFFLINE = 64,
     }
 
     /// <summary>
@@ -85,7 +85,7 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
+        public PunchHoleTypes PunchType { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -93,7 +93,7 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public byte Step { get; set; } = 0;
+        public byte Step { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -127,7 +127,7 @@ namespace client.messengers.punchHole
        /// <summary>
        /// 
        /// </summary>
-        public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
+        public PunchHoleTypes PunchType { get; set; }
 
         /// <summary>
         /// 
@@ -137,7 +137,7 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public byte Step { get; set; } = 0;
+        public byte Step { get; set; }
 
         /// <summary>
         /// 
@@ -171,17 +171,17 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
+        public PunchHoleTypes PunchType { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.FORWARD;
+        public PunchForwardTypes ForwardType { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public byte Step { get; set; } = 0;
+        public byte Step { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -214,15 +214,15 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
+        public PunchHoleTypes PunchType { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.FORWARD;
+        public PunchForwardTypes ForwardType { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public byte Step { get; set; } = 0;
+        public byte Step { get; set; }
 
         /// <summary>
         /// 
@@ -258,16 +258,16 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
+        public PunchHoleTypes PunchType { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.FORWARD;
+        public PunchForwardTypes ForwardType { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public byte Step { get; set; } = 0;
+        public byte Step { get; set; }
 
         /// <summary>
         /// 
@@ -308,17 +308,17 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.FORWARD;
+        public PunchForwardTypes ForwardType { get; set; } 
 
         /// <summary>
         /// 
         /// </summary>
-        public byte Step { get; set; } = 0;
+        public byte Step { get; set; } 
 
         /// <summary>
         /// 4个位，表示两边的tcp udp打洞情况
         /// </summary>
-        public byte Value { get; set; } = 0;
+        public byte Value { get; set; }
 
         /// <summary>
         /// 
@@ -360,12 +360,12 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public PunchForwardTypes ForwardType { get; private set; } = PunchForwardTypes.FORWARD;
+        public PunchForwardTypes ForwardType { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public byte Step { get; set; } = 0;
+        public byte Step { get; set; }
 
         /// <summary>
         /// 
@@ -405,12 +405,12 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public PunchForwardTypes ForwardType { get; private set; } = PunchForwardTypes.FORWARD;
+        public PunchForwardTypes ForwardType { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public byte Step { get; set; } = 0;
+        public byte Step { get; set; }
 
         /// <summary>
         /// 
@@ -450,17 +450,17 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 
         /// </summary>
-        public PunchForwardTypes ForwardType { get; private set; } = PunchForwardTypes.FORWARD;
+        public PunchForwardTypes ForwardType { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public byte Step { get; set; } = 0;
+        public byte Step { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public ulong TunnelName { get; set; } = 0;
+        public ulong TunnelName { get; set; }
 
         /// <summary>
         /// 
@@ -468,13 +468,17 @@ namespace client.messengers.punchHole
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var tunnelNameBytes = TunnelName.ToBytes();
             var bytes = new byte[12];
-            bytes[0] = (byte)PunchType;
-            bytes[1] = (byte)ForwardType;
-            bytes[2] = Step;
 
-            Array.Copy(tunnelNameBytes, 0, bytes, 4, tunnelNameBytes.Length);
+            int index = 0;
+            bytes[index] = (byte)PunchType;
+            index += 1;
+            bytes[index] = (byte)ForwardType;
+            index += 1;
+            bytes[index] = Step;
+            index += 1;
+
+            TunnelName.ToBytes(bytes.AsMemory(index));
 
             return bytes;
         }

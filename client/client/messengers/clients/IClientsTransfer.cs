@@ -1,4 +1,5 @@
 ﻿using common.server;
+using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
@@ -63,6 +64,6 @@ namespace client.messengers.clients
         /// <param name="relayids">中继线路</param>
         /// <param name="notify">是否通知对方</param>
         /// <returns></returns>
-        public Task Relay(IConnection sourceConnection, ulong[] relayids, bool notify = false);
+        public Task Relay(IConnection sourceConnection, Memory<ulong> relayids, bool notify = false);
     }
 }

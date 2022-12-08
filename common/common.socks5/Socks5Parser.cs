@@ -142,17 +142,17 @@ namespace common.socks5
         {
             //VER REP  RSV ATYPE BND.ADDR BND.PORT
 
-            byte[] ipaddress = remoteEndPoint.Address.GetAddressBytes();
             byte[] port = remoteEndPoint.Port.ToBytes();
 
-            byte[] res = new byte[6 + ipaddress.Length];
+            byte[] res = new byte[6 + remoteEndPoint.Address.Length()];
+            var span = res.AsSpan();
 
             res[0] = 5;
             res[1] = responseCommand;
             res[2] = 0;
-            res[3] = (byte)(ipaddress.Length == 4 ? Socks5EnumAddressType.IPV4 : Socks5EnumAddressType.IPV6);
+            res[3] = (byte)(remoteEndPoint.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? Socks5EnumAddressType.IPV4 : Socks5EnumAddressType.IPV6);
 
-            Array.Copy(ipaddress, 0, res, 4, ipaddress.Length);
+            remoteEndPoint.Address.TryWriteBytes(span.Slice(4),out _);
 
             res[res.Length - 2] = port[1];
             res[res.Length - 1] = port[0];
@@ -170,19 +170,20 @@ namespace common.socks5
             //RSV FRAG ATYPE DST.ADDR DST.PORT DATA
             //RSV占俩字节
 
-            byte[] ipaddress = remoteEndPoint.Address.GetAddressBytes();
+            int ipLength = remoteEndPoint.Address.Length();
             byte[] port = remoteEndPoint.Port.ToBytes();
-            byte[] res = new byte[4 + ipaddress.Length + 2 + data.Length];
+            byte[] res = new byte[4 + ipLength + 2 + data.Length];
+            var span = res.AsSpan();
 
             res[0] = 0;
             res[1] = 0;
             res[2] = 0; //FRAG
-            res[3] = (byte)(ipaddress.Length == 4 ? Socks5EnumAddressType.IPV4 : Socks5EnumAddressType.IPV6);
+            res[3] = (byte)(ipLength == 4 ? Socks5EnumAddressType.IPV4 : Socks5EnumAddressType.IPV6);
 
             int index = 4;
 
-            Array.Copy(ipaddress, 0, res, index, ipaddress.Length);
-            index += ipaddress.Length;
+            remoteEndPoint.Address.TryWriteBytes(span.Slice(index),out _);
+            index += ipLength;
 
             res[index] = port[1];
             res[index + 1] = port[0];

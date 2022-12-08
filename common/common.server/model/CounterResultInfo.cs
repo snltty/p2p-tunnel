@@ -11,35 +11,35 @@ namespace common.server.model
         /// <summary>
         /// 在线人数
         /// </summary>
-        public int OnlineCount { get; set; } = 0;
+        public int OnlineCount { get; set; }
         /// <summary>
         /// cpu使用率
         /// </summary>
-        public double Cpu { get; set; } = 0;
+        public double Cpu { get; set; }
         /// <summary>
         /// 内存
         /// </summary>
-        public double Memory { get; set; } = 0;
+        public double Memory { get; set; }
         /// <summary>
         /// 运行时间
         /// </summary>
-        public int RunTime { get; set; } = 0;
+        public int RunTime { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public long TcpSendBytes { get; set; } = 0;
+        public long TcpSendBytes { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public long TcpReceiveBytes { get; set; } = 0;
+        public long TcpReceiveBytes { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public long UdpSendBytes { get; set; } = 0;
+        public long UdpSendBytes { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public long UdpReceiveBytes { get; set; } = 0;
+        public long UdpReceiveBytes { get; set; }
 
         /// <summary>
         /// 
@@ -48,39 +48,32 @@ namespace common.server.model
         public byte[] ToBytes()
         {
             var bytes = new byte[4 + 8 + 8 + 4 + 8 + 8 + 8 + 8];
+            var memory = bytes.AsMemory();
             int index = 0;
 
-            var onlineCountBytes = OnlineCount.ToBytes();
-            Array.Copy(onlineCountBytes, 0, bytes, index, onlineCountBytes.Length);
-            index += onlineCountBytes.Length;
+            OnlineCount.ToBytes(memory.Slice(index));
+            index += 4;
 
-            var cpuBytes = Cpu.ToBytes();
-            Array.Copy(cpuBytes, 0, bytes, index, cpuBytes.Length);
-            index += cpuBytes.Length;
+            Cpu.ToBytes(memory.Slice(index));
+            index += 8;
 
-            var memoryBytes = Memory.ToBytes();
-            Array.Copy(memoryBytes, 0, bytes, index, memoryBytes.Length);
-            index += memoryBytes.Length;
+            Memory.ToBytes(memory.Slice(index));
+            index += 8;
 
-            var tuntimeBytes = RunTime.ToBytes();
-            Array.Copy(tuntimeBytes, 0, bytes, index, tuntimeBytes.Length);
-            index += tuntimeBytes.Length;
+            RunTime.ToBytes(memory.Slice(index));
+            index += 4;
 
-            var tcpsendBytes = TcpSendBytes.ToBytes();
-            Array.Copy(tcpsendBytes, 0, bytes, index, tcpsendBytes.Length);
-            index += tcpsendBytes.Length;
+            TcpSendBytes.ToBytes(memory.Slice(index));
+            index += 8;
 
-            var tcpreceiveBytes = TcpReceiveBytes.ToBytes();
-            Array.Copy(tcpreceiveBytes, 0, bytes, index, tcpreceiveBytes.Length);
-            index += tcpreceiveBytes.Length;
+            TcpReceiveBytes.ToBytes(memory.Slice(index));
+            index += 8;
 
-            var udpsendBytes = UdpSendBytes.ToBytes();
-            Array.Copy(udpsendBytes, 0, bytes, index, udpsendBytes.Length);
-            index += udpsendBytes.Length;
+            UdpSendBytes.ToBytes(memory.Slice(index));
+            index += 8;
 
-            var udpreceiveBytes = UdpReceiveBytes.ToBytes();
-            Array.Copy(udpreceiveBytes, 0, bytes, index, udpreceiveBytes.Length);
-            index += udpreceiveBytes.Length;
+            UdpReceiveBytes.ToBytes(memory.Slice(index));
+            index += 8;
 
             return bytes;
         }

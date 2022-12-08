@@ -561,23 +561,21 @@ namespace client.service.vea
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var ip = IP.GetAddressBytes();
-
-            var bytes = new byte[1 + ip.Length + 1 + LanIPs.Length * 4];
+            var bytes = new byte[1 + 4 + 1 + LanIPs.Length * 4];
+            var span = bytes.AsSpan();
 
             int index = 0;
-            bytes[index] = (byte)ip.Length;
+            bytes[index] = 4;
             index += 1;
-            Array.Copy(ip, 0, bytes, 1, ip.Length);
-            index += ip.Length;
+            IP.TryWriteBytes(span.Slice(index), out _);
+            index += 4;
 
             bytes[index] = (byte)LanIPs.Length;
             index += 1;
             for (int i = 0; i < LanIPs.Length; i++)
             {
-                var lanip = LanIPs[i].GetAddressBytes();
-                Array.Copy(lanip, 0, bytes, index, lanip.Length);
-                index += lanip.Length;
+                LanIPs[i].TryWriteBytes(span.Slice(index), out _);
+                index += 4;
             }
 
             return bytes;

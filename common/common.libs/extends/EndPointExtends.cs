@@ -28,11 +28,11 @@ namespace common.libs.extends
         /// </summary>
         /// <param name="adress"></param>
         /// <returns></returns>
-        public static bool IsLan(this IPAddress adress)
+        public static bool IsLan(this IPAddress address)
         {
-            if (adress == null) return false;
+            if (address == null) return false;
 
-            var bytes = adress.GetAddressBytes().AsSpan();
+            var bytes = address.GetAddressBytes().AsSpan();
             if (bytes.Length == 4)
             {
                 return bytes[0] == 127
@@ -46,22 +46,11 @@ namespace common.libs.extends
                 || (bytes[0] == ipv6Local.Span[0] && bytes[1] == ipv6Local.Span[1]);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ep"></param>
-        /// <returns></returns>
-        public static byte[] GetAddressBytes(this IPEndPoint ep)
+        public static int Length(this IPAddress address)
         {
-            var addressBytes = ep.Address.GetAddressBytes();
-            var portBytes = ep.Port.ToBytes();
-
-            var bytes = new byte[addressBytes.Length + 2];
-            addressBytes.AsSpan().CopyTo(bytes);
-            bytes[addressBytes.Length] = portBytes[0];
-            bytes[addressBytes.Length + 1] = portBytes[1];
-
-            return bytes;
+            if (address == null) return 0;
+            else if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) return 4;
+            return 16;
         }
     }
 }

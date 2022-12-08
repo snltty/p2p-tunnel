@@ -35,13 +35,12 @@ namespace common.server.model
             }
 
             int index = 0;
-            var lengthBytes = dataLength.ToBytes();
-            length += lengthBytes.Length;
+            length += 4;
 
             var bytes = new byte[length];
 
-            Array.Copy(lengthBytes, 0, bytes, index, lengthBytes.Length);
-            index += lengthBytes.Length;
+            dataLength.ToBytes(bytes);
+            index += 4;
 
             for (int i = 0; i < dataBytes.Length; i++)
             {
@@ -82,21 +81,21 @@ namespace common.server.model
         /// <summary>
         /// id
         /// </summary>
-        public ulong Id { get; set; } = 0;
+        public ulong Id { get; set; }
         /// <summary>
         /// 名字
         /// </summary>
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
         /// <summary>
         /// 权限
         /// </summary>
-        public uint Access { get; set; } = 0;
+        public uint Access { get; set; }
 
         /// <summary>
         /// 连接对象
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
-        public IConnection Connection { get; set; } = null;
+        public IConnection Connection { get; set; } 
 
         /// <summary>
         /// 
@@ -104,22 +103,21 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var idBytes = Id.ToBytes();
             var nameBytes = Name.ToBytes();
-            var clientAccessBytes = Access.ToBytes();
 
             var bytes = new byte[
                 4
                 + 8
                 + 1 + nameBytes.Length
                 ];
+            var memory = bytes.AsMemory();
 
             int index = 0;
 
-            Array.Copy(clientAccessBytes, 0, bytes, index, clientAccessBytes.Length);
+            Access.ToBytes(memory.Slice(index));
             index += 4;
 
-            Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
+            Id.ToBytes(memory.Slice(index));
             index += 8;
 
             bytes[index] = (byte)nameBytes.Length;

@@ -2,6 +2,7 @@
 using common.server;
 using System;
 using System.ComponentModel;
+using System.Linq;
 
 namespace common.tcpforward
 {
@@ -93,16 +94,15 @@ namespace common.tcpforward
              */
 
 
-            byte[] requestIdBytes = RequestId.ToBytes();
-
             int length =
                 1 +  //AliveType + ForwardType
                 1 + // DataType + StateType
-                 requestIdBytes.Length +
+                4 +
                 1 + TargetEndpoint.Length +
                 Buffer.Length;
 
             byte[] bytes = new byte[length];
+            var memory = bytes.AsMemory();
             int index = 0;
 
 
@@ -112,15 +112,15 @@ namespace common.tcpforward
             bytes[index] = (byte)((byte)DataType << 4 | (byte)StateType);
             index += 1;
 
-            Array.Copy(requestIdBytes, 0, bytes, index, requestIdBytes.Length);
-            index += requestIdBytes.Length;
+            RequestId.ToBytes(memory.Slice(index));
+            index += 4;
 
             bytes[index] = (byte)TargetEndpoint.Length;
             index += 1;
-            TargetEndpoint.CopyTo(bytes.AsMemory(index, TargetEndpoint.Length));
+            TargetEndpoint.CopyTo(memory.Slice(index));
             index += TargetEndpoint.Length;
 
-            Buffer.CopyTo(bytes.AsMemory(index, Buffer.Length));
+            Buffer.CopyTo(memory.Slice(index));
             index += Buffer.Length;
             return bytes;
         }
@@ -164,11 +164,11 @@ namespace common.tcpforward
         /// <summary>
         /// 连接，
         /// </summary>
-        Connect = 1,
+        Connect = 0,
         /// <summary>
         /// 转发
         /// </summary>
-        Forward = 2
+        Forward = 1
     }
 
     /// <summary>
@@ -180,15 +180,15 @@ namespace common.tcpforward
         /// <summary>
         /// 成功，
         /// </summary>
-        Success = 1,
+        Success = 0,
         /// <summary>
         /// 失败
         /// </summary>
-        Fail = 2,
+        Fail = 1,
         /// <summary>
         /// 关闭
         /// </summary>
-        Close = 4
+        Close = 2
     }
 
     /// <summary>
@@ -201,12 +201,12 @@ namespace common.tcpforward
         /// 
         /// </summary>
         [Description("转发")]
-        Forward = 1,
+        Forward = 0,
         /// <summary>
         /// 
         /// </summary>
         [Description("代理")]
-        Proxy = 2
+        Proxy = 1
     }
 
     /// <summary>
@@ -219,12 +219,12 @@ namespace common.tcpforward
         /// 
         /// </summary>
         [Description("长连接")]
-        Tunnel = 1,
+        Tunnel = 0,
         /// <summary>
         /// 
         /// </summary>
         [Description("短连接")]
-        Web = 2
+        Web = 1
     }
 
     /// <summary>

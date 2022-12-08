@@ -112,21 +112,18 @@ namespace common.server.model
         public byte[] ToBytes()
         {
             byte[] res = new byte[8 + 8 + 8 * Connects.Length];
-            Span<byte> span = res.AsSpan();
+            Memory<byte> memory = res.AsMemory();
 
             int index = 0;
 
-            ToId.ToBytes().CopyTo(span);
+            ToId.ToBytes(memory.Slice(index));
             index += 8;
 
-            Id.ToBytes().CopyTo(span.Slice(index));
+            Id.ToBytes(memory.Slice(index));
             index += 8;
 
-            for (int i = 0; i < Connects.Length; i++)
-            {
-                Connects[i].ToBytes().CopyTo(span.Slice(index));
-                index += 8;
-            }
+            Connects.AsMemory().ToBytes(memory.Slice(index));
+
             return res;
         }
 

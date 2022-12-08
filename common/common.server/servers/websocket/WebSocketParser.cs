@@ -182,19 +182,16 @@ namespace common.server.servers.websocket
             }
 
             byte payloadLength;
-            byte[] payloadLengthBytes = Helper.EmptyArray;
             int dataLength = remark.Data.Length;
             if (dataLength > ushort.MaxValue)
             {
                 length += 8;
                 payloadLength = 127;
-                payloadLengthBytes = BinaryPrimitives.ReverseEndianness(((ulong)dataLength)).ToBytes();
             }
             else if (dataLength > 125)
             {
                 length += 2;
                 payloadLength = 126;
-                payloadLengthBytes = BinaryPrimitives.ReverseEndianness(((ushort)dataLength)).ToBytes();
             }
             else
             {
@@ -203,13 +200,20 @@ namespace common.server.servers.websocket
 
 
             byte[] bytes = new byte[length];
+            var memory = bytes.AsMemory();
             bytes[0] = (byte)((byte)remark.Fin | (byte)remark.Rsv1 | (byte)remark.Rsv2 | (byte)remark.Rsv3 | (byte)remark.Opcode);
             bytes[1] = (byte)((byte)remark.Mask | payloadLength);
 
-            if (payloadLengthBytes.Length > 0)
+
+            if (dataLength > ushort.MaxValue)
             {
-                Array.Copy(payloadLengthBytes, 0, bytes, index, payloadLengthBytes.Length);
-                index += payloadLengthBytes.Length;
+                BinaryPrimitives.ReverseEndianness(((ulong)dataLength)).ToBytes(memory.Slice(index));
+                index += 8;
+            }
+            else if (dataLength > 125)
+            {
+                BinaryPrimitives.ReverseEndianness(((ushort)dataLength)).ToBytes(memory.Slice(index));
+                index += 2;
             }
 
             if (remark.Mask == WebSocketFrameInfo.EnumMask.Mask)

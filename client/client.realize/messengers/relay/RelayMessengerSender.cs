@@ -34,7 +34,7 @@ namespace client.realize.messengers.relay
         /// <param name="relayids"></param>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public async Task<bool> Relay(ulong[] relayids, IConnection connection)
+        public async Task<bool> Relay(Memory<ulong> relayids, IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {

@@ -18,35 +18,35 @@ namespace common.server.model
         /// <summary>
         /// 数据交换分两种，一种是a让服务器把a的公网数据发给b，另一种是，a把一些数据通过服务器原样交给b
         /// </summary>
-        public PunchForwardTypes PunchForwardType { get; set; } = PunchForwardTypes.NOTIFY;
+        public PunchForwardTypes PunchForwardType { get; set; }
         /// <summary>
         /// 打洞步骤，这个数据是第几步
         /// </summary>
-        public byte PunchStep { get; set; } = 0;
+        public byte PunchStep { get; set; }
         /// <summary>
         /// 打洞类别，tcp udp 或者其它
         /// </summary>
-        public byte PunchType { get; set; } = 0;
+        public byte PunchType { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public byte Index { get; set; } = 0;
+        public byte Index { get; set; }
         /// <summary>
         /// 来自谁
         /// </summary>
-        public ulong FromId { get; set; } = 0;
+        public ulong FromId { get; set; }
         /// <summary>
         /// 给谁
         /// </summary>
-        public ulong ToId { get; set; } = 0;
+        public ulong ToId { get; set; }
         /// <summary>
         /// 通道名，可能会有多个通道
         /// </summary>
-        public ulong TunnelName { get; set; } = 0;
+        public ulong TunnelName { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ulong RequestId { get; set; } = 0;
+        public ulong RequestId { get; set; }
 
         /// <summary>
         /// 携带的数
@@ -59,17 +59,19 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var fromidBytes = FromId.ToBytes();
-            var toidBytes = ToId.ToBytes();
-            var nameBytes = TunnelName.ToBytes();
-            var requestidBytes = RequestId.ToBytes();
-
             var bytes = new byte[
-                1 + 1 + 1 + 1
-                + 8 + 8
-                + nameBytes.Length + Data.Length
-                + 8
+                1  //PunchForwardType
+                + 1 //PunchStep
+                + 1   //PunchType
+                + 1 //Index
+                + 8  //FromId
+                + 8 //ToId
+                + 8 //TunnelName 
+                + 8 //RequestId
+                + Data.Length
                 ];
+            var memory = bytes.AsMemory();
+
             int index = 0;
 
             bytes[index] = (byte)PunchForwardType;
@@ -81,16 +83,17 @@ namespace common.server.model
             bytes[index] = Index;
             index += 1;
 
-            Array.Copy(fromidBytes, 0, bytes, index, fromidBytes.Length);
-            index += toidBytes.Length;
-            Array.Copy(toidBytes, 0, bytes, index, toidBytes.Length);
-            index += toidBytes.Length;
+            FromId.ToBytes(memory.Slice(index));
+            index += 8;
 
-            Array.Copy(nameBytes, 0, bytes, index, nameBytes.Length);
-            index += nameBytes.Length;
+            ToId.ToBytes(memory.Slice(index));
+            index += 8;
 
-            Array.Copy(requestidBytes, 0, bytes, index, requestidBytes.Length);
-            index += requestidBytes.Length;
+            TunnelName.ToBytes(memory.Slice(index));
+            index += 8;
+
+            RequestId.ToBytes(memory.Slice(index));
+            index += 8;
 
             Data.CopyTo(bytes.AsMemory(index));
 
@@ -156,18 +159,15 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var requestidBytes = RequestId.ToBytes();
-            var fromidBytes = FromId.ToBytes();
-            var toidBytes = ToId.ToBytes();
-
             var bytes = new byte[24];
+            var memory = bytes.AsMemory();
             int index = 0;
 
-            Array.Copy(requestidBytes, 0, bytes, index, requestidBytes.Length);
+            RequestId.ToBytes(memory.Slice(index));
             index += 8;
-            Array.Copy(fromidBytes, 0, bytes, index, fromidBytes.Length);
+            FromId.ToBytes(memory.Slice(index));
             index += 8;
-            Array.Copy(toidBytes, 0, bytes, index, toidBytes.Length);
+            ToId.ToBytes(memory.Slice(index));
             index += 8;
             return bytes;
         }
@@ -202,12 +202,12 @@ namespace common.server.model
         /// 通知
         /// </summary>
         [Description("通知A的数据给B")]
-        NOTIFY,
+        NOTIFY = 1,
         /// <summary>
         /// 转发
         /// </summary>
         [Description("原样转发")]
-        FORWARD
+        FORWARD = 0
     }
 
     /// <summary>
@@ -223,27 +223,27 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public IPAddress[] LocalIps { get; set; } = Array.Empty<IPAddress>();
+        public IPAddress[] LocalIps { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool IsDefault { get; set; } = false;
+        public bool IsDefault { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public byte Index { get; set; } = 0;
+        public byte Index { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public IPAddress Ip { get; set; } = IPAddress.Any;
+        public IPAddress Ip { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public int Port { get; set; } = 0;
+        public int Port { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public int LocalPort { get; set; } = 0;
+        public int LocalPort { get; set; }
 
         /// <summary>
         /// 
@@ -253,35 +253,32 @@ namespace common.server.model
         {
             int length = 0;
 
-            byte[][] ipsBytes = new byte[LocalIps.Length][];
             for (int i = 0; i < LocalIps.Length; i++)
             {
-                ipsBytes[i] = LocalIps[i].GetAddressBytes();
-                length += 1 + ipsBytes[i].Length;
+                length += 1 + LocalIps[i].Length();
             }
             length += 1;
 
             length += 1; //IsDefault
             length += 1; //Index
 
-            var ipBytes = Ip.GetAddressBytes();
-            length += 1 + ipBytes.Length;
+            length += 1 + Ip.Length();
 
-            var port = Port.ToBytes();
             length += 2;
-            var localport = LocalPort.ToBytes();
             length += 2;
 
 
             var bytes = new byte[length];
+            var memory = bytes.AsMemory();
+
             int index = 0;
-            bytes[index] = (byte)ipsBytes.Length;
+            bytes[index] = (byte)LocalIps.Length;
             index += 1;
-            for (int i = 0; i < ipsBytes.Length; i++)
+            for (int i = 0; i < LocalIps.Length; i++)
             {
-                bytes[index] = (byte)ipsBytes[i].Length;
-                Array.Copy(ipsBytes[i], 0, bytes, index + 1, ipsBytes[i].Length);
-                index += 1 + ipsBytes[i].Length;
+                LocalIps[i].TryWriteBytes(memory.Span.Slice(index + 1), out int ll);
+                bytes[index] = (byte)ll;
+                index += 1 + ll;
             }
 
             bytes[index] = (byte)(IsDefault ? 1 : 0);
@@ -289,16 +286,15 @@ namespace common.server.model
             bytes[index] = Index;
             index += 1;
 
-            bytes[index] = (byte)ipBytes.Length;
-            Array.Copy(ipBytes, 0, bytes, index + 1, ipBytes.Length);
-            index += 1 + ipBytes.Length;
 
+            Ip.TryWriteBytes(memory.Span.Slice(index + 1), out int l);
+            bytes[index] = (byte)l;
+            index += 1 + l;
 
-            bytes[index] = port[0];
-            bytes[index + 1] = port[1];
+            ((ushort)Port).ToBytes(memory.Slice(index));
             index += 2;
-            bytes[index] = localport[0];
-            bytes[index + 1] = localport[1];
+
+            ((ushort)LocalPort).ToBytes(memory.Slice(index));
             index += 2;
 
             return bytes;

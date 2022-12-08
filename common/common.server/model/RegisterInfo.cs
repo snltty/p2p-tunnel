@@ -1,4 +1,5 @@
-﻿using common.libs.extends;
+﻿using common.libs;
+using common.libs.extends;
 using System;
 using System.ComponentModel;
 using System.Net;
@@ -18,37 +19,37 @@ namespace common.server.model
         /// <summary>
         /// 本地ip，loopback 、LAN ip
         /// </summary>
-        public IPAddress[] LocalIps { get; set; } = Array.Empty<IPAddress>();
+        public IPAddress[] LocalIps { get; set; }
         /// <summary>
         /// 连接id，因为分两次注册，第二次带上第一次的注册后获得的id
         /// </summary>
-        public ulong Id { get; set; } = 0;
+        public ulong Id { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public byte ShortId { get; set; } = 0;
+        public byte ShortId { get; set; }
         /// <summary>
         /// 分组
         /// </summary>
-        public string GroupId { get; set; } = string.Empty;
+        public string GroupId { get; set; }
         /// <summary>
         /// 名称
         /// </summary>
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
 
         /// <summary>
         /// 本机tcp端口
         /// </summary>
-        public ushort LocalTcpPort { get; set; } = 0;
+        public ushort LocalTcpPort { get; set; }
         /// <summary>
         /// 本机udp端口
         /// </summary>
-        public ushort LocalUdpPort { get; set; } = 0;
+        public ushort LocalUdpPort { get; set; }
 
         /// <summary>
         /// 客户端自定义的权限列表
         /// </summary>
-        public uint ClientAccess { get; set; } = 0;
+        public uint ClientAccess { get; set; }
 
         /// <summary>
         /// 
@@ -56,67 +57,65 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            int length = 0;
+            int length = 1;
 
-            byte[][] ipBytes = new byte[LocalIps.Length][];
             for (int i = 0; i < LocalIps.Length; i++)
             {
-                ipBytes[i] = LocalIps[i].GetAddressBytes();
-                length += 1 + ipBytes[i].Length;
+                length += 1 + LocalIps[i].Length();
             }
-            length += 1;
 
-            var idBytes = Id.ToBytes();
-            length += 9;
-            var groupidBytes = GroupId.ToBytes();
-            length += 1 + groupidBytes.Length;
-            var nameBytes = Name.ToBytes();
-            length += 1 + nameBytes.Length;
-            var localtcpPort = LocalTcpPort.ToBytes();
-            length += 2;
-            var localudpPort = LocalUdpPort.ToBytes();
-            length += 2;
-
-            var clientAccess = ClientAccess.ToBytes();
-            length += clientAccess.Length;
+            var groupidBytes = GroupId.GetUTF16Bytes();
+            var nameBytes = Name.GetUTF16Bytes();
+            length +=
+                8 //Id
+                + 1 //ShortId
+                + 1 + 1 + groupidBytes.Length
+                + 1 + 1 + nameBytes.Length
+                + 2 //LocalTcpPort
+                + 2// LocalUdpPort
+                + 4; //ClientAccess
 
             var bytes = new byte[length];
+            var memory = bytes.AsMemory();
             int index = 0;
-            bytes[index] = (byte)ipBytes.Length;
+
+            bytes[index] = (byte)LocalIps.Length;
             index += 1;
-            for (int i = 0; i < ipBytes.Length; i++)
+            for (int i = 0; i < LocalIps.Length; i++)
             {
-                bytes[index] = (byte)ipBytes[i].Length;
-                Array.Copy(ipBytes[i], 0, bytes, index + 1, ipBytes[i].Length);
-                index += 1 + ipBytes[i].Length;
+                LocalIps[i].TryWriteBytes(memory.Span.Slice(index + 1), out int ll);
+                bytes[index] = (byte)ll;
+                index += 1 + ll;
             }
 
-            Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
+            Id.ToBytes(memory.Slice(index));
             index += 8;
             bytes[index] = ShortId;
             index += 1;
 
             bytes[index] = (byte)groupidBytes.Length;
             index += 1;
-            Array.Copy(groupidBytes, 0, bytes, index, groupidBytes.Length);
+            bytes[index] = (byte)GroupId.Length;
+            index += 1;
+            groupidBytes.CopyTo(memory.Span.Slice(index));
             index += groupidBytes.Length;
 
             bytes[index] = (byte)nameBytes.Length;
             index += 1;
-            Array.Copy(nameBytes, 0, bytes, index, nameBytes.Length);
+            bytes[index] = (byte)Name.Length;
+            index += 1;
+            nameBytes.CopyTo(memory.Span.Slice(index));
             index += nameBytes.Length;
 
 
-            bytes[index] = localtcpPort[0];
-            bytes[index + 1] = localtcpPort[1];
+            LocalTcpPort.ToBytes(memory.Slice(index));
             index += 2;
 
-            bytes[index] = localudpPort[0];
-            bytes[index + 1] = localudpPort[1];
+            LocalUdpPort.ToBytes(memory.Slice(index));
             index += 2;
 
-            Array.Copy(clientAccess, 0, bytes, index, clientAccess.Length);
-            index += clientAccess.Length;
+            ClientAccess.ToBytes(memory.Slice(index));
+            index += 4;
 
             return bytes;
 
@@ -144,10 +143,10 @@ namespace common.server.model
             ShortId = span[index];
             index += 1;
 
-            GroupId = span.Slice(index + 1, span[index]).GetString();
+            GroupId = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
             index += 1 + span[index];
 
-            Name = span.Slice(index + 1, span[index]).GetString();
+            Name = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
             index += 1 + span[index];
 
             LocalTcpPort = span.Slice(index, 2).ToUInt16();
@@ -173,38 +172,38 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public RegisterResultInfoCodes Code { get; set; } = RegisterResultInfoCodes.OK;
+        public RegisterResultInfoCodes Code { get; set; }
 
         /// <summary>
         /// 服务器是否支持中继
         /// </summary>
-        public bool Relay { get; set; } = false;
+        public bool Relay { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public ushort UdpPort { get; set; } = 0;
+        public ushort UdpPort { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ushort TcpPort { get; set; } = 0;
+        public ushort TcpPort { get; set; }
 
         /// <summary>
         /// 连接id
         /// </summary>
-        public ulong Id { get; set; } = 0;
+        public ulong Id { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public byte ShortId { get; set; } = 0;
+        public byte ShortId { get; set; }
         /// <summary>
         /// 连接ip
         /// </summary>
-        public IPAddress Ip { get; set; } = IPAddress.Any;
+        public IPAddress Ip { get; set; }
         /// <summary>
         /// 连接分组
         /// </summary>
-        public string GroupId { get; set; } = string.Empty;
+        public string GroupId { get; set; }
 
         /// <summary>
         /// 
@@ -212,19 +211,17 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var udpPortBytes = UdpPort.ToBytes();
-            var tcpPortBytes = TcpPort.ToBytes();
-            var idBytes = Id.ToBytes();
-            var ipBytes = Ip.GetAddressBytes();
-            var groupIdBytes = GroupId.ToBytes();
+            var groupIdBytes = GroupId.GetUTF16Bytes();
 
             var bytes = new byte[
                 1 //Code
                 + 1//Relay
                 + 2 + 2 //port
                 + 9 //id
-                + 1 + ipBytes.Length
-                + groupIdBytes.Length];
+                + 1 + Ip.Length()
+                + 1 + groupIdBytes.Length];
+
+            var memory = bytes.AsMemory();
 
             int index = 0;
             bytes[index] = (byte)Code;
@@ -233,24 +230,23 @@ namespace common.server.model
             bytes[index] = (byte)(Relay ? 1 : 0);
             index += 1;
 
-            bytes[index] = udpPortBytes[0];
-            bytes[index + 1] = udpPortBytes[1];
+            UdpPort.ToBytes(memory.Slice(index));
             index += 2;
 
-            bytes[index] = tcpPortBytes[0];
-            bytes[index + 1] = tcpPortBytes[1];
+            TcpPort.ToBytes(memory.Slice(index));
             index += 2;
 
-            Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
+            Id.ToBytes(memory.Slice(index));
             index += 8;
             bytes[index] = ShortId;
             index += 1;
 
-            bytes[index] = (byte)ipBytes.Length;
-            Array.Copy(ipBytes, 0, bytes, index + 1, ipBytes.Length);
-            index += 1 + ipBytes.Length;
+            Ip.TryWriteBytes(memory.Span.Slice(index + 1), out int ll);
+            bytes[index] = (byte)ll;
+            index += 1 + ll;
 
-            Array.Copy(groupIdBytes, 0, bytes, index, groupIdBytes.Length);
+            bytes[index] = (byte)GroupId.Length;
+            groupIdBytes.CopyTo(memory.Span.Slice(index));
             index += groupIdBytes.Length;
 
             return bytes;
@@ -286,7 +282,8 @@ namespace common.server.model
             Ip = new IPAddress(span.Slice(index + 1, span[index]));
             index += 1 + span[index];
 
-            GroupId = span.Slice(index).GetString();
+
+            GroupId = span.Slice(index + 1).GetUTF16String(span[index]);
         }
 
         /// <summary>
@@ -299,37 +296,37 @@ namespace common.server.model
             /// 
             /// </summary>
             [Description("成功")]
-            OK = 1,
+            OK = 0,
             /// <summary>
             /// 
             /// </summary>
             [Description("存在同名客户端")]
-            SAME_NAMES = 2,
+            SAME_NAMES = 1,
             /// <summary>
             /// 
             /// </summary>
             [Description("存在同名短id")]
-            SAME_SHORTID = 4,
+            SAME_SHORTID = 2,
             /// <summary>
             /// 
             /// </summary>
             [Description("短id获取失败")]
-            ERROR_SHORTID = 8,
+            ERROR_SHORTID = 4,
             /// <summary>
             /// 
             /// </summary>
             [Description("验证未通过")]
-            VERIFY = 16,
+            VERIFY = 8,
             /// <summary>
             /// 
             /// </summary>
             [Description("key验证未通过")]
-            KEY_VERIFY = 32,
+            KEY_VERIFY = 16,
             /// <summary>
             /// 
             /// </summary>
             [Description("出错")]
-            UNKNOW = 128
+            UNKNOW = 32
         }
     }
 
@@ -347,15 +344,15 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public ulong TunnelName { get; set; } = 0;
+        public ulong TunnelName { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ushort LocalPort { get; set; } = 0;
+        public ushort LocalPort { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ushort Port { get; set; } = 0;
+        public ushort Port { get; set; }
 
         /// <summary>
         /// 
@@ -364,22 +361,16 @@ namespace common.server.model
         public byte[] ToBytes()
         {
             var bytes = new byte[12];
-
-            var tunnelNameBytes = TunnelName.ToBytes();
-            var localPortBytes = LocalPort.ToBytes();
-            var portBytes = Port.ToBytes();
+            var memory = bytes.AsMemory();
 
             int index = 0;
-            Array.Copy(tunnelNameBytes, 0, bytes, 0, tunnelNameBytes.Length);
+            TunnelName.ToBytes(memory);
             index += 8;
 
-            bytes[index] = localPortBytes[0];
-            bytes[index + 1] = localPortBytes[1];
+            LocalPort.ToBytes(memory.Slice(index));
             index += 2;
 
-            bytes[index] = portBytes[0];
-            bytes[index + 1] = portBytes[1];
-
+            Port.ToBytes(memory.Slice(index));
             return bytes;
         }
         /// <summary>

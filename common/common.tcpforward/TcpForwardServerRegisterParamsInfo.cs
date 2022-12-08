@@ -18,23 +18,23 @@ namespace common.tcpforward
         /// <summary>
         /// 
         /// </summary>
-        public string SourceIp { get; set; } = IPAddress.Any.ToString();
+        public string SourceIp { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ushort SourcePort { get; set; } = 8080;
+        public ushort SourcePort { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public string TargetName { get; set; } = string.Empty;
+        public string TargetName { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public string TargetIp { get; set; } = IPAddress.Loopback.ToString();
+        public string TargetIp { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ushort TargetPort { get; set; } = 8080;
+        public ushort TargetPort { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -45,27 +45,29 @@ namespace common.tcpforward
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            byte[] sportBytes = SourcePort.ToBytes();
-            byte[] tportBytes = TargetPort.ToBytes();
-
             byte[] sipBytes = SourceIp.ToBytes();
             byte[] tipBytes = TargetIp.ToBytes();
-
             byte[] tnameBytes = TargetName.ToBytes();
 
-            byte[] bytes = new byte[1 + 2 + 2 + 1 + sipBytes.Length + 1 + tipBytes.Length + 1 + tnameBytes.Length];
+            byte[] bytes = new byte[
+                1  //AliveType
+                + 2  //SourcePort
+                + 2  //TargetPort
+                + 1 + sipBytes.Length  //SourceIp
+                + 1 + tipBytes.Length  //TargetIp
+                + 1 + tnameBytes.Length //TargetName
+             ];
+            var memory = bytes.AsMemory();
 
             int index = 0;
 
             bytes[index] = (byte)AliveType;
             index += 1;
 
-            bytes[index] = sportBytes[0];
-            bytes[index + 1] = sportBytes[1];
+            SourcePort.ToBytes(memory.Slice(index));
             index += 2;
 
-            bytes[index] = tportBytes[0];
-            bytes[index + 1] = tportBytes[1];
+            TargetPort.ToBytes(memory.Slice(index));
             index += 2;
 
             bytes[index] = (byte)sipBytes.Length;
@@ -124,15 +126,15 @@ namespace common.tcpforward
         /// <summary>
         /// 
         /// </summary>
-        public string SourceIp { get; set; } = IPAddress.Any.ToString();
+        public string SourceIp { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ushort SourcePort { get; set; } = 8080;
+        public ushort SourcePort { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
+        public TcpForwardAliveTypes AliveType { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -140,16 +142,14 @@ namespace common.tcpforward
         public byte[] ToBytes()
         {
             byte[] ipBytes = SourceIp.ToBytes();
-            byte[] portBytes = SourcePort.ToBytes();
-            byte[] bytes = new byte[1 + ipBytes.Length + portBytes.Length];
+            byte[] bytes = new byte[1 + ipBytes.Length + 2];
 
             int index = 0;
 
             bytes[index] = (byte)AliveType;
             index += 1;
 
-            bytes[index] = portBytes[0];
-            bytes[index + 1] = portBytes[1];
+            SourcePort.ToBytes(bytes.AsMemory(index));
             index += 2;
 
             Array.Copy(ipBytes, 0, bytes, index, ipBytes.Length);
@@ -183,31 +183,33 @@ namespace common.tcpforward
         /// <summary>
         /// 
         /// </summary>
-        public TcpForwardRegisterResultCodes Code { get; set; } = TcpForwardRegisterResultCodes.OK;
+        public TcpForwardRegisterResultCodes Code { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public ulong ID { get; set; } = 0;
+        public ulong ID { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public string Msg { get; set; } = string.Empty;
+        public string Msg { get; set; }
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var idBytes = ID.ToBytes();
             var msgBytes = Msg.ToBytes();
-            var bytes = new byte[1 + 8 + 1 + msgBytes.Length];
+            var bytes = new byte[
+                1
+                + 8
+                + 1 + msgBytes.Length];
 
             int index = 0;
 
             bytes[index] = (byte)Code;
             index += 1;
 
-            Array.Copy(idBytes, 0, bytes, index, idBytes.Length);
+            ID.ToBytes(bytes.AsMemory(index));
             index += 8;
 
             bytes[index] = (byte)msgBytes.Length;
@@ -245,26 +247,26 @@ namespace common.tcpforward
         /// 
         /// </summary>
         [Description("成功")]
-        OK = 1,
+        OK = 0,
         /// <summary>
         /// 
         /// </summary>
         [Description("插件未开启")]
-        DISABLED = 2,
+        DISABLED = 1,
         /// <summary>
         /// 
         /// </summary>
         [Description("已存在")]
-        EXISTS = 4,
+        EXISTS = 2,
         /// <summary>
         /// 
         /// </summary>
         [Description("端口超出范围")]
-        OUT_RANGE = 8,
+        OUT_RANGE = 4,
         /// <summary>
         /// 
         /// </summary>
         [Description("未知")]
-        UNKNOW = 16,
+        UNKNOW = 8,
     }
 }

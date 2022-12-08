@@ -17,12 +17,7 @@ namespace common.libs.extends
         public static byte[] ToBytes(this int[] obj)
         {
             var bytes = new byte[obj.Length * 4];
-            int index = 0;
-            for (int i = 0; i < obj.Length; i++)
-            {
-                Array.Copy(obj[i].ToBytes(), 0, bytes, index, 4);
-                index += 4;
-            }
+            obj.ToBytes(bytes);
             return bytes;
         }
         /// <summary>
@@ -51,12 +46,7 @@ namespace common.libs.extends
         public static byte[] ToBytes(this ushort[] obj)
         {
             var bytes = new byte[obj.Length * 2];
-            int index = 0;
-            for (int i = 0; i < obj.Length; i++)
-            {
-                Array.Copy(obj[i].ToBytes(), 0, bytes, index, 2);
-                index += 2;
-            }
+            obj.ToBytes(bytes);
             return bytes;
         }
         /// <summary>
