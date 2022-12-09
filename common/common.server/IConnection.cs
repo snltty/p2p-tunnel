@@ -485,9 +485,9 @@ namespace common.server
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public override ValueTask<bool> Send(byte[] data, int length)
+        public override async ValueTask<bool> Send(byte[] data, int length)
         {
-            return Send(data.AsMemory(0, length));
+            return await Send(data.AsMemory(0, length));
         }
         /// <summary>
         /// 销毁

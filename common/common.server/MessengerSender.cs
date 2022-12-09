@@ -79,7 +79,7 @@ namespace common.server
                 }
 
                 byte[] bytes = msg.ToArray(out int length);
-                bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
+                bool res = await msg.Connection.Send(bytes.AsMemory(0,length)).ConfigureAwait(false);
                 msg.Return(bytes);
 
                 return res;
@@ -106,7 +106,7 @@ namespace common.server
                 }
 
                 byte[] bytes = msg.ToArray(out int length);
-                bool res = await msg.Connection.Send(bytes, length).ConfigureAwait(false);
+                bool res = await msg.Connection.Send(bytes.AsMemory(0, length)).ConfigureAwait(false);
                 msg.Return(bytes);
                 return res;
             }
