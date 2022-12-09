@@ -2,6 +2,7 @@
 using common.libs.extends;
 using common.server;
 using System;
+using System.Buffers;
 using System.Net;
 
 namespace common.udpforward
@@ -43,15 +44,14 @@ namespace common.udpforward
         /// 
         /// </summary>
         /// <returns></returns>
-        public byte[] ToBytes()
+        public byte[] ToBytes(out int length)
         {
             int ipLength = SourceEndpoint.Address.Length();
 
-            var bytes = new byte[
-                1 + ipLength + 2 + // endpoint
-                1 + TargetEndpoint.Length + // endpoint
-                Buffer.Length
-            ];
+            length = 1 + ipLength + 2 + // endpoint
+                 1 + TargetEndpoint.Length + // endpoint
+                Buffer.Length;
+            var bytes = ArrayPool<byte>.Shared.Rent(length);
             var memory = bytes.AsMemory();
 
             int index = 0;
@@ -99,6 +99,11 @@ namespace common.udpforward
             index += endpointLength;
 
             Buffer = memory.Slice(index);
+        }
+
+        public void Return(byte[] data)
+        {
+            ArrayPool<byte>.Shared.Return(data);
         }
     }
 

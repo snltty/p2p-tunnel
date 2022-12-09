@@ -74,7 +74,7 @@ namespace common.server.servers.iocp
         {
             IPEndPoint localEndPoint = new IPEndPoint(NetworkHelper.IPv6Support ? IPAddress.IPv6Any : IPAddress.Any, port);
             Socket socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            socket.IPv6Only(localEndPoint.AddressFamily,false);
+            socket.IPv6Only(localEndPoint.AddressFamily, false);
             socket.ReuseBind(localEndPoint);
             socket.Listen(int.MaxValue);
 
@@ -364,8 +364,8 @@ namespace common.server.servers.iocp
 
             DataBuffer.Clear(true);
 
-            GC.Collect();
-            GC.SuppressFinalize(this);
+            //GC.Collect();
+            // GC.SuppressFinalize(this);
         }
     }
 }

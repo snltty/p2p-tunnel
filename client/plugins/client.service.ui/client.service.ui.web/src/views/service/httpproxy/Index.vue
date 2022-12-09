@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-08 09:52:44
+ * @LastEditTime: 2022-12-09 14:58:21
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\httpproxy\Index.vue
@@ -101,8 +101,8 @@ export default {
                 const json = res || {
                     ID: 0,
                     Port: 5412,
-                    ForwardType: 1,
-                    AliveType: 2,
+                    ForwardType: shareData.forwardTypes.proxy,
+                    AliveType: shareData.aliveTypes.web,
                     Name: '',
                     Listening: false,
                     Pac: '',
@@ -142,8 +142,8 @@ export default {
             form: {
                 ID: 0,
                 Port: 5413,
-                ForwardType: 1,
-                AliveType: 2,
+                ForwardType: shareData.forwardTypes.proxy,
+                AliveType: shareData.aliveTypes.web,
                 Name: '',
                 Listening: false,
                 Pac: '',

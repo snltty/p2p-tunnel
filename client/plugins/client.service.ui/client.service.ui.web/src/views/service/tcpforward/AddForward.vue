@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-05 10:52:05
+ * @LastEditTime: 2022-12-09 15:05:33
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\tcpforward\AddForward.vue
@@ -14,7 +14,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="源host" prop="SourceIp">
-                            <el-input :disabled="addForwardData.currentLsiten.AliveType == 1" v-model="form.SourceIp"></el-input>
+                            <el-input :disabled="addForwardData.currentLsiten.AliveType == shareData.aliveTypes.tunnel" v-model="form.SourceIp"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -63,17 +63,19 @@ export default {
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],
     setup (props, { emit }) {
+
+        const shareData = injectShareData();
         const defaultForm = {
             ListenID: 0,
             ID: 0,
             SourceIp: '0.0.0.0',
             Name: 'B客户端', TargetIp: '127.0.0.1', TargetPort: 80,
-            AliveType: '1',
+            AliveType: shareData.aliveTypes.tunnel + '',
             Desc: ''
         };
         const clientsState = injectClients();
         const addForwardData = inject('add-forward-data');
-        const shareData = injectShareData();
+
         const state = reactive({
             show: props.modelValue,
             loading: false,

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-03-24 15:15:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-08 09:52:35
+ * @LastEditTime: 2022-12-09 14:58:48
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\tcpforward\AddListen.vue
@@ -47,9 +47,9 @@ export default {
             form: {
                 ID: addListenData.value.ID || 0,
                 Port: addListenData.value.Port || 0,
-                AliveType: (addListenData.value.AliveType || '1') + '',
+                AliveType: (addListenData.value.AliveType || shareData.aliveTypes.tunnel) + '',
                 Desc: addListenData.value.Desc || '',
-                ForwardType: 0,
+                ForwardType: shareData.forwardTypes.forward,
             },
             rules: {
                 Port: [

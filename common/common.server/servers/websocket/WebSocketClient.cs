@@ -77,11 +77,11 @@ namespace common.server.servers.websocket
             };
         }
 
-       /// <summary>
-       /// 
-       /// </summary>
-       /// <param name="ip"></param>
-       /// <param name="port"></param>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="port"></param>
         public void Connect(IPAddress ip, int port)
         {
             Connect(new IPEndPoint(ip, port));
@@ -176,7 +176,7 @@ namespace common.server.servers.websocket
                     UserToken = token,
                     SocketFlags = SocketFlags.None,
                 };
-                token.PoolBuffer =  new byte[bufferSize];
+                token.PoolBuffer = new byte[bufferSize];
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, bufferSize);
                 readEventArgs.Completed += Target_IO_Completed;
                 if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
@@ -467,7 +467,7 @@ namespace common.server.servers.websocket
             return SendFrame(new WebSocketFrameRemarkInfo
             {
                 Opcode = WebSocketFrameInfo.EnumOpcode.Close,
-                Data = ((short)status).ToBytes()
+                Data = ((ushort)status).ToBytes()
             });
         }
         /// <summary>
@@ -476,8 +476,8 @@ namespace common.server.servers.websocket
         public void Dispose()
         {
             CloseClientSocket();
-            GC.Collect();
-            GC.SuppressFinalize(this);
+            // GC.Collect();
+            // GC.SuppressFinalize(this);
         }
     }
     /// <summary>
@@ -525,8 +525,8 @@ namespace common.server.servers.websocket
 
             PoolBuffer = Helper.EmptyArray;
 
-            GC.Collect();
-            GC.SuppressFinalize(this);
+            //GC.Collect();
+            //GC.SuppressFinalize(this);
         }
     }
 }

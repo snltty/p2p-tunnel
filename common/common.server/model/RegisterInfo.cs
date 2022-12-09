@@ -144,10 +144,10 @@ namespace common.server.model
             index += 1;
 
             GroupId = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
-            index += 1 + span[index];
+            index += 2 + span[index];
 
             Name = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
-            index += 1 + span[index];
+            index += 2 + span[index];
 
             LocalTcpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
@@ -246,6 +246,7 @@ namespace common.server.model
             index += 1 + ll;
 
             bytes[index] = (byte)GroupId.Length;
+            index += 1;
             groupIdBytes.CopyTo(memory.Span.Slice(index));
             index += groupIdBytes.Length;
 

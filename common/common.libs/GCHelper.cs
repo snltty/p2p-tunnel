@@ -24,7 +24,7 @@ namespace common.libs
         public static void FlushMemory()
         {
             GC.Collect();
-            GC.SuppressFinalize(true);
+            //GC.SuppressFinalize(true);
             GC.WaitForPendingFinalizers();
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {

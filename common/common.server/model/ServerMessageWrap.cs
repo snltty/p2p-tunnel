@@ -9,6 +9,17 @@ namespace common.server.model
 {
     /// <summary>
     /// 请求消息包
+    /// |                 Method |      Mean |    Error |    StdDev |    Median | Rank |   Gen0 | Allocated |
+    ///|----------------------- |----------:|---------:|----------:|----------:|-----:|-------:|----------:|
+    ///|    MemoryPackSerialize | 279.01 ns | 1.927 ns |  5.142 ns | 277.56 ns |    4 | 0.5274 |    1104 B |
+    ///|   MessagePackSerialize | 312.54 ns | 5.064 ns | 13.603 ns | 304.24 ns |    5 | 0.5355 |    1120 B |
+    ///|                ToArray |  89.05 ns | 0.354 ns |  0.946 ns |  89.02 ns |    2 |      - |         - |
+    ///|  MemoryPackDeserialize | 199.63 ns | 2.398 ns |  6.644 ns | 197.79 ns |    3 | 0.5581 |    1168 B |
+    ///| MessagePackDeserialize | 531.59 ns | 2.387 ns |  6.454 ns | 530.47 ns |    6 | 0.5579 |    1168 B |
+    ///不new
+    ///|              FromArray |  14.95 ns | 0.127 ns |  0.350 ns |  14.93 ns |    1 |      - |         - |
+    ///每次new
+    ///|              FromArray |  24.89 ns | 0.188 ns |  0.504 ns |  24.80 ns |    1 | 0.0344 |      72 B |
     /// </summary>
     public sealed class MessageRequestWrap
     {

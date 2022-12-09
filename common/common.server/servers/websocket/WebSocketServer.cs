@@ -487,7 +487,7 @@ namespace common.server.servers.websocket
             return SendFrame(new WebSocketFrameRemarkInfo
             {
                 Opcode = WebSocketFrameInfo.EnumOpcode.Close,
-                Data = ((short)status).ToBytes()
+                Data = ((ushort)status).ToBytes()
             });
         }
         /// <summary>

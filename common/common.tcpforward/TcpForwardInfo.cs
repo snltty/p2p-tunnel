@@ -1,6 +1,7 @@
 ﻿using common.libs.extends;
 using common.server;
 using System;
+using System.Buffers;
 using System.ComponentModel;
 using System.Linq;
 
@@ -85,7 +86,7 @@ namespace common.tcpforward
         /// 
         /// </summary>
         /// <returns></returns>
-        public byte[] ToBytes()
+        public byte[] ToBytes(out int length)
         {
             /*
                 连接类型  转发类型  数据类型  状态类型  请求id   目标地址  数据 
@@ -94,14 +95,14 @@ namespace common.tcpforward
              */
 
 
-            int length =
+            length =
                 1 +  //AliveType + ForwardType
                 1 + // DataType + StateType
                 4 +
                 1 + TargetEndpoint.Length +
                 Buffer.Length;
 
-            byte[] bytes = new byte[length];
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(length);
             var memory = bytes.AsMemory();
             int index = 0;
 
@@ -152,6 +153,11 @@ namespace common.tcpforward
 
 
             Buffer = memory.Slice(index);
+        }
+
+        public void Return(byte[] data)
+        {
+            ArrayPool<byte>.Shared.Return(data);
         }
     }
 

@@ -2,6 +2,7 @@
 using common.libs.extends;
 using common.server;
 using System;
+using System.Buffers;
 using System.Net;
 
 namespace common.socks5
@@ -52,9 +53,10 @@ namespace common.socks5
         /// 
         /// </summary>
         /// <returns></returns>
-        public byte[] ToBytes()
+        public byte[] ToBytes(out int length)
         {
-            int length = 1 + 4 + 1 + 1 + Data.Length, index = 1;
+            length = 1 + 4 + 1 + 1 + Data.Length;
+            int index = 1;
             int sepLength = 0, tepLength = 0;
             if (SourceEP != null)
             {
@@ -68,7 +70,7 @@ namespace common.socks5
                 length += tepLength + 2;
             }
 
-            byte[] bytes = new byte[length];
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(length);
             var span = bytes.AsSpan();
             bytes[0] = (byte)((byte)Socks5Step << 4 | Version);
 
@@ -77,7 +79,7 @@ namespace common.socks5
 
             bytes[index] = (byte)(sepLength + 2);
             index += 1;
-            if (sepLength >0 )
+            if (sepLength > 0)
             {
                 SourceEP.Address.TryWriteBytes(span.Slice(index), out _);
                 index += sepLength;
@@ -90,7 +92,7 @@ namespace common.socks5
             index += 1;
             if (tepLength > 0)
             {
-                TargetEP.Address.TryWriteBytes(span.Slice(index),out _);
+                TargetEP.Address.TryWriteBytes(span.Slice(index), out _);
                 index += tepLength;
 
                 ((ushort)TargetEP.Port).ToBytes(bytes.AsMemory(index));
@@ -150,6 +152,11 @@ namespace common.socks5
             Socks5Info info = new Socks5Info();
             info.DeBytes(data);
             return info;
+        }
+
+        public void Return(byte[] data)
+        {
+            ArrayPool<byte>.Shared.Return(data);
         }
     }
     /// <summary>

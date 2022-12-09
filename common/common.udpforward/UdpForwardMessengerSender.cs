@@ -2,6 +2,7 @@
 using common.libs.extends;
 using common.server;
 using common.server.model;
+using System;
 using System.Threading.Tasks;
 
 namespace common.udpforward
@@ -32,13 +33,16 @@ namespace common.udpforward
         /// <returns></returns>
         public async Task SendRequest(UdpForwardInfo arg)
         {
+            byte[] bytes = arg.ToBytes(out int length);
             var res = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)UdpForwardMessengerIds.Request,
                 Connection = arg.Connection,
-                Payload = arg.ToBytes()
+                Payload = bytes.AsMemory(0, length)
             }).ConfigureAwait(false);
             await res;
+
+            arg.Return(bytes);
         }
         /// <summary>
         /// 
@@ -61,13 +65,15 @@ namespace common.udpforward
         /// <returns></returns>
         public async Task SendResponse(UdpForwardInfo arg, IConnection Connection)
         {
+            byte[] bytes = arg.ToBytes(out int length);
             var res = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)UdpForwardMessengerIds.Response,
                 Connection = Connection,
-                Payload = arg.ToBytes()
+                Payload = bytes.AsMemory(0, length)
             }).ConfigureAwait(false);
             await res;
+            arg.Return(bytes);
         }
         /// <summary>
         /// 

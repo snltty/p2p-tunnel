@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 00:47:21
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-29 15:42:31
+ * @LastEditTime: 2022-12-09 14:56:24
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\tcpforward\Index.vue
@@ -62,7 +62,7 @@
                                             </template>
                                         </el-popconfirm>
                                         <el-button plain type="info" size="small" @click="handleEditListen(item)">编辑</el-button>
-                                        <el-button plain type="info" v-if="item.AliveType == 2 || item.Forwards.length < 1" size="small" @click="handleAddForward(item)">增加转发</el-button>
+                                        <el-button plain type="info" v-if="item.AliveType == shareData.aliveTypes.web || item.Forwards.length < 1" size="small" @click="handleAddForward(item)">增加转发</el-button>
                                     </dd>
                                 </dl>
                             </div>

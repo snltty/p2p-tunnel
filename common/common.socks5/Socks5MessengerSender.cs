@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
+using System;
 
 namespace common.socks5
 {
@@ -36,12 +37,15 @@ namespace common.socks5
         /// <returns></returns>
         public bool Request(Socks5Info data, IConnection connection)
         {
-            return messengerSender.SendOnly(new MessageRequestWrap
+            byte[] bytes = data.ToBytes(out int length);
+            bool res = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = TargetRequest,
                 Connection = connection,
-                Payload = data.ToBytes()
+                Payload = bytes.AsMemory(0, length)
             }).Result;
+            data.Return(bytes);
+            return res;
         }
         /// <summary>
         /// 
@@ -50,12 +54,14 @@ namespace common.socks5
         /// <param name="connection"></param>
         public void Response(Socks5Info data, IConnection connection)
         {
+            byte[] bytes = data.ToBytes(out int length);
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = TargetResponse,
                 Connection = connection,
-                Payload = data.ToBytes()
+                Payload = bytes.AsMemory(0, length)
             }).Result;
+            data.Return(bytes);
         }
         /// <summary>
         /// 
@@ -74,7 +80,7 @@ namespace common.socks5
         /// <param name="connection"></param>
         public void RequestClose(uint id, IConnection connection)
         {
-            Request(new Socks5Info { Id = id,Socks5Step = Socks5EnumStep.Forward }, connection);
+            Request(new Socks5Info { Id = id, Socks5Step = Socks5EnumStep.Forward }, connection);
         }
     }
 }

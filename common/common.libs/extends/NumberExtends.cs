@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace common.libs.extends
 {
@@ -70,9 +71,9 @@ namespace common.libs.extends
         /// </summary>
         /// <param name="num"></param>
         /// <returns></returns>
-        public static byte[] ToBytes(this ulong num)
+        public static byte[] ToBytes(this ulong value)
         {
-            return BitConverter.GetBytes(num);
+            return BitConverter.GetBytes(value);
         }
         /// <summary>
         /// 

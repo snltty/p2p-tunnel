@@ -138,11 +138,9 @@ namespace common.socks5
         /// <param name="remoteEndPoint"></param>
         /// <param name="responseCommand"></param>
         /// <returns></returns>
-        public static byte[] MakeConnectResponse(IPEndPoint remoteEndPoint, byte responseCommand)
+        public static unsafe byte[] MakeConnectResponse(IPEndPoint remoteEndPoint, byte responseCommand)
         {
             //VER REP  RSV ATYPE BND.ADDR BND.PORT
-
-            byte[] port = remoteEndPoint.Port.ToBytes();
 
             byte[] res = new byte[6 + remoteEndPoint.Address.Length()];
             var span = res.AsSpan();
@@ -152,10 +150,17 @@ namespace common.socks5
             res[2] = 0;
             res[3] = (byte)(remoteEndPoint.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? Socks5EnumAddressType.IPV4 : Socks5EnumAddressType.IPV6);
 
-            remoteEndPoint.Address.TryWriteBytes(span.Slice(4),out _);
+            remoteEndPoint.Address.TryWriteBytes(span.Slice(4), out _);
 
-            res[res.Length - 2] = port[1];
-            res[res.Length - 1] = port[0];
+            int port = remoteEndPoint.Port;
+            ref int _port = ref port;
+            fixed (void* p = &_port)
+            {
+                byte* pp = (byte*)p;
+                res[^2] = *(pp + 1);
+                res[^1] = *pp;
+            }
+
 
             return res;
         }
@@ -165,13 +170,12 @@ namespace common.socks5
         /// <param name="remoteEndPoint"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static Memory<byte> MakeUdpResponse(IPEndPoint remoteEndPoint, Memory<byte> data)
+        public static unsafe Memory<byte> MakeUdpResponse(IPEndPoint remoteEndPoint, Memory<byte> data)
         {
             //RSV FRAG ATYPE DST.ADDR DST.PORT DATA
             //RSV占俩字节
 
             int ipLength = remoteEndPoint.Address.Length();
-            byte[] port = remoteEndPoint.Port.ToBytes();
             byte[] res = new byte[4 + ipLength + 2 + data.Length];
             var span = res.AsSpan();
 
@@ -182,11 +186,17 @@ namespace common.socks5
 
             int index = 4;
 
-            remoteEndPoint.Address.TryWriteBytes(span.Slice(index),out _);
+            remoteEndPoint.Address.TryWriteBytes(span.Slice(index), out _);
             index += ipLength;
 
-            res[index] = port[1];
-            res[index + 1] = port[0];
+            int port = remoteEndPoint.Port;
+            ref int _port = ref port;
+            fixed (void* p = &_port)
+            {
+                byte* pp = (byte*)p;
+                res[index] = *(pp + 1);
+                res[index + 1] = *pp;
+            }
             index += 2;
 
             data.CopyTo(res.AsMemory(index, data.Length));

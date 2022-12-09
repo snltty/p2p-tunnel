@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
+using System;
 using System.Threading.Tasks;
 
 namespace common.tcpforward
@@ -26,12 +27,16 @@ namespace common.tcpforward
         /// <returns></returns>
         public bool SendRequest(TcpForwardInfo arg)
         {
-            return messengerSender.SendOnly(new MessageRequestWrap
+            byte[] bytes = arg.ToBytes(out int length);
+            bool res = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)TcpForwardMessengerIds.Request,
                 Connection = arg.Connection,
-                Payload = arg.ToBytes()
+                Payload = bytes.AsMemory(0, length)
             }).Result;
+            arg.Return(bytes);
+
+            return res;
         }
         /// <summary>
         /// 
@@ -40,12 +45,14 @@ namespace common.tcpforward
         /// <param name="connection"></param>
         public void SendResponse(TcpForwardInfo arg, IConnection connection)
         {
+            byte[] bytes = arg.ToBytes(out int length);
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)TcpForwardMessengerIds.Response,
                 Connection = connection,
-                Payload = arg.ToBytes()
+                Payload = bytes.AsMemory(0, length)
             }).Result;
+            arg.Return(bytes);
         }
         /// <summary>
         /// 

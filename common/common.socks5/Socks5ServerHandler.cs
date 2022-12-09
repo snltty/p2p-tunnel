@@ -445,8 +445,8 @@ namespace common.socks5
             TargetSocket = null;
 
             PoolBuffer = Helper.EmptyArray;
-            GC.Collect();
-            GC.SuppressFinalize(this);
+            // GC.Collect();
+            //GC.SuppressFinalize(this);
         }
     }
     /// <summary>
@@ -535,8 +535,8 @@ namespace common.socks5
         {
             TargetSocket?.SafeClose();
             PoolBuffer = Helper.EmptyArray;
-            GC.Collect();
-            GC.SuppressFinalize(this);
+            //GC.Collect();
+            // GC.SuppressFinalize(this);
         }
         /// <summary>
         /// 
