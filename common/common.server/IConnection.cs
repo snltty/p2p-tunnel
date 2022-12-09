@@ -3,6 +3,7 @@ using common.libs.extends;
 using common.server.model;
 using LiteNetLib;
 using System;
+using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -81,6 +82,8 @@ namespace common.server
         /// </summary>
         public Memory<byte> ReceiveData { get; set; }
 
+        public byte[] ResponseData { get; set; }
+
         /// <summary>
         /// 已发送字节
         /// </summary>
@@ -118,6 +121,27 @@ namespace common.server
         /// </summary>
         /// <returns></returns>
         public IConnection Clone();
+
+        public void WriteResponse(string str)
+        {
+            var span = str.GetUTF16Bytes();
+            ResponseData = ArrayPool<byte>.Shared.Rent(span.Length + 4);
+            str.Length.ToBytes(ResponseData);
+            span.CopyTo(ResponseData.AsSpan(4));
+        }
+        public void WriteResponse(ushort[] nums)
+        {
+            ResponseData = ArrayPool<byte>.Shared.Rent(nums.Length * 2);
+            nums.ToBytes(ResponseData);
+        }
+        public void Return()
+        {
+            if (ResponseData != null && ResponseData.Length > 0)
+            {
+                ArrayPool<byte>.Shared.Return(ResponseData);
+            }
+            ResponseData = null;
+        }
 
     }
 
@@ -223,6 +247,7 @@ namespace common.server
                 ReceiveBytes += receiveData.Length;
             }
         }
+        public byte[] ResponseData { get; set; }
 
         /// <summary>
         /// 已发送字节

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace common.libs.extends
 {
@@ -8,6 +7,8 @@ namespace common.libs.extends
     /// </summary>
     public static class NumberExtends
     {
+        #region 序列化
+        #region double
         /// <summary>
         /// 
         /// </summary>
@@ -30,7 +31,9 @@ namespace common.libs.extends
                 new Span<byte>(p, 8).CopyTo(memory.Span);
             }
         }
+        #endregion
 
+        #region 64
         /// <summary>
         /// 
         /// </summary>
@@ -112,7 +115,9 @@ namespace common.libs.extends
                 new Span<byte>(p, value.Length * 8).CopyTo(memory.Span);
             }
         }
+        #endregion
 
+        #region 32
         /// <summary>
         /// 
         /// </summary>
@@ -181,7 +186,9 @@ namespace common.libs.extends
                 new Span<byte>(p, value.Length * sizeof(uint)).CopyTo(memory.Span);
             }
         }
+        #endregion
 
+        #region 16
         /// <summary>
         /// 
         /// </summary>
@@ -201,7 +208,7 @@ namespace common.libs.extends
             ref short v = ref value;
             fixed (void* p = &v)
             {
-                var span = new Span<byte>(p, 2);
+                var span = new Span<byte>(p, sizeof(short));
                 memory.Span[0] = span[0];
                 memory.Span[1] = span[1];
             }
@@ -238,7 +245,7 @@ namespace common.libs.extends
             ref ushort v = ref value;
             fixed (void* p = &v)
             {
-                var span = new Span<byte>(p, 2);
+                var span = new Span<byte>(p, sizeof(ushort));
                 memory.Span[0] = span[0];
                 memory.Span[1] = span[1];
             }
@@ -255,9 +262,12 @@ namespace common.libs.extends
                 new Span<byte>(p, value.Length * sizeof(ushort)).CopyTo(memory.Span);
             }
         }
+        #endregion
+        #endregion
 
         #region 反序列化
 
+        #region double
         /// <summary>
         /// 
         /// </summary>
@@ -286,44 +296,9 @@ namespace common.libs.extends
         {
             return BitConverter.ToDouble(span);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bytes"></param>
-        /// <param name="startindex"></param>
-        /// <returns></returns>
-        public static long ToInt64(this byte[] bytes, int startindex = 0)
-        {
-            return BitConverter.ToInt64(bytes, startindex);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bytes"></param>
-        /// <param name="startindex"></param>
-        /// <returns></returns>
-        public static ulong ToUInt64(this byte[] bytes, int startindex = 0)
-        {
-            return BitConverter.ToUInt64(bytes, startindex);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="span"></param>
-        /// <returns></returns>
-        public static long ToInt64(this Span<byte> span)
-        {
-            return BitConverter.ToInt64(span);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="span"></param>
-        /// <returns></returns>
-        public static ulong ToUInt64(this Span<byte> span)
-        {
-            return BitConverter.ToUInt64(span);
-        }
+        #endregion
+
+        #region 64
         /// <summary>
         /// 
         /// </summary>
@@ -338,10 +313,67 @@ namespace common.libs.extends
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
+        public static long ToInt64(this Span<byte> span)
+        {
+            return BitConverter.ToInt64(span);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static long ToInt64(this ReadOnlyMemory<byte> memory)
+        {
+            return memory.ToInt64();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static long ToInt64(this Memory<byte> memory)
+        {
+            return memory.ToInt64();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
         public static ulong ToUInt64(this ReadOnlySpan<byte> span)
         {
             return BitConverter.ToUInt64(span);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
+        public static ulong ToUInt64(this Span<byte> span)
+        {
+            return BitConverter.ToUInt64(span);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static ulong ToUInt64(this ReadOnlyMemory<byte> memory)
+        {
+            return memory.ToUInt64();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static ulong ToUInt64(this Memory<byte> memory)
+        {
+            return memory.ToUInt64();
+        }
+        #endregion
+
+        #region 32
         /// <summary>
         /// 
         /// </summary>
@@ -351,34 +383,6 @@ namespace common.libs.extends
         public static int ToInt32(this byte[] bytes, int startindex = 0)
         {
             return BitConverter.ToInt32(bytes, startindex);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bytes"></param>
-        /// <param name="startindex"></param>
-        /// <returns></returns>
-        public static uint ToUInt32(this byte[] bytes, int startindex = 0)
-        {
-            return BitConverter.ToUInt32(bytes, startindex);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="span"></param>
-        /// <returns></returns>
-        public static int ToInt32(this Span<byte> span)
-        {
-            return BitConverter.ToInt32(span);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="span"></param>
-        /// <returns></returns>
-        public static uint ToUInt32(this Span<byte> span)
-        {
-            return BitConverter.ToUInt32(span);
         }
         /// <summary>
         /// 
@@ -394,6 +398,33 @@ namespace common.libs.extends
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
+        public static int ToInt32(this Span<byte> span)
+        {
+            return BitConverter.ToInt32(span);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static int ToInt32(this ReadOnlyMemory<byte> memory)
+        {
+            return memory.Span.ToInt32();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static int ToInt32(this Memory<byte> memory)
+        {
+            return memory.Span.ToInt32();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
         public static uint ToUInt32(this ReadOnlySpan<byte> span)
         {
             return BitConverter.ToUInt32(span);
@@ -401,31 +432,85 @@ namespace common.libs.extends
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="bytes"></param>
-        /// <param name="startindex"></param>
+        /// <param name="span"></param>
         /// <returns></returns>
-        public static short ToInt16(this byte[] bytes, int startindex = 0)
+        public static uint ToUInt32(this Span<byte> span)
         {
-            return BitConverter.ToInt16(bytes, startindex);
+            return BitConverter.ToUInt32(span);
         }
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="bytes"></param>
-        /// <param name="startindex"></param>
+        /// <param name="memory"></param>
         /// <returns></returns>
-        public static ushort ToUInt16(this byte[] bytes, int startindex = 0)
+        public static uint ToUInt32(this ReadOnlyMemory<byte> memory)
         {
-            return BitConverter.ToUInt16(bytes, startindex);
+            return memory.Span.ToUInt32();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static uint ToUInt32(this Memory<byte> memory)
+        {
+            return memory.Span.ToUInt32();
+        }
+        #endregion
+
+        #region 16
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
+        public static short ToInt16(this ReadOnlySpan<byte> span)
+        {
+            return BitConverter.ToInt16(span);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static short ToInt16(this ReadOnlyMemory<byte> memory)
+        {
+            return memory.Span.ToInt16();
         }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
-        public static short ToInt16(this Span<byte> span)
+        public static short[] ToInt16Array(this ReadOnlySpan<byte> span)
         {
-            return BitConverter.ToInt16(span);
+            short[] res = new short[span.Length / 2];
+            int index = 0;
+            for (int i = 0; i < res.Length; i++)
+            {
+                res[i] = span.Slice(index, 2).ToInt16();
+                index += 2;
+            }
+            return res;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static short[] ToInt16Array(this ReadOnlyMemory<byte> memory)
+        {
+            return memory.Span.ToInt16Array();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
+        public static ushort ToUInt16(this ReadOnlySpan<byte> span)
+        {
+            return BitConverter.ToUInt16(span);
         }
         /// <summary>
         /// 
@@ -439,21 +524,48 @@ namespace common.libs.extends
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="span"></param>
+        /// <param name="memory"></param>
         /// <returns></returns>
-        public static short ToInt16(this ReadOnlySpan<byte> span)
+        public static ushort ToUInt16(this ReadOnlyMemory<byte> memory)
         {
-            return BitConverter.ToInt16(span);
+            return memory.Span.ToUInt16();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static ushort ToUInt16(this Memory<byte> memory)
+        {
+            return memory.Span.ToUInt16();
         }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
-        public static ushort ToUInt16(this ReadOnlySpan<byte> span)
+        public static ushort[] ToUInt16Array(this ReadOnlySpan<byte> span)
         {
-            return BitConverter.ToUInt16(span);
+            ushort[] res = new ushort[span.Length / 2];
+            int index = 0;
+            for (int i = 0; i < res.Length; i++)
+            {
+                res[i] = span.Slice(index, 2).ToUInt16();
+                index += 2;
+            }
+            return res;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static ushort[] ToUInt16Array(this ReadOnlyMemory<byte> memory)
+        {
+            return memory.Span.ToUInt16Array();
+        }
+        #endregion
+
         #endregion
     }
 }

@@ -234,9 +234,33 @@ namespace common.libs.extends
         /// <param name="span"></param>
         /// <param name="strLength"></param>
         /// <returns></returns>
+        public static string GetUTF16String(this Span<byte> span)
+        {
+            int strLength = span.ToInt32();
+            return ReadUtf16(span.Slice(4), strLength);
+        }
+        /// <summary>
+        /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
+        /// write  0.065  read 0.038   readwrite 0.039
+        /// </summary>
+        /// <param name="span"></param>
+        /// <param name="strLength"></param>
+        /// <returns></returns>
         public static string GetUTF16String(this ReadOnlySpan<byte> span, int strLength)
         {
             return ReadUtf16(span, strLength);
+        }
+        /// <summary>
+        /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
+        /// write  0.065  read 0.038   readwrite 0.039
+        /// </summary>
+        /// <param name="span"></param>
+        /// <param name="strLength"></param>
+        /// <returns></returns>
+        public static string GetUTF16String(this ReadOnlySpan<byte> span)
+        {
+            int strLength = span.ToInt32();
+            return ReadUtf16(span.Slice(4), strLength);
         }
         /// <summary>
         /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
@@ -248,6 +272,17 @@ namespace common.libs.extends
         public static string GetUTF16String(this Memory<byte> memory, int strLength)
         {
             return ReadUtf16(memory.Span, strLength);
+        }
+        /// <summary>
+        /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
+        /// write  0.065  read 0.038   readwrite 0.039 
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <param name="strLength"></param>
+        /// <returns></returns>
+        public static string GetUTF16String(this Memory<byte> memory)
+        {
+            return memory.Span.GetUTF16String();
         }
         /// <summary>
         /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
@@ -267,10 +302,23 @@ namespace common.libs.extends
         /// <param name="memory"></param>
         /// <param name="strLength"></param>
         /// <returns></returns>
+        public static string GetUTF16String(this ReadOnlyMemory<byte> memory)
+        {
+            return memory.Span.GetUTF16String();
+        }
+
+        /// <summary>
+        /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
+        /// write  0.065  read 0.038   readwrite 0.039
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <param name="strLength"></param>
+        /// <returns></returns>
         public static string GetUTF16String(this byte[] memory, int strLength)
         {
             return ReadUtf16(memory, strLength);
         }
+
 
         #endregion
 

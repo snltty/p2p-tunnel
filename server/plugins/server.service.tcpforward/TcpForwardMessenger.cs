@@ -74,13 +74,13 @@ namespace server.service.tcpforward
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)TcpForwardMessengerIds.Ports)]
-        public byte[] Ports(IConnection connection)
+        public void Ports(IConnection connection)
         {
-            return config.WebListens
+            connection.WriteResponse(config.WebListens
                 .Concat(new ushort[] {
                     config.TunnelListenRange.Min,
                     config.TunnelListenRange.Max
-                }).ToArray().ToBytes();
+                }).ToArray());
         }
 
         /// <summary>

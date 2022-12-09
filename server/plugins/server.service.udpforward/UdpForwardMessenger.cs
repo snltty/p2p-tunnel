@@ -78,12 +78,12 @@ namespace server.service.udpforward
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.Ports)]
-        public byte[] Ports(IConnection connection)
+        public void Ports(IConnection connection)
         {
-            return new ushort[] {
+            connection.WriteResponse(new ushort[] {
                 config.TunnelListenRange.Min,
                     config.TunnelListenRange.Max
-                }.ToBytes();
+                });
         }
 
         /// <summary>

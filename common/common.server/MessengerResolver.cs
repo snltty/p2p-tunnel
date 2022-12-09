@@ -171,29 +171,36 @@ namespace common.server
 
                 MessengerCacheInfo plugin = messengers[requestWrap.MessengerId];
                 object resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { connection });
-                //void的，task的 没有返回值，不回复，需要回复的可以返回任意类型
-                if (plugin.IsVoid || requestWrap.Reply == false)
+                //task的 没有返回值，不回复，需要回复的可以返回任意类型
+                if (requestWrap.Reply == false)
                 {
                     return;
                 }
 
                 Memory<byte> resultObject = null;
-                if (plugin.IsTask)
+                if (plugin.IsVoid)
                 {
-                    if (plugin.IsTaskResult)
-                    {
-                        var task = resultAsync as Task<byte[]>;
-                        await task.ConfigureAwait(false);
-                        resultObject = task.Result;
-                    }
-                    else
-                    {
-                        return;
-                    }
+                    resultObject = connection.ResponseData;
                 }
-                else if (resultAsync != null)
+                else
                 {
-                    resultObject = resultAsync as byte[];
+                    if (plugin.IsTask)
+                    {
+                        if (plugin.IsTaskResult)
+                        {
+                            var task = resultAsync as Task<byte[]>;
+                            await task.ConfigureAwait(false);
+                            resultObject = task.Result;
+                        }
+                        else
+                        {
+                            resultObject = connection.ResponseData;
+                        }
+                    }
+                    else if (resultAsync != null)
+                    {
+                        resultObject = resultAsync as byte[];
+                    }
                 }
 
                 bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
@@ -204,6 +211,7 @@ namespace common.server
                     RequestId = requestWrap.RequestId
                 }).ConfigureAwait(false);
 
+                connection.Return();
             }
             catch (Exception ex)
             {

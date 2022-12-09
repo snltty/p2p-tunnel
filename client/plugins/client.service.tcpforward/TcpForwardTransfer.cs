@@ -473,7 +473,7 @@ namespace client.service.tcpforward
             var resp = await tcpForwardMessengerSender.GetPorts(registerStateInfo.OnlineConnection);
             if (resp.Code == MessageResponeCodes.OK)
             {
-                return resp.Data.DeBytes2UInt16Array();
+                return resp.Data.ToUInt16Array();
             }
 
             return Array.Empty<ushort>();

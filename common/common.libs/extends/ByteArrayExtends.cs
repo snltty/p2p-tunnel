@@ -9,64 +9,7 @@ namespace common.libs.extends
     /// </summary>
     public static class ByteArrayExtends
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public static byte[] ToBytes(this int[] obj)
-        {
-            var bytes = new byte[obj.Length * 4];
-            obj.ToBytes(bytes);
-            return bytes;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static int[] DeBytes2IntArray(this ReadOnlyMemory<byte> data)
-        {
-            var span = data.Span;
-            int[] res = new int[data.Length / 4];
-            int index = 0;
-            for (int i = 0; i < res.Length; i++)
-            {
-                res[i] = span.Slice(index, 4).ToInt32();
-                index += 4;
-            }
-            return res;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public static byte[] ToBytes(this ushort[] obj)
-        {
-            var bytes = new byte[obj.Length * 2];
-            obj.ToBytes(bytes);
-            return bytes;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static ushort[] DeBytes2UInt16Array(this ReadOnlyMemory<byte> data)
-        {
-            var span = data.Span;
-            ushort[] res = new ushort[data.Length / 2];
-            int index = 0;
-            for (int i = 0; i < res.Length; i++)
-            {
-                res[i] = span.Slice(index, 2).ToUInt16();
-                index += 2;
-            }
-            return res;
-        }
-
+       
         /// <summary>
         /// 
         /// </summary>
@@ -80,6 +23,7 @@ namespace common.libs.extends
             zipStream.Close();//不先关闭会有 解压结果为0的bug
             return compressStream.ToArray();
         }
+
         /// <summary>
         /// 
         /// </summary>
