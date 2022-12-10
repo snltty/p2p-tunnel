@@ -462,6 +462,8 @@ namespace common.server
         /// </summary>
         public override int RoundTripTime { get; set; }
 
+
+        SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         /// <summary>
         /// 发送
         /// </summary>
@@ -473,19 +475,11 @@ namespace common.server
             {
                 try
                 {
+                    await semaphore.WaitAsync();
                     int length = 0;
                     do
                     {
-                        int len = 0;
-
-                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                        {
-                            len = await TcpSocket.SendAsync(data[length..], SocketFlags.None).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            len = TcpSocket.Send(data[length..].Span, SocketFlags.None);
-                        }
+                        int len = await TcpSocket.SendAsync(data[length..], SocketFlags.None).ConfigureAwait(false);
                         if (len <= 0)
                         {
                             error = true;
@@ -495,12 +489,15 @@ namespace common.server
                     } while (length < data.Length);
 
                     SendBytes += length;
-
                     return true;
                 }
                 catch (Exception ex)
                 {
                     Logger.Instance.DebugError(ex);
+                }
+                finally
+                {
+                    semaphore.Release();
                 }
             }
             return false;
