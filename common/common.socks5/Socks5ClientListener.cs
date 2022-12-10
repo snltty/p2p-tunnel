@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 
 namespace common.socks5
 {
@@ -289,7 +290,11 @@ namespace common.socks5
                     }
                     else
                     {
-                        token.Socket.Send(info.Data.Span);
+                        int length = 0;
+                        do
+                        {
+                            length += token.Socket.Send(info.Data.Slice(length).Span, SocketFlags.None);
+                        } while (length < info.Data.Length);
                     }
 
                 }

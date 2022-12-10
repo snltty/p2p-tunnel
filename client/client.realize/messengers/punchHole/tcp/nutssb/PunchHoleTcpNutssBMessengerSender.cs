@@ -86,7 +86,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
             var ceche = new ConnectCacheModel
             {
-                TryTimes = param.TryTimes,
                 Tcs = tcs,
                 TunnelName = param.TunnelName,
                 LocalPort = param.LocalPort
@@ -178,26 +177,22 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 cache.Step1Timeout.Cancel();
 
                 bool success = false;
-                int times = cache.TryTimes;
                 List<IPEndPoint> ips = new List<IPEndPoint>();
 
                 if (UseLocalPort)
                 {
                     var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
-                    times += locals.Count;
                     ips.AddRange(locals);
                 }
                 if (IPv6Support())
                 {
                     var locals = arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, arg.Data.Port)).ToList();
-                    times += locals.Count;
                     ips.AddRange(locals);
                 }
                 ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port));
                 ips.Add(new IPEndPoint(arg.Data.Ip, arg.Data.Port + 1));
-                times += 1;
 
-                for (byte i = 0; i < times; i++)
+                for (byte i = 0; i < ips.Count; i++)
                 {
                     if (cache.Canceled)
                     {
@@ -253,7 +248,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             Logger.Instance.DebugError($"tcp {ip} connect fail");
                             targetSocket.SafeClose();
                             targetSocket = null;
-                            await SendStep2Retry(arg, i).ConfigureAwait(false);
+                            //await SendStep2Retry(arg, i).ConfigureAwait(false);
                             //await Task.Delay(100);
                         }
                     }
@@ -265,11 +260,11 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         if (ex.SocketErrorCode == SocketError.AddressNotAvailable)
                         {
                             Logger.Instance.DebugError($"{ex.SocketErrorCode}:{ip}");
-                            await Task.Delay(100);
+                            //await Task.Delay(100);
                         }
                         else
                         {
-                            await SendStep2Retry(arg, i).ConfigureAwait(false);
+                            //await SendStep2Retry(arg, i).ConfigureAwait(false);
                         }
 
                     }
@@ -279,7 +274,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                 }
 
-                if (!success)
+                if (success == false)
                 {
                     await SendStep2Fail(arg).ConfigureAwait(false);
                 }

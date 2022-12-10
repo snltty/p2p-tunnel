@@ -90,7 +90,12 @@ namespace common.socks5
                 {
                     try
                     {
-                        _ = token.TargetSocket.SendAsync(data.Data, SocketFlags.None);
+                        int length = 0;
+                        do
+                        {
+                            length += token.TargetSocket.Send(data.Data.Span.Slice(length), SocketFlags.None);
+                        } while (length < data.Data.Length);
+                        return;
                     }
                     catch (Exception)
                     {

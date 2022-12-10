@@ -14,7 +14,7 @@ namespace client.messengers.clients
         /// <summary>
         /// 连接中
         /// </summary>
-        public bool Connecting { get; private set; } = false;
+        public bool Connecting { get; private set; }
         /// <summary>
         /// 已连接
         /// </summary>
@@ -22,32 +22,32 @@ namespace client.messengers.clients
         /// <summary>
         /// ip
         /// </summary>
-        public IPAddress IPAddress { get => Connection?.Address.Address ?? IPAddress.Any; }
+        public IPEndPoint IPAddress { get => Connection?.Address ?? new IPEndPoint(0, 0); }
 
         /// <summary>
         /// 名字
         /// </summary>
-        public string Name { get; init; } = string.Empty;
+        public string Name { get; init; }
         /// <summary>
         /// 连接id
         /// </summary>
-        public ulong Id { get; init; } = 0;
+        public ulong Id { get; init; }
         /// <summary>
         /// 自动打洞
         /// </summary>
-        public bool UsePunchHole { get; init; } = false;
+        public bool UsePunchHole { get; init; }
         /// <summary>
         /// 用udp
         /// </summary>
-        public bool UseUdp { get; init; } = false;
+        public bool UseUdp { get; init; }
         /// <summary>
         /// 用tco
         /// </summary>
-        public bool UseTcp { get; init; } = false;
+        public bool UseTcp { get; init; }
         /// <summary>
         /// 中继节点
         /// </summary>
-        public bool UseRelay { get; init; } = false;
+        public bool UseRelay { get; init; }
         /// <summary>
         /// ping值
         /// </summary>
@@ -60,15 +60,15 @@ namespace client.messengers.clients
         /// <summary>
         /// 连接类型
         /// </summary>
-        public ClientConnectTypes ConnectType { get; private set; } = ClientConnectTypes.Unknow;
+        public ClientConnectTypes ConnectType { get; private set; }
         /// <summary>
         /// 上线类型
         /// </summary>
-        public ClientOnlineTypes OnlineType { get; private set; } = ClientOnlineTypes.Unknow;
+        public ClientOnlineTypes OnlineType { get; private set; }
         /// <summary>
         /// 离线类型
         /// </summary>
-        public ClientOfflineTypes OfflineType { get; private set; } = ClientOfflineTypes.Unknow;
+        public ClientOfflineTypes OfflineType { get; private set; }
 
         /// <summary>
         /// tcp状态位
@@ -94,12 +94,12 @@ namespace client.messengers.clients
         /// 打洞重试状态缓存
         /// </summary>
         [JsonIgnore]
-        public byte TryReverseValue { get; set; } = 0;
+        public byte TryReverseValue { get; set; }
         /// <summary>
         /// 连接对象
         /// </summary>
         [JsonIgnore]
-        public IConnection Connection { get; set; } = null;
+        public IConnection Connection { get; set; }
 
         public ulong TunnelName { get; set; } = (ulong)TunnelDefaults.MIN;
         /// <summary>
@@ -111,10 +111,7 @@ namespace client.messengers.clients
             Connecting = false;
             ConnectType = ClientConnectTypes.Unknow;
             OfflineType = offlineType;
-            if (Connection != null && Connection.Relay == false)
-            {
-                Connection.Disponse();
-            }
+            Connection?.Disponse();
             Connection = null;
         }
         /// <summary>
@@ -125,11 +122,14 @@ namespace client.messengers.clients
         /// <param name="onlineType"></param>
         public void Online(IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType, ulong tunnelName)
         {
+            IConnection _connection = Connection;
             Connection = connection;
             ConnectType = connectType;
             OnlineType = onlineType;
             Connecting = false;
             TunnelName = tunnelName;
+
+            _connection?.Disponse();
         }
         /// <summary>
         /// 设置连接中状态

@@ -259,7 +259,12 @@ namespace common.tcpforward
                         token.Request.TargetEndpoint = Helper.EmptyArray;
                         if (token.Request.ForwardType == TcpForwardTypes.Proxy)
                         {
-                            token.SourceSocket.Send(HttpConnectMethodHelper.ConnectSuccessMessage(), SocketFlags.None);
+                            var bytes = HttpConnectMethodHelper.ConnectSuccessMessage();
+                            int length = 0;
+                            do
+                            {
+                                length += token.SourceSocket.Send(bytes.AsSpan(length), SocketFlags.None);
+                            } while (length < model.Buffer.Length);
                         }
                         else if (token.Request.Cache.Length > 0)
                         {
@@ -276,7 +281,11 @@ namespace common.tcpforward
                     {
                         try
                         {
-                            token.SourceSocket.Send(model.Buffer.Span, SocketFlags.None);
+                            int length = 0;
+                            do
+                            {
+                                length += token.SourceSocket.Send(model.Buffer.Span.Slice(length), SocketFlags.None);
+                            } while (length < model.Buffer.Length);
                         }
                         catch (Exception)
                         {
@@ -288,11 +297,21 @@ namespace common.tcpforward
                 {
                     if (token.Request.ForwardType == TcpForwardTypes.Proxy)
                     {
-                        token.SourceSocket.Send(HttpConnectMethodHelper.ConnectErrorMessage(), SocketFlags.None);
+                        var bytes = HttpConnectMethodHelper.ConnectErrorMessage();
+
+                        int length = 0;
+                        do
+                        {
+                            length += token.SourceSocket.Send(bytes.AsSpan(length), SocketFlags.None);
+                        } while (length < bytes.Length);
                     }
                     else if (model.Buffer.Length > 0)
                     {
-                        token.SourceSocket.Send(model.Buffer.Span, SocketFlags.None);
+                        int length = 0;
+                        do
+                        {
+                            length += token.SourceSocket.Send(model.Buffer.Slice(length).Span, SocketFlags.None);
+                        } while (length < model.Buffer.Length);
                     }
                     clientsManager.TryRemove(model.RequestId, out _);
                 }
@@ -439,7 +458,7 @@ namespace common.tcpforward
     }
     sealed class ServerInfo
     {
-        public ushort SourcePort { get; set; } = 0;
+        public ushort SourcePort { get; set; }
         public Socket Socket { get; set; }
     }
 }

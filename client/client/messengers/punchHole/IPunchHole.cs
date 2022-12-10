@@ -43,19 +43,15 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 打谁
         /// </summary>
-        public ulong Id { get; set; } = 0;
-        /// <summary>
-        /// 尝试几次
-        /// </summary>
-        public byte TryTimes { get; set; } = 5;
+        public ulong Id { get; set; }
         /// <summary>
         /// 通道
         /// </summary>
-        public ulong TunnelName { get; set; } = 0;
+        public ulong TunnelName { get; set; }
         /// <summary>
         /// 本地端口
         /// </summary>
-        public int LocalPort { get; set; } = 0;
+        public int LocalPort { get; set; }
     }
 
     /// <summary>
@@ -124,10 +120,6 @@ namespace client.messengers.punchHole
     /// </summary>
     public class ConnectCacheModel
     {
-        /// <summary>
-        /// 尝试几次
-        /// </summary>
-        public byte TryTimes { get; set; } = 5;
         /// <summary>
         /// 是否已取消
         /// </summary>

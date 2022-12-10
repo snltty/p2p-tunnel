@@ -6,6 +6,7 @@ using System;
 using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -392,16 +393,19 @@ namespace common.server
         /// </summary>
         public override void Disponse()
         {
-            base.Disponse();
-            if (NetPeer != null)
+            if (Relay == false)
             {
-                if (NetPeer.ConnectionState == ConnectionState.Connected)
+                base.Disponse();
+                if (NetPeer != null)
                 {
-                    NetPeer.Disconnect();
+                    if (NetPeer.ConnectionState == ConnectionState.Connected)
+                    {
+                        NetPeer.Disconnect();
+                    }
+                    NetPeer = null;
                 }
-                NetPeer = null;
+                semaphore.Dispose();
             }
-            semaphore.Dispose();
         }
 
         /// <summary>
@@ -439,10 +443,11 @@ namespace common.server
             Address = address;
         }
 
+        private bool error;
         /// <summary>
         /// 已连接
         /// </summary>
-        public override bool Connected => TcpSocket != null && TcpSocket.Connected;
+        public override bool Connected => TcpSocket != null && TcpSocket.Connected && error == false;
 
         /// <summary>
         /// socket
@@ -468,8 +473,29 @@ namespace common.server
             {
                 try
                 {
-                    await TcpSocket.SendAsync(data, SocketFlags.None).ConfigureAwait(false);
-                    SendBytes += data.Length;
+                    int length = 0;
+                    do
+                    {
+                        int len = 0;
+
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            len = await TcpSocket.SendAsync(data[length..], SocketFlags.None).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            len = TcpSocket.Send(data[length..].Span, SocketFlags.None);
+                        }
+                        if (len <= 0)
+                        {
+                            error = true;
+                            return false;
+                        }
+                        length += len;
+                    } while (length < data.Length);
+
+                    SendBytes += length;
+
                     return true;
                 }
                 catch (Exception ex)
@@ -494,11 +520,14 @@ namespace common.server
         /// </summary>
         public override void Disponse()
         {
-            base.Disponse();
-            if (TcpSocket != null)
+            if (Relay == false)
             {
-                TcpSocket.SafeClose();
-                TcpSocket.Dispose();
+                base.Disponse();
+                if (TcpSocket != null)
+                {
+                    TcpSocket.SafeClose();
+                    TcpSocket.Dispose();
+                }
             }
         }
         /// <summary>

@@ -422,7 +422,12 @@ namespace common.server.servers.websocket
         /// <returns></returns>
         public int SendRaw(byte[] buffer)
         {
-            return Socket.Send(buffer);
+            int length = 0;
+            do
+            {
+                length += Socket.Send(buffer.AsSpan(length), SocketFlags.None);
+            } while (length < buffer.Length);
+            return length;
         }
         /// <summary>
         /// 

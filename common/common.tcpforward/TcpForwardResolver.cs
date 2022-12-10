@@ -58,7 +58,11 @@ namespace common.tcpforward
                         {
                             try
                             {
-                                token.TargetSocket.SendAsync(arg.Buffer, SocketFlags.None);
+                                int length = 0;
+                                do
+                                {
+                                    length += token.TargetSocket.Send(arg.Buffer.Span.Slice(length), SocketFlags.None);
+                                } while (length < arg.Buffer.Length);
                                 return;
                             }
                             catch (Exception)

@@ -84,7 +84,6 @@ namespace client.realize.messengers.punchHole.udp
             {
                 Step1Timeout = timeout,
                 Tcs = tcs,
-                TryTimes = param.TryTimes,
                 LocalPort = param.LocalPort,
             });
 
@@ -166,11 +165,11 @@ namespace client.realize.messengers.punchHole.udp
         /// 
         /// </summary>
         public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; } = new SimpleSubPushHandler<OnStep2Params>();
-       /// <summary>
-       /// 
-       /// </summary>
-       /// <param name="arg"></param>
-       /// <returns></returns>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public async Task OnStep2(OnStep2Params arg)
         {
             OnStep2Handler.Push(arg);
@@ -191,28 +190,22 @@ namespace client.realize.messengers.punchHole.udp
                  if (arg.Data.IsDefault)
                  {
                      List<IPEndPoint> ips = new List<IPEndPoint>();
-                     int times = cache.TryTimes;
                      if (UseLocalPort)
                      {
                          var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, localPort)).ToList();
-                         times += locals.Count;
                          ips.AddRange(locals);
                      }
                      if (IPv6Support())
                      {
                          var locals = arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, port)).ToList();
-                         times += locals.Count;
                          ips.AddRange(locals);
                      }
                      ips.Add(new IPEndPoint(arg.Data.Ip, port));
-                     if ((TunnelDefaults)(arg.RawData.TunnelName) > TunnelDefaults.MAX)
-                     {
-                         ips.Add(new IPEndPoint(arg.Data.Ip, port + 1));
-                     }
+                     ips.Add(new IPEndPoint(arg.Data.Ip, port + 1));
 
 
                      IConnection connection = null;
-                     for (int i = 0; i < times; i++)
+                     for (int i = 0; i < ips.Count; i++)
                      {
                          IPEndPoint ip = i >= ips.Count - 1 ? ips[^1] : ips[i];
                          if (NotIPv6Support(ip.Address))
@@ -223,12 +216,13 @@ namespace client.realize.messengers.punchHole.udp
                          connection = await udpServer.CreateConnection(ip);
                          if (connection != null)
                          {
-                             Logger.Instance.DebugWarning($"udp {ip} connect success");
+                             Logger.Instance.Warning($"udp {ip} connect success");
                              break;
                          }
                          else
                          {
                              Logger.Instance.DebugError($"udp {ip} connect fail");
+                             /*
                              if (i >= ips.Count - 1)
                              {
                                  await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep21Info>
@@ -242,8 +236,8 @@ namespace client.realize.messengers.punchHole.udp
                                          PunchType = PunchHoleTypes.UDP
                                      }
                                  }).ConfigureAwait(false);
-                                 //await Task.Delay(100);
                              }
+                             */
                          }
                      }
                      if (connection != null)

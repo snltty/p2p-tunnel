@@ -146,7 +146,10 @@ namespace server.service.messengers.register
         }
         private async Task<bool> GetAlive(IConnection connection)
         {
-            if (connection != null && connection.ServerType == ServerType.UDP) return true;
+            if (connection.ServerType == ServerType.UDP)
+            {
+                return connection != null && connection.Connected;
+            }
 
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {

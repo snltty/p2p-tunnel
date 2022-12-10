@@ -53,7 +53,7 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 return false;
             }
-            clientInfoCaching.Offline(id,5);
+            //clientInfoCaching.Offline(id,5);
             clientsTransfer.ConnectClient(client);
             return true;
         }
@@ -68,7 +68,7 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 return false;
             }
-            clientInfoCaching.Offline(id,6);
+            //clientInfoCaching.Offline(id,6);
             clientsTransfer.ConnectReverse(client);
             return true;
         }
@@ -148,7 +148,7 @@ namespace client.service.ui.api.service.clientServer.services
                 return false;
             }
 
-            clientInfoCaching.Offline(targetId,8);
+            //clientInfoCaching.Offline(targetId,8);
             await clientsTransfer.Relay(sourceConnection, relayids, true);
 
             return true;

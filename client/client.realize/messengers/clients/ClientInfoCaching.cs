@@ -116,8 +116,6 @@ namespace client.realize.messengers.clients
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
-                Logger.Instance.Error($"{client.Name},offline:{mask}");
-                //client.SetConnecting(false);
                 if (client.ConnectType != ClientConnectTypes.Unknow)
                 {
                     OnOffline.Push(client);
@@ -135,6 +133,7 @@ namespace client.realize.messengers.clients
         {
             if (clients.TryRemove(id, out ClientInfo client))
             {
+                client.Offline();
                 clientsByName.TryRemove(client.Name, out _);
                 udpservers.TryRemove(id, out _);
                 tunnelPorts.TryRemove(id, out _);
@@ -155,8 +154,8 @@ namespace client.realize.messengers.clients
             {
                 connection.ConnectId = id;
                 client.Online(connection, connectType, onlineType, tunnelName);
-                RemoveTunnelPort(tunnelName);
-                RemoveUdpserver(tunnelName);
+                //RemoveTunnelPort(tunnelName);
+                //RemoveUdpserver(tunnelName);
                 OnOnline.Push(client);
             }
         }

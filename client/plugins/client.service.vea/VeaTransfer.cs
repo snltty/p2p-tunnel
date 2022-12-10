@@ -491,7 +491,7 @@ namespace client.service.vea
 
         private IPAddress[] ExcludeLanIP(IPAddress[] _lanips, ClientInfo client)
         {
-            IPAddress ip = client.IPAddress;
+            IPAddress ip = client.IPAddress.Address;
 
             //跟目标客户端是局域网连接，则排除连接的ip网段
             if (client.ConnectType == ClientConnectTypes.P2P && ip.IsLan())

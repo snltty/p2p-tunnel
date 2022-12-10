@@ -146,7 +146,12 @@ namespace common.server.servers.websocket
                     {
                         SecWebSocketKey = token.SecWebSocketKey,
                     });
-                    token.TargetSocket.Send(connectData);
+
+                    int length = 0;
+                    do
+                    {
+                        length += token.TargetSocket.Send(connectData.AsSpan(length), SocketFlags.None);
+                    } while (length < connectData.Length);
 
                     connected = true;
                     BindTargetReceive(token);
@@ -392,7 +397,14 @@ namespace common.server.servers.websocket
         /// <returns></returns>
         public int SendRaw(byte[] buffer)
         {
-            return (readEventArgs.UserToken as AsyncServerUserToken).TargetSocket.Send(buffer);
+            var socket = (readEventArgs.UserToken as AsyncServerUserToken).TargetSocket;
+
+            int length = 0;
+            do
+            {
+                length += socket.Send(buffer.AsSpan(length), SocketFlags.None);
+            } while (length < buffer.Length);
+            return length;
         }
         /// <summary>
         /// 

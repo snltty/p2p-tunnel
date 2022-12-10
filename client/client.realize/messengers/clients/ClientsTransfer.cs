@@ -202,19 +202,25 @@ namespace client.realize.messengers.clients
 
         private void OnOffline(ClientInfo client)
         {
-            registerState.LocalInfo.IsConnecting = true;
-            client.SetConnecting(true);
-            punchHoleMessengerSender.SendOffline(client.Id).Wait();
-            client.SetConnecting(false);
-            registerState.LocalInfo.IsConnecting = false;
+            if (clientInfoCaching.Get(client.Id, out _))
+            {
+                registerState.LocalInfo.IsConnecting = true;
+                client.SetConnecting(true);
+                punchHoleMessengerSender.SendOffline(client.Id).Wait();
+                client.SetConnecting(false);
+                registerState.LocalInfo.IsConnecting = false;
+            }
+
         }
         private void OnOfflineAfter(ClientInfo client)
         {
-            Logger.Instance.Error($"{client.Name} 掉线,OnlineType:{client.OnlineType},OfflineType:{client.OfflineType}");
-            //主动连接的，未知掉线信息的，去尝试重连一下
-            if (config.Client.UseReConnect && client.OnlineType == ClientOnlineTypes.Active && client.OfflineType == ClientOfflineTypes.Disconnect)
+            if (clientInfoCaching.Get(client.Id, out _))
             {
-                ConnectClient(client);
+                //主动连接的，未知掉线信息的，去尝试重连一下
+                if (config.Client.UseReConnect && client.OnlineType == ClientOnlineTypes.Active && client.OfflineType == ClientOfflineTypes.Disconnect)
+                {
+                    ConnectClient(client);
+                }
             }
         }
         private void OnDisconnect(IConnection connection, IConnection regConnection)
@@ -223,7 +229,13 @@ namespace client.realize.messengers.clients
             {
                 return;
             }
-            clientInfoCaching.Offline(connection.ConnectId, 9, ClientOfflineTypes.Disconnect);
+            if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
+            {
+                if (ReferenceEquals(connection, client.Connection))
+                {
+                    clientInfoCaching.Offline(connection.ConnectId, 9, ClientOfflineTypes.Disconnect);
+                }
+            }
         }
 
         /// <summary>
@@ -358,10 +370,6 @@ namespace client.realize.messengers.clients
 
         private async Task<EnumConnectResult> ConnectUdp(ClientInfo client)
         {
-            if (client.Connected)
-            {
-                return EnumConnectResult.Success;
-            }
             if (client.Connecting)
             {
                 return EnumConnectResult.BreakOff;
@@ -385,7 +393,6 @@ namespace client.realize.messengers.clients
                 {
                     Id = client.Id,
                     TunnelName = tunnelNames[i],
-                    TryTimes = 2,
                     LocalPort = registerState.LocalInfo.UdpPort
                 }).ConfigureAwait(false);
                 if (result.State)
@@ -396,16 +403,10 @@ namespace client.realize.messengers.clients
             }
 
             client.SetConnecting(false);
-
-            clientInfoCaching.Offline(client.Id, 1);
             return EnumConnectResult.Fail;
         }
         private async Task<EnumConnectResult> ConnectTcp(ClientInfo client)
         {
-            if (client.Connected)
-            {
-                return EnumConnectResult.Success;
-            }
             if (client.Connecting)
             {
                 return EnumConnectResult.BreakOff;
@@ -428,7 +429,6 @@ namespace client.realize.messengers.clients
                 {
                     Id = client.Id,
                     TunnelName = tunnelNames[i],
-                    TryTimes = 2,
                     LocalPort = registerState.LocalInfo.UdpPort
                 }).ConfigureAwait(false);
                 if (result.State)
@@ -439,7 +439,6 @@ namespace client.realize.messengers.clients
             }
 
             client.SetConnecting(false);
-            clientInfoCaching.Offline(client.Id, 2);
             return EnumConnectResult.Fail;
         }
 
@@ -503,7 +502,6 @@ namespace client.realize.messengers.clients
                     IEnumerable<ulong> offlines = clientInfoCaching.AllIds().Except(remoteIds).Where(c => c != registerState.ConnectId);
                     foreach (ulong offid in offlines)
                     {
-                        clientInfoCaching.Offline(offid, 3);
                         clientInfoCaching.Remove(offid);
                     }
                     //新上线的
