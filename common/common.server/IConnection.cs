@@ -497,7 +497,13 @@ namespace common.server
                 }
                 finally
                 {
-                    semaphore.Release();
+                    try
+                    {
+                        semaphore.Release();
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             }
             return false;
