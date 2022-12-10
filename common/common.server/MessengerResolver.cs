@@ -180,7 +180,7 @@ namespace common.server
                 Memory<byte> resultObject = null;
                 if (plugin.IsVoid)
                 {
-                    resultObject = connection.ResponseData;
+                    resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
                 }
                 else
                 {
@@ -194,7 +194,7 @@ namespace common.server
                         }
                         else
                         {
-                            resultObject = connection.ResponseData;
+                            resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
                         }
                     }
                     else if (resultAsync != null)

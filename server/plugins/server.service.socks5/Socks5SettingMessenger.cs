@@ -37,9 +37,9 @@ namespace server.service.socks5
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)Socks5MessengerIds.GetSetting)]
-        public async Task<byte[]> GetSetting(IConnection connection)
+        public async Task GetSetting(IConnection connection)
         {
-            return (await config.ReadString()).ToBytes();
+            connection.WriteUTF8(await config.ReadString());
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace server.service.socks5
         [MessengerId((ushort)Socks5MessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
-            string str = connection.ReceiveRequestWrap.Payload.GetString();
+            string str = connection.ReceiveRequestWrap.Payload.GetUTF8String();
 
             if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
             {

@@ -123,13 +123,15 @@ namespace client.service.wakeup
             List<byte> bytes = new List<byte>(64);
             foreach (var item in Items)
             {
-                var macBytes = item.Mac.ToBytes();
-                var nameBytes = item.Name.ToBytes();
+                var macBytes = item.Mac.GetUTF16Bytes();
+                var nameBytes = item.Name.GetUTF16Bytes();
 
                 bytes.Add((byte)macBytes.Length);
-                bytes.AddRange(macBytes);
+                bytes.Add((byte)item.Mac.Length);
+                bytes.AddRange(macBytes.ToArray());
                 bytes.Add((byte)nameBytes.Length);
-                bytes.AddRange(nameBytes);
+                bytes.Add((byte)item.Name.Length);
+                bytes.AddRange(nameBytes.ToArray());
             }
             return bytes.ToArray();
         }
@@ -146,13 +148,16 @@ namespace client.service.wakeup
             int index = 0;
             while (index < span.Length - 1)
             {
+                string mac = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+                index += 1 + 1 + span[index];
+                string name = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+                index += 1 + 1 + span[index];
+
                 res.Add(new ConfigItem
                 {
-                    Mac = span.Slice(index + 1, span[index]).GetString(),
-                    Name = span.Slice(index + 1 + span[index] + 1, span[index + 1 + span[index]]).GetString(),
+                    Mac = mac,
+                    Name = name,
                 });
-
-                index += span[index] + span[index + 1 + span[index]] + 2;
             }
             return res;
         }

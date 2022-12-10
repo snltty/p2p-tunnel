@@ -38,9 +38,9 @@ namespace server.service.messengers
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Key)]
-        public byte[] Key(IConnection connection)
+        public void Key(IConnection connection)
         {
-            return asymmetricCrypto.Key.PublicKey.ToBytes();
+            connection.WriteUTF8(asymmetricCrypto.Key.PublicKey);
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace server.service.messengers
             if (connection.ReceiveRequestWrap.Payload.Length > 0)
             {
                 var memory = asymmetricCrypto.Decode(connection.ReceiveRequestWrap.Payload);
-                password = memory.GetString();
+                password = memory.GetUTF8String();
             }
             else
             {

@@ -58,7 +58,7 @@ namespace client.service.wakeup
             {
                 Connection = connection,
                 MessengerId = (ushort)WakeUpMessengerIds.WakeUp,
-                Payload = mac.ToBytes(),
+                Payload = mac.ToUTF16Bytes(),
                 Timeout = 1000
             }).ConfigureAwait(false);
 

@@ -34,17 +34,19 @@ namespace server.service.socks5
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)ServiceAccessValidatorMessengerIds.GetSetting)]
-        public async Task<byte[]> GetSetting(IConnection connection)
+        public async Task GetSetting(IConnection connection)
         {
             if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
             {
-                return Helper.EmptyArray;
+                return;
             }
             if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
             {
-                return Helper.EmptyArray;
+                return;
             }
-            return (await serviceAccessValidator.ReadString()).ToBytes();
+
+            string str = await serviceAccessValidator.ReadString();
+            connection.WriteUTF8(str);
         }
 
         /// <summary>
@@ -64,7 +66,7 @@ namespace server.service.socks5
                 return Helper.FalseArray;
             }
 
-            string str = connection.ReceiveRequestWrap.Payload.GetString();
+            string str = connection.ReceiveRequestWrap.Payload.GetUTF8String();
             await serviceAccessValidator.SaveConfig(str);
 
             return Helper.TrueArray;

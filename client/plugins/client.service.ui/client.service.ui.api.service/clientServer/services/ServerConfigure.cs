@@ -55,7 +55,7 @@ namespace client.service.udpforward
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
             {
-                return resp.Data.GetString();
+                return resp.Data.GetUTF8String();
             }
             return string.Empty;
         }
@@ -70,7 +70,7 @@ namespace client.service.udpforward
             {
                 MessengerId = (ushort)RegisterMessengerIds.Setting,
                 Connection = registerStateInfo.OnlineConnection,
-                Payload = jsonStr.ToBytes()
+                Payload = jsonStr.ToUTF8Bytes()
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray))
             {

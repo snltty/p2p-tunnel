@@ -80,7 +80,7 @@ namespace server.service.udpforward
         [MessengerId((ushort)UdpForwardMessengerIds.Ports)]
         public void Ports(IConnection connection)
         {
-            connection.WriteResponse(new ushort[] {
+            connection.Write(new ushort[] {
                 config.TunnelListenRange.Min,
                     config.TunnelListenRange.Max
                 });
@@ -182,9 +182,9 @@ namespace server.service.udpforward
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.GetSetting)]
-        public async Task<byte[]> GetSetting(IConnection connection)
+        public async Task GetSetting(IConnection connection)
         {
-            return (await config.ReadString()).ToBytes();
+            connection.WriteUTF8(await config.ReadString());
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace server.service.udpforward
             {
                 return Helper.FalseArray;
             }
-            string jsonStr = connection.ReceiveRequestWrap.Payload.GetString();
+            string jsonStr = connection.ReceiveRequestWrap.Payload.GetUTF8String();
 
             await config.SaveConfig(jsonStr);
 

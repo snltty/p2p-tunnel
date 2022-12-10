@@ -1,7 +1,6 @@
 ﻿using common.libs.extends;
 using System;
 using System.ComponentModel;
-using System.Net;
 
 namespace common.tcpforward
 {
@@ -45,19 +44,20 @@ namespace common.tcpforward
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            byte[] sipBytes = SourceIp.ToBytes();
-            byte[] tipBytes = TargetIp.ToBytes();
-            byte[] tnameBytes = TargetName.ToBytes();
+            var sipBytes = SourceIp.GetUTF16Bytes();
+            var tipBytes = TargetIp.GetUTF16Bytes();
+            var tnameBytes = TargetName.GetUTF16Bytes();
 
             byte[] bytes = new byte[
                 1  //AliveType
                 + 2  //SourcePort
                 + 2  //TargetPort
-                + 1 + sipBytes.Length  //SourceIp
-                + 1 + tipBytes.Length  //TargetIp
-                + 1 + tnameBytes.Length //TargetName
+                + 1 + 1 + sipBytes.Length  //SourceIp
+                + 1 + 1 + tipBytes.Length  //TargetIp
+                + 1 + 1 + tnameBytes.Length //TargetName
              ];
             var memory = bytes.AsMemory();
+            var span = bytes.AsSpan();
 
             int index = 0;
 
@@ -71,17 +71,23 @@ namespace common.tcpforward
             index += 2;
 
             bytes[index] = (byte)sipBytes.Length;
-            Array.Copy(sipBytes, 0, bytes, index + 1, sipBytes.Length);
-            index += 1 + sipBytes.Length;
+            index += 1;
+            bytes[index] = (byte)SourceIp.Length;
+            index += 1;
+            sipBytes.CopyTo(span.Slice(index));
 
             bytes[index] = (byte)tipBytes.Length;
-            Array.Copy(tipBytes, 0, bytes, index + 1, tipBytes.Length);
-            index += 1 + tipBytes.Length;
+            index += 1;
+            bytes[index] = (byte)TargetIp.Length;
+            index += 1;
+            tipBytes.CopyTo(span.Slice(index));
+
 
             bytes[index] = (byte)tnameBytes.Length;
-            Array.Copy(tnameBytes, 0, bytes, index + 1, tnameBytes.Length);
-            index += 1 + tnameBytes.Length;
-
+            index += 1;
+            bytes[index] = (byte)TargetName.Length;
+            index += 1;
+            tnameBytes.CopyTo(span.Slice(index));
             return bytes;
 
         }
@@ -103,14 +109,14 @@ namespace common.tcpforward
             TargetPort = span.Slice(index, 2).ToUInt16();
             index += 2;
 
-            SourceIp = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
+            SourceIp = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 1 + 1 + span[index];
 
-            TargetIp = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
+            TargetIp = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 1 + 1 + span[index];
 
-            TargetName = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
+            TargetName = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 1 + 1 + span[index];
         }
 
     }
@@ -141,8 +147,8 @@ namespace common.tcpforward
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            byte[] ipBytes = SourceIp.ToBytes();
-            byte[] bytes = new byte[1 + ipBytes.Length + 2];
+            var ipBytes = SourceIp.GetUTF16Bytes();
+            byte[] bytes = new byte[1 + 1 + ipBytes.Length + 2];
 
             int index = 0;
 
@@ -152,7 +158,9 @@ namespace common.tcpforward
             SourcePort.ToBytes(bytes.AsMemory(index));
             index += 2;
 
-            Array.Copy(ipBytes, 0, bytes, index, ipBytes.Length);
+            bytes[index] = (byte)SourceIp.Length;
+            index += 1;
+            ipBytes.CopyTo(bytes.AsSpan(index));
             index += ipBytes.Length;
 
             return bytes;
@@ -172,7 +180,7 @@ namespace common.tcpforward
             SourcePort = span.Slice(index, 2).ToUInt16();
             index += 2;
 
-            SourceIp = span.Slice(index).GetString();
+            SourceIp = span.Slice(index + 1).GetUTF16String(span[index]);
         }
     }
     /// <summary>
@@ -191,18 +199,18 @@ namespace common.tcpforward
         /// <summary>
         /// 
         /// </summary>
-        public string Msg { get; set; }
+        public string Msg { get; set; } = string.Empty;
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var msgBytes = Msg.ToBytes();
+            var msgBytes = Msg.GetUTF16Bytes();
             var bytes = new byte[
                 1
                 + 8
-                + 1 + msgBytes.Length];
+                + 1 + 1 + msgBytes.Length];
 
             int index = 0;
 
@@ -214,7 +222,9 @@ namespace common.tcpforward
 
             bytes[index] = (byte)msgBytes.Length;
             index += 1;
-            Array.Copy(msgBytes, 0, bytes, index, msgBytes.Length);
+            bytes[index] = (byte)Msg.Length;
+            index += 1;
+            msgBytes.CopyTo(bytes.AsSpan(index));
 
             return bytes;
         }
@@ -233,7 +243,7 @@ namespace common.tcpforward
             ID = span.Slice(index, 8).ToUInt64();
             index += 8;
 
-            Msg = span.Slice(index + 1, span[index]).GetString();
+            Msg = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
         }
     }
 

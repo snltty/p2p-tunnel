@@ -39,9 +39,9 @@ namespace server.service.messengers
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)ClientsMessengerIds.Port)]
-        public byte[] Port(IConnection connection)
+        public void Port(IConnection connection)
         {
-            return ((ushort)connection.Address.Port).ToBytes();
+            connection.Write((ushort)connection.Address.Port);
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace server.service.messengers
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)ClientsMessengerIds.AddTunnel)]
-        public byte[] AddTunnel(IConnection connection)
+        public void AddTunnel(IConnection connection)
         {
             TunnelRegisterInfo model = new TunnelRegisterInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
@@ -70,7 +70,7 @@ namespace server.service.messengers
                     TunnelName = model.TunnelName,
                 });
             }
-            return model.TunnelName.ToBytes();
+            connection.Write(model.TunnelName);
         }
 
         /// <summary>

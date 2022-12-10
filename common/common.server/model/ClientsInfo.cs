@@ -95,7 +95,7 @@ namespace common.server.model
         /// 连接对象
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
-        public IConnection Connection { get; set; } 
+        public IConnection Connection { get; set; }
 
         /// <summary>
         /// 
@@ -103,12 +103,12 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var nameBytes = Name.ToBytes();
+            var nameBytes = Name.GetUTF16Bytes();
 
             var bytes = new byte[
                 4
                 + 8
-                + 1 + nameBytes.Length
+                + 1 + 1 + nameBytes.Length
                 ];
             var memory = bytes.AsMemory();
 
@@ -121,8 +121,11 @@ namespace common.server.model
             index += 8;
 
             bytes[index] = (byte)nameBytes.Length;
-            Array.Copy(nameBytes, 0, bytes, index + 1, nameBytes.Length);
-            index += 1 + nameBytes.Length;
+            index += 1;
+            bytes[index] = (byte)Name.Length;
+            index += 1;
+            nameBytes.CopyTo(memory.Slice(index).Span);
+            index += nameBytes.Length;
 
             return bytes;
         }
@@ -143,8 +146,8 @@ namespace common.server.model
             Id = span.Slice(index, 8).ToUInt64();
             index += 8;
 
-            Name = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
+            Name = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 1 + 1 + span[index];
 
             return index;
         }

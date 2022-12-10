@@ -62,7 +62,7 @@ namespace common.libs.extends
         #region utf8
 
         /// <summary>
-        /// 慢，性能基准 1，Allocated 1
+        /// 慢，但通用，性能基准 1，Allocated 1
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
@@ -72,7 +72,7 @@ namespace common.libs.extends
             return Encoding.UTF8.GetBytes(str);
         }
         /// <summary>
-        /// 慢，性能基准 1，Allocated 1
+        /// 慢，但通用，性能基准 1，Allocated 1
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
@@ -81,7 +81,7 @@ namespace common.libs.extends
             return Encoding.UTF8.GetString(span);
         }
         /// <summary>
-        /// 慢，性能基准 1，Allocated 1
+        /// 慢，但通用，性能基准 1，Allocated 1
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
@@ -90,7 +90,7 @@ namespace common.libs.extends
             return Encoding.UTF8.GetString(span);
         }
         /// <summary>
-        /// 慢，性能基准 1，Allocated 1
+        /// 慢，但通用，性能基准 1，Allocated 1
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
@@ -99,7 +99,7 @@ namespace common.libs.extends
             return Encoding.UTF8.GetString(span.Span);
         }
         /// <summary>
-        /// 慢，性能基准 1，Allocated 1
+        /// 慢，但通用，性能基准 1，Allocated 1
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
@@ -110,21 +110,47 @@ namespace common.libs.extends
         #endregion
 
         #region utf8优化
-
         /// <summary>
         /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
         /// write 0.76  read 0.27  readwrite 0.38
-        /// read    
+        /// utf16Length = (str.AsSpan().Length+1)*3
+        /// 保存的时候，保存 utf16Length 和 utf8Length
         /// </summary>
         /// <param name="str"></param>
         /// <param name="bytes"></param>
         /// <returns></returns>
-        public static (int, int) ToUTF8Bytes(this string str, Memory<byte> bytes)
+        public static int ToUTF8Bytes(this ReadOnlySpan<char> str, Memory<byte> bytes)
         {
-            if (str == null) return (0, 0);
-            var source = str.AsSpan();
-            Utf8.FromUtf16(source, bytes.Span, out var _, out var bytesWritten, replaceInvalidSequences: false);
-            return ((source.Length + 1) * 3, bytesWritten);
+            if (str.Length == 0) return 0;
+            Utf8.FromUtf16(str, bytes.Span, out var _, out var utf8Length, replaceInvalidSequences: false);
+            return utf8Length;
+        }
+        /// <summary>
+        /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
+        /// write 0.76  read 0.27  readwrite 0.38
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static byte[] ToUTF8Bytes(this string str)
+        {
+            int utf16Length = 0, utf8Length = 0;
+            byte[] bytes;
+
+            if (str != null)
+            {
+                var source = str.AsSpan();
+                utf16Length = (source.Length + 1) * 3;
+                bytes = new byte[utf16Length + 8];
+                Utf8.FromUtf16(str, bytes.AsSpan(8), out var _, out utf8Length, replaceInvalidSequences: false);
+            }
+            else
+            {
+                bytes = new byte[8];
+            }
+            utf16Length.ToBytes(bytes);
+            utf8Length.ToBytes(bytes.AsMemory(4));
+
+            return bytes;
         }
         /// <summary>
         /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
@@ -143,12 +169,36 @@ namespace common.libs.extends
         /// write 0.76  read 0.27  readwrite 0.38
         /// </summary>
         /// <param name="span"></param>
+        /// <returns></returns>
+        public static string GetUTF8String(this Span<byte> span)
+        {
+            int utf16Length = span.ToInt32();
+            int utf8Length = span.Slice(4).ToInt32();
+            return ReadUtf8(span.Slice(8), utf16Length, utf8Length);
+        }
+        /// <summary>
+        /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
+        /// write 0.76  read 0.27  readwrite 0.38
+        /// </summary>
+        /// <param name="span"></param>
         /// <param name="utf16Length"></param>
         /// <param name="utf8Length"></param>
         /// <returns></returns>
         public static string GetUTF8String(this ReadOnlySpan<byte> span, int utf16Length, int utf8Length)
         {
             return ReadUtf8(span, utf16Length, utf8Length);
+        }
+        /// <summary>
+        /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
+        /// write 0.76  read 0.27  readwrite 0.38
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
+        public static string GetUTF8String(this ReadOnlySpan<byte> span)
+        {
+            int utf16Length = span.ToInt32();
+            int utf8Length = span.Slice(4).ToInt32();
+            return ReadUtf8(span.Slice(8), utf16Length, utf8Length);
         }
         /// <summary>
         /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
@@ -161,6 +211,18 @@ namespace common.libs.extends
         public static string GetUTF8String(this Memory<byte> memory, int utf16Length, int utf8Length)
         {
             return ReadUtf8(memory.Span, utf16Length, utf8Length);
+        }
+        /// <summary>
+        /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
+        /// write 0.76  read 0.27  readwrite 0.38  
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <returns></returns>
+        public static string GetUTF8String(this Memory<byte> memory)
+        {
+            int utf16Length = memory.ToInt32();
+            int utf8Length = memory.Slice(4).ToInt32();
+            return ReadUtf8(memory.Slice(8).Span, utf16Length, utf8Length);
         }
         /// <summary>
         /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
@@ -179,14 +241,13 @@ namespace common.libs.extends
         /// write 0.76  read 0.27  readwrite 0.38 
         /// </summary>
         /// <param name="memory"></param>
-        /// <param name="utf16Length"></param>
-        /// <param name="utf8Length"></param>
         /// <returns></returns>
-        public static string GetUTF8String(this byte[] memory, int utf16Length, int utf8Length)
+        public static string GetUTF8String(this ReadOnlyMemory<byte> memory)
         {
-            return ReadUtf8(memory, utf16Length, utf8Length);
+            int utf16Length = memory.ToInt32();
+            int utf8Length = memory.Slice(4).ToInt32();
+            return ReadUtf8(memory.Slice(8).Span, utf16Length, utf8Length);
         }
-
         #endregion
 
         #region utf16
@@ -202,19 +263,32 @@ namespace common.libs.extends
             if (str == null) return Helper.EmptyArray;
             return MemoryMarshal.AsBytes(str.AsSpan());
         }
+
         /// <summary>
-        /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
-        /// write  0.065  read 0.038   readwrite 0.039
+        /// 
         /// </summary>
         /// <param name="str"></param>
-        /// <param name="bytes"></param>
-        //public static void ToUTF16Bytes(this string str, Memory<byte> bytes)
-        //{
-        //    if (str != null)
-        //    {
-        //        MemoryMarshal.AsBytes(str.AsSpan()).CopyTo(bytes.Span);
-        //    }
-        //}
+        /// <returns></returns>
+        public static byte[] ToUTF16Bytes(this string str)
+        {
+            int strLength = 0;
+            byte[] bytes;
+
+            if (str != null)
+            {
+                var source = MemoryMarshal.AsBytes(str.AsSpan());
+                strLength = source.Length;
+                bytes = new byte[source.Length + 4];
+                source.CopyTo(bytes.AsSpan(4));
+            }
+            else
+            {
+                bytes = new byte[4];
+            }
+            strLength.ToBytes(bytes);
+
+            return bytes;
+        }
 
         /// <summary>
         /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
@@ -306,7 +380,6 @@ namespace common.libs.extends
         {
             return memory.Span.GetUTF16String();
         }
-
         /// <summary>
         /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
         /// write  0.065  read 0.038   readwrite 0.039

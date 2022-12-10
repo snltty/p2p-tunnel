@@ -38,11 +38,16 @@ namespace common.udpforward
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            byte[] tipBytes = TargetIp.ToBytes();
-            byte[] tnameBytes = TargetName.ToBytes();
+            var tipBytes = TargetIp.GetUTF16Bytes();
+            var tnameBytes = TargetName.GetUTF16Bytes();
 
-            byte[] bytes = new byte[2 + 2 + 1 + tipBytes.Length + 1 + tnameBytes.Length];
+            byte[] bytes = new byte[
+                2 + 2
+                + 1 + 1 + tipBytes.Length
+                + 1 + 1 + tnameBytes.Length
+            ];
             var memory = bytes.AsMemory();
+            var span = bytes.AsSpan();
 
             int index = 0;
 
@@ -54,12 +59,18 @@ namespace common.udpforward
 
 
             bytes[index] = (byte)tipBytes.Length;
-            Array.Copy(tipBytes, 0, bytes, index + 1, tipBytes.Length);
-            index += 1 + tipBytes.Length;
+            index += 1;
+            bytes[index] = (byte)TargetIp.Length;
+            index += 1;
+            tipBytes.CopyTo(span.Slice(index));
+            index += tipBytes.Length;
 
             bytes[index] = (byte)tnameBytes.Length;
-            Array.Copy(tnameBytes, 0, bytes, index + 1, tnameBytes.Length);
-            index += 1 + tnameBytes.Length;
+            index += 1;
+            bytes[index] = (byte)TargetName.Length;
+            index += 1;
+            tnameBytes.CopyTo(span.Slice(index));
+            index += tnameBytes.Length;
 
             return bytes;
 
@@ -79,11 +90,11 @@ namespace common.udpforward
             TargetPort = span.Slice(index, 2).ToUInt16();
             index += 2;
 
-            TargetIp = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
+            TargetIp = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 1 + 1 + span[index];
 
-            TargetName = span.Slice(index + 1, span[index]).GetString();
-            index += 1 + span[index];
+            TargetName = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 1 + 1 + span[index];
         }
 
     }
@@ -103,7 +114,7 @@ namespace common.udpforward
         /// <summary>
         /// 
         /// </summary>
-        public string Msg { get; set; }
+        public string Msg { get; set; } = string.Empty;
 
         /// <summary>
         /// 
@@ -111,13 +122,14 @@ namespace common.udpforward
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var msgBytes = Msg.ToBytes();
+            var msgBytes = Msg.GetUTF16Bytes();
             var bytes = new byte[
                 1
                 + 8
-                + 1 + msgBytes.Length
+                + 1 + 1 + msgBytes.Length
             ];
             var memory = bytes.AsMemory();
+            var span = bytes.AsSpan();
 
             int index = 0;
 
@@ -129,7 +141,9 @@ namespace common.udpforward
 
             bytes[index] = (byte)msgBytes.Length;
             index += 1;
-            Array.Copy(msgBytes, 0, bytes, index, msgBytes.Length);
+            bytes[index] = (byte)Msg.Length;
+            index += 1;
+            msgBytes.CopyTo(span.Slice(index));
 
             return bytes;
         }
@@ -148,7 +162,7 @@ namespace common.udpforward
             ID = span.Slice(index, 8).ToUInt64();
             index += 8;
 
-            Msg = span.Slice(index + 1, span[index]).GetString();
+            Msg = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
         }
     }
 

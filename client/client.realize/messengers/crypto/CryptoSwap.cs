@@ -51,10 +51,10 @@ namespace client.realize.messengers.crypto
                         return null;
                     }
 
-                    string publicKey = publicKeyResponse.Data.GetString();
+                    string publicKey = publicKeyResponse.Data.GetUTF8String();
                     IAsymmetricCrypto encoder = cryptoFactory.CreateAsymmetric(new RsaKey { PublicKey = publicKey, PrivateKey = string.Empty });
                     password = StringHelper.RandomPasswordStringMd5();
-                    encodedData = encoder.Encode(password.ToBytes());
+                    encodedData = encoder.Encode(password.ToUTF8Bytes());
                     encoder.Dispose();
                 }
 
@@ -67,7 +67,7 @@ namespace client.realize.messengers.crypto
                         MessengerId = (ushort)CryptoMessengerIds.Set,
                         Payload = encodedData
                     }).ConfigureAwait(false);
-                    if (setResponse.Code != MessageResponeCodes.OK || crypto.Decode(setResponse.Data.ToArray()).GetBool() == false)
+                    if (setResponse.Code != MessageResponeCodes.OK || crypto.Decode(setResponse.Data.ToArray()).Span.SequenceEqual(Helper.TrueArray) == false)
                     {
                         return null;
                     }
@@ -80,7 +80,7 @@ namespace client.realize.messengers.crypto
                         MessengerId = (ushort)CryptoMessengerIds.Set,
                         Payload = encodedData
                     }).ConfigureAwait(false);
-                    if (setResponse.Code != MessageResponeCodes.OK || crypto.Decode(setResponse.Data.ToArray()).GetBool() == false)
+                    if (setResponse.Code != MessageResponeCodes.OK || crypto.Decode(setResponse.Data.ToArray()).Span.SequenceEqual(Helper.TrueArray) == false)
                     {
                         return null;
                     }

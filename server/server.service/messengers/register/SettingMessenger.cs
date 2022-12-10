@@ -37,17 +37,18 @@ namespace server.service.messengers.register
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)RegisterMessengerIds.GetSetting)]
-        public async Task<byte[]> GetSetting(IConnection connection)
+        public async Task GetSetting(IConnection connection)
         {
             if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
             {
-                return Helper.EmptyArray;
+                return;
             }
             if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
             {
-                return Helper.EmptyArray;
+                return;
             }
-            return (await config.ReadString()).ToBytes();
+            string str = await config.ReadString();
+            connection.WriteUTF8(str);
         }
 
         /// <summary>
@@ -67,7 +68,7 @@ namespace server.service.messengers.register
                 return Helper.FalseArray;
             }
 
-            string str = connection.ReceiveRequestWrap.Payload.GetString();
+            string str = connection.ReceiveRequestWrap.Payload.GetUTF8String();
             await config.SaveConfig(str);
 
             return Helper.TrueArray;

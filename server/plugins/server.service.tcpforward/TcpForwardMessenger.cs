@@ -76,7 +76,7 @@ namespace server.service.tcpforward
         [MessengerId((ushort)TcpForwardMessengerIds.Ports)]
         public void Ports(IConnection connection)
         {
-            connection.WriteResponse(config.WebListens
+            connection.Write(config.WebListens
                 .Concat(new ushort[] {
                     config.TunnelListenRange.Min,
                     config.TunnelListenRange.Max
@@ -207,10 +207,10 @@ namespace server.service.tcpforward
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)TcpForwardMessengerIds.GetSetting)]
-        public async Task<byte[]> GetSetting(IConnection connection)
+        public async Task GetSetting(IConnection connection)
         {
             string str = await config.ReadString();
-            return str.ToBytes();
+            connection.WriteUTF8(str);
         }
         /// <summary>
         /// 
@@ -229,7 +229,7 @@ namespace server.service.tcpforward
                 return Helper.FalseArray;
             }
 
-            string jsonStr = connection.ReceiveRequestWrap.Payload.GetString();
+            string jsonStr = connection.ReceiveRequestWrap.Payload.GetUTF8String();
             for (int i = 0; i < config.WebListens.Length; i++)
             {
                 tcpForwardServer.Stop(config.WebListens[i]);

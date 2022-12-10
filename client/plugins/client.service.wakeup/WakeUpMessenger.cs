@@ -45,7 +45,7 @@ namespace client.service.wakeup
         [MessengerId((ushort)WakeUpMessengerIds.WakeUp)]
         public void WakeUp(IConnection connection)
         {
-            wakeUpTransfer.WakeUp(connection.ReceiveRequestWrap.Payload.GetString());
+            wakeUpTransfer.WakeUp(connection.ReceiveRequestWrap.Payload.GetUTF16String());
         }
     }
 

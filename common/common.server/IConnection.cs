@@ -6,7 +6,6 @@ using System;
 using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -84,6 +83,7 @@ namespace common.server
         public Memory<byte> ReceiveData { get; set; }
 
         public byte[] ResponseData { get; set; }
+        public int ResponseDataLength { get; set; }
 
         /// <summary>
         /// 已发送字节
@@ -123,18 +123,58 @@ namespace common.server
         /// <returns></returns>
         public IConnection Clone();
 
-        public void WriteResponse(string str)
+
+        public void Write(ulong num)
+        {
+            ResponseDataLength = 8;
+            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
+            num.ToBytes(ResponseData);
+        }
+        public void Write(ushort num)
+        {
+            ResponseDataLength = 2;
+            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
+            num.ToBytes(ResponseData);
+        }
+        public void Write(ushort[] nums)
+        {
+            ResponseDataLength = nums.Length * 2;
+            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
+            nums.ToBytes(ResponseData);
+        }
+        /// <summary>
+        /// 英文多用这个
+        /// </summary>
+        /// <param name="str"></param>
+        public void WriteUTF8(string str)
+        {
+            var span = str.AsSpan();
+            int utf16Length = (span.Length + 1) * 3;
+
+            ResponseDataLength = utf16Length + 8;
+            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
+            var memory = ResponseData.AsMemory();
+
+            int utf8Length = span.ToUTF8Bytes(memory.Slice(8));
+            utf16Length.ToBytes(memory);
+            utf8Length.ToBytes(memory.Slice(4));
+        }
+        /// <summary>
+        /// 中文多用这个
+        /// </summary>
+        /// <param name="str"></param>
+        public void WriteUTF16(string str)
         {
             var span = str.GetUTF16Bytes();
-            ResponseData = ArrayPool<byte>.Shared.Rent(span.Length + 4);
+
+            ResponseDataLength = span.Length + 4;
+            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
             str.Length.ToBytes(ResponseData);
             span.CopyTo(ResponseData.AsSpan(4));
         }
-        public void WriteResponse(ushort[] nums)
-        {
-            ResponseData = ArrayPool<byte>.Shared.Rent(nums.Length * 2);
-            nums.ToBytes(ResponseData);
-        }
+        /// <summary>
+        /// 归还池
+        /// </summary>
         public void Return()
         {
             if (ResponseData != null && ResponseData.Length > 0)
@@ -249,6 +289,7 @@ namespace common.server
             }
         }
         public byte[] ResponseData { get; set; }
+        public int ResponseDataLength { get; set; }
 
         /// <summary>
         /// 已发送字节
@@ -493,6 +534,7 @@ namespace common.server
                 }
                 catch (Exception ex)
                 {
+                    error = true;
                     Logger.Instance.DebugError(ex);
                 }
                 finally
