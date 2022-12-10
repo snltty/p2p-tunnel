@@ -186,6 +186,7 @@ namespace common.server
                 {
                     if (plugin.IsTask)
                     {
+
                         if (plugin.IsTaskResult)
                         {
                             var task = resultAsync as Task<byte[]>;
@@ -194,6 +195,8 @@ namespace common.server
                         }
                         else
                         {
+                            var task = resultAsync as Task;
+                            await task.ConfigureAwait(false);
                             resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
                         }
                     }
@@ -210,8 +213,6 @@ namespace common.server
                     RelayIds = requestWrap.RelayIds,
                     RequestId = requestWrap.RequestId
                 }).ConfigureAwait(false);
-
-                connection.Return();
             }
             catch (Exception ex)
             {
@@ -228,6 +229,11 @@ namespace common.server
                     }).ConfigureAwait(false);
                 }
             }
+            finally
+            {
+                connection.Return();
+            }
+
         }
 
         /// <summary>

@@ -149,15 +149,13 @@ namespace common.server
         public void WriteUTF8(string str)
         {
             var span = str.AsSpan();
-            int utf16Length = (span.Length + 1) * 3;
-
-            ResponseDataLength = utf16Length + 8;
-            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
+            ResponseData = ArrayPool<byte>.Shared.Rent((span.Length + 1) * 3 + 8);
             var memory = ResponseData.AsMemory();
 
             int utf8Length = span.ToUTF8Bytes(memory.Slice(8));
-            utf16Length.ToBytes(memory);
+            span.Length.ToBytes(memory);
             utf8Length.ToBytes(memory.Slice(4));
+            ResponseDataLength = utf8Length + 8;
         }
         /// <summary>
         /// 中文多用这个
@@ -182,6 +180,7 @@ namespace common.server
                 ArrayPool<byte>.Shared.Return(ResponseData);
             }
             ResponseData = null;
+            ResponseDataLength = 0;
         }
 
     }

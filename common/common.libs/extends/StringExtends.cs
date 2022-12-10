@@ -113,12 +113,12 @@ namespace common.libs.extends
         /// <summary>
         /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
         /// write 0.76  read 0.27  readwrite 0.38
-        /// utf16Length = (str.AsSpan().Length+1)*3
+        /// utf16Length = str.AsSpan().Length
         /// 保存的时候，保存 utf16Length 和 utf8Length
         /// </summary>
         /// <param name="str"></param>
         /// <param name="bytes"></param>
-        /// <returns></returns>
+        /// <returns>utf8Length</returns>
         public static int ToUTF8Bytes(this ReadOnlySpan<char> str, Memory<byte> bytes)
         {
             if (str.Length == 0) return 0;
@@ -131,26 +131,28 @@ namespace common.libs.extends
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static byte[] ToUTF8Bytes(this string str)
+        public static Memory<byte> ToUTF8Bytes(this string str)
         {
             int utf16Length = 0, utf8Length = 0;
             byte[] bytes;
-
+            int length;
             if (str != null)
             {
                 var source = str.AsSpan();
-                utf16Length = (source.Length + 1) * 3;
-                bytes = new byte[utf16Length + 8];
-                Utf8.FromUtf16(str, bytes.AsSpan(8), out var _, out utf8Length, replaceInvalidSequences: false);
+                utf16Length = source.Length;
+                bytes = new byte[(source.Length + 1) * 3 + 8];
+                Utf8.FromUtf16(str, bytes.AsSpan(8), out _, out utf8Length, replaceInvalidSequences: false);
+                length = utf8Length + 8;
             }
             else
             {
                 bytes = new byte[8];
+                length = 8;
             }
             utf16Length.ToBytes(bytes);
             utf8Length.ToBytes(bytes.AsMemory(4));
 
-            return bytes;
+            return bytes.AsMemory(0, length);
         }
         /// <summary>
         /// UTF8比较快，但是中文字符比UTF16更大，Allocated 0.135
@@ -162,6 +164,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF8String(this Span<byte> span, int utf16Length, int utf8Length)
         {
+            if (span.Length == 0) return string.Empty;
             return ReadUtf8(span, utf16Length, utf8Length);
         }
         /// <summary>
@@ -172,6 +175,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF8String(this Span<byte> span)
         {
+            if (span.Length == 0) return string.Empty;
             int utf16Length = span.ToInt32();
             int utf8Length = span.Slice(4).ToInt32();
             return ReadUtf8(span.Slice(8), utf16Length, utf8Length);
@@ -186,6 +190,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF8String(this ReadOnlySpan<byte> span, int utf16Length, int utf8Length)
         {
+            if (span.Length == 0) return string.Empty;
             return ReadUtf8(span, utf16Length, utf8Length);
         }
         /// <summary>
@@ -196,6 +201,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF8String(this ReadOnlySpan<byte> span)
         {
+            if (span.Length == 0) return string.Empty;
             int utf16Length = span.ToInt32();
             int utf8Length = span.Slice(4).ToInt32();
             return ReadUtf8(span.Slice(8), utf16Length, utf8Length);
@@ -210,6 +216,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF8String(this Memory<byte> memory, int utf16Length, int utf8Length)
         {
+            if (memory.Length == 0) return string.Empty;
             return ReadUtf8(memory.Span, utf16Length, utf8Length);
         }
         /// <summary>
@@ -220,6 +227,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF8String(this Memory<byte> memory)
         {
+            if (memory.Length == 0) return string.Empty;
             int utf16Length = memory.ToInt32();
             int utf8Length = memory.Slice(4).ToInt32();
             return ReadUtf8(memory.Slice(8).Span, utf16Length, utf8Length);
@@ -234,6 +242,8 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF8String(this ReadOnlyMemory<byte> memory, int utf16Length, int utf8Length)
         {
+            if (memory.Length == 0)
+                return string.Empty;
             return ReadUtf8(memory.Span, utf16Length, utf8Length);
         }
         /// <summary>
@@ -244,6 +254,8 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF8String(this ReadOnlyMemory<byte> memory)
         {
+            if (memory.Length == 0)
+                return string.Empty;
             int utf16Length = memory.ToInt32();
             int utf8Length = memory.Slice(4).ToInt32();
             return ReadUtf8(memory.Slice(8).Span, utf16Length, utf8Length);
@@ -299,6 +311,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF16String(this Span<byte> span, int strLength)
         {
+            if (span.Length == 0) return string.Empty;
             return ReadUtf16(span, strLength);
         }
         /// <summary>
@@ -310,6 +323,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF16String(this Span<byte> span)
         {
+            if (span.Length == 0) return string.Empty;
             int strLength = span.ToInt32();
             return ReadUtf16(span.Slice(4), strLength);
         }
@@ -322,6 +336,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF16String(this ReadOnlySpan<byte> span, int strLength)
         {
+            if (span.Length == 0) return string.Empty;
             return ReadUtf16(span, strLength);
         }
         /// <summary>
@@ -333,6 +348,8 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF16String(this ReadOnlySpan<byte> span)
         {
+            if (span.Length == 0)
+                return string.Empty;
             int strLength = span.ToInt32();
             return ReadUtf16(span.Slice(4), strLength);
         }
@@ -345,6 +362,8 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF16String(this Memory<byte> memory, int strLength)
         {
+            if (memory.Length == 0)
+                return string.Empty;    
             return ReadUtf16(memory.Span, strLength);
         }
         /// <summary>
@@ -356,6 +375,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF16String(this Memory<byte> memory)
         {
+            if (memory.Length == 0) return string.Empty;
             return memory.Span.GetUTF16String();
         }
         /// <summary>
@@ -367,6 +387,8 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF16String(this ReadOnlyMemory<byte> memory, int strLength)
         {
+            if (memory.Length == 0)
+                return string.Empty;
             return ReadUtf16(memory.Span, strLength);
         }
         /// <summary>
@@ -378,6 +400,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF16String(this ReadOnlyMemory<byte> memory)
         {
+            if (memory.Length == 0) return string.Empty;
             return memory.Span.GetUTF16String();
         }
         /// <summary>
@@ -389,6 +412,7 @@ namespace common.libs.extends
         /// <returns></returns>
         public static string GetUTF16String(this byte[] memory, int strLength)
         {
+            if (memory.Length == 0) return string.Empty;
             return ReadUtf16(memory, strLength);
         }
 
