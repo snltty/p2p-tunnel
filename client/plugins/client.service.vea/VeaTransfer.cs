@@ -238,25 +238,28 @@ namespace client.service.vea
 
         private void RunWindows()
         {
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 10; i++)
             {
                 Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
-                System.Threading.Thread.Sleep(1000);
-                if (GetWindowsHasInterface(veaName))
+                for (int k = 0; k < 4; k++)
                 {
-                    interfaceNumber = GetWindowsInterfaceNum();
-                    if (interfaceNumber > 0)
+                    System.Threading.Thread.Sleep(1000);
+                    if (GetWindowsHasInterface(veaName))
                     {
-                        Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
-                        System.Threading.Thread.Sleep(1000);
-                        if (GetWindowsHasIp(config.IP))
+                        interfaceNumber = GetWindowsInterfaceNum();
+                        if (interfaceNumber > 0)
                         {
-                            AddRoute();
-                            if (config.ProxyAll) //代理所有
+                            Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
+                            System.Threading.Thread.Sleep(100);
+                            if (GetWindowsHasIp(config.IP))
                             {
-                                //AddRoute(IPAddress.Any);
+                                AddRoute();
+                                if (config.ProxyAll) //代理所有
+                                {
+                                    //AddRoute(IPAddress.Any);
+                                }
+                                return;
                             }
-                            break;
                         }
                     }
                 }
