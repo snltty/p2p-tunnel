@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-14 19:17:29
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-09 14:58:21
+ * @LastEditTime: 2022-12-11 17:25:04
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\service\httpproxy\Index.vue
@@ -102,7 +102,7 @@ export default {
                     ID: 0,
                     Port: 5412,
                     ForwardType: shareData.forwardTypes.proxy,
-                    AliveType: shareData.aliveTypes.web,
+                    AliveType: shareData.aliveTypesName.web,
                     Name: '',
                     Listening: false,
                     Pac: '',
@@ -143,7 +143,7 @@ export default {
                 ID: 0,
                 Port: 5413,
                 ForwardType: shareData.forwardTypes.proxy,
-                AliveType: shareData.aliveTypes.web,
+                AliveType: shareData.aliveTypesName.web,
                 Name: '',
                 Listening: false,
                 Pac: '',

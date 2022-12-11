@@ -56,7 +56,7 @@ namespace common.socks5
         public byte[] ToBytes(out int length)
         {
             length = 1 + 4 + 1 + 1 + Data.Length;
-            int index = 1;
+           
             int sepLength = 0, tepLength = 0;
             if (SourceEP != null)
             {
@@ -72,12 +72,13 @@ namespace common.socks5
 
             byte[] bytes = ArrayPool<byte>.Shared.Rent(length);
             var span = bytes.AsSpan();
+            int index = 1;
             bytes[0] = (byte)((byte)Socks5Step << 4 | Version);
 
             Id.ToBytes(bytes.AsMemory(index));
             index += 4;
 
-            bytes[index] = (byte)(sepLength + 2);
+            bytes[index] = (byte)sepLength;
             index += 1;
             if (sepLength > 0)
             {
@@ -88,7 +89,7 @@ namespace common.socks5
                 index += 2;
             }
 
-            bytes[index] = (byte)(tepLength + 2);
+            bytes[index] = (byte)tepLength;
             index += 1;
             if (tepLength > 0)
             {
@@ -124,8 +125,8 @@ namespace common.socks5
             index += 1;
             if (epLength > 0)
             {
-                IPAddress ip = new IPAddress(span.Slice(index, epLength - 2));
-                index += epLength - 2;
+                IPAddress ip = new IPAddress(span.Slice(index, epLength));
+                index += epLength;
                 SourceEP = new IPEndPoint(ip, span.Slice(index, 2).ToUInt16());
                 index += 2;
             }
@@ -134,8 +135,8 @@ namespace common.socks5
             index += 1;
             if (targetepLength > 0)
             {
-                IPAddress ip = new IPAddress(span.Slice(index, targetepLength - 2));
-                index += targetepLength - 2;
+                IPAddress ip = new IPAddress(span.Slice(index, targetepLength));
+                index += targetepLength;
                 TargetEP = new IPEndPoint(ip, span.Slice(index, 2).ToUInt16());
                 index += 2;
             }

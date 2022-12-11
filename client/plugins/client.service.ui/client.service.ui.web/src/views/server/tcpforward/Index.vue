@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2022-05-28 16:09:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-09 14:53:32
+ * @LastEditTime: 2022-12-11 17:24:31
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\server\tcpforward\Index.vue
@@ -28,7 +28,7 @@
                                     <dt class="flex">
                                         <span>{{shareData.aliveTypes[item.AliveType]}}</span>
                                         <span class="flex-1 t-c">{{item.Domain}}:{{item.ServerPort}}</span>
-                                        <span v-if="item.AliveType == shareData.aliveTypes.tunnel">
+                                        <span v-if="item.AliveType == shareData.aliveTypesName.tunnel">
                                             <el-switch size="small" @click.stop @change="onListeningChange(item,item.Forwards[0])" v-model="item.Forwards[0].Listening" style="margin-top:-6px;"></el-switch>
                                         </span>
                                     </dt>
@@ -44,7 +44,7 @@
                                                             <p class="t-r">
                                                                 <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(item,fitem)">
                                                                     <template #reference>
-                                                                        <el-button plain type="danger" v-if="item.AliveType == shareData.aliveTypes.web" size="small">删除</el-button>
+                                                                        <el-button plain type="danger" v-if="item.AliveType == shareData.aliveTypesName.web" size="small">删除</el-button>
                                                                     </template>
                                                                 </el-popconfirm>
                                                             </p>
@@ -57,10 +57,10 @@
                                     <dd class="btns t-r">
                                         <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(item,item.Forwards[0])">
                                             <template #reference>
-                                                <el-button v-if="item.AliveType == shareData.aliveTypes.tunnel" plain type="danger" size="small">删除</el-button>
+                                                <el-button v-if="item.AliveType == shareData.aliveTypesName.tunnel" plain type="danger" size="small">删除</el-button>
                                             </template>
                                         </el-popconfirm>
-                                        <el-button plain type="info" v-if="item.AliveType == shareData.aliveTypes.web" size="small" @click="handleAddForward(item)">增加转发</el-button>
+                                        <el-button plain type="info" v-if="item.AliveType == shareData.aliveTypesName.web" size="small" @click="handleAddForward(item)">增加转发</el-button>
                                     </dd>
                                 </dl>
                             </div>
@@ -113,8 +113,8 @@ export default {
                         ServerPort: c,
                         Domain: registerState.ServerConfig.Ip,
                         Desc: '短链接',
-                        AliveType: shareData.aliveTypes.web,
-                        Forwards: forwards.filter(d => d.AliveType == shareData.aliveTypes.web && d.ServerPort == c).map(d => {
+                        AliveType: shareData.aliveTypesName.web,
+                        Forwards: forwards.filter(d => d.AliveType == shareData.aliveTypesName.web && d.ServerPort == c).map(d => {
                             return {
                                 Domain: d.Domain,
                                 Listening: d.Listening,
@@ -126,12 +126,12 @@ export default {
                             }
                         })
                     }
-                }).concat(forwards.filter(c => c.AliveType == shareData.aliveTypes.tunnel).map(d => {
+                }).concat(forwards.filter(c => c.AliveType == shareData.aliveTypesName.tunnel).map(d => {
                     return {
                         ServerPort: d.ServerPort,
                         Domain: registerState.ServerConfig.Ip,
                         Desc: d.Desc || '长连接',
-                        AliveType: shareData.aliveTypes.tunnel,
+                        AliveType: shareData.aliveTypesName.tunnel,
                         Listening: d.Listening,
                         Forwards: [
                             {
@@ -185,14 +185,14 @@ export default {
             })
         }
 
-        const addForwardData = ref({ AliveType: shareData.aliveTypes.web, ServerPort: 0 });
+        const addForwardData = ref({ AliveType: shareData.aliveTypesName.web, ServerPort: 0 });
         provide('add-forward-data', addForwardData);
         const handleAddForward = (row) => {
             addForwardData.value.ServerPort = row.ServerPort;
             state.showAddForward = true;
         }
 
-        const addListenData = ref({ AliveType: shareData.aliveTypes.tunnel });
+        const addListenData = ref({ AliveType: shareData.aliveTypesName.tunnel });
         provide('add-listen-data', addListenData);
         const handleAddListen = () => {
             state.showAddListen = true;
