@@ -479,7 +479,8 @@ namespace common.server.servers.websocket
         public void Dispose()
         {
             CloseClientSocket();
-            GCHelper.Gc(this);
+            GC.Collect();
+            GC.SuppressFinalize(this);
         }
     }
     /// <summary>

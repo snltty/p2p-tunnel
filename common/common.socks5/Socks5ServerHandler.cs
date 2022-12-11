@@ -445,7 +445,8 @@ namespace common.socks5
             TargetSocket = null;
 
             PoolBuffer = Helper.EmptyArray;
-            GCHelper.Gc(this);
+            GC.Collect();
+            GC.SuppressFinalize(this);
         }
     }
     /// <summary>

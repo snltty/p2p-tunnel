@@ -360,7 +360,8 @@ namespace common.tcpforward
                     c.PoolBuffer = Helper.EmptyArray;
 
                     c.Saea.Dispose();
-                    GCHelper.Gc(c);
+                    GC.Collect();
+                    GC.SuppressFinalize(c);
                 }
                 catch (Exception)
                 {
@@ -409,7 +410,8 @@ namespace common.tcpforward
                 try
                 {
                     c.Socket.SafeClose();
-                    GCHelper.Gc(c);
+                    GC.Collect();
+                    GC.SuppressFinalize(c);
                 }
                 catch (Exception)
                 {

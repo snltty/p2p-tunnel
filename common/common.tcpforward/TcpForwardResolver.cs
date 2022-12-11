@@ -248,7 +248,8 @@ namespace common.tcpforward
 
             PoolBuffer = Helper.EmptyArray;
 
-            GCHelper.Gc(this);
+            GC.Collect();
+            GC.SuppressFinalize(this);
         }
     }
 

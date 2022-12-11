@@ -364,7 +364,8 @@ namespace common.server.servers.iocp
 
             DataBuffer.Clear(true);
 
-            GCHelper.Gc(this);
+            GC.Collect();
+            GC.SuppressFinalize(this);
         }
     }
 }

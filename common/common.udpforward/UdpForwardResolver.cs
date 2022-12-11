@@ -130,7 +130,8 @@ namespace common.udpforward
             TargetSocket = null;
             PoolBuffer = Helper.EmptyArray;
 
-            GCHelper.Gc(this);
+            GC.Collect();
+            GC.SuppressFinalize(this);
         }
 
         public void Update()

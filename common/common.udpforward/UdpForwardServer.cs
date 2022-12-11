@@ -213,7 +213,8 @@ namespace common.udpforward
                 try
                 {
                     c.UdpClient.Dispose();
-                    GCHelper.Gc(c);
+                    GC.Collect();
+                    GC.SuppressFinalize(c);
                 }
                 catch (Exception)
                 {
