@@ -75,19 +75,21 @@ namespace common.tcpforward
             bytes[index] = (byte)SourceIp.Length;
             index += 1;
             sipBytes.CopyTo(span.Slice(index));
+            index += sipBytes.Length;
 
             bytes[index] = (byte)tipBytes.Length;
             index += 1;
             bytes[index] = (byte)TargetIp.Length;
             index += 1;
             tipBytes.CopyTo(span.Slice(index));
-
+            index += tipBytes.Length;
 
             bytes[index] = (byte)tnameBytes.Length;
             index += 1;
             bytes[index] = (byte)TargetName.Length;
             index += 1;
             tnameBytes.CopyTo(span.Slice(index));
+            index += tnameBytes.Length;
             return bytes;
 
         }
@@ -148,7 +150,7 @@ namespace common.tcpforward
         public byte[] ToBytes()
         {
             var ipBytes = SourceIp.GetUTF16Bytes();
-            byte[] bytes = new byte[1 + 1 + ipBytes.Length + 2];
+            byte[] bytes = new byte[1 +2+ 1 + ipBytes.Length];
 
             int index = 0;
 
