@@ -55,17 +55,18 @@ namespace common.server
         /// <returns></returns>
         public async Task<bool> SendOnly(MessageRequestWrap msg)
         {
+            if (msg.Connection == null)
+            {
+                return false;
+            }
             try
             {
+                msg.Connection.WaitOne();
                 if (msg.RequestId == 0)
                 {
                     uint id = msg.RequestId;
                     Interlocked.CompareExchange(ref id, requestIdNumberSpace.Increment(), 0);
                     msg.RequestId = id;
-                }
-                if (msg.Connection == null)
-                {
-                    return false;
                 }
 
                 msg.Relay = msg.Connection.Relay || msg.RelayId.Length > 0;
@@ -79,7 +80,7 @@ namespace common.server
                 }
 
                 byte[] bytes = msg.ToArray(out int length);
-                bool res = await msg.Connection.Send(bytes.AsMemory(0,length)).ConfigureAwait(false);
+                bool res = await msg.Connection.Send(bytes.AsMemory(0, length)).ConfigureAwait(false);
                 msg.Return(bytes);
 
                 return res;
@@ -87,6 +88,10 @@ namespace common.server
             catch (Exception ex)
             {
                 Logger.Instance.Error(ex);
+            }
+            finally
+            {
+                msg.Connection.Release();
             }
             return false;
         }
@@ -98,8 +103,15 @@ namespace common.server
         /// <returns></returns>
         public async ValueTask<bool> ReplyOnly(MessageResponseWrap msg)
         {
+            if (msg.Connection == null)
+            {
+                return false;
+            }
+
             try
             {
+                msg.Connection.WaitOne();
+
                 if (msg.Connection.EncodeEnabled)
                 {
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
@@ -113,6 +125,10 @@ namespace common.server
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
+            }
+            finally
+            {
+                msg.Connection.Release();
             }
             return false;
         }

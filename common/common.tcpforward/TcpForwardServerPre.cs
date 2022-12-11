@@ -259,12 +259,7 @@ namespace common.tcpforward
                         token.Request.TargetEndpoint = Helper.EmptyArray;
                         if (token.Request.ForwardType == TcpForwardTypes.Proxy)
                         {
-                            var bytes = HttpConnectMethodHelper.ConnectSuccessMessage();
-                            int length = 0;
-                            do
-                            {
-                                length += token.SourceSocket.Send(bytes.AsSpan(length), SocketFlags.None);
-                            } while (length < model.Buffer.Length);
+                            token.SourceSocket.SendAsync(HttpConnectMethodHelper.ConnectSuccessMessage().AsMemory(), SocketFlags.None);
                         }
                         else if (token.Request.Cache.Length > 0)
                         {
@@ -281,11 +276,7 @@ namespace common.tcpforward
                     {
                         try
                         {
-                            int length = 0;
-                            do
-                            {
-                                length += token.SourceSocket.Send(model.Buffer.Span.Slice(length), SocketFlags.None);
-                            } while (length < model.Buffer.Length);
+                            token.SourceSocket.SendAsync(model.Buffer, SocketFlags.None);
                         }
                         catch (Exception)
                         {
@@ -297,21 +288,11 @@ namespace common.tcpforward
                 {
                     if (token.Request.ForwardType == TcpForwardTypes.Proxy)
                     {
-                        var bytes = HttpConnectMethodHelper.ConnectErrorMessage();
-
-                        int length = 0;
-                        do
-                        {
-                            length += token.SourceSocket.Send(bytes.AsSpan(length), SocketFlags.None);
-                        } while (length < bytes.Length);
+                        token.SourceSocket.SendAsync(HttpConnectMethodHelper.ConnectErrorMessage().AsMemory(), SocketFlags.None);
                     }
                     else if (model.Buffer.Length > 0)
                     {
-                        int length = 0;
-                        do
-                        {
-                            length += token.SourceSocket.Send(model.Buffer.Slice(length).Span, SocketFlags.None);
-                        } while (length < model.Buffer.Length);
+                        token.SourceSocket.SendAsync(model.Buffer, SocketFlags.None);
                     }
                     clientsManager.TryRemove(model.RequestId, out _);
                 }
@@ -379,8 +360,7 @@ namespace common.tcpforward
                     c.PoolBuffer = Helper.EmptyArray;
 
                     c.Saea.Dispose();
-                    //GC.Collect();
-                    //GC.SuppressFinalize(c);
+                    GCHelper.Gc(c);
                 }
                 catch (Exception)
                 {
@@ -429,8 +409,7 @@ namespace common.tcpforward
                 try
                 {
                     c.Socket.SafeClose();
-                    // GC.Collect();
-                    // GC.SuppressFinalize(c);
+                    GCHelper.Gc(c);
                 }
                 catch (Exception)
                 {

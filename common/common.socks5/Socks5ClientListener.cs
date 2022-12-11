@@ -290,11 +290,7 @@ namespace common.socks5
                     }
                     else
                     {
-                        int length = 0;
-                        do
-                        {
-                            length += token.Socket.Send(info.Data.Slice(length).Span, SocketFlags.None);
-                        } while (length < info.Data.Length);
+                        token.Socket.Send(info.Data.Span, SocketFlags.None);
                     }
 
                 }

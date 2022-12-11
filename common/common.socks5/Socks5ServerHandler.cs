@@ -90,12 +90,7 @@ namespace common.socks5
                 {
                     try
                     {
-                        int length = 0;
-                        do
-                        {
-                            length += token.TargetSocket.Send(data.Data.Span.Slice(length), SocketFlags.None);
-                        } while (length < data.Data.Length);
-                        return;
+                        _ = token.TargetSocket.SendAsync(data.Data, SocketFlags.None);
                     }
                     catch (Exception)
                     {
@@ -450,8 +445,7 @@ namespace common.socks5
             TargetSocket = null;
 
             PoolBuffer = Helper.EmptyArray;
-            // GC.Collect();
-            //GC.SuppressFinalize(this);
+            GCHelper.Gc(this);
         }
     }
     /// <summary>

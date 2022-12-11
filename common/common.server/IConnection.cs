@@ -6,6 +6,7 @@ using System;
 using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -183,6 +184,10 @@ namespace common.server
             ResponseDataLength = 0;
         }
 
+
+
+        public void WaitOne();
+        public void Release();
     }
 
     /// <summary>
@@ -190,6 +195,10 @@ namespace common.server
     /// </summary>
     public abstract class Connection : IConnection
     {
+        public Connection()
+        {
+        }
+
         private ulong connectId = 0;
         /// <summary>
         /// 连接id
@@ -322,6 +331,7 @@ namespace common.server
         /// </summary>
         public virtual void Disponse()
         {
+            Semaphore.Dispose();
             ReceiveRequestWrap = null;
             ReceiveResponseWrap = null;
         }
@@ -331,6 +341,35 @@ namespace common.server
         /// </summary>
         /// <returns></returns>
         public abstract IConnection Clone();
+
+
+        Semaphore Semaphore = new Semaphore(1, 1);
+        public virtual void WaitOne()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == false || ServerType == ServerType.UDP)
+            {
+                try
+                {
+                    Semaphore.WaitOne();
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+        public virtual void Release()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == false || ServerType == ServerType.UDP)
+            {
+                try
+                {
+                    Semaphore.Release();
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -343,7 +382,7 @@ namespace common.server
         /// </summary>
         /// <param name="peer"></param>
         /// <param name="address"></param>
-        public RudpConnection(NetPeer peer, IPEndPoint address)
+        public RudpConnection(NetPeer peer, IPEndPoint address) : base()
         {
             NetPeer = peer;
 
@@ -384,7 +423,6 @@ namespace common.server
         }
 
 
-        SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         /// <summary>
         /// 发送
         /// </summary>
@@ -396,7 +434,6 @@ namespace common.server
             {
                 try
                 {
-                    await semaphore.WaitAsync();
                     int index = 0;
                     while (index < 100 && NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
@@ -413,16 +450,6 @@ namespace common.server
                 catch (Exception ex)
                 {
                     Logger.Instance.DebugError(ex);
-                }
-                finally
-                {
-                    try
-                    {
-                        semaphore.Release();
-                    }
-                    catch (Exception)
-                    {
-                    }
                 }
             }
             return false;
@@ -444,7 +471,7 @@ namespace common.server
                     }
                     NetPeer = null;
                 }
-                semaphore.Dispose();
+
             }
         }
 
@@ -471,7 +498,7 @@ namespace common.server
         /// 
         /// </summary>
         /// <param name="tcpSocket"></param>
-        public TcpConnection(Socket tcpSocket)
+        public TcpConnection(Socket tcpSocket) : base()
         {
             TcpSocket = tcpSocket;
 
@@ -483,11 +510,10 @@ namespace common.server
             Address = address;
         }
 
-        private bool error;
         /// <summary>
         /// 已连接
         /// </summary>
-        public override bool Connected => TcpSocket != null && TcpSocket.Connected && error == false;
+        public override bool Connected => TcpSocket != null && TcpSocket.Connected;
 
         /// <summary>
         /// socket
@@ -502,8 +528,6 @@ namespace common.server
         /// </summary>
         public override int RoundTripTime { get; set; }
 
-
-        SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         /// <summary>
         /// 发送
         /// </summary>
@@ -515,36 +539,13 @@ namespace common.server
             {
                 try
                 {
-                    await semaphore.WaitAsync();
-                    int length = 0;
-                    do
-                    {
-                        int len = await TcpSocket.SendAsync(data[length..], SocketFlags.None).ConfigureAwait(false);
-                        if (len <= 0)
-                        {
-                            error = true;
-                            return false;
-                        }
-                        length += len;
-                    } while (length < data.Length);
-
-                    SendBytes += length;
+                    await TcpSocket.SendAsync(data, SocketFlags.None).ConfigureAwait(false);
+                    SendBytes += data.Length;
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    error = true;
                     Logger.Instance.DebugError(ex);
-                }
-                finally
-                {
-                    try
-                    {
-                        semaphore.Release();
-                    }
-                    catch (Exception)
-                    {
-                    }
                 }
             }
             return false;

@@ -147,11 +147,7 @@ namespace common.server.servers.websocket
                         SecWebSocketKey = token.SecWebSocketKey,
                     });
 
-                    int length = 0;
-                    do
-                    {
-                        length += token.TargetSocket.Send(connectData.AsSpan(length), SocketFlags.None);
-                    } while (length < connectData.Length);
+                    token.TargetSocket.Send(connectData, SocketFlags.None);
 
                     connected = true;
                     BindTargetReceive(token);
@@ -399,12 +395,7 @@ namespace common.server.servers.websocket
         {
             var socket = (readEventArgs.UserToken as AsyncServerUserToken).TargetSocket;
 
-            int length = 0;
-            do
-            {
-                length += socket.Send(buffer.AsSpan(length), SocketFlags.None);
-            } while (length < buffer.Length);
-            return length;
+            return socket.Send(buffer, SocketFlags.None);
         }
         /// <summary>
         /// 
@@ -488,8 +479,7 @@ namespace common.server.servers.websocket
         public void Dispose()
         {
             CloseClientSocket();
-            // GC.Collect();
-            // GC.SuppressFinalize(this);
+            GCHelper.Gc(this);
         }
     }
     /// <summary>

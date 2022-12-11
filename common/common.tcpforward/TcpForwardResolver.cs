@@ -58,11 +58,7 @@ namespace common.tcpforward
                         {
                             try
                             {
-                                int length = 0;
-                                do
-                                {
-                                    length += token.TargetSocket.Send(arg.Buffer.Span.Slice(length), SocketFlags.None);
-                                } while (length < arg.Buffer.Length);
+                                _ = token.TargetSocket.SendAsync(arg.Buffer, SocketFlags.None);
                                 return;
                             }
                             catch (Exception)
@@ -252,8 +248,7 @@ namespace common.tcpforward
 
             PoolBuffer = Helper.EmptyArray;
 
-            //GC.Collect();
-            //GC.SuppressFinalize(this);
+            GCHelper.Gc(this);
         }
     }
 

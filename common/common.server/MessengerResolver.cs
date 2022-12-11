@@ -102,7 +102,10 @@ namespace common.server
 
                         //RelayIdIndex 后移一位
                         receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
+
+                        _connection.WaitOne();
                         await _connection.Send(receive).ConfigureAwait(false);
+                        _connection.Release();
                     }
                     else
                     {
@@ -133,8 +136,11 @@ namespace common.server
 
                             //RelayIdIndex 后移一位
                             receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
+
+                            _connection.WaitOne();
                             //中继数据不再次序列化，直接在原数据上更新数据然后发送
                             await _connection.Send(receive).ConfigureAwait(false);
+                            _connection.Release();
                         }
                         return;
                     }
