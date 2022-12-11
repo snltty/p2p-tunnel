@@ -58,7 +58,7 @@ namespace common.tcpforward
                         {
                             try
                             {
-                                _ = token.TargetSocket.SendAsync(arg.Buffer, SocketFlags.None);
+                                _ = token.TargetSocket.Send(arg.Buffer.Span, SocketFlags.None);
                                 return;
                             }
                             catch (Exception)
