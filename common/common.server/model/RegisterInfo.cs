@@ -241,9 +241,17 @@ namespace common.server.model
             bytes[index] = ShortId;
             index += 1;
 
-            Ip.TryWriteBytes(memory.Span.Slice(index + 1), out int ll);
-            bytes[index] = (byte)ll;
-            index += 1 + ll;
+            if (Ip != null)
+            {
+                Ip.TryWriteBytes(memory.Span.Slice(index + 1), out int ll);
+                bytes[index] = (byte)ll;
+                index += 1 + ll;
+            }
+            else
+            {
+                bytes[index] = 0;
+                index += 1 + 0;
+            }
 
             bytes[index] = (byte)GroupId.Length;
             index += 1;
@@ -280,7 +288,14 @@ namespace common.server.model
             index += 1;
 
 
-            Ip = new IPAddress(span.Slice(index + 1, span[index]));
+            if (span[index] == 0)
+            {
+                Ip = IPAddress.Any;
+            }
+            else
+            {
+                Ip = new IPAddress(span.Slice(index + 1, span[index]));
+            }
             index += 1 + span[index];
 
 
