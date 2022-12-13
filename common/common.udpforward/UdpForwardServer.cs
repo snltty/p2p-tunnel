@@ -50,8 +50,11 @@ namespace common.udpforward
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, sourcePort);
             var udpClient = new UdpClient(localEndPoint);
 
-            serversManager.TryAdd(new ForwardAsyncServerToken { SourcePort = sourcePort, UdpClient = udpClient });
-            IAsyncResult result = udpClient.BeginReceive(ProcessReceiveUdp, new ForwardAsyncServerToken { SourcePort = sourcePort, UdpClient = udpClient });
+
+            ForwardAsyncServerToken token = new ForwardAsyncServerToken { SourcePort = sourcePort, UdpClient = udpClient };
+            serversManager.TryAdd(token);
+
+            IAsyncResult result = udpClient.BeginReceive(ProcessReceiveUdp, token);
 
             OnListenChange.Push(new UdpforwardListenChangeInfo { Port = sourcePort, State = true });
         }
@@ -61,7 +64,7 @@ namespace common.udpforward
             {
                 var token = result.AsyncState as ForwardAsyncServerToken;
                 var data = token.UdpClient.EndReceive(result, ref token.TempRemoteEP);
-                if (!clientsManager.TryGetValue(token.TempRemoteEP, out ForwardAsyncUserToken userToken))
+                if (clientsManager.TryGetValue(token.TempRemoteEP, out ForwardAsyncUserToken userToken) == false)
                 {
                     userToken = new ForwardAsyncUserToken
                     {
@@ -76,8 +79,9 @@ namespace common.udpforward
 
                 result = token.UdpClient.BeginReceive(ProcessReceiveUdp, token);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.Instance.Error(ex);
             }
         }
         /// <summary>
