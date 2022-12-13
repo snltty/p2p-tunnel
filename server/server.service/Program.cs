@@ -47,7 +47,7 @@ namespace server.service
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
             Console.ReadLine();
-        }
+        } 
 
 
         static void LoggerConsole()
