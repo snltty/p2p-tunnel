@@ -57,15 +57,12 @@ namespace common.udpforward
                 token.TargetEP = endpoint;
                 token.PoolBuffer = new byte[65535];
                 connections.AddOrUpdate(key, token, (a, b) => token);
-
-                Console.WriteLine($"====udp forward {endpoint}:{arg.Buffer.Length}");
                 _ = token.TargetSocket.SendTo(arg.Buffer.Span, endpoint);
                 token.Data.Buffer = Helper.EmptyArray;
                 IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
             }
             else
             {
-                Console.WriteLine($"udp forward {token.TargetEP}:{arg.Buffer.Length}");
                 _ = token.TargetSocket.SendTo(arg.Buffer.Span, token.TargetEP);
                 token.Data.Buffer = Helper.EmptyArray;
             }
