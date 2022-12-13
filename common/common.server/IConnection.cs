@@ -332,9 +332,9 @@ namespace common.server
         public virtual void Disponse()
         {
             Semaphore?.Dispose();
-            Semaphore = null;
-            ReceiveRequestWrap = null;
-            ReceiveResponseWrap = null;
+            //Semaphore = null;
+            //ReceiveRequestWrap = null;
+            //ReceiveResponseWrap = null;
         }
 
         /// <summary>
