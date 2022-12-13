@@ -31,7 +31,7 @@ namespace client.realize.messengers.punchHole
         /// <param name="arg"></param>
         public void Execute(OnPunchHoleArg arg)
         {
-            clientInfoCaching.Offline(arg.Data.FromId,4);
+            clientInfoCaching.Offline(arg.Data.FromId);
         }
     }
 }

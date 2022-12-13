@@ -351,7 +351,6 @@ namespace common.server
             {
                 try
                 {
-
                     Semaphore?.WaitOne();
                 }
                 catch (Exception)

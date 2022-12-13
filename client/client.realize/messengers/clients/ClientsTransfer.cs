@@ -233,7 +233,7 @@ namespace client.realize.messengers.clients
             {
                 if (ReferenceEquals(connection, client.Connection))
                 {
-                    clientInfoCaching.Offline(connection.ConnectId, 9, ClientOfflineTypes.Disconnect);
+                    clientInfoCaching.Offline(connection.ConnectId, ClientOfflineTypes.Disconnect);
                 }
             }
         }

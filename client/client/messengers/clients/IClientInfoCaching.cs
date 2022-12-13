@@ -72,7 +72,7 @@ namespace client.messengers.clients
         /// </summary>
         /// <param name="id"></param>
         /// <param name="offlineType"></param>
-        public void Offline(ulong id,int mask, ClientOfflineTypes offlineType = ClientOfflineTypes.Manual);
+        public void Offline(ulong id,ClientOfflineTypes offlineType = ClientOfflineTypes.Manual);
         /// <summary>
         /// 上线
         /// </summary>

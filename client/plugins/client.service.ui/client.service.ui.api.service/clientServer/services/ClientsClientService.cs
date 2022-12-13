@@ -88,7 +88,7 @@ namespace client.service.ui.api.service.clientServer.services
         /// <param name="arg"></param>
         public bool Offline(ClientServiceParamsInfo arg)
         {
-            clientInfoCaching.Offline(ulong.Parse(arg.Content),7);
+            clientInfoCaching.Offline(ulong.Parse(arg.Content));
             return true;
         }
 

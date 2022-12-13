@@ -112,7 +112,7 @@ namespace client.realize.messengers.clients
         /// </summary>
         /// <param name="id"></param>
         /// <param name="offlineType"></param>
-        public void Offline(ulong id, int mask, ClientOfflineTypes offlineType = ClientOfflineTypes.Manual)
+        public void Offline(ulong id, ClientOfflineTypes offlineType = ClientOfflineTypes.Manual)
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
