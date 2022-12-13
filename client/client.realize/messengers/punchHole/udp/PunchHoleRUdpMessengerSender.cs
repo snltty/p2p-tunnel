@@ -159,6 +159,10 @@ namespace client.realize.messengers.punchHole.udp
                     Data = new PunchHoleStep2Info { Step = (byte)PunchHoleUdpSteps.STEP_2, PunchType = PunchHoleTypes.UDP }
                 }).ConfigureAwait(false);
             }
+            else
+            {
+                await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -256,14 +260,7 @@ namespace client.realize.messengers.punchHole.udp
                      }
                      else
                      {
-
-                         await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep2FailInfo>
-                         {
-                             Connection = this.connection,
-                             TunnelName = arg.RawData.TunnelName,
-                             ToId = arg.RawData.FromId,
-                             Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleUdpSteps.STEP_2_Fail, PunchType = PunchHoleTypes.UDP }
-                         }).ConfigureAwait(false);
+                         await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId);
                          if (connectCache.TryRemove(arg.RawData.FromId, out _))
                          {
                              cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "udp打洞失败" } });
@@ -338,6 +335,16 @@ namespace client.realize.messengers.punchHole.udp
         public void OnStep2Fail(OnStep2FailParams arg)
         {
             OnStep2FailHandler.Push(arg);
+        }
+        private async Task SendSetp2Fail(ulong tunname, ulong toid)
+        {
+            await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep2FailInfo>
+            {
+                Connection = connection,
+                TunnelName = tunname,
+                ToId = toid,
+                Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleUdpSteps.STEP_2_Fail, PunchType = PunchHoleTypes.UDP }
+            }).ConfigureAwait(false);
         }
 
         /// <summary>

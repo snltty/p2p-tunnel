@@ -65,9 +65,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 #endif
         private readonly ConcurrentDictionary<ulong, ConnectCacheModel> connectTcpCache = new();
 
-       /// <summary>
-       /// 
-       /// </summary>
+        /// <summary>
+        /// 
+        /// </summary>
         public SimpleSubPushHandler<ConnectParams> OnSendHandler => new SimpleSubPushHandler<ConnectParams>();
         /// <summary>
         /// 
@@ -84,18 +84,24 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
 
             TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
-            var ceche = new ConnectCacheModel
+            if (clientInfoCaching.GetTunnelPort(param.TunnelName, out _))
             {
-                Tcs = tcs,
-                TunnelName = param.TunnelName,
-                LocalPort = param.LocalPort
-            };
-            connectTcpCache.TryAdd(param.Id, ceche);
 
-            ceche.Step1Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 5000);
+                var ceche = new ConnectCacheModel
+                {
+                    Tcs = tcs,
+                    TunnelName = param.TunnelName,
+                    LocalPort = param.LocalPort
+                };
+                connectTcpCache.TryAdd(param.Id, ceche);
 
-            await SendStep1(param);
-
+                ceche.Step1Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 5000);
+                await SendStep1(param);
+            }
+            else
+            {
+                tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "未找到通道" } });
+            }
             return await tcs.Task.ConfigureAwait(false);
         }
 
@@ -151,6 +157,10 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     targetSocket.SafeClose();
                 }
                 await SendStep2(arg);
+            }
+            else
+            {
+                await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
             }
         }
 
@@ -276,7 +286,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
                 if (success == false)
                 {
-                    await SendStep2Fail(arg).ConfigureAwait(false);
+                    await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
                 }
 
             }).ConfigureAwait(false);
@@ -491,20 +501,17 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         /// 
         /// </summary>
         public SimpleSubPushHandler<ulong> OnSendStep2FailHandler => new SimpleSubPushHandler<ulong>();
-        private async Task SendStep2Fail(OnStep2Params arg)
+        private async Task SendStep2Fail(ulong tunname, ulong toid)
         {
-            if (arg.Data.IsDefault)
+            OnSendStep2FailHandler.Push(toid);
+            await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep2FailInfo>
             {
-                OnSendStep2FailHandler.Push(arg.RawData.FromId);
-                await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep2FailInfo>
-                {
-                    TunnelName = arg.RawData.TunnelName,
-                    Connection = TcpServer,
-                    ToId = arg.RawData.FromId,
-                    Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL, PunchType = PunchHoleTypes.TCP_NUTSSB }
-                }).ConfigureAwait(false);
-            }
-            if (connectTcpCache.TryRemove(arg.RawData.FromId, out ConnectCacheModel cache))
+                TunnelName = tunname,
+                Connection = TcpServer,
+                ToId = toid,
+                Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL, PunchType = PunchHoleTypes.TCP_NUTSSB }
+            }).ConfigureAwait(false);
+            if (connectTcpCache.TryRemove(toid, out ConnectCacheModel cache))
             {
                 cache.Canceled = true;
                 cache.Tcs.SetResult(new ConnectResultModel
