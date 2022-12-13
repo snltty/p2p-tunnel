@@ -131,7 +131,7 @@ namespace common.udpforward
             PoolBuffer = Helper.EmptyArray;
 
             GC.Collect();
-            GC.SuppressFinalize(this);
+            // GC.SuppressFinalize(this);
         }
 
         public void Update()

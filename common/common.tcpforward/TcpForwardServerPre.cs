@@ -361,7 +361,7 @@ namespace common.tcpforward
 
                     c.Saea.Dispose();
                     GC.Collect();
-                    GC.SuppressFinalize(c);
+                    //  GC.SuppressFinalize(c);
                 }
                 catch (Exception)
                 {
@@ -411,7 +411,7 @@ namespace common.tcpforward
                 {
                     c.Socket.SafeClose();
                     GC.Collect();
-                    GC.SuppressFinalize(c);
+                    //  GC.SuppressFinalize(c);
                 }
                 catch (Exception)
                 {
@@ -426,7 +426,7 @@ namespace common.tcpforward
                 try
                 {
                     item.Socket.SafeClose();
-                    // GC.Collect();
+                    GC.Collect();
                     // GC.SuppressFinalize(item);
                 }
                 catch (Exception)

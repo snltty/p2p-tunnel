@@ -249,7 +249,7 @@ namespace common.tcpforward
             PoolBuffer = Helper.EmptyArray;
 
             GC.Collect();
-            GC.SuppressFinalize(this);
+           // GC.SuppressFinalize(this);
         }
     }
 

@@ -214,7 +214,7 @@ namespace common.udpforward
                 {
                     c.UdpClient.Dispose();
                     GC.Collect();
-                    GC.SuppressFinalize(c);
+                  //  GC.SuppressFinalize(c);
                 }
                 catch (Exception)
                 {
@@ -229,7 +229,7 @@ namespace common.udpforward
                 try
                 {
                     item.UdpClient.Dispose();
-                    //GC.Collect();
+                    GC.Collect();
                 }
                 catch (Exception)
                 {

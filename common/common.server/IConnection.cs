@@ -331,7 +331,8 @@ namespace common.server
         /// </summary>
         public virtual void Disponse()
         {
-            Semaphore.Dispose();
+            Semaphore?.Dispose();
+            Semaphore = null;
             ReceiveRequestWrap = null;
             ReceiveResponseWrap = null;
         }
@@ -350,7 +351,8 @@ namespace common.server
             {
                 try
                 {
-                    Semaphore.WaitOne();
+
+                    Semaphore?.WaitOne();
                 }
                 catch (Exception)
                 {
@@ -363,7 +365,7 @@ namespace common.server
             {
                 try
                 {
-                    Semaphore.Release();
+                    Semaphore?.Release();
                 }
                 catch (Exception)
                 {

@@ -480,7 +480,7 @@ namespace common.server.servers.websocket
         {
             CloseClientSocket();
             GC.Collect();
-            GC.SuppressFinalize(this);
+            //GC.SuppressFinalize(this);
         }
     }
     /// <summary>

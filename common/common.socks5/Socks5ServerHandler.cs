@@ -446,7 +446,7 @@ namespace common.socks5
 
             PoolBuffer = Helper.EmptyArray;
             GC.Collect();
-            GC.SuppressFinalize(this);
+           // GC.SuppressFinalize(this);
         }
     }
     /// <summary>

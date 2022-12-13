@@ -33,27 +33,44 @@ namespace common.server
         /// <returns></returns>
         public async Task<MessageResponeInfo> SendReply(MessageRequestWrap msg)
         {
-            if (msg.RequestId == 0)
+            if (msg.Connection == null)
             {
-                uint id = msg.RequestId;
-                Interlocked.CompareExchange(ref id, requestIdNumberSpace.Increment(), 0);
-                msg.RequestId = id;
+                return new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT };
             }
-            WheelTimerTimeout<TimeoutState> timeout = NewReply(msg);
-            if (await SendOnly(msg).ConfigureAwait(false) == false)
+            try
             {
-                sends.TryRemove(msg.RequestId, out _);
-                timeout.Cancel();
-                timeout.Task.State.Tcs.SetResult(new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT });
+                msg.Connection.WaitOne();
+                if (msg.RequestId == 0)
+                {
+                    uint id = msg.RequestId;
+                    Interlocked.CompareExchange(ref id, requestIdNumberSpace.Increment(), 0);
+                    msg.RequestId = id;
+                }
+                WheelTimerTimeout<TimeoutState> timeout = NewReply(msg);
+                if (await SendOnly(msg, true).ConfigureAwait(false) == false)
+                {
+                    sends.TryRemove(msg.RequestId, out _);
+                    timeout.Cancel();
+                    timeout.Task.State.Tcs.SetResult(new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT });
+                }
+                return await timeout.Task.State.Tcs.Task.ConfigureAwait(false);
             }
-            return await timeout.Task.State.Tcs.Task.ConfigureAwait(false);
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                msg.Connection.Release();
+            }
+
+            return new MessageResponeInfo { Code = MessageResponeCodes.NOT_FOUND };
         }
         /// <summary>
         /// 只发送，不等回复
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public async Task<bool> SendOnly(MessageRequestWrap msg)
+        public async Task<bool> SendOnly(MessageRequestWrap msg, bool locked = false)
         {
             if (msg.Connection == null)
             {
@@ -61,7 +78,8 @@ namespace common.server
             }
             try
             {
-                msg.Connection.WaitOne();
+                if (locked == false)
+                    msg.Connection.WaitOne();
                 if (msg.RequestId == 0)
                 {
                     uint id = msg.RequestId;
@@ -91,7 +109,8 @@ namespace common.server
             }
             finally
             {
-                msg.Connection.Release();
+                if (locked == false)
+                    msg.Connection.Release();
             }
             return false;
         }
