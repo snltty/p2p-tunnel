@@ -560,23 +560,8 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     cache.Canceled = true;
 
                     OnSendStep2FailHandler.Push(toid);
-                    punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2FailInfo>
-                    {
-                        TunnelName = cache.TunnelName,
-                        Connection = TcpServer,
-                        ToId = toid,
-                        Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL, PunchType = PunchHoleTypes.TCP_NUTSSB }
-                    }).ConfigureAwait(false);
 
-                    cache.Tcs.SetResult(new ConnectResultModel
-                    {
-                        State = false,
-                        Result = new ConnectFailModel
-                        {
-                            Msg = "tcp打洞失败",
-                            Type = ConnectFailType.ERROR
-                        }
-                    });
+                    _ = SendStep2Fail(cache.TunnelName, toid);
                 }
 
             }
