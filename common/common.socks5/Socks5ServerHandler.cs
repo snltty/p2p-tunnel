@@ -106,35 +106,35 @@ namespace common.socks5
         private void HndleForwardUdp(IConnection connection)
         {
             Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
-
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
             Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
 
-            ConnectionKeyUdp key = new ConnectionKeyUdp(connection.FromConnection.ConnectId, data.SourceEP);
-            if (udpConnections.TryGetValue(key, out UdpToken token) == false)
+            try
             {
-                data.TargetEP = remoteEndPoint;
-                Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-                token = new UdpToken { Connection = connection.FromConnection, Data = data, TargetSocket = socket, };
-                token.PoolBuffer = new byte[65535];
-                udpConnections.AddOrUpdate(key, token, (a, b) => token);
-
-                try
+                ConnectionKeyUdp key = new ConnectionKeyUdp(connection.FromConnection.ConnectId, data.SourceEP);
+                if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
+                    data.TargetEP = remoteEndPoint;
+                    Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                    token = new UdpToken { Connection = connection.FromConnection, Data = data, TargetSocket = socket, };
+                    token.PoolBuffer = new byte[65535];
+                    udpConnections.AddOrUpdate(key, token, (a, b) => token);
+
                     _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
                     IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
                 }
-                catch (Exception)
+                else
                 {
+                    _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
+                    token.Data.Data = Helper.EmptyArray;
                 }
+                token.Update();
             }
-            else
+            catch (Exception ex)
             {
-                _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
-                token.Data.Data = Helper.EmptyArray;
+                Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
             }
-            token.Update();
         }
         private void TimeoutUdp()
         {
@@ -446,7 +446,7 @@ namespace common.socks5
 
             PoolBuffer = Helper.EmptyArray;
             GC.Collect();
-           // GC.SuppressFinalize(this);
+            // GC.SuppressFinalize(this);
         }
     }
     /// <summary>
