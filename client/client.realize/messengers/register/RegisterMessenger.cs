@@ -1,4 +1,5 @@
-﻿using common.server;
+﻿using client.messengers.register;
+using common.server;
 using common.server.model;
 
 namespace client.realize.messengers.register
@@ -10,13 +11,13 @@ namespace client.realize.messengers.register
     [MessengerIdRange((ushort)RegisterMessengerIds.Min, (ushort)RegisterMessengerIds.Max)]
     public sealed class RegisterMessenger : IMessenger
     {
-        private readonly RegisterTransfer registerTransfer;
+        private readonly IRegisterTransfer registerTransfer;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="registerTransfer"></param>
-        public RegisterMessenger(RegisterTransfer registerTransfer)
+        public RegisterMessenger(IRegisterTransfer registerTransfer)
         {
             this.registerTransfer = registerTransfer;
         }
