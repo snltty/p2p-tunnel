@@ -88,7 +88,7 @@ namespace server.service
 
             clientRegisterCache.OnChanged.Sub((changeClient) =>
             {
-                List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.OnLineConnection != null && c.OnLineConnection.Connected).Select(c => new ClientsClientInfo
+                List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.OnLineConnection != null && c.OnLineConnection.Connected).OrderBy(c=>c.Id).Select(c => new ClientsClientInfo
                 {
                     Connection = c.OnLineConnection,
                     Id = c.Id,
@@ -102,7 +102,7 @@ namespace server.service
                     {
                         Clients = clients.ToArray()
                     }.ToBytes();
-                    foreach (ClientsClientInfo client in clients.Where(c => c.Id != changeClient.Id))
+                    foreach (ClientsClientInfo client in clients)
                     {
                         messengerSender.SendOnly(new MessageRequestWrap
                         {
@@ -111,12 +111,6 @@ namespace server.service
                             MessengerId = (ushort)ClientsMessengerIds.Notify
                         }).Wait();
                     }
-                    messengerSender.SendOnly(new MessageRequestWrap
-                    {
-                        Connection = changeClient.OnLineConnection,
-                        Payload = bytes,
-                        MessengerId = (ushort)ClientsMessengerIds.Notify
-                    }).Wait();
                 }
             });
         }
