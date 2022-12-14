@@ -460,10 +460,6 @@ namespace common.server.model
         /// </summary>
         Setting = 4,
         /// <summary>
-        /// 离线
-        /// </summary>
-        Offline = 5,
-        /// <summary>
         /// 
         /// </summary>
         Max = 99,

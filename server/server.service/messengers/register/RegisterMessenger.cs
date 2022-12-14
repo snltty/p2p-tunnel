@@ -41,7 +41,7 @@ namespace server.service.messengers.register
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)RegisterMessengerIds.SignIn)]
-        public async Task<byte[]> SignIn(IConnection connection)
+        public byte[] SignIn(IConnection connection)
         {
             RegisterParamsInfo model = new RegisterParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
@@ -52,7 +52,7 @@ namespace server.service.messengers.register
                 return new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.KEY_VERIFY }.ToBytes();
             }
 
-            (RegisterResultInfo verify, RegisterCacheInfo client) = await VerifyAndAdd(model);
+            (RegisterResultInfo verify, RegisterCacheInfo client) = VerifyAndAdd(model);
             if (verify != null)
             {
                 return verify.ToBytes();
@@ -101,7 +101,7 @@ namespace server.service.messengers.register
             connection.Disponse();
         }
 
-        private async Task<(RegisterResultInfo, RegisterCacheInfo)> VerifyAndAdd(RegisterParamsInfo model)
+        private (RegisterResultInfo, RegisterCacheInfo) VerifyAndAdd(RegisterParamsInfo model)
         {
             RegisterResultInfo verify = null;
             RegisterCacheInfo client;
@@ -118,23 +118,22 @@ namespace server.service.messengers.register
                 //第一次注册，检查有没有重名
                 if (clientRegisterCache.Get(model.GroupId, model.Name, out client))
                 {
-                    await messengerSender.SendOnly(new MessageRequestWrap
-                    {
-                        Connection = client.OnLineConnection,
-                        MessengerId = (ushort)RegisterMessengerIds.Offline
-                    });
                     clientRegisterCache.Remove(client.Id);
+                    verify = new RegisterResultInfo { Code = RegisterResultInfo.RegisterResultInfoCodes.SAME_NAMES };
                 }
-                client = new()
+                else
                 {
-                    Name = model.Name,
-                    GroupId = model.GroupId,
-                    LocalIps = model.LocalIps,
-                    ClientAccess = model.ClientAccess,
-                    Id = 0,
-                    ShortId = model.ShortId,
-                };
-                clientRegisterCache.Add(client);
+                    client = new()
+                    {
+                        Name = model.Name,
+                        GroupId = model.GroupId,
+                        LocalIps = model.LocalIps,
+                        ClientAccess = model.ClientAccess,
+                        Id = 0,
+                        ShortId = model.ShortId,
+                    };
+                    clientRegisterCache.Add(client);
+                }
             }
             return (verify, client);
         }

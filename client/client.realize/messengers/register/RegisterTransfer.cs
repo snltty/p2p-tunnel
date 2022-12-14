@@ -140,9 +140,10 @@ namespace client.realize.messengers.register
 
                         //先退出
                         Exit1();
-                        Logger.Instance.Info($"开始注册");
 
+                        Logger.Instance.Info($"开始注册");
                         registerState.LocalInfo.IsConnecting = true;
+                        await Task.Delay(1000, cancellationToken.Token);
                         if (interval > 0)
                         {
                             await Task.Delay(interval, cancellationToken.Token);
@@ -263,23 +264,30 @@ namespace client.realize.messengers.register
         private async Task<RegisterResult> GetRegisterResult()
         {
             IPAddress[] localIps = new IPAddress[] { config.Client.LoopbackIp, registerState.LocalInfo.LocalIp };
-
             registerState.LocalInfo.Ipv6s = iPv6AddressRequest.GetIPV6();
-
             localIps = localIps.Concat(registerState.LocalInfo.Ipv6s).ToArray();
 
-            //注册
-            RegisterResult result = await registerMessageHelper.Register(new RegisterParams
+            RegisterResult result;
+            do
             {
-                ShortId = config.Client.ShortId,
-                ClientName = config.Client.Name,
-                GroupId = config.Client.GroupId,
-                LocalUdpPort = registerState.LocalInfo.UdpPort,
-                LocalTcpPort = registerState.LocalInfo.TcpPort,
-                LocalIps = localIps,
-                Timeout = 15 * 1000,
-                ClientAccess = config.Client.GetAccess()
-            }).ConfigureAwait(false);
+                result = await registerMessageHelper.Register(new RegisterParams
+                {
+                    ShortId = config.Client.ShortId,
+                    ClientName = config.Client.Name,
+                    GroupId = config.Client.GroupId,
+                    LocalUdpPort = registerState.LocalInfo.UdpPort,
+                    LocalTcpPort = registerState.LocalInfo.TcpPort,
+                    LocalIps = localIps,
+                    Timeout = 15 * 1000,
+                    ClientAccess = config.Client.GetAccess()
+                }).ConfigureAwait(false);
+
+                if (result.Data.Code == RegisterResultInfo.RegisterResultInfoCodes.SAME_NAMES)
+                {
+                    await Task.Delay(1000);
+                }
+
+            } while (result.Data.Code == RegisterResultInfo.RegisterResultInfoCodes.SAME_NAMES);
 
             if (result.NetState.Code != MessageResponeCodes.OK)
             {
