@@ -118,7 +118,6 @@ namespace server.service.messengers.register
                 //第一次注册，检查有没有重名
                 if (clientRegisterCache.Get(model.GroupId, model.Name, out client))
                 {
-                    Console.WriteLine($"重名");
                     await messengerSender.SendOnly(new MessageRequestWrap
                     {
                         Connection = client.OnLineConnection,
