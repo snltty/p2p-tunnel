@@ -96,7 +96,7 @@ namespace client.realize.messengers.register
         }
         private void Exit1()
         {
-            registerMessageHelper.Exit().Wait();
+            //registerMessageHelper.Exit().Wait();
             registerState.Offline();
             udpServer.Stop();
             tcpServer.Stop();
@@ -205,7 +205,7 @@ namespace client.realize.messengers.register
                         success.ErrorMsg = ex.Message;
                         isex = true;
                     }
-                    
+
                     registerState.LocalInfo.IsConnecting = false;
                     if ((config.Client.AutoReg || autoReg) && isex == false)
                     {
