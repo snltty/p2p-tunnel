@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-05 21:38:23
+ * @LastEditTime: 2022-12-14 15:56:45
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -212,8 +212,8 @@
                 </el-collapse>
                 <el-form-item label="" label-width="0" class="t-c last">
                     <div class="t-c w-100">
-                        <el-button type="primary" size="large" :loading="registerState.LocalInfo.IsConnecting" @click="handleSubmit">注册</el-button>
-                        <el-button v-if="registerState.LocalInfo.UdpConnected || registerState.LocalInfo.TcpConnected || registerState.LocalInfo.IsConnecting" type="info" size="large" @click="handleExit">退出</el-button>
+                        <el-button type="primary" size="large" v-if="registerState.LocalInfo.UdpConnected==false && registerState.LocalInfo.TcpConnected==false" :loading="registerState.LocalInfo.IsConnecting" @click="handleSubmit">注册</el-button>
+                        <el-button type="info" size="large" v-if="registerState.LocalInfo.UdpConnected || registerState.LocalInfo.TcpConnected" :loading="registerState.LocalInfo.IsConnecting" @click="handleExit">退出</el-button>
                     </div>
                 </el-form-item>
             </el-form>
