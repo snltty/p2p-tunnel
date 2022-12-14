@@ -347,28 +347,22 @@ namespace common.server
         Semaphore Semaphore = new Semaphore(1, 1);
         public virtual void WaitOne()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == false || ServerType == ServerType.UDP)
+            try
             {
-                try
-                {
-                    Semaphore?.WaitOne();
-                }
-                catch (Exception)
-                {
-                }
+                Semaphore?.WaitOne();
+            }
+            catch (Exception)
+            {
             }
         }
         public virtual void Release()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == false || ServerType == ServerType.UDP)
+            try
             {
-                try
-                {
-                    Semaphore?.Release();
-                }
-                catch (Exception)
-                {
-                }
+                Semaphore?.Release();
+            }
+            catch (Exception)
+            {
             }
         }
     }

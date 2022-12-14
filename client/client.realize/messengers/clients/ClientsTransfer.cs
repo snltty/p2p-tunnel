@@ -232,6 +232,7 @@ namespace client.realize.messengers.clients
             }
             if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
             {
+                Logger.Instance.Error($"{client.Name} 掉线");
                 if (ReferenceEquals(connection, client.Connection))
                 {
                     clientInfoCaching.Offline(connection.ConnectId, ClientOfflineTypes.Disconnect);
