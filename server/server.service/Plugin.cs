@@ -95,21 +95,28 @@ namespace server.service
                     Name = c.Name,
                     Access = c.ClientAccess,
                 }).ToList();
+
                 if (clients.Any())
                 {
                     byte[] bytes = new ClientsInfo
                     {
                         Clients = clients.ToArray()
                     }.ToBytes();
-                    foreach (ClientsClientInfo client in clients)
+                    foreach (ClientsClientInfo client in clients.Where(c => c.Id != changeClient.Id))
                     {
-                        _ = messengerSender.SendOnly(new MessageRequestWrap
+                        messengerSender.SendOnly(new MessageRequestWrap
                         {
                             Connection = client.Connection,
                             Payload = bytes,
                             MessengerId = (ushort)ClientsMessengerIds.Notify
-                        }).ConfigureAwait(false);
+                        }).Wait();
                     }
+                    messengerSender.SendOnly(new MessageRequestWrap
+                    {
+                        Connection = changeClient.OnLineConnection,
+                        Payload = bytes,
+                        MessengerId = (ushort)ClientsMessengerIds.Notify
+                    }).Wait();
                 }
             });
         }
