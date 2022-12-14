@@ -329,6 +329,10 @@ namespace client.realize.messengers.clients
                 client.TryReverseValue = (byte)(((model.Value & ClientInfo.TryReverseTcpUdpBit) << 2) | (model.Value >> 2));
                 ConnectClient(client);
             }
+            else
+            {
+                Logger.Instance.Error($"收到反向连接，但是这个客户端不存在，可能是因为对面比此客户端更早收到客户端列表数据");
+            }
         }
 
         /// <summary>

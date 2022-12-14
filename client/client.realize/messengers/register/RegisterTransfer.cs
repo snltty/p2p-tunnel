@@ -128,6 +128,7 @@ namespace client.realize.messengers.register
                 int interval = autoReg ? config.Client.AutoRegDelay : 0;
                 for (int i = 0; i < config.Client.AutoRegTimes; i++)
                 {
+                    bool isex = false;
                     try
                     {
                         if (registerState.LocalInfo.IsConnecting)
@@ -202,10 +203,11 @@ namespace client.realize.messengers.register
                         Logger.Instance.DebugError(ex);
                         Logger.Instance.Error(ex.Message);
                         success.ErrorMsg = ex.Message;
+                        isex = true;
                     }
-
+                    
                     registerState.LocalInfo.IsConnecting = false;
-                    if (config.Client.AutoReg || autoReg)
+                    if ((config.Client.AutoReg || autoReg) && isex == false)
                     {
                         interval = config.Client.AutoRegInterval;
                     }
