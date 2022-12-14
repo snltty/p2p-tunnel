@@ -496,7 +496,7 @@ namespace client.realize.messengers.clients
         {
             try
             {
-              
+
                 if (registerState.OnlineConnection == null || clients.Clients == null)
                 {
                     return;
@@ -512,7 +512,7 @@ namespace client.realize.messengers.clients
                     }
                     //新上线的
                     IEnumerable<ulong> upLines = remoteIds.Except(clientInfoCaching.AllIds());
-                    IEnumerable<ClientsClientInfo> upLineClients = clients.Clients.Where(c => upLines.Contains(c.Id) && c.Id != registerState.ConnectId);
+                    IEnumerable<ClientsClientInfo> upLineClients = clients.Clients.Where(c => upLines.Contains(c.Id) && c.Id != registerState.ConnectId && c.Name != config.Client.Name);
 
                     foreach (ClientsClientInfo item in upLineClients)
                     {
