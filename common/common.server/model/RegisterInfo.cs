@@ -199,11 +199,11 @@ namespace common.server.model
         /// <summary>
         /// 连接ip
         /// </summary>
-        public IPAddress Ip { get; set; }
+        public IPAddress Ip { get; set; } = IPAddress.Any;
         /// <summary>
         /// 连接分组
         /// </summary>
-        public string GroupId { get; set; }
+        public string GroupId { get; set; } = string.Empty;
 
         /// <summary>
         /// 

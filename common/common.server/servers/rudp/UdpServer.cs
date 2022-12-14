@@ -163,8 +163,9 @@ namespace common.server.servers.rudp
                 }
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.Instance.DebugError(ex);
                 return null;
             }
             finally

@@ -100,7 +100,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
             else
             {
-                tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "未找到通道" } });
+                tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = $"未找到通道{param.TunnelName}" } });
             }
             return await tcs.Task.ConfigureAwait(false);
         }

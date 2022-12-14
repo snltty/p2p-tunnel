@@ -8,6 +8,7 @@ using client.realize.messengers.heart;
 using client.realize.messengers.punchHole;
 using client.realize.messengers.relay;
 using common.libs;
+using common.libs.extends;
 using common.server;
 using common.server.model;
 using common.server.servers.rudp;
@@ -491,6 +492,7 @@ namespace client.realize.messengers.clients
         {
             try
             {
+              
                 if (registerState.OnlineConnection == null || clients.Clients == null)
                 {
                     return;

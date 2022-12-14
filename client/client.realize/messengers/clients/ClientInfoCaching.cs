@@ -135,8 +135,8 @@ namespace client.realize.messengers.clients
             {
                 client.Offline();
                 clientsByName.TryRemove(client.Name, out _);
-                udpservers.TryRemove(id, out _);
-                tunnelPorts.TryRemove(id, out _);
+                //udpservers.TryRemove(id, out _);
+                //tunnelPorts.TryRemove(id, out _);
                 OnRemove.Push(client);
             }
         }

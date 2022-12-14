@@ -148,7 +148,8 @@ namespace server.service.messengers.register
         {
             if (connection.ServerType == ServerType.UDP)
             {
-                return connection != null && connection.Connected;
+                return false;
+                //return connection != null && connection.Connected;
             }
 
             var resp = await messengerSender.SendReply(new MessageRequestWrap
