@@ -37,9 +37,9 @@ namespace common.server
             {
                 return new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT };
             }
+            await msg.Connection.WaitOne();
             try
             {
-                msg.Connection.WaitOne();
                 if (msg.RequestId == 0)
                 {
                     uint id = msg.RequestId;
@@ -70,16 +70,31 @@ namespace common.server
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public async Task<bool> SendOnly(MessageRequestWrap msg, bool locked = false)
+        public async Task<bool> SendOnly(MessageRequestWrap msg, bool locked = false,bool logger = false)
         {
+            if (logger)
+            {
+                Logger.Instance.Warning($"logger 1");
+            }
+
             if (msg.Connection == null)
             {
                 return false;
             }
+
+            if (logger)
+            {
+                Logger.Instance.Warning($"logger 2");
+            }
+            if (locked == false)
+               await msg.Connection.WaitOne();
+
+            if (logger)
+            {
+                Logger.Instance.Warning($"logger 3");
+            }
             try
             {
-                if (locked == false)
-                    msg.Connection.WaitOne();
                 if (msg.RequestId == 0)
                 {
                     uint id = msg.RequestId;
@@ -97,10 +112,18 @@ namespace common.server
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
 
+                if (logger)
+                {
+                    Logger.Instance.Warning($"logger 4");
+                }
                 byte[] bytes = msg.ToArray(out int length);
                 bool res = await msg.Connection.Send(bytes.AsMemory(0, length)).ConfigureAwait(false);
                 msg.Return(bytes);
 
+                if (logger)
+                {
+                    Logger.Instance.Warning($"logger 5");
+                }
                 return res;
             }
             catch (Exception ex)
@@ -127,10 +150,9 @@ namespace common.server
                 return false;
             }
 
+            await msg.Connection.WaitOne();
             try
             {
-                msg.Connection.WaitOne();
-
                 if (msg.Connection.EncodeEnabled)
                 {
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);

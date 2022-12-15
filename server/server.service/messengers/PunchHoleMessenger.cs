@@ -44,7 +44,7 @@ namespace server.service.messengers
                     //是否在同一个组
                     if (source.GroupId == target.GroupId)
                     {
-                       
+
                         model.FromId = connection.ConnectId;
                         IConnection online = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
                         if (online == null || online.Connected == false)
@@ -73,7 +73,7 @@ namespace server.service.messengers
         {
             PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
-           // if (model.Data.Length > 50) return;
+            // if (model.Data.Length > 50) return;
 
             //A已注册
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
@@ -108,7 +108,8 @@ namespace server.service.messengers
                             online = target.OnLineConnection;
                         }
 
-                        await messengerSender.SendOnly(new MessageRequestWrap
+
+                        bool res = await messengerSender.SendOnly(new MessageRequestWrap
                         {
                             Connection = online,
                             Payload = model.ToBytes(),

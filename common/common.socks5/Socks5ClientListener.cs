@@ -290,7 +290,14 @@ namespace common.socks5
                     }
                     else
                     {
-                        token.Socket.Send(info.Data.Span, SocketFlags.None);
+                        try
+                        {
+                            token.Socket.Send(info.Data.Span, SocketFlags.None);
+                        }
+                        catch (Exception)
+                        {
+                            CloseClientSocket(info.Id);
+                        }
                     }
 
                 }

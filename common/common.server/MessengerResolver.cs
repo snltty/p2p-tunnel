@@ -103,7 +103,7 @@ namespace common.server
                         //RelayIdIndex 后移一位
                         receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
 
-                        _connection.WaitOne();
+                        await _connection.WaitOne();
                         await _connection.Send(receive).ConfigureAwait(false);
                         _connection.Release();
                     }
@@ -120,6 +120,7 @@ namespace common.server
 
                 //新的请求
                 requestWrap.FromArray(readReceive);
+
                 //是中继数据
                 if (requestWrap.Relay)
                 {
@@ -137,7 +138,7 @@ namespace common.server
                             //RelayIdIndex 后移一位
                             receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
 
-                            _connection.WaitOne();
+                            await _connection.WaitOne();
                             //中继数据不再次序列化，直接在原数据上更新数据然后发送
                             await _connection.Send(receive).ConfigureAwait(false);
                             _connection.Release();
@@ -223,7 +224,6 @@ namespace common.server
             catch (Exception ex)
             {
                 Logger.Instance.Error(ex);
-                Logger.Instance.Error($"数据内容:{string.Join(",", receive.ToArray())}");
                 if (requestWrap.Reply)
                 {
                     await messengerSender.ReplyOnly(new MessageResponseWrap

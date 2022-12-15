@@ -129,7 +129,10 @@ namespace client.messengers.clients
             Connecting = false;
             TunnelName = tunnelName;
 
-            _connection?.Disponse();
+            if(onlineType == ClientOnlineTypes.Active)
+            {
+                _connection?.Disponse();
+            }
         }
         /// <summary>
         /// 设置连接中状态

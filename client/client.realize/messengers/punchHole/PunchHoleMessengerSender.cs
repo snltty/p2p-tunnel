@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using client.messengers.clients;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace client.realize.messengers.punchHole
 {
@@ -62,12 +63,11 @@ namespace client.realize.messengers.punchHole
         /// <param name="arg"></param>
         public void OnPunchHole(OnPunchHoleArg arg)
         {
+            Logger.Instance.Warning($"打洞消息:{arg.Data.PunchStep} ================={arg.Data.PunchType} in");
             PunchHoleTypes type = (PunchHoleTypes)arg.Data.PunchType;
-
-            if (plugins.ContainsKey(type))
+            if (plugins.TryGetValue(type, out IPunchHole value))
             {
-                IPunchHole plugin = plugins[type];
-                plugin?.Execute(arg);
+                value?.Execute(arg);
             }
         }
         /// <summary>
@@ -88,8 +88,9 @@ namespace client.realize.messengers.punchHole
         /// <param name="connection"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task Response(IConnection connection, PunchHoleRequestInfo request)
+        public async Task Response(IConnection connection, PunchHoleRequestInfo request, bool logger = false)
         {
+
             await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = connection,
@@ -100,7 +101,7 @@ namespace client.realize.messengers.punchHole
                     ToId = request.FromId,
                     RequestId = request.RequestId
                 }.ToBytes()
-            }).ConfigureAwait(false);
+            }, logger: logger).ConfigureAwait(false);
         }
         /// <summary>
         /// 发送请求
@@ -195,7 +196,7 @@ namespace client.realize.messengers.punchHole
         /// <returns></returns>
         public async Task SendTunnel(ulong toid, ulong tunnelName)
         {
-            await RequestReply(new SendPunchHoleArg<PunchHoleTunnelInfo>
+            await Request(new SendPunchHoleArg<PunchHoleTunnelInfo>
             {
                 Connection = registerState.OnlineConnection,
                 ToId = toid,
@@ -224,7 +225,7 @@ namespace client.realize.messengers.punchHole
         /// <returns></returns>
         public async Task SendOffline(ulong toid)
         {
-            await RequestReply(new SendPunchHoleArg<PunchHoleOfflineInfo>
+            await Request(new SendPunchHoleArg<PunchHoleOfflineInfo>
             {
                 Connection = registerState.OnlineConnection,
                 ToId = toid,

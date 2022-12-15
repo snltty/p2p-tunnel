@@ -1,4 +1,5 @@
 ﻿using client.messengers.punchHole;
+using common.libs;
 using common.server;
 using common.server.model;
 using System.Threading.Tasks;
@@ -47,8 +48,16 @@ namespace client.realize.messengers.punchHole
             PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
-            await punchHoleMessengerSender.Response(connection, model);
-
+            Logger.Instance.Warning($"打洞消息:{model.PunchStep} ================={model.PunchType}");
+            try
+            {
+                await punchHoleMessengerSender.Response(connection, model, model.PunchStep == 2);
+            }
+            catch (System.Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
+            Logger.Instance.Warning($"打洞消息:{model.PunchStep} ================={model.PunchType} ----------------------------");
             punchHoleMessengerSender.OnPunchHole(new OnPunchHoleArg
             {
                 Data = model,

@@ -186,7 +186,7 @@ namespace common.server
 
 
 
-        public void WaitOne();
+        public Task WaitOne();
         public void Release();
     }
 
@@ -332,7 +332,7 @@ namespace common.server
         public virtual void Disponse()
         {
             Semaphore?.Dispose();
-            //Semaphore = null;
+            Semaphore = null;
             //ReceiveRequestWrap = null;
             //ReceiveResponseWrap = null;
         }
@@ -344,26 +344,14 @@ namespace common.server
         public abstract IConnection Clone();
 
 
-        Semaphore Semaphore = new Semaphore(1, 1);
-        public virtual void WaitOne()
+        SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+        public virtual async Task WaitOne()
         {
-            try
-            {
-                Semaphore?.WaitOne();
-            }
-            catch (Exception)
-            {
-            }
+            await Semaphore?.WaitAsync();
         }
         public virtual void Release()
         {
-            try
-            {
-                Semaphore?.Release();
-            }
-            catch (Exception)
-            {
-            }
+            Semaphore?.Release();
         }
     }
 
@@ -540,6 +528,7 @@ namespace common.server
                 }
                 catch (Exception ex)
                 {
+                    Disponse();
                     Logger.Instance.DebugError(ex);
                 }
             }

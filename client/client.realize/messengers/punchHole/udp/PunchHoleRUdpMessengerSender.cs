@@ -87,7 +87,7 @@ namespace client.realize.messengers.punchHole.udp
                 LocalPort = param.LocalPort,
             });
 
-            await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep1Info>
+            await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
             {
                 Connection = connection,
                 TunnelName = param.TunnelName,
@@ -151,7 +151,7 @@ namespace client.realize.messengers.punchHole.udp
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port + 1));
 
-                await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep2Info>
+                await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2Info>
                 {
                     Connection = arg.Connection,
                     TunnelName = arg.RawData.TunnelName,
@@ -183,10 +183,13 @@ namespace client.realize.messengers.punchHole.udp
                  int port = arg.Data.Port;
                  if (connectCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache) == false)
                  {
+                     Logger.Instance.Error($"udp 找不到缓存");
+                     await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
                      return;
                  }
                  if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer) == false)
                  {
+                     Logger.Instance.Error($"udp 找不到通道服务器：{arg.RawData.TunnelName}");
                      return;
                  }
                  cache.Step1Timeout.Cancel();
@@ -247,7 +250,7 @@ namespace client.realize.messengers.punchHole.udp
                      if (connection != null)
                      {
                          await CryptoSwap(connection);
-                         await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep3Info>
+                         await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep3Info>
                          {
                              Connection = connection,
                              TunnelName = arg.RawData.TunnelName,
@@ -260,7 +263,7 @@ namespace client.realize.messengers.punchHole.udp
                      }
                      else
                      {
-                         await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId);
+                         await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
                          if (connectCache.TryRemove(arg.RawData.FromId, out _))
                          {
                              cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "udp打洞失败" } });
@@ -338,7 +341,7 @@ namespace client.realize.messengers.punchHole.udp
         }
         private async Task SendSetp2Fail(ulong tunname, ulong toid)
         {
-            await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep2FailInfo>
+            await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2FailInfo>
             {
                 Connection = connection,
                 TunnelName = tunname,
