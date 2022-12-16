@@ -171,6 +171,8 @@ namespace common.server.servers.iocp
                     UserToken = userToken,
                     SocketFlags = SocketFlags.None,
                 };
+                socket.ReceiveBufferSize= bufferSize;
+                socket.SendBufferSize = bufferSize;
                 userToken.PoolBuffer = new byte[bufferSize];
                 readEventArgs.SetBuffer(userToken.PoolBuffer, 0, bufferSize);
                 readEventArgs.Completed += IO_Completed;

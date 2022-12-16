@@ -29,6 +29,8 @@ namespace common.socks5
         /// 
         /// </summary>
         Action<Socks5Info> OnClose { get; set; }
+
+        void SetBufferSize(int bufferSize);
         /// <summary>
         /// 
         /// </summary>
@@ -84,6 +86,11 @@ namespace common.socks5
         /// </summary>
         public Socks5ClientListener()
         {
+        }
+
+        public void SetBufferSize(int bufferSize)
+        {
+            this.bufferSize = bufferSize;
         }
         /// <summary>
         /// 
@@ -170,6 +177,8 @@ namespace common.socks5
                 UserToken = token,
                 SocketFlags = SocketFlags.None,
             };
+            socket.SendBufferSize = bufferSize;
+            socket.ReceiveBufferSize = bufferSize;
             token.PoolBuffer = new byte[bufferSize];
             readEventArgs.SetBuffer(token.PoolBuffer, 0, bufferSize);
             readEventArgs.Completed += IO_Completed;

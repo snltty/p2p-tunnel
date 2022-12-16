@@ -13,6 +13,9 @@ namespace client.service.vea
     /// </summary>
     public sealed class VeaSocks5ClientListener: Socks5ClientListener, IVeaSocks5ClientListener
     {
-
+        public new void SetBufferSize(int bufferSize)
+        {
+            base.SetBufferSize(bufferSize);
+        }
     }
 }

@@ -150,6 +150,8 @@ namespace common.tcpforward
             };
             token.Saea = readEventArgs;
 
+            token.SourceSocket.SendBufferSize = receiveBufferSize;
+            token.SourceSocket.ReceiveBufferSize = receiveBufferSize;
             token.PoolBuffer = new byte[receiveBufferSize];
             readEventArgs.SetBuffer(token.PoolBuffer, 0, receiveBufferSize);
             readEventArgs.Completed += IO_Completed;
