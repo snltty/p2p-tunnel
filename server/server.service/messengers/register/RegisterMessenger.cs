@@ -1,9 +1,7 @@
-﻿using common.libs;
-using common.server;
+﻿using common.server;
 using common.server.model;
 using server.messengers.register;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace server.service.messengers.register
@@ -99,6 +97,23 @@ namespace server.service.messengers.register
         {
             clientRegisterCache.Remove(connection.ConnectId);
             connection.Disponse();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        [MessengerId((ushort)RegisterMessengerIds.Test)]
+        public async Task Test(IConnection connection)
+        {
+            var res = await messengerSender.SendReply(new MessageRequestWrap
+            {
+                Connection = connection,
+                MessengerId = (ushort)HeartMessengerIds.Alive,
+                Timeout = 2000,
+
+            });
+            Console.WriteLine(res.Code);
         }
 
         private (RegisterResultInfo, RegisterCacheInfo) VerifyAndAdd(RegisterParamsInfo model)

@@ -181,8 +181,10 @@ namespace common.server
                 Memory<byte> resultObject = null;
                 if (plugin.IsVoid)
                 {
-                    if (connection.ResponseDataLength <= 0) return;
-                    resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
+                    if (connection.ResponseDataLength > 0)
+                    {
+                        resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
+                    }
                 }
                 else
                 {
@@ -199,8 +201,10 @@ namespace common.server
                             var task = resultAsync as Task;
                             await task.ConfigureAwait(false);
 
-                            if (connection.ResponseDataLength <= 0) return;
-                            resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
+                            if (connection.ResponseDataLength > 0)
+                            {
+                                resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
+                            }
                         }
                     }
                     else if (resultAsync != null)
@@ -209,7 +213,7 @@ namespace common.server
                     }
                 }
 
-                if (requestWrap.Reply == true && resultObject.Length > 0)
+                if (requestWrap.Reply == true)
                 {
                     bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
                     {

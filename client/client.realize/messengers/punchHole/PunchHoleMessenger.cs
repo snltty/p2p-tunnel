@@ -31,7 +31,6 @@ namespace client.realize.messengers.punchHole
         public void Response(IConnection connection)
         {
             PunchHoleResponseInfo model = new PunchHoleResponseInfo();
-
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
             punchHoleMessengerSender.OnResponse(model);
@@ -47,7 +46,6 @@ namespace client.realize.messengers.punchHole
         {
             PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
-            // await punchHoleMessengerSender.Response(connection, model);
             punchHoleMessengerSender.OnPunchHole(new OnPunchHoleArg
             {
                 Data = model,

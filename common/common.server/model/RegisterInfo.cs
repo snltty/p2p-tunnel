@@ -459,6 +459,7 @@ namespace common.server.model
         /// 配置
         /// </summary>
         Setting = 4,
+        Test = 5,
         /// <summary>
         /// 
         /// </summary>

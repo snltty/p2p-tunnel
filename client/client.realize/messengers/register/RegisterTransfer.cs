@@ -20,7 +20,7 @@ namespace client.realize.messengers.register
     /// </summary>
     public sealed class RegisterTransfer : IRegisterTransfer
     {
-        private readonly RegisterMessengerSender registerMessageHelper;
+        private readonly RegisterMessengerSender  registerMessengerSender;
         private readonly ITcpServer tcpServer;
         private readonly IUdpServer udpServer;
         private readonly Config config;
@@ -32,7 +32,7 @@ namespace client.realize.messengers.register
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="registerMessageHelper"></param>
+        /// <param name="registerMessengerSender"></param>
         /// <param name="clientInfoCaching"></param>
         /// <param name="tcpServer"></param>
         /// <param name="udpServer"></param>
@@ -41,13 +41,13 @@ namespace client.realize.messengers.register
         /// <param name="cryptoSwap"></param>
         /// <param name="iPv6AddressRequest"></param>
         public RegisterTransfer(
-            RegisterMessengerSender registerMessageHelper, IClientInfoCaching clientInfoCaching,
+            RegisterMessengerSender registerMessengerSender, IClientInfoCaching clientInfoCaching,
             ITcpServer tcpServer, IUdpServer udpServer,
             Config config, RegisterStateInfo registerState,
             CryptoSwap cryptoSwap, IIPv6AddressRequest iPv6AddressRequest
         )
         {
-            this.registerMessageHelper = registerMessageHelper;
+            this.registerMessengerSender = registerMessengerSender;
             this.tcpServer = tcpServer;
             this.udpServer = udpServer;
             this.config = config;
@@ -83,6 +83,7 @@ namespace client.realize.messengers.register
                 });
             }
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -96,7 +97,6 @@ namespace client.realize.messengers.register
         }
         private void Exit1()
         {
-            //registerMessageHelper.Exit().Wait();
             registerState.Offline();
             udpServer.Stop();
             tcpServer.Stop();
@@ -143,7 +143,6 @@ namespace client.realize.messengers.register
 
                         Logger.Instance.Info($"开始注册");
                         registerState.LocalInfo.IsConnecting = true;
-                        await Task.Delay(1000, cancellationToken.Token);
                         if (interval > 0)
                         {
                             await Task.Delay(interval, cancellationToken.Token);
@@ -171,7 +170,6 @@ namespace client.realize.messengers.register
                             //绑定tcp
                             TcpBind(serverAddress);
                         }
-
                         //交换密钥
                         if (config.Server.Encode)
                         {
@@ -184,12 +182,10 @@ namespace client.realize.messengers.register
                         config.Client.GroupId = result.Data.GroupId;
                         registerState.RemoteInfo.Relay = result.Data.Relay;
                         registerState.Online(result.Data.Id, result.Data.Ip, result.Data.UdpPort, result.Data.TcpPort);
-                        //上线通知
-                        await registerMessageHelper.Notify().ConfigureAwait(false);
+                        await registerMessengerSender.Notify().ConfigureAwait(false);
 
                         success.ErrorMsg = "注册成功~";
                         success.Data = true;
-
                         Logger.Instance.Debug(success.ErrorMsg);
                         break;
                     }
@@ -268,7 +264,7 @@ namespace client.realize.messengers.register
             RegisterResult result;
             do
             {
-                result = await registerMessageHelper.Register(new RegisterParams
+                result = await registerMessengerSender.Register(new RegisterParams
                 {
                     ShortId = config.Client.ShortId,
                     ClientName = config.Client.Name,

@@ -142,6 +142,15 @@ namespace client.realize.messengers.register
             }).ConfigureAwait(false);
         }
 
+        public async Task Test()
+        {
+            await messengerSender.SendReply(new MessageRequestWrap
+            {
+                Connection = registerState.OnlineConnection,
+                MessengerId = (ushort)RegisterMessengerIds.Test,
+                Timeout = 2000
+            }).ConfigureAwait(false);
+        }
 
     }
 
