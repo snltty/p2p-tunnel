@@ -355,7 +355,6 @@ namespace common.server
                     }
                     Semaphore.Dispose();
                 }
-
                 Semaphore = null;
             }
             catch (Exception ex)
@@ -373,16 +372,16 @@ namespace common.server
         public abstract IConnection Clone();
 
 
-        Semaphore Semaphore = new Semaphore(1, 1);
+        SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
         bool locked = false;
         public virtual void WaitOne()
         {
             try
             {
-                if (Semaphore != null && ServerType == ServerType.UDP)
+                if (Semaphore != null)
                 {
                     locked = true;
-                    Semaphore.WaitOne();
+                    Semaphore.Wait();
                 }
             }
             catch (Exception ex)
@@ -395,7 +394,7 @@ namespace common.server
         {
             try
             {
-                if (Semaphore != null && ServerType == ServerType.UDP)
+                if (Semaphore != null)
                 {
                     locked = false;
                     Semaphore.Release();
