@@ -66,6 +66,11 @@ namespace common.server
         /// <returns></returns>
         public async Task<bool> SendOnly(MessageRequestWrap msg, bool locked = false)
         {
+            if (msg.Connection == null)
+            {
+                return false;
+            }
+
             if (locked == false)
                 msg.Connection.WaitOne();
             try

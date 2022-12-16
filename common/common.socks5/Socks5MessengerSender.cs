@@ -38,12 +38,12 @@ namespace common.socks5
         public bool Request(Socks5Info data, IConnection connection)
         {
             byte[] bytes = data.ToBytes(out int length);
-            bool res = messengerSender.SendOnly(new MessageRequestWrap
+            bool res  = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = TargetRequest,
                 Connection = connection,
                 Payload = bytes.AsMemory(0, length)
-            }).Result;
+            }).ConfigureAwait(false).GetAwaiter().GetResult();
             data.Return(bytes);
             return res;
         }
@@ -60,7 +60,7 @@ namespace common.socks5
                 MessengerId = TargetResponse,
                 Connection = connection,
                 Payload = bytes.AsMemory(0, length)
-            }).Result;
+            }).ConfigureAwait(false).GetAwaiter().GetResult();
             data.Return(bytes);
         }
         /// <summary>
