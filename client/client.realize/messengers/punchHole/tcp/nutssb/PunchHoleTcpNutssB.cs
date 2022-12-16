@@ -33,7 +33,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         {
             PunchHoleTcpNutssBSteps step = (PunchHoleTcpNutssBSteps)arg.Data.PunchStep;
 
-            Logger.Instance.Debug($"tcp {step}");
+            Logger.Instance.DebugDebug($"tcp {step}");
 
             switch (step)
             {
