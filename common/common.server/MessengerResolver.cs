@@ -103,7 +103,7 @@ namespace common.server
                         //RelayIdIndex 后移一位
                         receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
 
-                        await _connection.WaitOne();
+                        _connection.WaitOne();
                         await _connection.Send(receive).ConfigureAwait(false);
                         _connection.Release();
                     }
@@ -138,7 +138,7 @@ namespace common.server
                             //RelayIdIndex 后移一位
                             receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
 
-                            await _connection.WaitOne();
+                            _connection.WaitOne();
                             //中继数据不再次序列化，直接在原数据上更新数据然后发送
                             await _connection.Send(receive).ConfigureAwait(false);
                             _connection.Release();
@@ -178,22 +178,16 @@ namespace common.server
 
                 MessengerCacheInfo plugin = messengers[requestWrap.MessengerId];
                 object resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { connection });
-                //task的 没有返回值，不回复，需要回复的可以返回任意类型
-                if (requestWrap.Reply == false)
-                {
-                    return;
-                }
-
                 Memory<byte> resultObject = null;
                 if (plugin.IsVoid)
                 {
+                    if (connection.ResponseDataLength <= 0) return;
                     resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
                 }
                 else
                 {
                     if (plugin.IsTask)
                     {
-
                         if (plugin.IsTaskResult)
                         {
                             var task = resultAsync as Task<byte[]>;
@@ -204,6 +198,8 @@ namespace common.server
                         {
                             var task = resultAsync as Task;
                             await task.ConfigureAwait(false);
+
+                            if (connection.ResponseDataLength <= 0) return;
                             resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
                         }
                     }
@@ -213,13 +209,17 @@ namespace common.server
                     }
                 }
 
-                bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
+                if (requestWrap.Reply == true && resultObject.Length > 0)
                 {
-                    Connection = connection,
-                    Payload = resultObject,
-                    RelayIds = requestWrap.RelayIds,
-                    RequestId = requestWrap.RequestId
-                }).ConfigureAwait(false);
+                    bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
+                    {
+                        Connection = connection,
+                        Payload = resultObject,
+                        RelayIds = requestWrap.RelayIds,
+                        RequestId = requestWrap.RequestId
+                    }).ConfigureAwait(false);
+                }
+
             }
             catch (Exception ex)
             {

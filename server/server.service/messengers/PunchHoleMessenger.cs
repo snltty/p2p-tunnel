@@ -73,6 +73,7 @@ namespace server.service.messengers
         {
             PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
+            model.FromId = connection.ConnectId;
             // if (model.Data.Length > 50) return;
 
             //A已注册
@@ -101,7 +102,7 @@ namespace server.service.messengers
                             }.ToBytes();
                         }
 
-                        model.FromId = connection.ConnectId;
+
                         IConnection online = connection.ServerType == ServerType.UDP ? target.UdpConnection : target.TcpConnection;
                         if (online == null || online.Connected == false)
                         {
@@ -109,7 +110,7 @@ namespace server.service.messengers
                         }
 
 
-                        bool res = await messengerSender.SendOnly(new MessageRequestWrap
+                        await messengerSender.SendOnly(new MessageRequestWrap
                         {
                             Connection = online,
                             Payload = model.ToBytes(),

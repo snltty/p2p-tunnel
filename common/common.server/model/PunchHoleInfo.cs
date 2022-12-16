@@ -323,7 +323,6 @@ namespace common.server.model
 
             Index = span[index];
             index += 1;
-
             Ip = new IPAddress(span.Slice(index + 1, span[index]));
             index += 1 + span[index];
 

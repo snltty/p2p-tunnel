@@ -124,19 +124,31 @@ namespace common.server
         /// <returns></returns>
         public IConnection Clone();
 
-
+        #region 回复消息相关
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="num"></param>
         public void Write(ulong num)
         {
             ResponseDataLength = 8;
             ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
             num.ToBytes(ResponseData);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="num"></param>
         public void Write(ushort num)
         {
             ResponseDataLength = 2;
             ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
             num.ToBytes(ResponseData);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="nums"></param>
         public void Write(ushort[] nums)
         {
             ResponseDataLength = nums.Length * 2;
@@ -183,10 +195,11 @@ namespace common.server
             ResponseData = null;
             ResponseDataLength = 0;
         }
+        #endregion
 
 
 
-        public Task WaitOne();
+        public void WaitOne();
         public void Release();
     }
 
@@ -331,8 +344,24 @@ namespace common.server
         /// </summary>
         public virtual void Disponse()
         {
-            Semaphore?.Dispose();
-            Semaphore = null;
+            try
+            {
+                if (Semaphore != null)
+                {
+                    if (locked)
+                    {
+                        locked = false;
+                        Semaphore.Release();
+                    }
+                    Semaphore.Dispose();
+                }
+
+                Semaphore = null;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
             //ReceiveRequestWrap = null;
             //ReceiveResponseWrap = null;
         }
@@ -344,14 +373,38 @@ namespace common.server
         public abstract IConnection Clone();
 
 
-        SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
-        public virtual async Task WaitOne()
+        Semaphore Semaphore = new Semaphore(1, 1);
+        bool locked = false;
+        public virtual void WaitOne()
         {
-            await Semaphore?.WaitAsync();
+            try
+            {
+                if (Semaphore != null && ServerType == ServerType.UDP)
+                {
+                    locked = true;
+                    Semaphore.WaitOne();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
+
         }
         public virtual void Release()
         {
-            Semaphore?.Release();
+            try
+            {
+                if (Semaphore != null && ServerType == ServerType.UDP)
+                {
+                    locked = false;
+                    Semaphore.Release();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
         }
     }
 

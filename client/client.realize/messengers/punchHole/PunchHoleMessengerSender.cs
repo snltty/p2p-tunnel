@@ -63,7 +63,6 @@ namespace client.realize.messengers.punchHole
         /// <param name="arg"></param>
         public void OnPunchHole(OnPunchHoleArg arg)
         {
-            Logger.Instance.Warning($"打洞消息:{arg.Data.PunchStep} ================={arg.Data.PunchType} in");
             PunchHoleTypes type = (PunchHoleTypes)arg.Data.PunchType;
             if (plugins.TryGetValue(type, out IPunchHole value))
             {
@@ -88,7 +87,7 @@ namespace client.realize.messengers.punchHole
         /// <param name="connection"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task Response(IConnection connection, PunchHoleRequestInfo request, bool logger = false)
+        public async Task Response(IConnection connection, PunchHoleRequestInfo request)
         {
 
             await messengerSender.SendOnly(new MessageRequestWrap
@@ -101,7 +100,7 @@ namespace client.realize.messengers.punchHole
                     ToId = request.FromId,
                     RequestId = request.RequestId
                 }.ToBytes()
-            }, logger: logger).ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
         /// <summary>
         /// 发送请求

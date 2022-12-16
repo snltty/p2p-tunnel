@@ -43,21 +43,11 @@ namespace client.realize.messengers.punchHole
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)PunchHoleMessengerIds.Request)]
-        public async Task Request(IConnection connection)
+        public void Request(IConnection connection)
         {
             PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
-
-            Logger.Instance.Warning($"打洞消息:{model.PunchStep} ================={model.PunchType}");
-            try
-            {
-                await punchHoleMessengerSender.Response(connection, model, model.PunchStep == 2);
-            }
-            catch (System.Exception ex)
-            {
-                Logger.Instance.Error(ex);
-            }
-            Logger.Instance.Warning($"打洞消息:{model.PunchStep} ================={model.PunchType} ----------------------------");
+            // await punchHoleMessengerSender.Response(connection, model);
             punchHoleMessengerSender.OnPunchHole(new OnPunchHoleArg
             {
                 Data = model,

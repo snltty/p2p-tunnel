@@ -148,12 +148,6 @@ namespace client.realize.messengers.register
                         {
                             await Task.Delay(interval, cancellationToken.Token);
                         }
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            success.ErrorMsg = "已取消...";
-                            Logger.Instance.Error(success.ErrorMsg);
-                            break;
-                        }
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
                         config.Client.UseIpv6 = serverAddress.AddressFamily == AddressFamily.InterNetworkV6;
@@ -199,12 +193,16 @@ namespace client.realize.messengers.register
                         Logger.Instance.Debug(success.ErrorMsg);
                         break;
                     }
+                    catch (TaskCanceledException tex)
+                    {
+                        Logger.Instance.Error(tex.Message);
+                        success.ErrorMsg = tex.Message;
+                        isex = true;
+                    }
                     catch (Exception ex)
                     {
-                        Logger.Instance.DebugError(ex);
                         Logger.Instance.Error(ex.Message);
                         success.ErrorMsg = ex.Message;
-                        isex = true;
                     }
 
                     registerState.LocalInfo.IsConnecting = false;

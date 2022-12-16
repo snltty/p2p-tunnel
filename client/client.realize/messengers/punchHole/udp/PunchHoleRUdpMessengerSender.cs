@@ -190,6 +190,7 @@ namespace client.realize.messengers.punchHole.udp
                  if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer) == false)
                  {
                      Logger.Instance.Error($"udp 找不到通道服务器：{arg.RawData.TunnelName}");
+                     await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
                      return;
                  }
                  cache.Step1Timeout.Cancel();
