@@ -268,9 +268,18 @@ namespace common.libs
         public static IPEndPoint EndpointFromArray(Memory<byte> array)
         {
             var span = array.Span;
-            string ip = span.Slice(0, array.Length - 2).GetString();
-            int port = span.Slice(array.Length - 2, 2).ToUInt16();
-            return new IPEndPoint(GetDomainIp(ip), port);
+            try
+            {
+                string ip = span.Slice(0, array.Length - 2).GetString();
+                int port = span.Slice(array.Length - 2, 2).ToUInt16();
+                return new IPEndPoint(GetDomainIp(ip), port);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(span.Slice(0, array.Length - 2).GetString());
+                Logger.Instance.Error(ex);
+            }
+            return null;
         }
 
         /// <summary>

@@ -97,6 +97,12 @@ namespace common.tcpforward
             }
 
             IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
+            if(endpoint == null)
+            {
+                arg.StateType = TcpForwardStateTypes.Fail;
+                Receive(arg, Helper.EmptyArray);
+                return;
+            }
 
             // maxNumberAcceptedClients.WaitOne();
             Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);

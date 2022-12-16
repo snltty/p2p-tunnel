@@ -47,7 +47,7 @@ namespace server.service
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
             Console.ReadLine();
-        } 
+        }
 
 
         static void LoggerConsole()
@@ -85,6 +85,8 @@ namespace server.service
                 using StreamWriter sw = File.AppendText(Path.Combine("log", $"{DateTime.Now:yyyy-MM-dd}.log"));
                 sw.WriteLine(line);
                 sw.Flush();
+                sw.Close();
+                sw.Dispose();
             });
         }
     }

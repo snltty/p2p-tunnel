@@ -188,6 +188,11 @@ namespace common.socks5
 
             Socks5EnumRequestCommand command = (Socks5EnumRequestCommand)data.Data.Span[1];
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
+            if(remoteEndPoint == null)
+            {
+                ConnectReponse(data, Socks5EnumResponseCommand.NetworkError, connection.FromConnection);
+                return;
+            }
 
             if (command == Socks5EnumRequestCommand.Connect)
             {
