@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\common\common.libs\common.libs.csproj" />
+    <ProjectReference Include="..\..\common\common.server\common.server.csproj" />
+    <ProjectReference Include="..\..\server\plugins\server.service.socks5\server.service.socks5.csproj" />
+  </ItemGroup>
+
+</Project>
