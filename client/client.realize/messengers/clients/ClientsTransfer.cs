@@ -665,10 +665,11 @@ namespace client.realize.messengers.clients
 
             if (config.Client.Encode)
             {
-                ICrypto crypto = await cryptoSwap.Swap(connection, connection, config.Client.EncodePassword);
+                ICrypto crypto = await cryptoSwap.Swap(connection, null, config.Client.EncodePassword);
                 if (crypto == null)
                 {
                     Logger.Instance.Error("交换密钥失败，如果客户端设置了密钥，则目标端必须设置相同的密钥，如果目标端未设置密钥，则客户端必须留空");
+                    return;
                 }
                 connection.EncodeEnable(crypto);
             }
