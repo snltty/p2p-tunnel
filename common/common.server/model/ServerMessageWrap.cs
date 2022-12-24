@@ -37,7 +37,7 @@ namespace common.server.model
         /// </summary>
         public const int RelayIdSize = 8;
         /// <summary>
-        /// Relay + Reply + EncodeBit + 11111
+        /// Relay + Reply + EncodeBit + 00001
         /// </summary>
         public const byte RelayBit = 0b10000000;
         /// <summary>
@@ -51,7 +51,7 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public const byte TypeBits = 0b00011111;
+        public const byte TypeBits = 0b00000001;
 
         /// <summary>
         /// 超时时间，发送待回复时设置
@@ -128,7 +128,7 @@ namespace common.server.model
             ((uint)length - 4).ToBytes(res);
             index += 4;
 
-            res[index] = 0;
+            res[index] = (byte)MessageTypes.REQUEST;
             if (Relay == true)
             {
                 res[index] |= RelayBit;
