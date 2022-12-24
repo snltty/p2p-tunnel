@@ -87,7 +87,9 @@ namespace common.server
                 {
                     msg.RelayId = msg.Connection.RelayId;
                 }
-                if (msg.Connection.EncodeEnabled)
+
+                msg.Encode = msg.Connection.EncodeEnabled && msg.Encode;
+                if (msg.Encode)
                 {
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
@@ -124,7 +126,8 @@ namespace common.server
             msg.Connection.WaitOne();
             try
             {
-                if (msg.Connection.EncodeEnabled)
+                msg.Encode = msg.Connection.EncodeEnabled && msg.Encode;
+                if (msg.Encode)
                 {
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }

@@ -37,7 +37,7 @@ namespace common.server.model
         /// </summary>
         public const int RelayIdSize = 8;
         /// <summary>
-        /// Relay + Reply + 111111
+        /// Relay + Reply + EncodeBit + 11111
         /// </summary>
         public const byte RelayBit = 0b10000000;
         /// <summary>
@@ -47,7 +47,11 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public const byte TypeBits = 0b00111111;
+        public const byte EncodeBit = 0b00100000;
+        /// <summary>
+        /// 
+        /// </summary>
+        public const byte TypeBits = 0b00011111;
 
         /// <summary>
         /// 超时时间，发送待回复时设置
@@ -71,6 +75,12 @@ namespace common.server.model
         /// 是否中继
         /// </summary>
         public bool Relay { get; set; }
+        /// <summary>
+        /// 加密
+        /// </summary>
+        public bool Encode { get; set; } = true;
+
+
         /// <summary>
         /// 中继节点id列表
         /// </summary>
@@ -127,6 +137,10 @@ namespace common.server.model
             {
                 res[index] |= ReplyBit;
             }
+            if (Encode == true)
+            {
+                res[index] |= EncodeBit;
+            }
             index += 1;
 
             if (Relay)
@@ -164,6 +178,7 @@ namespace common.server.model
 
             Relay = (span[index] & RelayBit) == RelayBit;
             Reply = (span[index] & ReplyBit) == ReplyBit;
+            Encode = (span[index] & EncodeBit) == EncodeBit;
             index += 1;
 
             if (Relay)
@@ -242,6 +257,10 @@ namespace common.server.model
         /// 
         /// </summary>
         public bool Relay { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool Encode { get; set; }
 
         /// <summary>
         /// 转包
@@ -257,9 +276,8 @@ namespace common.server.model
 
             if (RelayIds.Length > 0)
             {
-                RelayIdLength = (byte)(RelayIds.Length / MessageRequestWrap.RelayIdSize - 2);
-                //不要头两个id
-                length += MessageRequestWrap.RelayIdSize * RelayIdLength + 2; //length + index
+                RelayIdLength = (byte)(RelayIds.Length / MessageRequestWrap.RelayIdSize);
+                length += RelayIds.Length + 2; //length + index
             }
 
             byte[] res = ArrayPool<byte>.Shared.Rent(length);
@@ -269,6 +287,10 @@ namespace common.server.model
             index += 4;
 
             res[index] = (byte)MessageTypes.RESPONSE;
+            if (Encode)
+            {
+                res[index] |= MessageRequestWrap.EncodeBit;
+            }
             index += 1;
 
             if (RelayIdLength > 0)
@@ -276,7 +298,7 @@ namespace common.server.model
                 res[index - 1] |= MessageRequestWrap.RelayBit;
                 res[index] = RelayIdLength;
                 index += 1;
-                res[index] = 0;
+                res[index] = 2;
                 index += 1;
 
                 for (int i = 0; i < RelayIdLength; i++)
@@ -309,6 +331,7 @@ namespace common.server.model
             int index = 0;
 
             Relay = (span[index] & MessageRequestWrap.RelayBit) == MessageRequestWrap.RelayBit;
+            Encode = (span[index] & MessageRequestWrap.EncodeBit) == MessageRequestWrap.EncodeBit;
             index += 1;
 
             if (Relay)
@@ -398,70 +421,5 @@ namespace common.server.model
         RESPONSE = 1
     }
 
-    /*
-    public class ObjectPool<T> where T : class
-    {
-        private readonly ConcurrentBag<T> _objects;
-        private readonly Func<T> _objectGenerator;
-
-        public ObjectPool(Func<T> objectGenerator)
-        {
-            _objectGenerator = objectGenerator ?? throw new ArgumentNullException(nameof(objectGenerator));
-            _objects = new ConcurrentBag<T>();
-        }
-
-        public T Get() => _objects.TryTake(out T item) ? item : _objectGenerator();
-
-        public virtual void Return(T item)
-        {
-            if (_objects.Count < 100)
-            {
-                _objects.Add(item);
-            }
-        }
-    }
-
-    public class ObjectPoolRequest : ObjectPool<MessageRequestWrap>
-    {
-        public ObjectPoolRequest() : base(() =>
-        {
-            return new MessageRequestWrap();
-        })
-        {
-        }
-
-        public override void Return(MessageRequestWrap item)
-        {
-            item.RelayIds = Helper.EmptyArray;
-            item.RelayId = Helper.EmptyUlongArray;
-            item.Connection = null;
-            item.Payload = Helper.EmptyArray;
-            item.RequestId = 0;
-            item.MessengerId = 0;
-            item.Reply = false;
-            base.Return(item);
-        }
-    }
-
-    public class ObjectPoolResponse : ObjectPool<MessageResponseWrap>
-    {
-        public ObjectPoolResponse() : base(() =>
-        {
-            return new MessageResponseWrap();
-        })
-        {
-        }
-
-        public override void Return(MessageResponseWrap item)
-        {
-            item.RelayIds = Helper.EmptyArray;
-            item.Connection = null;
-            item.Payload = Helper.EmptyArray;
-            item.Code = MessageResponeCodes.OK;
-            item.RequestId = 0;
-            base.Return(item);
-        }
-    }
-    */
 }
 

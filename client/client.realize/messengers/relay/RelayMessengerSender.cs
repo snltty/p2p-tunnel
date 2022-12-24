@@ -39,9 +39,10 @@ namespace client.realize.messengers.relay
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 MessengerId = (ushort)RelayMessengerIds.Relay,
+                Encode = false,
                 Connection = connection,
-                 RelayId = relayids,
-                Payload = new RelayInfo {  RelayIds = relayids }.ToBytes()
+                RelayId = relayids,
+                Payload = new RelayInfo { RelayIds = relayids }.ToBytes()
             }).ConfigureAwait(false);
 
             return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
@@ -58,6 +59,7 @@ namespace client.realize.messengers.relay
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 MessengerId = (ushort)RelayMessengerIds.Delay,
+                Encode = false,
                 Connection = connection,
                 Timeout = 1000,
                 RelayId = relayids
@@ -74,6 +76,7 @@ namespace client.realize.messengers.relay
             return await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)RelayMessengerIds.AskConnects,
+                Encode = false,
                 Connection = registerStateInfo.OnlineConnection
             }).ConfigureAwait(false);
         }
@@ -87,6 +90,7 @@ namespace client.realize.messengers.relay
             return await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)RelayMessengerIds.Connects,
+                Encode = false,
                 Connection = registerStateInfo.OnlineConnection,
                 Payload = connects.ToBytes(),
             }).ConfigureAwait(false);

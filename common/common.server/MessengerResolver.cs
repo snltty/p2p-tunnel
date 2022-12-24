@@ -86,6 +86,7 @@ namespace common.server
             var responseWrap = connection.ReceiveResponseWrap;
             var requestWrap = connection.ReceiveRequestWrap;
 
+            connection.FromConnection = connection;
             try
             {
                 //回复的消息
@@ -109,9 +110,13 @@ namespace common.server
                     }
                     else
                     {
-                        if (connection.EncodeEnabled)
+                        if (connection.EncodeEnabled && responseWrap.Encode)
                         {
-                            responseWrap.Payload = connection.Crypto.Decode(responseWrap.Payload);
+                            if (responseWrap.Relay)
+                            {
+                                connection.FromConnection = sourceConnectionSelector.Select(connection, responseWrap.RelayIds.Span.ToUInt64());
+                            }
+                            responseWrap.Payload = connection.FromConnection.Crypto.Decode(responseWrap.Payload);
                         }
                         messengerSender.Response(responseWrap);
                     }
@@ -120,7 +125,6 @@ namespace common.server
 
                 //新的请求
                 requestWrap.FromArray(readReceive);
-
                 //是中继数据
                 if (requestWrap.Relay)
                 {
@@ -147,15 +151,16 @@ namespace common.server
                     }
                 }
 
-                if (connection.EncodeEnabled)
-                {
-                    requestWrap.Payload = connection.Crypto.Decode(requestWrap.Payload);
-                }
 
-                connection.FromConnection = connection;
                 if (requestWrap.Relay)
                 {
                     connection.FromConnection = sourceConnectionSelector.Select(connection, requestWrap.RelayIds.Span.ToUInt64());
+                }
+                IConnection responseConnection = connection;
+                if (connection.EncodeEnabled && requestWrap.Encode)
+                {
+                    responseConnection = connection.FromConnection;
+                    requestWrap.Payload = connection.FromConnection.Crypto.Decode(requestWrap.Payload);
                 }
 
 
@@ -167,7 +172,8 @@ namespace common.server
                     {
                         await messengerSender.ReplyOnly(new MessageResponseWrap
                         {
-                            Connection = connection,
+                            Connection = responseConnection,
+                            Encode = requestWrap.Encode,
                             RequestId = requestWrap.RequestId,
                             RelayIds = requestWrap.RelayIds,
                             Code = MessageResponeCodes.NOT_FOUND
@@ -217,7 +223,8 @@ namespace common.server
                 {
                     bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
                     {
-                        Connection = connection,
+                        Connection = responseConnection,
+                        Encode = requestWrap.Encode,
                         Payload = resultObject,
                         RelayIds = requestWrap.RelayIds,
                         RequestId = requestWrap.RequestId
@@ -233,6 +240,7 @@ namespace common.server
                     await messengerSender.ReplyOnly(new MessageResponseWrap
                     {
                         Connection = connection,
+                        Encode = requestWrap.Encode,
                         RelayIds = requestWrap.RelayIds,
                         RequestId = requestWrap.RequestId,
                         Code = MessageResponeCodes.ERROR

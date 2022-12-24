@@ -66,7 +66,7 @@ namespace client.realize.messengers.clients
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
             IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
             RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnectsCaching connecRouteCaching,
-            PunchHoleDirectionConfig punchHoleDirectionConfig,CryptoSwap cryptoSwap
+            PunchHoleDirectionConfig punchHoleDirectionConfig, CryptoSwap cryptoSwap
         )
         {
             this.clientsMessengerSender = clientsMessengerSender;
@@ -661,17 +661,16 @@ namespace client.realize.messengers.clients
                     Logger.Instance.Error($"relay fail");
                     return;
                 }
-            }
-
-            if (config.Client.Encode)
-            {
-                ICrypto crypto = await cryptoSwap.Swap(connection, null, config.Client.EncodePassword);
-                if (crypto == null)
+                if (config.Client.Encode)
                 {
-                    Logger.Instance.Error("交换密钥失败，如果客户端设置了密钥，则目标端必须设置相同的密钥，如果目标端未设置密钥，则客户端必须留空");
-                    return;
+                    ICrypto crypto = await cryptoSwap.Swap(connection, null, config.Client.EncodePassword);
+                    if (crypto == null)
+                    {
+                        Logger.Instance.Error("交换密钥失败，如果客户端设置了密钥，则目标端必须设置相同的密钥，如果目标端未设置密钥，则客户端必须留空");
+                        return;
+                    }
+                    connection.EncodeEnable(crypto);
                 }
-                connection.EncodeEnable(crypto);
             }
 
             ClientConnectTypes relayType = relayids.Span[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;

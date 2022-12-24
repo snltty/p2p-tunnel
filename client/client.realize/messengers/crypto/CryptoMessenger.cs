@@ -42,7 +42,8 @@ namespace client.realize.messengers.crypto
         [MessengerId((ushort)CryptoMessengerIds.Key)]
         public void Key(IConnection connection)
         {
-            connection.WriteUTF8(asymmetricCrypto.Key.PublicKey);
+            string publicKey = asymmetricCrypto.Key.PublicKey;
+            connection.WriteUTF8(publicKey);
         }
 
         /// <summary>
@@ -67,9 +68,8 @@ namespace client.realize.messengers.crypto
             {
                 return Helper.FalseArray;
             }
-
             ISymmetricCrypto encoder = cryptoFactory.CreateSymmetric(password);
-            connection.EncodeEnable(encoder);
+            connection.FromConnection.EncodeEnable(encoder);
             return Helper.TrueArray;
         }
 
@@ -81,10 +81,7 @@ namespace client.realize.messengers.crypto
         [MessengerId((ushort)CryptoMessengerIds.Clear)]
         public byte[] Clear(IConnection connection)
         {
-            if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
-            {
-                client.Connection.EncodeDisable();
-            }
+            connection.FromConnection.EncodeDisable();
             return Helper.TrueArray;
         }
 
@@ -96,7 +93,7 @@ namespace client.realize.messengers.crypto
         [MessengerId((ushort)CryptoMessengerIds.Test)]
         public byte[] Test(IConnection connection)
         {
-            Console.WriteLine($"{connection.ServerType},encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");
+            Console.WriteLine($"{connection.ServerType},encoder test : {Encoding.UTF8.GetString(connection.FromConnection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");
 
             return Helper.TrueArray;
         }

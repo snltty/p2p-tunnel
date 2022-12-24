@@ -3,6 +3,7 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,6 +45,7 @@ namespace client.realize.messengers.crypto
                     MessageResponeInfo publicKeyResponse = await messengerSender.SendReply(new MessageRequestWrap
                     {
                         Connection = tcp ?? udp,
+                        Encode = false,
                         MessengerId = (ushort)CryptoMessengerIds.Key,
                     }).ConfigureAwait(false);
                     if (publicKeyResponse.Code != MessageResponeCodes.OK)
@@ -52,6 +54,7 @@ namespace client.realize.messengers.crypto
                     }
 
                     string publicKey = publicKeyResponse.Data.GetUTF8String();
+
                     IAsymmetricCrypto encoder = cryptoFactory.CreateAsymmetric(new RsaKey { PublicKey = publicKey, PrivateKey = string.Empty });
                     password = StringHelper.RandomPasswordStringMd5();
                     encodedData = encoder.Encode(password.ToUTF8Bytes());
@@ -64,10 +67,11 @@ namespace client.realize.messengers.crypto
                     MessageResponeInfo setResponse = await messengerSender.SendReply(new MessageRequestWrap
                     {
                         Connection = tcp,
+                        Encode = false,
                         MessengerId = (ushort)CryptoMessengerIds.Set,
                         Payload = encodedData
                     }).ConfigureAwait(false);
-                    if (setResponse.Code != MessageResponeCodes.OK || crypto.Decode(setResponse.Data.ToArray()).Span.SequenceEqual(Helper.TrueArray) == false)
+                    if (setResponse.Code != MessageResponeCodes.OK || setResponse.Data.Span.SequenceEqual(Helper.TrueArray) == false)
                     {
                         return null;
                     }
@@ -77,10 +81,11 @@ namespace client.realize.messengers.crypto
                     MessageResponeInfo setResponse = await messengerSender.SendReply(new MessageRequestWrap
                     {
                         Connection = udp,
+                        Encode = false,
                         MessengerId = (ushort)CryptoMessengerIds.Set,
                         Payload = encodedData
                     }).ConfigureAwait(false);
-                    if (setResponse.Code != MessageResponeCodes.OK || crypto.Decode(setResponse.Data.ToArray()).Span.SequenceEqual(Helper.TrueArray) == false)
+                    if (setResponse.Code != MessageResponeCodes.OK || setResponse.Data.Span.SequenceEqual(Helper.TrueArray) == false)
                     {
                         return null;
                     }

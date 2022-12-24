@@ -262,6 +262,7 @@ namespace common.libs
     /// </summary>
     public interface ISymmetricCrypto : ICrypto
     {
+        public string Password { get; set; }
     }
     /// <summary>
     /// 
@@ -271,12 +272,15 @@ namespace common.libs
         private ICryptoTransform encryptoTransform;
         private ICryptoTransform decryptoTransform;
 
+        public string Password { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="password"></param>
         public AesCrypto(in string password)
         {
+            Password = password;
             using Aes aes = Aes.Create();
             aes.Padding = PaddingMode.ANSIX923;
             (aes.Key, aes.IV) = GenerateKeyAndIV(password);
