@@ -66,7 +66,7 @@ namespace client.realize.messengers.clients
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
             IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
             RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnectsCaching connecRouteCaching,
-            PunchHoleDirectionConfig punchHoleDirectionConfig，CryptoSwap cryptoSwap
+            PunchHoleDirectionConfig punchHoleDirectionConfig,CryptoSwap cryptoSwap
         )
         {
             this.clientsMessengerSender = clientsMessengerSender;
@@ -675,7 +675,8 @@ namespace client.realize.messengers.clients
             }
 
             ClientConnectTypes relayType = relayids.Span[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
-            clientInfoCaching.Online(relayids.Span[^1], connection, relayType, notify == false ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active, (ulong)TunnelDefaults.MIN);
+            ClientOnlineTypes onlineType = notify == false ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active;
+            clientInfoCaching.Online(relayids.Span[^1], connection, relayType, onlineType, (ulong)TunnelDefaults.MIN);
         }
 
         /// <summary>
