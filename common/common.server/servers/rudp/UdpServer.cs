@@ -159,7 +159,8 @@ namespace common.server.servers.rudp
                 }
                 if (peer.ConnectionState == ConnectionState.Connected)
                 {
-                    return peer.Tag as RudpConnection;
+                    var rudp = peer.Tag as RudpConnection;
+                    return rudp;
                 }
                 return null;
             }
@@ -192,6 +193,7 @@ namespace common.server.servers.rudp
             if (server != null)
             {
                 server.SpeedLimit = limit;
+                RudpConnection.tokenBucketRatelimit.ChangeRate(limit);
             }
         }
 

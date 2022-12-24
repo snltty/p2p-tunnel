@@ -244,7 +244,6 @@ namespace LiteNetLib
             set
             {
                 speedLimit = value;
-                ReliableChannel.tokenBucketRatelimit.ChangeRate(value);
             }
         }
 
