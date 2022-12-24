@@ -476,7 +476,7 @@ namespace common.server
                         await Task.Delay(1);
                     }
 
-                    int len = tokenBucketRatelimit.Try(data.Length);
+                    int len = 0;
                     do
                     {
                         len = tokenBucketRatelimit.Try(data.Length);
