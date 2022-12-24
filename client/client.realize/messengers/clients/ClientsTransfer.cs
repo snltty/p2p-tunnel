@@ -4,6 +4,7 @@ using client.messengers.punchHole.tcp;
 using client.messengers.punchHole.udp;
 using client.messengers.register;
 using client.messengers.relay;
+using client.realize.messengers.crypto;
 using client.realize.messengers.heart;
 using client.realize.messengers.punchHole;
 using client.realize.messengers.relay;
@@ -39,6 +40,7 @@ namespace client.realize.messengers.clients
         private readonly RelayMessengerSender relayMessengerSender;
         private readonly IClientConnectsCaching connecRouteCaching;
         private readonly PunchHoleDirectionConfig punchHoleDirectionConfig;
+        private readonly CryptoSwap cryptoSwap;
 
         private object lockObject = new();
 
@@ -64,7 +66,7 @@ namespace client.realize.messengers.clients
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
             IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
             RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnectsCaching connecRouteCaching,
-            PunchHoleDirectionConfig punchHoleDirectionConfig
+            PunchHoleDirectionConfig punchHoleDirectionConfig，CryptoSwap cryptoSwap
         )
         {
             this.clientsMessengerSender = clientsMessengerSender;
@@ -79,6 +81,7 @@ namespace client.realize.messengers.clients
             this.connecRouteCaching = connecRouteCaching;
             this.punchHoleMessengerSender = punchHoleMessengerSender;
             this.punchHoleDirectionConfig = punchHoleDirectionConfig;
+            this.cryptoSwap = cryptoSwap;
 
             PunchHoleSub();
 
@@ -658,6 +661,16 @@ namespace client.realize.messengers.clients
                     Logger.Instance.Error($"relay fail");
                     return;
                 }
+            }
+
+            if (config.Client.Encode)
+            {
+                ICrypto crypto = await cryptoSwap.Swap(connection, connection, config.Client.EncodePassword);
+                if (crypto == null)
+                {
+                    Logger.Instance.Error("交换密钥失败，如果客户端设置了密钥，则目标端必须设置相同的密钥，如果目标端未设置密钥，则客户端必须留空");
+                }
+                connection.EncodeEnable(crypto);
             }
 
             ClientConnectTypes relayType = relayids.Span[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
