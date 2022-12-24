@@ -6,6 +6,7 @@ using System;
 using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -470,6 +471,11 @@ namespace common.server
             {
                 try
                 {
+                    while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
+                    {
+                        await Task.Delay(1);
+                    }
+
                     int len = tokenBucketRatelimit.Try(data.Length);
                     do
                     {
