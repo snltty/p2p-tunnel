@@ -61,9 +61,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "client.service.vea", "clien
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "client.service.wakeup", "client\plugins\client.service.wakeup\client.service.wakeup.csproj", "{58915D7F-AD71-4541-8097-7A2620867F76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "packUnpackSpeed", "tests\packUnpackSpeed\packUnpackSpeed.csproj", "{CAD39237-E690-4720-AB17-A59B33818259}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "packUnpackSpeed", "tests\packUnpackSpeed\packUnpackSpeed.csproj", "{CAD39237-E690-4720-AB17-A59B33818259}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0732D9F3-310A-44BE-AD37-E2346C5ACEB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "socks5", "tests\socks5\socks5.csproj", "{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -269,6 +271,14 @@ Global
 		{CAD39237-E690-4720-AB17-A59B33818259}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CAD39237-E690-4720-AB17-A59B33818259}.Release|x64.ActiveCfg = Release|Any CPU
 		{CAD39237-E690-4720-AB17-A59B33818259}.Release|x64.Build.0 = Release|Any CPU
+		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1}.Debug|x64.Build.0 = Debug|Any CPU
+		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1}.Release|x64.ActiveCfg = Release|Any CPU
+		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -301,6 +311,7 @@ Global
 		{DD690846-BCD7-464A-A330-C3B3D11B304B} = {689218D7-FC93-47D5-A95B-66780B9D4870}
 		{58915D7F-AD71-4541-8097-7A2620867F76} = {689218D7-FC93-47D5-A95B-66780B9D4870}
 		{CAD39237-E690-4720-AB17-A59B33818259} = {0732D9F3-310A-44BE-AD37-E2346C5ACEB6}
+		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1} = {0732D9F3-310A-44BE-AD37-E2346C5ACEB6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE8935B2-54F1-4FBD-98BB-8119E42B52A6}
