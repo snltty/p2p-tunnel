@@ -7,7 +7,7 @@ namespace client.realize
     internal sealed class IPv6AddressRequest : IIPv6AddressRequest
     {
         private byte[] ipv6LocalBytes = new byte[] { 254, 128, 0, 0, 0, 0, 0, 0 };
-        public IPAddress[] GetIPV6()
+        public IPAddress[] GetIPV6() 
         {
             return Dns.GetHostAddresses(Dns.GetHostName())
                  .Where(c => c.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
