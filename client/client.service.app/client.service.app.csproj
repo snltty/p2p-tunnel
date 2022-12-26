@@ -52,10 +52,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="Platforms\Android\Resources\xml\network_security_config.xml" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\client.realize\client.realize.csproj" />
 		<ProjectReference Include="..\plugins\client.service.logger\client.service.logger.csproj" />
 		<ProjectReference Include="..\plugins\client.service.socks5\client.service.socks5.csproj" />
