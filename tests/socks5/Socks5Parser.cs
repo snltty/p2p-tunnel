@@ -76,10 +76,9 @@ namespace socks5
             ipMemory = Helper.EmptyArray;
             try
             {
-                if (data.Length < 3)
+                if (data.Length <= 4)
                 {
-
-                    return null;
+                    return new IPEndPoint(IPAddress.Any, 0);
                 }
                 //VERSION COMMAND RSV ATYPE  DST.ADDR  DST.PORT
                 //去掉 VERSION COMMAND RSV

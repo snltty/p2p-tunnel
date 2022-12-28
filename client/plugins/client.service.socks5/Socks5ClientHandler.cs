@@ -234,7 +234,6 @@ namespace client.service.socks5
         protected virtual bool HandleCommand(Socks5Info data)
         {
             var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
-
             if (targetEp.Port == 0 || ipMemory.SequenceEqual(Helper.AnyIpArray))
             {
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
