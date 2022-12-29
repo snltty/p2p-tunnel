@@ -25,6 +25,14 @@ namespace common.libs
         /// 
         /// </summary>
         public static byte[] AnyIpArray = IPAddress.Any.GetAddressBytes();
+        /// <summary>
+        /// 
+        /// </summary>
+        public static byte[] AnyIpv6Array = IPAddress.IPv6Any.GetAddressBytes();
+        /// <summary>
+        /// 
+        /// </summary>
+        public static byte[] AnyPoryArray = new byte[] { 0, 0 };
 
 
         /// <summary>
@@ -51,7 +59,7 @@ namespace common.libs
             for (var i = 0; i < stacktrace.FrameCount; i++)
             {
                 var method = stacktrace.GetFrame(i).GetMethod();
-                result += (stacktrace.GetFrame(i).GetFileName() + "->" + method.Name +"\n");
+                result += (stacktrace.GetFrame(i).GetFileName() + "->" + method.Name + "\n");
             }
             return result;
         }

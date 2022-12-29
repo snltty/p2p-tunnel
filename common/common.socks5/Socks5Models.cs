@@ -49,6 +49,9 @@ namespace common.socks5
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public byte[] Response { get; set; } = new byte[1];
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public Memory<byte> Buffer { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -56,7 +59,7 @@ namespace common.socks5
         public byte[] ToBytes(out int length)
         {
             length = 1 + 4 + 1 + 1 + Data.Length;
-           
+
             int sepLength = 0, tepLength = 0;
             if (SourceEP != null)
             {

@@ -76,7 +76,7 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
-        public Func<Socks5Info, bool> OnData { get; set; }
+        public Func<Socks5Info, bool> OnData { get; set; } = (data) => true;
         /// <summary>
         /// 
         /// </summary>
@@ -189,7 +189,6 @@ namespace common.socks5
         }
         private void ProcessReceive(SocketAsyncEventArgs e)
         {
-
             try
             {
                 AsyncUserToken token = (AsyncUserToken)e.UserToken;
@@ -254,12 +253,9 @@ namespace common.socks5
         }
         private void ExecuteHandle(Socks5Info info)
         {
-            if (OnData != null)
+            if (OnData(info) == false)
             {
-                if (OnData(info) == false)
-                {
-                    CloseClientSocket(info.Id);
-                }
+                CloseClientSocket(info.Id);
             }
         }
 

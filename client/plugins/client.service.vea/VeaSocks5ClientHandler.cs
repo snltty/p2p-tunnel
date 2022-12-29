@@ -81,11 +81,10 @@ namespace client.service.vea
             var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
 
             target.TargetIp = targetEp.Address;
-
             if (targetEp.Port == 0 || ipMemory.SequenceEqual(Helper.AnyIpArray))
             {
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
-                data.Data = data.Response;
+                data.Data = data.Response.AsMemory(0,1);
 
                 CommandResponseData(data);
                 socks5ClientListener.Response(data);

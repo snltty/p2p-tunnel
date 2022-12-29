@@ -4,6 +4,7 @@ using common.libs;
 using common.server;
 using common.socks5;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 
 namespace client.service.socks5
@@ -94,15 +95,56 @@ namespace client.service.socks5
         {
             if (handles.TryGetValue(info.Socks5Step, out Func<Socks5Info, bool> func))
             {
-                if (info.Socks5Step == Socks5EnumStep.Auth)
+                //验证一下数据包是否已经完整，不完整的，等待下次数据继续拼接
+                switch (info.Socks5Step)
                 {
-                    info.Version = info.Data.Span[0];
+                    case Socks5EnumStep.Request:
+                        if (ValidateRequestData(info) == false) return true;
+                        break;
+                    case Socks5EnumStep.Auth:
+                        info.Version = info.Data.Span[0];
+                        if (ValidateAuthData(info) == false) return true;
+                        break;
+                    case Socks5EnumStep.Command:
+                        if (ValidateCommandData(info) == false) return true;
+                        break;
+                    case Socks5EnumStep.Forward:
+                        break;
+                    case Socks5EnumStep.ForwardUdp:
+                        break;
+                    default:
+                        break;
                 }
 
                 return func(info);
             }
             return false;
         }
+        private bool ValidateRequestData(Socks5Info info)
+        {
+            if (info.Buffer.Length == 0)
+            {
+                var span = info.Data.Span;
+                if (span.Length >= 2 && span.Length >= 2 + span[1])
+                {
+                    return true;
+                }
+
+            }
+
+            return false;
+        }
+        private bool ValidateAuthData(Socks5Info info)
+        {
+            return true;
+        }
+        private bool ValidateCommandData(Socks5Info info)
+        {
+            return true;
+        }
+
+
+
         /// <summary>
         /// 收到关闭
         /// </summary>
@@ -170,10 +212,7 @@ namespace client.service.socks5
             }
             else
             {
-                if (type == Socks5EnumResponseCommand.ConnecSuccess)
-                {
-                    info.Socks5Step = Socks5EnumStep.Forward;
-                }
+                info.Socks5Step = Socks5EnumStep.Forward;
                 info.Data = Socks5Parser.MakeConnectResponse(socks5ClientListener.DistEndpoint, (byte)type);
             }
         }
@@ -202,18 +241,11 @@ namespace client.service.socks5
         /// <returns></returns>
         protected virtual bool HandleRequest(Socks5Info data)
         {
-            #region 省略掉验证部分
             data.Response[0] = (byte)Socks5EnumAuthType.NoAuth;
-            data.Data = data.Response;
+            data.Data = data.Response.AsMemory(0, 1);
             RequestResponseData(data);
             socks5ClientListener.Response(data);
             return true;
-            #endregion
-
-            #region 去往目标端验证
-            //GetConnection();
-            //return socks5MessengerSender.Request(data, connection);
-            #endregion
         }
         /// <summary>
         /// 收到auth
@@ -223,8 +255,6 @@ namespace client.service.socks5
         protected virtual bool HandleAuth(Socks5Info data)
         {
             return true;
-            //GetConnection();
-            // return socks5MessengerSender.Request(data, connection);
         }
         /// <summary>
         /// 收到command
@@ -233,19 +263,20 @@ namespace client.service.socks5
         /// <returns></returns>
         protected virtual bool HandleCommand(Socks5Info data)
         {
-            var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
-            if (targetEp.Port == 0 || ipMemory.SequenceEqual(Helper.AnyIpArray))
+            //0.0.0.0  或者:0 都直接通过，这是udp中继的时候可能出现的情况
+            if (Socks5Parser.GetIsAnyAddress(data.Data))
             {
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
-                data.Data = data.Response;
+                data.Data = data.Response.AsMemory(0, 1);
                 CommandResponseData(data);
                 socks5ClientListener.Response(data);
                 return true;
             }
-
             GetConnection();
             return socks5MessengerSender.Request(data, connection);
         }
+
+
         /// <summary>
         /// 收到转发
         /// </summary>
@@ -285,7 +316,7 @@ namespace client.service.socks5
                 }
                 else
                 {
-                    if (clientInfoCaching.GetByName(config.TargetName,out ClientInfo client))
+                    if (clientInfoCaching.GetByName(config.TargetName, out ClientInfo client))
                     {
                         connection = client.Connection;
                     }
