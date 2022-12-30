@@ -117,6 +117,54 @@ namespace socks5
             }
             return null;
         }
+
+        public static bool GetIsAnyAddress(Memory<byte> data)
+        {
+            var span = data.Span.Slice(3);
+
+            return ((Socks5EnumAddressType)span[0]) switch
+            {
+                Socks5EnumAddressType.IPV4 => span.Slice(1, 4).SequenceEqual(Helper.AnyIpArray) || span.Slice(1 + 4, 2).SequenceEqual(Helper.AnyPoryArray),
+                Socks5EnumAddressType.IPV6 => span.Slice(1, 16).SequenceEqual(Helper.AnyIpv6Array) || span.Slice(1 + 16, 2).SequenceEqual(Helper.AnyPoryArray),
+                Socks5EnumAddressType.Domain => false || span.Slice(2 + span[1], 2).SequenceEqual(Helper.AnyPoryArray),
+                _ => false,
+            };
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static byte GetCommandTrueLength(Memory<byte> data)
+        {
+            var span = data.Span.Slice(3);
+            Socks5EnumAddressType type = (Socks5EnumAddressType)span[0];
+            return type switch
+            {
+                Socks5EnumAddressType.IPV4 => 4 + 4 + 2,
+                Socks5EnumAddressType.Domain => 4 + 16 + 2,
+                Socks5EnumAddressType.IPV6 => (byte)(4 + (span[1]) + 2),
+                _ => 255,
+            };
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static byte GetCommandMaxLength(Memory<byte> data)
+        {
+            var span = data.Span.Slice(3);
+            Socks5EnumAddressType type = (Socks5EnumAddressType)span[0];
+            return type switch
+            {
+                Socks5EnumAddressType.IPV4 => 4 + 4 + 2,
+                Socks5EnumAddressType.Domain => 4 + 16 + 2,
+                Socks5EnumAddressType.IPV6 => 255,
+                _ => 255,
+            };
+        }
+
         /// <summary>
         /// 
         /// </summary>

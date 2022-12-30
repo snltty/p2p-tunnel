@@ -95,52 +95,70 @@ namespace client.service.socks5
         {
             if (handles.TryGetValue(info.Socks5Step, out Func<Socks5Info, bool> func))
             {
-                //验证一下数据包是否已经完整，不完整的，等待下次数据继续拼接
-                switch (info.Socks5Step)
+                if (info.Socks5Step == Socks5EnumStep.Auth)
                 {
-                    case Socks5EnumStep.Request:
-                        if (ValidateRequestData(info) == false) return true;
-                        break;
-                    case Socks5EnumStep.Auth:
-                        info.Version = info.Data.Span[0];
-                        if (ValidateAuthData(info) == false) return true;
-                        break;
-                    case Socks5EnumStep.Command:
-                        if (ValidateCommandData(info) == false) return true;
-                        break;
-                    case Socks5EnumStep.Forward:
-                        break;
-                    case Socks5EnumStep.ForwardUdp:
-                        break;
-                    default:
-                        break;
+                    info.Version = info.Data.Span[0];
+                }
+                if (Validate(info) == false)
+                {
+                    return true;
                 }
 
                 return func(info);
             }
             return false;
         }
-        private bool ValidateRequestData(Socks5Info info)
-        {
-            if (info.Buffer.Length == 0)
-            {
-                var span = info.Data.Span;
-                if (span.Length >= 2 && span.Length >= 2 + span[1])
-                {
-                    return true;
-                }
 
+        private bool Validate(Socks5Info info)
+        {
+            //验证一下数据包是否已经完整，不完整的，等待下次数据继续拼接
+            bool res = _Validate(info);
+            if (res == false)
+            {
+                bool first = info.Buffer == null || info.Buffer[0] == 0;
+                if (info.Buffer == null)
+                {
+                    info.Buffer = ArrayPool<byte>.Shared.Rent(256);
+                    info.Buffer[0] = 0;
+                }
+                info.Data.CopyTo(info.Buffer.AsMemory(1 + info.Buffer[0]));
+                info.Buffer[0] += (byte)info.Data.Length;
+
+                //不是第一次拼接缓存，那就再验证一次
+                if (first == false)
+                {
+                    res = _Validate(info);
+                    if (res)
+                    {
+                        info.Data = info.Buffer.AsMemory(1, info.Buffer[0]);
+                        info.Buffer[0] = 0;
+                    }
+                }
             }
 
-            return false;
+            return res;
         }
-        private bool ValidateAuthData(Socks5Info info)
+        private bool _Validate(Socks5Info info) => info.Socks5Step switch
         {
-            return true;
+            Socks5EnumStep.Request => ValidateRequestData(info),
+            Socks5EnumStep.Command => ValidateCommandData(info),
+            _ => true
+        };
+        private bool ValidateRequestData(Socks5Info info)
+        {
+            if (info.Buffer == null || info.Buffer[0] == 0)
+            {
+                return info.Data.Length >= 2 && info.Data.Length >= 2 + info.Data.Span[1];
+            }
+            return info.Buffer[0] >= 2 && info.Buffer[0] >= 2 + info.Buffer[2];
         }
         private bool ValidateCommandData(Socks5Info info)
         {
-            return true;
+            if (info.Buffer == null || info.Buffer[0] == 0)
+            {
+                return info.Data.Length > 4 && info.Data.Length >= Socks5Parser.GetCommandTrueLength(info.Data);
+            }
+            return info.Buffer[0] > 4 && info.Buffer[0] >= Socks5Parser.GetCommandTrueLength(info.Buffer.AsMemory(1));
         }
 
 
@@ -273,7 +291,11 @@ namespace client.service.socks5
                 return true;
             }
             GetConnection();
-            return socks5MessengerSender.Request(data, connection);
+            bool res = socks5MessengerSender.Request(data, connection);
+
+            data.Return();
+
+            return res;
         }
 
 

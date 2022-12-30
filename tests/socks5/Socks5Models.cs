@@ -3,9 +3,6 @@ using System.Net;
 
 namespace socks5
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class Socks5Info
     {
         /// <summary>
@@ -45,6 +42,9 @@ namespace socks5
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public byte[] Response { get; set; } = new byte[1];
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public byte[] Buffer { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -52,7 +52,7 @@ namespace socks5
         public byte[] ToBytes(out int length)
         {
             length = 1 + 4 + 1 + 1 + Data.Length;
-           
+
             int sepLength = 0, tepLength = 0;
             if (SourceEP != null)
             {
@@ -154,6 +154,15 @@ namespace socks5
         public void Return(byte[] data)
         {
             ArrayPool<byte>.Shared.Return(data);
+        }
+
+        public void Return()
+        {
+            if (Buffer != null)
+            {
+                ArrayPool<byte>.Shared.Return(Buffer);
+                Buffer = null;
+            }
         }
     }
     /// <summary>

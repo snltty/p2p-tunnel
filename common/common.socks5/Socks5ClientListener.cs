@@ -390,6 +390,8 @@ namespace common.socks5
             PoolBuffer = Helper.EmptyArray;
 
             Disposabled = true;
+
+            DataWrap.Return();
         }
     }
 

@@ -1,4 +1,6 @@
-﻿namespace socks5
+﻿using System.Buffers;
+
+namespace socks5
 {
     /// <summary>
     /// socks5客户端
@@ -66,11 +68,69 @@
                 {
                     info.Version = info.Data.Span[0];
                 }
+                if (Validate(info) == false)
+                {
+                    return true;
+                }
 
                 return func(info);
             }
             return false;
         }
+
+        private bool Validate(Socks5Info info)
+        {
+            //验证一下数据包是否已经完整，不完整的，等待下次数据继续拼接
+            bool res = _Validate(info);
+            if (res == false)
+            {
+                bool first = info.Buffer == null || info.Buffer[0] == 0;
+                if (info.Buffer == null)
+                {
+                    info.Buffer = ArrayPool<byte>.Shared.Rent(256);
+                    info.Buffer[0] = 0;
+                }
+                info.Data.CopyTo(info.Buffer.AsMemory(1 + info.Buffer[0]));
+                info.Buffer[0] += (byte)info.Data.Length;
+
+                //不是第一次拼接缓存，那就再验证一次
+                if (first == false)
+                {
+                    res = _Validate(info);
+                    if (res)
+                    {
+                        info.Data = info.Buffer.AsMemory(1, info.Buffer[0]);
+                        info.Buffer[0] = 0;
+                    }
+                }
+            }
+
+            return res;
+        }
+        private bool _Validate(Socks5Info info) => info.Socks5Step switch
+        {
+            Socks5EnumStep.Request => ValidateRequestData(info),
+            Socks5EnumStep.Command => ValidateCommandData(info),
+            _ => true
+        };
+        private bool ValidateRequestData(Socks5Info info)
+        {
+            if (info.Buffer == null || info.Buffer[0] == 0)
+            {
+                return info.Data.Length >= 2 && info.Data.Length >= 2 + info.Data.Span[1];
+            }
+            return info.Buffer[0] >= 2 && info.Buffer[0] >= 2 + info.Buffer[2];
+        }
+        private bool ValidateCommandData(Socks5Info info)
+        {
+            if (info.Buffer == null || info.Buffer[0] == 0)
+            {
+                return info.Data.Length > 4 && info.Data.Length >= Socks5Parser.GetCommandTrueLength(info.Data);
+            }
+            return info.Buffer[0] > 4 && info.Buffer[0] >= Socks5Parser.GetCommandTrueLength(info.Buffer.AsMemory(1));
+        }
+
+
         /// <summary>
         /// 收到关闭
         /// </summary>
@@ -200,18 +260,20 @@
         /// <returns></returns>
         protected virtual bool HandleCommand(Socks5Info data)
         {
-            var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
-
-            if (targetEp.Port == 0 || ipMemory.SequenceEqual(Helper.AnyIpArray))
+            //0.0.0.0  或者:0 都直接通过，这是udp中继的时候可能出现的情况
+            if (Socks5Parser.GetIsAnyAddress(data.Data))
             {
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
-                data.Data = data.Response;
+                data.Data = data.Response.AsMemory(0, 1);
                 CommandResponseData(data);
                 socks5ClientListener.Response(data);
                 return true;
             }
 
-            return OnSendRequest(data);
+            bool res = OnSendRequest(data);
+            data.Return();
+
+            return res;
         }
         /// <summary>
         /// 收到转发

@@ -285,7 +285,7 @@ namespace common.server.servers.websocket
 
                 do
                 {
-                    if (!WebSocketFrameInfo.TryParse(token.FrameBuffer.Data.Slice(token.FrameIndex), out token.FrameInfo))
+                    if (WebSocketFrameInfo.TryParse(token.FrameBuffer.Data.Slice(token.FrameIndex), out token.FrameInfo) == false)
                     {
                         break;
                     }

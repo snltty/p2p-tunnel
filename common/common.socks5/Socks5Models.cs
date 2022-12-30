@@ -51,7 +51,7 @@ namespace common.socks5
         public byte[] Response { get; set; } = new byte[1];
 
         [System.Text.Json.Serialization.JsonIgnore]
-        public Memory<byte> Buffer { get; set; }
+        public byte[] Buffer { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -161,6 +161,15 @@ namespace common.socks5
         public void Return(byte[] data)
         {
             ArrayPool<byte>.Shared.Return(data);
+        }
+
+        public void Return()
+        {
+            if(Buffer != null)
+            {
+                ArrayPool<byte>.Shared.Return(Buffer);
+                Buffer = null;
+            }
         }
     }
     /// <summary>
