@@ -67,7 +67,7 @@ namespace client.service.ui.api.service.clientServer
             }
             foreach (Type item in types.Where(c => c.GetInterfaces().Contains(typeof(IClientConfigure))))
             {
-                if (!settingPlugins.ContainsKey(item.Name))
+                if (settingPlugins.ContainsKey(item.Name) == false)
                     settingPlugins.Add(item.Name, (IClientConfigure)serviceProvider.GetService(item));
             }
         }
