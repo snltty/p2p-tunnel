@@ -1,7 +1,4 @@
-﻿using common.server;
-using System;
-
-namespace common.socks5
+﻿namespace common.socks5
 {
     /// <summary>
     /// 

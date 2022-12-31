@@ -8,4 +8,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\common\common.socks5\common.socks5.csproj" />
+  </ItemGroup>
+
 </Project>

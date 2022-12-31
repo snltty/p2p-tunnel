@@ -1,6 +1,4 @@
-﻿using common.server;
-using System;
-using System.Net;
+﻿using System.Net;
 
 namespace common.socks5
 {
@@ -9,11 +7,11 @@ namespace common.socks5
     /// </summary>
     public interface ISocks5ClientHandler
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        void InputData(IConnection connection);
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <param name="info"></param>
+        void InputData(Socks5Info info);
     }
 
 

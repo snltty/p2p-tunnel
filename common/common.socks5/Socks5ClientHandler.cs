@@ -1,14 +1,9 @@
-﻿using client.messengers.clients;
-using client.messengers.register;
-using common.libs;
-using common.server;
-using common.socks5;
+﻿using common.libs;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Net;
 
-namespace client.service.socks5
+namespace common.socks5
 {
     /// <summary>
     /// socks5客户端
@@ -63,9 +58,8 @@ namespace client.service.socks5
         /// 输入数据
         /// </summary>
         /// <param name="connection"></param>
-        public void InputData(IConnection connection)
+        public void InputData(Socks5Info info)
         {
-            Socks5Info info = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
             if (info.Data.Length == 0)
             {
                 socks5ClientListener.Close(info.Id);

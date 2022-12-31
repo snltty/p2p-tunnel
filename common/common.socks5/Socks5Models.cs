@@ -1,5 +1,4 @@
-﻿using common.libs;
-using common.libs.extends;
+﻿using common.libs.extends;
 using common.server;
 using System;
 using System.Buffers;
@@ -324,7 +323,7 @@ namespace common.socks5
     /// <summary>
     /// socks5相关的消息id
     /// </summary>
-    [Flags, MessengerIdEnum]
+    [Flags]
     public enum Socks5MessengerIds : ushort
     {
         /// <summary>

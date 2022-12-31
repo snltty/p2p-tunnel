@@ -42,7 +42,8 @@ namespace client.service.socks5
         [MessengerId((ushort)Socks5MessengerIds.Response)]
         public void Response(IConnection connection)
         {
-            socks5ClientHandler.InputData(connection);
+            Socks5Info info = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
+            socks5ClientHandler.InputData(info);
         }
     }
 }

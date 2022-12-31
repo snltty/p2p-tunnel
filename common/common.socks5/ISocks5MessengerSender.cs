@@ -1,6 +1,4 @@
-﻿using common.server;
-
-namespace common.socks5
+﻿namespace common.socks5
 {
     /// <summary>
     /// 
@@ -23,10 +21,10 @@ namespace common.socks5
         /// </summary>
         /// <param name="id"></param>
         public void ResponseClose(Socks5Info data);
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <param name="data"></param>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void RequestClose(Socks5Info data);
     }
 
