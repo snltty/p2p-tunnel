@@ -11,26 +11,23 @@ namespace common.socks5
         /// 
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="connection"></param>
         /// <returns></returns>
-        public bool Request(Socks5Info data, IConnection connection);
+        public bool Request(Socks5Info data);
         /// <summary>
         /// 
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="connection"></param>
-        public void Response(Socks5Info data, IConnection connection);
+        public void Response(Socks5Info data);
         /// <summary>
         /// 
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="connection"></param>
-        public void ResponseClose(uint id, IConnection connection);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="connection"></param>
-        public void RequestClose(uint id, IConnection connection);
+        public void ResponseClose(Socks5Info data);
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="data"></param>
+        public void RequestClose(Socks5Info data);
     }
+
 }

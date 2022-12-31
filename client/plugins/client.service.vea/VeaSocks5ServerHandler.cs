@@ -46,6 +46,7 @@ namespace client.service.vea
             config.BufferSize = _config.BufferSize;
             config.ConnectEnable = _config.ConnectEnable;
             config.NumConnections = _config.NumConnections;
+            config.ListenPort = _config.SocksPort;
         }
     }
 

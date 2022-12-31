@@ -4,22 +4,21 @@ using common.server.model;
 using common.socks5;
 using System;
 
-namespace client.service.vea
+namespace server.service.socks5
 {
     /// <summary>
-    /// 组网socks5消息发送
+    /// socks5消息发送
     /// </summary>
-    public interface IVeaSocks5MessengerSender : ISocks5MessengerSender
-    {
-
-    }
-    /// <summary>
-    /// 组网socks5消息发送
-    /// </summary>
-    public sealed class VeaSocks5MessengerSender : IVeaSocks5MessengerSender
+    public class Socks5MessengerSender : ISocks5MessengerSender
     {
         private readonly MessengerSender messengerSender;
-        public VeaSocks5MessengerSender(MessengerSender messengerSender)
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messengerSender"></param>
+        public Socks5MessengerSender(MessengerSender messengerSender)
         {
             this.messengerSender = messengerSender;
         }
@@ -28,31 +27,22 @@ namespace client.service.vea
         /// 
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="connection"></param>
         /// <returns></returns>
         public bool Request(Socks5Info data)
         {
-            byte[] bytes = data.ToBytes(out int length);
-            bool res = messengerSender.SendOnly(new MessageRequestWrap
-            {
-                MessengerId = (ushort)VeaSocks5MessengerIds.Request,
-                Connection = (data.Tag as TagInfo).Connection,
-                Payload = bytes.AsMemory(0, length)
-            }).Result;
-            data.Return(bytes);
-            return res;
+            return true;
         }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="connection"></param>
         public void Response(Socks5Info data)
         {
             byte[] bytes = data.ToBytes(out int length);
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
-                MessengerId = (ushort)VeaSocks5MessengerIds.Response,
+                MessengerId = (ushort)Socks5MessengerIds.Response,
                 Connection = (data.Tag as IConnection).FromConnection,
                 Payload = bytes.AsMemory(0, length)
             }).Result;
@@ -65,18 +55,15 @@ namespace client.service.vea
         /// <param name="connection"></param>
         public void ResponseClose(Socks5Info data)
         {
+            data.Data = Helper.EmptyArray;
             Response(data);
         }
-
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="connection"></param>
+        /// <param name="data"></param>
         public void RequestClose(Socks5Info data)
         {
-            data.Data = Helper.EmptyArray;
-            Request(data);
         }
 
     }

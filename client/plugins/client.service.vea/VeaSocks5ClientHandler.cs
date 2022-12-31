@@ -1,5 +1,4 @@
 ﻿using client.messengers.clients;
-using client.messengers.register;
 using client.service.socks5;
 using common.libs;
 using common.libs.extends;
@@ -27,25 +26,20 @@ namespace client.service.vea
         private readonly Config config;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaTransfer virtualEthernetAdapterTransfer;
-        IVeaSocks5ClientListener socks5ClientListener;
+        private readonly IVeaSocks5ClientListener socks5ClientListener;
 
         /// <summary>
         /// 组网socks5客户端
         /// </summary>
         /// <param name="socks5MessengerSender"></param>
-        /// <param name="registerStateInfo"></param>
         /// <param name="config"></param>
         /// <param name="clientInfoCaching"></param>
         /// <param name="socks5ClientListener"></param>
         /// <param name="virtualEthernetAdapterTransfer"></param>
-        public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, RegisterStateInfo registerStateInfo, Config config, IClientInfoCaching clientInfoCaching, IVeaSocks5ClientListener socks5ClientListener, VeaTransfer virtualEthernetAdapterTransfer)
-            : base(socks5MessengerSender, registerStateInfo, new common.socks5.Config
-            {
-                ConnectEnable = config.ConnectEnable,
-                NumConnections = config.NumConnections,
-                BufferSize = config.BufferSize,
-                TargetName = config.TargetName,
-            }, clientInfoCaching, socks5ClientListener)
+        /// <param name="veaSocks5DstEndpointProvider"></param>
+        public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, IClientInfoCaching clientInfoCaching,
+            IVeaSocks5ClientListener socks5ClientListener, VeaTransfer virtualEthernetAdapterTransfer, IVeaSocks5DstEndpointProvider veaSocks5DstEndpointProvider)
+            : base(socks5MessengerSender, veaSocks5DstEndpointProvider, socks5ClientListener)
         {
             this.socks5MessengerSender = socks5MessengerSender;
             this.config = config;
@@ -62,7 +56,7 @@ namespace client.service.vea
         {
             if (info.Tag is TagInfo target)
             {
-                socks5MessengerSender.RequestClose(info.Id, target.Connection);
+                socks5MessengerSender.RequestClose(info);
             }
         }
 
@@ -79,12 +73,11 @@ namespace client.service.vea
                 data.Tag = target;
             }
             var targetEp = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
-
             target.TargetIp = targetEp.Address;
             if (targetEp.Port == 0 || ipMemory.SequenceEqual(Helper.AnyIpArray))
             {
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
-                data.Data = data.Response.AsMemory(0,1);
+                data.Data = data.Response.AsMemory(0, 1);
 
                 CommandResponseData(data);
                 socks5ClientListener.Response(data);
@@ -92,7 +85,7 @@ namespace client.service.vea
             }
             target.Connection = GetConnection(target.TargetIp, ipMemory);
 
-            return socks5MessengerSender.Request(data, target.Connection);
+            return socks5MessengerSender.Request(data);
         }
 
         /// <summary>
@@ -109,7 +102,7 @@ namespace client.service.vea
                 return false;
             }
 
-            return socks5MessengerSender.Request(data, target.Connection);
+            return socks5MessengerSender.Request(data);
         }
 
         /// <summary>
@@ -119,16 +112,14 @@ namespace client.service.vea
         /// <returns></returns>
         protected override bool HndleForwardUdp(Socks5Info data)
         {
+            if ((data.Tag is TagInfo target) == false)
+            {
+                target = new TagInfo();
+                data.Tag = target;
+            }
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
-            IConnection connection = GetConnection(remoteEndPoint.Address, ipMemory);
-            return socks5MessengerSender.Request(data, connection);
-        }
-
-        /// <summary>
-        /// 刷新
-        /// </summary>
-        public override void Flush()
-        {
+            target.Connection = GetConnection(remoteEndPoint.Address, ipMemory);
+            return socks5MessengerSender.Request(data);
         }
 
         private int[] Masks = new int[] { 0xffffff, 0xffff, 0xff };
@@ -157,10 +148,12 @@ namespace client.service.vea
             }
             return null;
         }
-        sealed class TagInfo
-        {
-            public IConnection Connection { get; set; }
-            public IPAddress TargetIp { get; set; }
-        }
+
+    }
+
+    public sealed class TagInfo
+    {
+        public IConnection Connection { get; set; }
+        public IPAddress TargetIp { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using common.socks5;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Net;
 
 namespace client.service.socks5
 {
@@ -16,10 +17,7 @@ namespace client.service.socks5
     {
         private readonly ISocks5MessengerSender socks5MessengerSender;
         private readonly ISocks5ClientListener socks5ClientListener;
-        private readonly RegisterStateInfo registerStateInfo;
-        private readonly common.socks5.Config config;
-        private IConnection connection;
-        private IClientInfoCaching clientInfoCaching;
+        private readonly ISocks5DstEndpointProvider socks5DstEndpointProvider;
 
         /// <summary>
         /// 
@@ -34,16 +32,12 @@ namespace client.service.socks5
         /// 
         /// </summary>
         /// <param name="socks5MessengerSender"></param>
-        /// <param name="registerStateInfo"></param>
-        /// <param name="config"></param>
-        /// <param name="clientInfoCaching"></param>
+        /// <param name="socks5DstEndpointProvider"></param>
         /// <param name="socks5ClientListener"></param>
-        public Socks5ClientHandler(ISocks5MessengerSender socks5MessengerSender, RegisterStateInfo registerStateInfo, common.socks5.Config config, IClientInfoCaching clientInfoCaching, ISocks5ClientListener socks5ClientListener)
+        public Socks5ClientHandler(ISocks5MessengerSender socks5MessengerSender,  ISocks5DstEndpointProvider socks5DstEndpointProvider, ISocks5ClientListener socks5ClientListener)
         {
             this.socks5MessengerSender = socks5MessengerSender;
-            this.registerStateInfo = registerStateInfo;
-            this.config = config;
-            this.clientInfoCaching = clientInfoCaching;
+            this.socks5DstEndpointProvider = socks5DstEndpointProvider;
             this.socks5ClientListener = socks5ClientListener;
 
             socks5ClientListener.OnData = OnData;
@@ -99,69 +93,10 @@ namespace client.service.socks5
                 {
                     info.Version = info.Data.Span[0];
                 }
-                if (Validate(info) == false)
-                {
-                    return true;
-                }
-
                 return func(info);
             }
             return false;
         }
-
-        private bool Validate(Socks5Info info)
-        {
-            //验证一下数据包是否已经完整，不完整的，等待下次数据继续拼接
-            bool res = _Validate(info);
-            if (res == false)
-            {
-                bool first = info.Buffer == null || info.Buffer[0] == 0;
-                if (info.Buffer == null)
-                {
-                    info.Buffer = ArrayPool<byte>.Shared.Rent(256);
-                    info.Buffer[0] = 0;
-                }
-                info.Data.CopyTo(info.Buffer.AsMemory(1 + info.Buffer[0]));
-                info.Buffer[0] += (byte)info.Data.Length;
-
-                //不是第一次拼接缓存，那就再验证一次
-                if (first == false)
-                {
-                    res = _Validate(info);
-                    if (res)
-                    {
-                        info.Data = info.Buffer.AsMemory(1, info.Buffer[0]);
-                        info.Buffer[0] = 0;
-                    }
-                }
-            }
-
-            return res;
-        }
-        private bool _Validate(Socks5Info info) => info.Socks5Step switch
-        {
-            Socks5EnumStep.Request => ValidateRequestData(info),
-            Socks5EnumStep.Command => ValidateCommandData(info),
-            _ => true
-        };
-        private bool ValidateRequestData(Socks5Info info)
-        {
-            if (info.Buffer == null || info.Buffer[0] == 0)
-            {
-                return info.Data.Length >= 2 && info.Data.Length >= 2 + info.Data.Span[1];
-            }
-            return info.Buffer[0] >= 2 && info.Buffer[0] >= 2 + info.Buffer[2];
-        }
-        private bool ValidateCommandData(Socks5Info info)
-        {
-            if (info.Buffer == null || info.Buffer[0] == 0)
-            {
-                return info.Data.Length > 4 && info.Data.Length >= Socks5Parser.GetCommandTrueLength(info.Data);
-            }
-            return info.Buffer[0] > 4 && info.Buffer[0] >= Socks5Parser.GetCommandTrueLength(info.Buffer.AsMemory(1));
-        }
-
-
 
         /// <summary>
         /// 收到关闭
@@ -169,8 +104,7 @@ namespace client.service.socks5
         /// <param name="info"></param>
         protected virtual void OnClose(Socks5Info info)
         {
-            GetConnection();
-            socks5MessengerSender.RequestClose(info.Id, connection);
+            socks5MessengerSender.RequestClose(info);
         }
         /// <summary>
         /// 构建request回复数据
@@ -193,7 +127,7 @@ namespace client.service.socks5
                 {
                     info.Socks5Step = Socks5EnumStep.Auth;
                 }
-                info.Data = new byte[] { socks5ClientListener.Version, (byte)type };
+                info.Data = new byte[] { 5, (byte)type };
             }
         }
         /// <summary>
@@ -231,7 +165,8 @@ namespace client.service.socks5
             else
             {
                 info.Socks5Step = Socks5EnumStep.Forward;
-                info.Data = Socks5Parser.MakeConnectResponse(socks5ClientListener.DistEndpoint, (byte)type);
+                IPEndPoint endpoint = socks5DstEndpointProvider.Get(socks5ClientListener.Port);
+                info.Data = Socks5Parser.MakeConnectResponse(endpoint, (byte)type);
             }
         }
         /// <summary>
@@ -260,7 +195,7 @@ namespace client.service.socks5
         protected virtual bool HandleRequest(Socks5Info data)
         {
             data.Response[0] = (byte)Socks5EnumAuthType.NoAuth;
-            data.Data = data.Response.AsMemory(0, 1);
+            data.Data = data.Response;
             RequestResponseData(data);
             socks5ClientListener.Response(data);
             return true;
@@ -285,17 +220,12 @@ namespace client.service.socks5
             if (Socks5Parser.GetIsAnyAddress(data.Data))
             {
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
-                data.Data = data.Response.AsMemory(0, 1);
+                data.Data = data.Response;
                 CommandResponseData(data);
                 socks5ClientListener.Response(data);
                 return true;
             }
-            GetConnection();
-            bool res = socks5MessengerSender.Request(data, connection);
-
-            data.Return();
-
-            return res;
+            return socks5MessengerSender.Request(data);
         }
 
 
@@ -306,8 +236,7 @@ namespace client.service.socks5
         /// <returns></returns>
         protected virtual bool HndleForward(Socks5Info data)
         {
-            GetConnection();
-            return socks5MessengerSender.Request(data, connection);
+            return socks5MessengerSender.Request(data);
         }
         /// <summary>
         /// 收到udp转发
@@ -316,34 +245,8 @@ namespace client.service.socks5
         /// <returns></returns>
         protected virtual bool HndleForwardUdp(Socks5Info data)
         {
-            GetConnection();
-            return socks5MessengerSender.Request(data, connection);
-        }
-        /// <summary>
-        /// 刷新
-        /// </summary>
-        public virtual void Flush()
-        {
-            connection = null;
-            GetConnection();
+            return socks5MessengerSender.Request(data);
         }
 
-        private void GetConnection()
-        {
-            if (connection == null || connection.Connected == false)
-            {
-                if (string.IsNullOrWhiteSpace(config.TargetName))
-                {
-                    connection = registerStateInfo.OnlineConnection;
-                }
-                else
-                {
-                    if (clientInfoCaching.GetByName(config.TargetName, out ClientInfo client))
-                    {
-                        connection = client.Connection;
-                    }
-                }
-            }
-        }
     }
 }

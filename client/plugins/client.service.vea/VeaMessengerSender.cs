@@ -14,6 +14,7 @@ namespace client.service.vea
     {
         private readonly MessengerSender messengerSender;
         private readonly Config config;
+
         /// <summary>
         /// 
         /// </summary>
@@ -73,5 +74,6 @@ namespace client.service.vea
             return false;
 
         }
+
     }
 }

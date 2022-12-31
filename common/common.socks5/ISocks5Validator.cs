@@ -14,15 +14,7 @@ namespace common.socks5
         /// <param name="connection"></param>
         /// <param name="info"></param>
         /// <returns></returns>
-        public bool Validate(IConnection connection, Socks5Info info);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="info"></param>
-        /// <param name="config"></param>
-        /// <returns></returns>
-        public bool Validate(IConnection connection, Socks5Info info, Config config);
+        public bool Validate(Socks5Info info);
     }
 
     /// <summary>
@@ -45,18 +37,7 @@ namespace common.socks5
         /// <param name="connection"></param>
         /// <param name="info"></param>
         /// <returns></returns>
-        public bool Validate(IConnection connection, Socks5Info info)
-        {
-            return config.ConnectEnable;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="info"></param>
-        /// <param name="config"></param>
-        /// <returns></returns>
-        public bool Validate(IConnection connection, Socks5Info info, Config config)
+        public bool Validate(Socks5Info info)
         {
             return config.ConnectEnable;
         }

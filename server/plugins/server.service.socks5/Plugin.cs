@@ -41,11 +41,8 @@ namespace server.service.socks5
         {
             services.AddSingleton<common.socks5.Config>();
 
-            services.AddSingleton<ISocks5ClientListener, Socks5ClientListener>();
             services.AddSingleton<ISocks5MessengerSender, Socks5MessengerSender>();
-
             services.AddSingleton<ISocks5ServerHandler, Socks5ServerHandler>();
-            services.AddSingleton<ISocks5ClientHandler, Socks5ClientHandler>();
 
             services.AddSingleton<ISocks5Validator, Socks5Validator>();
         }

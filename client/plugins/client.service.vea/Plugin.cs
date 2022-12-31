@@ -41,6 +41,8 @@ namespace client.service.vea
             services.AddSingleton<VeaTransfer>();
             services.AddSingleton<VeaMessengerSender>();
             services.AddSingleton<IVeaSocks5ClientHandler, VeaSocks5ClientHandler>();
+            services.AddSingleton<IVeaSocks5DstEndpointProvider, VeaSocks5DstEndpointProvider>();
+            
             services.AddSingleton<IVeaSocks5ServerHandler, VeaSocks5ServerHandler>();
             services.AddSingleton<IVeaSocks5ClientListener, VeaSocks5ClientListener>();
             services.AddSingleton<IVeaSocks5MessengerSender, VeaSocks5MessengerSender>();

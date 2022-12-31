@@ -4,7 +4,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 
 namespace common.socks5
 {
@@ -16,11 +15,8 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
-        IPEndPoint DistEndpoint { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        byte Version { get; }
+        ushort Port { get; }
+
         /// <summary>
         /// 
         /// </summary>
@@ -61,14 +57,11 @@ namespace common.socks5
         private Socket socket;
         private UdpClient udpClient;
         private int bufferSize = 8 * 1024;
+
         /// <summary>
         /// 
         /// </summary>
-        public IPEndPoint DistEndpoint { get; private set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public byte Version { get; private set; } = 5;
+        public ushort Port { get; private set; }
 
 
         private readonly ConcurrentDictionary<ulong, AsyncUserToken> connections = new();
@@ -101,7 +94,7 @@ namespace common.socks5
         {
             this.bufferSize = bufferSize;
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, port);
-            DistEndpoint = new IPEndPoint(IPAddress.Loopback, port);
+            Port = (ushort)port;
 
             socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.Bind(localEndPoint);
@@ -194,7 +187,14 @@ namespace common.socks5
                 AsyncUserToken token = (AsyncUserToken)e.UserToken;
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
-                    token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, e.BytesTransferred);
+                    int totalLength = e.BytesTransferred;
+                    token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
+                    while (ValidateData(token.DataWrap) == false)
+                    {
+                        int length = token.Socket.Receive(e.Buffer.AsSpan(e.Offset + totalLength));
+                        totalLength += length;
+                        token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
+                    }
                     ExecuteHandle(token.DataWrap);
                     token.DataWrap.Data = Helper.EmptyArray;
 
@@ -233,6 +233,21 @@ namespace common.socks5
                 Logger.Instance.DebugError(ex);
             }
         }
+        private bool ValidateData(Socks5Info info)
+        {
+            return info.Socks5Step switch
+            {
+                Socks5EnumStep.Request => Socks5Parser.ValidateRequestData(info.Data),
+                Socks5EnumStep.Command => Socks5Parser.ValidateCommandData(info.Data),
+
+                Socks5EnumStep.Auth => true,
+                Socks5EnumStep.Forward => true,
+                Socks5EnumStep.ForwardUdp => true,
+                _ => true
+            };
+        }
+
+
         Socks5Info udpInfo = new Socks5Info { Id = 0, Socks5Step = Socks5EnumStep.ForwardUdp };
         private void ProcessReceiveUdp(IAsyncResult result)
         {
@@ -390,8 +405,6 @@ namespace common.socks5
             PoolBuffer = Helper.EmptyArray;
 
             Disposabled = true;
-
-            DataWrap.Return();
         }
     }
 

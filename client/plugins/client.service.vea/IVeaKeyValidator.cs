@@ -13,20 +13,21 @@ namespace client.service.vea
     /// <summary>
     /// 组网权限验证
     /// </summary>
-    public sealed class DefaultVeaKeyValidator : DefaultSocks5Validator, IVeaKeyValidator
+    public sealed class DefaultVeaKeyValidator: IVeaKeyValidator
     {
+        private Config config;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="config"></param>
-        public DefaultVeaKeyValidator(Config config) : base(new common.socks5.Config
+        public DefaultVeaKeyValidator(Config config)
         {
-            BufferSize = config.BufferSize,
-            ConnectEnable = config.ConnectEnable,
-            NumConnections = config.NumConnections,
-        })
-        {
+            this.config = config;
+        }
 
+        public bool Validate(Socks5Info info)
+        {
+            return config.ConnectEnable;
         }
     }
 

@@ -283,13 +283,11 @@ namespace common.libs.extends
         /// <returns></returns>
         public static byte[] ToUTF16Bytes(this string str)
         {
-            int strLength = 0;
             byte[] bytes;
 
             if (str != null)
             {
                 var source = MemoryMarshal.AsBytes(str.AsSpan());
-                strLength = source.Length;
                 bytes = new byte[source.Length + 4];
                 source.CopyTo(bytes.AsSpan(4));
             }
@@ -297,7 +295,7 @@ namespace common.libs.extends
             {
                 bytes = new byte[4];
             }
-            strLength.ToBytes(bytes);
+            str.Length.ToBytes(bytes);
 
             return bytes;
         }

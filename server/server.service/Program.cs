@@ -28,7 +28,6 @@ namespace server.service
                 typeof(TcpForwardMessenger).Assembly,
                 typeof(UdpForwardMessenger).Assembly,
                 typeof(Socks5Messenger).Assembly,
-                typeof(Socks5ClientHandler).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();

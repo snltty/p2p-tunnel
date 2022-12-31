@@ -31,7 +31,7 @@ namespace common.socks5
             return res;
         }
         /// <summary>
-        /// 
+        /// 获取账号密码
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
@@ -47,7 +47,7 @@ namespace common.socks5
         }
 
         /// <summary>
-        /// 
+        /// 获取端口
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -137,40 +137,7 @@ namespace common.socks5
                 _ => false,
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static byte GetCommandTrueLength(Memory<byte> data)
-        {
-            var span = data.Span.Slice(3);
-            Socks5EnumAddressType type = (Socks5EnumAddressType)span[0];
-            return type switch
-            {
-                Socks5EnumAddressType.IPV4 => 4 + 4 + 2,
-                Socks5EnumAddressType.Domain => 4 + 16 + 2,
-                Socks5EnumAddressType.IPV6 => (byte)(4 + (span[1]) + 2),
-                _ => 255,
-            };
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static byte GetCommandMaxLength(Memory<byte> data)
-        {
-            var span = data.Span.Slice(3);
-            Socks5EnumAddressType type = (Socks5EnumAddressType)span[0];
-            return type switch
-            {
-                Socks5EnumAddressType.IPV4 => 4 + 4 + 2,
-                Socks5EnumAddressType.Domain => 4 + 16 + 2,
-                Socks5EnumAddressType.IPV6 => 255,
-                _ => 255,
-            };
-        }
+
 
         /// <summary>
         /// 
@@ -261,6 +228,42 @@ namespace common.socks5
             data.CopyTo(res.AsMemory(index, data.Length));
 
             return res;
+        }
+
+
+        /// <summary>
+        /// 验证 request数据完整性
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static bool ValidateRequestData(Memory<byte> data)
+        {
+            return data.Length > 2 && data.Length == 2 + data.Span[1];
+        }
+        /// <summary>
+        /// 验证command数据完整性
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static bool ValidateCommandData(Memory<byte> data)
+        {
+            /*
+             * VERSION  COMMAND RSV ADDRESS_TYPE    DST.ADDR    DST.PORT
+             * 1        1       1   1               1-255       2
+             * 域名模式下 DST.ADDR第一个字节是域名长度，那么整个数据至少5个字节
+             */
+            if (data.Length < 5) return false;
+
+            var span = data.Span;
+            int addrLength = (Socks5EnumAddressType)span[3] switch
+            {
+                Socks5EnumAddressType.IPV4 => 4 + 2,
+                Socks5EnumAddressType.Domain => span[4] + 1 + 2, //DST.ADDR第一个字节是域名长度 剩下的才是域名数据
+                Socks5EnumAddressType.IPV6 => 16 + 2,
+                _ => throw new NotImplementedException(),
+            };
+            //首部4字节+地址长度
+            return data.Length == 4 + addrLength;
         }
 
     }

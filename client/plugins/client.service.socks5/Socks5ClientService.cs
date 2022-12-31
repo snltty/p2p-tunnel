@@ -15,7 +15,6 @@ namespace client.service.socks5
         private readonly common.socks5.Config config;
         private readonly ISocks5ClientListener socks5ClientListener;
         private readonly Socks5Transfer socks5Transfer;
-        private readonly ISocks5ClientHandler socks5ClientHandler;
 
         /// <summary>
         /// 
@@ -24,12 +23,11 @@ namespace client.service.socks5
         /// <param name="socks5ClientListener"></param>
         /// <param name="socks5Transfer"></param>
         /// <param name="socks5ClientHandler"></param>
-        public Socks5ClientService(common.socks5.Config config, ISocks5ClientListener socks5ClientListener, Socks5Transfer socks5Transfer, ISocks5ClientHandler socks5ClientHandler)
+        public Socks5ClientService(common.socks5.Config config, ISocks5ClientListener socks5ClientListener, Socks5Transfer socks5Transfer)
         {
             this.config = config;
             this.socks5ClientListener = socks5ClientListener;
             this.socks5Transfer = socks5Transfer;
-            this.socks5ClientHandler = socks5ClientHandler;
         }
 
         /// <summary>
@@ -64,7 +62,6 @@ namespace client.service.socks5
             }
             
             socks5Transfer.ClearPac();
-            socks5ClientHandler.Flush();
         }
 
         /// <summary>

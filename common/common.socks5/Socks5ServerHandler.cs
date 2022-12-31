@@ -1,6 +1,5 @@
 ﻿using common.libs;
 using common.libs.extends;
-using common.server;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ namespace common.socks5
     {
         private ConcurrentDictionary<ConnectionKey, AsyncServerUserToken> connections = new(new ConnectionKeyComparer());
         private ConcurrentDictionary<ConnectionKeyUdp, UdpToken> udpConnections = new(new ConnectionKeyUdpComparer());
-        private readonly Dictionary<Socks5EnumStep, Action<IConnection>> handles = new Dictionary<Socks5EnumStep, Action<IConnection>>();
+        private readonly Dictionary<Socks5EnumStep, Action<Socks5Info>> handles = new Dictionary<Socks5EnumStep, Action<Socks5Info>>();
 
         private readonly ISocks5MessengerSender socks5MessengerSender;
         /// <summary>
@@ -43,7 +42,7 @@ namespace common.socks5
             this.socks5Validator = socks5Validator;
             TimeoutUdp();
 
-            handles = new Dictionary<Socks5EnumStep, Action<IConnection>> {
+            handles = new Dictionary<Socks5EnumStep, Action<Socks5Info>> {
                 {Socks5EnumStep.Request, HandleRequest},
                 {Socks5EnumStep.Auth, HandleAuth},
                 {Socks5EnumStep.Command, HandleCommand},
@@ -57,33 +56,30 @@ namespace common.socks5
         /// 
         /// </summary>
         /// <param name="connection"></param>
-        public void InputData(IConnection connection)
+        public void InputData(Socks5Info data)
         {
-            Socks5EnumStep step = (Socks5EnumStep)(byte)(connection.ReceiveRequestWrap.Payload.Span[0] >> 4);
-            if (handles.TryGetValue(step, out Action<IConnection> action))
+            if (handles.TryGetValue(data.Socks5Step, out Action<Socks5Info> action))
             {
-                action(connection);
+                action(data);
             }
         }
 
-        private void HandleRequest(IConnection connection)
+        private void HandleRequest(Socks5Info data)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
+
             data.Response[0] = (byte)Socks5EnumAuthType.NoAuth;
             data.Data = data.Response;
-            socks5MessengerSender.Response(data, connection.FromConnection);
+            socks5MessengerSender.Response(data);
         }
-        private void HandleAuth(IConnection connection)
+        private void HandleAuth(Socks5Info data)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
             data.Response[0] = (byte)Socks5EnumAuthState.Success;
             data.Data = data.Response;
-            socks5MessengerSender.Response(data, connection.FromConnection);
+            socks5MessengerSender.Response(data);
         }
-        private void HndleForward(IConnection connection)
+        private void HndleForward(Socks5Info data)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
-            ConnectionKey key = new ConnectionKey(connection.FromConnection.ConnectId, data.Id);
+            ConnectionKey key = new ConnectionKey(data.ClientId, data.Id);
             if (connections.TryGetValue(key, out AsyncServerUserToken token))
             {
                 if (data.Data.Length > 0 && token.TargetSocket.Connected)
@@ -103,20 +99,19 @@ namespace common.socks5
                 }
             }
         }
-        private void HndleForwardUdp(IConnection connection)
+        private void HndleForwardUdp(Socks5Info data)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
             Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
 
             try
             {
-                ConnectionKeyUdp key = new ConnectionKeyUdp(connection.FromConnection.ConnectId, data.SourceEP);
+                ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
                     data.TargetEP = remoteEndPoint;
                     Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-                    token = new UdpToken { Connection = connection.FromConnection, Data = data, TargetSocket = socket, };
+                    token = new UdpToken { Data = data, TargetSocket = socket, };
                     token.PoolBuffer = new byte[65535];
                     udpConnections.AddOrUpdate(key, token, (a, b) => token);
 
@@ -166,7 +161,7 @@ namespace common.socks5
                     token.Data.Data = token.PoolBuffer.AsMemory(0, length);
 
                     token.Update();
-                    socks5MessengerSender.Response(token.Data, token.Connection);
+                    socks5MessengerSender.Response(token.Data);
                     token.Data.Data = Helper.EmptyArray;
                 }
                 result = token.TargetSocket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
@@ -176,42 +171,40 @@ namespace common.socks5
             }
         }
 
-        private void HandleCommand(IConnection connection)
+        private void HandleCommand(Socks5Info data)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
-
-            if (socks5Validator.Validate(connection.FromConnection, data, config) == false)
+            if (socks5Validator.Validate(data) == false)
             {
-                ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow, connection.FromConnection);
+                ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
                 return;
             }
 
             Socks5EnumRequestCommand command = (Socks5EnumRequestCommand)data.Data.Span[1];
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
-            if(remoteEndPoint == null)
+            if (remoteEndPoint == null)
             {
-                ConnectReponse(data, Socks5EnumResponseCommand.NetworkError, connection.FromConnection);
+                ConnectReponse(data, Socks5EnumResponseCommand.NetworkError);
                 return;
             }
 
             if (command == Socks5EnumRequestCommand.Connect)
             {
-                Connect(connection.FromConnection, data, remoteEndPoint);
+                Connect(data, remoteEndPoint);
             }
             else if (command == Socks5EnumRequestCommand.UdpAssociate)
             {
-                ConnectReponse(data, Socks5EnumResponseCommand.ConnecSuccess, connection.FromConnection);
+                ConnectReponse(data, Socks5EnumResponseCommand.ConnecSuccess);
             }
             else if (command == Socks5EnumRequestCommand.Bind)
             {
-                ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow, connection.FromConnection);
+                ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
             }
             else
             {
-                ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow, connection.FromConnection);
+                ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
             }
         }
-        private void Connect(IConnection connection, Socks5Info data, IPEndPoint remoteEndPoint)
+        private void Connect(Socks5Info data, IPEndPoint remoteEndPoint)
         {
             //maxNumberAcceptedClients.WaitOne();
             Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -219,10 +212,9 @@ namespace common.socks5
 
             AsyncServerUserToken token = new AsyncServerUserToken
             {
-                Connection = connection,
                 TargetSocket = socket,
                 Data = data,
-                Key = new ConnectionKey(connection.ConnectId, data.Id)
+                Key = new ConnectionKey(data.ClientId, data.Id)
             };
             SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs
             {
@@ -299,20 +291,19 @@ namespace common.socks5
         }
         private void ConnectReponse(AsyncServerUserToken token, Socks5EnumResponseCommand command)
         {
-            ConnectReponse(token.Data, command, token.Connection);
+            ConnectReponse(token.Data, command);
         }
-        private void ConnectReponse(Socks5Info data, Socks5EnumResponseCommand command, IConnection connection)
+        private void ConnectReponse(Socks5Info data, Socks5EnumResponseCommand command)
         {
             data.Response[0] = (byte)command;
             data.Data = data.Response;
-            socks5MessengerSender.Response(data, connection);
+            socks5MessengerSender.Response(data);
         }
 
         private void BindTargetReceive(AsyncServerUserToken connectToken)
         {
             AsyncServerUserToken token = new AsyncServerUserToken
             {
-                Connection = connectToken.Connection,
                 TargetSocket = connectToken.TargetSocket,
                 Key = connectToken.Key,
                 Data = connectToken.Data
@@ -336,7 +327,7 @@ namespace common.socks5
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
-                socks5MessengerSender.ResponseClose(token.Key.RequestId, token.Connection);
+                socks5MessengerSender.ResponseClose(token.Data);
             }
         }
         private void TargetProcessReceive(SocketAsyncEventArgs e)
@@ -350,7 +341,7 @@ namespace common.socks5
                     int offset = e.Offset;
                     int length = e.BytesTransferred;
                     token.Data.Data = e.Buffer.AsMemory(offset, length);
-                    socks5MessengerSender.Response(token.Data, token.Connection);
+                    socks5MessengerSender.Response(token.Data);
                     token.Data.Data = Helper.EmptyArray;
 
                     if (token.TargetSocket.Available > 0)
@@ -361,7 +352,7 @@ namespace common.socks5
                             if (length > 0)
                             {
                                 token.Data.Data = e.Buffer.AsMemory(0, length);
-                                socks5MessengerSender.Response(token.Data, token.Connection);
+                                socks5MessengerSender.Response(token.Data);
                                 token.Data.Data = Helper.EmptyArray;
                             }
                         }
@@ -394,14 +385,13 @@ namespace common.socks5
             AsyncServerUserToken token = e.UserToken as AsyncServerUserToken;
             if (token.IsClosed == false)
             {
-                IConnection connection = token.Connection;
                 token.Clear();
 
                 e.Dispose();
 
                 connections.TryRemove(token.Key, out _);
                 //maxNumberAcceptedClients.Release();
-                socks5MessengerSender.ResponseClose(token.Key.RequestId, connection);
+                socks5MessengerSender.ResponseClose(token.Data);
             }
         }
         private void CloseClientSocket(AsyncServerUserToken token)
@@ -421,10 +411,6 @@ namespace common.socks5
         /// 
         /// </summary>
         public ConnectionKey Key { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public IConnection Connection { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -509,10 +495,6 @@ namespace common.socks5
     /// </summary>
     public class UdpToken
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public IConnection Connection { get; set; }
         /// <summary>
         /// 
         /// </summary>

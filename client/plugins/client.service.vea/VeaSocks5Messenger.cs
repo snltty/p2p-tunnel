@@ -8,17 +8,19 @@ namespace client.service.vea
     /// 组网socks5消息
     /// </summary>
     [MessengerIdRange((ushort)VeaSocks5MessengerIds.Min,(ushort)VeaSocks5MessengerIds.Max)]
-    public sealed class VeaSocks5Messenger : Socks5Messenger
+    public sealed class VeaSocks5Messenger : IMessenger
     {
+        private readonly IVeaSocks5ClientHandler socks5ClientHandler;
+        private readonly IVeaSocks5ServerHandler socks5ServerHandler;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="socks5ClientHandler"></param>
         /// <param name="socks5ServerHandler"></param>
         public VeaSocks5Messenger(IVeaSocks5ClientHandler socks5ClientHandler, IVeaSocks5ServerHandler socks5ServerHandler)
-            : base(socks5ClientHandler, socks5ServerHandler)
         {
-
+            this.socks5ClientHandler = socks5ClientHandler;
+            this.socks5ServerHandler = socks5ServerHandler;
         }
 
         /// <summary>
@@ -26,19 +28,22 @@ namespace client.service.vea
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)VeaSocks5MessengerIds.Request)]
-        public new void Request(IConnection connection)
+        public void Request(IConnection connection)
         {
-            base.Request(connection);
+            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
+            data.ClientId = connection.FromConnection.ConnectId;
+            data.Tag = connection;
+            socks5ServerHandler.InputData(data);
         }
 
         /// <summary>
-        /// 回复
+        /// 回执
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)VeaSocks5MessengerIds.Response)]
-        public new void Response(IConnection connection)
+        public void Response(IConnection connection)
         {
-            base.Response(connection);
+            socks5ClientHandler.InputData(connection);
         }
     }
 

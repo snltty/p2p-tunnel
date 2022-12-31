@@ -29,6 +29,7 @@ namespace common.socks5
         /// 请求id
         /// </summary>
         public uint Id { get; set; }
+
         /// <summary>
         /// 来源地址，数据从目标端回来的时候回给谁
         /// </summary>
@@ -49,9 +50,11 @@ namespace common.socks5
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public byte[] Response { get; set; } = new byte[1];
+        /// <summary>
+        /// 客户端唯一id
+        /// </summary>
+        public ulong ClientId { get; set; }
 
-        [System.Text.Json.Serialization.JsonIgnore]
-        public byte[] Buffer { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -163,14 +166,6 @@ namespace common.socks5
             ArrayPool<byte>.Shared.Return(data);
         }
 
-        public void Return()
-        {
-            if(Buffer != null)
-            {
-                ArrayPool<byte>.Shared.Return(Buffer);
-                Buffer = null;
-            }
-        }
     }
     /// <summary>
     /// 当前处于socks5协议的哪一步

@@ -2,6 +2,7 @@
 using client.messengers.register;
 using common.libs;
 using common.server;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -112,11 +113,22 @@ namespace client.service.wakeup
         {
             var packet = NetworkHelper.MagicPacket(mac);
 
+
             using UdpClient client = new UdpClient();
             for (int i = 0; i < 10; i++)
             {
                 client.Send(packet, new IPEndPoint(IPAddress.Parse("255.255.255.255"), 59410));
             }
+
+            /*
+            foreach (var item in Dns.GetHostAddresses(Dns.GetHostName()).Where(c => c.AddressFamily == AddressFamily.InterNetwork))
+            {
+                using UdpClient client = new UdpClient(new IPEndPoint(item, 59410));
+                for (int i = 0; i < 10; i++)
+                {
+                    client.Send(packet, new IPEndPoint(IPAddress.Parse("255.255.255.255"), 59410));
+                }
+            }*/
         }
     }
 }

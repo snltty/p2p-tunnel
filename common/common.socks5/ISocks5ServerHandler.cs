@@ -11,7 +11,6 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="connection"></param>
-        void InputData(IConnection connection);
+        void InputData(Socks5Info data);
     }
 }

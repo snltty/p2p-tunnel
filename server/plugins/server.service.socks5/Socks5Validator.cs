@@ -35,9 +35,9 @@ namespace server.service.socks5
         /// <param name="connection"></param>
         /// <param name="info"></param>
         /// <returns></returns>
-        public bool Validate(IConnection connection, Socks5Info info)
+        public bool Validate( Socks5Info info)
         {
-            return Validate(connection, info, config);
+            return Validate(info, config);
         }
         /// <summary>
         /// 
@@ -46,7 +46,7 @@ namespace server.service.socks5
         /// <param name="info"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public bool Validate(IConnection connection, Socks5Info info, common.socks5.Config config)
+        public bool Validate(Socks5Info info, common.socks5.Config config)
         {
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(info.Data, out Span<byte> ipMemory);
             if (remoteEndPoint.IsLan())
@@ -54,7 +54,7 @@ namespace server.service.socks5
                 return false;
             }
 
-            if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client))
+            if (clientRegisterCaching.Get(info.ClientId, out RegisterCacheInfo client))
             {
                 return config.ConnectEnable || serviceAccessProvider.Validate(client.GroupId, EnumServiceAccess.Socks5);
             }
