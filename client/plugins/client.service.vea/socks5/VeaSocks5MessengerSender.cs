@@ -4,7 +4,7 @@ using common.server.model;
 using common.socks5;
 using System;
 
-namespace client.service.vea
+namespace client.service.vea.socks5
 {
     /// <summary>
     /// 组网socks5消息发送
@@ -36,7 +36,7 @@ namespace client.service.vea
             bool res = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)VeaSocks5MessengerIds.Request,
-                Connection = (data.Tag as TagInfo).Connection,
+                Connection = (data.Tag as IConnection),
                 Payload = bytes.AsMemory(0, length)
             }).Result;
             data.Return(bytes);

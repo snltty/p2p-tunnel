@@ -189,11 +189,16 @@ namespace common.socks5
                 {
                     int totalLength = e.BytesTransferred;
                     token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
-                    while (ValidateData(token.DataWrap) == false)
+
+                    //有些客户端，会把一个包拆开发送，很奇怪，不得不验证一下数据完整性
+                    if (token.DataWrap.Socks5Step == Socks5EnumStep.Request || token.DataWrap.Socks5Step == Socks5EnumStep.Command)
                     {
-                        int length = token.Socket.Receive(e.Buffer.AsSpan(e.Offset + totalLength));
-                        totalLength += length;
-                        token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
+                        while (ValidateData(token.DataWrap) == false)
+                        {
+                            int length = token.Socket.Receive(e.Buffer.AsSpan(e.Offset + totalLength));
+                            totalLength += length;
+                            token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
+                        }
                     }
                     ExecuteHandle(token.DataWrap);
                     token.DataWrap.Data = Helper.EmptyArray;

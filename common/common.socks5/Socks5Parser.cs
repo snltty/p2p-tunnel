@@ -47,36 +47,12 @@ namespace common.socks5
         }
 
         /// <summary>
-        /// 获取端口
+        /// 获取地址
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static int GetRemotePort(Memory<byte> data)
+        public static IPEndPoint GetRemoteEndPoint(Memory<byte> data)
         {
-            ushort int16Port = 0;
-            if (data.Length < 3)
-            {
-                return int16Port;
-            }
-            Span<byte> span = data.Span.Slice(3);
-            int16Port = (Socks5EnumAddressType)span[0] switch
-            {
-                Socks5EnumAddressType.IPV4 => span.Slice(1 + 4, 2).ToUInt16(),
-                Socks5EnumAddressType.Domain => span.Slice(1 + 16, 2).ToUInt16(),
-                Socks5EnumAddressType.IPV6 => span.Slice(2 + span[1], 2).ToUInt16(),
-                _ => 0,
-            };
-            return BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(int16Port) : int16Port;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="ipMemory"></param>
-        /// <returns></returns>
-        public static IPEndPoint GetRemoteEndPoint(Memory<byte> data, out Span<byte> ipMemory)
-        {
-            ipMemory = Helper.EmptyArray;
             try
             {
                 if (data.Length <= 4)
@@ -87,17 +63,15 @@ namespace common.socks5
                 //去掉 VERSION COMMAND RSV
                 var span = data.Span.Slice(3);
 
-                IPAddress ip = null;
+                IPAddress ip = IPAddress.Any;
                 int index = 0;
                 switch ((Socks5EnumAddressType)span[0])
                 {
                     case Socks5EnumAddressType.IPV4:
-                        ipMemory = span.Slice(1, 4);
                         ip = new IPAddress(span.Slice(1, 4));
                         index = 1 + 4;
                         break;
                     case Socks5EnumAddressType.IPV6:
-                        ipMemory = span.Slice(1, 16);
                         ip = new IPAddress(span.Slice(1, 16));
                         index = 1 + 16;
                         break;
@@ -118,22 +92,69 @@ namespace common.socks5
             {
                 Logger.Instance.Error(ex);
             }
-            return null;
+            return new IPEndPoint(IPAddress.Any, 0);
         }
         /// <summary>
-        /// 
+        /// 获取地址
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static IPAddress GetRemoteAddress(Memory<byte> data)
+        {
+            try
+            {
+                if (data.Length <= 4)
+                {
+                    return IPAddress.Any;
+                }
+                //VERSION COMMAND RSV ATYPE  DST.ADDR  DST.PORT
+                //去掉 VERSION COMMAND RSV
+                var span = data.Span.Slice(3);
+                return (Socks5EnumAddressType)span[0] switch
+                {
+                    Socks5EnumAddressType.IPV4 => new IPAddress(span.Slice(1, 4)),
+                    Socks5EnumAddressType.IPV6 => new IPAddress(span.Slice(1, 16)),
+                    Socks5EnumAddressType.Domain => NetworkHelper.GetDomainIp(Encoding.UTF8.GetString(span.Slice(2, span[1]))),
+                    _ => IPAddress.Any,
+                };
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
+            return IPAddress.Any;
+        }
+
+        /// <summary>
+        /// 是否是 任意地址
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
         public static bool GetIsAnyAddress(Memory<byte> data)
         {
             var span = data.Span.Slice(3);
-
             return ((Socks5EnumAddressType)span[0]) switch
             {
                 Socks5EnumAddressType.IPV4 => span.Slice(1, 4).SequenceEqual(Helper.AnyIpArray) || span.Slice(1 + 4, 2).SequenceEqual(Helper.AnyPoryArray),
                 Socks5EnumAddressType.IPV6 => span.Slice(1, 16).SequenceEqual(Helper.AnyIpv6Array) || span.Slice(1 + 16, 2).SequenceEqual(Helper.AnyPoryArray),
                 Socks5EnumAddressType.Domain => false || span.Slice(2 + span[1], 2).SequenceEqual(Helper.AnyPoryArray),
+                _ => false,
+            };
+        }
+        /// <summary>
+        /// 是否是局域网地址
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static bool GetIsLanAddress(Memory<byte> data)
+        {
+            var memory = data.Slice(3);
+            var span = memory.Span;
+            return ((Socks5EnumAddressType)span[0]) switch
+            {
+                Socks5EnumAddressType.IPV4 => memory.Slice(1, 4).IsLan(),
+                Socks5EnumAddressType.IPV6 => memory.Slice(1, 16).IsLan(),
+                Socks5EnumAddressType.Domain => false,
                 _ => false,
             };
         }

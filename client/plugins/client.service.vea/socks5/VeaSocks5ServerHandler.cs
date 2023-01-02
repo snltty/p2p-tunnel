@@ -1,7 +1,7 @@
 ﻿using common.libs;
 using common.socks5;
 
-namespace client.service.vea
+namespace client.service.vea.socks5
 {
     /// <summary>
     /// 组网socks5服务端
@@ -27,14 +27,15 @@ namespace client.service.vea
         /// <param name="wheelTimer"></param>
         /// <param name="veaKeyValidator"></param>
         public VeaSocks5ServerHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, IVeaKeyValidator veaKeyValidator)
-            : base(socks5MessengerSender, new common.socks5.Config {
+            : base(socks5MessengerSender, new common.socks5.Config
+            {
                 ConnectEnable = config.ConnectEnable,
                 NumConnections = config.NumConnections,
                 BufferSize = config.BufferSize,
                 TargetName = config.TargetName,
             }, wheelTimer, veaKeyValidator)
         {
-            this._config = config;
+            _config = config;
             UpdateConfig();
         }
 

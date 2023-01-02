@@ -226,6 +226,24 @@ namespace common.libs
             var list = Dns.GetHostEntry(domain).AddressList;
             return list[0];
         }
+        /// <summary>
+        /// 域名解析
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <returns></returns>
+        public static IPAddress GetDomainIpV4(string domain)
+        {
+            if (IPAddress.TryParse(domain, out IPAddress ip))
+            {
+                return ip;
+            }
+            var list = Dns.GetHostEntry(domain).AddressList;
+            for (int i = 0; i < list.Length; i++)
+            {
+                if (list[i].AddressFamily == AddressFamily.InterNetwork) return list[i];
+            }
+            return list[0];
+        }
 
         /// <summary>
         /// 地址转数组，端口必须2字节

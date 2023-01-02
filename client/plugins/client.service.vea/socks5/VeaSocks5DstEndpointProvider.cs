@@ -1,9 +1,9 @@
 ﻿using common.socks5;
 using System.Net;
 
-namespace client.service.vea
+namespace client.service.vea.socks5
 {
-    public interface IVeaSocks5DstEndpointProvider: ISocks5DstEndpointProvider
+    public interface IVeaSocks5DstEndpointProvider : ISocks5DstEndpointProvider
     {
 
     }

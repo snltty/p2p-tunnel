@@ -2,12 +2,12 @@
 using common.socks5;
 using System;
 
-namespace client.service.vea
+namespace client.service.vea.socks5
 {
     /// <summary>
     /// 组网socks5消息
     /// </summary>
-    [MessengerIdRange((ushort)VeaSocks5MessengerIds.Min,(ushort)VeaSocks5MessengerIds.Max)]
+    [MessengerIdRange((ushort)VeaSocks5MessengerIds.Min, (ushort)VeaSocks5MessengerIds.Max)]
     public sealed class VeaSocks5Messenger : IMessenger
     {
         private readonly IVeaSocks5ClientHandler socks5ClientHandler;

@@ -1,7 +1,8 @@
 ﻿using client.service.ui.api.clientServer;
+using client.service.vea.socks5;
 using System.Threading.Tasks;
 
-namespace client.service.vea
+namespace client.service.vea.client
 {
     /// <summary>
     /// 组网配置文件

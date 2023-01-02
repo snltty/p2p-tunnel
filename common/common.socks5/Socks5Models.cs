@@ -1,5 +1,4 @@
 ﻿using common.libs.extends;
-using common.server;
 using System;
 using System.Buffers;
 using System.Net;
@@ -11,11 +10,7 @@ namespace common.socks5
     /// </summary>
     public sealed class Socks5Info
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public object Tag { get; set; }
-
+        #region 数据字段
         /// <summary>
         /// socks5步骤，执行到哪一步了
         /// </summary>
@@ -43,7 +38,13 @@ namespace common.socks5
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Data { get; set; }
+        #endregion
 
+        #region 辅助字段
+        /// <summary>
+        /// 
+        /// </summary>
+        public object Tag { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -53,6 +54,7 @@ namespace common.socks5
         /// 客户端唯一id
         /// </summary>
         public ulong ClientId { get; set; }
+        #endregion
 
         /// <summary>
         /// 

@@ -1,4 +1,5 @@
-﻿using common.libs;
+﻿using client.service.vea.socks5;
+using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;

@@ -5,7 +5,7 @@ using client.service.socks5;
 using client.service.tcpforward;
 using client.service.udpforward;
 using client.service.ui.api.service.clientServer;
-using client.service.vea;
+using client.service.vea.socks5;
 using client.service.wakeup;
 using common.libs;
 using common.server;

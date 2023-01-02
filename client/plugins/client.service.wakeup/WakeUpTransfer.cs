@@ -113,7 +113,6 @@ namespace client.service.wakeup
         {
             var packet = NetworkHelper.MagicPacket(mac);
 
-
             using UdpClient client = new UdpClient();
             for (int i = 0; i < 10; i++)
             {

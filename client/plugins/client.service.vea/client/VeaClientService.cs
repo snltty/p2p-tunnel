@@ -1,11 +1,12 @@
 ﻿using client.messengers.clients;
 using client.service.ui.api.clientServer;
+using client.service.vea.socks5;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace client.service.vea
+namespace client.service.vea.client
 {
     /// <summary>
     /// 组网前端接口

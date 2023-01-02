@@ -29,27 +29,15 @@ namespace server.service.socks5
             this.config = config;
             this.clientRegisterCaching = clientRegisterCaching;
         }
+
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="connection"></param>
         /// <param name="info"></param>
         /// <returns></returns>
-        public bool Validate( Socks5Info info)
+        public bool Validate(Socks5Info info)
         {
-            return Validate(info, config);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="info"></param>
-        /// <param name="config"></param>
-        /// <returns></returns>
-        public bool Validate(Socks5Info info, common.socks5.Config config)
-        {
-            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(info.Data, out Span<byte> ipMemory);
-            if (remoteEndPoint.IsLan())
+            if (Socks5Parser.GetIsLanAddress(info.Data))
             {
                 return false;
             }

@@ -97,7 +97,7 @@ namespace common.tcpforward
             }
 
             IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
-            if(endpoint == null)
+            if (endpoint == null)
             {
                 arg.StateType = TcpForwardStateTypes.Fail;
                 Receive(arg, Helper.EmptyArray);
@@ -257,7 +257,7 @@ namespace common.tcpforward
             PoolBuffer = Helper.EmptyArray;
 
             GC.Collect();
-           // GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
         }
     }
 

@@ -101,7 +101,7 @@ namespace common.socks5
         }
         private void HndleForwardUdp(Socks5Info data)
         {
-            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
+            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
             Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
 
             try
@@ -180,8 +180,8 @@ namespace common.socks5
             }
 
             Socks5EnumRequestCommand command = (Socks5EnumRequestCommand)data.Data.Span[1];
-            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data, out Span<byte> ipMemory);
-            if (remoteEndPoint == null)
+            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
+            if (remoteEndPoint.Port == 0)
             {
                 ConnectReponse(data, Socks5EnumResponseCommand.NetworkError);
                 return;
@@ -437,7 +437,7 @@ namespace common.socks5
 
             PoolBuffer = Helper.EmptyArray;
             GC.Collect();
-            // GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
         }
     }
     /// <summary>
@@ -522,8 +522,8 @@ namespace common.socks5
         {
             TargetSocket?.SafeClose();
             PoolBuffer = Helper.EmptyArray;
-            //GC.Collect();
-            // GC.SuppressFinalize(this);
+            GC.Collect();
+            GC.SuppressFinalize(this);
         }
         /// <summary>
         /// 

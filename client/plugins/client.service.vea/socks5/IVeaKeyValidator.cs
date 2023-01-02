@@ -1,6 +1,6 @@
 ﻿using common.socks5;
 
-namespace client.service.vea
+namespace client.service.vea.socks5
 {
 
     /// <summary>
@@ -13,7 +13,7 @@ namespace client.service.vea
     /// <summary>
     /// 组网权限验证
     /// </summary>
-    public sealed class DefaultVeaKeyValidator: IVeaKeyValidator
+    public sealed class DefaultVeaKeyValidator : IVeaKeyValidator
     {
         private Config config;
         /// <summary>

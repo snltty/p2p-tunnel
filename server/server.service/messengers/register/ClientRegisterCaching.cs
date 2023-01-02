@@ -180,6 +180,7 @@ namespace server.service.messengers.register
                         cacheGroups.TryRemove(client.GroupId, out _);
                     }
                 }
+                GC.Collect();
             }
         }
         /// <summary>

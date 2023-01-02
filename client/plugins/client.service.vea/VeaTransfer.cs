@@ -1,5 +1,6 @@
 ﻿using client.messengers.clients;
 using client.messengers.register;
+using client.service.vea.socks5;
 using common.libs;
 using common.libs.extends;
 using common.server;
