@@ -195,8 +195,7 @@ namespace common.socks5
                     {
                         while (ValidateData(token.DataWrap) == false)
                         {
-                            int length = token.Socket.Receive(e.Buffer.AsSpan(e.Offset + totalLength));
-                            totalLength += length;
+                            totalLength += token.Socket.Receive(e.Buffer.AsSpan(e.Offset + totalLength));
                             token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
                         }
                     }
@@ -308,6 +307,10 @@ namespace common.socks5
                 }
                 else
                 {
+                    if(info.Socks5Step < token.DataWrap.Socks5Step)
+                    {
+                        return;
+                    }
                     token.DataWrap.Socks5Step = info.Socks5Step;
                     if (info.Socks5Step == Socks5EnumStep.ForwardUdp)
                     {

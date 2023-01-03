@@ -193,6 +193,8 @@ namespace common.socks5
         /// 
         /// </summary>
         ForwardUdp = 5,
+
+        None = 0
     }
 
     /// <summary>
