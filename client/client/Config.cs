@@ -73,6 +73,11 @@ namespace client
         /// </summary>
         public string GroupId { get; set; } = string.Empty;
         /// <summary>
+        /// 分组待选列表
+        /// </summary>
+        public string[] GroupIds { get; set; } = Array.Empty<string>();
+
+        /// <summary>
         /// 客户端名
         /// </summary>
         public string Name { get; set; } = string.Empty;

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:30:19
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-24 10:59:22
+ * @LastEditTime: 2023-01-03 20:50:59
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\Register.vue
@@ -40,7 +40,19 @@
                         <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                             <el-form-item label="分组" prop="GroupId">
                                 <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top-start">
-                                    <el-input type="password" show-password v-model="model.GroupId" maxlength="32" show-word-limit placeholder="设置你的分组编号"></el-input>
+                                    <el-select v-model="model.GroupId" @change="handleGroupIdChange" allow-create clearable filterable default-first-option placeholder="选择或输入分组编号">
+                                        <el-option v-for="(item,index) in model.GroupIds" :key="index" :label="item" :value="item">
+                                            <div class="flex">
+                                                <span>{{item}}</span>
+                                                <span class="flex-1"></span>
+                                                <span style="padding:1px 0 0 1rem" @click.stop="handleRemoveGroupId(index)">
+                                                    <el-icon>
+                                                        <CircleClose />
+                                                    </el-icon>
+                                                </span>
+                                            </div>
+                                        </el-option>
+                                    </el-select>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -246,6 +258,7 @@ export default {
                 AutoRegInterval: 5000,
                 AutoRegDelay: 5000,
                 GroupId: '',
+                GroupIds: [],
                 ClientEncode: false,
                 ClientEncodePassword: "",
                 ServerEncode: false,
@@ -335,10 +348,13 @@ export default {
         //获取一下可修改的数据
         const loadConfig = () => {
             getRegisterInfo().then((_json) => {
+                console.log(_json);
                 json = _json;
                 state.model.ShortId = registerState.ClientConfig.ShortId = json.ClientConfig.ShortId;
                 state.model.Name = registerState.ClientConfig.Name = json.ClientConfig.Name;
                 state.model.GroupId = registerState.ClientConfig.GroupId = json.ClientConfig.GroupId;
+                state.model.GroupIds = registerState.ClientConfig.GroupIds = json.ClientConfig.GroupIds;
+
                 state.model.AutoReg = registerState.ClientConfig.AutoReg = json.ClientConfig.AutoReg;
                 state.model.AutoRegTimes = registerState.ClientConfig.AutoRegTimes = json.ClientConfig.AutoRegTimes;
                 state.model.AutoRegInterval = registerState.ClientConfig.AutoRegInterval = json.ClientConfig.AutoRegInterval;
@@ -368,39 +384,42 @@ export default {
                 // ElMessage.error(msg);
             });
         }
+        const getJson = () => {
+            let _json = JSON.parse(JSON.stringify(json));
+            _json.ClientConfig.ShortId = +state.model.ShortId;
+            _json.ClientConfig.Name = state.model.Name;
+            _json.ClientConfig.GroupId = state.model.GroupId;
+            _json.ClientConfig.AutoReg = state.model.AutoReg;
+            _json.ClientConfig.AutoRegTimes = +state.model.AutoRegTimes;
+            _json.ClientConfig.AutoRegInterval = +state.model.AutoRegInterval;
+            _json.ClientConfig.AutoRegDelay = +state.model.AutoRegDelay;
+            _json.ClientConfig.Encode = state.model.ClientEncode;
+            _json.ClientConfig.EncodePassword = state.model.ClientEncodePassword;
+            _json.ClientConfig.UsePunchHole = state.model.UsePunchHole;
+            _json.ClientConfig.TimeoutDelay = +state.model.TimeoutDelay;
+            _json.ClientConfig.UseUdp = state.model.UseUdp;
+            _json.ClientConfig.UseTcp = state.model.UseTcp;
+            _json.ClientConfig.UseRelay = state.model.UseRelay;
+            _json.ClientConfig.UseIpv6 = state.model.UseIpv6;
+            _json.ClientConfig.BindIp = state.model.BindIp;
+            _json.ClientConfig.UseOriginPort = state.model.UseOriginPort;
+            _json.ClientConfig.UseReConnect = state.model.UseReConnect;
+            _json.ClientConfig.UdpUploadSpeedLimit = +state.model.UdpUploadSpeedLimit;
+
+            _json.ServerConfig.Ip = state.model.ServerIp;
+            _json.ServerConfig.UdpPort = +state.model.ServerUdpPort;
+            _json.ServerConfig.TcpPort = +state.model.ServerTcpPort;
+            _json.ServerConfig.Encode = state.model.ServerEncode;
+            _json.ServerConfig.EncodePassword = state.model.ServerEncodePassword;
+            return _json;
+        }
         const handleSubmit = () => {
             formDom.value.validate((valid) => {
                 if (!valid) {
                     return false;
                 }
 
-                let _json = JSON.parse(JSON.stringify(json));
-
-                _json.ClientConfig.ShortId = +state.model.ShortId;
-                _json.ClientConfig.Name = state.model.Name;
-                _json.ClientConfig.GroupId = state.model.GroupId;
-                _json.ClientConfig.AutoReg = state.model.AutoReg;
-                _json.ClientConfig.AutoRegTimes = +state.model.AutoRegTimes;
-                _json.ClientConfig.AutoRegInterval = +state.model.AutoRegInterval;
-                _json.ClientConfig.AutoRegDelay = +state.model.AutoRegDelay;
-                _json.ClientConfig.Encode = state.model.ClientEncode;
-                _json.ClientConfig.EncodePassword = state.model.ClientEncodePassword;
-                _json.ClientConfig.UsePunchHole = state.model.UsePunchHole;
-                _json.ClientConfig.TimeoutDelay = +state.model.TimeoutDelay;
-                _json.ClientConfig.UseUdp = state.model.UseUdp;
-                _json.ClientConfig.UseTcp = state.model.UseTcp;
-                _json.ClientConfig.UseRelay = state.model.UseRelay;
-                _json.ClientConfig.UseIpv6 = state.model.UseIpv6;
-                _json.ClientConfig.BindIp = state.model.BindIp;
-                _json.ClientConfig.UseOriginPort = state.model.UseOriginPort;
-                _json.ClientConfig.UseReConnect = state.model.UseReConnect;
-                _json.ClientConfig.UdpUploadSpeedLimit = +state.model.UdpUploadSpeedLimit;
-
-                _json.ServerConfig.Ip = state.model.ServerIp;
-                _json.ServerConfig.UdpPort = +state.model.ServerUdpPort;
-                _json.ServerConfig.TcpPort = +state.model.ServerTcpPort;
-                _json.ServerConfig.Encode = state.model.ServerEncode;
-                _json.ServerConfig.EncodePassword = state.model.ServerEncodePassword;
+                const _json = getJson();
                 registerState.LocalInfo.IsConnecting = true;
 
                 Promise.all([sendExit(), updateConfig(_json)]).then(() => {
@@ -418,12 +437,24 @@ export default {
             sendExit();
         }
 
+        const handleGroupIdChange = (val) => {
+            val = val.replace(/^\s|\s$/g, '');
+            if (state.model.GroupIds.indexOf(val) == -1 && val) {
+                state.model.GroupIds.push(val);
+            }
+            updateConfig(getJson());
+        }
+        const handleRemoveGroupId = (index) => {
+            state.model.GroupIds.splice(index, 1);
+            updateConfig(getJson());
+        }
+
         onMounted(() => {
             loadConfig();
         });
 
         return {
-            ...toRefs(state), registerState, formDom, handleSubmit, handleExit
+            ...toRefs(state), registerState, formDom, handleSubmit, handleExit, handleGroupIdChange, handleRemoveGroupId
         }
     }
 }

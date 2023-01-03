@@ -302,3 +302,7 @@ h3.title {
 .el-message-box {
     max-width: 90%;
 }
+
+.el-select-dropdown__item {
+    padding-right: 2rem !important;
+}

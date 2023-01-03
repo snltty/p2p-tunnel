@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:39:45
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-24 17:35:21
+ * @LastEditTime: 2023-01-03 20:06:19
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\register.js
@@ -12,7 +12,6 @@
 import { provide, inject, reactive } from "vue";
 import { websocketState } from '../apis/request'
 import { getRegisterInfo } from '../apis/register'
-import { triggerEvent } from "element-plus/lib/utils";
 
 const provideRegisterKey = Symbol();
 export const provideRegister = () => {
@@ -20,6 +19,7 @@ export const provideRegister = () => {
         ClientConfig: {
             ShortId: 0,
             GroupId: '',
+            GroupIds: [],
             Name: '',
             AutoReg: false,
             AutoRegTimes: 10,
@@ -77,6 +77,7 @@ export const provideRegister = () => {
 
                 //state.ClientConfig.ShortId = json.ClientConfig.ShortId;
                 state.ClientConfig.Name = json.ClientConfig.Name;
+                state.ClientConfig.GroupIds = json.ClientConfig.GroupIds;
                 state.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
                 state.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
