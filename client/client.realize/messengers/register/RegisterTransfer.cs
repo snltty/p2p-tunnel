@@ -20,7 +20,7 @@ namespace client.realize.messengers.register
     /// </summary>
     public sealed class RegisterTransfer : IRegisterTransfer
     {
-        private readonly RegisterMessengerSender  registerMessengerSender;
+        private readonly RegisterMessengerSender registerMessengerSender;
         private readonly ITcpServer tcpServer;
         private readonly IUdpServer udpServer;
         private readonly Config config;
@@ -64,12 +64,7 @@ namespace client.realize.messengers.register
         }
         private void Disconnect(IConnection connection, IConnection regConnection)
         {
-            if (regConnection == null) return;
-            if (ReferenceEquals(regConnection, connection) == false)
-            {
-                return;
-            }
-            if (registerState.LocalInfo.IsConnecting)
+            if (regConnection == null || ReferenceEquals(regConnection, connection) == false || registerState.LocalInfo.IsConnecting)
             {
                 return;
             }
