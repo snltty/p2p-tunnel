@@ -101,6 +101,7 @@ namespace common.socks5
         }
         private void HndleForwardUdp(Socks5Info data)
         {
+            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
             Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
 
             try
@@ -108,27 +109,26 @@ namespace common.socks5
                 ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
-                    data.TargetEP = Socks5Parser.GetRemoteEndPoint(data.Data);
-                    Socket socket = new Socket(data.TargetEP.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                    data.TargetEP = remoteEndPoint;
+                    Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     token = new UdpToken { Data = data, TargetSocket = socket, };
                     token.PoolBuffer = new byte[65535];
                     udpConnections.AddOrUpdate(key, token, (a, b) => token);
 
-                    token.TargetSocket.Connect(data.TargetEP);
-                    _ = token.TargetSocket.Send(sendData.Span, SocketFlags.None);
+                    _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
                     IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
                 }
                 else
                 {
-                    _ = token.TargetSocket.Send(sendData.Span, SocketFlags.None);
+                    _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
                 }
                 token.Update();
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError($"socks5 forward udp -> {sendData.Length}  " + ex);
+                Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
             }
         }
         private void TimeoutUdp()

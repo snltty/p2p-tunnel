@@ -51,7 +51,8 @@ namespace socks5
         {
             //唯一客户端id
             data.ClientId = 1;
-            Server.InputData(data);
+            var bytes = data.ToBytes(out int length);
+            Server.InputData(Socks5Info.Debytes(bytes.AsMemory(0,length)));
             return true;
         }
         public void RequestClose(Socks5Info data)
@@ -59,17 +60,20 @@ namespace socks5
             data.Data = Helper.EmptyArray;
             //唯一客户端id
             data.ClientId = 1;
-            Server.InputData(data);
+            var bytes = data.ToBytes(out int length);
+            Server.InputData(Socks5Info.Debytes(bytes.AsMemory(0, length)));
         }
         //发给客户端
         public void Response(Socks5Info data)
         {
-            Client.InputData(data);
+            var bytes = data.ToBytes(out int length);
+            Client.InputData(Socks5Info.Debytes(bytes.AsMemory(0, length)));
         }
         public void ResponseClose(Socks5Info data)
         {
             data.Data = Helper.EmptyArray;
-            Client.InputData(data);
+            var bytes = data.ToBytes(out int length);
+            Client.InputData(Socks5Info.Debytes(bytes.AsMemory(0, length)));
         }
     }
 
