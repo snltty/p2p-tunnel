@@ -307,7 +307,7 @@ namespace common.socks5
                 }
                 else
                 {
-                    if(info.Socks5Step < token.DataWrap.Socks5Step)
+                    if (info.Socks5Step < token.DataWrap.Socks5Step)
                     {
                         return;
                     }

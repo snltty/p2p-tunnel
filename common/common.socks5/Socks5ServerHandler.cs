@@ -106,7 +106,7 @@ namespace common.socks5
 
             try
             {
-                ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
+                ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP, remoteEndPoint);
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
                     data.TargetEP = remoteEndPoint;
@@ -219,7 +219,7 @@ namespace common.socks5
             SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs
             {
                 UserToken = token,
-                SocketFlags = SocketFlags.None,
+                SocketFlags = SocketFlags.None
             };
             connectEventArgs.RemoteEndPoint = remoteEndPoint;
             connectEventArgs.Completed += Target_IO_Completed;
@@ -540,7 +540,7 @@ namespace common.socks5
         /// <returns></returns>
         public bool Equals(ConnectionKeyUdp x, ConnectionKeyUdp y)
         {
-            return x.Endpoint.Equals(y.Endpoint) && x.ConnectId == y.ConnectId;
+            return  x.Source.Equals(y.Source) && x.Dist.Equals(y.Dist) && x.ConnectId == y.ConnectId;
         }
         /// <summary>
         /// 
@@ -549,7 +549,7 @@ namespace common.socks5
         /// <returns></returns>
         public int GetHashCode(ConnectionKeyUdp obj)
         {
-            return obj.Endpoint.GetHashCode() ^ obj.ConnectId.GetHashCode();
+            return obj.Source.GetHashCode() ^ obj.Dist.GetHashCode() ^ obj.ConnectId.GetHashCode();
         }
     }
     /// <summary>
@@ -560,7 +560,8 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
-        public readonly IPEndPoint Endpoint { get; }
+        public readonly IPEndPoint Source { get; }
+        public readonly IPEndPoint Dist { get; }
         /// <summary>
         /// 
         /// </summary>
@@ -570,10 +571,11 @@ namespace common.socks5
         /// </summary>
         /// <param name="connectId"></param>
         /// <param name="endpoint"></param>
-        public ConnectionKeyUdp(ulong connectId, IPEndPoint endpoint)
+        public ConnectionKeyUdp(ulong connectId, IPEndPoint source, IPEndPoint dist)
         {
             ConnectId = connectId;
-            Endpoint = endpoint;
+            Source = source;
+            Dist = dist;
         }
     }
 }
