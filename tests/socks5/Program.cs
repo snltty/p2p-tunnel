@@ -57,12 +57,13 @@ namespace socks5
         }
         public void RequestClose(Socks5Info data)
         {
-            Socks5Info info = new Socks5Info { ClientId = clientid, Version = data.Version, Id = data.Id, Data = Helper.EmptyArray, Socks5Step = Socks5EnumStep.Forward };
-            Server.InputData(info);
+            data.Data = Helper.EmptyArray;
+            Server.InputData(data);
         }
         //发给客户端
         public void Response(Socks5Info data)
         {
+            data.ClientId = clientid;
             Client.InputData(data);
         }
         public void ResponseClose(Socks5Info data)
