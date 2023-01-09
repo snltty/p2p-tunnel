@@ -101,34 +101,34 @@ namespace common.socks5
         }
         private void HndleForwardUdp(Socks5Info data)
         {
-            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
             Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
 
             try
             {
-                ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP, remoteEndPoint);
+                ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
-                    data.TargetEP = remoteEndPoint;
-                    Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                    data.TargetEP = Socks5Parser.GetRemoteEndPoint(data.Data);
+                    Socket socket = new Socket(data.TargetEP.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     token = new UdpToken { Data = data, TargetSocket = socket, };
                     token.PoolBuffer = new byte[65535];
                     udpConnections.AddOrUpdate(key, token, (a, b) => token);
 
-                    _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
+                    token.TargetSocket.Connect(data.TargetEP);
+                    _ = token.TargetSocket.Send(sendData.Span, SocketFlags.None);
                     token.Data.Data = Helper.EmptyArray;
                     IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
                 }
                 else
                 {
-                    _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
+                    _ = token.TargetSocket.Send(sendData.Span, SocketFlags.None);
                     token.Data.Data = Helper.EmptyArray;
                 }
                 token.Update();
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
+                Logger.Instance.DebugError($"socks5 forward udp -> {sendData.Length}  " + ex);
             }
         }
         private void TimeoutUdp()
@@ -540,7 +540,7 @@ namespace common.socks5
         /// <returns></returns>
         public bool Equals(ConnectionKeyUdp x, ConnectionKeyUdp y)
         {
-            return  x.Source.Equals(y.Source) && x.Dist.Equals(y.Dist) && x.ConnectId == y.ConnectId;
+            return x.Source.Equals(y.Source) && x.ConnectId == y.ConnectId;
         }
         /// <summary>
         /// 
@@ -549,7 +549,7 @@ namespace common.socks5
         /// <returns></returns>
         public int GetHashCode(ConnectionKeyUdp obj)
         {
-            return obj.Source.GetHashCode() ^ obj.Dist.GetHashCode() ^ obj.ConnectId.GetHashCode();
+            return obj.Source.GetHashCode() ^ obj.ConnectId.GetHashCode();
         }
     }
     /// <summary>
@@ -561,7 +561,6 @@ namespace common.socks5
         /// 
         /// </summary>
         public readonly IPEndPoint Source { get; }
-        public readonly IPEndPoint Dist { get; }
         /// <summary>
         /// 
         /// </summary>
@@ -571,11 +570,10 @@ namespace common.socks5
         /// </summary>
         /// <param name="connectId"></param>
         /// <param name="endpoint"></param>
-        public ConnectionKeyUdp(ulong connectId, IPEndPoint source, IPEndPoint dist)
+        public ConnectionKeyUdp(ulong connectId, IPEndPoint source)
         {
             ConnectId = connectId;
             Source = source;
-            Dist = dist;
         }
     }
 }
