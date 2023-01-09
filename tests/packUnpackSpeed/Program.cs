@@ -5,7 +5,6 @@ using common.libs.extends;
 using common.server.model;
 using common.socks5;
 using System.Net;
-using System.Net.Sockets;
 
 namespace packUnpackSpeed
 {
@@ -13,7 +12,8 @@ namespace packUnpackSpeed
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<Test>();
+            //var summary = BenchmarkRunner.Run<Test>();
+            var summary = BenchmarkRunner.Run<Socks5Pack>();
             Console.ReadLine();
         }
     }
@@ -120,4 +120,27 @@ namespace packUnpackSpeed
         }
 
     }
+
+
+    [MemoryDiagnoser]
+    public class Socks5Pack
+    {
+        [GlobalSetup]
+        public void Setup()
+        {
+
+        }
+
+
+        Socks5Info info = new Socks5Info { Id = 1, Data = new byte[100], SourceEP = new IPEndPoint(IPAddress.Loopback, 5000), TargetEP = new IPEndPoint(IPAddress.Loopback, 5001) };
+        [Benchmark]
+        public void Socks5PackUnPack()
+        {
+            var bytes = info.ToBytes(out int length);
+            Memory<byte> memory = bytes.AsMemory(0, length);
+            Socks5Info.Debytes(memory);
+            info.Return(bytes);
+        }
+    }
+
 }

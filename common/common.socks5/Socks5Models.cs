@@ -78,11 +78,12 @@ namespace common.socks5
             }
 
             byte[] bytes = ArrayPool<byte>.Shared.Rent(length);
-            var span = bytes.AsSpan();
+            var memory = bytes.AsMemory(0,length);
+            var span = memory.Span;
             int index = 1;
             bytes[0] = (byte)((byte)Socks5Step << 4 | Version);
 
-            Id.ToBytes(bytes.AsMemory(index));
+            Id.ToBytes(memory.Slice(index));
             index += 4;
 
             bytes[index] = (byte)sepLength;
@@ -92,7 +93,7 @@ namespace common.socks5
                 SourceEP.Address.TryWriteBytes(span.Slice(index), out _);
                 index += sepLength;
 
-                ((ushort)SourceEP.Port).ToBytes(bytes.AsMemory(index));
+                ((ushort)SourceEP.Port).ToBytes(memory.Slice(index));
                 index += 2;
             }
 
@@ -103,13 +104,13 @@ namespace common.socks5
                 TargetEP.Address.TryWriteBytes(span.Slice(index), out _);
                 index += tepLength;
 
-                ((ushort)TargetEP.Port).ToBytes(bytes.AsMemory(index));
+                ((ushort)TargetEP.Port).ToBytes(memory.Slice(index));
                 index += 2;
             }
 
             if (Data.Length > 0)
             {
-                Data.CopyTo(bytes.AsMemory(index));
+                Data.CopyTo(memory.Slice(index));
             }
             return bytes;
         }
