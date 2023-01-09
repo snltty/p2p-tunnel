@@ -54,8 +54,8 @@ namespace socks5
 
             var bytes = data.ToBytes(out int length);
             Socks5Info info = Socks5Info.Debytes(bytes.AsMemory(0, length));
-            data.Return(bytes);
             Server.InputData(info);
+            data.Return(bytes);
             return true;
         }
         public void RequestClose(Socks5Info data)
@@ -65,17 +65,16 @@ namespace socks5
             data.ClientId = 1;
             var bytes = data.ToBytes(out int length);
             Socks5Info info = Socks5Info.Debytes(bytes.AsMemory(0, length));
-            data.Return(bytes);
-
             Server.InputData(info);
+            data.Return(bytes);
         }
         //发给客户端
         public void Response(Socks5Info data)
         {
             var bytes = data.ToBytes(out int length);
             Socks5Info info = Socks5Info.Debytes(bytes.AsMemory(0, length));
-            data.Return(bytes);
             Client.InputData(info);
+            data.Return(bytes);
         }
         public void ResponseClose(Socks5Info data)
         {
@@ -83,8 +82,8 @@ namespace socks5
 
             var bytes = data.ToBytes(out int length);
             Socks5Info info = Socks5Info.Debytes(bytes.AsMemory(0, length));
-            data.Return(bytes);
             Client.InputData(info);
+            data.Return(bytes);
         }
     }
 
