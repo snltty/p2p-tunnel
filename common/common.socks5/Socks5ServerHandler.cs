@@ -140,7 +140,7 @@ namespace common.socks5
                 {
                     long time = DateTimeHelper.GetTimeStamp();
 
-                    var tokens = udpConnections.Where(c => time - c.Value.LastTime > (5 * 60 * 1000));
+                    var tokens = udpConnections.Where(c => time - c.Value.LastTime > (60 * 1000));
                     foreach (var item in tokens)
                     {
                         item.Value.Clear();

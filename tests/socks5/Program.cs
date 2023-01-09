@@ -46,44 +46,29 @@ namespace socks5
         public ISocks5ClientHandler Client { get; set; }
         public ISocks5ServerHandler Server { get; set; }
 
+        private ulong clientid = 1;
+
         //发给服务端
         public bool Request(Socks5Info data)
         {
-            //唯一客户端id
-            data.ClientId = 1;
-
-            var bytes = data.ToBytes(out int length);
-            Socks5Info info = Socks5Info.Debytes(bytes.AsMemory(0, length));
+            Socks5Info info = new Socks5Info { ClientId = clientid, Version = data.Version, Id = data.Id, Data = data.Data, Socks5Step = data.Socks5Step, SourceEP = data.SourceEP, TargetEP = data.TargetEP };
             Server.InputData(info);
-            data.Return(bytes);
             return true;
         }
         public void RequestClose(Socks5Info data)
         {
-            data.Data = Helper.EmptyArray;
-            //唯一客户端id
-            data.ClientId = 1;
-            var bytes = data.ToBytes(out int length);
-            Socks5Info info = Socks5Info.Debytes(bytes.AsMemory(0, length));
+            Socks5Info info = new Socks5Info { ClientId = clientid, Version = data.Version, Id = data.Id, Data = Helper.EmptyArray, Socks5Step = Socks5EnumStep.Forward };
             Server.InputData(info);
-            data.Return(bytes);
         }
         //发给客户端
         public void Response(Socks5Info data)
         {
-            var bytes = data.ToBytes(out int length);
-            Socks5Info info = Socks5Info.Debytes(bytes.AsMemory(0, length));
-            Client.InputData(info);
-            data.Return(bytes);
+            Client.InputData(data);
         }
         public void ResponseClose(Socks5Info data)
         {
             data.Data = Helper.EmptyArray;
-
-            var bytes = data.ToBytes(out int length);
-            Socks5Info info = Socks5Info.Debytes(bytes.AsMemory(0, length));
-            Client.InputData(info);
-            data.Return(bytes);
+            Client.InputData(data);
         }
     }
 
