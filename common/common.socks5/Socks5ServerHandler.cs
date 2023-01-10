@@ -109,6 +109,7 @@ namespace common.socks5
                 ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
+                    //Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}：{data.SourceEP}->forward udp-> first {string.Join(",", sendData.ToArray())}");
                     data.TargetEP = remoteEndPoint;
                     Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     token = new UdpToken { Data = data, TargetSocket = socket, };
@@ -121,6 +122,7 @@ namespace common.socks5
                 }
                 else
                 {
+                   // Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}：{data.SourceEP}->forward udp-> {string.Join(",", sendData.ToArray())}");
                     _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
                 }
@@ -128,6 +130,7 @@ namespace common.socks5
             }
             catch (Exception ex)
             {
+                //Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}：{data.SourceEP}->forward udp-> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
                 Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
             }
         }
