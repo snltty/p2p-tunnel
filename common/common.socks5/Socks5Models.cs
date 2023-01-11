@@ -44,6 +44,7 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
         public object Tag { get; set; }
         /// <summary>
         /// 

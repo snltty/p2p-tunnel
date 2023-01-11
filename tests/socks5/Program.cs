@@ -59,6 +59,7 @@ namespace socks5
         {
             data.ClientId = clientid;
             data.Data = Helper.EmptyArray;
+            data.Socks5Step = Socks5EnumStep.Forward;
             Server.InputData(data);
         }
         //发给客户端

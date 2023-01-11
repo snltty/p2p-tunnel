@@ -109,7 +109,7 @@ namespace common.socks5
                 ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
-                    //Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}：{data.SourceEP}->forward udp-> first {string.Join(",", sendData.ToArray())}");
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> first {string.Join(",", sendData.ToArray())}");
                     data.TargetEP = remoteEndPoint;
                     Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     token = new UdpToken { Data = data, TargetSocket = socket, };
@@ -122,7 +122,7 @@ namespace common.socks5
                 }
                 else
                 {
-                   // Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}：{data.SourceEP}->forward udp-> {string.Join(",", sendData.ToArray())}");
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> {string.Join(",", sendData.ToArray())}");
                     _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
                 }
@@ -130,7 +130,7 @@ namespace common.socks5
             }
             catch (Exception ex)
             {
-                //Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}：{data.SourceEP}->forward udp-> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
+                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
                 Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
             }
         }
@@ -174,38 +174,57 @@ namespace common.socks5
             }
         }
 
+
         private void HandleCommand(Socks5Info data)
         {
-            if (socks5Validator.Validate(data) == false)
+            try
             {
+                if (socks5Validator.Validate(data) == false)
+                {
+                   
+                    ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
+                    return;
+                }
+
+                Socks5EnumRequestCommand command = (Socks5EnumRequestCommand)data.Data.Span[1];
+                IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
+                if (remoteEndPoint.Port == 0)
+                {
+                    ConnectReponse(data, Socks5EnumResponseCommand.NetworkError);
+                    return;
+                }
+
+                if (command == Socks5EnumRequestCommand.Connect)
+                {
+                    Connect(data, remoteEndPoint);
+                }
+                else if (command == Socks5EnumRequestCommand.UdpAssociate)
+                {
+                    ConnectReponse(data, Socks5EnumResponseCommand.ConnecSuccess);
+                }
+                else if (command == Socks5EnumRequestCommand.Bind)
+                {
+                    ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
+                }
+                else
+                {
+                    ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
+                }
+            }
+            catch (Exception ex)
+            {
+                ConsoleColor currentForeColor = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"data:{string.Join(",", data.Data.ToArray())}");
+                Console.WriteLine($"data:{data.ToJson()}");
+                Console.WriteLine(ex+"");
+                Console.ForegroundColor = currentForeColor;
+
                 ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
                 return;
             }
 
-            Socks5EnumRequestCommand command = (Socks5EnumRequestCommand)data.Data.Span[1];
-            IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
-            if (remoteEndPoint.Port == 0)
-            {
-                ConnectReponse(data, Socks5EnumResponseCommand.NetworkError);
-                return;
-            }
-
-            if (command == Socks5EnumRequestCommand.Connect)
-            {
-                Connect(data, remoteEndPoint);
-            }
-            else if (command == Socks5EnumRequestCommand.UdpAssociate)
-            {
-                ConnectReponse(data, Socks5EnumResponseCommand.ConnecSuccess);
-            }
-            else if (command == Socks5EnumRequestCommand.Bind)
-            {
-                ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
-            }
-            else
-            {
-                ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
-            }
+           
         }
         private void Connect(Socks5Info data, IPEndPoint remoteEndPoint)
         {
