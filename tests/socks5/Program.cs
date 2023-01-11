@@ -7,6 +7,8 @@ namespace socks5
     {
         static void Main(string[] args)
         {
+            LoggerConsole();
+
             //定时任务
             WheelTimer<object> wheelTimer = new WheelTimer<object>();
             //目标ip提供
@@ -34,6 +36,44 @@ namespace socks5
 
             Console.ReadLine();
         }
+
+        static void LoggerConsole()
+        {
+            if (Directory.Exists("log") == false)
+            {
+                Directory.CreateDirectory("log");
+            }
+            Logger.Instance.OnLogger.Sub((model) =>
+            {
+                ConsoleColor currentForeColor = Console.ForegroundColor;
+                switch (model.Type)
+                {
+                    case LoggerTypes.DEBUG:
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        break;
+                    case LoggerTypes.INFO:
+                        Console.ForegroundColor = ConsoleColor.White;
+                        break;
+                    case LoggerTypes.WARNING:
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        break;
+                    case LoggerTypes.ERROR:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        break;
+                    default:
+                        break;
+                }
+                string line = $"[{model.Type,-7}][{model.Time:yyyy-MM-dd HH:mm:ss}]:{model.Content}";
+                Console.WriteLine(line);
+                Console.ForegroundColor = currentForeColor;
+
+                using StreamWriter sw = File.AppendText(Path.Combine("log", $"{DateTime.Now:yyyy-MM-dd}.log"));
+                sw.WriteLine(line);
+                sw.Flush();
+                sw.Close();
+                sw.Dispose();
+            });
+        }
     }
 
     /// <summary>
@@ -59,7 +99,6 @@ namespace socks5
         {
             data.ClientId = clientid;
             data.Data = Helper.EmptyArray;
-            data.Socks5Step = Socks5EnumStep.Forward;
             Server.InputData(data);
         }
         //发给客户端

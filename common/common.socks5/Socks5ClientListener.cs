@@ -332,8 +332,8 @@ namespace common.socks5
             }
             else if (info.SourceEP != null)
             {
-                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{info.SourceEP}->response udp-> {string.Join(",", info.Data.ToArray())}");
-                Console.WriteLine("===================================================================================================================");
+                //Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{info.SourceEP}->response udp-> {string.Join(",", info.Data.ToArray())}");
+                //Console.WriteLine("===================================================================================================================");
                 udpClient.Send(info.Data.Span, info.SourceEP);
             }
         }
