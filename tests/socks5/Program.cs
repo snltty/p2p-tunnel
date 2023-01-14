@@ -7,7 +7,7 @@ namespace socks5
     {
         static void Main(string[] args)
         {
-            LoggerConsole();
+          //  LoggerConsole();
 
             //定时任务
             WheelTimer<object> wheelTimer = new WheelTimer<object>();
@@ -16,7 +16,7 @@ namespace socks5
             //消息发送
             Socks5MessengerSender socks5MessengerSender = new Socks5MessengerSender();
             //配置
-            Config config = new Config { BufferSize = 8 * 1027, ConnectEnable = true, ListenPort = 5412 };
+            Config config = new Config { BufferSize = 8 * 1027, ConnectEnable = true, ListenPort = 1082 };
             //socks5验证，是否能连接什么的
             ISocks5Validator validator = new DefaultSocks5Validator(config);
 

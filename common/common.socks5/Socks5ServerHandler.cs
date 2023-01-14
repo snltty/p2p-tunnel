@@ -19,6 +19,10 @@ namespace common.socks5
         private readonly Dictionary<Socks5EnumStep, Action<Socks5Info>> handles = new Dictionary<Socks5EnumStep, Action<Socks5Info>>();
 
         private readonly ISocks5MessengerSender socks5MessengerSender;
+
+        public static bool IsError = false;
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -113,7 +117,8 @@ namespace common.socks5
                 ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
-                    //Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> first {string.Join(",", sendData.ToArray())}");
+                    if (IsError == false)
+                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> first {string.Join(",", sendData.ToArray())}");
                     data.TargetEP = remoteEndPoint;
                     Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     token = new UdpToken { Data = data, TargetSocket = socket, };
@@ -126,7 +131,8 @@ namespace common.socks5
                 }
                 else
                 {
-                    //Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> {string.Join(",", sendData.ToArray())}");
+                    if (IsError == false)
+                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> {string.Join(",", sendData.ToArray())}");
                     token.Update();
                     _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
@@ -134,7 +140,9 @@ namespace common.socks5
             }
             catch (Exception ex)
             {
-                //Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
+                if (IsError == false)
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
+                IsError = true;
                 Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
             }
         }
@@ -173,8 +181,14 @@ namespace common.socks5
                 }
                 result = token.TargetSocket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if (IsError == false)
+                    Console.WriteLine($"socks5 forward udp -> receive" + ex);
+
+
+                IsError = true;
+                Logger.Instance.DebugError($"socks5 forward udp -> receive" + ex);
             }
         }
 

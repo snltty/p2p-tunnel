@@ -264,10 +264,22 @@ namespace common.socks5
                 ExecuteHandle(udpInfo);
                 udpInfo.Data = Helper.EmptyArray;
 
+
+            }
+            catch (Exception ex)
+            {
+                Socks5ServerHandler.IsError = true;
+                Console.WriteLine($"socks5 listen udp -> error " + ex);
+            }
+
+            try
+            {
                 result = udpClient.BeginReceive(ProcessReceiveUdp, null);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Socks5ServerHandler.IsError = true;
+                Console.WriteLine($"socks5 listen udp -> BeginReceive " + ex);
             }
         }
         private void ExecuteHandle(Socks5Info info)
@@ -332,8 +344,12 @@ namespace common.socks5
             }
             else if (info.SourceEP != null)
             {
-                //Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{info.SourceEP}->response udp-> {string.Join(",", info.Data.ToArray())}");
-                //Console.WriteLine("===================================================================================================================");
+                if (Socks5ServerHandler.IsError == false)
+                {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{info.SourceEP}->response udp-> {string.Join(",", info.Data.ToArray())}");
+                    Console.WriteLine("===================================================================================================================");
+                }
+
                 udpClient.Send(info.Data.Span, info.SourceEP);
             }
         }
