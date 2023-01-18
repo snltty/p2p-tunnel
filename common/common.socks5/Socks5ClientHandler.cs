@@ -14,7 +14,6 @@ namespace common.socks5
         private readonly ISocks5ClientListener socks5ClientListener;
         private readonly ISocks5DstEndpointProvider socks5DstEndpointProvider;
         private readonly ISocks5AuthValidator socks5AuthValidator;
-        private readonly Config config;
 
         /// <summary>
         /// 
@@ -31,13 +30,12 @@ namespace common.socks5
         /// <param name="socks5MessengerSender"></param>
         /// <param name="socks5DstEndpointProvider"></param>
         /// <param name="socks5ClientListener"></param>
-        public Socks5ClientHandler(ISocks5MessengerSender socks5MessengerSender, ISocks5DstEndpointProvider socks5DstEndpointProvider, ISocks5ClientListener socks5ClientListener, ISocks5AuthValidator socks5AuthValidator, Config config)
+        public Socks5ClientHandler(ISocks5MessengerSender socks5MessengerSender, ISocks5DstEndpointProvider socks5DstEndpointProvider, ISocks5ClientListener socks5ClientListener, ISocks5AuthValidator socks5AuthValidator)
         {
             this.socks5MessengerSender = socks5MessengerSender;
             this.socks5DstEndpointProvider = socks5DstEndpointProvider;
             this.socks5ClientListener = socks5ClientListener;
             this.socks5AuthValidator = socks5AuthValidator;
-            this.config = config;
 
             socks5ClientListener.OnData = OnData;
             socks5ClientListener.OnClose = OnClose;

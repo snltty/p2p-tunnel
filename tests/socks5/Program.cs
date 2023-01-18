@@ -26,7 +26,7 @@ namespace socks5
             listener.Start(config.ListenPort, config.BufferSize);
 
             //客户端处理
-            ISocks5ClientHandler client = new Socks5ClientHandler(socks5MessengerSender, socks5DstEndpointProvider, listener, socks5AuthValidator, config);
+            ISocks5ClientHandler client = new Socks5ClientHandler(socks5MessengerSender, socks5DstEndpointProvider, listener, socks5AuthValidator);
             //服务端处理
             ISocks5ServerHandler server = new Socks5ServerHandler(socks5MessengerSender, config, wheelTimer, validator, socks5AuthValidator);
 
