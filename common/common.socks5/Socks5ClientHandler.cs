@@ -13,6 +13,8 @@ namespace common.socks5
         private readonly ISocks5MessengerSender socks5MessengerSender;
         private readonly ISocks5ClientListener socks5ClientListener;
         private readonly ISocks5DstEndpointProvider socks5DstEndpointProvider;
+        private readonly ISocks5AuthValidator socks5AuthValidator;
+        private readonly Config config;
 
         /// <summary>
         /// 
@@ -29,11 +31,13 @@ namespace common.socks5
         /// <param name="socks5MessengerSender"></param>
         /// <param name="socks5DstEndpointProvider"></param>
         /// <param name="socks5ClientListener"></param>
-        public Socks5ClientHandler(ISocks5MessengerSender socks5MessengerSender,  ISocks5DstEndpointProvider socks5DstEndpointProvider, ISocks5ClientListener socks5ClientListener)
+        public Socks5ClientHandler(ISocks5MessengerSender socks5MessengerSender, ISocks5DstEndpointProvider socks5DstEndpointProvider, ISocks5ClientListener socks5ClientListener, ISocks5AuthValidator socks5AuthValidator, Config config)
         {
             this.socks5MessengerSender = socks5MessengerSender;
             this.socks5DstEndpointProvider = socks5DstEndpointProvider;
             this.socks5ClientListener = socks5ClientListener;
+            this.socks5AuthValidator = socks5AuthValidator;
+            this.config = config;
 
             socks5ClientListener.OnData = OnData;
             socks5ClientListener.OnClose = OnClose;
@@ -53,6 +57,7 @@ namespace common.socks5
                 {Socks5EnumStep.Forward, ForwardResponseData},
                 {Socks5EnumStep.ForwardUdp, ForwardUdpResponseData},
             };
+
         }
         /// <summary>
         /// 输入数据
@@ -188,11 +193,27 @@ namespace common.socks5
         /// <returns></returns>
         protected virtual bool HandleRequest(Socks5Info data)
         {
-            data.Response[0] = (byte)Socks5EnumAuthType.NoAuth;
+            data.AuthType = Socks5EnumAuthType.NoAuth;
+            data.Response[0] = (byte)data.AuthType;
             data.Data = data.Response;
             RequestResponseData(data);
             socks5ClientListener.Response(data);
             return true;
+            /*
+            if (config.AuthType == AuthTypes.Client)
+            {
+                data.AuthType = socks5AuthValidator.GetAuthType(Socks5Parser.GetAuthMethods(data.Data.Span));
+                data.Response[0] = (byte)data.AuthType;
+                data.Data = data.Response;
+                RequestResponseData(data);
+                socks5ClientListener.Response(data);
+                return true;
+            }
+            else
+            {
+                return socks5MessengerSender.Request(data);
+            }
+            */
         }
         /// <summary>
         /// 收到auth
@@ -201,7 +222,26 @@ namespace common.socks5
         /// <returns></returns>
         protected virtual bool HandleAuth(Socks5Info data)
         {
+            data.Response[0] = (byte)Socks5EnumAuthState.Success;
+            data.Data = data.Response;
+            AuthResponseData(data);
+            socks5ClientListener.Response(data);
             return true;
+
+            /*
+            if (config.AuthType == AuthTypes.Client)
+            {
+                data.Response[0] = (byte)socks5AuthValidator.Validate(data.Data, data.AuthType);
+                data.Data = data.Response;
+                AuthResponseData(data);
+                socks5ClientListener.Response(data);
+                return true;
+            }
+            else
+            {
+                return socks5MessengerSender.Request(data);
+            }
+            */
         }
         /// <summary>
         /// 收到command

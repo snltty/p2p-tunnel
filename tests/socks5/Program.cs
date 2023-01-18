@@ -7,16 +7,17 @@ namespace socks5
     {
         static void Main(string[] args)
         {
-          //  LoggerConsole();
+            LoggerConsole();
 
             //定时任务
             WheelTimer<object> wheelTimer = new WheelTimer<object>();
+            ISocks5AuthValidator  socks5AuthValidator = new Socks5AuthValidator();
             //目标ip提供
             ISocks5DstEndpointProvider socks5DstEndpointProvider = new Socks5DstEndpointProvider();
             //消息发送
             Socks5MessengerSender socks5MessengerSender = new Socks5MessengerSender();
             //配置
-            Config config = new Config { BufferSize = 8 * 1027, ConnectEnable = true, ListenPort = 1082 };
+            Config config = new Config { BufferSize = 8 * 1027, ConnectEnable = true, ListenPort = 1082};
             //socks5验证，是否能连接什么的
             ISocks5Validator validator = new DefaultSocks5Validator(config);
 
@@ -25,9 +26,9 @@ namespace socks5
             listener.Start(config.ListenPort, config.BufferSize);
 
             //客户端处理
-            ISocks5ClientHandler client = new Socks5ClientHandler(socks5MessengerSender, socks5DstEndpointProvider, listener);
+            ISocks5ClientHandler client = new Socks5ClientHandler(socks5MessengerSender, socks5DstEndpointProvider, listener, socks5AuthValidator, config);
             //服务端处理
-            ISocks5ServerHandler server = new Socks5ServerHandler(socks5MessengerSender, config, wheelTimer, validator);
+            ISocks5ServerHandler server = new Socks5ServerHandler(socks5MessengerSender, config, wheelTimer, validator, socks5AuthValidator);
 
             socks5MessengerSender.Client = client;
             socks5MessengerSender.Server = server;
@@ -39,10 +40,6 @@ namespace socks5
 
         static void LoggerConsole()
         {
-            if (Directory.Exists("log") == false)
-            {
-                Directory.CreateDirectory("log");
-            }
             Logger.Instance.OnLogger.Sub((model) =>
             {
                 ConsoleColor currentForeColor = Console.ForegroundColor;
@@ -66,12 +63,6 @@ namespace socks5
                 string line = $"[{model.Type,-7}][{model.Time:yyyy-MM-dd HH:mm:ss}]:{model.Content}";
                 Console.WriteLine(line);
                 Console.ForegroundColor = currentForeColor;
-
-                using StreamWriter sw = File.AppendText(Path.Combine("log", $"{DateTime.Now:yyyy-MM-dd}.log"));
-                sw.WriteLine(line);
-                sw.Flush();
-                sw.Close();
-                sw.Dispose();
             });
         }
     }

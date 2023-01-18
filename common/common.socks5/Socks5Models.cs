@@ -16,6 +16,10 @@ namespace common.socks5
         /// </summary>
         public Socks5EnumStep Socks5Step { get; set; } = Socks5EnumStep.Request;
         /// <summary>
+        /// 认证类型
+        /// </summary>
+        public Socks5EnumAuthType AuthType { get; set; } = Socks5EnumAuthType.NoAuth;
+        /// <summary>
         /// 版本
         /// </summary>
         public byte Version { get; set; }
@@ -63,7 +67,12 @@ namespace common.socks5
         /// <returns></returns>
         public byte[] ToBytes(out int length)
         {
-            length = 1 + 4 + 1 + 1 + Data.Length;
+            length = 1 // step + Version
+                + 1 //authType
+                + 4  // id
+                + 1  //source length
+                + 1  // target length
+                + Data.Length;
 
             int sepLength = 0, tepLength = 0;
             if (SourceEP != null)
@@ -79,10 +88,13 @@ namespace common.socks5
             }
 
             byte[] bytes = ArrayPool<byte>.Shared.Rent(length);
-            var memory = bytes.AsMemory(0,length);
+            var memory = bytes.AsMemory(0, length);
             var span = memory.Span;
-            int index = 1;
-            bytes[0] = (byte)((byte)Socks5Step << 4 | Version);
+            int index = 0;
+            bytes[index] = (byte)((byte)Socks5Step << 4 | Version);
+            index += 1;
+            bytes[index] = (byte)AuthType;
+            index += 1;
 
             Id.ToBytes(memory.Slice(index));
             index += 4;
@@ -122,10 +134,13 @@ namespace common.socks5
         public void DeBytes(Memory<byte> bytes)
         {
             var span = bytes.Span;
-            int index = 1;
+            int index = 0;
 
-            Socks5Step = (Socks5EnumStep)(span[0] >> 4);
-            Version = (byte)(span[0] & 0b1111);
+            Socks5Step = (Socks5EnumStep)(span[index] >> 4);
+            Version = (byte)(span[index] & 0b1111);
+            index += 1;
+            AuthType = (Socks5EnumAuthType)span[index];
+            index += 1;
 
             Id = span.Slice(index).ToUInt32();
             index += 4;

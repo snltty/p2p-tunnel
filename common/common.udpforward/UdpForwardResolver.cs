@@ -52,6 +52,7 @@ namespace common.udpforward
                 IPEndPoint endpoint = NetworkHelper.EndpointFromArray(arg.TargetEndpoint);
 
                 Socket socket = new Socket(endpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                socket.WindowsUdpBug();
                 token = new UdpToken { Connection = arg.Connection.FromConnection, Data = arg, TargetSocket = socket, };
 
                 token.TargetEP = endpoint;

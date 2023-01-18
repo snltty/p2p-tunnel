@@ -11,6 +11,26 @@ namespace common.libs.extends
     public static class SocketExtends
     {
         /// <summary>
+        /// windows平台的udp无连接bug
+        /// </summary>
+        /// <param name="socket"></param>
+        public static void WindowsUdpBug(this Socket socket)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                try
+                {
+                    const uint IOC_IN = 0x80000000;
+                    int IOC_VENDOR = 0x18000000;
+                    int SIO_UDP_CONNRESET = (int)(IOC_IN | IOC_VENDOR | 12);
+                    socket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="socket"></param>

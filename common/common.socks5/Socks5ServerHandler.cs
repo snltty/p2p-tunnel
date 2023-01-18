@@ -20,15 +20,13 @@ namespace common.socks5
 
         private readonly ISocks5MessengerSender socks5MessengerSender;
 
-        public static bool IsError = false;
-
-
         /// <summary>
         /// 
         /// </summary>
         protected Config config { get; }
         private readonly WheelTimer<object> wheelTimer;
         private readonly ISocks5Validator socks5Validator;
+        private readonly ISocks5AuthValidator socks5AuthValidator;
 
         /// <summary>
         /// 
@@ -37,13 +35,14 @@ namespace common.socks5
         /// <param name="config"></param>
         /// <param name="wheelTimer"></param>
         /// <param name="socks5Validator"></param>
-        public Socks5ServerHandler(ISocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, ISocks5Validator socks5Validator)
+        public Socks5ServerHandler(ISocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, ISocks5Validator socks5Validator, ISocks5AuthValidator socks5AuthValidator)
         {
             this.socks5MessengerSender = socks5MessengerSender;
             this.config = config;
 
             this.wheelTimer = wheelTimer;
             this.socks5Validator = socks5Validator;
+            this.socks5AuthValidator = socks5AuthValidator;
             TimeoutUdp();
 
             handles = new Dictionary<Socks5EnumStep, Action<Socks5Info>> {
@@ -74,14 +73,14 @@ namespace common.socks5
 
         private void HandleRequest(Socks5Info data)
         {
-
-            data.Response[0] = (byte)Socks5EnumAuthType.NoAuth;
+            data.AuthType = socks5AuthValidator.GetAuthType(Socks5Parser.GetAuthMethods(data.Data.Span));
+            data.Response[0] = (byte)data.AuthType;
             data.Data = data.Response;
             socks5MessengerSender.Response(data);
         }
         private void HandleAuth(Socks5Info data)
         {
-            data.Response[0] = (byte)Socks5EnumAuthState.Success;
+            data.Response[0] = (byte)socks5AuthValidator.Validate(data.Data, data.AuthType);
             data.Data = data.Response;
             socks5MessengerSender.Response(data);
         }
@@ -112,16 +111,16 @@ namespace common.socks5
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
             Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
 
+            ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
             try
             {
-                ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
+
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
-                    if (IsError == false)
-                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> first {string.Join(",", sendData.ToArray())}");
                     data.TargetEP = remoteEndPoint;
                     Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-                    token = new UdpToken { Data = data, TargetSocket = socket, };
+                    socket.WindowsUdpBug();
+                    token = new UdpToken { Data = data, TargetSocket = socket, Key = key };
                     token.PoolBuffer = new byte[65535];
                     udpConnections.AddOrUpdate(key, token, (a, b) => token);
 
@@ -131,8 +130,6 @@ namespace common.socks5
                 }
                 else
                 {
-                    if (IsError == false)
-                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> {string.Join(",", sendData.ToArray())}");
                     token.Update();
                     _ = token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
@@ -140,10 +137,11 @@ namespace common.socks5
             }
             catch (Exception ex)
             {
-                if (IsError == false)
-                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{data.SourceEP}->forward udp-> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
-                IsError = true;
-                Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
+                if (udpConnections.TryRemove(key, out UdpToken _token))
+                {
+                    _token.Clear();
+                    Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
+                }
             }
         }
         private void TimeoutUdp()
@@ -158,18 +156,19 @@ namespace common.socks5
                     var tokens = udpConnections.Where(c => time - c.Value.LastTime > (60 * 1000));
                     foreach (var item in tokens)
                     {
-                        item.Value.Clear();
-                        udpConnections.TryRemove(item.Key, out _);
+                        if (udpConnections.TryRemove(item.Key, out _))
+                        {
+                            item.Value.Clear();
+                        }
                     }
                 }
             }, 1000, true);
         }
         private void ReceiveCallbackUdp(IAsyncResult result)
         {
+            UdpToken token = result.AsyncState as UdpToken;
             try
             {
-                UdpToken token = result.AsyncState as UdpToken;
-
                 int length = token.TargetSocket.EndReceiveFrom(result, ref token.TempRemoteEP);
                 if (length > 0)
                 {
@@ -183,12 +182,11 @@ namespace common.socks5
             }
             catch (Exception ex)
             {
-                if (IsError == false)
-                    Console.WriteLine($"socks5 forward udp -> receive" + ex);
-
-
-                IsError = true;
-                Logger.Instance.DebugError($"socks5 forward udp -> receive" + ex);
+                if (udpConnections.TryRemove(token.Key, out _))
+                {
+                    token.Clear();
+                    Logger.Instance.DebugError($"socks5 forward udp -> receive" + ex);
+                }
             }
         }
 
@@ -460,7 +458,7 @@ namespace common.socks5
         public void Clear()
         {
             TargetSocket?.SafeClose();
-            TargetSocket = null;
+            //TargetSocket = null;
 
             PoolBuffer = Helper.EmptyArray;
             GC.Collect();
@@ -522,6 +520,7 @@ namespace common.socks5
     /// </summary>
     public class UdpToken
     {
+        public ConnectionKeyUdp Key { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -573,7 +572,7 @@ namespace common.socks5
         /// <returns></returns>
         public bool Equals(ConnectionKeyUdp x, ConnectionKeyUdp y)
         {
-            return x.Source.Equals(y.Source) && x.ConnectId == y.ConnectId;
+            return x.Source != null && x.Source.Equals(y.Source) && x.ConnectId == y.ConnectId;
         }
         /// <summary>
         /// 
@@ -582,6 +581,7 @@ namespace common.socks5
         /// <returns></returns>
         public int GetHashCode(ConnectionKeyUdp obj)
         {
+            if (obj.Source == null) return 0;
             return obj.Source.GetHashCode() ^ obj.ConnectId.GetHashCode();
         }
     }

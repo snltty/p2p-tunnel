@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.libs.extends;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace common.udpforward
 
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, sourcePort);
             var udpClient = new UdpClient(localEndPoint);
-
+            udpClient.Client.WindowsUdpBug();
 
             ForwardAsyncServerToken token = new ForwardAsyncServerToken { SourcePort = sourcePort, UdpClient = udpClient };
             serversManager.TryAdd(token);

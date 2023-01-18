@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace common.socks5
 {
@@ -113,6 +114,8 @@ namespace common.socks5
             StartAccept(acceptEventArg);
 
             udpClient = new UdpClient(localEndPoint);
+            udpClient.Client.WindowsUdpBug();
+
             IAsyncResult result = udpClient.BeginReceive(ProcessReceiveUdp, null);
         }
         private void IO_Completed(object sender, SocketAsyncEventArgs e)
@@ -182,27 +185,33 @@ namespace common.socks5
         }
         private void ProcessReceive(SocketAsyncEventArgs e)
         {
+            AsyncUserToken token = (AsyncUserToken)e.UserToken;
             try
             {
-                AsyncUserToken token = (AsyncUserToken)e.UserToken;
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
                     int totalLength = e.BytesTransferred;
                     token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
 
                     //有些客户端，会把一个包拆开发送，很奇怪，不得不验证一下数据完整性
-                    if (token.DataWrap.Socks5Step == Socks5EnumStep.Request || token.DataWrap.Socks5Step == Socks5EnumStep.Command)
+                    if (token.DataWrap.Socks5Step < Socks5EnumStep.Forward)
                     {
-                        while (ValidateData(token.DataWrap) == false)
+                        bool gt = false;
+                        while (ValidateData(token.DataWrap,out gt) == false && gt == false)
                         {
                             totalLength += token.Socket.Receive(e.Buffer.AsSpan(e.Offset + totalLength));
                             token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
+                        }
+                        if (gt)
+                        {
+                            CloseClientSocket(e);
+                            return;
                         }
                     }
                     ExecuteHandle(token.DataWrap);
                     token.DataWrap.Data = Helper.EmptyArray;
 
-                    if (token.Socket.Available > 0)
+                    if (token.Socket.Available > 0 && token.DataWrap.Socks5Step >= Socks5EnumStep.Forward)
                     {
                         while (token.Socket.Available > 0)
                         {
@@ -214,6 +223,7 @@ namespace common.socks5
                                 token.DataWrap.Data = Helper.EmptyArray;
                             }
                         }
+
                     }
 
                     if (token.Socket.Connected == false)
@@ -233,18 +243,19 @@ namespace common.socks5
             }
             catch (Exception ex)
             {
+                Logger.Instance.DebugError($"step:{token.DataWrap.Socks5Step}-{string.Join(",", token.DataWrap.Data.ToArray())}");
                 CloseClientSocket(e);
                 Logger.Instance.DebugError(ex);
             }
         }
-        private bool ValidateData(Socks5Info info)
+        private bool ValidateData(Socks5Info info,out bool gt)
         {
+            gt = false;
             return info.Socks5Step switch
             {
-                Socks5EnumStep.Request => Socks5Parser.ValidateRequestData(info.Data),
-                Socks5EnumStep.Command => Socks5Parser.ValidateCommandData(info.Data),
-
-                Socks5EnumStep.Auth => true,
+                Socks5EnumStep.Request => Socks5Parser.ValidateRequestData(info.Data,out gt),
+                Socks5EnumStep.Command => Socks5Parser.ValidateCommandData(info.Data, out gt),
+                Socks5EnumStep.Auth => Socks5Parser.ValidateAuthData(info.Data, info.AuthType, out gt),
                 Socks5EnumStep.Forward => true,
                 Socks5EnumStep.ForwardUdp => true,
                 _ => true
@@ -264,22 +275,11 @@ namespace common.socks5
                 ExecuteHandle(udpInfo);
                 udpInfo.Data = Helper.EmptyArray;
 
-
-            }
-            catch (Exception ex)
-            {
-                Socks5ServerHandler.IsError = true;
-                Console.WriteLine($"socks5 listen udp -> error " + ex);
-            }
-
-            try
-            {
                 result = udpClient.BeginReceive(ProcessReceiveUdp, null);
             }
             catch (Exception ex)
             {
-                Socks5ServerHandler.IsError = true;
-                Console.WriteLine($"socks5 listen udp -> BeginReceive " + ex);
+                Logger.Instance.Error($"socks5 listen udp -> error " + ex);
             }
         }
         private void ExecuteHandle(Socks5Info info)
@@ -324,6 +324,7 @@ namespace common.socks5
                         return;
                     }
                     token.DataWrap.Socks5Step = info.Socks5Step;
+                    token.DataWrap.AuthType = info.AuthType;
                     if (info.Socks5Step == Socks5EnumStep.ForwardUdp)
                     {
                         udpClient.Send(info.Data.Span, info.SourceEP);
@@ -344,13 +345,13 @@ namespace common.socks5
             }
             else if (info.SourceEP != null)
             {
-                if (Socks5ServerHandler.IsError == false)
+                try
                 {
-                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】：{info.SourceEP}->response udp-> {string.Join(",", info.Data.ToArray())}");
-                    Console.WriteLine("===================================================================================================================");
+                    udpClient.Send(info.Data.Span, info.SourceEP);
                 }
-
-                udpClient.Send(info.Data.Span, info.SourceEP);
+                catch (Exception)
+                {
+                }
             }
         }
 

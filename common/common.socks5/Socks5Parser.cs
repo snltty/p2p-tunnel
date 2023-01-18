@@ -23,10 +23,11 @@ namespace common.socks5
             //VER       NMETHODS    METHODS
             // 1            1       1-255
             //版本     支持哪些认证     一个认证方式一个字节
-            Socks5EnumAuthType[] res = new Socks5EnumAuthType[span[1]];
-            for (int i = 0; i < span.Length; i++)
+            byte length = span[1];
+            Socks5EnumAuthType[] res = new Socks5EnumAuthType[length];
+            for (byte i = 0; i < length; i++)
             {
-                res[i] = (Socks5EnumAuthType)span[i];
+                res[i] = (Socks5EnumAuthType)span[2 + i];
             }
             return res;
         }
@@ -257,17 +258,24 @@ namespace common.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static bool ValidateRequestData(Memory<byte> data)
+        public static bool ValidateRequestData(Memory<byte> data, out bool gt)
         {
-            return data.Length > 2 && data.Length == 2 + data.Span[1];
+            gt = false;
+            if (data.Length > 2)
+            {
+                gt = data.Length > 2 + data.Span[1];
+                return data.Length == 2 + data.Span[1];
+            }
+            return false;
         }
         /// <summary>
         /// 验证command数据完整性
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static bool ValidateCommandData(Memory<byte> data)
+        public static bool ValidateCommandData(Memory<byte> data, out bool gt)
         {
+            gt = false;
             /*
              * VERSION  COMMAND RSV ADDRESS_TYPE    DST.ADDR    DST.PORT
              * 1        1       1   1               1-255       2
@@ -283,9 +291,59 @@ namespace common.socks5
                 Socks5EnumAddressType.IPV6 => 16 + 2,
                 _ => throw new NotImplementedException(),
             };
+            gt = data.Length > 4 + addrLength;
             //首部4字节+地址长度
             return data.Length == 4 + addrLength;
         }
 
+        /// <summary>
+        /// 验证认证数据完整性
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="authType"></param>
+        /// <param name="gt"></param>
+        /// <returns></returns>
+        public static bool ValidateAuthData(Memory<byte> data, Socks5EnumAuthType authType, out bool gt)
+        {
+            gt = false;
+            return authType switch
+            {
+                Socks5EnumAuthType.NoAuth => true,
+                Socks5EnumAuthType.Password => ValidateAuthPasswordData(data, out gt),
+                Socks5EnumAuthType.GSSAPI => true,
+                Socks5EnumAuthType.IANA => true,
+                Socks5EnumAuthType.UnKnow => false,
+                Socks5EnumAuthType.NotSupported => false,
+                _ => false,
+            };
+        }
+        private static bool ValidateAuthPasswordData(Memory<byte> data, out bool gt)
+        {
+            /*
+             VERSION	USERNAME_LENGTH	USERNAME	PASSWORD_LENGTH	PASSWORD
+                1字节	1字节	        1到255字节	1字节	        1到255字节
+                0x01	0x01	        0x0a	    0x01	        0x0a
+             */
+            gt = false;
+
+            var span = data.Slice(1).Span;
+            //至少有 USERNAME_LENGTH  PASSWORD_LENGTH 字节以上
+            if (span.Length <= 2)
+            {
+                return false;
+            }
+
+            byte nameLength = span[0];
+            //至少有 USERNAME_LENGTH USERNAME  PASSWORD_LENGTH
+            if (span.Length < nameLength + 1 + 1)
+            {
+                return false;
+            }
+
+            byte passwordLength = span[1 + nameLength];
+
+            gt = span.Length > 1 + 1 + nameLength + passwordLength;
+            return span.Length == 1 + 1 + nameLength + passwordLength;
+        }
     }
 }

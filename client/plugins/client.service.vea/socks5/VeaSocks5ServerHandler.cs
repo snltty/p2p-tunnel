@@ -26,14 +26,14 @@ namespace client.service.vea.socks5
         /// <param name="config"></param>
         /// <param name="wheelTimer"></param>
         /// <param name="veaKeyValidator"></param>
-        public VeaSocks5ServerHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, IVeaKeyValidator veaKeyValidator)
+        public VeaSocks5ServerHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, IVeaKeyValidator veaKeyValidator,Socks5AuthValidator socks5AuthValidator)
             : base(socks5MessengerSender, new common.socks5.Config
             {
                 ConnectEnable = config.ConnectEnable,
                 NumConnections = config.NumConnections,
                 BufferSize = config.BufferSize,
-                TargetName = config.TargetName,
-            }, wheelTimer, veaKeyValidator)
+                TargetName = config.TargetName
+            }, wheelTimer, veaKeyValidator, socks5AuthValidator)
         {
             _config = config;
             UpdateConfig();

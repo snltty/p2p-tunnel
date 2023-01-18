@@ -75,7 +75,8 @@ namespace common.socks5
         /// <returns></returns>
         public async Task<Config> ReadConfig()
         {
-            return await configDataProvider.Load();
+            var config =  await configDataProvider.Load();
+            return config;
         }
         /// <summary>
         /// 
@@ -101,9 +102,7 @@ namespace common.socks5
             IsPac = config.IsPac;
             TargetName = config.TargetName;
             NumConnections = config.NumConnections;
-
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }
-
 }

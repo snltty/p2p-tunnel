@@ -1,11 +1,7 @@
 ﻿using client.messengers.clients;
-using client.service.socks5;
-using common.libs;
 using common.libs.extends;
 using common.server;
 using common.socks5;
-using System;
-using System.Linq;
 using System.Net;
 
 namespace client.service.vea.socks5
@@ -22,11 +18,9 @@ namespace client.service.vea.socks5
     /// </summary>
     public sealed class VeaSocks5ClientHandler : Socks5ClientHandler, IVeaSocks5ClientHandler
     {
-        private readonly IVeaSocks5MessengerSender socks5MessengerSender;
         private readonly Config config;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaTransfer veaTransfer;
-        private readonly IVeaSocks5ClientListener socks5ClientListener;
 
         /// <summary>
         /// 组网socks5客户端
@@ -38,13 +32,17 @@ namespace client.service.vea.socks5
         /// <param name="veaTransfer"></param>
         /// <param name="veaSocks5DstEndpointProvider"></param>
         public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, IClientInfoCaching clientInfoCaching,
-            IVeaSocks5ClientListener socks5ClientListener, VeaTransfer veaTransfer, IVeaSocks5DstEndpointProvider veaSocks5DstEndpointProvider)
-            : base(socks5MessengerSender, veaSocks5DstEndpointProvider, socks5ClientListener)
+            IVeaSocks5ClientListener socks5ClientListener, VeaTransfer veaTransfer, IVeaSocks5DstEndpointProvider veaSocks5DstEndpointProvider,ISocks5AuthValidator socks5AuthValidator)
+            : base(socks5MessengerSender, veaSocks5DstEndpointProvider, socks5ClientListener, socks5AuthValidator, new common.socks5.Config
+            {
+                ConnectEnable = config.ConnectEnable,
+                NumConnections = config.NumConnections,
+                BufferSize = config.BufferSize,
+                TargetName = config.TargetName
+            })
         {
-            this.socks5MessengerSender = socks5MessengerSender;
             this.config = config;
             this.clientInfoCaching = clientInfoCaching;
-            this.socks5ClientListener = socks5ClientListener;
             this.veaTransfer = veaTransfer;
         }
 
