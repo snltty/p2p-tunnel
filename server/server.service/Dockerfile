@@ -34,7 +34,7 @@
 
 FROM alpine:latest
 ENV TZ=Asia/Shanghai DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
-RUN echo "http://mirrors.aliyun.com/alpine/latest-stable/main/" > /etc/apk/repositories \
+RUN echo "https://mirrors.tuna.tsinghua.edu.cn/alpine/latest-stable/main/" > /etc/apk/repositories \
     && apk add --no-cache libstdc++ libintl tzdata zeromq \
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo $TZ > /etc/timezone
