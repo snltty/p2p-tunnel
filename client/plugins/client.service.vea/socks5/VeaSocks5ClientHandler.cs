@@ -33,13 +33,7 @@ namespace client.service.vea.socks5
         /// <param name="veaSocks5DstEndpointProvider"></param>
         public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, IClientInfoCaching clientInfoCaching,
             IVeaSocks5ClientListener socks5ClientListener, VeaTransfer veaTransfer, IVeaSocks5DstEndpointProvider veaSocks5DstEndpointProvider,ISocks5AuthValidator socks5AuthValidator)
-            : base(socks5MessengerSender, veaSocks5DstEndpointProvider, socks5ClientListener, socks5AuthValidator, new common.socks5.Config
-            {
-                ConnectEnable = config.ConnectEnable,
-                NumConnections = config.NumConnections,
-                BufferSize = config.BufferSize,
-                TargetName = config.TargetName
-            })
+            : base(socks5MessengerSender, veaSocks5DstEndpointProvider, socks5ClientListener, socks5AuthValidator)
         {
             this.config = config;
             this.clientInfoCaching = clientInfoCaching;
