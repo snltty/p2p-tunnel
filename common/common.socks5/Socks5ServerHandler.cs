@@ -140,8 +140,8 @@ namespace common.socks5
                 if (udpConnections.TryRemove(key, out UdpToken _token))
                 {
                     _token.Clear();
-                    Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
                 }
+                Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndPoint} : {sendData.Length}  " + ex);
             }
         }
         private void TimeoutUdp()
@@ -185,8 +185,8 @@ namespace common.socks5
                 if (udpConnections.TryRemove(token.Key, out _))
                 {
                     token.Clear();
-                    Logger.Instance.DebugError($"socks5 forward udp -> receive" + ex);
                 }
+                Logger.Instance.DebugError($"socks5 forward udp -> receive" + ex);
             }
         }
 
