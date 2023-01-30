@@ -765,6 +765,12 @@ namespace ENet
 
             Native.enet_host_bandwidth_limit(nativeHost, incomingBandwidth, outgoingBandwidth);
         }
+        public void SetBandwidthThrottle()
+        {
+            ThrowIfNotCreated();
+
+            Native.enet_host_bandwidth_throttle(nativeHost);
+        }
 
         public void SetChannelLimit(int channelLimit)
         {
@@ -1268,6 +1274,10 @@ namespace ENet
 
         [DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void enet_host_bandwidth_limit(IntPtr host, uint incomingBandwidth, uint outgoingBandwidth);
+
+        [DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void enet_host_bandwidth_throttle(IntPtr host);
+
 
         [DllImport(nativeLibrary, CallingConvention = CallingConvention.Cdecl)]
         internal static extern uint enet_host_get_peers_count(IntPtr host);

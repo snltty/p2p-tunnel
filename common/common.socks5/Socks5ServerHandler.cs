@@ -109,6 +109,7 @@ namespace common.socks5
         private void HndleForwardUdp(Socks5Info data)
         {
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
+            if (remoteEndPoint.Port == 0) return;
             Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
 
             ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);

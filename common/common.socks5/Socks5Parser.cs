@@ -77,8 +77,19 @@ namespace common.socks5
                         index = 1 + 16;
                         break;
                     case Socks5EnumAddressType.Domain:
-                        ip = NetworkHelper.GetDomainIp(Encoding.UTF8.GetString(span.Slice(2, span[1])));
-                        index = 2 + span[1];
+                        {
+                            try
+                            {
+                                ip = NetworkHelper.GetDomainIp(Encoding.UTF8.GetString(span.Slice(2, span[1])));
+                                index = 2 + span[1];
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Instance.Error(Encoding.UTF8.GetString(span.Slice(2, span[1])));
+                                Logger.Instance.Error(ex);
+                                return new IPEndPoint(IPAddress.Any, 0);
+                            }
+                        }
                         break;
 
                     default:

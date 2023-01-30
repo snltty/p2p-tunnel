@@ -26,7 +26,8 @@ namespace enet
                 Host server = new Host();
                 Address address = new Address();
                 address.Port = 5000;
-                server.Create(address, 400);
+                server.Create(address, 400, 255, 1 * 1024 * 1024, 1 * 1024 * 1024);
+                server.SetBandwidthThrottle();
 
                 Event netEvent;
                 while (true)
@@ -68,7 +69,7 @@ namespace enet
                                         if (i == packCount)
                                         {
                                             sw.Stop();
-                                            Console.WriteLine($"{((packSize * packCount / 1024.0 / 1024) / (sw.ElapsedMilliseconds/1000.0))}MB/s");
+                                            Console.WriteLine($"{((packSize * packCount / 1024.0 / 1024) / (sw.ElapsedMilliseconds / 1000.0))}MB/s");
                                         }
                                     }
                                     catch (Exception ex)
@@ -90,8 +91,12 @@ namespace enet
             {
                 try
                 {
+                    int queue = 0;
+
+
                     System.Threading.Thread.Sleep(2000);
                     Host client = new Host();
+
 
                     Address address = new Address();
                     address.SetIP(IPAddress.Loopback.ToString());
@@ -99,7 +104,8 @@ namespace enet
 
                     Address address1 = new Address();
                     address1.Port = 5001;
-                    client.Create(address1, 200);
+                    client.Create(address1, 400, 255, 1 * 1024 * 1024, 1 * 1024 * 1024);
+                    client.SetBandwidthThrottle();
                     Peer peer = client.Connect(address);
 
                     Event netEvent;
@@ -163,7 +169,8 @@ namespace enet
                         {
                             BitConverter.GetBytes(i).AsSpan().CopyTo(bytes);
                             packet.Create(bytes, PacketFlags.Reliable);
-                            if(peer.Send(0, ref packet) == false)
+
+                            if (peer.Send(0, ref packet) == false)
                             {
                                 Console.WriteLine("发送失败");
                             }
