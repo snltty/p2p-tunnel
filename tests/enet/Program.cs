@@ -26,8 +26,7 @@ namespace enet
                 Host server = new Host();
                 Address address = new Address();
                 address.Port = 5000;
-                server.Create(address, 400, 255, 1 * 1024 * 1024, 1 * 1024 * 1024);
-                server.SetBandwidthThrottle();
+                server.Create(address, 400, 255, 1 * 1024, 1 * 1024);
 
                 Event netEvent;
                 while (true)
@@ -104,8 +103,7 @@ namespace enet
 
                     Address address1 = new Address();
                     address1.Port = 5001;
-                    client.Create(address1, 400, 255, 1 * 1024 * 1024, 1 * 1024 * 1024);
-                    client.SetBandwidthThrottle();
+                    client.Create(address1, 400, 255, 1 * 1024, 1 * 1024);
                     Peer peer = client.Connect(address);
 
                     Event netEvent;
