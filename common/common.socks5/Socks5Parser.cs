@@ -2,6 +2,7 @@
 using common.libs.extends;
 using System;
 using System.Buffers.Binary;
+using System.Linq;
 using System.Net;
 using System.Text;
 
@@ -85,6 +86,7 @@ namespace common.socks5
                             }
                             catch (Exception ex)
                             {
+                                Logger.Instance.Error(string.Join(",", span.ToArray()));
                                 Logger.Instance.Error(Encoding.UTF8.GetString(span.Slice(2, span[1])));
                                 Logger.Instance.Error(ex);
                                 return new IPEndPoint(IPAddress.Any, 0);
