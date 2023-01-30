@@ -96,7 +96,6 @@ namespace enet
                     System.Threading.Thread.Sleep(2000);
                     Host client = new Host();
 
-
                     Address address = new Address();
                     address.SetIP(IPAddress.Loopback.ToString());
                     address.Port = 5000;
