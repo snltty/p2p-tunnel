@@ -1,11 +1,16 @@
 ﻿using ENet;
+using System.Diagnostics;
 using System.Net;
 using System.Threading.Channels;
 
 namespace enet
 {
-    internal class Program
+    internal unsafe class Program
     {
+        static int packSize = 2 * 1024;
+        static int packCount = 10000;
+        static Stopwatch sw = new Stopwatch();
+
         static void Main(string[] args)
         {
             ENet.Library.Initialize();
@@ -43,19 +48,34 @@ namespace enet
                                 break;
 
                             case EventType.Connect:
-                                Console.WriteLine("Client connected - ID: " + netEvent.Peer.ID + ", IP: " + netEvent.Peer.IP);
+                                Console.WriteLine("Client connected - ID: " + netEvent.Peer.ID + ", IP: " + netEvent.Peer.IP + "，port:" + netEvent.Peer.Port);
                                 break;
 
                             case EventType.Disconnect:
-                                Console.WriteLine("Client disconnected - ID: " + netEvent.Peer.ID + ", IP: " + netEvent.Peer.IP);
+                                Console.WriteLine("Client disconnected - ID: " + netEvent.Peer.ID + ", IP: " + netEvent.Peer.IP + "，port:" + netEvent.Peer.Port);
                                 break;
 
                             case EventType.Timeout:
-                                Console.WriteLine("Client timeout - ID: " + netEvent.Peer.ID + ", IP: " + netEvent.Peer.IP);
+                                Console.WriteLine("Client timeout - ID: " + netEvent.Peer.ID + ", IP: " + netEvent.Peer.IP + "，port:" + netEvent.Peer.Port);
                                 break;
 
                             case EventType.Receive:
-                                Console.WriteLine("Packet received from - ID: " + netEvent.Peer.ID + ", IP: " + netEvent.Peer.IP + ", Channel ID: " + netEvent.ChannelID + ", Data length: " + netEvent.Packet.Length);
+                                {
+                                    try
+                                    {
+                                        int i = BitConverter.ToInt32(new Span<byte>((void*)(netEvent.Packet.Data), netEvent.Packet.Length));
+
+                                        if (i == packCount)
+                                        {
+                                            sw.Stop();
+                                            Console.WriteLine($"{((packSize * packCount / 1024.0 / 1024) / (sw.ElapsedMilliseconds/1000.0))}MB/s");
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine(ex + "");
+                                    }
+                                }
                                 netEvent.Packet.Dispose();
                                 break;
                         }
@@ -71,7 +91,7 @@ namespace enet
                 try
                 {
                     System.Threading.Thread.Sleep(2000);
-                    using Host client = new Host();
+                    Host client = new Host();
 
                     Address address = new Address();
                     address.SetIP(IPAddress.Loopback.ToString());
@@ -81,7 +101,7 @@ namespace enet
                     address1.Port = 5001;
                     client.Create(address1, 200);
                     Peer peer = client.Connect(address);
-                   
+
                     Event netEvent;
                     Task.Run(() =>
                     {
@@ -104,19 +124,22 @@ namespace enet
                                         break;
 
                                     case EventType.Connect:
-                                        //  Console.WriteLine("Client connected to server");
+                                        Console.WriteLine("Client connected to server");
                                         break;
 
                                     case EventType.Disconnect:
-                                        // Console.WriteLine("Client disconnected from server");
+                                        Console.WriteLine("Client disconnected from server");
                                         break;
 
                                     case EventType.Timeout:
-                                        // Console.WriteLine("Client connection timeout");
+                                        Console.WriteLine("Client connection timeout");
                                         break;
 
                                     case EventType.Receive:
-                                        // Console.WriteLine("Packet received from server - Channel ID: " + netEvent.ChannelID + ", Data length: " + netEvent.Packet.Length);
+                                        {
+                                            int i = BitConverter.ToInt32(new Span<byte>((void*)new IntPtr(netEvent.Packet.UserData), netEvent.Packet.Length));
+                                            Console.WriteLine(i);
+                                        }
                                         netEvent.Packet.Dispose();
                                         break;
                                 }
@@ -133,12 +156,20 @@ namespace enet
 
                     Task.Run(() =>
                     {
+                        sw.Start();
+                        byte[] bytes = new byte[packSize];
                         Packet packet = default(Packet);
-                        for (int i = 0; i < 10; i++)
+                        for (int i = 1; i <= packCount; i++)
                         {
-                            packet.Create(BitConverter.GetBytes(i), PacketFlags.Reliable);
-                            peer.Send(0, ref packet);
+                            BitConverter.GetBytes(i).AsSpan().CopyTo(bytes);
+                            packet.Create(bytes, PacketFlags.Reliable);
+                            if(peer.Send(0, ref packet) == false)
+                            {
+                                Console.WriteLine("发送失败");
+                            }
+                            packet.Dispose();
                         }
+                        Console.WriteLine("发送完成====");
                     });
                 }
                 catch (Exception ex)

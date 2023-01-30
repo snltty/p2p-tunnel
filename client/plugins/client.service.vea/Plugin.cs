@@ -1,6 +1,7 @@
 ﻿using client.service.vea.socks5;
 using common.libs;
 using common.server;
+using common.socks5;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -43,12 +44,14 @@ namespace client.service.vea
             services.AddSingleton<VeaMessengerSender>();
             services.AddSingleton<IVeaSocks5ClientHandler, VeaSocks5ClientHandler>();
             services.AddSingleton<IVeaSocks5DstEndpointProvider, VeaSocks5DstEndpointProvider>();
-            
+
             services.AddSingleton<IVeaSocks5ServerHandler, VeaSocks5ServerHandler>();
             services.AddSingleton<IVeaSocks5ClientListener, VeaSocks5ClientListener>();
             services.AddSingleton<IVeaSocks5MessengerSender, VeaSocks5MessengerSender>();
 
             services.AddSingleton<IVeaKeyValidator, DefaultVeaKeyValidator>();
+            services.AddSingleton<ISocks5AuthValidator, Socks5AuthValidator>();
+
         }
     }
 }

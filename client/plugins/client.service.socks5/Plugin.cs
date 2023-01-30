@@ -65,6 +65,7 @@ namespace client.service.socks5
             
 
             services.AddSingleton<ISocks5Validator, DefaultSocks5Validator>();
+            services.AddSingleton<ISocks5AuthValidator, Socks5AuthValidator>();
         }
     }
 
