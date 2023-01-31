@@ -34,6 +34,7 @@ namespace client.service
         public static void Start()
         {
             ThreadPool.SetMinThreads(150, 150);
+            ThreadPool.SetMaxThreads(1024, 1024);
             LoggerConsole();
             Logger.Instance.Info("正在启动...");
 

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace common.tcpforward
 {
@@ -216,6 +217,7 @@ namespace common.tcpforward
                 Logger.Instance.DebugError(ex);
             }
         }
+
 
         private bool Receive(ForwardAsyncUserToken token, Memory<byte> data)
         {

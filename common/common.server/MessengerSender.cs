@@ -37,7 +37,7 @@ namespace common.server
             {
                 return new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT };
             }
-            msg.Connection.WaitOne();
+            await msg.Connection.WaitOne();
             if (msg.RequestId == 0)
             {
                 uint id = msg.RequestId;
@@ -48,14 +48,14 @@ namespace common.server
 
             bool res = await SendOnly(msg, true).ConfigureAwait(false);
 
-            msg.Connection.Release();
-
             if (res == false)
             {
                 sends.TryRemove(msg.RequestId, out _);
                 timeout.Cancel();
                 timeout.Task.State.Tcs.SetResult(new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT });
             }
+            msg.Connection.Release();
+
             return await timeout.Task.State.Tcs.Task.ConfigureAwait(false);
         }
 
@@ -72,7 +72,7 @@ namespace common.server
             }
 
             if (locked == false)
-                msg.Connection.WaitOne();
+                await msg.Connection.WaitOne();
             try
             {
                 if (msg.RequestId == 0)
@@ -123,7 +123,7 @@ namespace common.server
                 return false;
             }
 
-            msg.Connection.WaitOne();
+            await msg.Connection.WaitOne();
             try
             {
                 msg.Encode = msg.Connection.EncodeEnabled && msg.Encode;

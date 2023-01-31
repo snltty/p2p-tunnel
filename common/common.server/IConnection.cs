@@ -198,7 +198,7 @@ namespace common.server
 
 
 
-        public void WaitOne();
+        public Task WaitOne();
         public void Release();
     }
 
@@ -371,16 +371,16 @@ namespace common.server
         public abstract IConnection Clone();
 
 
-        SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+        SemaphoreSlim Semaphore = new SemaphoreSlim(2);
         bool locked = false;
-        public virtual void WaitOne()
+        public virtual async Task WaitOne()
         {
             try
             {
                 if (Semaphore != null)
                 {
                     locked = true;
-                    Semaphore.Wait();
+                    await Semaphore.WaitAsync();
                 }
             }
             catch (Exception ex)
@@ -469,9 +469,11 @@ namespace common.server
             {
                 try
                 {
+
                     while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
-                        await Task.Delay(1);
+                        await Task.Delay(30);
+                        NetPeer.Update();
                     }
 
                     int len = 0;
@@ -480,9 +482,11 @@ namespace common.server
                         len = tokenBucketRatelimit.Try(data.Length);
                         if (len < data.Length)
                         {
-                            await Task.Delay(1);
+                            await Task.Delay(30);
                         }
                     } while (len < data.Length);
+
+
 
                     NetPeer.Send(data, 0, data.Length, DeliveryMethod.ReliableOrdered);
                     NetPeer.Update();

@@ -28,6 +28,7 @@ namespace common.tcpforward
         public bool SendRequest(TcpForwardInfo arg)
         {
             byte[] bytes = arg.ToBytes(out int length);
+
             bool res = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)TcpForwardMessengerIds.Request,
@@ -46,12 +47,14 @@ namespace common.tcpforward
         public void SendResponse(TcpForwardInfo arg, IConnection connection)
         {
             byte[] bytes = arg.ToBytes(out int length);
+
             _ = messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)TcpForwardMessengerIds.Response,
                 Connection = connection,
                 Payload = bytes.AsMemory(0, length)
             }).Result;
+
             arg.Return(bytes);
         }
         /// <summary>
