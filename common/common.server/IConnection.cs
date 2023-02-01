@@ -103,14 +103,14 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public ValueTask<bool> Send(ReadOnlyMemory<byte> data);
+        public Task<bool> Send(ReadOnlyMemory<byte> data);
         /// <summary>
         /// 发送
         /// </summary>
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public ValueTask<bool> Send(byte[] data, int length);
+        public Task<bool> Send(byte[] data, int length);
 
         /// <summary>
         /// 销毁
@@ -329,14 +329,14 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public abstract ValueTask<bool> Send(ReadOnlyMemory<byte> data);
+        public abstract Task<bool> Send(ReadOnlyMemory<byte> data);
         /// <summary>
         /// 发送
         /// </summary>
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public abstract ValueTask<bool> Send(byte[] data, int length);
+        public abstract Task<bool> Send(byte[] data, int length);
 
         /// <summary>
         /// 销毁
@@ -370,8 +370,7 @@ namespace common.server
         /// <returns></returns>
         public abstract IConnection Clone();
 
-
-        SemaphoreSlim Semaphore = new SemaphoreSlim(2);
+        SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         bool locked = false;
         public virtual async Task WaitOne()
         {
@@ -451,7 +450,7 @@ namespace common.server
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public override async ValueTask<bool> Send(byte[] data, int length)
+        public override async Task<bool> Send(byte[] data, int length)
         {
             return await Send(data.AsMemory(0, length));
         }
@@ -463,7 +462,7 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
+        public override async Task<bool> Send(ReadOnlyMemory<byte> data)
         {
             if (Connected)
             {
@@ -472,8 +471,8 @@ namespace common.server
 
                     while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
-                        await Task.Delay(30);
                         NetPeer.Update();
+                        await Task.Delay(30);
                     }
 
                     int len = 0;
@@ -485,8 +484,6 @@ namespace common.server
                             await Task.Delay(30);
                         }
                     } while (len < data.Length);
-
-
 
                     NetPeer.Send(data, 0, data.Length, DeliveryMethod.ReliableOrdered);
                     NetPeer.Update();
@@ -580,7 +577,7 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public override async ValueTask<bool> Send(ReadOnlyMemory<byte> data)
+        public override async Task<bool> Send(ReadOnlyMemory<byte> data)
         {
             if (Connected)
             {
@@ -604,7 +601,7 @@ namespace common.server
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public override async ValueTask<bool> Send(byte[] data, int length)
+        public override async Task<bool> Send(byte[] data, int length)
         {
             return await Send(data.AsMemory(0, length));
         }

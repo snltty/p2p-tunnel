@@ -46,6 +46,17 @@ namespace common.libs
             { IsBackground = true }.Start();
         }
 
+
+        public int lockNum = 0;
+        public void Lock()
+        {
+            Interlocked.Increment(ref lockNum);
+        }
+        public void UnLock()
+        {
+            Interlocked.Decrement(ref lockNum);
+        }
+
         /// <summary>
         /// 
         /// </summary>
