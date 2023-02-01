@@ -31,13 +31,21 @@ namespace common.server
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public async Task<MessageResponeInfo> SendReply(MessageRequestWrap msg)
+        public async Task<MessageResponeInfo> SendReply(MessageRequestWrap msg, bool logger = false)
         {
             if (msg.Connection == null)
             {
                 return new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT };
             }
+            //if (logger)
+            //{
+            //    Console.WriteLine("抢锁");
+            //}
             await msg.Connection.WaitOne();
+            //if (logger)
+            //{
+            //    Console.WriteLine("抢锁成功");
+            //}
             if (msg.RequestId == 0)
             {
                 uint id = msg.RequestId;
