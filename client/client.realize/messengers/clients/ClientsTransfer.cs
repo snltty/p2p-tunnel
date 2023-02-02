@@ -460,7 +460,7 @@ namespace client.realize.messengers.clients
             {
                 try
                 {
-                    //Console.WriteLine($"start ping:{item.Name}");
+                    Console.WriteLine($"start ping:{item.Name}");
                     var start = DateTime.Now;
                     var res = await heartMessengerSender.Heart(item.Connection);
                     if (res)
@@ -471,7 +471,7 @@ namespace client.realize.messengers.clients
                     {
                         item.Connection.RoundTripTime = -1;
                     }
-                    // Console.WriteLine($"end ping:{item.Name}");
+                    Console.WriteLine($"end ping:{item.Name}");
                 }
                 catch (Exception)
                 {

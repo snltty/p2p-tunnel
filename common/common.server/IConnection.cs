@@ -583,7 +583,8 @@ namespace common.server
             {
                 try
                 {
-                    await TcpSocket.SendAsync(data, SocketFlags.None).ConfigureAwait(false);
+                    await Task.CompletedTask;
+                    TcpSocket.Send(data.Span, SocketFlags.None);
                     SendBytes += data.Length;
                     return true;
                 }

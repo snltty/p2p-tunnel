@@ -221,17 +221,20 @@ namespace common.tcpforward
         }
 
 
-       
+        object lockObject = new object();
         private bool Receive(ForwardAsyncUserToken token, Memory<byte> data)
         {
-            token.Request.Buffer = data;
-            bool res = OnRequest(token.Request);
-            token.Request.Buffer = Helper.EmptyArray;
-            if (res == false)
+            lock (lockObject)
             {
-                CloseClientSocket(token);
+                token.Request.Buffer = data;
+                bool res = OnRequest(token.Request);
+                token.Request.Buffer = Helper.EmptyArray;
+                if (res == false)
+                {
+                    CloseClientSocket(token);
+                }
+                return res;
             }
-            return res;
         }
 
         private void CloseClientSocket(SocketAsyncEventArgs e)
