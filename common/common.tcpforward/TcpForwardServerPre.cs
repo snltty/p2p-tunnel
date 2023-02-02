@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace common.tcpforward
 {
@@ -27,6 +28,7 @@ namespace common.tcpforward
         private readonly ClientsManager clientsManager = new ClientsManager();
 
         private NumberSpaceUInt32 requestIdNs = new NumberSpaceUInt32(0);
+        SemaphoreSlim Semaphore = new SemaphoreSlim(1);
 
         private int receiveBufferSize = 8 * 1024;
 
@@ -219,6 +221,7 @@ namespace common.tcpforward
         }
 
 
+       
         private bool Receive(ForwardAsyncUserToken token, Memory<byte> data)
         {
             token.Request.Buffer = data;

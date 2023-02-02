@@ -37,15 +37,8 @@ namespace common.server
             {
                 return new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT };
             }
-            //if (logger)
-            //{
-            //    Console.WriteLine("抢锁");
-            //}
+
             await msg.Connection.WaitOne();
-            //if (logger)
-            //{
-            //    Console.WriteLine("抢锁成功");
-            //}
             if (msg.RequestId == 0)
             {
                 uint id = msg.RequestId;

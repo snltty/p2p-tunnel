@@ -471,7 +471,7 @@ namespace client.realize.messengers.clients
                     {
                         item.Connection.RoundTripTime = -1;
                     }
-                    //Console.WriteLine($"end ping:{item.Name}");
+                    // Console.WriteLine($"end ping:{item.Name}");
                 }
                 catch (Exception)
                 {
