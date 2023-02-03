@@ -38,7 +38,8 @@ namespace common.server
                 return new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT };
             }
 
-            //  await msg.Connection.WaitOne();
+
+            await msg.Connection.WaitOne();
             if (msg.RequestId == 0)
             {
                 uint id = msg.RequestId;
@@ -47,15 +48,14 @@ namespace common.server
             }
             WheelTimerTimeout<TimeoutState> timeout = NewReply(msg);
 
-            bool res = await SendOnly(msg, true).ConfigureAwait(false);
-
+            bool res = await SendOnly(msg, true, logger).ConfigureAwait(false);
             if (res == false)
             {
                 sends.TryRemove(msg.RequestId, out _);
                 timeout.Cancel();
                 timeout.Task.State.Tcs.SetResult(new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT });
             }
-            //  msg.Connection.Release();
+            msg.Connection.Release();
 
             return await timeout.Task.State.Tcs.Task.ConfigureAwait(false);
         }
@@ -71,9 +71,8 @@ namespace common.server
             {
                 return false;
             }
-
-            //  if (locked == false)
-            //    await msg.Connection.WaitOne();
+            if (locked == false)
+                await msg.Connection.WaitOne();
             try
             {
                 if (msg.RequestId == 0)
@@ -94,7 +93,6 @@ namespace common.server
                 {
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
-
                 byte[] bytes = msg.ToArray(out int length);
                 bool res = await msg.Connection.Send(bytes.AsMemory(0, length)).ConfigureAwait(false);
                 msg.Return(bytes);
@@ -106,8 +104,8 @@ namespace common.server
             }
             finally
             {
-                //  if (locked == false)
-                //    msg.Connection.Release();
+                if (locked == false)
+                    msg.Connection.Release();
             }
             return false;
         }
@@ -124,7 +122,7 @@ namespace common.server
                 return false;
             }
 
-            //  await msg.Connection.WaitOne();
+            await msg.Connection.WaitOne();
             try
             {
                 msg.Encode = msg.Connection.EncodeEnabled && msg.Encode;
@@ -144,7 +142,7 @@ namespace common.server
             }
             finally
             {
-                // msg.Connection.Release();
+                msg.Connection.Release();
             }
             return false;
         }

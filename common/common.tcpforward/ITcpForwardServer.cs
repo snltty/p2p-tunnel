@@ -1,5 +1,6 @@
 ﻿using common.libs;
 using System;
+using System.Threading.Tasks;
 
 namespace common.tcpforward
 {
@@ -38,7 +39,7 @@ namespace common.tcpforward
         /// <summary>
         /// 
         /// </summary>
-        public Func<TcpForwardInfo,bool> OnRequest { get; set; }
+        public Func<TcpForwardInfo, bool> OnRequest { get; set; }
         /// <summary>
         /// 
         /// </summary>

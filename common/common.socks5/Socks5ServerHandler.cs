@@ -241,6 +241,8 @@ namespace common.socks5
             //maxNumberAcceptedClients.WaitOne();
             Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
+            socket.SendTimeout = 15000;
 
             AsyncServerUserToken token = new AsyncServerUserToken
             {

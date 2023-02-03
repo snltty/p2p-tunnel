@@ -34,7 +34,7 @@ namespace common.tcpforward
                 MessengerId = (ushort)TcpForwardMessengerIds.Request,
                 Connection = arg.Connection,
                 Payload = bytes.AsMemory(0, length)
-            },logger:true).Result;
+            }).Result;
             arg.Return(bytes);
 
             return res;

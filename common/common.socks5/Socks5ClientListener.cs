@@ -183,7 +183,7 @@ namespace common.socks5
                 ProcessReceive(readEventArgs);
             }
         }
-        private void ProcessReceive(SocketAsyncEventArgs e)
+        private async void ProcessReceive(SocketAsyncEventArgs e)
         {
             AsyncUserToken token = (AsyncUserToken)e.UserToken;
             try
@@ -197,7 +197,7 @@ namespace common.socks5
                     if (token.DataWrap.Socks5Step < Socks5EnumStep.Forward)
                     {
                         bool gt = false;
-                        while (ValidateData(token.DataWrap,out gt) == false && gt == false)
+                        while (ValidateData(token.DataWrap, out gt) == false && gt == false)
                         {
                             totalLength += token.Socket.Receive(e.Buffer.AsSpan(e.Offset + totalLength));
                             token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
@@ -215,7 +215,7 @@ namespace common.socks5
                     {
                         while (token.Socket.Available > 0)
                         {
-                            int length = token.Socket.Receive(e.Buffer);
+                            int length = await token.Socket.ReceiveAsync(e.Buffer.AsMemory(), SocketFlags.None);
                             if (length > 0)
                             {
                                 token.DataWrap.Data = e.Buffer.AsMemory(0, length);
@@ -223,7 +223,6 @@ namespace common.socks5
                                 token.DataWrap.Data = Helper.EmptyArray;
                             }
                         }
-
                     }
 
                     if (token.Socket.Connected == false)
@@ -248,12 +247,12 @@ namespace common.socks5
                 Logger.Instance.DebugError(ex);
             }
         }
-        private bool ValidateData(Socks5Info info,out bool gt)
+        private bool ValidateData(Socks5Info info, out bool gt)
         {
             gt = false;
             return info.Socks5Step switch
             {
-                Socks5EnumStep.Request => Socks5Parser.ValidateRequestData(info.Data,out gt),
+                Socks5EnumStep.Request => Socks5Parser.ValidateRequestData(info.Data, out gt),
                 Socks5EnumStep.Command => Socks5Parser.ValidateCommandData(info.Data, out gt),
                 Socks5EnumStep.Auth => Socks5Parser.ValidateAuthData(info.Data, info.AuthType, out gt),
                 Socks5EnumStep.Forward => true,
