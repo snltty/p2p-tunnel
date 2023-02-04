@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace common.tcpforward
 {
@@ -37,15 +38,15 @@ namespace common.tcpforward
         /// 
         /// </summary>
         /// <param name="connection"></param>
-        public void InputData(IConnection connection)
+        public async Task InputData(IConnection connection)
         {
             TcpForwardInfo data = new TcpForwardInfo();
             data.Connection = connection.FromConnection;
             data.DeBytes(connection.ReceiveRequestWrap.Payload);
-            OnRequest(data);
+            await OnRequest(data);
         }
 
-        private void OnRequest(TcpForwardInfo arg)
+        private async Task OnRequest(TcpForwardInfo arg)
         {
             ConnectionKey key = new ConnectionKey(arg.Connection.ConnectId, arg.RequestId);
             if (arg.StateType == TcpForwardStateTypes.Success)
@@ -58,41 +59,41 @@ namespace common.tcpforward
                         {
                             try
                             {
-                                token.TargetSocket.Send(arg.Buffer.Span, SocketFlags.None);
+                                await token.TargetSocket.SendAsync(arg.Buffer, SocketFlags.None);
                                 return;
                             }
                             catch (Exception)
                             {
-                                CloseClientSocket(token);
+                                await CloseClientSocket(token);
                                 return;
                             }
                         }
                     }
 
                     arg.StateType = TcpForwardStateTypes.Close;
-                    Receive(arg, Helper.EmptyArray);
+                    await ReceiveAsync(arg, Helper.EmptyArray);
 
                 }
                 else if (arg.DataType == TcpForwardDataTypes.Connect)
                 {
-                    Connect(arg);
+                    await Connect(arg);
                 }
             }
             else
             {
                 if (connections.TryRemove(key, out ConnectUserToken token))
                 {
-                    CloseClientSocket(token);
+                    await CloseClientSocket(token);
                 }
             }
         }
 
-        private void Connect(TcpForwardInfo arg)
+        private async Task Connect(TcpForwardInfo arg)
         {
             if (tcpForwardValidator.Validate(arg) == false)
             {
                 arg.StateType = TcpForwardStateTypes.Fail;
-                Receive(arg, Helper.EmptyArray);
+                await ReceiveAsync(arg, Helper.EmptyArray);
                 return;
             }
 
@@ -100,7 +101,7 @@ namespace common.tcpforward
             if (endpoint == null)
             {
                 arg.StateType = TcpForwardStateTypes.Fail;
-                Receive(arg, Helper.EmptyArray);
+                await ReceiveAsync(arg, Helper.EmptyArray);
                 return;
             }
 
@@ -139,7 +140,7 @@ namespace common.tcpforward
                     break;
             }
         }
-        private void ProcessConnect(SocketAsyncEventArgs e)
+        private async void ProcessConnect(SocketAsyncEventArgs e)
         {
             ConnectUserToken token = (ConnectUserToken)e.UserToken;
             try
@@ -150,7 +151,7 @@ namespace common.tcpforward
 
                     token.SendArg.TargetEndpoint = Helper.EmptyArray;
                     token.SendArg.StateType = TcpForwardStateTypes.Success;
-                    Receive(token.SendArg, Helper.EmptyArray);
+                    await ReceiveAsync(token.SendArg, Helper.EmptyArray);
 
                     token.TargetSocket.SendBufferSize = config.BufferSize;
                     token.TargetSocket.ReceiveBufferSize = config.BufferSize;
@@ -164,16 +165,16 @@ namespace common.tcpforward
                 }
                 else
                 {
-                    CloseClientSocket(token, TcpForwardStateTypes.Fail);
+                    await CloseClientSocket(token, TcpForwardStateTypes.Fail);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
-                CloseClientSocket(token);
+                await CloseClientSocket(token);
             }
         }
-        private void ProcessReceive(SocketAsyncEventArgs e)
+        private async void ProcessReceive(SocketAsyncEventArgs e)
         {
             try
             {
@@ -183,22 +184,22 @@ namespace common.tcpforward
                     int offset = e.Offset;
                     int length = e.BytesTransferred;
 
-                    Receive(token.SendArg, e.Buffer.AsMemory(offset, length));
+                    await ReceiveAsync(token.SendArg, e.Buffer.AsMemory(offset, length));
 
                     if (token.TargetSocket.Available > 0)
                     {
                         while (token.TargetSocket.Available > 0)
                         {
-                            length = token.TargetSocket.Receive(e.Buffer);
+                            length = await token.TargetSocket.ReceiveAsync(e.Buffer.AsMemory(), SocketFlags.None);
                             if (length > 0)
                             {
-                                Receive(token.SendArg, e.Buffer.AsMemory(0, length));
+                                await ReceiveAsync(token.SendArg, e.Buffer.AsMemory(0, length));
                             }
                         }
                     }
                     if (token.TargetSocket.Connected == false)
                     {
-                        CloseClientSocket(token);
+                        await CloseClientSocket(token);
                         return;
                     }
                     if (token.TargetSocket.ReceiveAsync(e) == false)
@@ -208,35 +209,35 @@ namespace common.tcpforward
                 }
                 else
                 {
-                    CloseClientSocket(token);
+                    await CloseClientSocket(token);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
-                CloseClientSocket(e);
+                await CloseClientSocket(e);
             }
         }
 
-        private void Receive(TcpForwardInfo arg, Memory<byte> data)
+        private async Task ReceiveAsync(TcpForwardInfo arg, Memory<byte> data)
         {
             arg.Buffer = data;
-            tcpForwardMessengerSender.SendResponse(arg, arg.Connection);
+            await tcpForwardMessengerSender.SendResponse(arg, arg.Connection);
             arg.Buffer = Helper.EmptyArray;
         }
 
-        private void CloseClientSocket(SocketAsyncEventArgs e)
+        private async Task CloseClientSocket(SocketAsyncEventArgs e)
         {
             ConnectUserToken token = e.UserToken as ConnectUserToken;
-            CloseClientSocket(token);
+            await CloseClientSocket(token);
         }
-        private void CloseClientSocket(ConnectUserToken token, TcpForwardStateTypes state = TcpForwardStateTypes.Close)
+        private async Task CloseClientSocket(ConnectUserToken token, TcpForwardStateTypes state = TcpForwardStateTypes.Close)
         {
             if (token != null)
             {
                 //maxNumberAcceptedClients.Release();
                 token.SendArg.StateType = state;
-                Receive(token.SendArg, Helper.EmptyArray);
+                await ReceiveAsync(token.SendArg, Helper.EmptyArray);
                 token.Clear();
                 connections.TryRemove(token.Key, out _);
             }

@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace common.socks5
 {
@@ -21,7 +22,7 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
-        Func<Socks5Info, bool> OnData { get; set; }
+        Func<Socks5Info, Task<bool>> OnData { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -38,7 +39,7 @@ namespace common.socks5
         /// 
         /// </summary>
         /// <param name="info"></param>
-        void Response(Socks5Info info);
+        Task Response(Socks5Info info);
         /// <summary>
         /// 
         /// </summary>
@@ -70,7 +71,7 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
-        public Func<Socks5Info, bool> OnData { get; set; } = (data) => true;
+        public Func<Socks5Info, Task<bool>> OnData { get; set; } = async (data) => await Task.FromResult(true);
         /// <summary>
         /// 
         /// </summary>
@@ -199,7 +200,7 @@ namespace common.socks5
                         bool gt = false;
                         while (ValidateData(token.DataWrap, out gt) == false && gt == false)
                         {
-                            totalLength += token.Socket.Receive(e.Buffer.AsSpan(e.Offset + totalLength));
+                            totalLength += await token.Socket.ReceiveAsync(e.Buffer.AsMemory(e.Offset + totalLength), SocketFlags.None);
                             token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
                         }
                         if (gt)
@@ -208,7 +209,7 @@ namespace common.socks5
                             return;
                         }
                     }
-                    ExecuteHandle(token.DataWrap);
+                    await ExecuteHandle(token.DataWrap);
                     token.DataWrap.Data = Helper.EmptyArray;
 
                     if (token.Socket.Available > 0 && token.DataWrap.Socks5Step >= Socks5EnumStep.Forward)
@@ -219,7 +220,7 @@ namespace common.socks5
                             if (length > 0)
                             {
                                 token.DataWrap.Data = e.Buffer.AsMemory(0, length);
-                                ExecuteHandle(token.DataWrap);
+                                await ExecuteHandle(token.DataWrap);
                                 token.DataWrap.Data = Helper.EmptyArray;
                             }
                         }
@@ -263,7 +264,7 @@ namespace common.socks5
 
 
         Socks5Info udpInfo = new Socks5Info { Id = 0, Socks5Step = Socks5EnumStep.ForwardUdp };
-        private void ProcessReceiveUdp(IAsyncResult result)
+        private async void ProcessReceiveUdp(IAsyncResult result)
         {
             IPEndPoint rep = null;
             try
@@ -271,7 +272,7 @@ namespace common.socks5
                 udpInfo.Data = udpClient.EndReceive(result, ref rep);
                 udpInfo.SourceEP = rep;
 
-                ExecuteHandle(udpInfo);
+                await ExecuteHandle(udpInfo);
                 udpInfo.Data = Helper.EmptyArray;
 
                 result = udpClient.BeginReceive(ProcessReceiveUdp, null);
@@ -281,9 +282,9 @@ namespace common.socks5
                 Logger.Instance.Error($"socks5 listen udp -> error " + ex);
             }
         }
-        private void ExecuteHandle(Socks5Info info)
+        private async Task ExecuteHandle(Socks5Info info)
         {
-            if (OnData(info) == false)
+            if (await OnData(info) == false)
             {
                 CloseClientSocket(info.Id);
             }
@@ -308,7 +309,7 @@ namespace common.socks5
         /// 
         /// </summary>
         /// <param name="info"></param>
-        public void Response(Socks5Info info)
+        public async Task Response(Socks5Info info)
         {
             if (connections.TryGetValue(info.Id, out AsyncUserToken token))
             {
@@ -326,13 +327,13 @@ namespace common.socks5
                     token.DataWrap.AuthType = info.AuthType;
                     if (info.Socks5Step == Socks5EnumStep.ForwardUdp)
                     {
-                        udpClient.Send(info.Data.Span, info.SourceEP);
+                        await udpClient.SendAsync(info.Data, info.SourceEP);
                     }
                     else
                     {
                         try
                         {
-                            token.Socket.Send(info.Data.Span, SocketFlags.None);
+                            await token.Socket.SendAsync(info.Data, SocketFlags.None);
                         }
                         catch (Exception)
                         {
@@ -346,7 +347,7 @@ namespace common.socks5
             {
                 try
                 {
-                    udpClient.Send(info.Data.Span, info.SourceEP);
+                    await udpClient.SendAsync(info.Data, info.SourceEP);
                 }
                 catch (Exception)
                 {

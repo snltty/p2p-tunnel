@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using System.Threading.Tasks;
 
 namespace common.udpforward
 {
@@ -24,13 +25,13 @@ namespace common.udpforward
             this.udpForwardTargetProvider = udpForwardTargetProvider;
 
             //A来了请求 ，转发到B，
-            udpForwardServer.OnRequest.Sub(OnRequest);
+            udpForwardServer.OnRequest = OnRequest;
             //A收到B的回复
-            udpForwardMessengerSender.OnResponseHandler.Sub(udpForwardServer.Response);
+            udpForwardMessengerSender.OnResponseHandle = udpForwardServer.Response;
         }
 
 
-        private void OnRequest(UdpForwardInfo request)
+        private async Task OnRequest(UdpForwardInfo request)
         {
             if (request.Connection == null || !request.Connection.Connected)
             {
@@ -41,13 +42,13 @@ namespace common.udpforward
             if (request.Connection == null)
             {
                 request.Buffer = Helper.EmptyArray;
-                udpForwardServer.Response(request);
+                await udpForwardServer.Response(request);
             }
             else
             {
                 request.Connection = request.Connection;
                 request.Connection.ReceiveBytes += request.Buffer.Length;
-                _ = udpForwardMessengerSender.SendRequest(request);
+                await udpForwardMessengerSender.SendRequest(request);
             }
         }
     }

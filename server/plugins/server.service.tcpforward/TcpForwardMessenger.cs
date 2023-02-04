@@ -60,12 +60,12 @@ namespace server.service.tcpforward
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)TcpForwardMessengerIds.Response)]
-        public void Response(IConnection connection)
+        public async Task Response(IConnection connection)
         {
             TcpForwardInfo data = new TcpForwardInfo();
             data.Connection = connection;
             data.DeBytes(connection.ReceiveRequestWrap.Payload);
-            tcpForwardServer.Response(data);
+            await tcpForwardServer.Response(data);
         }
 
         /// <summary>

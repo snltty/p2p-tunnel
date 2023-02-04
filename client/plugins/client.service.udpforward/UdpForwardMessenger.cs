@@ -1,5 +1,6 @@
 ﻿using common.server;
 using common.udpforward;
+using System.Threading.Tasks;
 
 namespace client.service.udpforward
 {
@@ -24,12 +25,12 @@ namespace client.service.udpforward
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)UdpForwardMessengerIds.Request)]
-        public void Request(IConnection connection)
+        public async Task Request(IConnection connection)
         {
             UdpForwardInfo data = new UdpForwardInfo();
             data.Connection = connection;
             data.DeBytes(connection.ReceiveRequestWrap.Payload);
-            udpForwardMessengerSender.OnRequest(data);
+            await udpForwardMessengerSender.OnRequest(data);
         }
 
         /// <summary>
@@ -37,12 +38,12 @@ namespace client.service.udpforward
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)UdpForwardMessengerIds.Response)]
-        public void Response(IConnection connection)
+        public async Task Response(IConnection connection)
         {
             UdpForwardInfo data = new UdpForwardInfo();
             data.Connection = connection;
             data.DeBytes(connection.ReceiveRequestWrap.Payload);
-            udpForwardMessengerSender.OnResponse(data);
+            await udpForwardMessengerSender.OnResponse(data);
         }
     }
 }

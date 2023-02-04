@@ -19,7 +19,7 @@ namespace common.tcpforward
         /// <summary>
         /// 
         /// </summary>
-        public Func<TcpForwardInfo, bool> OnRequest { get; set; } = (info) => true;
+        public Func<TcpForwardInfo, Task<bool>> OnRequest { get; set; } = (info) => Task.FromResult(true);
         /// <summary>
         /// 
         /// </summary>
@@ -162,7 +162,7 @@ namespace common.tcpforward
             if (token.Request.AliveType == TcpForwardAliveTypes.Tunnel)
             {
                 token.FirstPacket = false;
-                Receive(token, Helper.EmptyArray);
+                Receive(token, Helper.EmptyArray).Wait();
             }
             else
             {
@@ -179,7 +179,7 @@ namespace common.tcpforward
                 ForwardAsyncUserToken token = (ForwardAsyncUserToken)e.UserToken;
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
-                    Receive(token, e.Buffer.AsMemory(e.Offset, e.BytesTransferred));
+                    await Receive(token, e.Buffer.AsMemory(e.Offset, e.BytesTransferred));
                     if (token.FirstPacket == true)
                     {
                         token.FirstPacket = false;
@@ -193,7 +193,7 @@ namespace common.tcpforward
                             int length = await token.SourceSocket.ReceiveAsync(e.Buffer.AsMemory(), SocketFlags.None);
                             if (length > 0)
                             {
-                                Receive(token, e.Buffer.AsMemory(0, length));
+                                await Receive(token, e.Buffer.AsMemory(0, length));
                             }
                         }
                     }
@@ -220,10 +220,10 @@ namespace common.tcpforward
             }
         }
 
-        private void Receive(ForwardAsyncUserToken token, Memory<byte> data)
+        private async Task Receive(ForwardAsyncUserToken token, Memory<byte> data)
         {
             token.Request.Buffer = data;
-            bool res = OnRequest(token.Request);
+            bool res = await OnRequest(token.Request);
             token.Request.Buffer = Helper.EmptyArray;
             if (res == false)
             {
@@ -244,14 +244,14 @@ namespace common.tcpforward
             {
                 token.Request.StateType = TcpForwardStateTypes.Close;
                 token.Request.Buffer = Helper.EmptyArray;
-                OnRequest(token.Request);
+                OnRequest(token.Request).Wait();
             }
         }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="model"></param>
-        public void Response(TcpForwardInfo model)
+        public async Task Response(TcpForwardInfo model)
         {
             if (clientsManager.TryGetValue(model.RequestId, out ForwardAsyncUserToken token))
             {
@@ -263,11 +263,11 @@ namespace common.tcpforward
                         token.Request.TargetEndpoint = Helper.EmptyArray;
                         if (token.Request.ForwardType == TcpForwardTypes.Proxy)
                         {
-                            token.SourceSocket.Send(HttpConnectMethodHelper.ConnectSuccessMessage(), SocketFlags.None);
+                            await token.SourceSocket.SendAsync(HttpConnectMethodHelper.ConnectSuccessMessage(), SocketFlags.None);
                         }
                         else if (token.Request.Cache.Length > 0)
                         {
-                            Receive(token, token.Request.Cache);
+                            await Receive(token, token.Request.Cache);
                             token.Request.Cache = Helper.EmptyArray;
                         }
                         if (token.SourceSocket.ReceiveAsync(token.Saea) == false)
@@ -280,7 +280,7 @@ namespace common.tcpforward
                     {
                         try
                         {
-                            token.SourceSocket.Send(model.Buffer.Span, SocketFlags.None);
+                            await token.SourceSocket.SendAsync(model.Buffer, SocketFlags.None);
                         }
                         catch (Exception)
                         {
@@ -292,11 +292,11 @@ namespace common.tcpforward
                 {
                     if (token.Request.ForwardType == TcpForwardTypes.Proxy)
                     {
-                        token.SourceSocket.Send(HttpConnectMethodHelper.ConnectErrorMessage(), SocketFlags.None);
+                        await token.SourceSocket.SendAsync(HttpConnectMethodHelper.ConnectErrorMessage(), SocketFlags.None);
                     }
                     else if (model.Buffer.Length > 0)
                     {
-                        token.SourceSocket.Send(model.Buffer.Span);
+                        await token.SourceSocket.SendAsync(model.Buffer, SocketFlags.None);
                     }
                     clientsManager.TryRemove(model.RequestId, out _);
                 }

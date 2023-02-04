@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace common.udpforward
 {
@@ -31,7 +32,7 @@ namespace common.udpforward
         {
             //B接收到A的请求
             this.udpForwardMessengerSender = udpForwardMessengerSender;
-            udpForwardMessengerSender.OnRequestHandler.Sub(OnRequest);
+            udpForwardMessengerSender.OnRequestHandle = OnRequest;
 
             this.wheelTimer = wheelTimer;
             this.udpForwardValidator = udpForwardValidator;
@@ -39,7 +40,7 @@ namespace common.udpforward
             TimeoutUdp();
         }
 
-        private void OnRequest(UdpForwardInfo arg)
+        private async Task OnRequest(UdpForwardInfo arg)
         {
             ConnectionKeyUdp key = new ConnectionKeyUdp(arg.Connection.FromConnection.ConnectId, arg.SourceEndpoint);
             if (connections.TryGetValue(key, out UdpToken token) == false)
@@ -58,13 +59,13 @@ namespace common.udpforward
                 token.TargetEP = endpoint;
                 token.PoolBuffer = new byte[65535];
                 connections.AddOrUpdate(key, token, (a, b) => token);
-                _ = token.TargetSocket.SendTo(arg.Buffer.Span, endpoint);
+                await token.TargetSocket.SendToAsync(arg.Buffer, SocketFlags.None, endpoint);
                 token.Data.Buffer = Helper.EmptyArray;
                 IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
             }
             else
             {
-                _ = token.TargetSocket.SendTo(arg.Buffer.Span, token.TargetEP);
+                await token.TargetSocket.SendToAsync(arg.Buffer,SocketFlags.None, token.TargetEP);
                 token.Data.Buffer = Helper.EmptyArray;
             }
             token.Update();
@@ -87,7 +88,7 @@ namespace common.udpforward
                 }
             }, 1000, true);
         }
-        private void ReceiveCallbackUdp(IAsyncResult result)
+        private async void ReceiveCallbackUdp(IAsyncResult result)
         {
             try
             {
@@ -99,7 +100,7 @@ namespace common.udpforward
                     token.Data.Buffer = token.PoolBuffer.AsMemory(0, length);
 
                     token.Update();
-                    _ = udpForwardMessengerSender.SendResponse(token.Data, token.Connection);
+                    await udpForwardMessengerSender.SendResponse(token.Data, token.Connection);
                     token.Data.Buffer = Helper.EmptyArray;
                 }
                 result = token.TargetSocket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);

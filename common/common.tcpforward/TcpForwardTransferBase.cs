@@ -30,7 +30,7 @@ namespace common.tcpforward
             tcpForwardServer.OnRequest = OnRequest;
         }
 
-        private bool OnRequest(TcpForwardInfo request)
+        private async Task<bool> OnRequest(TcpForwardInfo request)
         {
             if (request.Connection == null || request.Connection.Connected == false)
             {
@@ -45,11 +45,11 @@ namespace common.tcpforward
                 {
                     request.Buffer = HttpParseHelper.BuildMessage("未选择转发对象，或者未与转发对象建立连接");
                 }
-                tcpForwardServer.Response(request);
+                await tcpForwardServer.Response(request);
                 return true;
             }
             request.Connection.ReceiveBytes += request.Buffer.Length;
-            return tcpForwardMessengerSender.SendRequest(request);
+            return await tcpForwardMessengerSender.SendRequest(request);
         }
 
         private void GetTarget(TcpForwardInfo request)

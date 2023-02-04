@@ -25,7 +25,7 @@ namespace common.udpforward
         /// <summary>
         /// 
         /// </summary>
-        public SimpleSubPushHandler<UdpForwardInfo> OnRequestHandler { get; } = new SimpleSubPushHandler<UdpForwardInfo>();
+        public Func<UdpForwardInfo, Task> OnRequestHandle { get; set; } = async (a) => await Task.CompletedTask;
         /// <summary>
         /// 
         /// </summary>
@@ -34,13 +34,12 @@ namespace common.udpforward
         public async Task SendRequest(UdpForwardInfo arg)
         {
             byte[] bytes = arg.ToBytes(out int length);
-            var res = messengerSender.SendOnly(new MessageRequestWrap
+            var res = await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)UdpForwardMessengerIds.Request,
                 Connection = arg.Connection,
                 Payload = bytes.AsMemory(0, length)
             }).ConfigureAwait(false);
-            await res;
 
             arg.Return(bytes);
         }
@@ -48,15 +47,15 @@ namespace common.udpforward
         /// 
         /// </summary>
         /// <param name="data"></param>
-        public void OnRequest(UdpForwardInfo data)
+        public async Task OnRequest(UdpForwardInfo data)
         {
-            OnRequestHandler.Push(data);
+            await OnRequestHandle(data);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public SimpleSubPushHandler<UdpForwardInfo> OnResponseHandler { get; } = new SimpleSubPushHandler<UdpForwardInfo>();
+        public Func<UdpForwardInfo, Task> OnResponseHandle { get; set; } = async (a) => await Task.CompletedTask;
         /// <summary>
         /// 
         /// </summary>
@@ -79,9 +78,9 @@ namespace common.udpforward
         /// 
         /// </summary>
         /// <param name="data"></param>
-        public void OnResponse(UdpForwardInfo data)
+        public async Task OnResponse(UdpForwardInfo data)
         {
-            OnResponseHandler.Push(data);
+            await OnResponseHandle(data);
         }
 
         /// <summary>

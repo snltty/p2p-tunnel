@@ -1,4 +1,6 @@
 ﻿using common.libs;
+using System;
+using System.Threading.Tasks;
 
 namespace common.udpforward
 {
@@ -16,7 +18,7 @@ namespace common.udpforward
         /// 
         /// </summary>
         /// <param name="model"></param>
-        public void Response(UdpForwardInfo model);
+        public Task Response(UdpForwardInfo model);
         /// <summary>
         /// 
         /// </summary>
@@ -30,7 +32,7 @@ namespace common.udpforward
         /// <summary>
         /// 
         /// </summary>
-        public SimpleSubPushHandler<UdpForwardInfo> OnRequest { get; }
+        public Func<UdpForwardInfo,Task> OnRequest { get; set; }
         /// <summary>
         /// 
         /// </summary>

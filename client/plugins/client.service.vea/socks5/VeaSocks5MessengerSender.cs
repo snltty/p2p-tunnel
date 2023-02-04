@@ -3,6 +3,7 @@ using common.server;
 using common.server.model;
 using common.socks5;
 using System;
+using System.Threading.Tasks;
 
 namespace client.service.vea.socks5
 {
@@ -30,15 +31,15 @@ namespace client.service.vea.socks5
         /// <param name="data"></param>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public bool Request(Socks5Info data)
+        public async Task<bool> Request(Socks5Info data)
         {
             byte[] bytes = data.ToBytes(out int length);
-            bool res = messengerSender.SendOnly(new MessageRequestWrap
+            bool res = await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)VeaSocks5MessengerIds.Request,
                 Connection = (data.Tag as IConnection),
                 Payload = bytes.AsMemory(0, length)
-            }).Result;
+            });
             data.Return(bytes);
             return res;
         }
@@ -47,15 +48,15 @@ namespace client.service.vea.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <param name="connection"></param>
-        public void Response(Socks5Info data)
+        public async Task Response(Socks5Info data)
         {
             byte[] bytes = data.ToBytes(out int length);
-            _ = messengerSender.SendOnly(new MessageRequestWrap
+            await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)VeaSocks5MessengerIds.Response,
                 Connection = (data.Tag as IConnection).FromConnection,
                 Payload = bytes.AsMemory(0, length)
-            }).Result;
+            });
             data.Return(bytes);
         }
         /// <summary>
@@ -63,9 +64,9 @@ namespace client.service.vea.socks5
         /// </summary>
         /// <param name="id"></param>
         /// <param name="connection"></param>
-        public void ResponseClose(Socks5Info data)
+        public async Task ResponseClose(Socks5Info data)
         {
-            Response(data);
+            await Response(data);
         }
 
         /// <summary>
@@ -73,10 +74,10 @@ namespace client.service.vea.socks5
         /// </summary>
         /// <param name="id"></param>
         /// <param name="connection"></param>
-        public void RequestClose(Socks5Info data)
+        public async Task RequestClose(Socks5Info data)
         {
             data.Data = Helper.EmptyArray;
-            Request(data);
+            await Request(data);
         }
 
     }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace common.socks5
 {
@@ -18,7 +19,7 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
-        protected Dictionary<Socks5EnumStep, Func<Socks5Info, bool>> handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, bool>>();
+        protected Dictionary<Socks5EnumStep, Func<Socks5Info, Task<bool>>> handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, Task<bool>>>();
         /// <summary>
         /// 
         /// </summary>
@@ -40,7 +41,7 @@ namespace common.socks5
             socks5ClientListener.OnData = OnData;
             socks5ClientListener.OnClose = OnClose;
 
-            handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, bool>>
+            handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, Task<bool>>>
             {
                 { Socks5EnumStep.Request,HandleRequest},
                 { Socks5EnumStep.Auth,HandleAuth},
@@ -61,7 +62,7 @@ namespace common.socks5
         /// 输入数据
         /// </summary>
         /// <param name="connection"></param>
-        public void InputData(Socks5Info info)
+        public async Task InputData(Socks5Info info)
         {
             if (info.Data.Length == 0)
             {
@@ -72,7 +73,7 @@ namespace common.socks5
                 if (buildHandles.TryGetValue(info.Socks5Step, out Action<Socks5Info> func))
                 {
                     func(info);
-                    socks5ClientListener.Response(info);
+                    await socks5ClientListener.Response(info);
                 }
             }
         }
@@ -82,15 +83,15 @@ namespace common.socks5
         /// </summary>
         /// <param name="info"></param>
         /// <returns></returns>
-        protected bool OnData(Socks5Info info)
+        protected async Task<bool> OnData(Socks5Info info)
         {
-            if (handles.TryGetValue(info.Socks5Step, out Func<Socks5Info, bool> func))
+            if (handles.TryGetValue(info.Socks5Step, out Func<Socks5Info, Task<bool>> func))
             {
                 if (info.Socks5Step == Socks5EnumStep.Auth)
                 {
                     info.Version = info.Data.Span[0];
                 }
-                return func(info);
+                return await func(info);
             }
             return false;
         }
@@ -189,13 +190,13 @@ namespace common.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected virtual bool HandleRequest(Socks5Info data)
+        protected virtual async Task<bool> HandleRequest(Socks5Info data)
         {
             data.AuthType = Socks5EnumAuthType.NoAuth;
             data.Response[0] = (byte)data.AuthType;
             data.Data = data.Response;
             RequestResponseData(data);
-            socks5ClientListener.Response(data);
+            await socks5ClientListener.Response(data);
             return true;
             /*
             if (config.AuthType == AuthTypes.Client)
@@ -218,12 +219,12 @@ namespace common.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected virtual bool HandleAuth(Socks5Info data)
+        protected virtual async Task<bool> HandleAuth(Socks5Info data)
         {
             data.Response[0] = (byte)Socks5EnumAuthState.Success;
             data.Data = data.Response;
             AuthResponseData(data);
-            socks5ClientListener.Response(data);
+            await socks5ClientListener.Response(data);
             return true;
 
             /*
@@ -246,7 +247,7 @@ namespace common.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected virtual bool HandleCommand(Socks5Info data)
+        protected virtual async Task<bool> HandleCommand(Socks5Info data)
         {
             //0.0.0.0  或者:0 都直接通过，这是udp中继的时候可能出现的情况
             if (Socks5Parser.GetIsAnyAddress(data.Data))
@@ -254,10 +255,10 @@ namespace common.socks5
                 data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
                 data.Data = data.Response;
                 CommandResponseData(data);
-                socks5ClientListener.Response(data);
+                await socks5ClientListener.Response(data);
                 return true;
             }
-            return socks5MessengerSender.Request(data);
+            return await socks5MessengerSender.Request(data);
         }
 
 
@@ -266,18 +267,18 @@ namespace common.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected virtual bool HndleForward(Socks5Info data)
+        protected virtual async Task<bool> HndleForward(Socks5Info data)
         {
-            return socks5MessengerSender.Request(data);
+            return await socks5MessengerSender.Request(data);
         }
         /// <summary>
         /// 收到udp转发
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected virtual bool HndleForwardUdp(Socks5Info data)
+        protected virtual async Task<bool> HndleForwardUdp(Socks5Info data)
         {
-            return socks5MessengerSender.Request(data);
+            return await socks5MessengerSender.Request(data);
         }
 
     }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace common.udpforward
 {
@@ -17,7 +18,7 @@ namespace common.udpforward
         /// <summary>
         /// 
         /// </summary>
-        public SimpleSubPushHandler<UdpForwardInfo> OnRequest { get; } = new SimpleSubPushHandler<UdpForwardInfo>();
+        public Func<UdpForwardInfo, Task> OnRequest { get; set; } = async (a) => await Task.CompletedTask;
         /// <summary>
         /// 
         /// </summary>
@@ -59,7 +60,7 @@ namespace common.udpforward
 
             OnListenChange.Push(new UdpforwardListenChangeInfo { Port = sourcePort, State = true });
         }
-        private void ProcessReceiveUdp(IAsyncResult result)
+        private async void ProcessReceiveUdp(IAsyncResult result)
         {
             try
             {
@@ -75,7 +76,7 @@ namespace common.udpforward
                     clientsManager.TryAdd(userToken);
                 }
                 userToken.Request.Buffer = data;
-                OnRequest.Push(userToken.Request);
+                await OnRequest(userToken.Request);
                 userToken.Request.Buffer = Helper.EmptyArray;
 
                 result = token.UdpClient.BeginReceive(ProcessReceiveUdp, token);
@@ -89,16 +90,15 @@ namespace common.udpforward
         /// 
         /// </summary>
         /// <param name="model"></param>
-        public void Response(UdpForwardInfo model)
+        public async Task Response(UdpForwardInfo model)
         {
             if (clientsManager.TryGetValue(model.SourceEndpoint, out ForwardAsyncUserToken token))
             {
-                var span = model.Buffer.Span;
-                if (span.Length > 0)
+                if (model.Buffer.Length > 0)
                 {
                     try
                     {
-                        token.ServerUdpClient.Send(span, model.SourceEndpoint);
+                        await token.ServerUdpClient.SendAsync(model.Buffer, model.SourceEndpoint);
                     }
                     catch (Exception)
                     {
@@ -219,7 +219,7 @@ namespace common.udpforward
                 {
                     c.UdpClient.Dispose();
                     GC.Collect();
-                  //  GC.SuppressFinalize(c);
+                    //  GC.SuppressFinalize(c);
                 }
                 catch (Exception)
                 {

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Threading.Tasks;
 
 namespace common.socks5
 {
@@ -7,11 +8,11 @@ namespace common.socks5
     /// </summary>
     public interface ISocks5ClientHandler
     {
-       /// <summary>
-       /// 
-       /// </summary>
-       /// <param name="info"></param>
-        void InputData(Socks5Info info);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="info"></param>
+        Task InputData(Socks5Info info);
     }
 
 

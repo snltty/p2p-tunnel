@@ -25,7 +25,7 @@ namespace common.tcpforward
         /// 
         /// </summary>
         /// <param name="model"></param>
-        public void Response(TcpForwardInfo model);
+        public Task Response(TcpForwardInfo model);
         /// <summary>
         /// 
         /// </summary>
@@ -39,7 +39,7 @@ namespace common.tcpforward
         /// <summary>
         /// 
         /// </summary>
-        public Func<TcpForwardInfo, bool> OnRequest { get; set; }
+        public Func<TcpForwardInfo, Task<bool>> OnRequest { get; set; }
         /// <summary>
         /// 
         /// </summary>

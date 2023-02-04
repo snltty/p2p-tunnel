@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace common.socks5
 {
@@ -10,7 +11,7 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
-        void InputData(Socks5Info data);
+        Task InputData(Socks5Info data);
     }
 
     public interface ISocks5AuthValidator

@@ -25,16 +25,16 @@ namespace common.tcpforward
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public bool SendRequest(TcpForwardInfo arg)
+        public async Task<bool> SendRequest(TcpForwardInfo arg)
         {
             byte[] bytes = arg.ToBytes(out int length);
 
-            bool res = messengerSender.SendOnly(new MessageRequestWrap
+            bool res = await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)TcpForwardMessengerIds.Request,
                 Connection = arg.Connection,
                 Payload = bytes.AsMemory(0, length)
-            }).Result;
+            });
             arg.Return(bytes);
 
             return res;
@@ -44,16 +44,16 @@ namespace common.tcpforward
         /// </summary>
         /// <param name="arg"></param>
         /// <param name="connection"></param>
-        public void SendResponse(TcpForwardInfo arg, IConnection connection)
+        public async Task SendResponse(TcpForwardInfo arg, IConnection connection)
         {
             byte[] bytes = arg.ToBytes(out int length);
 
-            _ = messengerSender.SendOnly(new MessageRequestWrap
+            await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)TcpForwardMessengerIds.Response,
                 Connection = connection,
                 Payload = bytes.AsMemory(0, length)
-            }).Result;
+            });
 
             arg.Return(bytes);
         }
