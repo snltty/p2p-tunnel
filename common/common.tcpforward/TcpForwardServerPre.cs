@@ -222,6 +222,7 @@ namespace common.tcpforward
 
         private async Task Receive(ForwardAsyncUserToken token, Memory<byte> data)
         {
+            await Semaphore.WaitAsync();
             token.Request.Buffer = data;
             bool res = await OnRequest(token.Request);
             token.Request.Buffer = Helper.EmptyArray;
@@ -229,6 +230,7 @@ namespace common.tcpforward
             {
                 CloseClientSocket(token);
             }
+            Semaphore.Release();
         }
 
         private void CloseClientSocket(SocketAsyncEventArgs e)

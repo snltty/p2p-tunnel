@@ -1,5 +1,6 @@
 ﻿using common.server;
 using common.socks5;
+using System.Threading.Tasks;
 
 namespace server.service.socks5
 {
@@ -24,12 +25,12 @@ namespace server.service.socks5
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)Socks5MessengerIds.Request)]
-        public void Request(IConnection connection)
+        public async Task Request(IConnection connection)
         {
             Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
             data.Tag = connection;
             data.ClientId = connection.FromConnection.ConnectId;
-            socks5ServerHandler.InputData(data);
+            await socks5ServerHandler.InputData(data);
         }
     }
 }

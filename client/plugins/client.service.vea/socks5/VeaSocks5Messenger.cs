@@ -1,6 +1,8 @@
-﻿using common.server;
+﻿using common.libs;
+using common.server;
 using common.socks5;
 using System;
+using System.Threading.Tasks;
 
 namespace client.service.vea.socks5
 {
@@ -28,12 +30,27 @@ namespace client.service.vea.socks5
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)VeaSocks5MessengerIds.Request)]
-        public void Request(IConnection connection)
+        public async Task Request(IConnection connection)
         {
-            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
-            data.ClientId = connection.FromConnection.ConnectId;
-            data.Tag = connection;
-            socks5ServerHandler.InputData(data);
+            try
+            {
+                Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
+                data.ClientId = connection.FromConnection.ConnectId;
+                data.Tag = connection;
+                await socks5ServerHandler.InputData(data);
+            }
+            catch (Exception ex)
+            {
+                if (connection.ReceiveRequestWrap.Payload.Length > 1024)
+                {
+                    Logger.Instance.Error(string.Join(",", connection.ReceiveRequestWrap.Payload.Slice(0, 1024).ToArray()));
+                }
+                else
+                {
+                    Logger.Instance.Error(string.Join(",", connection.ReceiveRequestWrap.Payload.ToArray()));
+                }
+                Logger.Instance.Error(ex);
+            }
         }
 
         /// <summary>
@@ -41,10 +58,10 @@ namespace client.service.vea.socks5
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)VeaSocks5MessengerIds.Response)]
-        public void Response(IConnection connection)
+        public async Task Response(IConnection connection)
         {
             Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
-            socks5ClientHandler.InputData(data);
+            await socks5ClientHandler.InputData(data);
         }
     }
 
