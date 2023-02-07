@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace common.udpforward
@@ -21,6 +22,7 @@ namespace common.udpforward
 
         private readonly WheelTimer<object> wheelTimer;
         private readonly IUdpForwardValidator udpForwardValidator;
+        private readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1);
 
         /// <summary>
         /// 
@@ -65,7 +67,7 @@ namespace common.udpforward
             }
             else
             {
-                await token.TargetSocket.SendToAsync(arg.Buffer,SocketFlags.None, token.TargetEP);
+                await token.TargetSocket.SendToAsync(arg.Buffer, SocketFlags.None, token.TargetEP);
                 token.Data.Buffer = Helper.EmptyArray;
             }
             token.Update();
@@ -100,8 +102,10 @@ namespace common.udpforward
                     token.Data.Buffer = token.PoolBuffer.AsMemory(0, length);
 
                     token.Update();
+                    await Semaphore.WaitAsync();
                     await udpForwardMessengerSender.SendResponse(token.Data, token.Connection);
                     token.Data.Buffer = Helper.EmptyArray;
+                    Semaphore.Release();
                 }
                 result = token.TargetSocket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
             }

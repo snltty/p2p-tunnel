@@ -19,6 +19,7 @@ namespace common.tcpforward
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
         private readonly Config config;
         private readonly ITcpForwardValidator tcpForwardValidator;
+        private readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         private ConcurrentDictionary<ConnectionKey, ConnectUserToken> connections = new ConcurrentDictionary<ConnectionKey, ConnectUserToken>(new ConnectionComparer());
 
         /// <summary>
@@ -221,9 +222,11 @@ namespace common.tcpforward
 
         private async Task ReceiveAsync(TcpForwardInfo arg, Memory<byte> data)
         {
+            await Semaphore.WaitAsync();
             arg.Buffer = data;
             await tcpForwardMessengerSender.SendResponse(arg, arg.Connection);
             arg.Buffer = Helper.EmptyArray;
+            Semaphore.Release();
         }
 
         private async Task CloseClientSocket(SocketAsyncEventArgs e)

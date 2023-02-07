@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace common.socks5
@@ -18,7 +19,7 @@ namespace common.socks5
         private ConcurrentDictionary<ConnectionKey, AsyncServerUserToken> connections = new(new ConnectionKeyComparer());
         private ConcurrentDictionary<ConnectionKeyUdp, UdpToken> udpConnections = new(new ConnectionKeyUdpComparer());
         private readonly Dictionary<Socks5EnumStep, Func<Socks5Info, Task>> handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, Task>>();
-
+        private readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         private readonly ISocks5MessengerSender socks5MessengerSender;
 
         /// <summary>
@@ -77,13 +78,13 @@ namespace common.socks5
             data.AuthType = socks5AuthValidator.GetAuthType(Socks5Parser.GetAuthMethods(data.Data.Span));
             data.Response[0] = (byte)data.AuthType;
             data.Data = data.Response;
-            await socks5MessengerSender.Response(data);
+            await Receive(data);
         }
         private async Task HandleAuth(Socks5Info data)
         {
             data.Response[0] = (byte)socks5AuthValidator.Validate(data.Data, data.AuthType);
             data.Data = data.Response;
-            await socks5MessengerSender.Response(data);
+            await Receive(data);
         }
         private async Task HndleForward(Socks5Info data)
         {
@@ -177,7 +178,7 @@ namespace common.socks5
                     token.Data.Data = token.PoolBuffer.AsMemory(0, length);
 
                     token.Update();
-                    socks5MessengerSender.Response(token.Data);
+                    Receive(token.Data);
                     token.Data.Data = Helper.EmptyArray;
                 }
                 result = token.TargetSocket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
@@ -328,7 +329,7 @@ namespace common.socks5
         {
             data.Response[0] = (byte)command;
             data.Data = data.Response;
-            await socks5MessengerSender.Response(data);
+            await Receive(data);
         }
 
         private void BindTargetReceive(AsyncServerUserToken connectToken)
@@ -370,7 +371,7 @@ namespace common.socks5
                     int offset = e.Offset;
                     int length = e.BytesTransferred;
                     token.Data.Data = e.Buffer.AsMemory(offset, length);
-                    await socks5MessengerSender.Response(token.Data);
+                    await Receive(token.Data);
                     token.Data.Data = Helper.EmptyArray;
 
                     if (token.TargetSocket.Available > 0)
@@ -381,7 +382,7 @@ namespace common.socks5
                             if (length > 0)
                             {
                                 token.Data.Data = e.Buffer.AsMemory(0, length);
-                                await socks5MessengerSender.Response(token.Data);
+                                await Receive(token.Data);
                                 token.Data.Data = Helper.EmptyArray;
                             }
                         }
@@ -407,6 +408,12 @@ namespace common.socks5
                 await CloseClientSocket(e);
                 Logger.Instance.DebugError(ex);
             }
+        }
+        private async Task Receive(Socks5Info info)
+        {
+            await Semaphore.WaitAsync();
+            await socks5MessengerSender.Response(info);
+            Semaphore.Release();
         }
 
         private async Task CloseClientSocket(SocketAsyncEventArgs e)
