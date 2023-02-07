@@ -51,12 +51,12 @@ namespace server.service.udpforward
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)UdpForwardMessengerIds.Request)]
-        public void Request(IConnection connection)
+        public async Task Request(IConnection connection)
         {
             UdpForwardInfo data = new UdpForwardInfo();
             data.Connection = connection;
             data.DeBytes(connection.ReceiveRequestWrap.Payload);
-            tcpForwardMessengerSender.OnRequest(data);
+            await tcpForwardMessengerSender.OnRequest(data);
         }
 
         /// <summary>
@@ -64,12 +64,12 @@ namespace server.service.udpforward
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)UdpForwardMessengerIds.Response)]
-        public void Response(IConnection connection)
+        public async Task Response(IConnection connection)
         {
             UdpForwardInfo data = new UdpForwardInfo();
             data.Connection = connection;
             data.DeBytes(connection.ReceiveRequestWrap.Payload);
-            tcpForwardMessengerSender.OnResponse(data);
+            await tcpForwardMessengerSender.OnResponse(data);
         }
 
         /// <summary>

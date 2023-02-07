@@ -29,9 +29,9 @@ namespace client.service.tcpforward
         /// </summary>
         /// <param name="connection"></param>
         [MessengerId((ushort)TcpForwardMessengerIds.Request)]
-        public void Request(IConnection connection)
+        public async Task Request(IConnection connection)
         {
-            tcpForwardResolver.InputData(connection);
+            await tcpForwardResolver.InputData(connection);
         }
 
         /// <summary>
