@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace common.socks5
@@ -68,6 +69,8 @@ namespace common.socks5
 
         private readonly ConcurrentDictionary<ulong, AsyncUserToken> connections = new();
         private readonly NumberSpaceUInt32 numberSpace = new NumberSpaceUInt32(0);
+        SemaphoreSlim Semaphore = new SemaphoreSlim(1);
+
         /// <summary>
         /// 
         /// </summary>
@@ -284,10 +287,12 @@ namespace common.socks5
         }
         private async Task ExecuteHandle(Socks5Info info)
         {
+            await Semaphore.WaitAsync();
             if (await OnData(info) == false)
             {
                 CloseClientSocket(info.Id);
             }
+            Semaphore.Release();
         }
 
         private void ProcessSend(SocketAsyncEventArgs e)

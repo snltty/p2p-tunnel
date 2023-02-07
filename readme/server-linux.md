@@ -28,4 +28,8 @@ docker cp /usr/local/p2p-tunnel-server/udpforward-appsettings.json  p2p-tunnel-s
 
 // 重启容器
 docker restart p2p-tunnel-server
+
+
+//docker rm p2p-tunnel-server
+//docker logs --since 360m c49c8c16acbd
 ```
