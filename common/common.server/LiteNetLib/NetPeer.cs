@@ -1291,10 +1291,11 @@ namespace LiteNetLib
                 if (_pingTimer.IsRunning)
                     UpdateRoundTripTime((int)_pingTimer.ElapsedMilliseconds);
                 _pingTimer.Restart();
-                if (NetManager.SendRaw(_pingPacket, _remoteEndPoint) > 0)
-                {
-                    Interlocked.Exchange(ref _timeSinceLastPacket, 0);
-                }
+                NetManager.SendRaw(_pingPacket, _remoteEndPoint);
+                //if (NetManager.SendRaw(_pingPacket, _remoteEndPoint) > 0)
+                //{
+                //    Interlocked.Exchange(ref _timeSinceLastPacket, 0);
+                //}
             }
 
             //RTT - round trip time
