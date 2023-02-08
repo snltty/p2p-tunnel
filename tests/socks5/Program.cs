@@ -11,13 +11,13 @@ namespace socks5
 
             //定时任务
             WheelTimer<object> wheelTimer = new WheelTimer<object>();
-            ISocks5AuthValidator  socks5AuthValidator = new Socks5AuthValidator();
+            ISocks5AuthValidator socks5AuthValidator = new Socks5AuthValidator();
             //目标ip提供
             ISocks5DstEndpointProvider socks5DstEndpointProvider = new Socks5DstEndpointProvider();
             //消息发送
             Socks5MessengerSender socks5MessengerSender = new Socks5MessengerSender();
             //配置
-            Config config = new Config { BufferSize = 8 * 1027, ConnectEnable = true, ListenPort = 1082};
+            Config config = new Config { BufferSize = 8 * 1027, ConnectEnable = true, ListenPort = 1082 };
             //socks5验证，是否能连接什么的
             ISocks5Validator validator = new DefaultSocks5Validator(config);
 
@@ -80,27 +80,27 @@ namespace socks5
         private ulong clientid = 1;
 
         //发给服务端
-        public bool Request(Socks5Info data)
+        public async Task<bool> Request(Socks5Info data)
         {
             Socks5Info info = new Socks5Info { ClientId = clientid, Version = data.Version, Id = data.Id, Data = data.Data, Socks5Step = data.Socks5Step, SourceEP = data.SourceEP, TargetEP = data.TargetEP };
-            Server.InputData(info);
+            await Server.InputData(info);
             return true;
         }
-        public void RequestClose(Socks5Info data)
+        public async Task RequestClose(Socks5Info data)
         {
             data.ClientId = clientid;
             data.Data = Helper.EmptyArray;
-            Server.InputData(data);
+            await Server.InputData(data);
         }
         //发给客户端
-        public void Response(Socks5Info data)
+        public async Task Response(Socks5Info data)
         {
-            Client.InputData(data);
+            await Client.InputData(data);
         }
-        public void ResponseClose(Socks5Info data)
+        public async Task ResponseClose(Socks5Info data)
         {
             data.Data = Helper.EmptyArray;
-            Client.InputData(data);
+            await Client.InputData(data);
         }
     }
 

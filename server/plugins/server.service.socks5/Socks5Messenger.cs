@@ -28,27 +28,10 @@ namespace server.service.socks5
         [MessengerId((ushort)Socks5MessengerIds.Request)]
         public async Task Request(IConnection connection)
         {
-            try
-            {
-                Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
-                data.Tag = connection;
-                data.ClientId = connection.FromConnection.ConnectId;
-                await socks5ServerHandler.InputData(data);
-            }
-            catch (System.Exception ex)
-            {
-                if (connection.ReceiveRequestWrap.Payload.Length > 1024)
-                {
-                    Logger.Instance.Error(string.Join(",", connection.ReceiveRequestWrap.Payload.Slice(0, 1024).ToArray()));
-                }
-                else
-                {
-                    Logger.Instance.Error(string.Join(",", connection.ReceiveRequestWrap.Payload.ToArray()));
-                }
-                Logger.Instance.Error(ex);
-            }
-
-
+            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
+            data.Tag = connection;
+            data.ClientId = connection.FromConnection.ConnectId;
+            await socks5ServerHandler.InputData(data);
         }
     }
 }

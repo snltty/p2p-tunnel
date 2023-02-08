@@ -32,25 +32,10 @@ namespace client.service.vea.socks5
         [MessengerId((ushort)VeaSocks5MessengerIds.Request)]
         public async Task Request(IConnection connection)
         {
-            try
-            {
-                Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
-                data.ClientId = connection.FromConnection.ConnectId;
-                data.Tag = connection;
-                await socks5ServerHandler.InputData(data);
-            }
-            catch (Exception ex)
-            {
-                if (connection.ReceiveRequestWrap.Payload.Length > 1024)
-                {
-                    Logger.Instance.Error(string.Join(",", connection.ReceiveRequestWrap.Payload.Slice(0, 1024).ToArray()));
-                }
-                else
-                {
-                    Logger.Instance.Error(string.Join(",", connection.ReceiveRequestWrap.Payload.ToArray()));
-                }
-                Logger.Instance.Error(ex);
-            }
+            Socks5Info data = Socks5Info.Debytes(connection.ReceiveRequestWrap.Payload);
+            data.ClientId = connection.FromConnection.ConnectId;
+            data.Tag = connection;
+            await socks5ServerHandler.InputData(data);
         }
 
         /// <summary>
