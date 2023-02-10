@@ -177,11 +177,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
                 ulong toid = (ulong)timeout.Task.State;
                 timeout.Cancel();
-                if (connectTcpCache.TryRemove(toid, out ConnectCacheModel cache))
+                if (connectTcpCache.TryGetValue(toid, out ConnectCacheModel cache))
                 {
                     cache.Canceled = true;
-                    cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "tcp打洞超时" } });
-
                     _ = SendStep2Fail(cache.TunnelName, toid);
                 }
             }

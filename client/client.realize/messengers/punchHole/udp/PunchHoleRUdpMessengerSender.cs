@@ -67,11 +67,9 @@ namespace client.realize.messengers.punchHole.udp
 
                 ulong toid = (ulong)timeout.Task.State;
                 timeout.Cancel();
-                if (connectCache.TryRemove(toid, out ConnectCacheModel cache))
+                if (connectCache.TryGetValue(toid, out ConnectCacheModel cache))
                 {
                     cache.Canceled = true;
-                    cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "tcp打洞超时" } });
-
                     _ = SendStep2Fail(cache.TunnelName, toid);
                 }
             }
