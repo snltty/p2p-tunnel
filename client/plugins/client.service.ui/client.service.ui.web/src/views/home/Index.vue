@@ -2,25 +2,31 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-08-30 22:38:45
+ * @LastEditTime: 2023-02-10 15:32:36
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Index.vue
 -->
 <template>
     <div class="home">
-        <Clients></Clients>
-        <Counter v-if="registerState.LocalInfo.connected"></Counter>
+        <div class="connect-button">
+            <ConnectButton></ConnectButton>
+        </div>
+        <div class="server-line">
+            <ServerLine></ServerLine>
+        </div>
+        <!-- <Clients></Clients>
+        <Counter v-if="registerState.LocalInfo.connected"></Counter> -->
     </div>
 </template>
 
 <script>
-import Clients from './Clients.vue'
-import Counter from './Counter.vue'
 import { injectRegister } from '../../states/register'
+import ConnectButton from './ConnectButton.vue'
+import ServerLine from './ServerLine.vue'
 export default {
     name: 'Home',
-    components: { Clients, Counter },
+    components: { ConnectButton, ServerLine },
     setup () {
 
         const registerState = injectRegister();
@@ -33,6 +39,7 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
-.home
-    padding: 2rem;
+.connect-button
+    padding: 5rem 0 2rem 0;
+    text-align: center;
 </style>

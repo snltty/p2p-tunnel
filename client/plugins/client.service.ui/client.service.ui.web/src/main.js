@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 09:12:44
  * @LastEditors: snltty
- * @LastEditTime: 2023-01-03 20:25:37
+ * @LastEditTime: 2023-02-10 16:45:10
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\main.js
@@ -16,6 +16,8 @@ import router from './router'
 
 const app = createApp(App);
 
+import './assets/particles.min.js'
+
 import './assets/style.css'
 import './extends/index'
 import auth from './components/auth'
@@ -26,12 +28,15 @@ import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/display.css'
 
 
-import { Loading, FolderDelete, Connection, ArrowDown, CloseBold, CircleClose } from '@element-plus/icons'
-app.component(Loading.name, Loading);
-app.component(FolderDelete.name, FolderDelete);
-app.component(Connection.name, Connection);
-app.component(ArrowDown.name, ArrowDown);
-app.component(CloseBold.name, CloseBold);
+import { CircleClose, House, Link, Position, OfficeBuilding, SwitchButton, Loading, ArrowRightBold, Setting } from '@element-plus/icons'
 app.component(CircleClose.name, CircleClose);
+app.component(House.name, House);
+app.component(Link.name, Link);
+app.component(Position.name, Position);
+app.component(OfficeBuilding.name, OfficeBuilding);
+app.component(SwitchButton.name, SwitchButton);
+app.component(Loading.name, Loading);
+app.component(ArrowRightBold.name, ArrowRightBold);
+app.component(Setting.name, Setting);
 
 app.use(ElementPlus).use(router).mount('#app');
