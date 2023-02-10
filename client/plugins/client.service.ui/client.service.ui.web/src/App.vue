@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-10 14:31:39
+ * @LastEditTime: 2023-02-10 17:59:43
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\App.vue
@@ -50,6 +50,8 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
+.body
+    z-index 9
 .wrap
     width: 100%;
     height: 60rem;

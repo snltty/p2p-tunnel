@@ -15,6 +15,9 @@
         <div class="server-line">
             <ServerLine></ServerLine>
         </div>
+        <div class="servers">
+            <Servers></Servers>
+        </div>
         <!-- <Clients></Clients>
         <Counter v-if="registerState.LocalInfo.connected"></Counter> -->
     </div>
@@ -24,9 +27,10 @@
 import { injectRegister } from '../../states/register'
 import ConnectButton from './ConnectButton.vue'
 import ServerLine from './ServerLine.vue'
+import Servers from './Servers.vue'
 export default {
     name: 'Home',
-    components: { ConnectButton, ServerLine },
+    components: { ConnectButton, ServerLine, Servers },
     setup () {
 
         const registerState = injectRegister();

@@ -1,5 +1,5 @@
 <template>
-    <div id="bg" class="absolute"></div>
+    <div id="bg" class="bg absolute"></div>
 </template>
 
 <script>
@@ -130,3 +130,7 @@ export default {
     }
 }
 </script>
+<style lang="stylus" scoped>
+.bg
+    z-index 1
+</style>

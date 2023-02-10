@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:05:47
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-10 17:06:40
+ * @LastEditTime: 2023-02-10 17:51:03
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\components\Menu.vue
@@ -90,9 +90,13 @@ export default {
 </script>
 <style lang="stylus" scoped>
 .menu-wrap
+    position: relative;
     height: 5rem;
     padding-left: 1rem;
     background-color: #15602d;
+    box-shadow: 1px 1px 0.6rem 0.6rem rgba(0,0,0,0.1);
+    border-bottom: 1px solid #205531;
+    z-index 9
 
 .logo
     padding-top: 0.7rem;
