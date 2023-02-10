@@ -1,3 +1,12 @@
+<!--
+ * @Author: snltty
+ * @Date: 2023-02-10 21:02:51
+ * @LastEditors: snltty
+ * @LastEditTime: 2023-02-10 21:57:36
+ * @version: v1.0.0
+ * @Descripttion: 功能说明
+ * @FilePath: \client.service.ui.web\src\views\home\ServerLine.vue
+-->
 <template>
     <div>
         <div class="line flex" title="选择服务器线路">

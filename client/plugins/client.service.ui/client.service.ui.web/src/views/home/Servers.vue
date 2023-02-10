@@ -2,14 +2,14 @@
  * @Author: snltty
  * @Date: 2023-02-10 17:33:52
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-10 17:58:00
+ * @LastEditTime: 2023-02-10 22:00:16
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\Servers.vue
 -->
 <template>
-    <div class="servers-mark absolute">
-        <div class="servers-wrap absolute scrollbar">
+    <div class="servers-mark absolute" :class="{show:animation}" @click="handleClose">
+        <div class="servers-wrap absolute scrollbar" @click.stop>
             <ul>
                 <li class="flex">
                     <div class="country-img">
@@ -77,12 +77,32 @@
 </template>  
    
 <script>
+import { onMounted, ref, watch } from '@vue/runtime-core'
 import Signal from './Signal.vue'
 export default {
     components:{Signal},
-    setup () {
+    props: ['modelValue'],
+    emits: ['update:modelValue', 'success'],
+    setup (props, { emit }) {
+
+        const animation = ref(false);
+        watch(() => animation.value, (val) => {
+            if (val == false) {
+                setTimeout(() => {
+                    emit('update:modelValue', val);
+                }, 300);
+            }
+        });
+        onMounted(()=>{
+            setTimeout(()=>{
+                animation.value = true;
+            });
+        });
+        const handleClose = ()=>{
+            animation.value = false;
+        }
  
-        return {}
+        return {animation,handleClose}
     }
 }
 </script>
@@ -90,13 +110,20 @@ export default {
 <style lang="stylus" scoped>
 .servers-mark
     background-color: rgba(0,0,0,0.05);
+    &.show
+        .servers-wrap
+            left: 100%;
+            transform: translateX(-20rem);
 .servers-wrap
-    left: auto;
-    right: 0;
+    left: 200%;
+    transform: translateX(0);
+    right: auto;
     width: 20rem;
     border-left: 1px solid #ddd;
     box-shadow: -1px -1px .6rem rgba(0,0,0,0.05);
     background-color: #fff;
+    transition: .3s;
+
 
     ul
         padding: 1rem

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 14:45:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-04-30 16:06:01
+ * @LastEditTime: 2023-02-10 22:12:27
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\components\Theme.vue
@@ -15,13 +15,13 @@
 import { toRefs, reactive } from '@vue/reactivity';
 import { watch } from '@vue/runtime-core';
 const version = require('element-plus/package.json').version
-let ORIGINAL_THEME = '#409EFF'
+let ORIGINAL_THEME = '#67C23A'
 export default {
     setup () {
         const state = reactive({
             chalk: '', // 当前是否已经获取过css样式文件内容，如果获取过，这里会有值，避免多次获取
-            color: '#409EFF',
-            predefineColors: ['#409EFF', '#1890ff', '#304156', '#212121', '#11a983', '#13c2c2', '#6959CD', '#f5222d'],
+            color: '#67C23A',
+            predefineColors: ['#67C23A', '#1890ff', '#304156', '#212121', '#11a983', '#13c2c2', '#6959CD', '#f5222d'],
         });
         const updateStyle = (style, oldCluster, newCluster) => {
             let newStyle = style
@@ -81,21 +81,6 @@ export default {
             clusters.push(shadeColor(theme, 0.1))
             return clusters
         }
-        const setCss = (color) => {
-            localStorage.setItem('ui-theme-color', color);
-            let css = `:root{
-                --main-color:#${color};
-                --header-bg-color:#${color};
-            }`;
-            let dom = document.getElementById('theme-style');
-            if (!dom) {
-                dom = document.createElement("style");
-                dom.id = 'theme-style';
-                document.body.appendChild(dom);
-            }
-            dom.innerHTML = css;
-        }
-
         const setTheme = async (color) => {
             if (!color) {
                 color = localStorage.getItem('ui-theme-color') || '0A8463';
@@ -139,7 +124,6 @@ export default {
                 if (typeof innerText !== 'string') return
                 style.innerText = updateStyle(innerText, originalCluster, themeCluster)
             })
-            setCss(themeCluster[0]);
         }
 
         setTheme();

@@ -1,3 +1,12 @@
+<!--
+ * @Author: snltty
+ * @Date: 2023-02-10 21:02:51
+ * @LastEditors: snltty
+ * @LastEditTime: 2023-02-10 22:27:08
+ * @version: v1.0.0
+ * @Descripttion: 功能说明
+ * @FilePath: \client.service.ui.web\src\views\home\ConnectButton.vue
+-->
 <template>
     <div>
         <a href="javascript:;" :class="className">
@@ -16,14 +25,14 @@
 </template>
 
 <script>
-import { computed } from '@vue/reactivity'
+import { computed, ref } from '@vue/reactivity'
 export default {
     setup () {
 
         const loading = computed(() => false);
-        const connected = computed(() => true);
+        const connected = computed(() => false);
         const className = computed(() => connected.value ? 'green' : 'gray');
-
+        
         return {
             loading, connected, className
         }
@@ -64,7 +73,7 @@ a
             color: #abb1b7;
 
     &.gray:hover
-        box-shadow: 0 0 0 12px #b8c3d361;
+        box-shadow: 0 0 0 12px #d1d8e261;
         background-color: #b6bbc0;
         background-image: url('../../assets/button_bg.png'), url('../../assets/button_bg.png'), -moz-radial-gradient(center bottom, circle, rgba(202, 205, 208, 1) 0, rgba(202, 205, 208, 0) 100px), -moz-linear-gradient(#d1d3d6, #9fa5a9);
         background-image: url('../../assets/button_bg.png'), url('../../assets/button_bg.png'), -webkit-gradient(radial, 50% 100%, 0, 50% 100%, 100, from(#fefeff), to(rgba(197, 199, 202, 0))), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#e1e4e8), to(#b4bcc2));

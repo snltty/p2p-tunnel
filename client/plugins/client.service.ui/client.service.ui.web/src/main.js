@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 09:12:44
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-10 16:45:10
+ * @LastEditTime: 2023-02-10 21:34:49
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\main.js
@@ -17,6 +17,8 @@ import router from './router'
 const app = createApp(App);
 
 import './assets/particles.min.js'
+import directives from './directives/index'
+directives(app);
 
 import './assets/style.css'
 import './extends/index'

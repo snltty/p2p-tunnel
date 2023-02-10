@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole.tcp.nutssb
@@ -65,15 +66,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 #endif
         private readonly ConcurrentDictionary<ulong, ConnectCacheModel> connectTcpCache = new();
 
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<ConnectParams> OnSendHandler => new SimpleSubPushHandler<ConnectParams>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
         public async Task<ConnectResultModel> Send(ConnectParams param)
         {
             if (param.TunnelName == (ulong)TunnelDefaults.MIN)
@@ -83,49 +76,28 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 param.LocalPort = localPort;
             }
 
-            TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
-            if (clientInfoCaching.GetTunnelPort(param.TunnelName, out _))
+            var ceche = new ConnectCacheModel
             {
+                Tcs = new TaskCompletionSource<ConnectResultModel>(),
+                TunnelName = param.TunnelName,
+                LocalPort = param.LocalPort
+            };
+            connectTcpCache.TryAdd(param.Id, ceche);
 
-                var ceche = new ConnectCacheModel
-                {
-                    Tcs = tcs,
-                    TunnelName = param.TunnelName,
-                    LocalPort = param.LocalPort
-                };
-                connectTcpCache.TryAdd(param.Id, ceche);
-
-                ceche.Step1Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 5000);
-                await SendStep1(param);
-            }
-            else
-            {
-                tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = $"未找到通道{param.TunnelName}" } });
-            }
-            return await tcs.Task.ConfigureAwait(false);
+            await SendStep1(param);
+            return await ceche.Tcs.Task.ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<OnStep1Params> OnStep1Handler { get; } = new SimpleSubPushHandler<OnStep1Params>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
         public async Task OnStep1(OnStep1Params arg)
         {
-            if (arg.Data.IsDefault)
-            {
-                OnStep1Handler.Push(arg);
-            }
+            OnStep1Handler.Push(arg);
 
             if (arg.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
             {
                 await clientsTunnel.NewBind(arg.Connection.ServerType, arg.RawData.TunnelName);
             }
 
+            RemoveSendTimeout(arg.RawData.FromId);
             if (clientInfoCaching.GetTunnelPort(arg.RawData.TunnelName, out int localPort))
             {
                 List<IPEndPoint> ips = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new IPEndPoint(c, arg.Data.LocalPort)).ToList();
@@ -165,19 +137,101 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+        private async Task CryptoSwap(IConnection connection)
+        {
+            if (config.Client.Encode)
+            {
+                ICrypto crypto = await cryptoSwap.Swap(connection, null, config.Client.EncodePassword);
+                if (crypto == null)
+                {
+                    Logger.Instance.Error("tcp打洞交换密钥失败，可能是两端密钥不一致，A如果设置了密钥，则B必须设置相同的密钥，如果B未设置密钥，则A必须留空");
+                }
+                else
+                {
+                    connection.EncodeEnable(crypto);
+                }
+            }
+        }
+
+        private void Cancel(ulong id)
+        {
+            if (connectTcpCache.TryRemove(id, out ConnectCacheModel cache))
+            {
+                cache.Canceled = true;
+                cache.Tcs.SetResult(new ConnectResultModel
+                {
+                    State = false,
+                    Result = new ConnectFailModel
+                    {
+                        Msg = "取消",
+                        Type = ConnectFailType.CANCEL
+                    }
+                });
+            }
+        }
+        private void SendTimeout(WheelTimerTimeout<object> timeout)
+        {
+            try
+            {
+                if (timeout.IsCanceled) return;
+
+                ulong toid = (ulong)timeout.Task.State;
+                timeout.Cancel();
+                if (connectTcpCache.TryRemove(toid, out ConnectCacheModel cache))
+                {
+                    cache.Canceled = true;
+                    cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "tcp打洞超时" } });
+
+                    _ = SendStep2Fail(cache.TunnelName, toid);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
+        }
+        private void AddSendTimeout(ulong toid)
+        {
+            if (connectTcpCache.TryGetValue(toid, out ConnectCacheModel cache))
+            {
+                cache.SendTimeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendTimeout, State = toid }, 5000);
+            }
+        }
+        private void RemoveSendTimeout(ulong toid)
+        {
+            if (connectTcpCache.TryGetValue(toid, out ConnectCacheModel cache))
+            {
+                cache.SendTimeout?.Cancel();
+            }
+        }
+
+
+        public async Task SendStep1(ConnectParams param)
+        {
+            AddSendTimeout(param.Id);
+            bool res = await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
+            {
+                TunnelName = param.TunnelName,
+                Connection = TcpServer,
+                ToId = param.Id,
+                Data = new PunchHoleStep1Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_1, PunchType = PunchHoleTypes.TCP_NUTSSB }
+            }).ConfigureAwait(false);
+        }
+        public async Task SendStep2(OnStep1Params arg)
+        {
+            AddSendTimeout(arg.RawData.FromId);
+            bool res = await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2Info>
+            {
+                TunnelName = arg.RawData.TunnelName,
+                Connection = TcpServer,
+                ToId = arg.RawData.FromId,
+                Data = new PunchHoleStep2Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2, PunchType = PunchHoleTypes.TCP_NUTSSB }
+            }).ConfigureAwait(false);
+        }
         public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; } = new SimpleSubPushHandler<OnStep2Params>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
         public async Task OnStep2(OnStep2Params arg)
         {
-            await Task.CompletedTask;
-            _ = Task.Run(async () =>
+            await Task.Run(async () =>
             {
                 OnStep2Handler.Push(arg);
                 if (connectTcpCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache) == false)
@@ -186,7 +240,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
                     return;
                 }
-                cache.Step1Timeout.Cancel();
+                RemoveSendTimeout(arg.RawData.FromId);
 
                 bool success = false;
                 List<IPEndPoint> ips = new List<IPEndPoint>();
@@ -239,19 +293,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             Logger.Instance.Warning($"tcp {ip} connect success");
                             cache.Success = true;
 
-                            if (arg.Data.IsDefault)
-                            {
-                                IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: config.Client.TcpBufferSize);
-                                await CryptoSwap(connection);
-                                await SendStep3(connection, arg.RawData.TunnelName, arg.RawData.FromId);
-                            }
-                            else
-                            {
-                                if (connectTcpCache.TryRemove(arg.RawData.FromId, out _))
-                                {
-                                    cache.Tcs.SetResult(new ConnectResultModel { State = true });
-                                }
-                            }
+                            IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: config.Client.TcpBufferSize);
+                            await CryptoSwap(connection);
+                            await SendStep3(connection, arg.RawData.TunnelName, arg.RawData.FromId);
                             success = true;
                             break;
                         }
@@ -260,8 +304,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             Logger.Instance.DebugError($"tcp {ip} connect fail");
                             targetSocket.SafeClose();
                             targetSocket = null;
-                            //await SendStep2Retry(arg, i).ConfigureAwait(false);
-                            //await Task.Delay(100);
                         }
                     }
                     catch (SocketException ex)
@@ -272,13 +314,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         if (ex.SocketErrorCode == SocketError.AddressNotAvailable)
                         {
                             Logger.Instance.DebugError($"{ex.SocketErrorCode}:{ip}");
-                            //await Task.Delay(100);
                         }
-                        else
-                        {
-                            //await SendStep2Retry(arg, i).ConfigureAwait(false);
-                        }
-
                     }
                     catch (Exception ex)
                     {
@@ -293,31 +329,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
             }).ConfigureAwait(false);
         }
-
-        private async Task CryptoSwap(IConnection connection)
-        {
-            if (config.Client.Encode)
-            {
-                ICrypto crypto = await cryptoSwap.Swap(connection, null, config.Client.EncodePassword);
-                if (crypto == null)
-                {
-                    Logger.Instance.Error("tcp打洞交换密钥失败，可能是两端密钥不一致，A如果设置了密钥，则B必须设置相同的密钥，如果B未设置密钥，则A必须留空");
-                }
-                else
-                {
-                    connection.EncodeEnable(crypto);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<OnStep2RetryParams> OnStep2RetryHandler { get; } = new SimpleSubPushHandler<OnStep2RetryParams>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
         public void OnStep2Retry(OnStep2RetryParams e)
         {
             if (connectTcpCache.TryGetValue(e.RawData.FromId, out ConnectCacheModel cache) == false || cache.Success)
@@ -361,136 +373,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep2FailParams> OnStep2FailHandler { get; } = new SimpleSubPushHandler<OnStep2FailParams>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        public void OnStep2Fail(OnStep2FailParams arg)
-        {
-            OnStep2FailHandler.Push(arg);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
-        public void OnStep2Stop(OnStep2StopParams e)
-        {
-            Cancel(e.RawData.FromId);
-        }
-        private void Cancel(ulong id)
-        {
-            if (connectTcpCache.TryRemove(id, out ConnectCacheModel cache))
-            {
-                cache.Canceled = true;
-                cache.Tcs.SetResult(new ConnectResultModel
-                {
-                    State = false,
-                    Result = new ConnectFailModel
-                    {
-                        Msg = "取消",
-                        Type = ConnectFailType.CANCEL
-                    }
-                });
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep3Params> OnStep3Handler { get; } = new SimpleSubPushHandler<OnStep3Params>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public async Task OnStep3(OnStep3Params arg)
-        {
-            await SendStep4(arg);
-            OnStep3Handler.Push(arg);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep4Params> OnStep4Handler { get; } = new SimpleSubPushHandler<OnStep4Params>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        public void OnStep4(OnStep4Params arg)
-        {
-            if (connectTcpCache.TryRemove(arg.RawData.FromId, out ConnectCacheModel cache))
-            {
-                if (cache.Step3Timeout != null)
-                {
-                    cache.Step3Timeout.Cancel();
-                }
-                cache.Tcs.SetResult(new ConnectResultModel { State = true });
-            }
-            OnStep4Handler.Push(arg);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public async Task SendStep1(ConnectParams param)
-        {
-            bool res = await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
-            {
-                TunnelName = param.TunnelName,
-                Connection = TcpServer,
-                ToId = param.Id,
-                Data = new PunchHoleStep1Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_1, PunchType = PunchHoleTypes.TCP_NUTSSB }
-            }).ConfigureAwait(false);
-        }
-        private void SendStep1Timeout(WheelTimerTimeout<object> timeout)
-        {
-            try
-            {
-                if (timeout.IsCanceled) return;
-
-                ulong toid = (ulong)timeout.Task.State;
-                timeout.Cancel();
-                if (connectTcpCache.TryRemove(toid, out ConnectCacheModel cache))
-                {
-                    cache.Canceled = true;
-                    cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "tcp打洞超时" } });
-
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.Error(ex);
-            }
-
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public async Task SendStep2(OnStep1Params arg)
-        {
-            bool res = await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2Info>
-            {
-                TunnelName = arg.RawData.TunnelName,
-                Connection = TcpServer,
-                ToId = arg.RawData.FromId,
-                Data = new PunchHoleStep2Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2, PunchType = PunchHoleTypes.TCP_NUTSSB }
-            }).ConfigureAwait(false);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<ulong> OnSendStep2FailHandler => new SimpleSubPushHandler<ulong>();
         private async Task SendStep2Fail(ulong tunname, ulong toid)
         {
@@ -517,11 +399,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
 
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="toid"></param>
-        /// <returns></returns>
+        public SimpleSubPushHandler<OnStep2FailParams> OnStep2FailHandler { get; } = new SimpleSubPushHandler<OnStep2FailParams>();
+        public void OnStep2Fail(OnStep2FailParams arg)
+        {
+            RemoveSendTimeout(arg.RawData.FromId);
+            OnStep2FailHandler.Push(arg);
+        }
         public async Task SendStep2Stop(ulong toid)
         {
             if (connectTcpCache.TryGetValue(toid, out ConnectCacheModel cache))
@@ -536,41 +419,14 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 Cancel(toid);
             }
         }
-
-        private void SendStep3Timeout(WheelTimerTimeout<object> timeout)
+        public void OnStep2Stop(OnStep2StopParams e)
         {
-            try
-            {
-                if (timeout.IsCanceled) return;
-
-                ulong toid = (ulong)timeout.Task.State;
-                timeout.Cancel();
-                if (connectTcpCache.TryRemove(toid, out ConnectCacheModel cache))
-                {
-                    cache.Canceled = true;
-                    OnSendStep2FailHandler.Push(toid);
-
-                    _ = SendStep2Fail(cache.TunnelName, toid);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.Error(ex);
-            }
-
+            Cancel(e.RawData.FromId);
         }
+
         private async Task SendStep3(IConnection connection, ulong tunnelName, ulong toid)
         {
-            WheelTimerTimeout<object> step3Timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object>
-            {
-                Callback = SendStep3Timeout,
-                State = toid
-            }, 2000);
-            if (connectTcpCache.TryGetValue(toid, out ConnectCacheModel cache))
-            {
-                cache.Step3Timeout = step3Timeout;
-            }
+            AddSendTimeout(toid);
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep3Info>
             {
                 TunnelName = tunnelName,
@@ -582,6 +438,14 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 }
             }).ConfigureAwait(false);
         }
+        public SimpleSubPushHandler<OnStep3Params> OnStep3Handler { get; } = new SimpleSubPushHandler<OnStep3Params>();
+        public async Task OnStep3(OnStep3Params arg)
+        {
+            RemoveSendTimeout(arg.RawData.FromId);
+            await SendStep4(arg);
+            OnStep3Handler.Push(arg);
+        }
+
         private async Task SendStep4(OnStep3Params arg)
         {
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep4Info>
@@ -594,6 +458,16 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     PunchType = PunchHoleTypes.TCP_NUTSSB
                 }
             });
+        }
+        public SimpleSubPushHandler<OnStep4Params> OnStep4Handler { get; } = new SimpleSubPushHandler<OnStep4Params>();
+        public void OnStep4(OnStep4Params arg)
+        {
+            RemoveSendTimeout(arg.RawData.FromId);
+            if (connectTcpCache.TryRemove(arg.RawData.FromId, out ConnectCacheModel cache))
+            {
+                cache.Tcs.SetResult(new ConnectResultModel { State = true });
+            }
+            OnStep4Handler.Push(arg);
         }
 
         private bool NotIPv6Support(IPAddress ip)

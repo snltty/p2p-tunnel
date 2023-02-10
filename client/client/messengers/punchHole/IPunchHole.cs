@@ -134,13 +134,9 @@ namespace client.messengers.punchHole
         public ulong TunnelName { get; set; }
 
         /// <summary>
-        /// 步骤1超时
+        /// 发送超时
         /// </summary>
-        public WheelTimerTimeout<object> Step1Timeout { get; set; }
-        /// <summary>
-        /// 步骤3超时
-        /// </summary>
-        public WheelTimerTimeout<object> Step3Timeout { get; set; }
+        public WheelTimerTimeout<object> SendTimeout { get; set; }
 
         /// <summary>
         /// 是否已成功

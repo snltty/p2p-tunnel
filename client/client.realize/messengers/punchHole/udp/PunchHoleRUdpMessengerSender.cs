@@ -59,44 +59,7 @@ namespace client.realize.messengers.punchHole.udp
 
         private readonly ConcurrentDictionary<ulong, ConnectCacheModel> connectCache = new();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<ConnectParams> OnSendHandler => new SimpleSubPushHandler<ConnectParams>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public async Task<ConnectResultModel> Send(ConnectParams param)
-        {
-            if (param.TunnelName == (ulong)TunnelDefaults.MIN)
-            {
-                (ulong tunnelName, int localPort) = await clientsTunnel.NewBind(ServerType.UDP, (ulong)TunnelDefaults.MIN);
-                param.TunnelName = tunnelName;
-                param.LocalPort = localPort;
-            }
-
-            var timeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendStep1Timeout, State = param.Id }, 5000);
-
-            TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
-            connectCache.TryAdd(param.Id, new ConnectCacheModel
-            {
-                Step1Timeout = timeout,
-                Tcs = tcs,
-                LocalPort = param.LocalPort,
-            });
-
-            await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
-            {
-                Connection = connection,
-                TunnelName = param.TunnelName,
-                ToId = param.Id,
-                Data = new PunchHoleStep1Info { Step = (byte)PunchHoleUdpSteps.STEP_1, PunchType = PunchHoleTypes.UDP }
-            }).ConfigureAwait(false);
-            return await tcs.Task.ConfigureAwait(false);
-        }
-        private void SendStep1Timeout(WheelTimerTimeout<object> timeout)
+        private void SendTimeout(WheelTimerTimeout<object> timeout)
         {
             try
             {
@@ -107,36 +70,69 @@ namespace client.realize.messengers.punchHole.udp
                 if (connectCache.TryRemove(toid, out ConnectCacheModel cache))
                 {
                     cache.Canceled = true;
-                    cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "udp打洞超时" } });
+                    cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "tcp打洞超时" } });
+
+                    _ = SendStep2Fail(cache.TunnelName, toid);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Instance.Error(ex);
             }
-
+        }
+        private void AddSendTimeout(ulong toid)
+        {
+            if (connectCache.TryGetValue(toid, out ConnectCacheModel cache))
+            {
+                cache.SendTimeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendTimeout, State = toid }, 5000);
+            }
+        }
+        private void RemoveSendTimeout(ulong toid)
+        {
+            if (connectCache.TryGetValue(toid, out ConnectCacheModel cache))
+            {
+                cache.SendTimeout?.Cancel();
+            }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+        public SimpleSubPushHandler<ConnectParams> OnSendHandler => new SimpleSubPushHandler<ConnectParams>();
+        public async Task<ConnectResultModel> Send(ConnectParams param)
+        {
+            if (param.TunnelName == (ulong)TunnelDefaults.MIN)
+            {
+                (ulong tunnelName, int localPort) = await clientsTunnel.NewBind(ServerType.UDP, (ulong)TunnelDefaults.MIN);
+                param.TunnelName = tunnelName;
+                param.LocalPort = localPort;
+            }
+
+            TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
+            connectCache.TryAdd(param.Id, new ConnectCacheModel
+            {
+                Tcs = tcs,
+                LocalPort = param.LocalPort,
+            });
+            AddSendTimeout(param.Id);
+
+            await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
+            {
+                Connection = connection,
+                TunnelName = param.TunnelName,
+                ToId = param.Id,
+                Data = new PunchHoleStep1Info { Step = (byte)PunchHoleUdpSteps.STEP_1, PunchType = PunchHoleTypes.UDP }
+            }).ConfigureAwait(false);
+            return await tcs.Task.ConfigureAwait(false);
+        }
+
         public SimpleSubPushHandler<OnStep1Params> OnStep1Handler { get; } = new SimpleSubPushHandler<OnStep1Params>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
         public async Task OnStep1(OnStep1Params arg)
         {
-            if (arg.Data.IsDefault)
-            {
-                OnStep1Handler.Push(arg);
-            }
+            OnStep1Handler.Push(arg);
             if (arg.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
             {
                 await clientsTunnel.NewBind(arg.Connection.ServerType, arg.RawData.TunnelName);
             }
 
+            RemoveSendTimeout(arg.RawData.FromId);
             if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
             {
 
@@ -151,6 +147,7 @@ namespace client.realize.messengers.punchHole.udp
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port + 1));
 
+                AddSendTimeout(arg.RawData.FromId);
                 await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2Info>
                 {
                     Connection = arg.Connection,
@@ -161,19 +158,11 @@ namespace client.realize.messengers.punchHole.udp
             }
             else
             {
-                await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
+                await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; } = new SimpleSubPushHandler<OnStep2Params>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
         public async Task OnStep2(OnStep2Params arg)
         {
             OnStep2Handler.Push(arg);
@@ -184,99 +173,59 @@ namespace client.realize.messengers.punchHole.udp
                  if (connectCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache) == false)
                  {
                      Logger.Instance.Error($"udp 找不到缓存");
-                     await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
+                     await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
                      return;
                  }
                  if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer) == false)
                  {
                      Logger.Instance.Error($"udp 找不到通道服务器：{arg.RawData.TunnelName}");
-                     await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
+                     await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
                      return;
                  }
-                 cache.Step1Timeout.Cancel();
+                 RemoveSendTimeout(arg.RawData.FromId);
 
-                 if (arg.Data.IsDefault)
+                 List<IPEndPoint> ips = new List<IPEndPoint>();
+                 if (UseLocalPort)
                  {
-                     List<IPEndPoint> ips = new List<IPEndPoint>();
-                     if (UseLocalPort)
-                     {
-                         var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, localPort)).ToList();
-                         ips.AddRange(locals);
-                     }
-                     if (IPv6Support())
-                     {
-                         var locals = arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, port)).ToList();
-                         ips.AddRange(locals);
-                     }
-                     ips.Add(new IPEndPoint(arg.Data.Ip, port));
-                     ips.Add(new IPEndPoint(arg.Data.Ip, port + 1));
+                     var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, localPort)).ToList();
+                     ips.AddRange(locals);
+                 }
+                 if (IPv6Support())
+                 {
+                     var locals = arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, port)).ToList();
+                     ips.AddRange(locals);
+                 }
+                 ips.Add(new IPEndPoint(arg.Data.Ip, port));
+                 ips.Add(new IPEndPoint(arg.Data.Ip, port + 1));
 
 
-                     IConnection connection = null;
-                     for (int i = 0; i < ips.Count; i++)
+                 IConnection connection = null;
+                 for (int i = 0; i < ips.Count; i++)
+                 {
+                     IPEndPoint ip = i >= ips.Count - 1 ? ips[^1] : ips[i];
+                     if (NotIPv6Support(ip.Address))
                      {
-                         IPEndPoint ip = i >= ips.Count - 1 ? ips[^1] : ips[i];
-                         if (NotIPv6Support(ip.Address))
-                         {
-                             continue;
-                         }
-                         Logger.Instance.DebugDebug($"udp {ip} connect");
-                         connection = await udpServer.CreateConnection(ip);
-                         if (connection != null)
-                         {
-                             Logger.Instance.Warning($"udp {ip} connect success");
-                             break;
-                         }
-                         else
-                         {
-                             Logger.Instance.DebugError($"udp {ip} connect fail");
-                             /*
-                             if (i >= ips.Count - 1)
-                             {
-                                 await punchHoleMessengerSender.RequestReply(new SendPunchHoleArg<PunchHoleStep21Info>
-                                 {
-                                     Connection = this.connection,
-                                     TunnelName = arg.RawData.TunnelName,
-                                     ToId = arg.RawData.FromId,
-                                     Data = new PunchHoleStep21Info
-                                     {
-                                         Step = (byte)PunchHoleUdpSteps.STEP_2_1,
-                                         PunchType = PunchHoleTypes.UDP
-                                     }
-                                 }).ConfigureAwait(false);
-                             }
-                             */
-                         }
+                         continue;
                      }
+                     Logger.Instance.DebugDebug($"udp {ip} connect");
+                     connection = await udpServer.CreateConnection(ip);
                      if (connection != null)
                      {
-                         await CryptoSwap(connection);
-                         await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep3Info>
-                         {
-                             Connection = connection,
-                             TunnelName = arg.RawData.TunnelName,
-                             Data = new PunchHoleStep3Info
-                             {
-                                 Step = (byte)PunchHoleUdpSteps.STEP_3,
-                                 PunchType = PunchHoleTypes.UDP
-                             }
-                         }).ConfigureAwait(false);
+                         break;
                      }
                      else
                      {
-                         await SendSetp2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
-                         if (connectCache.TryRemove(arg.RawData.FromId, out _))
-                         {
-                             cache.Tcs.SetResult(new ConnectResultModel { State = false, Result = new ConnectFailModel { Type = ConnectFailType.ERROR, Msg = "udp打洞失败" } });
-                         }
+                         Logger.Instance.DebugError($"udp {ip} connect fail");
                      }
+                 }
+                 if (connection != null)
+                 {
+                     await CryptoSwap(connection).ConfigureAwait(false);
+                     await SendStep3(connection, arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
                  }
                  else
                  {
-                     if (connectCache.TryRemove(arg.RawData.FromId, out _))
-                     {
-                         cache.Tcs.SetResult(new ConnectResultModel { State = true });
-                     }
+                     await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
                  }
              });
         }
@@ -297,21 +246,10 @@ namespace client.realize.messengers.punchHole.udp
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<OnStep21Params> OnStep21Handler { get; } = new SimpleSubPushHandler<OnStep21Params>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
         public async Task OnStep21(OnStep21Params arg)
         {
-            if (arg.Data.IsDefault)
-            {
-                OnStep21Handler.Push(arg);
-            }
+            OnStep21Handler.Push(arg);
             if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
             {
                 foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
@@ -328,19 +266,12 @@ namespace client.realize.messengers.punchHole.udp
             await Task.CompletedTask;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<OnStep2FailParams> OnStep2FailHandler { get; } = new SimpleSubPushHandler<OnStep2FailParams>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
         public void OnStep2Fail(OnStep2FailParams arg)
         {
             OnStep2FailHandler.Push(arg);
         }
-        private async Task SendSetp2Fail(ulong tunname, ulong toid)
+        private async Task SendStep2Fail(ulong tunname, ulong toid)
         {
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2FailInfo>
             {
@@ -349,19 +280,40 @@ namespace client.realize.messengers.punchHole.udp
                 ToId = toid,
                 Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleUdpSteps.STEP_2_Fail, PunchType = PunchHoleTypes.UDP }
             }).ConfigureAwait(false);
+
+            if (connectCache.TryRemove(toid, out ConnectCacheModel cache))
+            {
+                cache.Canceled = true;
+                cache.Tcs.SetResult(new ConnectResultModel
+                {
+                    State = false,
+                    Result = new ConnectFailModel
+                    {
+                        Msg = "udp打洞失败",
+                        Type = ConnectFailType.ERROR
+                    }
+                });
+            }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+        private async Task SendStep3(IConnection connection, ulong tunnelName, ulong toid)
+        {
+            AddSendTimeout(toid);
+            await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep3Info>
+            {
+                TunnelName = tunnelName,
+                Connection = connection,
+                Data = new PunchHoleStep3Info
+                {
+                    Step = (byte)PunchHoleUdpSteps.STEP_3,
+                    PunchType = PunchHoleTypes.UDP
+                }
+            }).ConfigureAwait(false);
+        }
         public SimpleSubPushHandler<OnStep3Params> OnStep3Handler { get; } = new SimpleSubPushHandler<OnStep3Params>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
         public async Task OnStep3(OnStep3Params arg)
         {
+            RemoveSendTimeout(arg.RawData.FromId);
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep4Info>
             {
                 Connection = arg.Connection,
@@ -375,16 +327,10 @@ namespace client.realize.messengers.punchHole.udp
             OnStep3Handler.Push(arg);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<OnStep4Params> OnStep4Handler { get; } = new SimpleSubPushHandler<OnStep4Params>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
         public void OnStep4(OnStep4Params arg)
         {
+            RemoveSendTimeout(arg.RawData.FromId);
             if (connectCache.TryRemove(arg.RawData.FromId, out ConnectCacheModel cache))
             {
                 cache.Tcs.SetResult(new ConnectResultModel { State = true });

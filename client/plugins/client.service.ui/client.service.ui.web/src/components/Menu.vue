@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:05:47
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-10 17:51:03
+ * @LastEditTime: 2023-02-10 22:17:12
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\components\Menu.vue
@@ -37,12 +37,6 @@
                     <OfficeBuilding />
                 </el-icon>
                 <span>服务器代理</span>
-            </router-link>
-            <router-link :to="{name:'Setting'}">
-                <el-icon>
-                    <Setting />
-                </el-icon>
-                <span>设置</span>
             </router-link>
         </div>
         <div class="flex-1"></div>
@@ -105,12 +99,12 @@ export default {
         height: 3.6rem;
 
 .navs
-    padding-top: 1rem;
+    padding-top: 1.1rem;
 
     a
         display: inline-block;
         margin-left: 0.4rem;
-        padding: 0.4rem 1rem 0.6rem 1rem;
+        padding: 0.2rem 1rem 0.6rem 1rem;
         border-radius: 2rem;
         transition: 0.3s;
         color: #fff;
@@ -122,7 +116,8 @@ export default {
 
         .el-icon, span
             vertical-align: middle;
-
+        .el-icon
+            padding-top: 3px;
         span
             margin-left: 0.4rem;
 </style>
