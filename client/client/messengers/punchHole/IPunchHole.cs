@@ -18,8 +18,10 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 执行局接口
         /// </summary>
-        /// <param name="arg"></param>
-        void Execute(OnPunchHoleArg arg);
+        /// <param name="connection"></param>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        Task Execute(IConnection connection,PunchHoleRequestInfo info);
     }
     /// <summary>
     /// 打洞数据
@@ -57,7 +59,7 @@ namespace client.messengers.punchHole
     /// <summary>
     /// 打洞步骤基类
     /// </summary>
-    public class OnStepBaseParams
+    public class PunchHoleStepModel
     {
         /// <summary>
         /// 连接对象
@@ -70,49 +72,7 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 服务端发来的客户端数据
         /// </summary>
-        public PunchHoleNotifyInfo Data { get; set; }
-    }
-    /// <summary>
-    /// 步骤1
-    /// </summary>
-    public class OnStep1Params : OnStepBaseParams { }
-    /// <summary>
-    /// 步骤2
-    /// </summary>
-    public class OnStep2Params : OnStepBaseParams { }
-    /// <summary>
-    /// 步骤2.1
-    /// </summary>
-    public class OnStep21Params : OnStepBaseParams { }
-    /// <summary>
-    /// 步骤2失败
-    /// </summary>
-    public class OnStep2FailParams : OnStepBaseParams
-    {
-        /// <summary>
-        /// 步骤2失败携带数据
-        /// </summary>
-        public new PunchHoleStep2FailInfo Data { get; set; }
-    }
-    /// <summary>
-    /// 步骤3
-    /// </summary>
-    public class OnStep3Params : OnStepBaseParams
-    {
-        /// <summary>
-        /// 步骤3数据
-        /// </summary>
-        public new PunchHoleStep3Info Data { get; set; }
-    }
-    /// <summary>
-    /// 步骤4
-    /// </summary>
-    public class OnStep4Params : OnStepBaseParams
-    {
-        /// <summary>
-        /// 步骤4数据
-        /// </summary>
-        public new PunchHoleStep4Info Data { get; set; }
+        public object Data { get; set; }
     }
 
     /// <summary>

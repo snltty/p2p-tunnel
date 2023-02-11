@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using client.messengers.clients;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace client.realize.messengers.punchHole
 {
@@ -61,12 +60,12 @@ namespace client.realize.messengers.punchHole
         /// 收到打洞消息
         /// </summary>
         /// <param name="arg"></param>
-        public void OnPunchHole(OnPunchHoleArg arg)
+        public async Task OnPunchHole(OnPunchHoleArg arg)
         {
             PunchHoleTypes type = (PunchHoleTypes)arg.Data.PunchType;
             if (plugins.TryGetValue(type, out IPunchHole value))
             {
-                value?.Execute(arg);
+                await value?.Execute(arg);
             }
         }
         /// <summary>
@@ -166,7 +165,7 @@ namespace client.realize.messengers.punchHole
         /// <summary>
         /// 收到反向连接
         /// </summary>
-        public SimpleSubPushHandler<OnPunchHoleArg> OnReverse { get; } = new SimpleSubPushHandler<OnPunchHoleArg>();
+        public SimpleSubPushHandler<PunchHoleRequestInfo> OnReverse { get; } = new SimpleSubPushHandler<PunchHoleRequestInfo>();
         /// <summary>
         /// 通知其反向连接
         /// </summary>

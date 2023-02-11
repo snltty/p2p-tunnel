@@ -1,4 +1,7 @@
 ﻿using client.messengers.punchHole;
+using common.server;
+using common.server.model;
+using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole
 {
@@ -8,28 +11,17 @@ namespace client.realize.messengers.punchHole
     public sealed class PunchHoleReverse : IPunchHole
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="punchHoleMessengerSender"></param>
         public PunchHoleReverse(PunchHoleMessengerSender punchHoleMessengerSender)
         {
 
             this.punchHoleMessengerSender = punchHoleMessengerSender;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes Type => PunchHoleTypes.REVERSE;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        public void Execute(OnPunchHoleArg arg)
+        public async Task Execute(IConnection connection, PunchHoleRequestInfo info)
         {
-            punchHoleMessengerSender.OnReverse.Push(arg);
+            punchHoleMessengerSender.OnReverse.Push(info);
+            await Task.CompletedTask;
         }
     }
 }

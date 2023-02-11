@@ -1,6 +1,7 @@
 ﻿using client.messengers.punchHole;
 using common.server;
 using common.server.model;
+using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole
 {
@@ -40,11 +41,11 @@ namespace client.realize.messengers.punchHole
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)PunchHoleMessengerIds.Request)]
-        public void Request(IConnection connection)
+        public async Task Request(IConnection connection)
         {
             PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
-            punchHoleMessengerSender.OnPunchHole(new OnPunchHoleArg
+            await punchHoleMessengerSender.OnPunchHole(new OnPunchHoleArg
             {
                 Data = model,
                 Connection = connection

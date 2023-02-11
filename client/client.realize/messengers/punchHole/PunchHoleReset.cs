@@ -1,5 +1,8 @@
 ﻿using client.messengers.punchHole;
 using client.messengers.register;
+using common.server;
+using common.server.model;
+using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole
 {
@@ -9,28 +12,16 @@ namespace client.realize.messengers.punchHole
     public sealed class PunchHoleReset : IPunchHole
     {
         private readonly IRegisterTransfer registerTransfer;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="registerTransfer"></param>
         public PunchHoleReset(IRegisterTransfer registerTransfer)
         {
 
             this.registerTransfer = registerTransfer;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes Type => PunchHoleTypes.RESET;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        public void Execute(OnPunchHoleArg arg)
+        public async Task Execute(IConnection connection, PunchHoleRequestInfo info)
         {
             _ = registerTransfer.Register(true);
+            await Task.CompletedTask;
         }
     }
 }

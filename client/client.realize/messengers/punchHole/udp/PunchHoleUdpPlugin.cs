@@ -1,6 +1,7 @@
 ﻿using client.messengers.punchHole;
 using client.messengers.punchHole.udp;
 using common.libs;
+using common.server;
 using common.server.model;
 
 namespace client.realize.messengers.punchHole.udp
@@ -11,27 +12,16 @@ namespace client.realize.messengers.punchHole.udp
     public sealed class PunchHoleUdp : IPunchHole
     {
         private readonly IPunchHoleUdp punchHoleUdp;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="punchHoleUdp"></param>
         public PunchHoleUdp(IPunchHoleUdp punchHoleUdp)
         {
             this.punchHoleUdp = punchHoleUdp;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes Type => PunchHoleTypes.UDP;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        public void Execute(OnPunchHoleArg arg)
+        public void Execute(IConnection connection, PunchHoleRequestInfo info)
         {
-            PunchHoleUdpSteps step = (PunchHoleUdpSteps)arg.Data.PunchStep;
+            PunchHoleUdpSteps step = (PunchHoleUdpSteps)info.PunchStep;
 
             Logger.Instance.DebugDebug($"udp {step}");
 

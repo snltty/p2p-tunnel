@@ -1,6 +1,9 @@
 ﻿using client.messengers.clients;
 using client.messengers.punchHole;
 using common.libs;
+using common.server;
+using common.server.model;
+using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole
 {
@@ -10,28 +13,18 @@ namespace client.realize.messengers.punchHole
     public sealed class PunchHoleOffline : IPunchHole
     {
         private readonly IClientInfoCaching clientInfoCaching;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientInfoCaching"></param>
         public PunchHoleOffline(IClientInfoCaching clientInfoCaching)
         {
 
             this.clientInfoCaching = clientInfoCaching;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes Type => PunchHoleTypes.OFFLINE;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        public void Execute(OnPunchHoleArg arg)
+        public async Task Execute(IConnection connection, PunchHoleRequestInfo info)
         {
-            clientInfoCaching.Offline(arg.Data.FromId);
+            clientInfoCaching.Offline(info.FromId);
+            await Task.CompletedTask;
         }
     }
 }

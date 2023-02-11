@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.server;
 using common.server.model;
 using System;
 using System.Threading.Tasks;
@@ -10,108 +11,14 @@ namespace client.messengers.punchHole.tcp
     /// </summary>
     public interface IPunchHoleTcp
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<ConnectParams> OnSendHandler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
+
+        public delegate void StepEvent(object sender, PunchHoleStepModel e);
+        public event StepEvent OnStepHandler;
+
         public Task<ConnectResultModel> Send(ConnectParams param);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep1Params> OnStep1Handler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public Task OnStep1(OnStep1Params e);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public Task OnStep2(OnStep2Params e);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep2RetryParams> OnStep2RetryHandler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
-        public void OnStep2Retry(OnStep2RetryParams e);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<ulong> OnSendStep2FailHandler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep2FailParams> OnStep2FailHandler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        public void OnStep2Fail(OnStep2FailParams arg);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="toid"></param>
-        /// <returns></returns>
-        public Task SendStep2Stop(ulong toid);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
-        public void OnStep2Stop(OnStep2StopParams e);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep3Params> OnStep3Handler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public Task OnStep3(OnStep3Params arg);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep4Params> OnStep4Handler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        public void OnStep4(OnStep4Params arg);
+        public Task InputData(PunchHoleStepModel model);
     }
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public class OnStep2RetryParams : OnStepBaseParams
-    {
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class OnStep2StopParams : OnStepBaseParams { }
 
     /// <summary>
     /// 

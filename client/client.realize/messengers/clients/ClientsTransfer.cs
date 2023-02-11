@@ -322,12 +322,12 @@ namespace client.realize.messengers.clients
             });
         }
         //收到反连接请求
-        private void OnReverse(OnPunchHoleArg arg)
+        private void OnReverse(PunchHoleRequestInfo info)
         {
-            if (clientInfoCaching.Get(arg.Data.FromId, out ClientInfo client))
+            if (clientInfoCaching.Get(info.FromId, out ClientInfo client))
             {
                 PunchHoleReverseInfo model = new PunchHoleReverseInfo();
-                model.DeBytes(arg.Data.Data);
+                model.DeBytes(info.Data);
                 //交换状态 , 11 01 -> 01 11
                 client.TryReverseValue = (byte)(((model.Value & ClientInfo.TryReverseTcpUdpBit) << 2) | (model.Value >> 2));
                 ConnectClient(client);
@@ -460,7 +460,7 @@ namespace client.realize.messengers.clients
             {
                 try
                 {
-                   // Console.WriteLine($"start ping:{item.Name}=========================");
+                    // Console.WriteLine($"start ping:{item.Name}=========================");
                     var start = DateTime.Now;
                     var res = await heartMessengerSender.Heart(item.Connection);
                     if (res)
@@ -471,7 +471,7 @@ namespace client.realize.messengers.clients
                     {
                         item.Connection.RoundTripTime = -1;
                     }
-                   // Console.WriteLine($"end ping:{item.Name}============================");
+                    // Console.WriteLine($"end ping:{item.Name}============================");
                 }
                 catch (Exception)
                 {
