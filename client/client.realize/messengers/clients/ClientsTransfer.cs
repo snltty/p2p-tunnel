@@ -83,7 +83,8 @@ namespace client.realize.messengers.clients
             this.punchHoleDirectionConfig = punchHoleDirectionConfig;
             this.cryptoSwap = cryptoSwap;
 
-            PunchHoleSub();
+            punchHoleUdp.OnStepHandler += OnPunchHoleStep;
+            punchHoleTcp.OnStepHandler += OnPunchHoleStep;
 
             //掉线的
             tcpServer.OnDisconnect.Sub((connection) => OnDisconnect(connection, registerState.TcpConnection));
@@ -110,98 +111,65 @@ namespace client.realize.messengers.clients
             registerState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();
         }
 
-        private void PunchHoleSub()
+        private void OnPunchHoleStep(object sender, PunchHoleStepModel arg)
         {
-            punchHoleUdp.OnStep1Handler.Sub((e) =>
+            byte step1 = 0, step2fail = 0, step3 = 0, step4 = 0;
+            if (arg.Connection.ServerType == ServerType.TCP)
             {
-                if (config.Client.UseUdp == true)
+                if (config.Client.UseTcp == false) return;
+                step1 = (byte)PunchHoleTcpNutssBSteps.STEP_1;
+                step2fail = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL;
+                step3 = (byte)PunchHoleTcpNutssBSteps.STEP_3;
+                step4 = (byte)PunchHoleTcpNutssBSteps.STEP_4;
+            }
+            else if (arg.Connection.ServerType == ServerType.UDP)
+            {
+                if (config.Client.UseUdp == false) return;
+                step1 = (byte)PunchHoleUdpSteps.STEP_1;
+                step2fail = (byte)PunchHoleUdpSteps.STEP_2_Fail;
+                step3 = (byte)PunchHoleUdpSteps.STEP_3;
+                step4 = (byte)PunchHoleUdpSteps.STEP_4;
+            }
+
+            //3 4步骤是已成功连接，设置上线状态
+            if (arg.RawData.PunchStep == step3 || arg.RawData.PunchStep == step4)
+            {
+                if (clientInfoCaching.Get(arg.RawData.FromId, out ClientInfo client))
                 {
-                    clientInfoCaching.SetConnecting(e.RawData.FromId, true);
+                    //3是被动方 4是主动方
+                    ClientOnlineTypes onlineType = arg.RawData.PunchStep == step3 ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active;
+                    clientInfoCaching.Online(arg.RawData.FromId, arg.Connection, ClientConnectTypes.P2P, onlineType, arg.RawData.TunnelName);
+                    if (arg.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                    {
+                        clientInfoCaching.RemoveTunnelPort(arg.RawData.TunnelName);
+                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, arg.RawData.TunnelName);
+                    }
+                    //主动方 记录一下，是我这边主动打洞成功的，下次由我这边开始尝试
+                    if (arg.RawData.PunchStep == step4)
+                    {
+                        punchHoleDirectionConfig.Add(client.Name);
+                    }
                 }
-            });
-            punchHoleUdp.OnStep2FailHandler.Sub((e) =>
+            }
+            //被动方收到打洞消息，设置状态位连接中
+            else if (arg.RawData.PunchStep == step1)
             {
-                if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
+                clientInfoCaching.SetConnecting(arg.RawData.FromId, true);
+            }
+            //打洞失败
+            else if (arg.RawData.PunchStep == step2fail)
+            {
+                if (clientInfoCaching.Get(arg.RawData.FromId, out ClientInfo client))
                 {
                     client.SetConnecting(false);
-                    if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+                    if (arg.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
                     {
-                        clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                        clientInfoCaching.RemoveUdpserver(e.RawData.TunnelName, true);
-                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
+                        clientInfoCaching.RemoveTunnelPort(arg.RawData.TunnelName);
+                        clientInfoCaching.RemoveUdpserver(arg.RawData.TunnelName, true);
+                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, arg.RawData.TunnelName);
                     }
                 }
-
-            });
-            punchHoleUdp.OnStep3Handler.Sub((e) =>
-            {
-                clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive, e.RawData.TunnelName);
-                if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
-                {
-                    clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                    _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
-                }
-            });
-            punchHoleUdp.OnStep4Handler.Sub((e) =>
-            {
-                if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
-                {
-                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active, e.RawData.TunnelName);
-                    if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
-                    {
-                        clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
-                    }
-                    punchHoleDirectionConfig.Add(client.Name);
-                }
-            });
-
-            punchHoleTcp.OnStep1Handler.Sub((e) =>
-            {
-                if (config.Client.UseTcp == true)
-                {
-                    clientInfoCaching.SetConnecting(e.RawData.FromId, true);
-                }
-            });
-            punchHoleTcp.OnStep2FailHandler.Sub((e) =>
-            {
-                if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
-                {
-                    client.SetConnecting(false);
-                    if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
-                    {
-                        clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
-                    }
-                }
-            });
-            punchHoleTcp.OnStep3Handler.Sub((e) =>
-            {
-                if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
-                {
-                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Passive, e.RawData.TunnelName);
-                    if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
-                    {
-                        clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
-
-                    }
-                }
-
-            });
-            punchHoleTcp.OnStep4Handler.Sub((e) =>
-            {
-                if (clientInfoCaching.Get(e.RawData.FromId, out ClientInfo client))
-                {
-                    clientInfoCaching.Online(e.RawData.FromId, e.Connection, ClientConnectTypes.P2P, ClientOnlineTypes.Active, e.RawData.TunnelName);
-                    if (e.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
-                    {
-                        clientInfoCaching.RemoveTunnelPort(e.RawData.TunnelName);
-                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, e.RawData.TunnelName);
-                    }
-                    punchHoleDirectionConfig.Add(client.Name);
-                }
-            });
+            }
         }
 
         private void OnOffline(ClientInfo client)
@@ -373,7 +341,6 @@ namespace client.realize.messengers.clients
         /// <param name="id"></param>
         public void ConnectStop(ulong id)
         {
-            punchHoleTcp.SendStep2Stop(id);
         }
 
         private async Task<EnumConnectResult> ConnectUdp(ClientInfo client)
@@ -547,7 +514,7 @@ namespace client.realize.messengers.clients
                                     ConnectReverse(client);
                                 }
                             }
-                            else
+                            else if (config.Client.AutoRelay)
                             {
                                 _ = Relay(client, true);
                             }

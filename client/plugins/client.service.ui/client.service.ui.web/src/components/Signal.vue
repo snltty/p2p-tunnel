@@ -2,10 +2,10 @@
  * @Author: snltty
  * @Date: 2022-10-23 01:39:31
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-08 10:46:44
+ * @LastEditTime: 2023-02-12 01:50:17
  * @version: v1.0.0
  * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\home\Signal.vue
+ * @FilePath: \client.service.ui.web\src\components\Signal.vue
 -->
 <template>
     <div :class="`flex signal-${classValue}`">
@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { computed, reactive } from '@vue/reactivity'
+import { computed } from '@vue/reactivity'
 export default {
     props: ['value'],
     setup (props) {

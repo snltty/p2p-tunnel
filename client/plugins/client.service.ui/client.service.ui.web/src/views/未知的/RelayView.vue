@@ -42,7 +42,7 @@ import { inject, onMounted, onUnmounted, watch } from '@vue/runtime-core';
 import { getDelay, getConnects } from '../../apis/clients'
 import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
-import Signal from './Signal.vue'
+import Signal from '../home/Signal.vue'
 export default {
     props: ['modelValue'],
     emits: ["update:modelValue", 'success'],

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole.udp
@@ -58,6 +59,91 @@ namespace client.realize.messengers.punchHole.udp
 #endif
 
         private readonly ConcurrentDictionary<ulong, ConnectCacheModel> connectCache = new();
+        public event IPunchHoleUdp.StepEvent OnStepHandler;
+
+        public async Task<ConnectResultModel> Send(ConnectParams param)
+        {
+            if (param.TunnelName == (ulong)TunnelDefaults.MIN)
+            {
+                (ulong tunnelName, int localPort) = await clientsTunnel.NewBind(ServerType.UDP, (ulong)TunnelDefaults.MIN);
+                param.TunnelName = tunnelName;
+                param.LocalPort = localPort;
+            }
+
+            TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
+            connectCache.TryAdd(param.Id, new ConnectCacheModel
+            {
+                Tcs = tcs,
+                LocalPort = param.LocalPort,
+            });
+            AddSendTimeout(param.Id);
+
+            await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
+            {
+                Connection = connection,
+                TunnelName = param.TunnelName,
+                ToId = param.Id,
+                Data = new PunchHoleStep1Info { Step = (byte)PunchHoleUdpSteps.STEP_1, PunchType = PunchHoleTypes.UDP }
+            }).ConfigureAwait(false);
+            return await tcs.Task.ConfigureAwait(false);
+        }
+        public async Task InputData(PunchHoleStepModel model)
+        {
+            PunchHoleUdpSteps step = (PunchHoleUdpSteps)model.RawData.PunchStep;
+
+            RemoveSendTimeout(model.RawData.FromId);
+            OnStepHandler?.Invoke(this, model);
+            switch (step)
+            {
+                case PunchHoleUdpSteps.STEP_1:
+                    {
+                        PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
+                        data.DeBytes(model.RawData.Data);
+                        model.Data = data;
+                        await OnStep1(model);
+                    }
+                    break;
+                case PunchHoleUdpSteps.STEP_2:
+                    {
+                        PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
+                        data.DeBytes(model.RawData.Data);
+                        model.Data = data;
+                        await OnStep2(model);
+                    }
+                    break;
+                case PunchHoleUdpSteps.STEP_2_1:
+                    {
+                        PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
+                        data.DeBytes(model.RawData.Data);
+                        model.Data = data;
+                        await OnStep21(model);
+                    }
+                    break;
+                case PunchHoleUdpSteps.STEP_2_Fail:
+                    {
+                        OnStep2Fail(model);
+                    }
+                    break;
+                case PunchHoleUdpSteps.STEP_3:
+                    {
+                        PunchHoleStep3Info data = new PunchHoleStep3Info();
+                        data.DeBytes(model.RawData.Data);
+                        model.Data = data;
+                        await OnStep3(model);
+                    }
+                    break;
+                case PunchHoleUdpSteps.STEP_4:
+                    {
+                        PunchHoleStep4Info data = new PunchHoleStep4Info();
+                        data.DeBytes(model.RawData.Data);
+                        model.Data = data;
+                        OnStep4(model);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
 
         private void SendTimeout(WheelTimerTimeout<object> timeout)
         {
@@ -93,108 +179,75 @@ namespace client.realize.messengers.punchHole.udp
             }
         }
 
-        public SimpleSubPushHandler<ConnectParams> OnSendHandler => new SimpleSubPushHandler<ConnectParams>();
-        public async Task<ConnectResultModel> Send(ConnectParams param)
+
+        private async Task OnStep1(PunchHoleStepModel model)
         {
-            if (param.TunnelName == (ulong)TunnelDefaults.MIN)
+            if (model.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
             {
-                (ulong tunnelName, int localPort) = await clientsTunnel.NewBind(ServerType.UDP, (ulong)TunnelDefaults.MIN);
-                param.TunnelName = tunnelName;
-                param.LocalPort = localPort;
+                await clientsTunnel.NewBind(model.Connection.ServerType, model.RawData.TunnelName);
             }
 
-            TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
-            connectCache.TryAdd(param.Id, new ConnectCacheModel
-            {
-                Tcs = tcs,
-                LocalPort = param.LocalPort,
-            });
-            AddSendTimeout(param.Id);
-
-            await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
-            {
-                Connection = connection,
-                TunnelName = param.TunnelName,
-                ToId = param.Id,
-                Data = new PunchHoleStep1Info { Step = (byte)PunchHoleUdpSteps.STEP_1, PunchType = PunchHoleTypes.UDP }
-            }).ConfigureAwait(false);
-            return await tcs.Task.ConfigureAwait(false);
-        }
-
-        public SimpleSubPushHandler<OnStep1Params> OnStep1Handler { get; } = new SimpleSubPushHandler<OnStep1Params>();
-        public async Task OnStep1(OnStep1Params arg)
-        {
-            OnStep1Handler.Push(arg);
-            if (arg.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
-            {
-                await clientsTunnel.NewBind(arg.Connection.ServerType, arg.RawData.TunnelName);
-            }
-
-            RemoveSendTimeout(arg.RawData.FromId);
-            if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
+            PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
+            if (clientInfoCaching.GetUdpserver(model.RawData.TunnelName, out UdpServer udpServer))
             {
 
-                foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
+                foreach (var ip in data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
                     if (NotIPv6Support(ip))
                     {
                         continue;
                     }
-                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.LocalPort));
                 }
-                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
-                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port + 1));
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port));
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + 1));
 
-                AddSendTimeout(arg.RawData.FromId);
+                AddSendTimeout(model.RawData.FromId);
                 await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2Info>
                 {
-                    Connection = arg.Connection,
-                    TunnelName = arg.RawData.TunnelName,
-                    ToId = arg.RawData.FromId,
+                    Connection = model.Connection,
+                    TunnelName = model.RawData.TunnelName,
+                    ToId = model.RawData.FromId,
                     Data = new PunchHoleStep2Info { Step = (byte)PunchHoleUdpSteps.STEP_2, PunchType = PunchHoleTypes.UDP }
                 }).ConfigureAwait(false);
             }
             else
             {
-                await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
+                await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
             }
         }
 
-        public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; } = new SimpleSubPushHandler<OnStep2Params>();
-        public async Task OnStep2(OnStep2Params arg)
+        private async Task OnStep2(PunchHoleStepModel model)
         {
-            OnStep2Handler.Push(arg);
             await Task.Run(async () =>
              {
-                 int localPort = arg.Data.LocalPort;
-                 int port = arg.Data.Port;
-                 if (connectCache.TryGetValue(arg.RawData.FromId, out ConnectCacheModel cache) == false)
+                 PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
+                 if (connectCache.TryGetValue(model.RawData.FromId, out ConnectCacheModel cache) == false)
                  {
                      Logger.Instance.Error($"udp 找不到缓存");
-                     await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
+                     await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
                      return;
                  }
-                 if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer) == false)
+                 if (clientInfoCaching.GetUdpserver(model.RawData.TunnelName, out UdpServer udpServer) == false)
                  {
-                     Logger.Instance.Error($"udp 找不到通道服务器：{arg.RawData.TunnelName}");
-                     await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
+                     Logger.Instance.Error($"udp 找不到通道服务器：{model.RawData.TunnelName}");
+                     await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
                      return;
                  }
-                 RemoveSendTimeout(arg.RawData.FromId);
 
                  List<IPEndPoint> ips = new List<IPEndPoint>();
                  if (UseLocalPort)
                  {
-                     var locals = arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, localPort)).ToList();
+                     var locals = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
                      ips.AddRange(locals);
                  }
                  if (IPv6Support())
                  {
-                     var locals = arg.Data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, port)).ToList();
+                     var locals = data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, data.Port)).ToList();
                      ips.AddRange(locals);
                  }
-                 ips.Add(new IPEndPoint(arg.Data.Ip, port));
-                 ips.Add(new IPEndPoint(arg.Data.Ip, port + 1));
+                 ips.Add(new IPEndPoint(data.Ip, data.Port));
+                 ips.Add(new IPEndPoint(data.Ip, data.Port + 1));
 
 
                  IConnection connection = null;
@@ -219,15 +272,14 @@ namespace client.realize.messengers.punchHole.udp
                  if (connection != null)
                  {
                      await CryptoSwap(connection).ConfigureAwait(false);
-                     await SendStep3(connection, arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
+                     await SendStep3(connection, model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
                  }
                  else
                  {
-                     await SendStep2Fail(arg.RawData.TunnelName, arg.RawData.FromId).ConfigureAwait(false);
+                     await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
                  }
              });
         }
-
         private async Task CryptoSwap(IConnection connection)
         {
             if (config.Client.Encode)
@@ -244,30 +296,27 @@ namespace client.realize.messengers.punchHole.udp
             }
         }
 
-        public SimpleSubPushHandler<OnStep21Params> OnStep21Handler { get; } = new SimpleSubPushHandler<OnStep21Params>();
-        public async Task OnStep21(OnStep21Params arg)
+        private async Task OnStep21(PunchHoleStepModel model)
         {
-            OnStep21Handler.Push(arg);
-            if (clientInfoCaching.GetUdpserver(arg.RawData.TunnelName, out UdpServer udpServer))
+            PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
+            if (clientInfoCaching.GetUdpserver(model.RawData.TunnelName, out UdpServer udpServer))
             {
-                foreach (var ip in arg.Data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
+                foreach (var ip in data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
                     if (NotIPv6Support(ip))
                     {
                         continue;
                     }
-                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, arg.Data.LocalPort));
+                    udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.LocalPort));
                 }
-                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port));
-                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(arg.Data.Ip, arg.Data.Port + 1));
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port));
+                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + 1));
             }
             await Task.CompletedTask;
         }
 
-        public SimpleSubPushHandler<OnStep2FailParams> OnStep2FailHandler { get; } = new SimpleSubPushHandler<OnStep2FailParams>();
-        public void OnStep2Fail(OnStep2FailParams arg)
+        private void OnStep2Fail(PunchHoleStepModel model)
         {
-            OnStep2FailHandler.Push(arg);
         }
         private async Task SendStep2Fail(ulong tunname, ulong toid)
         {
@@ -308,32 +357,26 @@ namespace client.realize.messengers.punchHole.udp
                 }
             }).ConfigureAwait(false);
         }
-        public SimpleSubPushHandler<OnStep3Params> OnStep3Handler { get; } = new SimpleSubPushHandler<OnStep3Params>();
-        public async Task OnStep3(OnStep3Params arg)
+        public async Task OnStep3(PunchHoleStepModel model)
         {
-            RemoveSendTimeout(arg.RawData.FromId);
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep4Info>
             {
-                Connection = arg.Connection,
-                TunnelName = arg.RawData.TunnelName,
+                Connection = model.Connection,
+                TunnelName = model.RawData.TunnelName,
                 Data = new PunchHoleStep4Info
                 {
                     Step = (byte)PunchHoleUdpSteps.STEP_4,
                     PunchType = PunchHoleTypes.UDP
                 }
             }).ConfigureAwait(false);
-            OnStep3Handler.Push(arg);
         }
 
-        public SimpleSubPushHandler<OnStep4Params> OnStep4Handler { get; } = new SimpleSubPushHandler<OnStep4Params>();
-        public void OnStep4(OnStep4Params arg)
+        public void OnStep4(PunchHoleStepModel model)
         {
-            RemoveSendTimeout(arg.RawData.FromId);
-            if (connectCache.TryRemove(arg.RawData.FromId, out ConnectCacheModel cache))
+            if (connectCache.TryRemove(model.RawData.FromId, out ConnectCacheModel cache))
             {
                 cache.Tcs.SetResult(new ConnectResultModel { State = true });
             }
-            OnStep4Handler.Push(arg);
         }
 
         private bool NotIPv6Support(IPAddress ip)

@@ -24,20 +24,6 @@ namespace client.messengers.punchHole
         Task Execute(IConnection connection,PunchHoleRequestInfo info);
     }
     /// <summary>
-    /// 打洞数据
-    /// </summary>
-    public class OnPunchHoleArg
-    {
-        /// <summary>
-        /// 数据
-        /// </summary>
-        public PunchHoleRequestInfo Data { get; set; }
-        /// <summary>
-        /// 连接对象
-        /// </summary>
-        public IConnection Connection { get; set; }
-    }
-    /// <summary>
     /// 打洞参数
     /// </summary>
     public class ConnectParams

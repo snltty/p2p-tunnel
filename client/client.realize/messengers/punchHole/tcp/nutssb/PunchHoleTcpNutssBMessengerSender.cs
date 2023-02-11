@@ -107,14 +107,14 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
-                        await OnStep2Retry(model);
+                        OnStep2Retry(model);
                     }
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_2_FAIL:
-                    await OnStep2Fail(model);
+                    OnStep2Fail(model);
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_2_STOP:
-                    await OnStep2Stop(model);
+                    OnStep2Stop(model);
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_3:
                     {
@@ -129,7 +129,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         PunchHoleStep4Info data = new PunchHoleStep4Info();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
-                        await OnStep4(model);
+                        OnStep4(model);
                     }
                     break;
                 default:
@@ -386,9 +386,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
             if (clientInfoCaching.GetTunnelPort(model.RawData.TunnelName, out int localPort))
             {
-                OnStep2RetryHandler.Push(e);
-
-                if (NotIPv6Support(e.Data.Ip))
+                if (NotIPv6Support(data.Ip))
                 {
                     return;
                 }
@@ -397,12 +395,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 {
                     if (data.Ip.Equals(IPAddress.Any) == false || data.Ip.Equals(IPAddress.IPv6Any))
                     {
-                        IPEndPoint target = new IPEndPoint(e.Data.Ip, data.Port);
+                        IPEndPoint target = new IPEndPoint(data.Ip, data.Port);
                         targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                         targetSocket.IPv6Only(target.AddressFamily, false);
-                        targetSocket.Ttl = (short)(RouteLevel + e.RawData.Index);
+                        targetSocket.Ttl = (short)(RouteLevel + model.RawData.Index);
                         targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                        targetSocket.Bind(new IPEndPoint(e.Data.Ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
+                        targetSocket.Bind(new IPEndPoint(data.Ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
                         _ = targetSocket.ConnectAsync(target);
                     }
 
@@ -499,13 +497,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 }
             });
         }
-        public void OnStep4((PunchHoleStepModel model)
+        public void OnStep4(PunchHoleStepModel model)
         {
             if (connectTcpCache.TryRemove(model.RawData.FromId, out ConnectCacheModel cache))
             {
                 cache.Tcs.SetResult(new ConnectResultModel { State = true });
             }
-            OnStep4Handler.Push(model);
         }
 
         private bool NotIPv6Support(IPAddress ip)

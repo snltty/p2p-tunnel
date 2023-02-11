@@ -85,18 +85,6 @@ namespace client
         /// 自动注册
         /// </summary>
         public bool AutoReg { get; set; } = false;
-        /// <summary>
-        /// 自动注册重试次数
-        /// </summary>
-        public int AutoRegTimes { get; set; } = 10;
-        /// <summary>
-        /// 自动注册间隔
-        /// </summary>
-        public int AutoRegInterval { get; set; } = 5000;
-        /// <summary>
-        /// 自动注册延迟
-        /// </summary>
-        public int AutoRegDelay { get; set; } = 5000;
 
         /// <summary>
         /// 使用ipv6
@@ -134,6 +122,7 @@ namespace client
         /// 中继节点
         /// </summary>
         public bool UseRelay { get; set; } = true;
+        public bool AutoRelay { get; set; } = true;
         /// <summary>
         /// 原端口打洞
         /// </summary>
@@ -184,6 +173,15 @@ namespace client
                 | (UseRelay ? EnumClientAccess.UseRelay : EnumClientAccess.None);
 
         }
+    }
+
+    public sealed class ServerItem
+    {
+        public string Img { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Ip { get; set; } = string.Empty;
+        public ushort UdpPort { get; set; } = 5410;
+        public ushort TcpPort { get; set; } = 59410;
     }
 
     /// <summary>
@@ -243,5 +241,10 @@ namespace client
         /// 加密密码 32位
         /// </summary>
         public string EncodePassword { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 服务器选项列表
+        /// </summary>
+        public ServerItem[] Items { get; set; } = Array.Empty<ServerItem>();
     }
 }

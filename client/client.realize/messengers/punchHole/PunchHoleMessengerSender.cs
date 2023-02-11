@@ -60,12 +60,12 @@ namespace client.realize.messengers.punchHole
         /// 收到打洞消息
         /// </summary>
         /// <param name="arg"></param>
-        public async Task OnPunchHole(OnPunchHoleArg arg)
+        public async Task OnPunchHole(IConnection connection, PunchHoleRequestInfo info)
         {
-            PunchHoleTypes type = (PunchHoleTypes)arg.Data.PunchType;
+            PunchHoleTypes type = (PunchHoleTypes)info.PunchType;
             if (plugins.TryGetValue(type, out IPunchHole value))
             {
-                await value?.Execute(arg);
+                await value?.Execute(connection, info);
             }
         }
         /// <summary>

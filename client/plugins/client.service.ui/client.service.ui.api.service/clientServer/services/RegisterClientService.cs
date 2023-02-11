@@ -1,6 +1,8 @@
 ﻿using client.messengers.register;
 using client.service.ui.api.clientServer;
 using common.libs.extends;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
@@ -77,6 +79,32 @@ namespace client.service.ui.api.service.clientServer.services
             config.Server = model.ServerConfig;
 
             await config.SaveConfig(config).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// ping ip地址
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public async Task<long[]> Ping(ClientServiceParamsInfo arg)
+        {
+            string[] ips = arg.Content.DeJson<string[]>();
+            long[] result = new long[ips.Length];
+
+            using Ping ping = new Ping();
+            for (int i = 0; i < ips.Length; i++)
+            {
+                var reply = await ping.SendPingAsync(ips[i], 1000);
+                if (reply.Status == IPStatus.Success)
+                {
+                    result[i] = reply.RoundtripTime;
+                }
+                else
+                {
+                    result[i] = -1;
+                }
+            }
+            return result;
         }
 
     }

@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:05:47
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-10 22:17:12
+ * @LastEditTime: 2023-02-12 01:53:52
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\components\Menu.vue
@@ -18,31 +18,30 @@
                 <el-icon>
                     <House />
                 </el-icon>
-                <span>首页</span>
+                <span>{{$t('menu.home')}}</span>
             </router-link>
             <router-link :to="{name:'Register'}">
                 <el-icon>
                     <Link />
                 </el-icon>
-                <span>客户端列表</span>
+                <span>{{$t('menu.nodes')}}</span>
             </router-link>
             <router-link :to="{name:'Register'}">
                 <el-icon>
                     <Position />
                 </el-icon>
-                <span>P2P通信</span>
+                <span>{{$t('menu.functions')}}</span>
             </router-link>
             <router-link :to="{name:'Register'}">
                 <el-icon>
                     <OfficeBuilding />
                 </el-icon>
-                <span>服务器代理</span>
+                <span>{{$t('menu.serverProxy')}}</span>
             </router-link>
         </div>
         <div class="flex-1"></div>
         <div class="meta">
-            <!-- <a href="javascript:;" @click="editWsUrl" title="点击修改" :class="{active:websocketState.connected}">{{wsUrl}} {{connectStr}}<i class="el-icon-refresh"></i></a> -->
-            <!-- <Theme></Theme> -->
+            <a href="javascript:;" @click="editWsUrl" title="点击修改" :class="{active:websocketState.connected}">{{wsUrl}} {{connectStr}}<i class="el-icon-refresh"></i></a>
         </div>
     </div>
 </template>
@@ -52,11 +51,10 @@ import { onMounted } from '@vue/runtime-core'
 import { injectRegister } from '../states/register'
 import { injectWebsocket } from '../states/websocket'
 import { initWebsocket } from '../apis/request'
-import Theme from './Theme.vue'
 import AuthItem from './auth/AuthItem.vue';
 import { ElMessageBox } from 'element-plus'
 export default {
-    components: { Theme, AuthItem },
+    components: {AuthItem },
     setup () {
         const registerState = injectRegister();
         const websocketState = injectWebsocket();

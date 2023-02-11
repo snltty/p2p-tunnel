@@ -10,79 +10,12 @@ namespace client.messengers.punchHole.udp
     /// </summary>
     public interface IPunchHoleUdp
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<ConnectParams> OnSendHandler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
+        public delegate void StepEvent(object sender, PunchHoleStepModel e);
+        public event StepEvent OnStepHandler;
+
         public Task<ConnectResultModel> Send(ConnectParams param);
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep1Params> OnStep1Handler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public Task OnStep1(OnStep1Params arg);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep2Params> OnStep2Handler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public Task OnStep2(OnStep2Params e);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep21Params> OnStep21Handler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public Task OnStep21(OnStep21Params e);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep2FailParams> OnStep2FailHandler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
-        public void OnStep2Fail(OnStep2FailParams e);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep3Params> OnStep3Handler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public Task OnStep3(OnStep3Params e);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<OnStep4Params> OnStep4Handler { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        public void OnStep4(OnStep4Params arg);
+        public Task InputData(PunchHoleStepModel model);
     }
 
     /// <summary>

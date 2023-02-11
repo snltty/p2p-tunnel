@@ -12,10 +12,6 @@ namespace client.realize.messengers.punchHole
     public sealed class PunchHoleMessenger : IMessenger
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="punchHoleMessengerSender"></param>
         public PunchHoleMessenger(PunchHoleMessengerSender punchHoleMessengerSender)
         {
 
@@ -45,11 +41,7 @@ namespace client.realize.messengers.punchHole
         {
             PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
-            await punchHoleMessengerSender.OnPunchHole(new OnPunchHoleArg
-            {
-                Data = model,
-                Connection = connection
-            });
+            await punchHoleMessengerSender.OnPunchHole(connection, model);
         }
     }
 }

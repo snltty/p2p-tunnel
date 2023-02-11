@@ -15,6 +15,10 @@ export const sendRegisterMsg = () => {
 export const sendExit = () => {
     return sendWebsocketMsg(`register/exit`);
 }
+export const sendPing = (ips) => {
+    return sendWebsocketMsg(`register/ping`,ips);
+}
+
 
 export const getRegisterInfo = () => {
     return sendWebsocketMsg(`register/info`);

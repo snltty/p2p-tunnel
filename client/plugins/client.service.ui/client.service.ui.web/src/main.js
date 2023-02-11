@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 09:12:44
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-10 21:34:49
+ * @LastEditTime: 2023-02-12 01:15:53
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\main.js
@@ -15,6 +15,9 @@ import router from './router'
 // const vConsole = new VConsole();
 
 const app = createApp(App);
+
+import i18n from './lang/index'
+app.use(i18n);
 
 import './assets/particles.min.js'
 import directives from './directives/index'

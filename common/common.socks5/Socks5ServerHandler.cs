@@ -167,7 +167,7 @@ namespace common.socks5
                 }
             }, 1000, true);
         }
-        private void ReceiveCallbackUdp(IAsyncResult result)
+        private async void ReceiveCallbackUdp(IAsyncResult result)
         {
             UdpToken token = result.AsyncState as UdpToken;
             try
@@ -178,7 +178,7 @@ namespace common.socks5
                     token.Data.Data = token.PoolBuffer.AsMemory(0, length);
 
                     token.Update();
-                    Receive(token.Data);
+                    await Receive(token.Data);
                     token.Data.Data = Helper.EmptyArray;
                 }
                 result = token.TargetSocket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);

@@ -45,8 +45,8 @@ import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
 import { injectShareData } from '../../states/shareData'
 import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendClientOffline, sendPing, setRelay } from '../../apis/clients'
-import Signal from './Signal.vue'
-import RelayView from './RelayView.vue'
+import Signal from '../home/Signal.vue'
+import RelayView from '../home./未知的/RelayView.vue'
 import { onMounted, onUnmounted, provide } from '@vue/runtime-core';
 import { ElMessageBox } from 'element-plus'
 export default {

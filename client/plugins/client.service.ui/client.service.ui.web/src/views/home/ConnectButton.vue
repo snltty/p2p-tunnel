@@ -2,14 +2,14 @@
  * @Author: snltty
  * @Date: 2023-02-10 21:02:51
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-10 22:27:08
+ * @LastEditTime: 2023-02-12 01:48:09
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\ConnectButton.vue
 -->
 <template>
     <div>
-        <a href="javascript:;" :class="className">
+        <a href="javascript:;" :class="className" @click="handleConnect">
             <template v-if="loading">
                 <el-icon :size="30" class="is-loading">
                     <Loading />
@@ -25,16 +25,38 @@
 </template>
 
 <script>
-import { computed, ref } from '@vue/reactivity'
+import { computed } from '@vue/reactivity'
+import { injectRegister } from '../../states/register'
+import { sendRegisterMsg,sendExit } from '../../apis/register'
+import { ElMessage } from 'element-plus/lib/components'
+import { ElMessageBox } from 'element-plus'
+import $t from '../../hooks/language'
 export default {
     setup () {
 
-        const loading = computed(() => false);
-        const connected = computed(() => false);
+        const registerState = injectRegister();
+        const loading = computed(() => registerState.LocalInfo.IsConnecting);
+        const connected = computed(() => registerState.LocalInfo.UdpConnected || registerState.LocalInfo.TcpConnected);
         const className = computed(() => connected.value ? 'green' : 'gray');
         
+        const handleConnect = ()=>{
+            if(loading.value){
+                ElMessageBox.confirm($t('home.cancelConnect'),$t('global.notice')).then(()=>{
+                    sendExit();
+                }).catch(()=>{
+                })
+            }else if(connected.value){
+                sendExit();
+            }else{
+                sendRegisterMsg().then((res) => {
+
+                }).catch((msg) => {
+                    ElMessage.error(msg);
+                });
+            }
+        }
         return {
-            loading, connected, className
+            loading, connected, className,handleConnect
         }
     }
 }

@@ -55,7 +55,7 @@ namespace client.service.ui.api.service.clientServer.services
             if (plugin != null)
             {
                 string msg = await plugin.Save(model.Content).ConfigureAwait(false);
-                if (!string.IsNullOrWhiteSpace(msg))
+                if (string.IsNullOrWhiteSpace(msg) == false)
                 {
                     arg.SetCode(ClientServiceResponseCodes.Error, msg);
                 }

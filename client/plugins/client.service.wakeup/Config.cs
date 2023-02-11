@@ -31,6 +31,8 @@ namespace client.service.wakeup
             Items = config.Items;
         }
 
+
+        public bool Enable { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -111,6 +113,7 @@ namespace client.service.wakeup
         {
             var _config = jsonStr.DeJson<Config>();
             Items = _config.Items;
+            Enable =_config.Enable;
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }

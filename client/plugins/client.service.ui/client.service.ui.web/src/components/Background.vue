@@ -6,10 +6,8 @@
 import { onMounted } from '@vue/runtime-core';
 export default {
     setup () {
-
         const render = () => {
             particlesJS('bg',
-
                 {
                     "particles": {
                         "number": {
@@ -120,11 +118,9 @@ export default {
                     },
                     "retina_detect": false
                 }
-
             );
         }
         onMounted(render);
-
 
         return {}
     }

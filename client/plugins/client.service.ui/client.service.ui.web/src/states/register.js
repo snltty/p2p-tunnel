@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 22:39:45
  * @LastEditors: snltty
- * @LastEditTime: 2023-01-03 20:06:19
+ * @LastEditTime: 2023-02-11 22:45:19
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\states\register.js
@@ -41,7 +41,8 @@ export const provideRegister = () => {
             UdpPort: 0,
             TcpPort: 0,
             Encode: false,
-            EncodePassword: ""
+            EncodePassword: "",
+            Items:[]
         },
         LocalInfo: {
             RouteLevel: 0,
