@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-21 13:58:43
  * @LastEditors: snltty
- * @LastEditTime: 2022-05-14 21:34:44
+ * @LastEditTime: 2023-02-12 16:00:28
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\apis\socks5.js
@@ -18,6 +18,6 @@ export const set = (data) => {
 export const getPac = () => {
     return sendWebsocketMsg(`socks5/getpac`);
 }
-export const setPac = (data) => {
-    return sendWebsocketMsg(`socks5/setpac`, data);
+export const updatePac = (content) => {
+    return sendWebsocketMsg(`socks5/updatepac`, content);
 }

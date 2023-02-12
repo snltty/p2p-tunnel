@@ -45,24 +45,17 @@ namespace client.service.socks5
         /// <summary>
         /// 更新pac
         /// </summary>
-        /// <param name="param"></param>
         /// <returns></returns>
-        public string UpdatePac(PacSetParamsInfo param)
+        public string UpdatePac()
         {
             try
             {
-                string pacContent = param.Pac;
-                string file = Path.Join(uiconfig.Web.Root, "socks-custom.pac");
-                if (param.IsCustom)
+                string pacContent = string.Empty;
+                string file = string.Empty;
+                if (config.IsCustomPac)
                 {
-                    if (string.IsNullOrEmpty(param.Pac))
-                    {
-                        pacContent = File.ReadAllText("./socks-custom.pac");
-                    }
-                    else
-                    {
-                        File.WriteAllText("./socks-custom.pac", param.Pac);
-                    }
+                    file = Path.Join(uiconfig.Web.Root, "socks-custom.pac"); ;
+                    pacContent = File.ReadAllText("./socks-custom.pac");
                 }
                 else
                 {
@@ -73,7 +66,7 @@ namespace client.service.socks5
                 pacContent = pacContent.Replace("{socks5-address}", $"127.0.0.1:{config.ListenPort}");
                 File.WriteAllText(file, pacContent);
 
-                if (config.ListenEnable)
+                if (config.ListenEnable && config.IsPac)
                 {
                     SetPac($"http://{(uiconfig.Web.BindIp == "+" ? "127.0.0.1" : uiconfig.Web.BindIp)}:{uiconfig.Web.Port}/{Path.GetFileName(file)}");
                 }
@@ -88,6 +81,11 @@ namespace client.service.socks5
             {
                 return ex.Message;
             }
+        }
+
+        public void UpdatePac(string content)
+        {
+            File.WriteAllText("./socks-custom.pac", content);
         }
 
         /// <summary>

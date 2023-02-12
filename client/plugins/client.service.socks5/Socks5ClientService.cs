@@ -2,6 +2,7 @@
 using common.libs.extends;
 using common.socks5;
 using System;
+using System.Reflection;
 
 namespace client.service.socks5
 {
@@ -37,6 +38,15 @@ namespace client.service.socks5
         {
             return config;
         }
+        /// <summary>
+        /// 获取pac
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public string GetPac(ClientServiceParamsInfo arg)
+        {
+            return socks5Transfer.GetPac();
+        }
 
         /// <summary>
         /// 设置配置
@@ -58,34 +68,18 @@ namespace client.service.socks5
                     arg.SetCode(ClientServiceResponseCodes.Error, ex.Message);
                 }
             }
-            
-            socks5Transfer.ClearPac();
+            socks5Transfer.UpdatePac();
         }
 
+       
         /// <summary>
-        /// 获取pac
+        /// 更新pac内容
         /// </summary>
         /// <param name="arg"></param>
-        /// <returns></returns>
-        public string GetPac(ClientServiceParamsInfo arg)
+        public void UpdatePac(ClientServiceParamsInfo arg)
         {
-            return socks5Transfer.GetPac();
+            socks5Transfer.UpdatePac(arg.Content);
         }
-
-        /// <summary>
-        /// 设置pac
-        /// </summary>
-        /// <param name="arg"></param>
-        public void SetPac(ClientServiceParamsInfo arg)
-        {
-            PacSetParamsInfo model = arg.Content.DeJson<PacSetParamsInfo>();
-            string msg = socks5Transfer.UpdatePac(model);
-            if (!string.IsNullOrWhiteSpace(msg))
-            {
-                arg.SetCode(ClientServiceResponseCodes.Error, msg);
-            }
-        }
-
 
     }
 }

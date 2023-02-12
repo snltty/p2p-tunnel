@@ -306,3 +306,12 @@ h3.title {
 .el-select-dropdown__item {
     padding-right: 2rem !important;
 }
+
+:root {
+    --el-color-primary: #3b9c64 !important;
+    --el-color-primary-light-3: #42b877 !important;
+    --el-color-primary-light-5: #70d192 !important;
+    --el-color-primary-light-7: #bce6cf !important;
+    --el-color-primary-light-8: #d9ffec !important;
+    --el-color-primary-light-9: #ecfff6 !important;
+}

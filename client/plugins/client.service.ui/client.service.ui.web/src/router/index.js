@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-10 21:17:57
+ * @LastEditTime: 2023-02-12 22:09:52
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\router\index.js
@@ -15,9 +15,14 @@ const routes = [
         component: () => import('../views/home/Index.vue')
     },
     {
-        path: '/register.html',
-        name: 'Register',
-        component: () => import('../views/Register.vue')
+        path: '/nodes.html',
+        name: 'Nodes',
+        component: () => import('../views/nodes/Index.vue')
+    },
+    {
+        path: '/setting.html',
+        name: 'Setting',
+        component: () => import('../views/setting/Index.vue')
     },
     {
         path: '/services.html',

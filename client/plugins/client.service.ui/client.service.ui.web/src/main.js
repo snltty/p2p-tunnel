@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2021-08-20 09:12:44
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 01:15:53
+ * @LastEditTime: 2023-02-12 21:09:58
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\main.js
@@ -44,4 +44,4 @@ app.component(Loading.name, Loading);
 app.component(ArrowRightBold.name, ArrowRightBold);
 app.component(Setting.name, Setting);
 
-app.use(ElementPlus).use(router).mount('#app');
+app.use(ElementPlus,{size:'default'}).use(router).mount('#app');

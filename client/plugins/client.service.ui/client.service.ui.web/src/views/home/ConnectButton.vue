@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2023-02-10 21:02:51
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 01:48:09
+ * @LastEditTime: 2023-02-12 17:03:44
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\ConnectButton.vue
@@ -22,41 +22,37 @@
             </template>
         </a>
     </div>
-</template>
-
+</template>  
+ 
 <script>
 import { computed } from '@vue/reactivity'
 import { injectRegister } from '../../states/register'
-import { sendRegisterMsg,sendExit } from '../../apis/register'
+import { sendRegisterMsg, sendExit } from '../../apis/register'
 import { ElMessage } from 'element-plus/lib/components'
 import { ElMessageBox } from 'element-plus'
-import $t from '../../hooks/language'
 export default {
     setup () {
-
         const registerState = injectRegister();
         const loading = computed(() => registerState.LocalInfo.IsConnecting);
         const connected = computed(() => registerState.LocalInfo.UdpConnected || registerState.LocalInfo.TcpConnected);
         const className = computed(() => connected.value ? 'green' : 'gray');
-        
-        const handleConnect = ()=>{
-            if(loading.value){
-                ElMessageBox.confirm($t('home.cancelConnect'),$t('global.notice')).then(()=>{
-                    sendExit();
-                }).catch(()=>{
-                })
-            }else if(connected.value){
-                sendExit();
-            }else{
-                sendRegisterMsg().then((res) => {
 
+        const handleConnect = () => {
+            if (loading.value) {
+                ElMessageBox.confirm('正在连接，是否确定操作', '提示').then(() => {
+                    sendExit();
+                }).catch(() => { })
+            } else if (connected.value) {
+                sendExit();
+            } else {
+                sendRegisterMsg().then((res) => {
                 }).catch((msg) => {
                     ElMessage.error(msg);
                 });
             }
         }
         return {
-            loading, connected, className,handleConnect
+            loading, connected, className, handleConnect
         }
     }
 }

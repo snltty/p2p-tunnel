@@ -2,7 +2,7 @@
  * @Author: snltty
  * @Date: 2023-02-10 21:02:51
  * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 01:50:50
+ * @LastEditTime: 2023-02-12 21:48:22
  * @version: v1.0.0
  * @Descripttion: 功能说明
  * @FilePath: \client.service.ui.web\src\views\home\ServerLine.vue
@@ -30,59 +30,59 @@
 <script>
 //国旗图片：http://icon.mobanwang.com/2010/467.html
 import Signal from '../../components/Signal.vue'
-import {injectShareData} from '../../states/shareData'
-import {getRegisterInfo,sendPing} from '../../apis/register'
+import { injectShareData } from '../../states/shareData'
+import { getRegisterInfo, sendPing } from '../../apis/register'
 import { onMounted, onUnmounted, reactive } from '@vue/runtime-core';
 export default {
     components: { Signal },
     emits: ['handle'],
-    setup (props,{emit}) {
+    setup (props, { emit }) {
 
         const shareData = injectShareData();
         const state = reactive({
-            item:{},
-            pings:[]
+            item: {},
+            pings: []
         });
 
-        const update = ()=>{
+        const update = () => {
             clearTimeout(timer);
-            getRegisterInfo().then((info)=>{
+            getRegisterInfo().then((info) => {
                 let ip = info.ServerConfig.Ip;
-                let items = info.ServerConfig.Items.filter(c=>c.Ip == ip);
-                if(items.length > 0){
+                let items = info.ServerConfig.Items.filter(c => c.Ip == ip);
+                if (items.length > 0) {
                     state.item = items[0];
                     loadPingData([items[0].Ip]);
                 }
             });
         }
         let timer = 0;
-        const loadPingData = (ips)=>{
-            sendPing(ips).then((res)=>{
+        const loadPingData = (ips) => {
+            sendPing(ips).then((res) => {
                 state.pings = res;
-                timer = setTimeout(()=>{
+                timer = setTimeout(() => {
                     loadPingData(ips);
-                },1000);
+                }, 1000);
             });
         }
-        onMounted(()=>{
+        onMounted(() => {
             update();
         });
-        onUnmounted(()=>{
+        onUnmounted(() => {
             clearTimeout(timer);
         })
 
-        const handleClick = ()=>{
+        const handleClick = () => {
             emit('handle');
         }
         return {
-            shareData,state,update,handleClick
+            shareData, state, update, handleClick
         }
     }
 }
 </script>
 
 <style lang="stylus" scoped>
-.line
+.line {
     cursor: pointer;
     margin: 0 auto;
     border: 1px solid #ddd;
@@ -91,24 +91,32 @@ export default {
     border-radius: 0.4rem;
     transition: 0.3s;
 
-    &:hover
-        box-shadow: 0 0 0 0.4rem #d1d8e261;
+    &:hover {
+        box-shadow: 0 0 0 0.4rem #36836112;
+        border-color: #c0d3c9;
+    }
 
-    .country-img
+    .country-img {
         font-size: 0;
         margin-right: 0.6rem;
 
-        img
+        img {
             height: 2rem;
+        }
+    }
 
-    .country-name
+    .country-name {
         line-height: 2rem;
+    }
 
-    .country-time, .country-select
+    .country-time, .country-select {
         padding-top: 0.2rem;
+    }
 
-    .country-select
+    .country-select {
         margin-left: 0.6rem;
         padding-top: 0.3rem;
         color: #999;
+    }
+}
 </style>

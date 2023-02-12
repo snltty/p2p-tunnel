@@ -2,18 +2,17 @@
  * @Author: snltty
  * @Date: 2021-08-19 21:50:16
  * @LastEditors: snltty
- * @LastEditTime: 2022-12-02 10:36:13
+ * @LastEditTime: 2023-02-12 23:18:59
  * @version: v1.0.0
  * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\home\Clients.vue
+ * @FilePath: \client.service.ui.web\src\views\nodes\Clients.vue
 -->
 <template>
     <div class="wrap">
-        <h3 class="title t-c">已注册的客户端列表</h3>
         <div class="content">
             <el-row>
                 <template v-for="(item,index) in clients" :key="index">
-                    <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
+                    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                         <div class="item">
                             <dl v-loading="item.Connecting">
                                 <dt>{{item.Name}}</dt>
@@ -45,8 +44,8 @@ import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
 import { injectShareData } from '../../states/shareData'
 import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendClientOffline, sendPing, setRelay } from '../../apis/clients'
-import Signal from '../home/Signal.vue'
-import RelayView from '../home./未知的/RelayView.vue'
+import Signal from '../../components/Signal.vue'
+import RelayView from './RelayView.vue'
 import { onMounted, onUnmounted, provide } from '@vue/runtime-core';
 import { ElMessageBox } from 'element-plus'
 export default {
@@ -162,56 +161,66 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
-.wrap
-    border: 1px solid #eee;
-    border-radius: 0.4rem;
-    padding: 2rem;
+.content {
+    padding: 1rem;
 
-.content
-    padding-top: 1rem;
-
-    .item
+    .item {
         padding: 1rem 0.6rem;
+    }
 
-    dl
-        border: 1px solid #eee;
+    dl {
+        border: 1px solid #ddd;
         border-radius: 0.4rem;
 
-        dt
+        dt {
             border-bottom: 1px solid #eee;
             padding: 1rem;
             font-size: 1.4rem;
             font-weight: 600;
             color: #555;
+        }
 
-        dd
+        dd {
             cursor: pointer;
             padding: 0.4rem 1rem;
 
-            &:hover
+            &:hover {
                 text-decoration: underline;
+            }
 
-            &:nth-child(2)
+            &:nth-child(2) {
                 padding-top: 1rem;
+            }
 
-            &:last-child
+            &:last-child {
                 padding-bottom: 1rem;
+            }
 
-            .label
+            .label {
                 width: 4rem;
+            }
 
-@media screen and (max-width: 500px)
-    .el-col-24
+            .el-dropdown {
+                margin-left: 1.2rem;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .el-col-24 {
         max-width: 100%;
         flex: 0 0 100%;
+    }
+}
 
-@media screen and (max-width: 450px)
-    .wrap
-        padding: 2rem 0.6rem 0.6rem 0.6rem;
-
-    .content
+@media screen and (max-width: 450px) {
+    .content {
         padding-top: 0;
 
-        .item
+        .item {
             padding: 1rem 0.6rem;
+        }
+    }
+}
 </style>

@@ -2,10 +2,10 @@
  * @Author: snltty
  * @Date: 2022-11-08 09:57:59
  * @LastEditors: snltty
- * @LastEditTime: 2022-11-19 13:46:56
+ * @LastEditTime: 2023-02-12 22:14:05
  * @version: v1.0.0
  * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\home\RelayView.vue
+ * @FilePath: \client.service.ui.web\src\views\nodes\RelayView.vue
 -->
 <template>
     <el-dialog title="选择中继线路" v-model="state.show" draggable center :close-on-click-modal="false" top="1rem" append-to-body width="50rem">
@@ -22,7 +22,7 @@
                             </div>
                         </dt>
                         <dd>
-                            <template v-for="(p,pi) in item.pathName" :index="pi">
+                            <template v-for="(p,pi) in item.pathName" :key="pi">
                                 <span class="label" v-if="pi>0">
                                     &lt;--&gt;
                                 </span>
@@ -42,7 +42,7 @@ import { inject, onMounted, onUnmounted, watch } from '@vue/runtime-core';
 import { getDelay, getConnects } from '../../apis/clients'
 import { injectClients } from '../../states/clients'
 import { injectRegister } from '../../states/register'
-import Signal from '../home/Signal.vue'
+import Signal from '../../components/Signal.vue'
 export default {
     props: ['modelValue'],
     emits: ["update:modelValue", 'success'],
@@ -92,11 +92,10 @@ export default {
                         Connects: connects[j]
                     })
                 }
-                console.log(`_connects:${JSON.stringify(_connects)}`);
+
                 state.connects = _connects;
                 let starts = _connects.filter(c => c.Connects.filter(c => c == state.start).length > 0 && c.Connects.length > 1);
                 let paths = fun(starts, [state.start], [state.start], []);
-                console.log(`paths:${JSON.stringify(paths)}`);
                 //服务器开启了中继
                 if (registerState.RemoteInfo.Relay) {
                     paths.push([state.start, 0, state.end]);
@@ -115,7 +114,6 @@ export default {
                             json[current.Id] = current.Name;
                             return json;
                         }, {});
-                        console.log(`clients1:${JSON.stringify(clients1)}`);
 
                         state.paths = paths.map((path, index) => {
                             return {
@@ -128,7 +126,6 @@ export default {
                                 })
                             }
                         });
-                        console.log(`state.paths:${JSON.stringify(state.paths)}`);
                         timer = setTimeout(getData, 1000);
                     }).catch((e) => {
                         timer = setTimeout(getData, 1000);
@@ -141,7 +138,6 @@ export default {
             });
         }
         const fun = (starts, exclude = [], path = [], result = []) => {
-
             for (let i = 0; i < starts.length; i++) {
                 let _path = path.slice(0);
                 if (starts[i].Id == state.end) {
@@ -187,32 +183,38 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.nodes-ul
+.nodes-ul {
     min-height: 10rem;
     max-height: 50rem;
     border: 1px solid #eee;
     padding: 0.6rem;
     border-radius: 0.4rem;
+}
 
-li
+li {
     padding: 1rem 0;
 
-    dl
+    dl {
         border: 1px solid #eee;
         border-radius: 0.4rem;
 
-        dt
+        dt {
             border-bottom: 1px solid #eee;
             padding: 1rem;
             font-size: 1.4rem;
             font-weight: 600;
             color: #555;
             line-height: 2.4rem;
+        }
 
-        dd
+        dd {
             cursor: pointer;
             padding: 0.4rem 1rem;
 
-            span.label
+            span.label {
                 width: 4rem;
+            }
+        }
+    }
+}
 </style>

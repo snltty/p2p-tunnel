@@ -742,7 +742,7 @@ namespace client.service.tcpforward
                 pacContent = pacContent.Replace("{socks5-address}", $"127.0.0.1:{param.Port}");
                 File.WriteAllText(file, pacContent);
 
-                if (param.IsPac)
+                if (param.Listening && param.IsPac)
                 {
                     SetPac($"http://{(uiconfig.Web.BindIp == "+" ? "127.0.0.1" : uiconfig.Web.BindIp)}:{uiconfig.Web.Port}/{Path.GetFileName(file)}");
                 }

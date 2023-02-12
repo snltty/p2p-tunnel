@@ -28,7 +28,7 @@ namespace client.service.socks5
                 services.GetService<ISocks5ClientListener>().Start(config.ListenPort, config.BufferSize);
                 if (config.IsPac)
                 {
-                    socks5Transfer.UpdatePac(new PacSetParamsInfo { IsCustom = config.IsCustomPac });
+                    socks5Transfer.UpdatePac();
                 }
                 Logger.Instance.Debug($"socks5已监听 socks5://127.0.0.1:{config.ListenPort}");
             }

@@ -9,6 +9,13 @@
  */
 import { sendWebsocketMsg } from "./request";
 
+export const getConfig = () => {
+    return sendWebsocketMsg(`configure/configure`, 'TcpForwardClientConfigure');
+}
+export const updateConfig = (content) => {
+    return sendWebsocketMsg(`configure/save`, { ClassName: 'TcpForwardClientConfigure', Content: content });
+}
+
 export const get = (id) => {
     return sendWebsocketMsg(`tcpforward/get`, id);
 }
