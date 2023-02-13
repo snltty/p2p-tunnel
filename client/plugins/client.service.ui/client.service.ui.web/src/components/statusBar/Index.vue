@@ -1,5 +1,8 @@
 <template>
     <div class="status-bar-wrap flex">
+        <div>
+            <Modes></Modes>
+        </div>
         <div class="flex-1"></div>
         <div>
             <Websocket></Websocket>
@@ -9,8 +12,9 @@
 
 <script>
 import Websocket from './Websocket.vue'
+import Modes from './Modes.vue'
 export default {
-    components: { Websocket },
+    components: { Modes, Websocket },
     setup() {
         return {}
     }
@@ -23,5 +27,6 @@ export default {
     padding: 0 0.6rem;
     height: 3rem;
     line-height: 3rem;
+    background-color: #fafafa;
 }
 </style>

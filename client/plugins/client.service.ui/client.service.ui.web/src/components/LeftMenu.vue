@@ -41,7 +41,6 @@ export default {
     box-shadow: 1px 1px 0.6rem 0.1rem rgba(0, 0, 0, 0.05);
     background-color: #fff;
     transition: 0.3s cubic-bezier(0.56, -0.37, 0.78, 1.66);
-    background: linear-gradient(to right, #1e623812, white 70px);
 
     ul {
         padding: 1rem 1rem;

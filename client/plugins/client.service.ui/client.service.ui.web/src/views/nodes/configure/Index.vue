@@ -81,7 +81,7 @@ export default {
     margin-bottom: 0.6rem;
 
     .el-button {
-        vertical-align: baseline;
+        vertical-align: middle;
     }
 }
 </style>

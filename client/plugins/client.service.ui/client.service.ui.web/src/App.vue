@@ -21,7 +21,7 @@
 <script>
 import Menu from "./components/Menu.vue";
 import Background from "./components/Background.vue";
-import StatusBar from "./components/StatusBar.vue";
+import StatusBar from "./components/statusBar/Index.vue";
 import { provideRegister } from "./states/register";
 import { provideWebsocket } from "./states/websocket";
 import { provideClients } from "./states/clients";

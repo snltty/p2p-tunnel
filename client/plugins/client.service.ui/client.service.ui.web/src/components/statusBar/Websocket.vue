@@ -5,8 +5,8 @@
 </template>
 
 <script>
-import { injectWebsocket } from '../states/websocket'
-import { initWebsocket } from '../apis/request'
+import { injectWebsocket } from '../../states/websocket'
+import { initWebsocket } from '../../apis/request'
 import { computed, onMounted, ref } from '@vue/runtime-core'
 import { ElMessageBox } from 'element-plus'
 export default {

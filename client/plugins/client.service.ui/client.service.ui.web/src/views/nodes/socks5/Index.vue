@@ -9,7 +9,7 @@
                 </el-form-item>
                 <el-form-item>
                     <div class="w-100 t-c">
-                        <el-select v-model="state.targetName" placeholder="选择目标" @change="handleChange">
+                        <span>目标</span>：<el-select v-model="state.targetName" placeholder="选择目标" @change="handleChange">
                             <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.Name">
                             </el-option>
                         </el-select>

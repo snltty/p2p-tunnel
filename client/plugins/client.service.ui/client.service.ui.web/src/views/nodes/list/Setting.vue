@@ -33,8 +33,10 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="自动注册" prop="AutoReg">
-                                <el-checkbox size="default" v-model="model.AutoReg">开启</el-checkbox>
+                            <el-form-item label="掉线超时" prop="TimeoutDelay">
+                                <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top-start">
+                                    <el-input size="default" v-model="model.TimeoutDelay" placeholder="掉线超时"></el-input>
+                                </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -49,23 +51,10 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="使用udp" prop="UseUdp">
-                                <el-tooltip class="box-item" effect="dark" content="是否使用udp" placement="top-start">
-                                    <el-checkbox v-model="model.UseUdp">开启</el-checkbox>
-                                </el-tooltip>
+                            <el-form-item label="自动注册" prop="AutoReg">
+                                <el-checkbox size="default" v-model="model.AutoReg">开启</el-checkbox>
                             </el-form-item>
                         </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="使用tcp" prop="UseTcp">
-                                <el-tooltip class="box-item" effect="dark" content="是否使用tcp" placement="top-start">
-                                    <el-checkbox v-model="model.UseTcp">开启</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form-item>
-                <el-form-item label="" label-width="0">
-                    <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="原端口" prop="UseOriginPort">
                                 <el-tooltip class="box-item" effect="dark" content="是否使用原端口打洞" placement="top-start">
@@ -73,10 +62,22 @@
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
+
+                    </el-row>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="掉线超时" prop="TimeoutDelay">
-                                <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top-start">
-                                    <el-input size="default" v-model="model.TimeoutDelay" placeholder="掉线超时"></el-input>
+                            <el-form-item label="使用tcp" prop="UseTcp">
+                                <el-tooltip class="box-item" effect="dark" content="是否使用tcp" placement="top-start">
+                                    <el-checkbox v-model="model.UseTcp">开启</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <el-form-item label="使用udp" prop="UseUdp">
+                                <el-tooltip class="box-item" effect="dark" content="是否使用udp" placement="top-start">
+                                    <el-checkbox v-model="model.UseUdp">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
