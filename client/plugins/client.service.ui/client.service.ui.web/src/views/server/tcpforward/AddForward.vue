@@ -1,14 +1,5 @@
-<!--
- * @Author: snltty
- * @Date: 2022-03-24 15:15:31
- * @LastEditors: snltty
- * @LastEditTime: 2022-12-05 10:50:52
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\server\tcpforward\AddForward.vue
--->
 <template>
-    <el-dialog title="添加短连接转发" destroy-on-close v-model="show" center :close-on-click-modal="false" width="350px">
+    <el-dialog title="添加短连接转发" top="1vh" destroy-on-close v-model="show" center :close-on-click-modal="false" width="350px">
         <el-form ref="formDom" :model="form" :rules="rules" label-width="100px">
             <el-form-item label="服务器域名" prop="Domain">
                 <el-input v-model="form.Domain"></el-input>
@@ -40,7 +31,7 @@ import { injectRegister } from '../../../states/register'
 export default {
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],
-    setup (props, { emit }) {
+    setup(props, { emit }) {
 
         const registerState = injectRegister();
         const addForwardData = inject('add-forward-data');
@@ -62,7 +53,7 @@ export default {
                 LocalPort: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: 1, max: 65535, message: '数字 1-65535', trigger: 'blur', transform (value) {
+                        type: 'number', min: 1, max: 65535, message: '数字 1-65535', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }
@@ -118,6 +109,7 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
-.remark
+.remark {
     margin-top: 1rem;
+}
 </style>

@@ -1,12 +1,3 @@
-/*
- * @Author: snltty
- * @Date: 2021-08-19 23:04:50
- * @LastEditors: snltty
- * @LastEditTime: 2022-09-01 11:38:22
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\apis\request.js
- */
 import { ElMessage } from 'element-plus'
 
 let requestId = 0, ws = null, wsUrl = '';
@@ -35,7 +26,7 @@ export const pushListener = {
             this.subs[type].push(callback);
         }
     },
-    remove (type, callback) {
+    remove(type, callback) {
         let funcs = this.subs[type] || [];
         for (let i = funcs.length - 1; i >= 0; i--) {
             if (funcs[i] == callback) {
@@ -43,7 +34,7 @@ export const pushListener = {
             }
         }
     },
-    push (type, data) {
+    push(type, data) {
         let funcs = this.subs[type] || [];
         for (let i = funcs.length - 1; i >= 0; i--) {
             funcs[i](data);

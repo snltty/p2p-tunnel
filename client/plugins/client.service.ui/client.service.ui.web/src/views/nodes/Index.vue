@@ -4,27 +4,38 @@
             <LeftMenu :menus="leftMenus" v-model="state.currentMenu"></LeftMenu>
         </div>
         <div class="content h-100 flex-1 scrollbar">
-            <Clients></Clients>
+            <router-view></router-view>
         </div>
     </div>
 </template>
-
+  
 <script>
-import Clients from './Clients.vue'
 import LeftMenu from '../../components/LeftMenu.vue'
 import { reactive } from '@vue/reactivity';
-import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { watch } from '@vue/runtime-core';
 export default {
-    components: { LeftMenu, Clients },
-    setup () {
+    components: { LeftMenu },
+    setup() {
 
-        const route = useRoute();
-        const leftMenus = [
-            { text: '节点', url: 'Nodes' }
-        ];
         const state = reactive({
             currentMenu: 0
         });
+        const router = useRouter();
+        const leftMenus = router.options.routes.filter(c => c.name == 'Nodes')[0].children.map(c => {
+            return {
+                text: c.meta.name,
+                url: c.name
+            }
+        });
+        watch(() => router.currentRoute.value.name, (name) => {
+            for (let i = 0; i < leftMenus.length; i++) {
+                if (leftMenus[i].url == name) {
+                    state.currentMenu = i;
+                    break;
+                }
+            }
+        }, { immediate: true })
 
         return {
             leftMenus, state

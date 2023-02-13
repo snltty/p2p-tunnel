@@ -1,14 +1,5 @@
-<!--
- * @Author: snltty
- * @Date: 2022-03-24 15:15:31
- * @LastEditors: snltty
- * @LastEditTime: 2022-12-05 10:00:23
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\server\udpforward\AddListen.vue
--->
 <template>
-    <el-dialog :title="form.ID > 0?'编辑监听':'新增监听'" destroy-on-close v-model="show" center :close-on-click-modal="false" width="350px">
+    <el-dialog :title="form.ID > 0?'编辑监听':'新增监听'" top="1vh" destroy-on-close v-model="show" center :close-on-click-modal="false" width="350px">
         <el-form ref="formDom" :model="form" :rules="rules" label-width="80px">
             <el-form-item label="监听端口" prop="ServerPort">
                 <el-input v-model="form.ServerPort" :readonly="form.ID > 0"></el-input>
@@ -40,7 +31,7 @@ import { ElMessage } from 'element-plus/lib/components';
 export default {
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],
-    setup (props, { emit }) {
+    setup(props, { emit }) {
         const addListenData = inject('add-listen-data');
         const shareData = injectShareData();
         const clientsState = injectClients();
@@ -58,7 +49,7 @@ export default {
                 ServerPort: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: 1, max: 65535, message: '数字 1-65535', trigger: 'blur', transform (value) {
+                        type: 'number', min: 1, max: 65535, message: '数字 1-65535', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }
@@ -67,7 +58,7 @@ export default {
                 LocalPort: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: 1, max: 65535, message: '数字 1-65535', trigger: 'blur', transform (value) {
+                        type: 'number', min: 1, max: 65535, message: '数字 1-65535', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }

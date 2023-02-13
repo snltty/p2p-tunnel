@@ -5,7 +5,7 @@
 <script>
 import { onMounted } from '@vue/runtime-core';
 export default {
-    setup () {
+    setup() {
         const render = () => {
             particlesJS('bg',
                 {
@@ -58,7 +58,7 @@ export default {
                         "line_linked": {
                             "enable": true,
                             "distance": 150,
-                            "color": "#ffffff",
+                            "color": "#fff",
                             "opacity": 0.4,
                             "width": 1
                         },
@@ -127,6 +127,7 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
-.bg
-    z-index 1
+.bg {
+    z-index: 1;
+}
 </style>

@@ -21,7 +21,7 @@ namespace client.service.socks5
         /// <summary>
         /// 名字
         /// </summary>
-        public string Name => "socks5";
+        public string Name => "socks5代理";
 
         /// <summary>
         /// 作者

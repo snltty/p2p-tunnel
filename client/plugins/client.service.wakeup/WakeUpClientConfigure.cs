@@ -23,7 +23,7 @@ namespace client.service.wakeup
         /// <summary>
         /// 
         /// </summary>
-        public string Name => "wakeup";
+        public string Name => "远程唤醒";
         /// <summary>
         /// 
         /// </summary>

@@ -1,12 +1,3 @@
-<!--
- * @Author: snltty
- * @Date: 2023-02-12 22:58:50
- * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 23:17:53
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\components\LeftMenu.vue
--->
 <template>
     <div class="menu h-100">
         <ul>
@@ -22,14 +13,14 @@
             </template>
         </ul>
     </div>
-</template>
+</template> 
 
 <script>
 import { computed } from '@vue/reactivity'
 export default {
     props: ['menus', 'modelValue'],
     emits: ['update:modelValue', 'handle'],
-    setup (props, { emit }) {
+    setup(props, { emit }) {
         const current = computed(() => props.modelValue);
         const handleJumpScroll = (index) => {
             emit('handle', index);
@@ -46,10 +37,11 @@ export default {
 <style lang="stylus" scoped>
 .menu {
     width: 14rem;
-    border-right: 1px solid #ddd;
-    box-shadow: 1px 1px 0.6rem rgba(0, 0, 0, 0.05);
+    border-right: 1px solid var(--main-border-color);
+    box-shadow: 1px 1px 0.6rem 0.1rem rgba(0, 0, 0, 0.05);
     background-color: #fff;
     transition: 0.3s cubic-bezier(0.56, -0.37, 0.78, 1.66);
+    background: linear-gradient(to right, #1e623812, white 70px);
 
     ul {
         padding: 1rem 1rem;
@@ -59,7 +51,7 @@ export default {
 
             a {
                 padding: 0.6rem 1rem;
-                color: #555;
+                color: var(--left-menu-color);
                 display: block;
                 font-size: 1.4rem;
                 transition: 0.3s;

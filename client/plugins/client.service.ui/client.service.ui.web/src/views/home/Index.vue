@@ -1,21 +1,18 @@
-<!--
- * @Author: snltty
- * @Date: 2021-08-19 21:50:16
- * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 01:48:56
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\home\Index.vue
--->
 <template>
     <div class="home">
         <div class="connection">
-            <div class="connect-button">
-                <ConnectButton></ConnectButton>
-            </div>
-            <div class="server-line">
-                <ServerLine ref="serverLineDom" @handle="handleSelectServer"></ServerLine>
-            </div>
+            <el-form label-width="0">
+                <el-form-item>
+                    <div class="w-100 t-c">
+                        <ConnectButton :loading="loading" v-model="connected" @handle="handleConnect"></ConnectButton>
+                    </div>
+                </el-form-item>
+                <el-form-item>
+                    <div class="w-100 t-c">
+                        <ServerLine ref="serverLineDom" @handle="handleSelectServer"></ServerLine>
+                    </div>
+                </el-form-item>
+            </el-form>
         </div>
         <div class="servers">
             <Servers v-if="state.showServers" v-model="state.showServers" @success="handleSelectServerSuccess"></Servers>
@@ -24,43 +21,61 @@
 </template>
 
 <script>
-import { reactive, ref } from '@vue/reactivity'
+import { computed, reactive, ref } from '@vue/reactivity'
 import { injectRegister } from '../../states/register'
-import { sendExit } from '../../apis/register'
-import ConnectButton from './ConnectButton.vue'
+import { sendRegisterMsg, sendExit } from '../../apis/register'
+import ConnectButton from '../../components/ConnectButton.vue'
 import ServerLine from './ServerLine.vue'
 import Servers from './Servers.vue'
+import { ElMessageBox } from 'element-plus/lib/components'
 export default {
     name: 'Home',
     components: { ConnectButton, ServerLine, Servers },
-    setup () {
+    setup() {
 
         const registerState = injectRegister();
         const state = reactive({
-            showServers:false,
+            showServers: false,
         });
 
+        const loading = computed(() => registerState.LocalInfo.IsConnecting);
+        const connected = computed(() => registerState.LocalInfo.UdpConnected || registerState.LocalInfo.TcpConnected);
+        const handleConnect = () => {
+            if (loading.value) {
+                ElMessageBox.confirm('正在连接，是否确定操作', '提示').then(() => {
+                    sendExit();
+                }).catch(() => { })
+            } else if (connected.value) {
+                sendExit();
+            } else {
+                sendRegisterMsg().then((res) => {
+                }).catch((msg) => {
+                    ElMessage.error(msg);
+                });
+            }
+        }
+
         const serverLineDom = ref(null);
-        const handleSelectServer = ()=>{
+        const handleSelectServer = () => {
             state.showServers = true;
         }
-        const handleSelectServerSuccess = ()=>{
+        const handleSelectServerSuccess = () => {
             sendExit();
             serverLineDom.value.update();
         }
 
+
         return {
-            registerState,state,serverLineDom,handleSelectServer,handleSelectServerSuccess
+            registerState, state,
+            loading, connected, handleConnect,
+            serverLineDom, handleSelectServer, handleSelectServerSuccess
         }
 
     }
 }
 </script>
 <style lang="stylus" scoped>
-.connection
+.connection {
     padding-top: 5rem;
-.connect-button
-    text-align: center;
-.server-line
-    margin-top: 2rem;
+}
 </style>

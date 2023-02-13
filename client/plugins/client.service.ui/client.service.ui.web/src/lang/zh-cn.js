@@ -1,12 +1,3 @@
-/*
- * @Author: snltty
- * @Date: 2021-08-20 16:34:23
- * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 01:25:38
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\lang\zh-cn.js
- */
 export default {
     global: {
         notice: '提示',

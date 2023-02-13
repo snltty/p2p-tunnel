@@ -1,23 +1,10 @@
-<!--
- * @Author: snltty
- * @Date: 2021-08-20 00:47:21
- * @LastEditors: snltty
- * @LastEditTime: 2022-12-05 10:00:51
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\server\udpforward\Index.vue
--->
 <template>
     <div class="forward-wrap">
-        <h3 class="title t-c">{{$route.meta.name}}</h3>
         <div class="inner">
             <div class="head flex">
                 <el-button type="primary" size="small" @click="handleAddListen">增加转发监听</el-button>
                 <el-button size="small" @click="getData">刷新列表</el-button>
                 <span class="flex-1"></span>
-                <ConfigureModal className="UdpForwardServerConfigure">
-                    <el-button size="small">服务端配置</el-button>
-                </ConfigureModal>
             </div>
             <div class="content">
                 <el-row>
@@ -50,7 +37,6 @@
                 </el-row>
             </div>
         </div>
-        <el-alert class="alert" type="warning" show-icon :closable="false" title="服务器代理转发" description="一个端口对应一个服务，只要服务器设定的端口范围未满，即可使用" />
         <AddListen v-if="showAddListen" v-model="showAddListen" @success="getData"></AddListen>
     </div>
 </template>
@@ -61,10 +47,9 @@ import { onMounted, provide } from '@vue/runtime-core'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../states/shareData'
 import { injectRegister } from '../../../states/register'
-import ConfigureModal from '../../service/configure/ConfigureModal.vue'
 export default {
-    components: { AddListen, ConfigureModal },
-    setup () {
+    components: { AddListen },
+    setup() {
 
         const shareData = injectShareData();
         const registerState = injectRegister();
@@ -110,49 +95,61 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
-@media screen and (max-width: 500px)
-    .el-col-24
+@media screen and (max-width: 500px) {
+    .el-col-24 {
         max-width: 100%;
         flex: 0 0 100%;
+    }
+}
 
-.forward-wrap
+.forward-wrap {
     padding: 2rem;
 
-    .inner
-        border: 1px solid #eee;
+    .inner {
+        border: 1px solid var(--main-border-color);
         // padding: 1rem;
         border-radius: 0.4rem;
+    }
 
-    .head
+    .head {
         padding: 1rem;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--main-border-color);
+    }
 
-    .content
+    .content {
         padding: 1rem;
 
-        .item
+        .item {
             padding: 1rem 0.6rem;
 
-            dl
-                border: 1px solid #eee;
+            dl {
+                border: 1px solid var(--main-border-color);
                 border-radius: 0.4rem;
 
-                dt
-                    border-bottom: 1px solid #eee;
+                dt {
+                    border-bottom: 1px solid var(--main-border-color);
                     padding: 1rem;
                     font-size: 1.4rem;
                     font-weight: 600;
                     color: #555;
                     line-height: 2.4rem;
+                }
 
-                dd
+                dd {
                     padding: 0.4rem 1rem;
 
-                    &:nth-child(2)
+                    &:nth-child(2) {
                         padding: 1rem;
                         background-color: #fafafa;
                         border-bottom: 1px solid #eee;
+                    }
+                }
+            }
+        }
+    }
 
-    .alert
+    .alert {
         margin-top: 1rem;
+    }
+}
 </style>

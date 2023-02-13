@@ -43,14 +43,9 @@ namespace common.libs.database
     /// <typeparam name="T"></typeparam>
     public class ConfigDataFileProvider<T> : IConfigDataProvider<T> where T : class, new()
     {
-       /// <summary>
-       /// 
-       /// </summary>
-       /// <returns></returns>
         public async Task<T> Load()
         {
             string fileName = GetTableName(typeof(T));
-
             if (File.Exists(fileName))
             {
                 string str = (await File.ReadAllTextAsync(fileName).ConfigureAwait(false));
@@ -58,35 +53,21 @@ namespace common.libs.database
             }
             return default;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public async Task<string> LoadString()
         {
             string fileName = GetTableName(typeof(T));
-
             if (File.Exists(fileName))
             {
                 return (await File.ReadAllTextAsync(fileName).ConfigureAwait(false));
             }
             return string.Empty;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
+
         public async Task Save(T model)
         {
             string fileName = GetTableName(typeof(T));
-            await File.WriteAllTextAsync(fileName, model.ToJson(), Encoding.UTF8).ConfigureAwait(false);
+            await File.WriteAllTextAsync(fileName, model.ToJsonIndented(), Encoding.UTF8).ConfigureAwait(false);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="jsonStr"></param>
-        /// <returns></returns>
         public async Task Save(string jsonStr)
         {
             string fileName = GetTableName(typeof(T));

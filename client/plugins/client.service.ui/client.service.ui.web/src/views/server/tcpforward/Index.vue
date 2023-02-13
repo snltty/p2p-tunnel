@@ -1,23 +1,10 @@
-<!--
- * @Author: snltty
- * @Date: 2022-05-28 16:09:31
- * @LastEditors: snltty
- * @LastEditTime: 2022-12-11 17:24:31
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\server\tcpforward\Index.vue
--->
 <template>
     <div class="forward-wrap">
-        <h3 class="title t-c">{{$route.meta.name}}</h3>
         <div class="inner">
             <div class="head flex">
                 <el-button type="primary" size="small" @click="handleAddListen">增加长连接端口</el-button>
                 <el-button size="small" @click="loadPorts">刷新列表</el-button>
                 <span class="flex-1"></span>
-                <ConfigureModal className="TcpForwardServerConfigure">
-                    <el-button size="small">服务端配置</el-button>
-                </ConfigureModal>
             </div>
             <div class="content">
                 <el-row>
@@ -69,7 +56,6 @@
                 </el-row>
             </div>
         </div>
-        <el-alert class="alert" type="warning" show-icon :closable="false" title="服务器代理转发" description="短链接端口是由服务器配置好的，不能自由新增，使用多个转发即可实现访问不同服务。长连接一个端口对应一个服务，只要服务器设定的端口范围未满，即可使用" />
         <AddForward v-if="state.showAddForward" v-model="state.showAddForward" @success="loadPorts"></AddForward>
         <AddListen v-if="state.showAddListen" v-model="state.showAddListen" @success="loadPorts"></AddListen>
     </div>
@@ -82,10 +68,9 @@ import { injectShareData } from '../../../states/shareData'
 import { injectRegister } from '../../../states/register'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
-import ConfigureModal from '../../service/configure/ConfigureModal.vue'
 export default {
-    components: { AddForward, AddListen, ConfigureModal },
-    setup () {
+    components: { AddForward, AddListen },
+    setup() {
 
         const shareData = injectShareData();
         const registerState = injectRegister();
@@ -210,67 +195,85 @@ export default {
 </script>
 
 <style lang="stylus">
-.forward-wrap
-    .el-collapse-item__header, .el-collapse-item__content, .el-collapse-item__wrap
+.forward-wrap {
+    .el-collapse-item__header, .el-collapse-item__content, .el-collapse-item__wrap {
         border-right: 0;
         border-left: 0;
+    }
 
-    .el-collapse-item__content
+    .el-collapse-item__content {
         padding: 0;
+    }
+}
 </style>
 <style lang="stylus" scoped>
-@media screen and (max-width: 500px)
-    .el-col-24
+@media screen and (max-width: 500px) {
+    .el-col-24 {
         max-width: 100%;
         flex: 0 0 100%;
+    }
+}
 
-.forward-wrap
+.forward-wrap {
     padding: 2rem;
 
-    .inner
-        border: 1px solid #eee;
+    .inner {
+        border: 1px solid var(--main-border-color);
         // padding: 1rem;
         border-radius: 0.4rem;
+    }
 
-    .head
+    .head {
         padding: 1rem;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--main-border-color);
+    }
 
-    .content
+    .content {
         padding: 1rem;
 
-        .item
+        .item {
             padding: 1rem 0.6rem;
 
-            dl
-                border: 1px solid #eee;
+            dl {
+                border: 1px solid var(--main-border-color);
                 border-radius: 0.4rem;
 
-                dt
-                    border-bottom: 1px solid #eee;
+                dt {
+                    border-bottom: 1px solid var(--main-border-color);
                     padding: 1rem;
                     font-size: 1.4rem;
                     font-weight: 600;
                     color: #555;
                     line-height: 2.4rem;
+                }
 
-                dd
+                dd {
                     padding: 0.4rem 1rem;
 
-                    &:nth-child(2)
+                    &:nth-child(2) {
                         padding: 1rem;
                         background-color: #fafafa;
+                    }
 
-                    &.forwards
+                    &.forwards {
                         padding: 0;
 
-                        li
+                        li {
                             border-bottom: 1px solid #eee;
                             padding: 1rem;
 
-                            &:last-child
+                            &:last-child {
                                 border: 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-    .alert
+    .alert {
         margin-top: 1rem;
+    }
+}
 </style>

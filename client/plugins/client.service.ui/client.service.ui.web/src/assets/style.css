@@ -78,7 +78,7 @@ table {
 
 html {
     font-size: 10px;
-    background-color: #15172A;
+    background-color: #282c34;
 }
 
 body {
@@ -115,6 +115,7 @@ span.split-pad10 {
 }
 
 .scrollbar,
+.scrollbar-4,
 .scrollbar-10 {
     overflow: auto;
 }
@@ -125,6 +126,16 @@ span.split-pad10 {
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.scrollbar-4::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.scrollbar-4::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 10px;
 }
@@ -314,4 +325,51 @@ h3.title {
     --el-color-primary-light-7: #bce6cf !important;
     --el-color-primary-light-8: #d9ffec !important;
     --el-color-primary-light-9: #ecfff6 !important;
+}
+
+.el-form-item--default {
+    --font-size: 13px !important;
+}
+
+.el-input__inner {
+    font-size: 13px;
+}
+
+
+/**/
+:root {
+    --main-border-color: #ddd;
+    --left-menu-shdow: rgba(0, 0, 0, 0.05);
+    --left-menu-color: #555;
+}
+
+html.dark:root {
+    --el-bg-color: #25272d !important;
+    --main-border-color: #1d2022;
+    --left-menu-shdow: #ffffff03;
+    --left-menu-color: #cfd3dc;
+    --el-color-primary: #3b9c642e !important;
+    --el-color-primary-light-3: #42b87740 !important;
+    --el-color-primary-light-5: #70d19254 !important;
+    --el-color-primary-light-7: #bce6cf !important;
+    --el-color-primary-light-8: #d9ffec !important;
+    --el-color-primary-light-9: #ecfff6 !important;
+}
+
+html.dark .wrap {
+    background-color: #25272d;
+}
+
+
+
+html.dark .menu {
+    background: #25272d;
+}
+
+html.dark .el-divider--horizontal {
+    border-color: #555;
+}
+
+html.dark .setting-item {
+    border-color: #1d2022;
 }

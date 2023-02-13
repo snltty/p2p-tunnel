@@ -1,12 +1,3 @@
-<!--
- * @Author: snltty
- * @Date: 2023-02-10 17:33:52
- * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 22:36:05
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\home\Servers.vue
--->
 <template>
     <div class="servers-mark absolute" :class="{show:state.animation}" @click="handleClose" ref="rootDom">
         <div class="servers-wrap absolute scrollbar" @click.stop>
@@ -39,7 +30,7 @@ export default {
     components: { Signal },
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],
-    setup (props, { emit }) {
+    setup(props, { emit }) {
 
         const shareData = injectShareData();
         const state = reactive({
@@ -57,17 +48,7 @@ export default {
 
         const loadData = () => {
             getRegisterInfo().then((info) => {
-                let arr = JSON.parse(JSON.stringify(info.ServerConfig.Items));
-                if (process.env.NODE_ENV == 'development') {
-                    arr.push({
-                        "Img": "zg",
-                        "Name": "本地",
-                        "Ip": "127.0.0.1",
-                        "UdpPort": 5410,
-                        "TcpPort": 59410
-                    });
-                }
-                state.servers = arr;
+                state.servers = JSON.parse(JSON.stringify(info.ServerConfig.Items));
                 loadPingData(state.servers.map(c => c.Ip));
             });
         }
@@ -127,6 +108,7 @@ export default {
 <style lang="stylus" scoped>
 .servers-mark {
     background-color: rgba(0, 0, 0, 0.05);
+    overflow: hidden;
 
     &.show {
         .servers-wrap {

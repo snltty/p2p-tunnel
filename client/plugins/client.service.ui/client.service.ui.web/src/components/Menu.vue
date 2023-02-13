@@ -1,17 +1,8 @@
-<!--
- * @Author: snltty
- * @Date: 2021-08-19 22:05:47
- * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 22:09:11
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\components\Menu.vue
--->
 <template>
     <div class="menu-wrap flex">
         <div class="logo">
             <router-link :to="{name:'Home'}">
-                <img src="@/assets/logo.svg" @click="window.location.reload()" alt="p2p-tunnel">
+                <img src="@/assets/logo.svg" alt="p2p-tunnel">
             </router-link>
         </div>
         <div class="flex-1"></div>
@@ -28,13 +19,13 @@
                 </el-icon>
                 <span>节点</span>
             </router-link>
-            <router-link :to="{name:'Server'}">
+            <router-link :to="{name:'Servers'}">
                 <el-icon>
                     <Position />
                 </el-icon>
                 <span>代理穿透</span>
             </router-link>
-            <router-link :to="{name:'Setting'}">
+            <router-link :to="{name:'Settings'}">
                 <el-icon>
                     <Setting />
                 </el-icon>
@@ -42,43 +33,15 @@
             </router-link>
         </div>
         <div class="flex-1"></div>
-        <div class="meta">
-            <!-- <a href="javascript:;" @click="editWsUrl" title="点击修改" :class="{active:websocketState.connected}">{{wsUrl}} {{connectStr}}<i class="el-icon-refresh"></i></a> -->
-        </div>
+        <div class="meta"></div>
     </div>
 </template>
 <script>
-import { computed, ref } from '@vue/reactivity';
-import { onMounted } from '@vue/runtime-core'
-import { injectRegister } from '../states/register'
-import { injectWebsocket } from '../states/websocket'
-import { initWebsocket } from '../apis/request'
 import AuthItem from './auth/AuthItem.vue';
-import { ElMessageBox } from 'element-plus'
 export default {
     components: { AuthItem },
-    setup () {
-        const registerState = injectRegister();
-        const websocketState = injectWebsocket();
-        const connectStr = computed(() => `${['未连接', '已连接'][Number(websocketState.connected)]}`);
-        const editWsUrl = () => {
-            ElMessageBox.prompt('修改连接地址', '修改连接地址', {
-                inputValue: wsUrl.value
-            }).then(({ value }) => {
-                localStorage.setItem('wsurl', value);
-                wsUrl.value = value;
-                initWebsocket(wsUrl.value);
-            })
-        }
-        const wsUrl = ref(localStorage.getItem('wsurl') || 'ws://127.0.0.1:59411');
-        onMounted(() => {
-            initWebsocket(wsUrl.value);
-        });
-
-        return {
-            registerState,
-            websocketState, connectStr, wsUrl, editWsUrl
-        }
+    setup() {
+        return {}
     }
 }
 </script>
@@ -130,5 +93,9 @@ export default {
             margin-left: 0.4rem;
         }
     }
+}
+
+.meta {
+    width: 10rem;
 }
 </style>

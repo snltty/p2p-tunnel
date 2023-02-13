@@ -1,14 +1,3 @@
-/*
- * @Author: snltty
- * @Date: 2021-08-19 22:39:45
- * @LastEditors: snltty
- * @LastEditTime: 2023-02-11 22:45:19
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\states\register.js
- */
-// import { provide, inject, reactive } from 'vue'
-
 import { provide, inject, reactive } from "vue";
 import { websocketState } from '../apis/request'
 import { getRegisterInfo } from '../apis/register'
@@ -42,7 +31,7 @@ export const provideRegister = () => {
             TcpPort: 0,
             Encode: false,
             EncodePassword: "",
-            Items:[]
+            Items: []
         },
         LocalInfo: {
             RouteLevel: 0,

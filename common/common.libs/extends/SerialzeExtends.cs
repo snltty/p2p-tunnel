@@ -4,9 +4,6 @@ using System.Text.Unicode;
 
 namespace common.libs.extends
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public static class SerialzeExtends
     {
         private static JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
@@ -15,23 +12,26 @@ namespace common.libs.extends
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             PropertyNameCaseInsensitive = true,
+            WriteIndented = true,
             Converters = { new IPAddressJsonConverter(), new IPEndpointJsonConverter() }
         };
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        private static JsonSerializerOptions jsonSerializerOptionsIndented = new JsonSerializerOptions
+        {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All),
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true,
+            Converters = { new IPAddressJsonConverter(), new IPEndpointJsonConverter() }
+        };
         public static string ToJson(this object obj)
         {
-            return JsonSerializer.Serialize(obj, options: jsonSerializerOptions);
+            return JsonSerializer.Serialize(obj, jsonSerializerOptions);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="json"></param>
-        /// <returns></returns>
+        public static string ToJsonIndented(this object obj)
+        {
+            return JsonSerializer.Serialize(obj, jsonSerializerOptionsIndented);
+        }
         public static T DeJson<T>(this string json)
         {
             return JsonSerializer.Deserialize<T>(json, options: jsonSerializerOptions);

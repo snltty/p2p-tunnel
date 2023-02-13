@@ -1,12 +1,3 @@
-/*
- * @Author: snltty
- * @Date: 2021-08-20 09:12:44
- * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 21:09:58
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\main.js
- */
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
@@ -16,8 +7,8 @@ import router from './router'
 
 const app = createApp(App);
 
-import i18n from './lang/index'
-app.use(i18n);
+// import i18n from './lang/index'
+// app.use(i18n);
 
 import './assets/particles.min.js'
 import directives from './directives/index'
@@ -31,6 +22,7 @@ app.use(auth);
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/display.css'
+import 'element-plus/theme-chalk/dark/css-vars.css'
 
 
 import { CircleClose, House, Link, Position, OfficeBuilding, SwitchButton, Loading, ArrowRightBold, Setting } from '@element-plus/icons'
@@ -44,4 +36,4 @@ app.component(Loading.name, Loading);
 app.component(ArrowRightBold.name, ArrowRightBold);
 app.component(Setting.name, Setting);
 
-app.use(ElementPlus,{size:'default'}).use(router).mount('#app');
+app.use(ElementPlus, { size: 'default' }).use(router).mount('#app');

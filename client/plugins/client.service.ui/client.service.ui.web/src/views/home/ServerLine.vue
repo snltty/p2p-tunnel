@@ -1,15 +1,6 @@
-<!--
- * @Author: snltty
- * @Date: 2023-02-10 21:02:51
- * @LastEditors: snltty
- * @LastEditTime: 2023-02-12 21:48:22
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\views\home\ServerLine.vue
--->
 <template>
     <div>
-        <div class="line flex" :title="$t('home.selectServer')" @click="handleClick">
+        <div class="line flex" title="选择服务器线路" @click="handleClick">
             <div class="country-img">
                 <img :src="shareData.serverImgs[state.item.Img]">
             </div>
@@ -36,12 +27,12 @@ import { onMounted, onUnmounted, reactive } from '@vue/runtime-core';
 export default {
     components: { Signal },
     emits: ['handle'],
-    setup (props, { emit }) {
+    setup(props, { emit }) {
 
         const shareData = injectShareData();
         const state = reactive({
-            item: {},
-            pings: []
+            item: { Img: 'zg', Name: '未知' },
+            pings: [-1]
         });
 
         const update = () => {
@@ -83,6 +74,8 @@ export default {
 
 <style lang="stylus" scoped>
 .line {
+    line-height: normal;
+    font-size: 1.2rem;
     cursor: pointer;
     margin: 0 auto;
     border: 1px solid #ddd;
@@ -107,6 +100,7 @@ export default {
 
     .country-name {
         line-height: 2rem;
+        color: #666;
     }
 
     .country-time, .country-select {

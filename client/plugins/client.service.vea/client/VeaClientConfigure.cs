@@ -27,7 +27,7 @@ namespace client.service.vea.client
         /// <summary>
         /// 名字
         /// </summary>
-        public string Name => "virtual adapter";
+        public string Name => "虚拟网卡组网";
         /// <summary>
         /// 作者
         /// </summary>

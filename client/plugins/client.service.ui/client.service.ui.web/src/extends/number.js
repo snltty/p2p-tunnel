@@ -1,12 +1,3 @@
-/*
- * @Author: snltty
- * @Date: 2021-09-26 20:43:28
- * @LastEditors: snltty
- * @LastEditTime: 2022-04-23 17:50:51
- * @version: v1.0.0
- * @Descripttion: 功能说明
- * @FilePath: \client.service.ui.web\src\extends\number.js
- */
 Number.prototype.sizeFormat = function () {
     let unites = ['B', 'KB', 'MB', 'GB', 'TB'];
     let unit = unites[0], size = this;
