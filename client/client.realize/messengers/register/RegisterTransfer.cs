@@ -69,7 +69,7 @@ namespace client.realize.messengers.register
                 return;
             }
 
-            Logger.Instance.Error($"{connection.ServerType} 断开~~~~");
+            Logger.Instance.Error($"{connection.ServerType} register 断开~~~~${connection.Address}");
             if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
             {
                 Register(true).ContinueWith((result) =>

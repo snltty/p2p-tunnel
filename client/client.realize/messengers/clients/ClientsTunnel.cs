@@ -111,7 +111,9 @@ namespace client.realize.messengers.clients
             }
 
             ushort port = await clientsMessengerSender.GetTunnelPort(connection);
+            Logger.Instance.DebugDebug($"udp 新通道:{model.Value} -----------------------");
             model.Value = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, model.Value, port, localport);
+            Logger.Instance.DebugDebug($"udp 新通道:{model.Value} =======================");
 
             clientInfoCaching.AddTunnelPort(model.Value, port);
             clientInfoCaching.AddUdpserver(model.Value, tempUdpServer);

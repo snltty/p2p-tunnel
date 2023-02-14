@@ -216,7 +216,8 @@ namespace common.tcpforward
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError(ex);
+                CloseClientSocket(e);
+                //Logger.Instance.DebugError(ex);
             }
         }
 
@@ -244,9 +245,9 @@ namespace common.tcpforward
 
             if (token.Request.Connection != null)
             {
-                token.Request.StateType = TcpForwardStateTypes.Close;
-                token.Request.Buffer = Helper.EmptyArray;
-                OnRequest(token.Request).Wait();
+                ///token.Request.StateType = TcpForwardStateTypes.Close;
+                //oken.Request.Buffer = Helper.EmptyArray;
+                //OnRequest(token.Request).Wait();
             }
         }
         /// <summary>

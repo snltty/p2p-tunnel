@@ -53,7 +53,7 @@ export const provideRegister = () => {
     });
     provide(provideRegisterKey, state);
 
-    setInterval(() => {
+    const fn = () => {
         if (websocketState.connected) {
             getRegisterInfo().then((json) => {
                 state.LocalInfo.UdpConnected = json.LocalInfo.UdpConnected;
@@ -97,12 +97,18 @@ export const provideRegister = () => {
                     state.ServerConfig.UdpPort = json.ServerConfig.UdpPort;
                     state.ServerConfig.TcpPort = json.ServerConfig.TcpPort;
                 }
-            })
+
+                setTimeout(fn, 1000);
+            }).catch(() => {
+                setTimeout(fn, 1000);
+            });
         } else {
             state.UdpConnected = false;
             state.TcpConnected = false;
+            setTimeout(fn, 1000);
         }
-    }, 300);
+    }
+    fn();
 }
 export const injectRegister = () => {
     return inject(provideRegisterKey);

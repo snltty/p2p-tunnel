@@ -14,10 +14,10 @@ export const getList = () => {
     return sendWebsocketMsg(`tcpforward/list`);
 }
 export const getListProxy = () => {
-    return sendWebsocketMsg(`tcpforward/listproxy`);
+    return sendWebsocketMsg(`httpproxy/listproxy`);
 }
 export const getPac = () => {
-    return sendWebsocketMsg(`tcpforward/GetPac`);
+    return sendWebsocketMsg(`httpproxy/GetPac`);
 }
 
 export const startListen = (id) => {
@@ -47,21 +47,21 @@ export const removeForward = (listenid, forwardid) => {
 
 
 export const getServerPorts = () => {
-    return sendWebsocketMsg(`tcpforward/ServerPorts`);
+    return sendWebsocketMsg(`servertcpforward/ServerPorts`);
 }
 export const getServerForwards = () => {
-    return sendWebsocketMsg(`tcpforward/ServerForwards`);
+    return sendWebsocketMsg(`servertcpforward/ServerForwards`);
 }
 
 export const AddServerForward = (model) => {
-    return sendWebsocketMsg(`tcpforward/AddServerForward`, model);
+    return sendWebsocketMsg(`servertcpforward/AddServerForward`, model);
 }
 export const startServerForward = (model) => {
-    return sendWebsocketMsg(`tcpforward/StartServerForward`, model);
+    return sendWebsocketMsg(`servertcpforward/StartServerForward`, model);
 }
 export const stopServerForward = (model) => {
-    return sendWebsocketMsg(`tcpforward/StopServerForward`, model);
+    return sendWebsocketMsg(`servertcpforward/StopServerForward`, model);
 }
 export const removeServerForward = (model) => {
-    return sendWebsocketMsg(`tcpforward/RemoveServerForward`, model);
+    return sendWebsocketMsg(`servertcpforward/RemoveServerForward`, model);
 }

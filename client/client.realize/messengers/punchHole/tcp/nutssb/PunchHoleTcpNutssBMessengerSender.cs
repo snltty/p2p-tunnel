@@ -296,7 +296,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     var locals = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
                     ips.AddRange(locals);
                 }
-                if (IPv6Support())
+                if (IPv6Support() && data.Ip.IsLan() == false)
                 {
                     var locals = data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, data.Port)).ToList();
                     ips.AddRange(locals);
@@ -438,6 +438,19 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     {
                         Msg = "tcp打洞失败",
                         Type = ConnectFailType.ERROR
+                    }
+                });
+            }
+            else
+            {
+                OnStepHandler?.Invoke(this, new PunchHoleStepModel
+                {
+                    Connection = TcpServer,
+                    RawData = new PunchHoleRequestInfo
+                    {
+                        PunchStep =(byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL,
+                        FromId = toid,
+                        TunnelName = tunname
                     }
                 });
             }

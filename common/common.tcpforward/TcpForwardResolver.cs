@@ -239,8 +239,8 @@ namespace common.tcpforward
             if (token != null)
             {
                 //maxNumberAcceptedClients.Release();
-                token.SendArg.StateType = state;
-                await ReceiveAsync(token.SendArg, Helper.EmptyArray);
+                //token.SendArg.StateType = state;
+                //await ReceiveAsync(token.SendArg, Helper.EmptyArray);
                 token.Clear();
                 connections.TryRemove(token.Key, out _);
             }

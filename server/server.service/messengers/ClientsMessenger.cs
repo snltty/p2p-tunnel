@@ -54,6 +54,8 @@ namespace server.service.messengers
         {
             TunnelRegisterInfo model = new TunnelRegisterInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
+
+            Logger.Instance.DebugDebug($"新通道:{model.TunnelName}");
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
             {
                 if (model.TunnelName == (ulong)TunnelDefaults.MIN)

@@ -19,12 +19,14 @@
                 </el-icon>
                 <span>节点</span>
             </router-link>
-            <router-link :to="{name:'Servers'}">
-                <el-icon>
-                    <Position />
-                </el-icon>
-                <span>代理穿透</span>
-            </router-link>
+            <auth-item-or :names="['ServerTcpForwardClientService','ServerTcpForwardClientService']">
+                <router-link :to="{name:'Servers'}">
+                    <el-icon>
+                        <Position />
+                    </el-icon>
+                    <span>代理穿透</span>
+                </router-link>
+            </auth-item-or>
             <router-link :to="{name:'Settings'}">
                 <el-icon>
                     <Setting />

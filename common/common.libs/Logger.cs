@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using System.Threading;
 
 namespace common.libs
@@ -159,7 +160,7 @@ namespace common.libs
         /// 
         /// </summary>
         /// <param name="ex"></param>
-         [Conditional("DEBUG")]
+        [Conditional("DEBUG")]
         public void DebugError(Exception ex)
         {
             Enqueue(new LoggerModel { Type = LoggerTypes.ERROR, Content = ex + "" });
@@ -201,7 +202,7 @@ namespace common.libs
         /// <summary>
         /// 
         /// </summary>
-        DEBUG = 0, 
+        DEBUG = 0,
         /// <summary>
         /// 
         /// </summary>

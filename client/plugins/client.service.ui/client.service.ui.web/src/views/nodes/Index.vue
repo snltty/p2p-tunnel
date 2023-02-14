@@ -11,9 +11,10 @@
   
 <script>
 import LeftMenu from '../../components/LeftMenu.vue'
-import { reactive } from '@vue/reactivity';
+import { computed, reactive } from '@vue/reactivity';
 import { useRouter } from 'vue-router'
 import { watch } from '@vue/runtime-core';
+import { injectServices } from '../../states/services'
 export default {
     components: { LeftMenu },
     setup() {
@@ -22,19 +23,28 @@ export default {
             currentMenu: 0
         });
         const router = useRouter();
-        const leftMenus = router.options.routes.filter(c => c.name == 'Nodes')[0].children.map(c => {
-            return {
-                text: c.meta.name,
-                url: c.name
-            }
+        const servicesState = injectServices();
+
+        const leftMenus = computed(() => {
+            return router.options.routes
+                .filter(c => c.name == 'Nodes')[0].children
+                .filter(c => servicesState.services.indexOf(c.meta.service) >= 0 || !c.meta.service).map(c => {
+                    return {
+                        text: c.meta.name,
+                        url: c.name
+                    }
+                });
         });
         watch(() => router.currentRoute.value.name, (name) => {
-            for (let i = 0; i < leftMenus.length; i++) {
-                if (leftMenus[i].url == name) {
+            for (let i = 0; i < leftMenus.value.length; i++) {
+                if (leftMenus.value[i].url == name) {
                     state.currentMenu = i;
-                    break;
+                    return;
                 }
             }
+            // if (leftMenus.value.length > 0) {
+            //     router.push({ name: leftMenus.value[0].url })
+            // }
         }, { immediate: true })
 
         return {

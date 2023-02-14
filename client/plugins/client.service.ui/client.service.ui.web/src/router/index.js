@@ -20,55 +20,55 @@ const routes = [
                 path: '/nodes/list.html',
                 name: 'NodesList',
                 component: () => import('../views/nodes/list/Index.vue'),
-                meta: { name: '节点' }
+                meta: { name: '节点', service: 'ClientsClientService' }
             },
             {
                 path: '/nodes/tcp-forward.html',
                 name: 'NodesTcpForward',
                 component: () => import('../views/nodes/tcpforward/Index.vue'),
-                meta: { name: 'TCP转发' }
+                meta: { name: 'TCP转发', service: 'TcpForwardClientService' }
             },
             {
                 path: '/nodes/udp-forward.html',
                 name: 'NodesUdpForward',
                 component: () => import('../views/nodes/udpforward/Index.vue'),
-                meta: { name: 'UDP转发' }
+                meta: { name: 'UDP转发', service: 'UdpForwardClientService' }
             },
             {
                 path: '/nodes/proxy.html',
                 name: 'NodesProxy',
                 component: () => import('../views/nodes/httpproxy/Index.vue'),
-                meta: { name: 'http代理' }
+                meta: { name: 'http代理', service: 'HttpProxyClientService' }
             },
             {
                 path: '/nodes/socks5.html',
                 name: 'NodesSocks5',
                 component: () => import('../views/nodes/socks5/Index.vue'),
-                meta: { name: 'socks5代理' }
+                meta: { name: 'socks5代理', service: 'Socks5ClientService' }
             },
             {
                 path: '/nodes/vea.html',
                 name: 'NodesVea',
                 component: () => import('../views/nodes/vea/Index.vue'),
-                meta: { name: '虚拟网卡组网' }
+                meta: { name: '虚拟网卡组网', service: 'VeaClientService' }
             },
             {
                 path: '/nodes/wakeup.html',
                 name: 'NodesWakeUp',
                 component: () => import('../views/nodes/wakeup/Index.vue'),
-                meta: { name: '远程唤醒' }
+                meta: { name: '远程唤醒', service: 'WakeUpClientService' }
             },
             {
                 path: '/nodes/logger.html',
                 name: 'NodesLogger',
                 component: () => import('../views/nodes/logger/Index.vue'),
-                meta: { name: '日志信息' }
+                meta: { name: '日志信息', service: 'LoggerClientService' }
             },
             {
                 path: '/nodes/configure.html',
                 name: 'Nodesconfigure',
                 component: () => import('../views/nodes/configure/Index.vue'),
-                meta: { name: '配置文件' }
+                meta: { name: '配置文件', service: '' }
             }
         ]
     },
@@ -82,13 +82,13 @@ const routes = [
                 path: '/server-tcp-forward.html',
                 name: 'ServerTcpForward',
                 component: () => import('../views/server/tcpforward/Index.vue'),
-                meta: { name: 'tcp转发', service: 'TcpForwardClientService' }
+                meta: { name: 'tcp转发', service: 'ServerTcpForwardClientService' }
             },
             {
                 path: '/server-udp-forward.html',
                 name: 'ServerUdpForward',
                 component: () => import('../views/server/udpforward/Index.vue'),
-                meta: { name: 'udp转发', service: 'UdpForwardClientService' }
+                meta: { name: 'udp转发', service: 'ServerUdpForwardClientService' }
             },
         ]
     }

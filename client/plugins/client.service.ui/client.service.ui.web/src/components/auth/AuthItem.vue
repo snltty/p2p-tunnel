@@ -1,17 +1,17 @@
 <template>
-    <template v-if="services.indexOf(name) >= 0">
+    <template v-if="servicesState.services.indexOf(name) >= 0">
         <slot></slot>
     </template>
 </template>
 
 <script>
-import { inject } from 'vue'
+import { injectServices } from '../../states/services'
 export default {
     props: ['name'],
     setup() {
-        const services = inject('btn-auth-services');
+        const servicesState = injectServices();
         return {
-            services
+            servicesState
         }
     }
 }

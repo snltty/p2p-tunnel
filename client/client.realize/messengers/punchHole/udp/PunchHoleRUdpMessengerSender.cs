@@ -4,6 +4,7 @@ using client.messengers.punchHole.udp;
 using client.messengers.register;
 using client.realize.messengers.crypto;
 using common.libs;
+using common.libs.extends;
 using common.server;
 using common.server.model;
 using common.server.servers.rudp;
@@ -213,6 +214,7 @@ namespace client.realize.messengers.punchHole.udp
             }
             else
             {
+                Logger.Instance.Warning($"OnStep1 未找到通道：{model.RawData.TunnelName}");
                 await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
             }
         }
@@ -241,7 +243,7 @@ namespace client.realize.messengers.punchHole.udp
                      var locals = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
                      ips.AddRange(locals);
                  }
-                 if (IPv6Support())
+                 if (IPv6Support() && data.Ip.IsLan() == false)
                  {
                      var locals = data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, data.Port)).ToList();
                      ips.AddRange(locals);
@@ -338,6 +340,19 @@ namespace client.realize.messengers.punchHole.udp
                     {
                         Msg = "udp打洞失败",
                         Type = ConnectFailType.ERROR
+                    }
+                });
+            }
+            else
+            {
+                OnStepHandler?.Invoke(this, new PunchHoleStepModel
+                {
+                    Connection = connection,
+                    RawData = new PunchHoleRequestInfo
+                    {
+                        PunchStep = (byte)PunchHoleUdpSteps.STEP_2_Fail,
+                        FromId = toid,
+                        TunnelName = tunname
                     }
                 });
             }

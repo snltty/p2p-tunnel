@@ -22,11 +22,12 @@ export default {
     emits: ['update:modelValue', 'handle'],
     setup(props, { emit }) {
         const current = computed(() => props.modelValue);
+        const menus = computed(() => props.menus);
         const handleJumpScroll = (index) => {
             emit('handle', index);
         }
         return {
-            menus: props.menus,
+            menus,
             currentMenu: current,
             handleJumpScroll
         }

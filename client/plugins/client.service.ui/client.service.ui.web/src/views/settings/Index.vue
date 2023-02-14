@@ -96,7 +96,7 @@ export default {
             const promises = [];
             for (let j in refs) {
                 if (j.indexOf('setting_item') == 0) {
-                    promises.push(refs[j].submit);
+                    promises.push(refs[j][0].submit);
                 }
             }
             return promises;

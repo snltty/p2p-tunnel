@@ -75,35 +75,7 @@ namespace client.service.tcpforward
         {
             return tcpForwardTransfer.p2pListens.Where(c => c.ForwardType == common.tcpforward.TcpForwardTypes.Forward);
         }
-        /// <summary>
-        /// 代理
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public P2PListenInfo ListProxy(ClientServiceParamsInfo arg)
-        {
-            return tcpForwardTransfer.p2pListens.FirstOrDefault(c => c.ForwardType == common.tcpforward.TcpForwardTypes.Proxy) ?? new P2PListenInfo
-            {
-                ID = 0,
-                Port = 5412,
-                AliveType = common.tcpforward.TcpForwardAliveTypes.Web,
-                ForwardType = common.tcpforward.TcpForwardTypes.Proxy,
-                Listening = false,
-                IsPac = false,
-                IsCustomPac = false,
-                Name = string.Empty,
-                Desc = string.Empty,
-            };
-        }
-        /// <summary>
-        /// 获取pac
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public string GetPac(ClientServiceParamsInfo arg)
-        {
-            return tcpForwardTransfer.GetPac();
-        }
+     
         /// <summary>
         /// 获取监听
         /// </summary>

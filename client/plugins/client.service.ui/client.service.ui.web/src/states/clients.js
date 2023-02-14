@@ -9,15 +9,20 @@ export const provideClients = () => {
     });
     provide(provideClientsKey, state);
 
-    setInterval(() => {
+    const fn = () => {
         if (websocketState.connected) {
             getClients().then((res) => {
                 state.clients = res;
-            })
+                setTimeout(fn, 1000);
+            }).catch(() => {
+                setTimeout(fn, 1000);
+            });
         } else {
             state.clients = [];
+            setTimeout(fn, 1000);
         }
-    }, 1000);
+    }
+    fn();
 }
 export const injectClients = () => {
     return inject(provideClientsKey);
