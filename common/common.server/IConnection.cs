@@ -468,11 +468,16 @@ namespace common.server
             {
                 try
                 {
-
+                    int index = 0;
                     while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
+                        if (index >= 10000 / 30)
+                        {
+                            Console.WriteLine($"等待超时：{index}");
+                        }
                         NetPeer.Update();
                         await Task.Delay(30);
+                        index++;
                     }
 
                     int len = 0;

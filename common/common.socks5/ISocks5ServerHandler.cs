@@ -11,7 +11,7 @@ namespace common.socks5
         /// <summary>
         /// 
         /// </summary>
-        Task InputData(Socks5Info data);
+        void InputData(Socks5Info data);
     }
 
     public interface ISocks5AuthValidator

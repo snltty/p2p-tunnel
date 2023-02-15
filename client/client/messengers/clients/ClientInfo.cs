@@ -48,6 +48,11 @@ namespace client.messengers.clients
         /// 中继节点
         /// </summary>
         public bool UseRelay { get; init; }
+        public bool UseAutoRelay { get; init; }
+        /// <summary>
+        /// 原端口打洞
+        /// </summary>
+        public bool UseOriginPort { get; init; }
         /// <summary>
         /// ping值
         /// </summary>

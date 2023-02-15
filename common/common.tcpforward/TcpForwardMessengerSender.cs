@@ -44,11 +44,11 @@ namespace common.tcpforward
         /// </summary>
         /// <param name="arg"></param>
         /// <param name="connection"></param>
-        public async Task SendResponse(TcpForwardInfo arg, IConnection connection)
+        public async Task<bool> SendResponse(TcpForwardInfo arg, IConnection connection)
         {
             byte[] bytes = arg.ToBytes(out int length);
 
-            await messengerSender.SendOnly(new MessageRequestWrap
+            bool res = await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)TcpForwardMessengerIds.Response,
                 Connection = connection,
@@ -56,6 +56,8 @@ namespace common.tcpforward
             });
 
             arg.Return(bytes);
+
+            return res;
         }
         /// <summary>
         /// 

@@ -46,7 +46,7 @@ namespace common.libs
         /// <summary>
         /// 
         /// </summary>
-        public static int Version = 1;
+        public static byte[] Version = new byte[4] { 2, 0, 0, 0 };
 
         /// <summary>
         /// 

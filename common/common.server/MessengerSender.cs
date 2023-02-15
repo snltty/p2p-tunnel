@@ -39,7 +39,7 @@ namespace common.server
             }
 
 
-            //await msg.Connection.WaitOne();
+            await msg.Connection.WaitOne();
             if (msg.RequestId == 0)
             {
                 uint id = msg.RequestId;
@@ -55,7 +55,7 @@ namespace common.server
                 timeout.Cancel();
                 timeout.Task.State.Tcs.SetResult(new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT });
             }
-            //msg.Connection.Release();
+            msg.Connection.Release();
 
             return await timeout.Task.State.Tcs.Task.ConfigureAwait(false);
         }
@@ -71,8 +71,8 @@ namespace common.server
             {
                 return false;
             }
-            //if (locked == false)
-            //    await msg.Connection.WaitOne();
+            if (locked == false)
+                await msg.Connection.WaitOne();
             try
             {
                 if (msg.RequestId == 0)
@@ -104,8 +104,8 @@ namespace common.server
             }
             finally
             {
-                //if (locked == false)
-                //    msg.Connection.Release();
+                if (locked == false)
+                    msg.Connection.Release();
             }
             return false;
         }
@@ -122,7 +122,7 @@ namespace common.server
                 return false;
             }
 
-            //await msg.Connection.WaitOne();
+            await msg.Connection.WaitOne();
             try
             {
                 msg.Encode = msg.Connection.EncodeEnabled && msg.Encode;
@@ -142,7 +142,7 @@ namespace common.server
             }
             finally
             {
-                // msg.Connection.Release();
+                msg.Connection.Release();
             }
             return false;
         }

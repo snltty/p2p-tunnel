@@ -104,9 +104,9 @@ namespace common.server
                         //RelayIdIndex 后移一位
                         receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
 
-                        // await _connection.WaitOne();
+                        await _connection.WaitOne();
                         await _connection.Send(receive).ConfigureAwait(false);
-                        // _connection.Release();
+                        _connection.Release();
                     }
                     else
                     {
@@ -142,10 +142,10 @@ namespace common.server
                             //RelayIdIndex 后移一位
                             receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
 
-                            // await _connection.WaitOne();
+                            await _connection.WaitOne();
                             //中继数据不再次序列化，直接在原数据上更新数据然后发送
                             await _connection.Send(receive).ConfigureAwait(false);
-                            //  _connection.Release();
+                            _connection.Release();
                         }
                         return;
                     }
@@ -235,6 +235,16 @@ namespace common.server
             catch (Exception ex)
             {
                 Logger.Instance.Error(ex);
+                if (receive.Length > 1024)
+                {
+                    Logger.Instance.Error($"{connection.Address}:{string.Join(",", receive.Slice(0, 1024).ToArray())}");
+                }
+                else
+                {
+                    Logger.Instance.Error($"{connection.Address}:{string.Join(",", receive.ToArray())}");
+                }
+                connection.Disponse();
+                /*
                 if (requestWrap.Reply)
                 {
                     await messengerSender.ReplyOnly(new MessageResponseWrap
@@ -246,6 +256,7 @@ namespace common.server
                         Code = MessageResponeCodes.ERROR
                     }).ConfigureAwait(false);
                 }
+                */
             }
             finally
             {

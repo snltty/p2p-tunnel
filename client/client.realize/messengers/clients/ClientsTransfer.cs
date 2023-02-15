@@ -359,7 +359,7 @@ namespace client.realize.messengers.clients
             client.SetConnecting(true);
 
             ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.UDP, (ulong)TunnelDefaults.MIN };
-            if (config.Client.UseOriginPort == false)
+            if (config.Client.UseOriginPort == false || client.UseOriginPort == false)
             {
                 tunnelNames[0] = (ulong)TunnelDefaults.MIN;
             }
@@ -396,7 +396,7 @@ namespace client.realize.messengers.clients
             client.SetConnecting(true);
 
             ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.TCP, (ulong)TunnelDefaults.MIN };
-            if (config.Client.UseOriginPort == false)
+            if (config.Client.UseOriginPort == false || client.UseOriginPort == false)
             {
                 tunnelNames[0] = (ulong)TunnelDefaults.MIN;
             }
@@ -499,6 +499,8 @@ namespace client.realize.messengers.clients
                             UseUdp = (enumClientAccess & EnumClientAccess.UseUdp) == EnumClientAccess.UseUdp,
                             UsePunchHole = (enumClientAccess & EnumClientAccess.UsePunchHole) == EnumClientAccess.UsePunchHole,
                             UseRelay = (enumClientAccess & EnumClientAccess.UseRelay) == EnumClientAccess.UseRelay,
+                            UseAutoRelay = (enumClientAccess & EnumClientAccess.UseAutoRelay) == EnumClientAccess.UseAutoRelay,
+                            UseOriginPort = (enumClientAccess & EnumClientAccess.UseOriginPort) == EnumClientAccess.UseOriginPort,
                         };
                         clientInfoCaching.Add(client);
                         if (firstClients.IsDefault)
@@ -516,7 +518,7 @@ namespace client.realize.messengers.clients
                                     ConnectReverse(client);
                                 }
                             }
-                            else if (config.Client.AutoRelay)
+                            else if (config.Client.AutoRelay && client.UseAutoRelay)
                             {
                                 _ = Relay(client, true);
                             }

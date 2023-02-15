@@ -170,7 +170,9 @@ namespace client
                 | (UseUdp ? EnumClientAccess.UseUdp : EnumClientAccess.None)
                 | (UseTcp ? EnumClientAccess.UseTcp : EnumClientAccess.None)
                 | (UsePunchHole ? EnumClientAccess.UsePunchHole : EnumClientAccess.None)
-                | (UseRelay ? EnumClientAccess.UseRelay : EnumClientAccess.None);
+                | (UseRelay ? EnumClientAccess.UseRelay : EnumClientAccess.None)
+                | (AutoRelay ? EnumClientAccess.UseAutoRelay : EnumClientAccess.None)
+                | (UseOriginPort ? EnumClientAccess.UseOriginPort : EnumClientAccess.None);
 
         }
     }
@@ -210,6 +212,11 @@ namespace client
         /// 中继节点
         /// </summary>
         UseRelay = 8,
+        UseAutoRelay = 16,
+        /// <summary>
+        /// 中继节点
+        /// </summary>
+        UseOriginPort = 32,
         /// <summary>
         /// 全部
         /// </summary>
