@@ -17,7 +17,7 @@ namespace common.socks5
         /// 
         /// </summary>
         /// <param name="data"></param>
-        public Task Response(Socks5Info data);
+        public Task<bool> Response(Socks5Info data);
         /// <summary>
         /// 
         /// </summary>

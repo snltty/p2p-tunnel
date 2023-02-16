@@ -11,9 +11,6 @@ using System.Threading.Tasks;
 
 namespace common.tcpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class TcpForwardResolver
     {
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
@@ -22,12 +19,6 @@ namespace common.tcpforward
         private readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         private ConcurrentDictionary<ConnectionKey, ConnectUserToken> connections = new ConcurrentDictionary<ConnectionKey, ConnectUserToken>(new ConnectionComparer());
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tcpForwardMessengerSender"></param>
-        /// <param name="config"></param>
-        /// <param name="tcpForwardValidator"></param>
         public TcpForwardResolver(TcpForwardMessengerSender tcpForwardMessengerSender, Config config, ITcpForwardValidator tcpForwardValidator)
         {
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
@@ -35,10 +26,7 @@ namespace common.tcpforward
 
             this.tcpForwardValidator = tcpForwardValidator;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
+
         public async Task InputData(IConnection connection)
         {
             TcpForwardInfo data = new TcpForwardInfo();
@@ -60,15 +48,12 @@ namespace common.tcpforward
                         {
                             try
                             {
-                                Console.WriteLine($"开始发送.....");
-                                token.TargetSocket.Send(arg.Buffer.Span, SocketFlags.None);
-                                Console.WriteLine($"结束发送=====");
+                                await token.TargetSocket.SendAsync(arg.Buffer, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                             }
-                            catch (Exception ex)
+                            catch (Exception)
                             {
-                                Logger.Instance.DebugError(ex);
-                                connections.TryRemove(token.Key, out _);
-                                // _ = CloseClientSocket(token);
+                                // Logger.Instance.DebugError(ex);
+                                _ = CloseClientSocket(token);
                             }
                             return;
                         }
@@ -112,8 +97,8 @@ namespace common.tcpforward
             // maxNumberAcceptedClients.WaitOne();
             Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
-            socket.SendTimeout = 5000;
+            // socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
+            //socket.SendTimeout = 5000;
 
             SocketAsyncEventArgs saea = new SocketAsyncEventArgs();
             saea.RemoteEndPoint = endpoint;
@@ -203,7 +188,7 @@ namespace common.tcpforward
                     }
                     if (token.TargetSocket.Connected == false)
                     {
-                        await CloseClientSocket(token);
+                        _ = CloseClientSocket(token);
                         return;
                     }
                     if (token.TargetSocket.ReceiveAsync(e) == false)
@@ -213,13 +198,13 @@ namespace common.tcpforward
                 }
                 else
                 {
-                    await CloseClientSocket(token);
+                    _ = CloseClientSocket(token);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
-                await CloseClientSocket(e);
+                _ = CloseClientSocket(e);
             }
         }
 
@@ -251,8 +236,8 @@ namespace common.tcpforward
             if (token != null)
             {
                 //maxNumberAcceptedClients.Release();
-                //token.SendArg.StateType = state;
-                //await ReceiveAsync(token.SendArg, Helper.EmptyArray);
+                token.SendArg.StateType = state;
+                await ReceiveAsync(token.SendArg, Helper.EmptyArray);
                 token.Clear();
                 connections.TryRemove(token.Key, out _);
             }

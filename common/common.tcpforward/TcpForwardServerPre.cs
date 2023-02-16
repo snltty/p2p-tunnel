@@ -11,18 +11,9 @@ using System.Threading.Tasks;
 
 namespace common.tcpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class TcpForwardServerPre : ITcpForwardServer
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public Func<TcpForwardInfo, Task<bool>> OnRequest { get; set; } = (info) => Task.FromResult(true);
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<ListeningChangeInfo> OnListeningChange { get; } = new SimpleSubPushHandler<ListeningChangeInfo>();
         private readonly ServersManager serversManager = new ServersManager();
         private readonly ClientsManager clientsManager = new ClientsManager();
@@ -32,26 +23,13 @@ namespace common.tcpforward
 
         private int receiveBufferSize = 8 * 1024;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public TcpForwardServerPre()
         {
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="numConnections"></param>
-        /// <param name="receiveBufferSize"></param>
         public void Init(int numConnections, int receiveBufferSize)
         {
             this.receiveBufferSize = receiveBufferSize;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="port"></param>
-        /// <param name="aliveType"></param>
         public void Start(ushort port, TcpForwardAliveTypes aliveType)
         {
             if (serversManager.Contains(port))
@@ -153,6 +131,8 @@ namespace common.tcpforward
             };
             token.Saea = readEventArgs;
 
+            token.SourceSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
+            token.SourceSocket.SendTimeout = 5000;
             token.SourceSocket.SendBufferSize = receiveBufferSize;
             token.SourceSocket.ReceiveBufferSize = receiveBufferSize;
             token.PoolBuffer = new byte[receiveBufferSize];
@@ -214,7 +194,7 @@ namespace common.tcpforward
                     CloseClientSocket(e);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 CloseClientSocket(e);
                 //Logger.Instance.DebugError(ex);
@@ -229,7 +209,8 @@ namespace common.tcpforward
             token.Request.Buffer = Helper.EmptyArray;
             if (res == false)
             {
-                CloseClientSocket(token);
+                clientsManager.TryRemove(token.Request.RequestId, out _);
+                // CloseClientSocket(token);
             }
             Semaphore.Release();
         }
@@ -242,73 +223,70 @@ namespace common.tcpforward
         private void CloseClientSocket(ForwardAsyncUserToken token)
         {
             clientsManager.TryRemove(token.Request.RequestId, out _);
-
-            if (token.Request.Connection != null)
-            {
-                ///token.Request.StateType = TcpForwardStateTypes.Close;
-                //oken.Request.Buffer = Helper.EmptyArray;
-                //OnRequest(token.Request).Wait();
-            }
+            token.Request.StateType = TcpForwardStateTypes.Close;
+            _ = Receive(token, Helper.EmptyArray);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="model"></param>
+      
         public async Task Response(TcpForwardInfo model)
         {
             if (clientsManager.TryGetValue(model.RequestId, out ForwardAsyncUserToken token))
             {
-                if (model.StateType == TcpForwardStateTypes.Success)
+                try
                 {
-                    if (token.Request.DataType == TcpForwardDataTypes.Connect)
+                    if (model.StateType == TcpForwardStateTypes.Success)
                     {
-                        token.Request.DataType = TcpForwardDataTypes.Forward;
-                        token.Request.TargetEndpoint = Helper.EmptyArray;
+                        if (token.Request.DataType == TcpForwardDataTypes.Connect)
+                        {
+                            token.Request.DataType = TcpForwardDataTypes.Forward;
+                            token.Request.TargetEndpoint = Helper.EmptyArray;
+                            if (token.Request.ForwardType == TcpForwardTypes.Proxy)
+                            {
+                                await token.SourceSocket.SendAsync(HttpConnectMethodHelper.ConnectSuccessMessage(), SocketFlags.None).WaitAsync(TimeSpan.FromSeconds(5));
+                            }
+                            else if (token.Request.Cache.Length > 0)
+                            {
+                                _ = Receive(token, token.Request.Cache);
+                                token.Request.Cache = Helper.EmptyArray;
+                            }
+                            if (token.SourceSocket.ReceiveAsync(token.Saea) == false)
+                            {
+                                ProcessReceive(token.Saea);
+                            }
+
+                        }
+                        if (model.Buffer.Length > 0)
+                        {
+                            try
+                            {
+                                await token.SourceSocket.SendAsync(model.Buffer, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                            }
+                            catch (Exception)
+                            {
+                                clientsManager.TryRemove(model.RequestId, out _);
+                            }
+                        }
+                    }
+                    else
+                    {
                         if (token.Request.ForwardType == TcpForwardTypes.Proxy)
                         {
-                            await token.SourceSocket.SendAsync(HttpConnectMethodHelper.ConnectSuccessMessage(), SocketFlags.None);
+                            await token.SourceSocket.SendAsync(HttpConnectMethodHelper.ConnectErrorMessage(), SocketFlags.None).WaitAsync(TimeSpan.FromSeconds(5));
                         }
-                        else if (token.Request.Cache.Length > 0)
+                        else if (model.Buffer.Length > 0)
                         {
-                            await Receive(token, token.Request.Cache);
-                            token.Request.Cache = Helper.EmptyArray;
+                            await token.SourceSocket.SendAsync(model.Buffer, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                         }
-                        if (token.SourceSocket.ReceiveAsync(token.Saea) == false)
-                        {
-                            ProcessReceive(token.Saea);
-                        }
-
-                    }
-                    if (model.Buffer.Length > 0)
-                    {
-                        try
-                        {
-                            await token.SourceSocket.SendAsync(model.Buffer, SocketFlags.None);
-                        }
-                        catch (Exception)
-                        {
-                            clientsManager.TryRemove(model.RequestId, out _);
-                        }
+                        clientsManager.TryRemove(model.RequestId, out _);
                     }
                 }
-                else
+                catch (Exception)
                 {
-                    if (token.Request.ForwardType == TcpForwardTypes.Proxy)
-                    {
-                        await token.SourceSocket.SendAsync(HttpConnectMethodHelper.ConnectErrorMessage(), SocketFlags.None);
-                    }
-                    else if (model.Buffer.Length > 0)
-                    {
-                        await token.SourceSocket.SendAsync(model.Buffer, SocketFlags.None);
-                    }
                     clientsManager.TryRemove(model.RequestId, out _);
                 }
             }
+            await Task.CompletedTask;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sourcePort"></param>
+       
         public void Stop(ushort sourcePort)
         {
             if (serversManager.TryRemove(sourcePort, out ServerInfo model))
@@ -322,9 +300,6 @@ namespace common.tcpforward
                 clientsManager.Clear(model.SourcePort);
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public void Stop()
         {
             serversManager.Clear();

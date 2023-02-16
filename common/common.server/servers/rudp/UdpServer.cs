@@ -91,9 +91,7 @@ namespace common.server.servers.rudp
                 {
                     IConnection connection = peer.Tag as IConnection;
                     connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
-                    Console.WriteLine($"开始处理：{peer.EndPoint}");
-                    OnPacket(connection);
-                    Console.WriteLine($"结束处理：{peer.EndPoint}================================");
+                    OnPacket(connection).Wait();
                 }
                 catch (Exception)
                 {

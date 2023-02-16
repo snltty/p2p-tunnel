@@ -11,32 +11,19 @@ using System.Threading.Tasks;
 
 namespace common.socks5
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class Socks5ServerHandler : ISocks5ServerHandler
     {
         private ConcurrentDictionary<ConnectionKey, AsyncServerUserToken> connections = new(new ConnectionKeyComparer());
         private ConcurrentDictionary<ConnectionKeyUdp, UdpToken> udpConnections = new(new ConnectionKeyUdpComparer());
-        private readonly Dictionary<Socks5EnumStep, Action<Socks5Info>> handles = new Dictionary<Socks5EnumStep, Action<Socks5Info>>();
+        private readonly Dictionary<Socks5EnumStep, Func<Socks5Info, Task>> handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, Task>>();
         private readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         private readonly ISocks5MessengerSender socks5MessengerSender;
 
-        /// <summary>
-        /// 
-        /// </summary>
         protected Config config { get; }
         private readonly WheelTimer<object> wheelTimer;
         private readonly ISocks5Validator socks5Validator;
         private readonly ISocks5AuthValidator socks5AuthValidator;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="socks5MessengerSender"></param>
-        /// <param name="config"></param>
-        /// <param name="wheelTimer"></param>
-        /// <param name="socks5Validator"></param>
         public Socks5ServerHandler(ISocks5MessengerSender socks5MessengerSender, Config config, WheelTimer<object> wheelTimer, ISocks5Validator socks5Validator, ISocks5AuthValidator socks5AuthValidator)
         {
             this.socks5MessengerSender = socks5MessengerSender;
@@ -47,7 +34,7 @@ namespace common.socks5
             this.socks5AuthValidator = socks5AuthValidator;
             TimeoutUdp();
 
-            handles = new Dictionary<Socks5EnumStep, Action<Socks5Info>> {
+            handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, Task>> {
                 {Socks5EnumStep.Request, HandleRequest},
                 {Socks5EnumStep.Auth, HandleAuth},
                 {Socks5EnumStep.Command, HandleCommand},
@@ -57,32 +44,34 @@ namespace common.socks5
 
         }
 
-        public void InputData(Socks5Info data)
+        public async Task InputData(Socks5Info data)
         {
             if (data.Data.Length == 0)
             {
                 data.Socks5Step = Socks5EnumStep.Forward;
             }
-            if (handles.TryGetValue(data.Socks5Step, out Action<Socks5Info> action))
+            if (handles.TryGetValue(data.Socks5Step, out Func<Socks5Info, Task> action))
             {
-                action(data);
+                await action(data);
             }
         }
 
-        private void HandleRequest(Socks5Info data)
+        private async Task HandleRequest(Socks5Info data)
         {
             data.AuthType = socks5AuthValidator.GetAuthType(Socks5Parser.GetAuthMethods(data.Data.Span));
             data.Response[0] = (byte)data.AuthType;
             data.Data = data.Response;
             _ = Receive(data);
+            await Task.CompletedTask;
         }
-        private void HandleAuth(Socks5Info data)
+        private async Task HandleAuth(Socks5Info data)
         {
             data.Response[0] = (byte)socks5AuthValidator.Validate(data.Data, data.AuthType);
             data.Data = data.Response;
             _ = Receive(data);
+            await Task.CompletedTask;
         }
-        private void HndleForward(Socks5Info data)
+        private async Task HndleForward(Socks5Info data)
         {
             ConnectionKey key = new ConnectionKey(data.ClientId, data.Id);
             if (connections.TryGetValue(key, out AsyncServerUserToken token))
@@ -91,7 +80,7 @@ namespace common.socks5
                 {
                     try
                     {
-                        token.TargetSocket.Send(data.Data.Span, SocketFlags.None);
+                        await token.TargetSocket.SendAsync(data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                     }
                     catch (Exception)
                     {
@@ -104,7 +93,7 @@ namespace common.socks5
                 }
             }
         }
-        private void HndleForwardUdp(Socks5Info data)
+        private async Task HndleForwardUdp(Socks5Info data)
         {
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
             if (remoteEndPoint.Port == 0) return;
@@ -123,14 +112,14 @@ namespace common.socks5
                     token.PoolBuffer = new byte[65535];
                     udpConnections.AddOrUpdate(key, token, (a, b) => token);
 
-                    token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
+                    await token.TargetSocket.SendToAsync(sendData, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
                     IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
                 }
                 else
                 {
                     token.Update();
-                    token.TargetSocket.SendTo(sendData.Span, SocketFlags.None, remoteEndPoint);
+                    await token.TargetSocket.SendToAsync(sendData, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
                 }
             }
@@ -190,7 +179,7 @@ namespace common.socks5
         }
 
 
-        private void HandleCommand(Socks5Info data)
+        private async Task HandleCommand(Socks5Info data)
         {
             try
             {
@@ -199,6 +188,8 @@ namespace common.socks5
                     _ = ConnectReponse(data, Socks5EnumResponseCommand.CommandNotAllow);
                     return;
                 }
+
+                await Task.CompletedTask;
 
                 Socks5EnumRequestCommand command = (Socks5EnumRequestCommand)data.Data.Span[1];
                 IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
@@ -367,7 +358,7 @@ namespace common.socks5
                     int offset = e.Offset;
                     int length = e.BytesTransferred;
                     token.Data.Data = e.Buffer.AsMemory(offset, length);
-                    await Receive(token.Data);
+                    await Receive(token);
                     token.Data.Data = Helper.EmptyArray;
 
                     if (token.TargetSocket.Available > 0)
@@ -378,7 +369,7 @@ namespace common.socks5
                             if (length > 0)
                             {
                                 token.Data.Data = e.Buffer.AsMemory(0, length);
-                                await Receive(token.Data);
+                                await Receive(token);
                                 token.Data.Data = Helper.EmptyArray;
                             }
                         }
@@ -386,7 +377,7 @@ namespace common.socks5
 
                     if (token.TargetSocket.Connected == false)
                     {
-                        await CloseClientSocket(e);
+                        CloseClientSocket(e);
                         return;
                     }
                     if (token.TargetSocket.ReceiveAsync(e) == false)
@@ -396,42 +387,52 @@ namespace common.socks5
                 }
                 else
                 {
-                    await CloseClientSocket(e);
+                    CloseClientSocket(e);
                 }
             }
             catch (Exception ex)
             {
-                await CloseClientSocket(e);
+                CloseClientSocket(e);
                 Logger.Instance.DebugError(ex);
             }
         }
-      
-        private async Task Receive(Socks5Info info)
+
+        private async Task<bool> Receive(AsyncServerUserToken token)
+        {
+            bool res = await Receive(token.Data);
+            if (res == false)
+            {
+                CloseClientSocket(token);
+            }
+            return res;
+        }
+        private async Task<bool> Receive(Socks5Info info)
         {
             await Semaphore.WaitAsync();
-            await socks5MessengerSender.Response(info);
+            bool res = await socks5MessengerSender.Response(info);
             Semaphore.Release();
+            return res;
         }
 
-        private async Task CloseClientSocket(SocketAsyncEventArgs e)
+        private void CloseClientSocket(SocketAsyncEventArgs e)
         {
             AsyncServerUserToken token = e.UserToken as AsyncServerUserToken;
-            if (token.IsClosed == false)
+            if (CloseClientSocket(token))
             {
-                token.Clear();
-
                 e.Dispose();
-
-                connections.TryRemove(token.Key, out _);
-                //maxNumberAcceptedClients.Release();
-                await socks5MessengerSender.ResponseClose(token.Data);
             }
         }
-        private void CloseClientSocket(AsyncServerUserToken token)
+        private bool CloseClientSocket(AsyncServerUserToken token)
         {
-            token.IsClosed = true;
-            token.Clear();
-            connections.TryRemove(token.Key, out _);
+            if (token.IsClosed == false)
+            {
+                token.IsClosed = true;
+                token.Clear();
+                connections.TryRemove(token.Key, out _);
+                _ = socks5MessengerSender.ResponseClose(token.Data);
+                return true;
+            }
+            return false;
         }
     }
 

@@ -202,7 +202,7 @@ namespace client.realize.messengers.clients
                 return;
             }
 
-            Logger.Instance.Error($"{connection.ServerType} client 断开~~~~${connection.Address}");
+            //Logger.Instance.Error($"{connection.ServerType} client 断开~~~~${connection.Address}");
             if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
             {
                 if (ReferenceEquals(connection, client.Connection))

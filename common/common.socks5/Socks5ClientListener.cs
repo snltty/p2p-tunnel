@@ -177,6 +177,8 @@ namespace common.socks5
                 UserToken = token,
                 SocketFlags = SocketFlags.None,
             };
+            //socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
+            //socket.SendTimeout = 5000;
             socket.SendBufferSize = bufferSize;
             socket.ReceiveBufferSize = bufferSize;
             token.PoolBuffer = new byte[bufferSize];
@@ -300,7 +302,7 @@ namespace common.socks5
             if (e.SocketError == SocketError.Success)
             {
                 AsyncUserToken token = (AsyncUserToken)e.UserToken;
-                if (!token.Socket.ReceiveAsync(e))
+                if (token.Socket.ReceiveAsync(e) == false)
                 {
                     ProcessReceive(e);
                 }
@@ -338,14 +340,13 @@ namespace common.socks5
                     {
                         try
                         {
-                            await token.Socket.SendAsync(info.Data, SocketFlags.None);
+                            await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                         }
                         catch (Exception)
                         {
                             CloseClientSocket(info.Id);
                         }
                     }
-
                 }
             }
             else if (info.SourceEP != null)

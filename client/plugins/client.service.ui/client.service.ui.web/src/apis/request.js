@@ -63,7 +63,10 @@ export const onWebsocketMsg = (msg) => {
     if (callback) {
         if (json.Code == 0) {
             callback.resolve(json.Content);
-        } else if (json.Code == 255) {
+        } else if (json.Code == 1) {
+            console.error(json.Content);
+        }
+        else if (json.Code == 255) {
             callback.reject(json.Content);
             if (!callback.errHandle) {
                 ElMessage.error(`${callback.path}:${json.Content}`);

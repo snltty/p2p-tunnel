@@ -144,14 +144,14 @@ namespace client.service.ui.api.service.clientServer
         public async Task<ClientServiceResponseInfo> OnMessage(ClientServiceRequestInfo model)
         {
             model.Path = model.Path.ToLower();
-            if (!plugins.ContainsKey(model.Path))
+            if (plugins.ContainsKey(model.Path) == false)
             {
                 return new ClientServiceResponseInfo
                 {
                     Content = "not exists this path",
                     RequestId = model.RequestId,
                     Path = model.Path,
-                    Code = ClientServiceResponseCodes.Error
+                    Code = ClientServiceResponseCodes.NotFound
                 };
             }
 

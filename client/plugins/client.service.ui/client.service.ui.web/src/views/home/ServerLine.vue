@@ -31,7 +31,7 @@ export default {
 
         const shareData = injectShareData();
         const state = reactive({
-            item: { Img: 'zg', Name: '未知' },
+            item: { Img: 'zg', Name: '未知', Ip: '127.0.0.1' },
             pings: [-1]
         });
 

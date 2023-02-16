@@ -38,7 +38,6 @@ namespace common.server
                 return new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT };
             }
 
-
             await msg.Connection.WaitOne();
             if (msg.RequestId == 0)
             {

@@ -473,7 +473,7 @@ namespace common.server
                     {
                         if (index >= 10000 / 30)
                         {
-                            Console.WriteLine($"等待超时：{index}");
+                            return false;
                         }
                         NetPeer.Update();
                         await Task.Delay(30);

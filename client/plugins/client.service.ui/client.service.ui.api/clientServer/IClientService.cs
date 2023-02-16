@@ -101,9 +101,14 @@ namespace client.service.ui.api.clientServer
         /// </summary>
         Success = 0,
         /// <summary>
+        /// 没找到
+        /// </summary>
+        NotFound = 1,
+        /// <summary>
         /// 失败
         /// </summary>
         Error = 0xff,
+
     }
 
     /// <summary>

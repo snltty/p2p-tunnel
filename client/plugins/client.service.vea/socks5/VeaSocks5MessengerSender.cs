@@ -48,16 +48,17 @@ namespace client.service.vea.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <param name="connection"></param>
-        public async Task Response(Socks5Info data)
+        public async Task<bool> Response(Socks5Info data)
         {
             byte[] bytes = data.ToBytes(out int length);
-            await messengerSender.SendOnly(new MessageRequestWrap
+            bool res = await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)VeaSocks5MessengerIds.Response,
                 Connection = (data.Tag as IConnection).FromConnection,
                 Payload = bytes.AsMemory(0, length)
             });
             data.Return(bytes);
+            return res;
         }
         /// <summary>
         /// 
