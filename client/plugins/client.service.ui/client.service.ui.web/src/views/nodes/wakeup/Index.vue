@@ -36,6 +36,7 @@ import { get, getList, wakeup, update } from '../../../apis/wakeup'
 import { ElMessage } from 'element-plus'
 
 export default {
+    service: 'WakeUpClientService',
     components: {},
     setup() {
 

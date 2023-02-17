@@ -52,12 +52,12 @@ const routes = [
                 component: () => import('../views/nodes/vea/Index.vue'),
                 meta: { name: '虚拟网卡组网', service: 'VeaClientService' }
             },
-            {
-                path: '/nodes/wakeup.html',
-                name: 'NodesWakeUp',
-                component: () => import('../views/nodes/wakeup/Index.vue'),
-                meta: { name: '远程唤醒', service: 'WakeUpClientService' }
-            },
+            // {
+            //     path: '/nodes/wakeup.html',
+            //     name: 'NodesWakeUp',
+            //     component: () => import('../views/nodes/wakeup/Index.vue'),
+            //     meta: { name: '远程唤醒', service: 'WakeUpClientService' }
+            // },
             {
                 path: '/nodes/logger.html',
                 name: 'NodesLogger',

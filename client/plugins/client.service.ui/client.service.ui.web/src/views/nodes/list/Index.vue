@@ -7,13 +7,20 @@
                         <div class="item">
                             <dl v-loading="item.Connecting">
                                 <dt>{{item.Name}}</dt>
-                                <dd :style="item.connectTypeStyle" :title="item.IPAddress" class="flex" @click="handleShowDelay(item)">
+                                <dd :style="item.connectTypeStyle" :title="item.IPAddress" class="flex line" @click="handleShowDelay(item)">
                                     <span class="label">{{item.serverType}}</span>
                                     <span>{{item.connectTypeStr}}</span>
                                     <span class="flex-1"></span>
                                     <Signal :value="item.Ping"></Signal>
                                 </dd>
-                                <dd class="t-r">
+                                <dd class="t-c plugins flex">
+                                    <template v-for="(item1,index) in components" :key="index">
+                                        <div class="item">
+                                            <component :is="item1" :params="item"></component>
+                                        </div>
+                                    </template>
+                                </dd>
+                                <dd class="t-r btns">
                                     <el-button plain text bg size="small" @click="handleConnect(item)">连它</el-button>
                                     <el-button plain text bg size="small" @click="handleConnectReverse(item)">连我</el-button>
                                     <el-button plain text bg size="small" @click="handleConnectReset(item)">重启</el-button>
@@ -39,10 +46,17 @@ import Signal from '../../../components/Signal.vue'
 import RelayView from './RelayView.vue'
 import { onMounted, onUnmounted, provide } from '@vue/runtime-core';
 import { ElMessageBox } from 'element-plus'
+import { injectServices, accessService } from '../../../states/services';
 export default {
+    service: 'ClientsClientService',
     name: 'NodesList',
     components: { Signal, RelayView },
     setup() {
+
+        const servicesState = injectServices();
+        const files = require.context('../../../views/', true, /Badge\.vue/);
+        const components = files.keys().map(c => files(c).default).filter(c => accessService(c.service, servicesState));
+
         const clientsState = injectClients();
         const registerState = injectRegister();
         const shareDataState = injectShareData();
@@ -144,7 +158,7 @@ export default {
 
 
         return {
-            registerState, clients, handleConnect, handleConnectReverse, handleConnectReset, handleConnectOffline,
+            components, registerState, clients, handleConnect, handleConnectReverse, handleConnectReset, handleConnectOffline,
             state, handleShowDelay, handleOnRelay
         }
 
@@ -179,20 +193,34 @@ export default {
                 text-decoration: underline;
             }
 
-            &:nth-child(2) {
+            &.plugins {
+                .item {
+                    padding: 0.6rem;
+                }
+
+                &:hover {
+                    text-decoration: none;
+                }
+
+                a {
+                    color: #666;
+                }
+
+                a:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            &.line {
                 padding-top: 1rem;
             }
 
-            &:last-child {
+            &.btns {
                 padding-bottom: 1rem;
             }
 
             .label {
                 width: 4rem;
-            }
-
-            .el-dropdown {
-                margin-left: 1.2rem;
             }
         }
     }

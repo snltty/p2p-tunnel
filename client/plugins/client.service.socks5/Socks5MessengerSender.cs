@@ -47,6 +47,8 @@ namespace client.service.socks5
         public async Task<bool> Request(Socks5Info data)
         {
             GetConnection();
+            if (connection == null || connection.Connected == false) return false;
+
             byte[] bytes = data.ToBytes(out int length);
             bool res = await messengerSender.SendOnly(new MessageRequestWrap
             {
@@ -101,7 +103,7 @@ namespace client.service.socks5
             if (connection == null || connection.Connected == false || config.TargetName != targetName)
             {
                 targetName = config.TargetName;
-                if (string.IsNullOrWhiteSpace(config.TargetName))
+                if (config.TargetName == "/")
                 {
                     connection = registerStateInfo.OnlineConnection;
                 }

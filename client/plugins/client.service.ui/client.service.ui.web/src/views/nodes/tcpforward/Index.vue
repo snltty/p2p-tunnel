@@ -69,6 +69,7 @@ import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../states/shareData'
 export default {
+    service: 'TcpForwardClientService',
     components: { AddListen, AddForward },
     setup() {
 

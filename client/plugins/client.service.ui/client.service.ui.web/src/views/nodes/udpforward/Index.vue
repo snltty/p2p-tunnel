@@ -47,6 +47,7 @@ import { onMounted, provide } from '@vue/runtime-core'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../states/shareData'
 export default {
+    service: 'UdpForwardClientService',
     components: { AddListen },
     setup() {
 

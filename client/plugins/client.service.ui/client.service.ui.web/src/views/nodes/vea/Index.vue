@@ -17,48 +17,17 @@
                 </el-form-item>
             </el-form>
         </div>
-        <div class="inner">
-            <h3 class="title t-c">
-                <span>组网列表</span>
-                <el-button type="primary" size="small" :loading="state.loading" @click="handleUpdate">刷新列表</el-button>
-            </h3>
-            <div>
-                <el-table size="small" border :data="showClients" style="width: 100%">
-                    <el-table-column prop="Name" label="客户端">
-                        <template #default="scope">
-                            <strong v-if="scope.row.Connected" style="color:green">{{scope.row.Name}}</strong>
-                            <span v-else>{{scope.row.Name}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="veaIp" label="虚拟ip">
-                        <template #default="scope">
-                            <p><strong>{{scope.row.veaIp.IP}}</strong></p>
-                            <template v-for="(item) in scope.row.veaIp.LanIPs" :key="item">
-                                <p style="color:#999">{{item}}</p>
-                            </template>
-
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="todo" label="操作">
-                        <template #default="scope">
-                            <el-button size="small" :loading="state.loading" @click="handleResetVea(scope.row)" class="m-r-1">重装其网卡</el-button>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </div>
-        </div>
     </div>
 </template>
 
 <script>
 import { computed, reactive } from '@vue/reactivity'
-import { getConfig, setConfig, getList, reset, update } from '../../../apis/vea'
-import { onMounted, onUnmounted } from '@vue/runtime-core'
-import { ElMessage } from 'element-plus'
+import { getConfig, setConfig } from '../../../apis/vea'
+import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
-import { websocketState } from '../../../apis/request'
 import ConnectButton from '../../../components/ConnectButton.vue'
 export default {
+    service: 'VeaClientService',
     components: { ConnectButton },
     setup() {
 
@@ -71,15 +40,7 @@ export default {
         const state = reactive({
             loading: false,
             enable: false,
-            targetName: '',
-            veaClients: {}
-        });
-        const showClients = computed(() => {
-            clientsState.clients.forEach(c => {
-                c.veaIp = JSON.parse(JSON.stringify(state.veaClients[c.Id] || { IP: '', LanIPs: [] }));
-                c.veaIp.LanIPs = c.veaIp.LanIPs.filter(c => c.length > 0);
-            });
-            return clientsState.clients;
+            targetName: ''
         });
 
         const loadConfig = () => {
@@ -89,15 +50,8 @@ export default {
             });
         }
 
-
-
         onMounted(() => {
-            handleUpdate();
             loadConfig();
-            loadVeaClients();
-        });
-        onUnmounted(() => {
-            clearTimeout(timer);
         });
 
         const submit = () => {
@@ -122,44 +76,12 @@ export default {
         };
         const handleChange = (name) => {
             if (state.loading) return;
-            state.TargetName = TargetName;
+            state.targetName = name;
             submit();
         }
 
-        const handleResetVea = (row) => {
-            state.loading = true;
-            reset(row.Id).then((res) => {
-                state.loading = false;
-                if (res) {
-                    ElMessage.success('成功');
-                } else {
-                    ElMessage.error('失败');
-                }
-            }).catch(() => {
-                state.loading = false;
-                ElMessage.error('失败');
-            });
-        }
-        const handleUpdate = () => {
-            update().then(() => {
-                ElMessage.success('已更新');
-            })
-        }
-        let timer = 0;
-        const loadVeaClients = () => {
-            if (websocketState.connected) {
-                getList().then((res) => {
-                    state.veaClients = res;
-                    timer = setTimeout(loadVeaClients, 1000);
-                });
-            } else {
-                state.veaClients = {};
-                timer = setTimeout(loadVeaClients, 1000);
-            }
-        }
-
         return {
-            targets, state, showClients, handleResetVea, handleUpdate, handle, handleChange
+            targets, state, handle, handleChange
         }
     }
 }

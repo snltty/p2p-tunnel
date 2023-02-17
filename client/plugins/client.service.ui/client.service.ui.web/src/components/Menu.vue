@@ -72,7 +72,7 @@ export default {
     a {
         display: inline-block;
         margin-left: 0.8rem;
-        padding: 0.2rem 1rem 0.6rem 1rem;
+        padding: 0.3rem 1rem 0.6rem 1rem;
         border-radius: 1rem;
         transition: 0.3s;
         color: #fff;
@@ -88,7 +88,7 @@ export default {
         }
 
         .el-icon {
-            padding-top: 3px;
+            // padding-top: 3px;
         }
 
         span {

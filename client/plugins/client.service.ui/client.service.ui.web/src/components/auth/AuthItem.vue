@@ -1,17 +1,17 @@
 <template>
-    <template v-if="servicesState.services.indexOf(name) >= 0">
+    <template v-if="accessService(name,servicesState)">
         <slot></slot>
     </template>
 </template>
 
 <script>
-import { injectServices } from '../../states/services'
+import { injectServices, accessService } from '../../states/services'
 export default {
     props: ['name'],
     setup() {
         const servicesState = injectServices();
         return {
-            servicesState
+            servicesState, accessService
         }
     }
 }

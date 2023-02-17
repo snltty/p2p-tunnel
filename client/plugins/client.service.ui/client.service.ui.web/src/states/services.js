@@ -26,3 +26,10 @@ export const provideServices = () => {
 export const injectServices = () => {
     return inject(provideServicesKey);
 }
+
+export const accessService = (name, state = null) => {
+    if (!state) {
+        state = inject(provideServicesKey);
+    }
+    return state.services.indexOf(name) >= 0 || !name;
+}

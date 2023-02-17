@@ -23,6 +23,7 @@ import { ref, toRefs, reactive } from "@vue/reactivity";
 import { getConfig, updateConfig } from "../../../apis/wakeup";
 import { onMounted } from "@vue/runtime-core";
 export default {
+    service: 'WakeUpClientService',
     setup() {
         const formDom = ref(null);
         const state = reactive({

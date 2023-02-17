@@ -50,9 +50,9 @@ namespace common.tcpforward
                             {
                                 await token.TargetSocket.SendAsync(arg.Buffer, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
-                                // Logger.Instance.DebugError(ex);
+                                Logger.Instance.DebugError(ex);
                                 _ = CloseClientSocket(token);
                             }
                             return;
@@ -97,8 +97,8 @@ namespace common.tcpforward
             // maxNumberAcceptedClients.WaitOne();
             Socket socket = new(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-            // socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
-            //socket.SendTimeout = 5000;
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
+            socket.SendTimeout = 5000;
 
             SocketAsyncEventArgs saea = new SocketAsyncEventArgs();
             saea.RemoteEndPoint = endpoint;

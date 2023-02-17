@@ -83,6 +83,7 @@ import { onMounted } from "@vue/runtime-core";
 import { injectClients } from "../../../states/clients";
 import { injectShareData } from "../../../states/shareData";
 export default {
+    service: 'Socks5ClientService',
     components: {},
     setup() {
         const clientsState = injectClients();

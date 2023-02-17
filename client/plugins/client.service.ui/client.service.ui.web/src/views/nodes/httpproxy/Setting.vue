@@ -65,6 +65,7 @@ import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 import { injectShareData } from '../../../states/shareData'
 export default {
+    service: 'HttpProxyClientService',
     components: {},
     setup() {
 
@@ -76,7 +77,6 @@ export default {
             }));
         })
         const state = reactive({
-            configInfo: {},
             showPac: false,
             pac: '',
             form: {
@@ -100,7 +100,6 @@ export default {
         const loadConfig = () => {
             getListProxy().then((res) => {
                 const json = res;
-                state.configInfo = json;
                 state.form.Port = json.Port;
                 state.form.Name = json.Name;
                 state.form.IsPac = json.IsPac;
@@ -133,12 +132,15 @@ export default {
                         reject();
                         return false;
                     }
-                    state.configInfo.Name = state.form.Name;
-                    state.configInfo.Port = +state.form.Port;
-                    state.configInfo.Pac = state.form.Pac;
-                    state.configInfo.IsPac = state.form.IsPac;
-                    state.configInfo.IsCustomPac = state.form.IsCustomPac;
-                    addListen(state.configInfo).then(resolve).catch(reject);
+                    getListProxy().then((res) => {
+                        res.Name = state.form.Name;
+                        res.Port = +state.form.Port;
+                        res.Pac = state.form.Pac;
+                        res.IsPac = state.form.IsPac;
+                        res.IsCustomPac = state.form.IsCustomPac;
+                        addListen(res).then(resolve).catch(reject);
+                    });
+
                 });
             });
         }

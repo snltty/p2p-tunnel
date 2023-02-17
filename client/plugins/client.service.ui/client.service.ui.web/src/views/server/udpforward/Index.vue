@@ -48,6 +48,7 @@ import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../states/shareData'
 import { injectRegister } from '../../../states/register'
 export default {
+    service: 'ServerUdpForwardClientService',
     components: { AddListen },
     setup() {
 

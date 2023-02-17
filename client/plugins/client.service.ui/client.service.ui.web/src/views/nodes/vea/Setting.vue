@@ -78,6 +78,7 @@ import { getConfig, setConfig } from '../../../apis/vea'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 export default {
+    service: 'VeaClientService',
     components: {},
     setup() {
 

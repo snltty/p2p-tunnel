@@ -40,6 +40,7 @@ import { getLoggers, clearLoggers } from '../../../apis/logger'
 import { onMounted } from '@vue/runtime-core'
 import { ElMessageBox } from 'element-plus/lib/components'
 export default {
+    service: 'LoggerClientService',
     components: {},
     setup() {
 

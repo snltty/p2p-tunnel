@@ -38,16 +38,17 @@ namespace server.service.socks5
         /// 
         /// </summary>
         /// <param name="data"></param>
-        public async Task Response(Socks5Info data)
+        public async Task<bool> Response(Socks5Info data)
         {
             byte[] bytes = data.ToBytes(out int length);
-            await messengerSender.SendOnly(new MessageRequestWrap
+            bool res = await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)Socks5MessengerIds.Response,
                 Connection = (data.Tag as IConnection).FromConnection,
                 Payload = bytes.AsMemory(0, length)
             });
             data.Return(bytes);
+            return res;
         }
         /// <summary>
         /// 

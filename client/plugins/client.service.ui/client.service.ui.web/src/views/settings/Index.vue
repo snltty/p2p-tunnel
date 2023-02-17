@@ -5,10 +5,10 @@
         </div>
         <div class="content h-100 flex-1 flex flex-column">
             <div class="inner flex-1 scrollbar" ref="contentDom">
-                <template v-for="(item,index) in state.menus" :key="index">
+                <template v-for="(item,index) in leftMenus" :key="index">
                     <el-divider content-position="left" border-style="dotted">{{item.text}}</el-divider>
                     <div class="setting-item">
-                        <component :is="item.component" :ref="`setting_item_${item.text}`" />
+                        <component :is="item.component.value" :ref="`setting_item_${item.text}`" />
                     </div>
                 </template>
             </div>
@@ -29,7 +29,9 @@ import Socks5 from '../nodes/socks5/Setting.vue'
 import Vea from '../nodes/vea/Setting.vue'
 import Logger from '../nodes/logger/Setting.vue'
 import WakeUp from '../nodes/wakeup/Setting.vue'
-import { getCurrentInstance, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef } from '@vue/runtime-core'
+import { getCurrentInstance, nextTick, onBeforeUnmount, computed, watch, onMounted, reactive, ref, shallowRef } from '@vue/runtime-core'
+import { useRouter } from 'vue-router'
+import { injectServices, accessService } from '../../states/services'
 import { ElMessage } from 'element-plus/lib/components'
 import LeftMenu from '../../components/LeftMenu.vue'
 export default {
@@ -38,7 +40,7 @@ export default {
 
         const instance = getCurrentInstance();
 
-        const menus = [
+        const _menus = [
             { text: '节点配置', component: shallowRef(Client) },
             { text: '通信加密', component: shallowRef(Encode) },
             { text: 'tcp转发', component: shallowRef(TcpForward) },
@@ -49,16 +51,33 @@ export default {
             { text: '远程唤醒', component: shallowRef(WakeUp) },
             { text: '日志信息', component: shallowRef(Logger) }
         ];
-        const leftMenus = menus.map(c => {
-            return {
-                text: c.text
-            };
+        const router = useRouter();
+        const servicesState = injectServices();
+        const getMenuIndex = (menus) => {
+            for (let i = 0; i < menus.length; i++) {
+                if (menus[i].url == router.currentRoute.value.name) {
+                    state.currentMenu = i;
+                    return;
+                }
+            }
+        }
+        const leftMenus = computed(() => {
+            let menus = _menus.filter(c => accessService(c.component.value.service, servicesState)).map(c => {
+                return {
+                    text: c.text, component: c.component
+                }
+            });
+            getMenuIndex(menus);
+            return menus;
         });
+        watch(() => router.currentRoute.value.name, (name) => {
+            getMenuIndex(leftMenus.value);
+        }, { immediate: true });
+
+
         const state = reactive({
             loading: false,
-            currentMenu: 0,
-            dom: null,
-            menus: menus
+            currentMenu: 0
         });
 
         const contentDom = ref(null);

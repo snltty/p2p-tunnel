@@ -38,7 +38,11 @@ export default {
 
         const loadConfig = () => {
             getConfigure(state.name).then((res) => {
-                state.content = res;
+                if (res.indexOf('//') >= 0) {
+                    state.content = res;
+                } else {
+                    state.content = JSON.stringify(JSON.parse(res), null, 4)
+                }
             });
         }
         const handleChange = (name) => {

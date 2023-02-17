@@ -69,6 +69,7 @@ import { injectRegister } from '../../../states/register'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
 export default {
+    service: 'ServerTcpForwardClientService',
     components: { AddForward, AddListen },
     setup() {
 

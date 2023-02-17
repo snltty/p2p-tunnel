@@ -63,7 +63,7 @@ namespace client.service.tcpforward
 
         private IConnection SelectConnection(TcpForwardTargetCacheInfo cacheInfo)
         {
-            if (string.IsNullOrWhiteSpace(cacheInfo.Name))
+            if (cacheInfo.Name == "/")
             {
                 return registerStateInfo.OnlineConnection;
             }

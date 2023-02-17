@@ -35,12 +35,13 @@ import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 import ConnectButton from '../../../components/ConnectButton.vue'
 export default {
+    service: 'HttpProxyClientService',
     components: { ConnectButton },
     setup() {
 
         const clientsState = injectClients();
         const targets = computed(() => {
-            return [{ Name: '', label: '服务器' }].concat(clientsState.clients.map(c => {
+            return [{ Name: '/', label: '服务器' }].concat(clientsState.clients.map(c => {
                 return { Name: c.Name, label: c.Name }
             }));
         });

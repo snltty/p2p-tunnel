@@ -30,6 +30,7 @@ import { ref, toRefs, reactive } from "@vue/reactivity";
 import { getConfig, updateConfig } from "../../../apis/logger";
 import { onMounted } from "@vue/runtime-core";
 export default {
+    service: 'LoggerClientService',
     setup() {
         const formDom = ref(null);
         const state = reactive({
