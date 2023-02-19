@@ -163,6 +163,7 @@ export default {
 .setting-item {
     margin: 0 2rem 0rem 2rem;
     border: 1px solid #ececec;
+    background-color: #fff;
     padding: 2rem;
     border-radius: 4px;
 }

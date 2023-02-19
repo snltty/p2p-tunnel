@@ -27,6 +27,6 @@ export default {
     padding: 0 0.6rem;
     height: 3rem;
     line-height: 3rem;
-    background-color: #fafafa;
+    background-color: #fff;
 }
 </style>

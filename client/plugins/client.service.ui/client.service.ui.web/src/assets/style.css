@@ -269,6 +269,10 @@ span.split-pad10 {
 }
 
 
+.el-divider__text {
+    background-color: transparent !important;
+}
+
 /* .el-input__inner:read-only {
     background-color: #fafafa;
 } */

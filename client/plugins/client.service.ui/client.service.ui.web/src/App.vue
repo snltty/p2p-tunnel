@@ -52,7 +52,7 @@ export default {
     height: 60rem;
     max-width: 80rem;
     max-height: 100%;
-    background-color: #fff;
+    background-color: #f6f8fa;
     left: 50%;
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
