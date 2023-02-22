@@ -33,3 +33,16 @@ export const accessService = (name, state = null) => {
     }
     return state.services.indexOf(name) >= 0 || !name;
 }
+export const accessServiceOr = (names, state = null) => {
+    if (!state) {
+        state = inject(provideServicesKey);
+    }
+    if (!names || names.length == 0) return true;
+
+    for (let i = 0; i < names.length; i++) {
+        if (state.services.indexOf(names[i]) >= 0) {
+            return true;
+        }
+    }
+    return false;
+}

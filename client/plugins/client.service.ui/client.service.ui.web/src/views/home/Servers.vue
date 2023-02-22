@@ -2,20 +2,31 @@
     <div class="servers-mark absolute" :class="{show:state.animation}" @click="handleClose" ref="rootDom">
         <div class="servers-wrap absolute scrollbar" @click.stop>
             <ul>
+                <li>
+                    <el-button size="small" @click="state.showAdd = true;">添加服务器节点</el-button>
+                </li>
                 <template v-for="(item,index) in state.servers" :key="index">
                     <li class="flex" @click="handleSelect(item)">
                         <div class="country-img">
-                            <img :src="shareData.serverImgs[item.Img]">
+                            <img :src="shareData.serverImgs[item.Img].img">
                         </div>
-                        <div class="country-name">{{item.Name}}</div>
+                        <div class="country-name">{{shareData.serverImgs[item.Img].name}}<span v-if="item.Name">-{{item.Name}}</span></div>
                         <div class="flex-1"></div>
                         <div class="country-time">
-                            <Signal :value="state.pings[index] || -1"></Signal>
+                            <Signal :value="state.pings[index]"></Signal>
+                        </div>
+                        <div class="oper">
+                            <el-popconfirm title="删除不可逆，是否确认?" @confirm="handleDelete(index)">
+                                <template #reference>
+                                    <el-button type="danger" icon="Delete" size="small" circle @click.stop />
+                                </template>
+                            </el-popconfirm>
                         </div>
                     </li>
                 </template>
             </ul>
         </div>
+        <AddServer v-if="state.showAdd" v-model="state.showAdd" @success="loadData" @click.stop></AddServer>
     </div>
 </template>  
    
@@ -26,14 +37,16 @@ import { getRegisterInfo, sendPing, updateConfig } from '../../apis/register'
 import { ElLoading } from 'element-plus'
 import { ElMessage } from 'element-plus/lib/components'
 import { injectShareData } from '../../states/shareData'
+import AddServer from './AddServer.vue'
 export default {
-    components: { Signal },
+    components: { Signal, AddServer },
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],
     setup(props, { emit }) {
 
         const shareData = injectShareData();
         const state = reactive({
+            showAdd: false,
             servers: [],
             pings: [],
             animation: false
@@ -47,6 +60,9 @@ export default {
         });
 
         const loadData = () => {
+            clearTimeout(timer);
+            state.servers = [];
+            state.pings = [];
             getRegisterInfo().then((info) => {
                 state.servers = JSON.parse(JSON.stringify(info.ServerConfig.Items));
                 loadPingData(state.servers.map(c => c.Ip));
@@ -77,6 +93,25 @@ export default {
             state.animation = false;
             emit('success');
         }
+        const handleDelete = (index) => {
+            state.servers.splice(index, 1);
+            state.pings.splice(index, 1);
+            loadingInstance = ElLoading.service({ target: rootDom.value });
+            getRegisterInfo().then((json) => {
+                json.ServerConfig.Items = JSON.parse(JSON.stringify(state.servers));
+                updateConfig(json).then(() => {
+                    loadingInstance.close();
+                    loadingInstance = null;
+                    loadData();
+                }).catch(() => {
+                    loadingInstance.close();
+                    loadingInstance = null;
+                    ElMessage.error('更新失败');
+                });
+            }).catch(() => {
+                loadingInstance.close();
+            });
+        }
 
         const rootDom = ref(null);
         let loadingInstance = null;
@@ -100,7 +135,7 @@ export default {
             });
         }
 
-        return { shareData, state, handleClose, handleSelect, rootDom }
+        return { shareData, state, loadData, handleClose, handleSelect, rootDom, handleDelete }
     }
 }
 </script>
@@ -143,6 +178,16 @@ li {
     transition: 0.3s;
     box-sizing: border-box;
     margin-bottom: 1rem;
+    position: relative;
+
+    &:first-child {
+        border: 0;
+        text-align: center;
+    }
+
+    &:first-child:hover {
+        box-shadow: none;
+    }
 
     &:hover {
         box-shadow: 0 0 0 0.4rem #d1d8e261;
@@ -164,6 +209,17 @@ li {
 
     .country-time {
         padding-top: 0.2rem;
+    }
+
+    .oper {
+        position: absolute;
+        right: 0.6rem;
+        top: 0.4rem;
+        display: none;
+    }
+
+    &:hover .oper {
+        display: block;
     }
 }
 </style>

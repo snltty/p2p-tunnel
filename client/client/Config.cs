@@ -136,6 +136,8 @@ namespace client
         /// </summary>
         public int UdpUploadSpeedLimit { get; set; } = 0;
 
+        public string[] Services { get; set; } = Array.Empty<string>();
+
         /// <summary>
         /// 绑定ip
         /// </summary>

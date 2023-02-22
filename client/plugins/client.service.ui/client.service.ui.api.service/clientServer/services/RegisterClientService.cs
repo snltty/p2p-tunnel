@@ -1,6 +1,10 @@
 ﻿using client.messengers.register;
 using client.service.ui.api.clientServer;
 using common.libs.extends;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
@@ -89,22 +93,26 @@ namespace client.service.ui.api.service.clientServer.services
         public async Task<long[]> Ping(ClientServiceParamsInfo arg)
         {
             string[] ips = arg.Content.DeJson<string[]>();
-            long[] result = new long[ips.Length];
 
-            using Ping ping = new Ping();
-            for (int i = 0; i < ips.Length; i++)
+            PingModel[] result = ips.Select(c =>
             {
-                var reply = await ping.SendPingAsync(ips[i], 1000);
-                if (reply.Status == IPStatus.Success)
+                Ping ping = new Ping();
+                return new PingModel
                 {
-                    result[i] = reply.RoundtripTime;
-                }
-                else
-                {
-                    result[i] = -1;
-                }
+                    Ping = ping,
+                    Task = ping.SendPingAsync(c, 1000)
+                };
+            }).ToArray();
+            await Task.WhenAll(result.Select(c => c.Task));
+            foreach (var item in result)
+            {
+                item.Ping.Dispose();
             }
-            return result;
+
+            return result.Select(c =>
+            {
+                return c.Task.Result.Status == IPStatus.Success ? c.Task.Result.RoundtripTime : -1;
+            }).ToArray();
         }
 
     }
@@ -144,5 +152,13 @@ namespace client.service.ui.api.service.clientServer.services
         /// 远程数据
         /// </summary>
         public RemoteInfo RemoteInfo { get; set; } = new RemoteInfo();
+    }
+
+
+    class PingModel
+    {
+        public Ping Ping { get; set; }
+        public Task<PingReply> Task { get; set; }
+
     }
 }

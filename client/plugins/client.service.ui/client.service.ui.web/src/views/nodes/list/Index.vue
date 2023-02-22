@@ -54,7 +54,7 @@ export default {
     setup() {
 
         const servicesState = injectServices();
-        const files = require.context('../../../views/', true, /Badge\.vue/);
+        const files = require.context('../../', true, /Badge\.vue/);
         const components = files.keys().map(c => files(c).default).filter(c => accessService(c.service, servicesState));
 
         const clientsState = injectClients();

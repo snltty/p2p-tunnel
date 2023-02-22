@@ -129,6 +129,7 @@ import { ref, toRefs, reactive } from '@vue/reactivity';
 import { getRegisterInfo, updateConfig } from '../../../apis/register'
 import { onMounted } from '@vue/runtime-core';
 export default {
+    service: 'RegisterClientService',
     components: {},
     setup() {
         const formDom = ref(null);

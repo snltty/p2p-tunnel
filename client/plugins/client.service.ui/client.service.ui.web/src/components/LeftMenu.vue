@@ -1,5 +1,13 @@
 <template>
-    <div class="menu h-100">
+    <div class="menu h-100" :class="className">
+        <div class="btn" @click="handleShow">
+            <el-icon v-if="state">
+                <DArrowLeft />
+            </el-icon>
+            <el-icon v-else>
+                <DArrowRight />
+            </el-icon>
+        </div>
         <ul>
             <template v-for="(item,index) in menus" :key="index">
                 <li>
@@ -16,20 +24,30 @@
 </template> 
 
 <script>
-import { computed } from '@vue/reactivity'
+import { computed, ref } from '@vue/reactivity'
 export default {
     props: ['menus', 'modelValue'],
     emits: ['update:modelValue', 'handle'],
     setup(props, { emit }) {
+
+        const state = ref(window.innerWidth > 799);
+        const className = computed(c => state.value.toString());
         const current = computed(() => props.modelValue);
         const menus = computed(() => props.menus);
         const handleJumpScroll = (index) => {
             emit('handle', index);
         }
+        const handleShow = () => {
+            state.value = !state.value;
+        }
+
         return {
+            state,
+            className,
             menus,
             currentMenu: current,
-            handleJumpScroll
+            handleJumpScroll,
+            handleShow
         }
     }
 }
@@ -37,11 +55,44 @@ export default {
 
 <style lang="stylus" scoped>
 .menu {
-    width: 14rem;
     border-right: 1px solid var(--main-border-color);
     box-shadow: 1px 1px 0.6rem 0.1rem rgba(0, 0, 0, 0.05);
     background-color: #fff;
     transition: 0.3s cubic-bezier(0.56, -0.37, 0.78, 1.66);
+    position: relative;
+    z-index: 9;
+
+    &.true {
+        width: 14rem;
+    }
+
+    &.false {
+        width: 0;
+    }
+
+    .btn {
+        position: absolute;
+        right: -2.2rem;
+        top: 40%;
+        width: 2rem;
+        padding: 2rem 0;
+        text-align: center;
+        background-color: #fff;
+        border-width: 1px 1px 1px 0;
+        border-style: solid;
+        border-color: var(--main-border-color);
+        border-radius: 0 4px 4px 0px;
+        cursor: pointer;
+        color: #555;
+
+        &:hover {
+            box-box-shadow: 0 0 4px rgba(0, 0, 0, 1);
+        }
+    }
+
+    &.false ul {
+        display: none;
+    }
 
     ul {
         padding: 1rem 1rem;

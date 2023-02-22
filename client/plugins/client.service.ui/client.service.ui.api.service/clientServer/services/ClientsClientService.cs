@@ -1,12 +1,10 @@
 ﻿using client.messengers.clients;
 using client.messengers.register;
 using client.service.ui.api.clientServer;
-using common.libs;
 using common.libs.extends;
 using common.server;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services

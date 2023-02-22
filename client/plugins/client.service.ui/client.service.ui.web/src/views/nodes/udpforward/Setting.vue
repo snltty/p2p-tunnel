@@ -21,9 +21,12 @@
 <script>
 import { ref, toRefs, reactive } from '@vue/reactivity';
 import { getConfig, updateConfig } from '../../../apis/udp-forward'
+import { accessServiceOr } from "../../../states/services";
 import { onMounted } from '@vue/runtime-core';
 export default {
-    service: 'UdpForwardClientService',
+    serviceCallback: (state) => {
+        return accessServiceOr(['UdpForwardClientService', 'ServerUdpForwardClientService'], state);
+    },
     setup() {
         const formDom = ref(null);
         const state = reactive({

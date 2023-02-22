@@ -122,7 +122,7 @@ namespace client.realize.messengers.register
             {
                 int interval = autoReg ? 5000 : 0;
                 int times = autoReg ? 10000 : 2;
-                for (int i = 0; i < 10000; i++)
+                for (int i = 0; i < times; i++)
                 {
                     bool isex = false;
                     try

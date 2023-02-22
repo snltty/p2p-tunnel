@@ -19,7 +19,7 @@
                 </el-icon>
                 <span>节点</span>
             </router-link>
-            <auth-item-or :names="['ServerTcpForwardClientService','ServerTcpForwardClientService']">
+            <auth-item-or :names="['ServerTcpForwardClientService','ServerUdpForwardClientService']">
                 <router-link :to="{name:'Servers'}">
                     <el-icon>
                         <Position />

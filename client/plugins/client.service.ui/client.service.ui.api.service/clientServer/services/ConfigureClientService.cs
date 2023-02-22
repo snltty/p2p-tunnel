@@ -1,6 +1,7 @@
 ﻿using client.service.ui.api.clientServer;
 using common.libs.extends;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.clientServer.services
@@ -11,13 +12,15 @@ namespace client.service.ui.api.service.clientServer.services
     public sealed class ConfigureClientService : IClientService
     {
         private readonly IClientServer clientServer;
+        private readonly client.Config clientConfig;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="clientServer"></param>
-        public ConfigureClientService(IClientServer clientServer)
+        public ConfigureClientService(IClientServer clientServer, client.Config clientConfig)
         {
             this.clientServer = clientServer;
+            this.clientConfig = clientConfig;
         }
 
         /// <summary>
@@ -68,6 +71,10 @@ namespace client.service.ui.api.service.clientServer.services
         /// <returns></returns>
         public IEnumerable<string> Services(ClientServiceParamsInfo arg)
         {
+            if (clientConfig.Client.Services.Length > 0)
+            {
+                return clientServer.GetServices().Where(c => clientConfig.Client.Services.Contains(c));
+            }
             return clientServer.GetServices();
         }
     }

@@ -89,7 +89,7 @@ export default {
         const clientsState = injectClients();
         const shareData = injectShareData();
         const targets = computed(() => {
-            return [{ Name: "", label: "服务器" }].concat(
+            return [{ Name: "/", label: "服务器" }].concat(
                 clientsState.clients.map((c) => {
                     return { Name: c.Name, label: c.Name };
                 })

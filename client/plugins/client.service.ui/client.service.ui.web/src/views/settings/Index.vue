@@ -12,7 +12,7 @@
                     </div>
                 </template>
             </div>
-            <div class="btn">
+            <div class="btn" v-if="leftMenus.length > 0">
                 <el-button type="primary" size="default" @click="handleSave" :loading="state.loading">应用更改</el-button>
             </div>
         </div>
@@ -48,7 +48,7 @@ export default {
             { text: 'http代理', component: shallowRef(HttpProxy) },
             { text: 'socks5代理', component: shallowRef(Socks5) },
             { text: '虚拟网卡组网', component: shallowRef(Vea) },
-            { text: '远程唤醒', component: shallowRef(WakeUp) },
+            // { text: '远程唤醒', component: shallowRef(WakeUp) },
             { text: '日志信息', component: shallowRef(Logger) }
         ];
         const router = useRouter();
@@ -62,7 +62,12 @@ export default {
             }
         }
         const leftMenus = computed(() => {
-            let menus = _menus.filter(c => accessService(c.component.value.service, servicesState)).map(c => {
+            let menus = _menus.filter(c => {
+                if (c.component.value.serviceCallback) {
+                    return c.component.value.serviceCallback(servicesState);
+                }
+                return accessService(c.component.value.service, servicesState);
+            }).map(c => {
                 return {
                     text: c.text, component: c.component
                 }

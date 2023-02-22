@@ -9,12 +9,12 @@ export const provideShareData = () => {
         clientConnectTypes: { 0: '未连接', 1: '打洞', 2: '节点中继', 4: '服务器中继' },
         serverTypes: { 1: 'TCP', 2: 'UDP', 3: '/' },
         serverImgs: {
-            'zg': require('../assets/zg.png'),
-            'zgxg': require('../assets/zgxg.png'),
-            'xjp': require('../assets/xjp.png'),
-            'hg': require('../assets/hg.png'),
-            'rb': require('../assets/rb.png'),
-            'mg': require('../assets/mg.png'),
+            'zg': { img: require('../assets/zg.png'), name: '中国' },
+            'zgxg': { img: require('../assets/zgxg.png'), name: '中国香港' },
+            'xjp': { img: require('../assets/xjp.png'), name: '新加坡' },
+            'hg': { img: require('../assets/hg.png'), name: '韩国' },
+            'rb': { img: require('../assets/rb.png'), name: '日本' },
+            'mg': { img: require('../assets/mg.png'), name: '美国' },
         }
     });
     provide(shareDataKey, state);

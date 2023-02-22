@@ -17,7 +17,7 @@ namespace client.service.tray
             this.Hide();
             InitializeComponent();
             InitialTray();
-            OpenExe();
+            //OpenExe();
         }
 
         private void InitialTray()
@@ -30,7 +30,7 @@ namespace client.service.tray
             notifyIcon.Visible = true;
 
             notifyIcon.ContextMenuStrip = new ContextMenuStrip();
-            notifyIcon.ContextMenuStrip.Items.Add("web管理页面");
+            notifyIcon.ContextMenuStrip.Items.Add("管理页面");
             notifyIcon.ContextMenuStrip.Items.Add("退出");
             notifyIcon.ContextMenuStrip.ItemClicked += ContextMenuStrip_ItemClicked;
             notifyIcon.ContextMenuStrip.MouseDoubleClick += ContextMenuStrip_MouseDoubleClick;
@@ -47,7 +47,7 @@ namespace client.service.tray
                 case "退出":
                     this.Close();
                     break;
-                case "web管理页面":
+                case "管理页面":
                     OpenWeb();
                     break;
                 default:
@@ -87,19 +87,15 @@ namespace client.service.tray
 
         private void OpenWeb()
         {
-            string jsonstr = File.ReadAllText("./ui-appsettings.json").ToLower();
-            System.Text.Json.JsonDocument jd = System.Text.Json.JsonDocument.Parse(jsonstr,new System.Text.Json.JsonDocumentOptions { 
-                  CommentHandling =  System.Text.Json.JsonCommentHandling.Skip,
-            });
-            string ip = jd.RootElement.GetProperty("web").GetProperty("bindIp").ToString();
-            string port = jd.RootElement.GetProperty("web").GetProperty("port").ToString();
-            Process.Start("explorer.exe", $"http://{(ip == "+"?"127.0.0.1": ip)}:{port}");
+
+            Web web = new Web("http://127.0.0.1:8080");
+            web.Show();
         }
 
         private new void Closing(object sender, FormClosingEventArgs e)
         {
-            proc.Close();
-            proc.Dispose();
+            proc?.Close();
+            proc?.Dispose();
         }
     }
 }

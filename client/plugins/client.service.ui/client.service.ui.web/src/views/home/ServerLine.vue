@@ -2,9 +2,9 @@
     <div>
         <div class="line flex" title="选择服务器线路" @click="handleClick">
             <div class="country-img">
-                <img :src="shareData.serverImgs[state.item.Img]">
+                <img :src="shareData.serverImgs[state.item.Img].img">
             </div>
-            <div class="country-name">{{state.item.Name}}</div>
+            <div class="country-name">{{shareData.serverImgs[state.item.Img].name}}<span v-if="state.item.Name">-{{state.item.Name}}</span></div>
             <div class="flex-1"></div>
             <div class="country-time">
                 <Signal :value="state.pings[0]"></Signal>

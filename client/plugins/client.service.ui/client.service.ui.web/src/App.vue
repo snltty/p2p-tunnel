@@ -52,7 +52,7 @@ export default {
     height: 60rem;
     max-width: 80rem;
     max-height: 100%;
-    background-color: #f6f8fa;
+    background-color: #fff;
     left: 50%;
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
@@ -60,11 +60,14 @@ export default {
     border-radius: 4px;
     border: 1px solid #297c5c;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 @media screen and (max-width: 800px) {
     .wrap {
         height: 100%;
+        border-radius: 0;
+        border: 0;
     }
 }
 </style>
