@@ -2,7 +2,7 @@
     <div class="modes-wrap">
         <el-dropdown size="small" title="不同的模式，可能会隐藏部分功能，及自动修改部分配置" @command="handleCommand">
             <span class="el-dropdown-link">
-                <span>完全模式</span>
+                <span>{{name}}</span>
                 <el-icon class="el-icon--right">
                     <arrow-down />
                 </el-icon>
@@ -19,10 +19,11 @@
 </template>
 
 <script>
-import { reactive } from '@vue/reactivity'
+import { reactive,computed } from '@vue/reactivity'
 import { getRegisterInfo, updateConfig } from '../../apis/register'
+import {injectServices} from '../../states/services'
 import { ElMessage } from 'element-plus/lib/components';
-import { ElLoading } from 'element-plus';
+import { ElLoading,ElMessageBox } from 'element-plus';
 export default {
     setup() {
 
@@ -35,53 +36,84 @@ export default {
             "WakeUpClientService"];
 
         const files = require.context('../../views/', true, /mode\.js/);
-        const func = files.keys().map(c => files(c).default);
+        const funcs = files.keys().map(c => files(c));
 
+        const servicesState = injectServices();
+        const name = computed(()=>{
+            let name = servicesState.services[0] || 'full';
+            return state.modes.filter(c=>c.name == name)[0].text;
+        });
+        console.log(servicesState);
         const state = reactive({
             modes: [
                 { name: 'full', text: '完全功能', services: [] },
                 {
                     name: 'p2p', text: '仅打洞穿透', services: [
-                        'LoggerClientService', 'ConfigureClientService', 'RegisterClientService', 'ClientsClientService',
+                        'full','LoggerClientService', 'ConfigureClientService', 'RegisterClientService', 'ClientsClientService',
                         'HttpProxyClientService', 'TcpForwardClientService', 'UdpForwardClientService',
                         'Socks5ClientService', 'VeaClientService', 'WakeUpClientService'
                     ]
                 },
                 {
                     name: 'rproxy', text: '仅代理穿透', services: [
-                        'LoggerClientService', 'ConfigureClientService', 'RegisterClientService',
+                        'rproxy','LoggerClientService', 'ConfigureClientService', 'RegisterClientService',
                         'ServerTcpForwardClientService', 'ServerUdpForwardClientService'
                     ]
                 },
                 {
                     name: 'proxy', text: '仅代理翻越', services: [
-                        'LoggerClientService', 'ConfigureClientService', 'RegisterClientService',
+                        'proxy','LoggerClientService', 'ConfigureClientService', 'RegisterClientService',
                         'HttpProxyClientService', 'Socks5ClientService'
                     ]
                 }
             ]
         });
+
         let loadingInstance = null;
+        const _updateConfig = (funcs,command)=>{
+           return new Promise((resolve, reject) => {
+                const fn = (index = 0)=>{
+                    if(index>=funcs.length){
+                        resolve();
+                        return;
+                    }
+                    funcs[index].update(command.services,command.name).then(()=>{
+                        fn(++index);
+                    }).catch(reject);
+                }
+                fn();
+           });
+        }
         const handleCommand = (command) => {
-            loadingInstance = ElLoading.service({ target: '.wrap' });
-            getRegisterInfo().then((json) => {
-                json.ClientConfig.Services = command.services;
-                updateConfig(json).then(() => {
-                    loadingInstance.close()
-                    ElMessage.success('成功，刷新生效');
-                }).catch(() => {
-                    ElMessage.error('失败');
+            let remarks = funcs.reduce((value,item)=>value.concat(item.remarks(command.services,command.name)),[]);
+            ElMessageBox.confirm(remarks.join('</br>'),'提示',{type: 'warning', confirmButtonText: '确定',cancelButtonText: '取消',dangerouslyUseHTMLString:true})
+            .then(() => {
+                loadingInstance = ElLoading.service({ target: '.wrap' });
+                _updateConfig(funcs,command).then(()=>{
+                    getRegisterInfo().then((json) => {
+                        json.ClientConfig.Services = command.services;
+                        updateConfig(json).then(() => {
+                            loadingInstance.close()
+                            ElMessage.success('成功，刷新生效');
+                        }).catch((e) => {
+                            console.log(e);
+                            ElMessage.error('失败'+e);
+                            loadingInstance.close();
+                        });
+                    }).catch((e) => {
+                        ElMessage.error('失败'+e);
+                        loadingInstance.close();
+                    });
+                }).catch((e)=>{
+                    ElMessage.error('失败'+e);
                     loadingInstance.close();
                 });
             }).catch(() => {
-                ElMessage.error('失败');
-                loadingInstance.close();
             });
         }
 
-
         return {
-            state, handleCommand
+            name,  state, handleCommand
         }
     }
 }

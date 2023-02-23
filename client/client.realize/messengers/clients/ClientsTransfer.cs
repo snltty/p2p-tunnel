@@ -358,11 +358,7 @@ namespace client.realize.messengers.clients
 
             client.SetConnecting(true);
 
-            ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.UDP, (ulong)TunnelDefaults.MIN };
-            if (config.Client.UseOriginPort == false || client.UseOriginPort == false)
-            {
-                tunnelNames[0] = (ulong)TunnelDefaults.MIN;
-            }
+            ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.MIN, (ulong)TunnelDefaults.MIN };
 
             for (int i = 0; i < tunnelNames.Length; i++)
             {

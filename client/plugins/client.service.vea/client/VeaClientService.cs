@@ -19,14 +19,6 @@ namespace client.service.vea.client
         private readonly VeaMessengerSender veaMessengerSender;
         private readonly IClientInfoCaching clientInfoCaching;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="VeaTransfer"></param>
-        /// <param name="veaSocks5ServerHandler"></param>
-        /// <param name="veaMessengerSender"></param>
-        /// <param name="clientInfoCaching"></param>
         public VeaClientService(Config config, VeaTransfer VeaTransfer, IVeaSocks5ServerHandler veaSocks5ServerHandler, VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
         {
             this.config = config;

@@ -5,7 +5,6 @@ using Android.OS;
 using Android.Text;
 using Android.Views;
 using AndroidX.Core.App;
-using Android.App.Job;
 
 namespace client.service.app
 {
@@ -19,21 +18,24 @@ namespace client.service.app
             Window.SetStatusBarColor(Android.Graphics.Color.Transparent);
             Window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
 
-            PowerManager pm = (PowerManager)GetSystemService(PowerService);
-            wakelock = pm.NewWakeLock(WakeLockFlags.Partial | WakeLockFlags.OnAfterRelease, "mywakelock");
-            if (wakelock != null)
-            {
-                wakelock.Acquire();
-            }
+            //PowerManager pm = (PowerManager)GetSystemService(PowerService);
+            //wakelock = pm.NewWakeLock(WakeLockFlags.Partial | WakeLockFlags.OnAfterRelease, "mywakelock");
+            //if (wakelock != null)
+            //{
+            //    wakelock.Acquire();
+            //}
 
+            Intent intent = new Intent(this, typeof(MyService));
+            StartService(intent);
             //1像素广播注册
-            KeepManager.GetInstance().RegisterKeep(this);
-            // Intent intent = new Intent(this, typeof(MyService));
-            // StartService(intent);
+            // KeepManager.GetInstance().RegisterKeep(this);
             //前台服务保活
-            StartService(new Intent(this, typeof(ForegroundService)));
+            //  StartService(new Intent(this, typeof(ForegroundService)));
 
             base.OnCreate(savedInstanceState);
+
+            //VpnService service = new VpnService();
+            //_ = new VpnService.Builder(service).SetHttpProxy(ProxyInfo.BuildPacProxy(Android.Net.Uri.Parse("http://127.0.0.1:5411/web/pac.pac"))); 
         }
 
         protected override void OnDestroy()
@@ -68,7 +70,7 @@ namespace client.service.app
 
     }
 
-    
+
     #region service
 
     /// <summary>
@@ -101,7 +103,7 @@ namespace client.service.app
                 //将service设置成前台服务
                 StartForeground(SERVICE_ID, new Notification());
                 //删除通知栏消息
-                StartService(new Intent(this, typeof(InnerService)));
+                //StartService(new Intent(this, typeof(InnerService)));
             }
             else
             {

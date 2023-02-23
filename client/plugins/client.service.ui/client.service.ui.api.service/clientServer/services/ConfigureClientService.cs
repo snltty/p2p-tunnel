@@ -73,7 +73,7 @@ namespace client.service.ui.api.service.clientServer.services
         {
             if (clientConfig.Client.Services.Length > 0)
             {
-                return clientServer.GetServices().Where(c => clientConfig.Client.Services.Contains(c));
+                return clientServer.GetServices().Intersect(clientConfig.Client.Services).Append(clientConfig.Client.Services[0]).Reverse();
             }
             return clientServer.GetServices();
         }
