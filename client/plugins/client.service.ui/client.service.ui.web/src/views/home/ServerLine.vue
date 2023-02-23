@@ -42,8 +42,10 @@ export default {
                 let items = info.ServerConfig.Items.filter(c => c.Ip == ip);
                 if (items.length > 0) {
                     state.item = items[0];
-                    loadPingData([items[0].Ip]);
+                }else{
+                    state.item.Ip = ip;
                 }
+                loadPingData([state.item.Ip]);
             });
         }
         let timer = 0;

@@ -41,9 +41,8 @@ export default {
         const servicesState = injectServices();
         const name = computed(()=>{
             let name = servicesState.services[0] || 'full';
-            return state.modes.filter(c=>c.name == name)[0].text;
+            return state.modes.filter(c=>c.name == name || c.name == 'full')[0].text;
         });
-        console.log(servicesState);
         const state = reactive({
             modes: [
                 { name: 'full', text: '完全功能', services: [] },
