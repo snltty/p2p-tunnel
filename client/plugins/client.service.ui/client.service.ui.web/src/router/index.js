@@ -3,12 +3,14 @@ const routes = [
     {
         path: '/',
         name: 'Home',
-        component: () => import('../views/home/Index.vue')
+        component: () => import('../views/home/Index.vue'),
+        meta: { name: '首页' }
     },
     {
         path: '/settings.html',
         name: 'Settings',
-        component: () => import('../views/settings/Index.vue')
+        component: () => import('../views/settings/Index.vue'),
+        meta: { name: '设置' }
     },
     {
         path: '/nodes.html',

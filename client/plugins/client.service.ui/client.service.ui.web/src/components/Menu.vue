@@ -1,6 +1,6 @@
 <template>
     <div class="menu-wrap flex">
-        <div class="logo">
+        <div class="logo display">
             <router-link :to="{name:'Home'}">
                 <img src="@/assets/logo.svg" alt="p2p-tunnel">
             </router-link>
@@ -35,19 +35,75 @@
             </router-link>
         </div>
         <div class="flex-1"></div>
+
+        <!-- <div>
+            <el-dropdown @command="handleCommand">
+                <span class="el-dropdown-link">
+                    {{$route.meta.name}}
+                    <el-icon class="el-icon--right">
+                        <arrow-down />
+                    </el-icon>
+                </span>
+                <template #dropdown>
+                    <el-dropdown-menu>
+                        <template v-for="(item,index) in state.menus" :key="index">
+                            <el-dropdown-item :command="item">{{item.text}}</el-dropdown-item>
+                        </template>
+                    </el-dropdown-menu>
+                </template>
+            </el-dropdown>
+        </div> -->
         <div class="meta"></div>
     </div>
 </template>
 <script>
+import { reactive } from 'vue';
 import AuthItem from './auth/AuthItem.vue';
+import { useRouter } from 'vue-router'
 export default {
     components: { AuthItem },
     setup() {
-        return {}
+
+        const router = useRouter();
+        const state = reactive({
+            menus: [
+                { text: '首页', page: 'Home' },
+                { text: '节点', page: 'Nodes' },
+                { text: '代理穿透', page: 'Servers' },
+                { text: '设置', page: 'Settings' },
+            ]
+        });
+        const handleCommand = (command) => {
+            router.push({ name: command.page });
+        }
+
+        return { state, handleCommand }
     }
 }
 </script>
 <style lang="stylus" scoped>
+@media screen and (max-width: 400px) {
+    .display {
+        display: none;
+    }
+
+    .meta {
+        width: 1rem !important;
+    }
+}
+
+.el-dropdown {
+    color: #fff;
+
+    .el-dropdown-link {
+        line-height: 5rem;
+
+        .el-icon {
+            vertical-align: middle;
+        }
+    }
+}
+
 .menu-wrap {
     position: relative;
     height: 5rem;
