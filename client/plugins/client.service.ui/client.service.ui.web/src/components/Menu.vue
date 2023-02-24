@@ -35,49 +35,16 @@
             </router-link>
         </div>
         <div class="flex-1"></div>
-
-        <!-- <div>
-            <el-dropdown @command="handleCommand">
-                <span class="el-dropdown-link">
-                    {{$route.meta.name}}
-                    <el-icon class="el-icon--right">
-                        <arrow-down />
-                    </el-icon>
-                </span>
-                <template #dropdown>
-                    <el-dropdown-menu>
-                        <template v-for="(item,index) in state.menus" :key="index">
-                            <el-dropdown-item :command="item">{{item.text}}</el-dropdown-item>
-                        </template>
-                    </el-dropdown-menu>
-                </template>
-            </el-dropdown>
-        </div> -->
         <div class="meta"></div>
     </div>
 </template>
 <script>
-import { reactive } from 'vue';
 import AuthItem from './auth/AuthItem.vue';
-import { useRouter } from 'vue-router'
 export default {
     components: { AuthItem },
     setup() {
 
-        const router = useRouter();
-        const state = reactive({
-            menus: [
-                { text: '首页', page: 'Home' },
-                { text: '节点', page: 'Nodes' },
-                { text: '代理穿透', page: 'Servers' },
-                { text: '设置', page: 'Settings' },
-            ]
-        });
-        const handleCommand = (command) => {
-            router.push({ name: command.page });
-        }
-
-        return { state, handleCommand }
+        return {}
     }
 }
 </script>
