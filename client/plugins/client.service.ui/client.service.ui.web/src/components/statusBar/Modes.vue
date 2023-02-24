@@ -41,7 +41,11 @@ export default {
         const servicesState = injectServices();
         const name = computed(()=>{
             let name = servicesState.services[0] || 'full';
-            return state.modes.filter(c=>c.name == name || c.name == 'full')[0].text;
+            let _modes =  state.modes.filter(c=>c.name == name);
+            if(_modes.length > 0){
+                return _modes[0].text;
+            }
+            return state.modes[0].text;
         });
         const state = reactive({
             modes: [
