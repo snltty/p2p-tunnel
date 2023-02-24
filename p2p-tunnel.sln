@@ -69,6 +69,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "enet-test", "tests\enet\ene
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "client.service.tray", "client\client.service.tray\client.service.tray.csproj", "{B00F422D-028A-4C41-83E3-56083EEE2E18}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lidgren", "tests\lidgren\lidgren.csproj", "{A32F51F4-532F-44D7-A507-44A047112470}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -289,6 +291,14 @@ Global
 		{B00F422D-028A-4C41-83E3-56083EEE2E18}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B00F422D-028A-4C41-83E3-56083EEE2E18}.Release|x64.ActiveCfg = Release|Any CPU
 		{B00F422D-028A-4C41-83E3-56083EEE2E18}.Release|x64.Build.0 = Release|Any CPU
+		{A32F51F4-532F-44D7-A507-44A047112470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A32F51F4-532F-44D7-A507-44A047112470}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A32F51F4-532F-44D7-A507-44A047112470}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A32F51F4-532F-44D7-A507-44A047112470}.Debug|x64.Build.0 = Debug|Any CPU
+		{A32F51F4-532F-44D7-A507-44A047112470}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A32F51F4-532F-44D7-A507-44A047112470}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A32F51F4-532F-44D7-A507-44A047112470}.Release|x64.ActiveCfg = Release|Any CPU
+		{A32F51F4-532F-44D7-A507-44A047112470}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -323,6 +333,7 @@ Global
 		{25ED82D3-9AA3-4F22-8E0B-5AAA04F316C1} = {0732D9F3-310A-44BE-AD37-E2346C5ACEB6}
 		{932FCC8F-1CC8-446B-B39D-8716E04FD62E} = {0732D9F3-310A-44BE-AD37-E2346C5ACEB6}
 		{B00F422D-028A-4C41-83E3-56083EEE2E18} = {ED711009-8175-4193-BFDA-FD88C4B1E4AD}
+		{A32F51F4-532F-44D7-A507-44A047112470} = {0732D9F3-310A-44BE-AD37-E2346C5ACEB6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE8935B2-54F1-4FBD-98BB-8119E42B52A6}

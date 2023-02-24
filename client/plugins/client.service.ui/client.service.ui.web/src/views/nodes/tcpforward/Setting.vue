@@ -32,7 +32,7 @@ import { accessServiceOr } from "../../../states/services";
 import { onMounted } from "@vue/runtime-core";
 export default {
     serviceCallback: (state) => {
-        return accessServiceOr(['HttpProxyClientService', 'TcpForwardClientService', 'ServerTcpForwardClientService'], state);
+        return accessServiceOr(['TcpForwardClientService', 'ServerTcpForwardClientService'], state);
     },
     setup() {
         const formDom = ref(null);
