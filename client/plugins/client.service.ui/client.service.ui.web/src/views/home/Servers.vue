@@ -1,5 +1,5 @@
 <template>
-    <div class="servers-mark absolute" :class="{show:state.animation}" @click="handleClose" ref="rootDom">
+    <div class="servers-mark absolute" :class="{show:state.animation}" @click="handleClose(0)" ref="rootDom">
         <div class="servers-wrap absolute scrollbar" @click.stop>
             <ul>
                 <li>
@@ -88,10 +88,10 @@ export default {
             clearTimeout(timer);
         })
 
-        const handleClose = () => {
+        const handleClose = (_state) => {
             if (loadingInstance != null) return;
             state.animation = false;
-            emit('success');
+            emit('success', _state);
         }
         const handleDelete = (index) => {
             state.servers.splice(index, 1);
@@ -124,7 +124,7 @@ export default {
                 updateConfig(json).then(() => {
                     loadingInstance.close();
                     loadingInstance = null;
-                    handleClose();
+                    handleClose(1);
                 }).catch(() => {
                     loadingInstance.close();
                     loadingInstance = null;

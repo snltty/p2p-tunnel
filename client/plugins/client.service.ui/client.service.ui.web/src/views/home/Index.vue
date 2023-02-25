@@ -59,8 +59,10 @@ export default {
         const handleSelectServer = () => {
             state.showServers = true;
         }
-        const handleSelectServerSuccess = () => {
-            sendExit();
+        const handleSelectServerSuccess = (_state) => {
+            if (_state) {
+                sendExit();
+            }
             serverLineDom.value.update();
         }
 
