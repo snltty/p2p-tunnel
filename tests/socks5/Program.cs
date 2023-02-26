@@ -93,9 +93,10 @@ namespace socks5
             await Server.InputData(data);
         }
         //发给客户端
-        public async Task Response(Socks5Info data)
+        public async Task<bool> Response(Socks5Info data)
         {
             await Client.InputData(data);
+            return true;
         }
         public async Task ResponseClose(Socks5Info data)
         {
