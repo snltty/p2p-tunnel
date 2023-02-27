@@ -212,6 +212,11 @@ namespace client.realize.messengers.clients
             }
         }
 
+
+        public async Task SendOffline(ulong toid)
+        {
+           await punchHoleMessengerSender.SendOffline(toid);
+        }
         /// <summary>
         /// 连它
         /// </summary>

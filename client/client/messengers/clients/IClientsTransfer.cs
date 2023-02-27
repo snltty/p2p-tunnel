@@ -10,6 +10,8 @@ namespace client.messengers.clients
     /// </summary>
     public interface IClientsTransfer
     {
+
+        public Task SendOffline(ulong toid);
         /// <summary>
         /// 连接
         /// </summary>

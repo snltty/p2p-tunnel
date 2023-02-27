@@ -120,7 +120,7 @@ namespace client.realize.messengers.register
 
             return await Task.Run(async () =>
             {
-                int interval = autoReg ? 5000 : 0;
+                double interval = autoReg ? 5000 : 0;
                 int times = autoReg ? 10000 : 2;
                 for (int i = 0; i < times; i++)
                 {
@@ -141,7 +141,7 @@ namespace client.realize.messengers.register
                         registerState.LocalInfo.IsConnecting = true;
                         if (interval > 0)
                         {
-                            await Task.Delay(interval, cancellationToken.Token);
+                            await Task.Delay((int)interval, cancellationToken.Token);
                         }
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
@@ -200,7 +200,7 @@ namespace client.realize.messengers.register
                     registerState.LocalInfo.IsConnecting = false;
                     if ((config.Client.AutoReg || autoReg) && isex == false)
                     {
-                        interval = 5000;
+                        interval *= 0.1;
                     }
                     else
                     {

@@ -84,9 +84,20 @@ namespace client.service.ui.api.service.clientServer.services
         /// 断开
         /// </summary>
         /// <param name="arg"></param>
-        public bool Offline(ClientServiceParamsInfo arg)
+        public async Task<bool> Offline(ClientServiceParamsInfo arg)
         {
-            clientInfoCaching.Offline(ulong.Parse(arg.Content));
+            if (clientInfoCaching.Get(ulong.Parse(arg.Content), out ClientInfo client))
+            {
+                if (client.OnlineType == ClientOnlineTypes.Active)
+                {
+                    clientInfoCaching.Offline(client.Id);
+                }
+                else
+                {
+                    await clientsTransfer.SendOffline(client.Id);
+                }
+            }
+
             return true;
         }
 
