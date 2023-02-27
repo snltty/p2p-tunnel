@@ -120,7 +120,6 @@ export default {
                 ]
             }
         });
-        const formDom = ref(null);
 
         const loadConfig = () => {
             getConfig().then((res) => {
@@ -137,6 +136,7 @@ export default {
         onMounted(() => {
             loadConfig();
         });
+        const formDom = ref(null);
         const submit = () => {
             return new Promise((resolve, reject) => {
                 formDom.value.validate((valid) => {

@@ -1307,7 +1307,7 @@ namespace LiteNetLib
                 _rttCount = 1;
             }
 
-            //UpdateMtuLogic(deltaTime);
+            UpdateMtuLogic(deltaTime);
         }
         internal void Update(int deltaTime)
         {
