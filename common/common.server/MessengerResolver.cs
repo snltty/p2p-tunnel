@@ -123,6 +123,10 @@ namespace common.server
                     return;
                 }
 
+                //if(connection.Address.Port != 5410)
+                //{
+                //    Console.WriteLine($"{requestWrap.MessengerId}:request 1");
+                //}
                 //新的请求
                 requestWrap.FromArray(readReceive);
                 //是中继数据
@@ -150,7 +154,10 @@ namespace common.server
                         return;
                     }
                 }
-
+                //if (connection.Address.Port != 5410)
+                //{
+                //    Console.WriteLine($"{requestWrap.MessengerId}:request 2");
+                //}
 
                 if (requestWrap.Relay)
                 {
@@ -162,7 +169,6 @@ namespace common.server
                     responseConnection = connection.FromConnection;
                     requestWrap.Payload = connection.FromConnection.Crypto.Decode(requestWrap.Payload);
                 }
-
 
                 //404,没这个插件
                 if (messengers.ContainsKey(requestWrap.MessengerId) == false)
@@ -182,6 +188,10 @@ namespace common.server
                     return;
                 }
 
+                //if (connection.Address.Port != 5410)
+                //{
+                //    Console.WriteLine($"{requestWrap.MessengerId}:request 3");
+                //}
                 MessengerCacheInfo plugin = messengers[requestWrap.MessengerId];
                 object resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { connection });
                 Memory<byte> resultObject = null;
@@ -218,9 +228,16 @@ namespace common.server
                         resultObject = resultAsync as byte[];
                     }
                 }
-
+                //if (connection.Address.Port != 5410)
+                //{
+                //    Console.WriteLine($"{requestWrap.MessengerId}:request 4");
+                //}
                 if (requestWrap.Reply == true)
                 {
+                    //if (connection.Address.Port != 5410)
+                    //{
+                    //    Console.WriteLine($"{requestWrap.MessengerId}:request 5");
+                    //}
                     bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
                     {
                         Connection = responseConnection,
@@ -229,6 +246,10 @@ namespace common.server
                         RelayIds = requestWrap.RelayIds,
                         RequestId = requestWrap.RequestId
                     }).ConfigureAwait(false);
+                    //if (connection.Address.Port != 5410)
+                    //{
+                    //    Console.WriteLine($"{requestWrap.MessengerId}:request 6");
+                    //}
                 }
 
             }

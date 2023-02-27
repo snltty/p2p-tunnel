@@ -10,15 +10,12 @@ using client.service.wakeup;
 using common.libs;
 using common.server;
 using common.server.middleware;
-using common.socks5;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace client.service
 {

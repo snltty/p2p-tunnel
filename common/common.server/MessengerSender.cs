@@ -93,7 +93,7 @@ namespace common.server
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
                 byte[] bytes = msg.ToArray(out int length);
-                bool res = await msg.Connection.Send(bytes.AsMemory(0, length)).ConfigureAwait(false);
+                bool res = await msg.Connection.Send(bytes.AsMemory(0, length), logger).ConfigureAwait(false);
                 msg.Return(bytes);
                 return res;
             }

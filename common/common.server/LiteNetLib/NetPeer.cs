@@ -1138,6 +1138,7 @@ namespace LiteNetLib
                 NetManager.PoolRecycle(packet);
                 return;
             }
+
             Interlocked.Exchange(ref _timeSinceLastPacket, 0);
 
             NetDebug.Write("[RR]PacketProperty: {0}", packet.Property);

@@ -103,14 +103,14 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public Task<bool> Send(ReadOnlyMemory<byte> data);
+        public Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false);
         /// <summary>
         /// 发送
         /// </summary>
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public Task<bool> Send(byte[] data, int length);
+        public Task<bool> Send(byte[] data, int length, bool logger = false);
 
         /// <summary>
         /// 销毁
@@ -329,14 +329,14 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public abstract Task<bool> Send(ReadOnlyMemory<byte> data);
+        public abstract Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false);
         /// <summary>
         /// 发送
         /// </summary>
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public abstract Task<bool> Send(byte[] data, int length);
+        public abstract Task<bool> Send(byte[] data, int length, bool logger = false);
 
         /// <summary>
         /// 销毁
@@ -450,9 +450,9 @@ namespace common.server
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public override async Task<bool> Send(byte[] data, int length)
+        public override async Task<bool> Send(byte[] data, int length, bool logger = false)
         {
-            return await Send(data.AsMemory(0, length));
+            return await Send(data.AsMemory(0, length), logger);
         }
 
 
@@ -462,7 +462,7 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public override async Task<bool> Send(ReadOnlyMemory<byte> data)
+        public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
         {
             if (Connected)
             {
@@ -479,7 +479,6 @@ namespace common.server
                         await Task.Delay(30);
                         index++;
                     }
-
                     int len = 0;
                     do
                     {
@@ -583,7 +582,7 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public override async Task<bool> Send(ReadOnlyMemory<byte> data)
+        public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
         {
             if (Connected)
             {
@@ -607,9 +606,9 @@ namespace common.server
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public override async Task<bool> Send(byte[] data, int length)
+        public override async Task<bool> Send(byte[] data, int length, bool logger = false)
         {
-            return await Send(data.AsMemory(0, length));
+            return await Send(data.AsMemory(0, length), logger);
         }
         /// <summary>
         /// 销毁
