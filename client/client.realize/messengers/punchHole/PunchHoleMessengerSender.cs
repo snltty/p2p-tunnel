@@ -89,7 +89,6 @@ namespace client.realize.messengers.punchHole
         /// <returns></returns>
         public async Task Response(IConnection connection, PunchHoleRequestInfo request)
         {
-
             await messengerSender.SendOnly(new MessageRequestWrap
             {
                 Connection = connection,

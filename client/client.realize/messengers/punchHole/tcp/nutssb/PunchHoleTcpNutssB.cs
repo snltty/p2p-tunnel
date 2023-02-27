@@ -21,8 +21,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         public async Task Execute(IConnection connection, PunchHoleRequestInfo info)
         {
-            await Task.CompletedTask;
-            _ = punchHoleTcp.InputData(new PunchHoleStepModel
+            await punchHoleTcp.InputData(new PunchHoleStepModel
             {
                 Connection = connection,
                 RawData = info

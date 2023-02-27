@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.punchHole.tcp.nutssb
@@ -91,7 +90,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
-                        await OnStep1(model);
+                        _ = OnStep1(model);
                     }
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_2:
@@ -99,7 +98,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
-                        await OnStep2(model);
+                        _ = OnStep2(model);
                     }
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_2_TRY:
@@ -121,7 +120,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         PunchHoleStep3Info data = new PunchHoleStep3Info();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
-                        await OnStep3(model);
+                        _ = OnStep3(model);
                     }
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_4:
@@ -135,6 +134,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 default:
                     break;
             }
+            await Task.CompletedTask;
         }
 
         private void Cancel(ulong id)
@@ -448,7 +448,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     Connection = TcpServer,
                     RawData = new PunchHoleRequestInfo
                     {
-                        PunchStep =(byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL,
+                        PunchStep = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL,
                         FromId = toid,
                         TunnelName = tunname
                     }

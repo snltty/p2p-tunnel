@@ -101,7 +101,7 @@ namespace client.realize.messengers.punchHole.udp
                         PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
-                        await OnStep1(model);
+                        _ = OnStep1(model);
                     }
                     break;
                 case PunchHoleUdpSteps.STEP_2:
@@ -109,7 +109,7 @@ namespace client.realize.messengers.punchHole.udp
                         PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
-                        await OnStep2(model);
+                        _ = OnStep2(model);
                     }
                     break;
                 case PunchHoleUdpSteps.STEP_2_1:
@@ -117,7 +117,7 @@ namespace client.realize.messengers.punchHole.udp
                         PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
-                        await OnStep21(model);
+                        _ = OnStep21(model);
                     }
                     break;
                 case PunchHoleUdpSteps.STEP_2_Fail:
@@ -130,7 +130,7 @@ namespace client.realize.messengers.punchHole.udp
                         PunchHoleStep3Info data = new PunchHoleStep3Info();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
-                        await OnStep3(model);
+                        _ = OnStep3(model);
                     }
                     break;
                 case PunchHoleUdpSteps.STEP_4:
@@ -144,6 +144,7 @@ namespace client.realize.messengers.punchHole.udp
                 default:
                     break;
             }
+            await Task.CompletedTask;
         }
 
         private void SendTimeout(WheelTimerTimeout<object> timeout)
