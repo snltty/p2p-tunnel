@@ -60,7 +60,7 @@ export default {
                 TcpPort: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: 1024, max: 65535, message: '数字 1024-65535', trigger: 'blur', transform(value) {
+                        type: 'number', min: 1, max: 65535, message: '数字 1-65535', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }
@@ -68,7 +68,7 @@ export default {
                 UdpPort: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: 1024, max: 65535, message: '数字 1024-65535', trigger: 'blur', transform(value) {
+                        type: 'number', min: 1, max: 65535, message: '数字 1-65535', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }

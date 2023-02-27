@@ -471,7 +471,7 @@ namespace common.server
                     int index = 0;
                     while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                     {
-                        if (index >= 10000 / 30)
+                        if (index >= 10000 / 30 || Connected == false)
                         {
                             return false;
                         }
@@ -488,6 +488,7 @@ namespace common.server
                         {
                             await Task.Delay(30);
                         }
+                        if (Connected == false) return false;
                     } while (len < data.Length);
 
                     NetPeer.Send(data, 0, data.Length, DeliveryMethod.ReliableOrdered);
