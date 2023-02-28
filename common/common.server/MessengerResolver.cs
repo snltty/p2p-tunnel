@@ -123,20 +123,36 @@ namespace common.server
                     return;
                 }
 
-                //if(connection.Address.Port != 5410)
-                //{
-                //    Console.WriteLine($"{requestWrap.MessengerId}:request 1");
-                //}
+                if (connection.Address.Port != 5410)
+                {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 1");
+                }
                 //新的请求
                 requestWrap.FromArray(readReceive);
+                if (connection.Address.Port != 5410)
+                {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 2");
+                }
                 //是中继数据
                 if (requestWrap.Relay)
                 {
+                    if (connection.Address.Port != 5410)
+                    {
+                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 2");
+                    }
                     //还在路上
                     if (requestWrap.RelayIdLength - 1 - requestWrap.RelayIdIndex >= 0)
                     {
+                        if (connection.Address.Port != 5410)
+                        {
+                            Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 4");
+                        }
                         if (relayValidator.Validate(connection))
                         {
+                            if (connection.Address.Port != 5410)
+                            {
+                                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 5");
+                            }
                             ulong nextId = requestWrap.RelayIds.Span.Slice(requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize).ToUInt64();
 
                             //目的地连接对象
@@ -146,28 +162,48 @@ namespace common.server
                             //RelayIdIndex 后移一位
                             receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
 
+                            if (connection.Address.Port != 5410)
+                            {
+                                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 6");
+                            }
                             await _connection.WaitOne();
                             //中继数据不再次序列化，直接在原数据上更新数据然后发送
                             await _connection.Send(receive).ConfigureAwait(false);
                             _connection.Release();
+                            if (connection.Address.Port != 5410)
+                            {
+                                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 7");
+                            }
+                        }
+                        if (connection.Address.Port != 5410)
+                        {
+                            Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 8");
                         }
                         return;
                     }
                 }
-                //if (connection.Address.Port != 5410)
-                //{
-                //    Console.WriteLine($"{requestWrap.MessengerId}:request 2");
-                //}
+                if (connection.Address.Port != 5410)
+                {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 9");
+                }
 
                 if (requestWrap.Relay)
                 {
                     connection.FromConnection = sourceConnectionSelector.Select(connection, requestWrap.RelayIds.Span.ToUInt64());
+                }
+                if (connection.Address.Port != 5410)
+                {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 10");
                 }
                 IConnection responseConnection = connection;
                 if (connection.EncodeEnabled && requestWrap.Encode)
                 {
                     responseConnection = connection.FromConnection;
                     requestWrap.Payload = connection.FromConnection.Crypto.Decode(requestWrap.Payload);
+                }
+                if (connection.Address.Port != 5410)
+                {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 11");
                 }
 
                 //404,没这个插件
@@ -188,10 +224,10 @@ namespace common.server
                     return;
                 }
 
-                //if (connection.Address.Port != 5410)
-                //{
-                //    Console.WriteLine($"{requestWrap.MessengerId}:request 3");
-                //}
+                if (connection.Address.Port != 5410)
+                {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 12");
+                }
                 MessengerCacheInfo plugin = messengers[requestWrap.MessengerId];
                 object resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { connection });
                 Memory<byte> resultObject = null;
@@ -228,16 +264,16 @@ namespace common.server
                         resultObject = resultAsync as byte[];
                     }
                 }
-                //if (connection.Address.Port != 5410)
-                //{
-                //    Console.WriteLine($"{requestWrap.MessengerId}:request 4");
-                //}
+                if (connection.Address.Port != 5410)
+                {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 13");
+                }
                 if (requestWrap.Reply == true)
                 {
-                    //if (connection.Address.Port != 5410)
-                    //{
-                    //    Console.WriteLine($"{requestWrap.MessengerId}:request 5");
-                    //}
+                    if (connection.Address.Port != 5410)
+                    {
+                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 14");
+                    }
                     bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
                     {
                         Connection = responseConnection,
@@ -246,10 +282,14 @@ namespace common.server
                         RelayIds = requestWrap.RelayIds,
                         RequestId = requestWrap.RequestId
                     }).ConfigureAwait(false);
-                    //if (connection.Address.Port != 5410)
-                    //{
-                    //    Console.WriteLine($"{requestWrap.MessengerId}:request 6");
-                    //}
+                    if (connection.Address.Port != 5410)
+                    {
+                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 15");
+                    }
+                }
+                if (connection.Address.Port != 5410)
+                {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 16");
                 }
 
             }

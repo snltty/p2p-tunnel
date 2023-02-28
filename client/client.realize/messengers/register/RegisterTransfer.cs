@@ -70,13 +70,13 @@ namespace client.realize.messengers.register
             }
 
             Logger.Instance.Error($"{connection.ServerType} register 断开~~~~${connection.Address}");
-            if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
-            {
-                Register(true).ContinueWith((result) =>
-                {
-                    Interlocked.Exchange(ref lockObject, 0);
-                });
-            }
+            //if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
+            //{
+            //    Register(true).ContinueWith((result) =>
+            //    {
+            //        Interlocked.Exchange(ref lockObject, 0);
+            //    });
+            //}
         }
 
         /// <summary>
