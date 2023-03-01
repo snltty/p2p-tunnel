@@ -123,12 +123,13 @@ namespace common.server
                     return;
                 }
 
+                //新的请求
+                requestWrap.FromArray(readReceive);
                 if (connection.Address.Port != 5410)
                 {
                     Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 1");
                 }
-                //新的请求
-                requestWrap.FromArray(readReceive);
+                
                 if (connection.Address.Port != 5410)
                 {
                     Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 2");
@@ -138,7 +139,7 @@ namespace common.server
                 {
                     if (connection.Address.Port != 5410)
                     {
-                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 2");
+                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{requestWrap.MessengerId}:{connection.GetHashCode()}:request 3");
                     }
                     //还在路上
                     if (requestWrap.RelayIdLength - 1 - requestWrap.RelayIdIndex >= 0)
