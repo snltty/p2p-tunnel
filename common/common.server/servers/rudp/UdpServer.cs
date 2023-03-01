@@ -87,14 +87,17 @@ namespace common.server.servers.rudp
             };
             listener.NetworkReceiveEvent += (NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod) =>
             {
-                try
+                lock (peer.Tag)
                 {
-                    IConnection connection = peer.Tag as IConnection;
-                    connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
-                    OnPacket(connection).Wait();
-                }
-                catch (Exception)
-                {
+                    try
+                    {
+                        IConnection connection = peer.Tag as IConnection;
+                        connection.ReceiveData = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
+                        OnPacket(connection).Wait();
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             };
         }
