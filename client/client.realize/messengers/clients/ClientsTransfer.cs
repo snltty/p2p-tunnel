@@ -197,12 +197,21 @@ namespace client.realize.messengers.clients
         }
         private void OnDisconnect(IConnection connection, IConnection regConnection)
         {
+            Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】OnDisconnect 1");
             if (ReferenceEquals(regConnection, connection))
             {
                 return;
             }
+            if (regConnection != null && connection != null)
+            {
+                if (regConnection.Address.Equals(connection.Address))
+                {
+                    return;
+                }
+            }
 
-            Logger.Instance.Error($"{connection.ServerType} client 断开~~~~${connection.Address}");
+            Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】OnDisconnect 2");
+            Console.WriteLine($"{connection.ServerType} client 断开~~~~${connection.Address}");
             if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
             {
                 if (ReferenceEquals(connection, client.Connection))
@@ -215,7 +224,7 @@ namespace client.realize.messengers.clients
 
         public async Task SendOffline(ulong toid)
         {
-           await punchHoleMessengerSender.SendOffline(toid);
+            await punchHoleMessengerSender.SendOffline(toid);
         }
         /// <summary>
         /// 连它

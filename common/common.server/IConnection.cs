@@ -430,7 +430,7 @@ namespace common.server
         /// <summary>
         /// 已连接
         /// </summary>
-        public override bool Connected => NetPeer != null;
+        public override bool Connected => NetPeer != null && NetPeer.ConnectionState == ConnectionState.Connected;
         /// <summary>
         /// 连接对象
         /// </summary>

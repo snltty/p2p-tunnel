@@ -174,11 +174,16 @@ namespace LiteNetLib
                     var packet = PoolGetPacket(NetConstants.MaxPacketSize);
                     packet.Size = socket.ReceiveFrom(packet.RawData, 0, NetConstants.MaxPacketSize, SocketFlags.None,
                         ref bufferEndPoint);
+
                     //NetDebug.Write(NetLogLevel.Trace, $"[R]Received data from {bufferEndPoint}, result: {packet.Size}");
                     OnMessageReceived(packet, (IPEndPoint)bufferEndPoint);
+
                     packetsReceived++;
                     if (packetsReceived == MaxPacketsReceivePerUpdate)
+                    {
                         break;
+                    }
+                       
                 }
             }
             catch (SocketException ex)
@@ -253,17 +258,17 @@ namespace LiteNetLib
                     //NetDebug.Write(NetLogLevel.Trace, $"[R]Received data from {bufferEndPoint}, result: {packet.Size}");
                     OnMessageReceived(packet, (IPEndPoint)bufferEndPoint);
                 }
-                catch (SocketException ex)
+                catch (SocketException e)
                 {
-                    if (ProcessError(ex))
+                    if (ProcessError(e))
                         return;
                 }
-                catch (ObjectDisposedException)
+                catch (ObjectDisposedException e)
                 {
                     //socket closed
                     return;
                 }
-                catch (ThreadAbortException)
+                catch (ThreadAbortException e)
                 {
                     //thread closed
                     return;

@@ -577,6 +577,7 @@ namespace LiteNetLib
         private void ProcessEvent(NetEvent evt)
         {
             NetDebug.Write("[NM] Processing event: " + evt.Type);
+
             bool emptyData = evt.DataReader.IsNull;
             switch (evt.Type)
             {
@@ -590,6 +591,7 @@ namespace LiteNetLib
                         AdditionalData = evt.DataReader,
                         SocketErrorCode = evt.ErrorCode
                     };
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{evt.Peer.EndPoint}:ProcessEvent {evt.Type}");
                     _netEventListener.OnPeerDisconnected(evt.Peer, info);
                     break;
                 case NetEvent.EType.Receive:
@@ -1148,7 +1150,9 @@ namespace LiteNetLib
                     if (peerFound)
                         netPeer.ProcessPacket(packet);
                     else
+                    {
                         SendRawAndRecycle(PoolGetWithProperty(PacketProperty.PeerNotFound), remoteEndPoint);
+                    }
                     break;
             }
         }
@@ -1509,7 +1513,10 @@ namespace LiteNetLib
             }
 
             while (_netEventsConsumeQueue.Count > 0)
-                ProcessEvent(_netEventsConsumeQueue.Dequeue());
+            {
+                var evt = _netEventsConsumeQueue.Dequeue();
+                ProcessEvent(evt);
+            }
         }
 
         /// <summary>

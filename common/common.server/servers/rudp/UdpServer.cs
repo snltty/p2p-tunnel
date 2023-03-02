@@ -49,7 +49,6 @@ namespace common.server.servers.rudp
         {
             listener = new EventBasedNetListener();
             server = new NetManager(listener);
-            server.ReconnectDelay = Math.Max(timeout / 5, 5000);
             server.UnsyncedEvents = true;
             server.UpdateTime = 5;
             server.PingInterval = Math.Max(timeout / 5, 5000);
@@ -76,14 +75,17 @@ namespace common.server.servers.rudp
             };
             listener.PeerDisconnectedEvent += (peer, disconnectInfo) =>
             {
+                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{peer.EndPoint}:OnPeerDisconnected 2,tag==null:{peer.Tag == null}");
                 if (peer.Tag is IConnection connection)
                 {
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{peer.EndPoint}:OnPeerDisconnected 3");
                     OnDisconnect.Push(connection);
                     connection.Disponse();
                 }
             };
             listener.NetworkErrorEvent += (endPoint, socketError) =>
             {
+                Logger.Instance.Error($"NetworkErrorEvent:{endPoint}-{socketError}");
             };
             listener.NetworkReceiveEvent += (NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod) =>
             {
@@ -126,8 +128,6 @@ namespace common.server.servers.rudp
             OnPacket = null;
             OnDisconnect = null;
             OnConnected = null;
-            maxNumberConnectings.Dispose();
-            maxNumberConnectingNumberSpace = null;
         }
         /// <summary>
         /// 
@@ -199,10 +199,20 @@ namespace common.server.servers.rudp
 
         private void Release()
         {
-            if (maxNumberConnectingNumberSpace != null && maxNumberConnectingNumberSpace.IsDefault == false)
+            try
             {
-                maxNumberConnectingNumberSpace.Reset();
-                maxNumberConnectings.Release();
+                if (maxNumberConnectingNumberSpace != null && maxNumberConnectingNumberSpace.IsDefault == false)
+                {
+                    maxNumberConnectingNumberSpace.Reset();
+                    maxNumberConnectings.Release();
+                    maxNumberConnectings.Dispose();
+                }
+                maxNumberConnectingNumberSpace = null;
+                maxNumberConnectings = null;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
             }
         }
     }

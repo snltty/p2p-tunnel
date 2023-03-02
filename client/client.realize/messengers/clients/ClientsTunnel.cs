@@ -94,13 +94,31 @@ namespace client.realize.messengers.clients
 
             tempUdpServer.OnDisconnect.Sub((IConnection _connection) =>
             {
+                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】tempUdpServer OnDisconnect 0");
                 if (ReferenceEquals(connection, _connection) == false)
                 {
-                    clientInfoCaching.RemoveUdpserver(model.Value);
-                    tempUdpServer.Disponse();
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】tempUdpServer OnDisconnect 1");
+                    try
+                    {
+                        clientInfoCaching.RemoveUdpserver(model.Value);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】tempUdpServer OnDisconnect 1-1 " + ex);
+                    }
+                    try
+                    {
+                        tempUdpServer.Disponse();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】tempUdpServer OnDisconnect 1-2 " + ex);
+                    }
 
+                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】tempUdpServer OnDisconnect 2");
                     OnDisConnect(_connection, registerState.UdpConnection);
                 }
+                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】tempUdpServer OnDisconnect 3");
             });
             tempUdpServer.Start(localport, config.Client.TimeoutDelay);
             tempUdpServer.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
