@@ -3,7 +3,7 @@
         <div class="servers-wrap absolute scrollbar" @click.stop>
             <ul>
                 <li>
-                    <el-button size="small" @click="state.showAdd = true;">添加服务器节点</el-button>
+                    <el-button size="small" @click="handleAdd">添加服务器节点</el-button>
                 </li>
                 <template v-for="(item,index) in state.servers" :key="index">
                     <li class="flex" @click="handleSelect(item)">
@@ -16,6 +16,7 @@
                             <Signal :value="state.pings[index]"></Signal>
                         </div>
                         <div class="oper">
+                            <el-button type="default" icon="Edit" size="small" circle @click.stop="handleEdit(index)" />
                             <el-popconfirm title="删除不可逆，是否确认?" @confirm="handleDelete(index)">
                                 <template #reference>
                                     <el-button type="danger" icon="Delete" size="small" circle @click.stop />
@@ -31,7 +32,7 @@
 </template>  
    
 <script>
-import { onMounted, onUnmounted, reactive, ref, watch } from '@vue/runtime-core'
+import { onMounted, onUnmounted, provide, reactive, ref, watch } from '@vue/runtime-core'
 import Signal from '../../components/Signal.vue'
 import { getRegisterInfo, sendPing, updateConfig } from '../../apis/register'
 import { ElLoading } from 'element-plus'
@@ -113,6 +114,18 @@ export default {
             });
         }
 
+        const stateEdit = ref({ data: {}, index: -1 });
+        provide('add-edit-data', stateEdit);
+        const handleAdd = () => {
+            stateEdit.value.index = -1;
+            state.showAdd = true;
+        }
+        const handleEdit = (index) => {
+            stateEdit.value.data = state.servers[index];
+            stateEdit.value.index = index;
+            state.showAdd = true;
+        }
+
         const rootDom = ref(null);
         let loadingInstance = null;
         const handleSelect = (item) => {
@@ -135,7 +148,7 @@ export default {
             });
         }
 
-        return { shareData, state, loadData, handleClose, handleSelect, rootDom, handleDelete }
+        return { shareData, state, loadData, handleClose, handleSelect, rootDom, handleAdd, handleDelete, handleEdit }
     }
 }
 </script>

@@ -35,7 +35,7 @@
 
 <script>
 import { reactive, ref } from '@vue/reactivity';
-import { watch } from '@vue/runtime-core';
+import { inject, watch } from '@vue/runtime-core';
 import { getRegisterInfo, updateConfig } from '../../apis/register'
 import { injectShareData } from '../../states/shareData'
 import { ElMessage } from 'element-plus/lib/components';
@@ -45,15 +45,16 @@ export default {
     setup(props, { emit }) {
 
         const shareData = injectShareData();
+        const stateEdit = inject('add-edit-data');
         const state = reactive({
             show: props.modelValue,
             loading: false,
             form: {
-                TcpPort: 59410,
-                UdpPort: 5410,
-                Ip: '',
-                Name: '',
-                Img: Object.keys(shareData.serverImgs)[0],
+                TcpPort: stateEdit.value.data.TcpPort || 59410,
+                UdpPort: stateEdit.value.data.TcpPort || 5410,
+                Ip: stateEdit.value.data.Ip || '',
+                Name: stateEdit.value.data.Name || '',
+                Img: stateEdit.value.data.Img || Object.keys(shareData.serverImgs)[0],
             },
             rules: {
                 Ip: [{ required: true, message: '必填', trigger: 'blur' }],
@@ -92,18 +93,28 @@ export default {
                 state.loading = true;
 
                 getRegisterInfo().then((json) => {
-                    if (json.ServerConfig.Items.filter(c => c.Ip == state.form.Ip).length > 0) {
+                    if (json.ServerConfig.Items.filter((c, index) => c.Ip == state.form.Ip && index != stateEdit.value.index).length > 0) {
                         state.loading = false;
                         ElMessage.error('已存在相同地址');
                         return;
                     }
-                    json.ServerConfig.Items.push({
-                        Img: state.form.Img,
-                        Name: state.form.Name,
-                        Ip: state.form.Ip,
-                        TcpPort: Number(state.form.TcpPort),
-                        UdpPort: Number(state.form.UdpPort),
-                    });
+                    if (stateEdit.value.index == -1) {
+                        json.ServerConfig.Items.push({
+                            Img: state.form.Img,
+                            Name: state.form.Name,
+                            Ip: state.form.Ip,
+                            TcpPort: Number(state.form.TcpPort),
+                            UdpPort: Number(state.form.UdpPort),
+                        });
+                    } else {
+                        let item = json.ServerConfig.Items[stateEdit.value.index];
+                        item.Img = state.form.Img;
+                        item.Name = state.form.Name;
+                        item.Ip = state.form.Ip;
+                        item.TcpPort = Number(state.form.TcpPort);
+                        item.UdpPort = Number(state.form.UdpPort);
+                    }
+
                     updateConfig(json).then(() => {
                         state.show = false;
                         emit('success');

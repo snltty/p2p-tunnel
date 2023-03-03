@@ -56,8 +56,6 @@ namespace client.realize.messengers.register
             this.iPv6AddressRequest = iPv6AddressRequest;
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
-            //安卓注释
-            //Console.CancelKeyPress += (s, e) => Exit();
 
             tcpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.TcpConnection));
             udpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.UdpConnection));
