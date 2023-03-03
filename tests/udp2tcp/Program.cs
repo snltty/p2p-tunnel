@@ -50,11 +50,16 @@ namespace udp2tcp
 
                     Memory<byte> ports = bytes.AsMemory(headLength * 4).Slice(2, 2);
                     int port = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(ports.Span));
-
                     Console.WriteLine($"TCP包目标端口:{port}");
 
+                    var newPorts = BitConverter.GetBytes(6000);
+                    ports.Span[0] = newPorts[1];
+                    ports.Span[1] = newPorts[0];
+                    int newPort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(ports.Span));
+                    Console.WriteLine($"TCP包新目标端口:{newPort}");
 
                     var rawTcp1 = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
+                    rawTcp1.SendTo(bytes.AsMemory(0,len).Span,new IPEndPoint(IPAddress.Loopback,6000));
                 }
                 catch (Exception ex)
                 {

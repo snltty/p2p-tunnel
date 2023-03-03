@@ -124,10 +124,17 @@ namespace common.server.servers.rudp
         /// </summary>
         public void Disponse()
         {
-            Stop();
-            OnPacket = null;
-            OnDisconnect = null;
-            OnConnected = null;
+            try
+            {
+                Stop();
+                OnPacket = null;
+                OnDisconnect = null;
+                OnConnected = null;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
         }
         /// <summary>
         /// 
@@ -205,10 +212,7 @@ namespace common.server.servers.rudp
                 {
                     maxNumberConnectingNumberSpace.Reset();
                     maxNumberConnectings.Release();
-                    maxNumberConnectings.Dispose();
                 }
-                maxNumberConnectingNumberSpace = null;
-                maxNumberConnectings = null;
             }
             catch (Exception ex)
             {

@@ -95,6 +95,7 @@ namespace client.realize.messengers.clients
             tempUdpServer.OnDisconnect.Sub((IConnection _connection) =>
             {
                 Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】tempUdpServer OnDisconnect 0");
+                //不是跟服务器的连接对象，那就是打洞的
                 if (ReferenceEquals(connection, _connection) == false)
                 {
                     Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】tempUdpServer OnDisconnect 1");
