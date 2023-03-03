@@ -200,6 +200,16 @@ namespace common.server
 
         public Task WaitOne();
         public void Release();
+
+
+        public static bool Equals(IConnection connection1, IConnection connection2)
+        {
+            if (connection1 == null || connection2 == null)
+            {
+                return false;
+            }
+            return ReferenceEquals(connection1, connection2) || connection1.Address.Equals(connection2.Address);
+        }
     }
 
     /// <summary>

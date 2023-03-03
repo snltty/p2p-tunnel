@@ -191,27 +191,19 @@ namespace client.realize.messengers.clients
                 //主动连接的，未知掉线信息的，去尝试重连一下
                 if (config.Client.UseReConnect && client.OnlineType == ClientOnlineTypes.Active && client.OfflineType == ClientOfflineTypes.Disconnect)
                 {
+                    Logger.Instance.Warning($"尝试对【{client.Name}】重新打洞");
                     ConnectClient(client);
                 }
             }
         }
         private void OnDisconnect(IConnection connection, IConnection regConnection)
         {
-            Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】OnDisconnect 1");
-            if (ReferenceEquals(regConnection, connection))
+            if (IConnection.Equals(connection, regConnection))
             {
                 return;
             }
-            if (regConnection != null && connection != null)
-            {
-                if (regConnection.Address.Equals(connection.Address))
-                {
-                    return;
-                }
-            }
 
-            Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】OnDisconnect 2");
-            Console.WriteLine($"{connection.ServerType} client 断开~~~~${connection.Address}");
+            Logger.Instance.Error($"{connection.ServerType} client 断开~~~~${connection.Address}");
             if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
             {
                 if (ReferenceEquals(connection, client.Connection))

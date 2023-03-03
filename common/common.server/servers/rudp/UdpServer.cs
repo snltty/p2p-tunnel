@@ -75,10 +75,8 @@ namespace common.server.servers.rudp
             };
             listener.PeerDisconnectedEvent += (peer, disconnectInfo) =>
             {
-                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{peer.EndPoint}:OnPeerDisconnected 2,tag==null:{peer.Tag == null}");
                 if (peer.Tag is IConnection connection)
                 {
-                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{peer.EndPoint}:OnPeerDisconnected 3");
                     OnDisconnect.Push(connection);
                     connection.Disponse();
                 }
@@ -105,17 +103,17 @@ namespace common.server.servers.rudp
         /// </summary>
         public void Stop()
         {
+            if (server != null)
+            {
+                server.DisconnectAll();
+                server.Stop();
+            }
             if (listener != null)
             {
                 listener.ClearConnectionRequestEvent();
                 listener.ClearPeerConnectedEvent();
                 listener.ClearPeerDisconnectedEvent();
                 listener.ClearNetworkReceiveEvent();
-            }
-            if (server != null)
-            {
-                server.DisconnectAll();
-                server.Stop();
             }
             Release();
         }
@@ -219,5 +217,6 @@ namespace common.server.servers.rudp
                 Logger.Instance.Error(ex);
             }
         }
+
     }
 }

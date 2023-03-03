@@ -218,10 +218,8 @@ namespace LiteNetLib
 
         void INetEventListener.OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
-            Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{peer.EndPoint}:OnPeerDisconnected 0");
             if (PeerDisconnectedEvent != null)
             {
-                Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{peer.EndPoint}:OnPeerDisconnected 1");
                 PeerDisconnectedEvent(peer, disconnectInfo);
             }
         }

@@ -23,6 +23,7 @@ namespace udp2tcp
                 {
                     TcpClient tcp = new TcpClient();
                     tcp.Connect(IPAddress.Loopback, 5000);
+                    Console.WriteLine("connected");
                 }
                 catch (Exception ex)
                 {
@@ -36,30 +37,88 @@ namespace udp2tcp
             Task.Run(() =>
             {
 
+                Dictionary<IPEndPoint, Socket> dic = new Dictionary<IPEndPoint, Socket>();
                 try
                 {
                     var rawTcp = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
                     rawTcp.Bind(new IPEndPoint(IPAddress.Any, 5000));
 
-                    var bytes = new byte[1024];
-                    int len = rawTcp.Receive(bytes);
-                    Console.WriteLine($"IP数据包:{string.Join(",", bytes.AsMemory(0, len).ToArray())}");
+                    var bytes = new byte[65536];
+                    while (true)
+                    {
+                        int len = rawTcp.Receive(bytes);
 
-                    int headLength = bytes[0] & 0b00001111;
-                    Console.WriteLine($"数据包首部长度:{headLength}");
+                        var ipPacket = bytes.AsMemory(0, len);
+                        var ipPacketSpan = ipPacket.Span;
 
-                    Memory<byte> ports = bytes.AsMemory(headLength * 4).Slice(2, 2);
-                    int port = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(ports.Span));
-                    Console.WriteLine($"TCP包目标端口:{port}");
+                        //只处理tcp
+                        int proto = ipPacketSpan[9];
+                        if (proto != 6)
+                        {
+                            continue;
+                        }
 
-                    var newPorts = BitConverter.GetBytes(6000);
-                    ports.Span[0] = newPorts[1];
-                    ports.Span[1] = newPorts[0];
-                    int newPort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(ports.Span));
-                    Console.WriteLine($"TCP包新目标端口:{newPort}");
+                        //ip包ip地址
+                        Memory<byte> sourceIp = ipPacket.Slice(12, 4);
+                        Memory<byte> targetIp = ipPacket.Slice(16, 4);
 
-                    var rawTcp1 = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
-                    rawTcp1.SendTo(bytes.AsMemory(0,len).Span,new IPEndPoint(IPAddress.Loopback,6000));
+
+                        Memory<byte> tcp = ipPacket.Slice((ipPacketSpan[0] & 0b00001111) * 4);
+                        var tcpSpan = tcp.Span;
+                        //tcp包端口
+                        ushort sourcePort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(tcpSpan));
+                        Span<byte> targetPorts = tcpSpan.Slice(2);
+                        ushort targetPort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(targetPorts));
+                        //重写tcp目标端口
+                        var newPorts = BitConverter.GetBytes(6000);
+                        targetPorts[0] = newPorts[1];
+                        targetPorts[1] = newPorts[0];
+
+                        targetPort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(targetPorts));
+                        //Console.WriteLine($"目标端口：{targetPort}");
+
+                        IPEndPoint sourceEp = new IPEndPoint(new IPAddress(sourceIp.Span), sourcePort);
+                        if (dic.TryGetValue(sourceEp, out Socket socket) == false)
+                        {
+                            socket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
+                            dic.Add(sourceEp, socket);
+                            socket.SendTo(ipPacketSpan, new IPEndPoint(IPAddress.Loopback, 6000));
+                            Task.Run(() =>
+                            {
+                                var bytes = new byte[65536];
+                                while (true)
+                                {
+                                    int length = socket.Receive(bytes);
+
+                                    var ipPacket = bytes.AsMemory(0, len);
+                                    var ipPacketSpan = ipPacket.Span;
+
+                                    Memory<byte> tcp = ipPacket.Slice((ipPacketSpan[0] & 0b00001111) * 4);
+                                    var tcpSpan = tcp.Span;
+                                    ushort sourcePort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(tcpSpan));
+                                    // Console.WriteLine($"源端口：{sourcePort}");
+                                    ushort targetPort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(tcpSpan));
+                                    //Console.WriteLine($"目标端口1：{targetPort}");
+
+                                    var newPorts = BitConverter.GetBytes(5000);
+                                    tcpSpan[0] = newPorts[1];
+                                    tcpSpan[1] = newPorts[0];
+
+                                    sourcePort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(tcpSpan));
+                                    // Console.WriteLine($"源端口1：{sourcePort}");
+
+                                    rawTcp.SendTo(ipPacket.Span, sourceEp);
+
+
+                                    //Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]:receive:{length}");
+                                }
+                            });
+                        }
+                        else
+                        {
+                            socket.SendTo(ipPacketSpan, new IPEndPoint(IPAddress.Loopback, 6000));
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {

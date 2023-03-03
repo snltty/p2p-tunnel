@@ -20,5 +20,6 @@ namespace common.server
         /// <param name="address"></param>
         /// <returns></returns>
         public Task<IConnection> CreateConnection(IPEndPoint address);
+
     }
 }

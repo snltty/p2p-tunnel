@@ -62,19 +62,19 @@ namespace client.realize.messengers.register
         }
         private void Disconnect(IConnection connection, IConnection regConnection)
         {
-            if (regConnection == null || ReferenceEquals(regConnection, connection) == false || registerState.LocalInfo.IsConnecting)
+            if(IConnection.Equals(connection, regConnection) == false || registerState.LocalInfo.IsConnecting)
             {
                 return;
             }
 
             Logger.Instance.Error($"{connection.ServerType} register 断开~~~~${connection.Address}");
-            //if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
-            //{
-            //    Register(true).ContinueWith((result) =>
-            //    {
-            //        Interlocked.Exchange(ref lockObject, 0);
-            //    });
-            //}
+            if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
+            {
+                Register(true).ContinueWith((result) =>
+                {
+                    Interlocked.Exchange(ref lockObject, 0);
+                });
+            }
         }
 
         /// <summary>

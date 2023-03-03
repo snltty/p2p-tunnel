@@ -534,6 +534,7 @@ namespace LiteNetLib
             NetPacket readerSource = null,
             object userData = null)
         {
+
             NetEvent evt;
             bool unsyncEvent = UnsyncedEvents;
 
@@ -550,7 +551,6 @@ namespace LiteNetLib
                 else
                     _netEventPoolHead = evt.Next;
             }
-
             evt.Type = type;
             evt.DataReader.SetSource(readerSource, readerSource?.GetHeaderSize() ?? 0);
             evt.Peer = peer;
@@ -591,7 +591,6 @@ namespace LiteNetLib
                         AdditionalData = evt.DataReader,
                         SocketErrorCode = evt.ErrorCode
                     };
-                    Console.WriteLine($"【{DateTime.Now:yyyy-MM-dd HH:mm:ss}】{evt.Peer.EndPoint}:ProcessEvent {evt.Type}");
                     _netEventListener.OnPeerDisconnected(evt.Peer, info);
                     break;
                 case NetEvent.EType.Receive:
@@ -667,7 +666,6 @@ namespace LiteNetLib
                     int elapsed = (int)stopwatch.ElapsedMilliseconds;
                     elapsed = elapsed <= 0 ? 1 : elapsed;
                     stopwatch.Restart();
-
                     for (var netPeer = _headPeer; netPeer != null; netPeer = netPeer.NextPeer)
                     {
                         if (netPeer.ConnectionState == ConnectionState.Disconnected &&
@@ -680,7 +678,6 @@ namespace LiteNetLib
                             netPeer.Update(elapsed);
                         }
                     }
-
                     if (peersToRemove.Count > 0)
                     {
                         _peersLock.EnterWriteLock();
@@ -689,12 +686,14 @@ namespace LiteNetLib
                         _peersLock.ExitWriteLock();
                         peersToRemove.Clear();
                     }
-
-                    ProcessNtpRequests(elapsed);
+                    //ProcessNtpRequests(elapsed);
 
                     int sleepTime = UpdateTime - (int)stopwatch.ElapsedMilliseconds;
                     if (sleepTime > 0)
+                    {
                         _updateTriggerEvent.WaitOne(sleepTime);
+                    }
+
                 }
                 catch (ThreadAbortException)
                 {
