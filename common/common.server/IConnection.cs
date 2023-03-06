@@ -208,6 +208,14 @@ namespace common.server
             {
                 return false;
             }
+            return ReferenceEquals(connection1, connection2);
+        }
+        public static bool Equals2(IConnection connection1, IConnection connection2)
+        {
+            if (connection1 == null || connection2 == null)
+            {
+                return false;
+            }
             return ReferenceEquals(connection1, connection2) || connection1.Address.Equals(connection2.Address);
         }
     }

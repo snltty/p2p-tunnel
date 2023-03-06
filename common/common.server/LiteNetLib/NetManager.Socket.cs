@@ -263,12 +263,12 @@ namespace LiteNetLib
                     if (ProcessError(e))
                         return;
                 }
-                catch (ObjectDisposedException e)
+                catch (ObjectDisposedException)
                 {
                     //socket closed
                     return;
                 }
-                catch (ThreadAbortException e)
+                catch (ThreadAbortException)
                 {
                     //thread closed
                     return;

@@ -17,20 +17,6 @@ namespace client.service.app
             Window.SetStatusBarColor(Android.Graphics.Color.Transparent);
             Window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
 
-            // Intent intent = new Intent(this, typeof(MyService));
-            // StartService(intent);
-            //1像素广播注册
-            KeepManager.GetInstance().RegisterKeep(this);
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-            {
-                StartForegroundService(new Intent(this, typeof(ForegroundService)));
-            }
-            else
-            {
-                StartService(new Intent(this, typeof(ForegroundService)));
-            }
-
-
             base.OnCreate(savedInstanceState);
         }
 
@@ -40,36 +26,6 @@ namespace client.service.app
         }
     }
 
-    [Service(IsolatedProcess = false, Exported = true, Name = "client.service.app.MyService", Process = "client.service.app.myservice_process")]
-    public class MyService : Service
-    {
-        public MyService()
-        {
-        }
-        public override IBinder OnBind(Intent intent)
-        {
-            return null;
-        }
-        public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
-        {
-            return StartCommandResult.Sticky;
-
-        }
-        public override void OnCreate()
-        {
-            base.OnCreate();
-
-            Startup.Start();
-        }
-
-    }
-
-
-    #region service
-
-    /// <summary>
-    /// 不同版本有差异，需分开处理 此种方法适用于音乐播放器保活，8.0以后会在通知栏显示
-    /// </summary>
     [Service]
     public class ForegroundService : Service
     {
@@ -96,12 +52,12 @@ namespace client.service.app
                 }
             }
 
-          //  PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
+            //PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
             Notification notification = new NotificationCompat.Builder(this, "service")
                   .SetSmallIcon(Resource.Drawable.appiconfg)
-                //  .SetContentIntent(pendingIntent)
-                  .SetContentTitle("通知")
-                  .SetContentText("通知内容")
+                  //.SetContentIntent(pendingIntent)
+                  .SetContentTitle("保活")
+                  .SetContentText("保活")
                   .SetOngoing(true)
                   .Build();
             notification.Flags |= NotificationFlags.NoClear;
@@ -111,17 +67,7 @@ namespace client.service.app
             return StartCommandResult.Sticky;
         }
     }
-
-
-    #endregion
-
-    #region activity
-
-    /// <summary>
-    /// 用于保活的1像素activity
-    /// </summary>
-    [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
-    public class AliveActivity : Android.App.Activity
+    public class AliveActivity : Activity
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -148,38 +94,9 @@ namespace client.service.app
             base.OnDestroy();
         }
     }
-
-    /// <summary>
-    /// 息屏广播监听
-    /// </summary>
-    public class KeepAliveReceiver : BroadcastReceiver
-    {
-        private static readonly string TAG = "KeepAliveReceiver";
-        public override void OnReceive(Context context, Intent intent)
-        {
-            String action = intent.Action;
-            if (TextUtils.Equals(action, Intent.ActionScreenOff))
-            {
-                //息屏 开启
-                KeepManager.GetInstance().StartKeep(context);
-            }
-            else if (TextUtils.Equals(action, Intent.ActionScreenOn))
-            {
-                //开屏 关闭
-                KeepManager.GetInstance().FinishKeep();
-            }
-
-        }
-    }
-
-    /// <summary>
-    ///  1像素activity保活管理类
-    /// </summary>
     public class KeepManager
     {
         private static readonly KeepManager mInstance = new KeepManager();
-
-        private KeepAliveReceiver mKeepAliveReceiver;
 
         private WeakReference<Android.App.Activity> mKeepActivity;
 
@@ -193,39 +110,11 @@ namespace client.service.app
             return mInstance;
         }
 
-        /// <summary>
-        /// 注册 开屏 关屏 广播
-        /// </summary>
-        /// <param name="context"></param>
         public void RegisterKeep(Context context)
         {
-            IntentFilter filter = new IntentFilter();
-
-            filter.AddAction(Intent.ActionScreenOn);
-            filter.AddAction(Intent.ActionScreenOff);
-
-
-            mKeepAliveReceiver = new KeepAliveReceiver();
-            context.RegisterReceiver(mKeepAliveReceiver, filter);
-            //StartKeep(context);
+            StartKeep(context);
         }
 
-        /// <summary>
-        /// 注销 广播接收者
-        /// </summary>
-        /// <param name="context"></param>
-        public void UnregisterKeep(Context context)
-        {
-            if (mKeepAliveReceiver != null)
-            {
-                context.UnregisterReceiver(mKeepAliveReceiver);
-            }
-        }
-
-        /// <summary>
-        /// 开启1像素Activity
-        /// </summary>
-        /// <param name="context"></param>
         public void StartKeep(Context context)
         {
             Intent intent = new Intent(context, typeof(AliveActivity));
@@ -234,31 +123,9 @@ namespace client.service.app
             context.StartActivity(intent);
         }
 
-        /// <summary>
-        /// 关闭1像素Activity
-        /// </summary>
-        public void FinishKeep()
-        {
-            if (mKeepActivity != null)
-            {
-                mKeepActivity.TryGetTarget(out Activity activity);
-                if (activity != null)
-                {
-                    activity.Finish();
-                }
-                mKeepActivity = null;
-            }
-        }
-
-        /// <summary>
-        /// 设置弱引用
-        /// </summary>
-        /// <param name="keep"></param>
         public void SetKeep(AliveActivity keep)
         {
             mKeepActivity = new WeakReference<Activity>(keep);
         }
     }
-
-    #endregion
 }

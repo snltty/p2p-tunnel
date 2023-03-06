@@ -198,7 +198,7 @@ namespace client.realize.messengers.clients
         }
         private void OnDisconnect(IConnection connection, IConnection regConnection)
         {
-            if (IConnection.Equals(connection, regConnection))
+            if (IConnection.Equals2(connection, regConnection))
             {
                 return;
             }

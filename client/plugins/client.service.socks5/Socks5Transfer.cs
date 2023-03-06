@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace client.service.socks5
 {
@@ -32,14 +33,11 @@ namespace client.service.socks5
         /// <returns></returns>
         public string GetPac()
         {
-            try
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return File.ReadAllText("./socks-custom.pac");
             }
-            catch (Exception)
-            {
-            }
-            return String.Empty;
+            return string.Empty;
         }
 
         /// <summary>
@@ -48,44 +46,51 @@ namespace client.service.socks5
         /// <returns></returns>
         public string UpdatePac()
         {
-            try
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                string pacContent = string.Empty;
-                string file = string.Empty;
-                if (config.IsCustomPac)
+                try
                 {
-                    file = Path.Join(uiconfig.Web.Root, "socks-custom.pac"); ;
-                    pacContent = File.ReadAllText("./socks-custom.pac");
-                }
-                else
-                {
-                    file = Path.Join(uiconfig.Web.Root, "socks.pac");
-                    pacContent = File.ReadAllText("./socks.pac");
-                }
+                    string pacContent = string.Empty;
+                    string file = string.Empty;
+                    if (config.IsCustomPac)
+                    {
+                        file = Path.Join(uiconfig.Web.Root, "socks-custom.pac"); ;
+                        pacContent = File.ReadAllText("./socks-custom.pac");
+                    }
+                    else
+                    {
+                        file = Path.Join(uiconfig.Web.Root, "socks.pac");
+                        pacContent = File.ReadAllText("./socks.pac");
+                    }
 
-                pacContent = pacContent.Replace("{socks5-address}", $"127.0.0.1:{config.ListenPort}");
-                File.WriteAllText(file, pacContent);
+                    pacContent = pacContent.Replace("{socks5-address}", $"127.0.0.1:{config.ListenPort}");
+                    File.WriteAllText(file, pacContent);
 
-                if (config.ListenEnable && config.IsPac)
-                {
-                    SetPac($"http://{(uiconfig.Web.BindIp == "+" ? "127.0.0.1" : uiconfig.Web.BindIp)}:{uiconfig.Web.Port}/{Path.GetFileName(file)}");
-                }
-                else
-                {
-                    ClearPac();
-                }
+                    if (config.ListenEnable && config.IsPac)
+                    {
+                        SetPac($"http://{(uiconfig.Web.BindIp == "+" ? "127.0.0.1" : uiconfig.Web.BindIp)}:{uiconfig.Web.Port}/{Path.GetFileName(file)}");
+                    }
+                    else
+                    {
+                        ClearPac();
+                    }
 
-                return string.Empty;
+                    return string.Empty;
+                }
+                catch (Exception ex)
+                {
+                    return ex.Message;
+                }
             }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
+            return string.Empty;
         }
 
         public void UpdatePac(string content)
         {
-            File.WriteAllText("./socks-custom.pac", content);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                File.WriteAllText("./socks-custom.pac", content);
+            }
         }
 
         /// <summary>
