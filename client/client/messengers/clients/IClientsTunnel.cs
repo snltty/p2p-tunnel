@@ -18,8 +18,9 @@ namespace client.messengers.clients
         /// 新通道
         /// </summary>
         /// <param name="serverType"></param>
-        /// <param name="tunnelName"></param>
-        /// <returns>通道名，端口</returns>
-        public Task<(ulong, ushort)> NewBind(ServerType serverType, ulong tunnelName);
+        /// <param name="selfId"></param>
+        /// <param name="targetId"></param>
+        /// <returns></returns>
+        public Task<ushort> NewBind(ServerType serverType, ulong selfId, ulong targetId);
     }
 }

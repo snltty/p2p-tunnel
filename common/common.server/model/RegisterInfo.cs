@@ -41,10 +41,6 @@ namespace common.server.model
         /// 本机tcp端口
         /// </summary>
         public ushort LocalTcpPort { get; set; }
-        /// <summary>
-        /// 本机udp端口
-        /// </summary>
-        public ushort LocalUdpPort { get; set; }
 
         /// <summary>
         /// 客户端自定义的权限列表
@@ -72,7 +68,6 @@ namespace common.server.model
                 + 1 + 1 + groupidBytes.Length
                 + 1 + 1 + nameBytes.Length
                 + 2 //LocalTcpPort
-                + 2// LocalUdpPort
                 + 4; //ClientAccess
 
             var bytes = new byte[length];
@@ -109,9 +104,6 @@ namespace common.server.model
 
 
             LocalTcpPort.ToBytes(memory.Slice(index));
-            index += 2;
-
-            LocalUdpPort.ToBytes(memory.Slice(index));
             index += 2;
 
             ClientAccess.ToBytes(memory.Slice(index));
@@ -151,8 +143,6 @@ namespace common.server.model
 
             LocalTcpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
-            LocalUdpPort = span.Slice(index, 2).ToUInt16();
-            index += 2;
 
             ClientAccess = span.Slice(index, 4).ToUInt32();
             index += 4;
@@ -164,14 +154,8 @@ namespace common.server.model
     /// </summary>
     public sealed class RegisterResultInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public RegisterResultInfo() { }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public RegisterResultInfoCodes Code { get; set; }
 
         /// <summary>
@@ -180,21 +164,9 @@ namespace common.server.model
         public bool Relay { get; set; }
 
         /// <summary>
-        /// 
-        /// </summary>
-        public ushort UdpPort { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public ushort TcpPort { get; set; }
-
-        /// <summary>
         /// 连接id
         /// </summary>
         public ulong Id { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public byte ShortId { get; set; }
         /// <summary>
         /// 连接ip
@@ -205,10 +177,6 @@ namespace common.server.model
         /// </summary>
         public string GroupId { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var groupIdBytes = GroupId.GetUTF16Bytes();
@@ -216,7 +184,6 @@ namespace common.server.model
             var bytes = new byte[
                 1 //Code
                 + 1//Relay
-                + 2 + 2 //port
                 + 9 //id
                 + 1 + Ip.Length()
                 + 1 + groupIdBytes.Length];
@@ -229,12 +196,6 @@ namespace common.server.model
 
             bytes[index] = (byte)(Relay ? 1 : 0);
             index += 1;
-
-            UdpPort.ToBytes(memory.Slice(index));
-            index += 2;
-
-            TcpPort.ToBytes(memory.Slice(index));
-            index += 2;
 
             Id.ToBytes(memory.Slice(index));
             index += 8;
@@ -261,10 +222,6 @@ namespace common.server.model
             return bytes;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -275,12 +232,6 @@ namespace common.server.model
 
             Relay = span[index] != 0;
             index += 1;
-
-            UdpPort = span.Slice(index, 2).ToUInt16();
-            index += 2;
-
-            TcpPort = span.Slice(index, 2).ToUInt16();
-            index += 2;
 
             Id = span.Slice(index, 8).ToUInt64();
             index += 8;
@@ -352,23 +303,11 @@ namespace common.server.model
     /// </summary>
     public sealed class TunnelRegisterInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public TunnelRegisterInfo() { }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public ulong TunnelName { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
+        public ulong SelfId { get; set; }
+        public ulong TargetId { get; set; }
         public ushort LocalPort { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public ushort Port { get; set; }
 
         /// <summary>
         /// 
@@ -376,17 +315,18 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var bytes = new byte[12];
+            var bytes = new byte[18];
             var memory = bytes.AsMemory();
 
             int index = 0;
-            TunnelName.ToBytes(memory);
+            SelfId.ToBytes(memory);
+            index += 8;
+            TargetId.ToBytes(memory);
             index += 8;
 
             LocalPort.ToBytes(memory.Slice(index));
             index += 2;
 
-            Port.ToBytes(memory.Slice(index));
             return bytes;
         }
         /// <summary>
@@ -396,13 +336,13 @@ namespace common.server.model
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             int index = 0;
-            TunnelName = data.Span.Slice(index, 8).ToUInt64();
+            SelfId = data.Span.Slice(index, 8).ToUInt64();
+            index += 8;
+            TargetId = data.Span.Slice(index, 8).ToUInt64();
             index += 8;
 
             LocalPort = data.Span.Slice(index, 2).ToUInt16();
             index += 2;
-
-            Port = data.Span.Slice(index, 2).ToUInt16();
         }
     }
 

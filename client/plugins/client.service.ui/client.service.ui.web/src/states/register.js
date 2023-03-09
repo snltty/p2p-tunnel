@@ -11,9 +11,6 @@ export const provideRegister = () => {
             GroupIds: [],
             Name: '',
             AutoReg: false,
-            AutoRegTimes: 10,
-            AutoRegInterval: 5000,
-            AutoRegDelay: 5000,
             Encode: false,
             EncodePassword: "",
             UsePunchHole: false,
@@ -21,7 +18,6 @@ export const provideRegister = () => {
             UseUdp: false,
             UseTcp: false,
             UseRelay: false,
-            UseOriginPort: false,
             UseReConnect: false,
             UdpUploadSpeedLimit: 0
         },
@@ -34,19 +30,11 @@ export const provideRegister = () => {
             Items: []
         },
         LocalInfo: {
-            RouteLevel: 0,
-            Mac: '',
-            Port: 0,
-            TcpPort: 0,
             IsConnecting: false,
-            UdpConnected: false,
-            TcpConnected: false,
-            LocalIp: ''
+            Connected: false
         },
         RemoteInfo: {
             Ip: '',
-            UdpPort: 0,
-            TcpPort: 0,
             ConnectId: 0,
             Relay: false
         }
@@ -56,36 +44,25 @@ export const provideRegister = () => {
     const fn = () => {
         if (websocketState.connected) {
             getRegisterInfo().then((json) => {
-                state.LocalInfo.UdpConnected = json.LocalInfo.UdpConnected;
-                state.LocalInfo.TcpConnected = json.LocalInfo.TcpConnected;
-                state.LocalInfo.UdpPort = json.LocalInfo.UdpPort;
-                state.LocalInfo.TcpPort = json.LocalInfo.TcpPort;
-                state.LocalInfo.Mac = json.LocalInfo.Mac;
-                state.LocalInfo.LocalIp = json.LocalInfo.LocalIp;
+                state.LocalInfo.Connected = json.LocalInfo.Connected;
 
-                state.LocalInfo.connected = state.LocalInfo.UdpConnected || state.LocalInfo.TcpConnected;
-
-                //state.ClientConfig.ShortId = json.ClientConfig.ShortId;
+                state.ClientConfig.ShortId = json.ClientConfig.ShortId;
                 state.ClientConfig.Name = json.ClientConfig.Name;
                 state.ClientConfig.GroupIds = json.ClientConfig.GroupIds;
                 state.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
                 state.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
-                state.ClientConfig.UseOriginPort = json.ClientConfig.UseOriginPort;
                 state.ClientConfig.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
 
 
                 state.ClientConfig.UsePunchHole = json.ClientConfig.UsePunchHole;
                 state.ClientConfig.TimeoutDelay = json.ClientConfig.TimeoutDelay;
 
-                state.RemoteInfo.UdpPort = json.RemoteInfo.UdpPort;
-                state.RemoteInfo.TcpPort = json.RemoteInfo.TcpPort;
                 state.RemoteInfo.Ip = json.RemoteInfo.Ip;
                 state.RemoteInfo.ConnectId = json.RemoteInfo.ConnectId;
                 state.RemoteInfo.Relay = json.RemoteInfo.Relay;
 
                 state.LocalInfo.IsConnecting = json.LocalInfo.IsConnecting;
-                state.LocalInfo.RouteLevel = json.LocalInfo.RouteLevel;
                 if (state.ClientConfig.ShortId == 0) {
                     state.ClientConfig.ShortId = json.ClientConfig.ShortId;
                 }
@@ -103,8 +80,7 @@ export const provideRegister = () => {
                 setTimeout(fn, 1000);
             });
         } else {
-            state.UdpConnected = false;
-            state.TcpConnected = false;
+            state.Connected = false;
             setTimeout(fn, 1000);
         }
     }

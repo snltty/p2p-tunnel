@@ -124,10 +124,6 @@ namespace client
         public bool UseRelay { get; set; } = true;
         public bool AutoRelay { get; set; } = true;
         /// <summary>
-        /// 原端口打洞
-        /// </summary>
-        public bool UseOriginPort { get; set; } = true;
-        /// <summary>
         /// 自动重连
         /// </summary>
         public bool UseReConnect { get; set; } = true;
@@ -173,8 +169,7 @@ namespace client
                 | (UseTcp ? EnumClientAccess.UseTcp : EnumClientAccess.None)
                 | (UsePunchHole ? EnumClientAccess.UsePunchHole : EnumClientAccess.None)
                 | (UseRelay ? EnumClientAccess.UseRelay : EnumClientAccess.None)
-                | (AutoRelay ? EnumClientAccess.UseAutoRelay : EnumClientAccess.None)
-                | (UseOriginPort ? EnumClientAccess.UseOriginPort : EnumClientAccess.None);
+                | (AutoRelay ? EnumClientAccess.UseAutoRelay : EnumClientAccess.None);
 
         }
     }
@@ -215,10 +210,6 @@ namespace client
         /// </summary>
         UseRelay = 8,
         UseAutoRelay = 16,
-        /// <summary>
-        /// 中继节点
-        /// </summary>
-        UseOriginPort = 32,
         /// <summary>
         /// 全部
         /// </summary>

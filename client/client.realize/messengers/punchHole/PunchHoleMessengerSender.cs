@@ -29,12 +29,6 @@ namespace client.realize.messengers.punchHole
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
         private ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>>();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
-        /// <param name="registerState"></param>
-        /// <param name="serviceProvider"></param>
         public PunchHoleMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerState, ServiceProvider serviceProvider)
         {
             this.messengerSender = messengerSender;
@@ -82,26 +76,6 @@ namespace client.realize.messengers.punchHole
         }
 
         /// <summary>
-        /// 发送回执
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task Response(IConnection connection, PunchHoleRequestInfo request)
-        {
-            await messengerSender.SendOnly(new MessageRequestWrap
-            {
-                Connection = connection,
-                MessengerId = (ushort)PunchHoleMessengerIds.Response,
-                Payload = new PunchHoleResponseInfo
-                {
-                    FromId = registerState.ConnectId,
-                    ToId = request.FromId,
-                    RequestId = request.RequestId
-                }.ToBytes()
-            }).ConfigureAwait(false);
-        }
-        /// <summary>
         /// 发送请求
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -124,8 +98,7 @@ namespace client.realize.messengers.punchHole
                     PunchStep = msg.Step,
                     PunchType = (byte)msg.PunchType,
                     ToId = arg.ToId,
-                    TunnelName = arg.TunnelName,
-                    Index = arg.Index,
+                    NewTunnel = arg.NewTunnel
                 }.ToBytes()
             }).ConfigureAwait(false);
         }
@@ -176,29 +149,9 @@ namespace client.realize.messengers.punchHole
             byte times = info.TryReverseValue;
             await Request(new SendPunchHoleArg<PunchHoleReverseInfo>
             {
-                Connection = registerState.OnlineConnection,
+                Connection = registerState.Connection,
                 ToId = info.Id,
                 Data = new PunchHoleReverseInfo { Value = times }
-            }).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<PunchHoleTunnelInfo> OnTunnel { get; } = new SimpleSubPushHandler<PunchHoleTunnelInfo>();
-        /// <summary>
-        /// 通知其开启新通道
-        /// </summary>
-        /// <param name="toid"></param>
-        /// <param name="tunnelName"></param>
-        /// <returns></returns>
-        public async Task SendTunnel(ulong toid, ulong tunnelName)
-        {
-            await Request(new SendPunchHoleArg<PunchHoleTunnelInfo>
-            {
-                Connection = registerState.OnlineConnection,
-                ToId = toid,
-                Data = new PunchHoleTunnelInfo { TunnelName = tunnelName, }
             }).ConfigureAwait(false);
         }
 
@@ -211,7 +164,7 @@ namespace client.realize.messengers.punchHole
         {
             await Request(new SendPunchHoleArg<PunchHoleResetInfo>
             {
-                Connection = registerState.OnlineConnection,
+                Connection = registerState.Connection,
                 ToId = toid,
                 Data = new PunchHoleResetInfo { }
             }).ConfigureAwait(false);
@@ -225,7 +178,7 @@ namespace client.realize.messengers.punchHole
         {
             await Request(new SendPunchHoleArg<PunchHoleOfflineInfo>
             {
-                Connection = registerState.OnlineConnection,
+                Connection = registerState.Connection,
                 ToId = toid,
                 Data = new PunchHoleOfflineInfo { }
             }).ConfigureAwait(false);
@@ -247,14 +200,9 @@ namespace client.realize.messengers.punchHole
         /// </summary>
         public ulong ToId { get; set; }
         /// <summary>
-        /// 通道
+        /// 给谁
         /// </summary>
-        public ulong TunnelName { get; set; } = 0;
-        /// <summary>
-        /// 次数
-        /// </summary>
-        public byte Index { get; set; } = 0;
-
+        public byte NewTunnel { get; set; }
         /// <summary>
         /// 数据
         /// </summary>

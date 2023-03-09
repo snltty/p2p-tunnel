@@ -44,23 +44,7 @@ namespace client.realize.messengers.clients
 
         private object lockObject = new();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientsMessengerSender"></param>
-        /// <param name="punchHoleUdp"></param>
-        /// <param name="punchHoleTcp"></param>
-        /// <param name="clientInfoCaching"></param>
-        /// <param name="registerState"></param>
-        /// <param name="punchHoleMessengerSender"></param>
-        /// <param name="config"></param>
-        /// <param name="udpServer"></param>
-        /// <param name="tcpServer"></param>
-        /// <param name="heartMessengerSender"></param>
-        /// <param name="relayMessengerSender"></param>
-        /// <param name="clientsTunnel"></param>
-        /// <param name="connecRouteCaching"></param>
-        /// <param name="punchHoleDirectionConfig"></param>
+       
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
@@ -87,8 +71,7 @@ namespace client.realize.messengers.clients
             punchHoleTcp.OnStepHandler += OnPunchHoleStep;
 
             //掉线的
-            tcpServer.OnDisconnect.Sub((connection) => OnDisconnect(connection, registerState.TcpConnection));
-            udpServer.OnDisconnect.Sub((connection) => OnDisconnect(connection, registerState.UdpConnection));
+            tcpServer.OnDisconnect += (connection) => OnDisconnect(connection, registerState.Connection);
             clientsTunnel.OnDisConnect = OnDisconnect;
             clientInfoCaching.OnOffline.Sub(OnOffline);
             clientInfoCaching.OnOfflineAfter.Sub(OnOfflineAfter);
@@ -138,12 +121,8 @@ namespace client.realize.messengers.clients
                 {
                     //3是被动方 4是主动方
                     ClientOnlineTypes onlineType = arg.RawData.PunchStep == step3 ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active;
-                    clientInfoCaching.Online(arg.RawData.FromId, arg.Connection, ClientConnectTypes.P2P, onlineType, arg.RawData.TunnelName);
-                    if (arg.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
-                    {
-                        clientInfoCaching.RemoveTunnelPort(arg.RawData.TunnelName);
-                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, arg.RawData.TunnelName);
-                    }
+                    clientInfoCaching.Online(arg.RawData.FromId, arg.Connection, ClientConnectTypes.P2P, onlineType);
+                    _ = clientsMessengerSender.RemoveTunnel(registerState.Connection, arg.RawData.FromId);
                     //主动方 记录一下，是我这边主动打洞成功的，下次由我这边开始尝试
                     if (arg.RawData.PunchStep == step4)
                     {
@@ -159,16 +138,7 @@ namespace client.realize.messengers.clients
             //打洞失败
             else if (arg.RawData.PunchStep == step2fail)
             {
-                if (clientInfoCaching.Get(arg.RawData.FromId, out ClientInfo client))
-                {
-                    client.SetConnecting(false);
-                    if (arg.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
-                    {
-                        clientInfoCaching.RemoveTunnelPort(arg.RawData.TunnelName);
-                        clientInfoCaching.RemoveUdpserver(arg.RawData.TunnelName, true);
-                        _ = clientsMessengerSender.RemoveTunnel(registerState.OnlineConnection, arg.RawData.TunnelName);
-                    }
-                }
+                clientInfoCaching.Offline(arg.RawData.FromId, ClientOfflineTypes.Manual);
             }
         }
 
@@ -364,15 +334,13 @@ namespace client.realize.messengers.clients
 
             client.SetConnecting(true);
 
-            ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.MIN, (ulong)TunnelDefaults.MIN };
-
-            for (int i = 0; i < tunnelNames.Length; i++)
+            for (int i = 0; i < 2; i++)
             {
                 ConnectResultModel result = await punchHoleUdp.Send(new ConnectParams
                 {
                     Id = client.Id,
-                    TunnelName = tunnelNames[i],
-                    LocalPort = registerState.LocalInfo.UdpPort
+                    NewTunnel = 1,
+                    LocalPort = 0
                 }).ConfigureAwait(false);
                 if (result.State)
                 {
@@ -397,18 +365,15 @@ namespace client.realize.messengers.clients
 
             client.SetConnecting(true);
 
-            ulong[] tunnelNames = new ulong[] { (ulong)TunnelDefaults.TCP, (ulong)TunnelDefaults.MIN };
-            if (config.Client.UseOriginPort == false || client.UseOriginPort == false)
-            {
-                tunnelNames[0] = (ulong)TunnelDefaults.MIN;
-            }
+            byte[] tunnelNames = new byte[] { 0, 1 };
             for (int i = 0; i < tunnelNames.Length; i++)
             {
+                clientInfoCaching.AddTunnelPort(client.Id, registerState.LocalInfo.Port);
                 ConnectResultModel result = await punchHoleTcp.Send(new ConnectParams
                 {
                     Id = client.Id,
-                    TunnelName = tunnelNames[i],
-                    LocalPort = registerState.LocalInfo.UdpPort
+                    NewTunnel  = tunnelNames[i],
+                    LocalPort = registerState.LocalInfo.Port
                 }).ConfigureAwait(false);
                 if (result.State)
                 {
@@ -452,18 +417,6 @@ namespace client.realize.messengers.clients
         {
             firstClients.Reset();
             clientInfoCaching.Clear();
-            if (state)
-            {
-                clientInfoCaching.AddTunnelPort((ulong)TunnelDefaults.UDP, registerState.LocalInfo.UdpPort);
-                clientInfoCaching.AddUdpserver((ulong)TunnelDefaults.UDP, udpServer as UdpServer);
-                clientInfoCaching.AddTunnelPort((ulong)TunnelDefaults.TCP, registerState.LocalInfo.TcpPort);
-            }
-            else
-            {
-                clientInfoCaching.RemoveTunnelPort((ulong)TunnelDefaults.UDP);
-                clientInfoCaching.RemoveUdpserver((ulong)TunnelDefaults.UDP, true);
-                clientInfoCaching.RemoveTunnelPort((ulong)TunnelDefaults.TCP);
-            }
         }
 
         private void OnServerSendClients(ClientsInfo clients)
@@ -471,7 +424,7 @@ namespace client.realize.messengers.clients
             try
             {
 
-                if (registerState.OnlineConnection == null || clients.Clients == null)
+                if (registerState.Connection == null || clients.Clients == null)
                 {
                     return;
                 }
@@ -499,8 +452,7 @@ namespace client.realize.messengers.clients
                             UseUdp = (enumClientAccess & EnumClientAccess.UseUdp) == EnumClientAccess.UseUdp,
                             UsePunchHole = (enumClientAccess & EnumClientAccess.UsePunchHole) == EnumClientAccess.UsePunchHole,
                             UseRelay = (enumClientAccess & EnumClientAccess.UseRelay) == EnumClientAccess.UseRelay,
-                            UseAutoRelay = (enumClientAccess & EnumClientAccess.UseAutoRelay) == EnumClientAccess.UseAutoRelay,
-                            UseOriginPort = (enumClientAccess & EnumClientAccess.UseOriginPort) == EnumClientAccess.UseOriginPort,
+                            UseAutoRelay = (enumClientAccess & EnumClientAccess.UseAutoRelay) == EnumClientAccess.UseAutoRelay
                         };
                         clientInfoCaching.Add(client);
                         if (firstClients.IsDefault)
@@ -561,7 +513,7 @@ namespace client.realize.messengers.clients
                 IConnection connection = null;
                 if (item[1] == 0)
                 {
-                    connection = registerState.OnlineConnection;
+                    connection = registerState.Connection;
                 }
                 else
                 {
@@ -594,7 +546,7 @@ namespace client.realize.messengers.clients
                 return;
             }
 
-            IConnection connection = registerState.OnlineConnection;
+            IConnection connection = registerState.Connection;
             if (client.Connected == true)
             {
                 return;
@@ -636,7 +588,7 @@ namespace client.realize.messengers.clients
                 }
                 if (config.Client.Encode)
                 {
-                    ICrypto crypto = await cryptoSwap.Swap(connection, null, config.Client.EncodePassword);
+                    ICrypto crypto = await cryptoSwap.Swap(connection, config.Client.EncodePassword);
                     if (crypto == null)
                     {
                         Logger.Instance.Error("交换密钥失败，如果客户端设置了密钥，则目标端必须设置相同的密钥，如果目标端未设置密钥，则客户端必须留空");
@@ -648,7 +600,7 @@ namespace client.realize.messengers.clients
 
             ClientConnectTypes relayType = relayids.Span[1] == 0 ? ClientConnectTypes.RelayServer : ClientConnectTypes.RelayNode;
             ClientOnlineTypes onlineType = notify == false ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active;
-            clientInfoCaching.Online(relayids.Span[^1], connection, relayType, onlineType, (ulong)TunnelDefaults.MIN);
+            clientInfoCaching.Online(relayids.Span[^1], connection, relayType, onlineType);
         }
 
         /// <summary>

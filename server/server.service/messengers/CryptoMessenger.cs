@@ -93,8 +93,7 @@ namespace server.service.messengers
         {
             if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo client))
             {
-                client.UdpConnection?.EncodeDisable();
-                client.TcpConnection?.EncodeDisable();
+                client.Connection?.EncodeDisable();
             }
             return Helper.FalseArray;
         }

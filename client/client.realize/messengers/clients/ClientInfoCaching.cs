@@ -3,6 +3,7 @@ using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.servers.rudp;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -15,8 +16,6 @@ namespace client.realize.messengers.clients
     {
         private readonly ConcurrentDictionary<ulong, ClientInfo> clients = new ConcurrentDictionary<ulong, ClientInfo>();
         private readonly ConcurrentDictionary<string, ClientInfo> clientsByName = new ConcurrentDictionary<string, ClientInfo>();
-        private readonly ConcurrentDictionary<ulong, int> tunnelPorts = new ConcurrentDictionary<ulong, int>();
-        private readonly ConcurrentDictionary<ulong, UdpServer> udpservers = new ConcurrentDictionary<ulong, UdpServer>();
 
         /// <summary>
         /// 下线
@@ -119,7 +118,10 @@ namespace client.realize.messengers.clients
                 if (client.ConnectType != ClientConnectTypes.Unknow)
                 {
                     OnOffline.Push(client);
-                    client.Offline(offlineType);
+                }
+                client.Offline(offlineType);
+                if (client.ConnectType != ClientConnectTypes.Unknow)
+                {
                     OnOfflineAfter.Push(client);
                 }
             }
@@ -148,14 +150,12 @@ namespace client.realize.messengers.clients
         /// <param name="connection"></param>
         /// <param name="connectType"></param>
         /// <param name="onlineType"></param>
-        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType, ulong tunnelName)
+        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType)
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
                 connection.ConnectId = id;
-                client.Online(connection, connectType, onlineType, tunnelName);
-                //RemoveTunnelPort(tunnelName);
-                //RemoveUdpserver(tunnelName);
+                client.Online(connection, connectType, onlineType);
                 OnOnline.Push(client);
             }
         }
@@ -163,60 +163,76 @@ namespace client.realize.messengers.clients
         /// <summary>
         /// 新端口
         /// </summary>
-        /// <param name="tunnelName"></param>
+        /// <param name="id"></param>
         /// <param name="port"></param>
-        public void AddTunnelPort(ulong tunnelName, int port)
+        public void AddTunnelPort(ulong id, int port)
         {
-            tunnelPorts.TryAdd(tunnelName, port);
+            if (clients.TryGetValue(id, out ClientInfo client))
+            {
+                client.TunnelPort = port;
+            }
         }
         /// <summary>
         /// 新端口
         /// </summary>
-        /// <param name="tunnelName"></param>
+        /// <param name="id"></param>
         /// <param name="port"></param>
         /// <returns></returns>
-        public bool GetTunnelPort(ulong tunnelName, out int port)
+        public bool GetTunnelPort(ulong id, out int port)
         {
-            return tunnelPorts.TryGetValue(tunnelName, out port);
-        }
-        /// <summary>
-        /// 删除新端口
-        /// </summary>
-        /// <param name="tunnelName"></param>
-        public void RemoveTunnelPort(ulong tunnelName)
-        {
-            tunnelPorts.TryRemove(tunnelName, out _);
+            port = 0;
+            if (clients.TryGetValue(id, out ClientInfo client))
+            {
+                port = client.TunnelPort;
+                return port > 0;
+            }
+            return false;
         }
 
         /// <summary>
         /// 新通道
         /// </summary>
-        /// <param name="tunnelName"></param>
+        /// <param name="id"></param>
         /// <param name="server"></param>
-        public void AddUdpserver(ulong tunnelName, UdpServer server)
+        public void AddUdpserver(ulong id, UdpServer server)
         {
-            udpservers.TryAdd(tunnelName, server);
+            if (clients.TryGetValue(id, out ClientInfo client))
+            {
+                client.TunnelServer?.Disponse();
+                client.TunnelServer = server;
+            }
         }
         /// <summary>
         /// 新通道
         /// </summary>
-        /// <param name="tunnelName"></param>
+        /// <param name="id"></param>
         /// <param name="server"></param>
         /// <returns></returns>
-        public bool GetUdpserver(ulong tunnelName, out UdpServer server)
+        public bool GetUdpserver(ulong id, out UdpServer server)
         {
-            return udpservers.TryGetValue(tunnelName, out server);
+            server = null;
+            if (clients.TryGetValue(id, out ClientInfo client))
+            {
+                if (client.TunnelServer == null) return false;
+                server = (UdpServer)client.TunnelServer;
+                return true;
+            }
+            return false;
         }
         /// <summary>
         /// 删除新通道
         /// </summary>
-        /// <param name="tunnelName"></param>
+        /// <param name="id"></param>
         /// <param name="clear"></param>
-        public void RemoveUdpserver(ulong tunnelName, bool clear = false)
+        public void RemoveUdpserver(ulong id, bool clear = false)
         {
-            if (udpservers.TryRemove(tunnelName, out UdpServer server) && server != null && clear)
+            if (clients.TryGetValue(id, out ClientInfo client))
             {
-                server.Disponse();
+                if (clear)
+                {
+                    client?.TunnelServer.Disponse();
+                }
+                client.TunnelServer = null;
             }
         }
 
@@ -234,8 +250,6 @@ namespace client.realize.messengers.clients
                 clients.TryRemove(item.Id, out _);
                 OnRemove.Push(item);
             }
-            udpservers.Clear();
-            tunnelPorts.Clear();
             clientsByName.Clear();
         }
     }

@@ -55,28 +55,20 @@
                                 <el-checkbox size="default" v-model="model.AutoReg">开启</el-checkbox>
                             </el-form-item>
                         </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="原端口" prop="UseOriginPort">
-                                <el-tooltip class="box-item" effect="dark" content="是否使用原端口打洞" placement="top-start">
-                                    <el-checkbox v-model="model.UseOriginPort">开启</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                        </el-col>
-
                     </el-row>
                 </el-form-item>
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="使用tcp" prop="UseTcp">
-                                <el-tooltip class="box-item" effect="dark" content="是否使用tcp" placement="top-start">
+                                <el-tooltip class="box-item" effect="dark" content="是否使用tcp打洞" placement="top-start">
                                     <el-checkbox v-model="model.UseTcp">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="使用udp" prop="UseUdp">
-                                <el-tooltip class="box-item" effect="dark" content="是否使用udp" placement="top-start">
+                                <el-tooltip class="box-item" effect="dark" content="是否使用udp打洞" placement="top-start">
                                     <el-checkbox v-model="model.UseUdp">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
@@ -145,7 +137,6 @@ export default {
                 UseTcp: false,
                 UseRelay: true,
                 AutoRelay: true,
-                UseOriginPort: true,
                 UseReConnect: false,
                 UdpUploadSpeedLimit: 0
             },
@@ -186,7 +177,6 @@ export default {
                 state.model.UseTcp = json.ClientConfig.UseTcp;
                 state.model.UseRelay = json.ClientConfig.UseRelay;
                 state.model.AutoRelay = json.ClientConfig.AutoRelay;
-                state.model.UseOriginPort = json.ClientConfig.UseOriginPort;
                 state.model.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
             }).catch((msg) => {
             });
@@ -204,7 +194,6 @@ export default {
                     json.ClientConfig.UseTcp = state.model.UseTcp;
                     json.ClientConfig.UseRelay = state.model.UseRelay;
                     json.ClientConfig.AutoRelay = state.model.AutoRelay;
-                    json.ClientConfig.UseOriginPort = state.model.UseOriginPort;
                     json.ClientConfig.UseReConnect = state.model.UseReConnect;
                     json.ClientConfig.UdpUploadSpeedLimit = +state.model.UdpUploadSpeedLimit;
                     resolve(json);

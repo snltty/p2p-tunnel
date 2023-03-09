@@ -13,19 +13,15 @@ using server.messengers.register;
 using common.libs.database;
 using server.messengers;
 using server.service.validators;
+using System.Runtime.Intrinsics.Arm;
+using System.Net;
+using server.service.messengers;
+using common.libs.extends;
 
 namespace server.service
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class Plugin : IPlugin
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="assemblys"></param>
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddTransient(typeof(IConfigDataProvider<>), typeof(ConfigDataFileProvider<>));
@@ -52,11 +48,6 @@ namespace server.service
                 services.AddSingleton(item);
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="assemblys"></param>
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             var config = services.GetService<Config>();
@@ -67,17 +58,18 @@ namespace server.service
             server.Start(config.Tcp);
             Logger.Instance.Info("TCP服务已开启");
 
-            services.GetService<IUdpServer>().Start(services.GetService<Config>().Udp, timeout: config.TimeoutDelay);
+            var udpServer = services.GetService<IUdpServer>();
+            udpServer.Start(config.Udp, timeout: config.TimeoutDelay);
+
             Logger.Instance.Info("UDP服务已开启");
 
-
             MessengerResolver messenger = services.GetService<MessengerResolver>();
-            MessengerSender sender = services.GetService<MessengerSender>();
             foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)).Distinct())
             {
                 messenger.LoadMessenger(item, services.GetService(item));
             }
             Loop(services);
+            Udp((UdpServer)udpServer, messenger);
         }
 
         private void Loop(ServiceProvider services)
@@ -88,9 +80,9 @@ namespace server.service
 
             clientRegisterCache.OnChanged.Sub((changeClient) =>
             {
-                List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.OnLineConnection != null && c.OnLineConnection.Connected).OrderBy(c=>c.Id).Select(c => new ClientsClientInfo
+                List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.Connection != null && c.Connection.Connected).OrderBy(c => c.Id).Select(c => new ClientsClientInfo
                 {
-                    Connection = c.OnLineConnection,
+                    Connection = c.Connection,
                     Id = c.Id,
                     Name = c.Name,
                     Access = c.ClientAccess,
@@ -113,6 +105,35 @@ namespace server.service
                     }
                 }
             });
+        }
+
+        ClientsMessenger clientsMessenger;
+        private void Udp(UdpServer udpServer, MessengerResolver messenger)
+        {
+            if (messenger.GetMessenger((ushort)ClientsMessengerIds.AddTunnel, out object obj))
+            {
+                clientsMessenger = obj as ClientsMessenger;
+            }
+            udpServer.OnMessage += (IPEndPoint remoteEndpoint, Memory<byte> data) =>
+            {
+                try
+                {
+                    TunnelRegisterInfo model = new TunnelRegisterInfo();
+                    model.DeBytes(data);
+                    if (clientsMessenger != null)
+                    {
+
+                        Console.WriteLine($"{model.SelfId} -> {model.TargetId} : {model.LocalPort} {remoteEndpoint.Port}");
+
+                        clientsMessenger?.AddTunnel(model, remoteEndpoint.Port);
+                        udpServer.SendUnconnectedMessage(((ushort)remoteEndpoint.Port).ToBytes(), remoteEndpoint);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.Error(ex);
+                }
+            };
         }
     }
 }

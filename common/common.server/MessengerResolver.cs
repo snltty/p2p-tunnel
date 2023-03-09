@@ -22,15 +22,9 @@ namespace common.server
         private readonly IRelaySourceConnectionSelector sourceConnectionSelector;
         private readonly IRelayValidator relayValidator;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="udpserver"></param>
-        /// <param name="tcpserver"></param>
-        /// <param name="messengerSender"></param>
-        /// <param name="sourceConnectionSelector"></param>
-        /// <param name="relayValidator"></param>
-        public MessengerResolver(IUdpServer udpserver, ITcpServer tcpserver, MessengerSender messengerSender, IRelaySourceConnectionSelector sourceConnectionSelector, IRelayValidator relayValidator)
+
+        public MessengerResolver(IUdpServer udpserver, ITcpServer tcpserver, MessengerSender messengerSender,
+            IRelaySourceConnectionSelector sourceConnectionSelector, IRelayValidator relayValidator)
         {
             this.tcpserver = tcpserver;
             this.udpserver = udpserver;
@@ -42,11 +36,6 @@ namespace common.server
             this.relayValidator = relayValidator;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="obj"></param>
         public void LoadMessenger(Type type, object obj)
         {
             Type voidType = typeof(void);
@@ -54,23 +43,37 @@ namespace common.server
             foreach (var method in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
             {
                 MessengerIdAttribute mid = method.GetCustomAttribute(midType) as MessengerIdAttribute;
-                if (messengers.ContainsKey(mid.Id) == false)
+                if(mid != null)
                 {
-                    MessengerCacheInfo cache = new MessengerCacheInfo
+                    if (messengers.ContainsKey(mid.Id) == false)
                     {
-                        IsVoid = method.ReturnType == voidType,
-                        Method = method,
-                        Target = obj,
-                        IsTask = method.ReturnType.GetProperty("IsCompleted") != null && method.ReturnType.GetMethod("GetAwaiter") != null,
-                        IsTaskResult = method.ReturnType.GetProperty("Result") != null
-                    };
-                    messengers.TryAdd(mid.Id, cache);
-                }
-                else
-                {
-                    Logger.Instance.Error($"{type.Name}->{method.Name}->{mid.Id} 消息id已存在");
+                        MessengerCacheInfo cache = new MessengerCacheInfo
+                        {
+                            IsVoid = method.ReturnType == voidType,
+                            Method = method,
+                            Target = obj,
+                            IsTask = method.ReturnType.GetProperty("IsCompleted") != null && method.ReturnType.GetMethod("GetAwaiter") != null,
+                            IsTaskResult = method.ReturnType.GetProperty("Result") != null
+                        };
+                        messengers.TryAdd(mid.Id, cache);
+                    }
+                    else
+                    {
+                        Logger.Instance.Error($"{type.Name}->{method.Name}->{mid.Id} 消息id已存在");
+                    }
                 }
             }
+        }
+
+        public bool GetMessenger(ushort id, out object obj)
+        {
+            obj = null;
+            if (messengers.TryGetValue(id, out MessengerCacheInfo cache))
+            {
+                obj = cache.Target;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

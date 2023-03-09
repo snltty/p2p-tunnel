@@ -32,16 +32,6 @@ namespace client.realize.messengers.punchHole.udp
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly IClientsTunnel clientsTunnel;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="punchHoleMessengerSender"></param>
-        /// <param name="registerState"></param>
-        /// <param name="cryptoSwap"></param>
-        /// <param name="config"></param>
-        /// <param name="wheelTimer"></param>
-        /// <param name="clientInfoCaching"></param>
-        /// <param name="clientsTunnel"></param>
         public PunchHoleRUdpMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching, IClientsTunnel clientsTunnel)
         {
             this.punchHoleMessengerSender = punchHoleMessengerSender;
@@ -52,7 +42,7 @@ namespace client.realize.messengers.punchHole.udp
             this.clientInfoCaching = clientInfoCaching;
             this.clientsTunnel = clientsTunnel;
         }
-        private IConnection connection => registerState.UdpConnection;
+        private IConnection Connection => registerState.Connection;
 #if DEBUG
         private bool UseLocalPort = true;
 #else
@@ -64,12 +54,7 @@ namespace client.realize.messengers.punchHole.udp
 
         public async Task<ConnectResultModel> Send(ConnectParams param)
         {
-            if (param.TunnelName == (ulong)TunnelDefaults.MIN)
-            {
-                (ulong tunnelName, int localPort) = await clientsTunnel.NewBind(ServerType.UDP, (ulong)TunnelDefaults.MIN);
-                param.TunnelName = tunnelName;
-                param.LocalPort = localPort;
-            }
+            param.LocalPort = await clientsTunnel.NewBind(ServerType.UDP, Connection.ConnectId, param.Id);
 
             TaskCompletionSource<ConnectResultModel> tcs = new TaskCompletionSource<ConnectResultModel>();
             connectCache.TryAdd(param.Id, new ConnectCacheModel
@@ -81,9 +66,9 @@ namespace client.realize.messengers.punchHole.udp
 
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
             {
-                Connection = connection,
-                TunnelName = param.TunnelName,
+                Connection = Connection,
                 ToId = param.Id,
+                NewTunnel = 0,
                 Data = new PunchHoleStep1Info { Step = (byte)PunchHoleUdpSteps.STEP_1, PunchType = PunchHoleTypes.UDP }
             }).ConfigureAwait(false);
             return await tcs.Task.ConfigureAwait(false);
@@ -158,7 +143,7 @@ namespace client.realize.messengers.punchHole.udp
                 if (connectCache.TryGetValue(toid, out ConnectCacheModel cache))
                 {
                     cache.Canceled = true;
-                    _ = SendStep2Fail(cache.TunnelName, toid);
+                    _ = SendStep2Fail(toid, cache.NewTunnel);
                 }
             }
             catch (Exception ex)
@@ -184,13 +169,10 @@ namespace client.realize.messengers.punchHole.udp
 
         private async Task OnStep1(PunchHoleStepModel model)
         {
-            if (model.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
-            {
-                await clientsTunnel.NewBind(model.Connection.ServerType, model.RawData.TunnelName);
-            }
+            await clientsTunnel.NewBind(ServerType.UDP, Connection.ConnectId, model.RawData.FromId);
 
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
-            if (clientInfoCaching.GetUdpserver(model.RawData.TunnelName, out UdpServer udpServer))
+            if (clientInfoCaching.GetUdpserver(model.RawData.FromId, out UdpServer udpServer))
             {
 
                 foreach (var ip in data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
@@ -200,23 +182,26 @@ namespace client.realize.messengers.punchHole.udp
                         continue;
                     }
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.LocalPort));
+                    Console.WriteLine($"Unconnected {Connection.ConnectId} -> {model.RawData.FromId} : {data.LocalPort}");
                 }
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port));
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + 1));
+                Console.WriteLine($"Unconnected {Connection.ConnectId} -> {model.RawData.FromId} : {data.Port}");
+                Console.WriteLine($"Unconnected {Connection.ConnectId} -> {model.RawData.FromId} : {data.Port + 1}");
 
                 AddSendTimeout(model.RawData.FromId);
                 await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2Info>
                 {
                     Connection = model.Connection,
-                    TunnelName = model.RawData.TunnelName,
                     ToId = model.RawData.FromId,
+                    NewTunnel = model.RawData.NewTunnel,
                     Data = new PunchHoleStep2Info { Step = (byte)PunchHoleUdpSteps.STEP_2, PunchType = PunchHoleTypes.UDP }
                 }).ConfigureAwait(false);
             }
             else
             {
-                Logger.Instance.Warning($"OnStep1 未找到通道：{model.RawData.TunnelName}");
-                await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
+                Logger.Instance.Warning($"udp OnStep1 未找到通道：{model.RawData.FromId}");
+                await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
             }
         }
 
@@ -228,13 +213,13 @@ namespace client.realize.messengers.punchHole.udp
                  if (connectCache.TryGetValue(model.RawData.FromId, out ConnectCacheModel cache) == false)
                  {
                      Logger.Instance.Error($"udp 找不到缓存");
-                     await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
+                     await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
                      return;
                  }
-                 if (clientInfoCaching.GetUdpserver(model.RawData.TunnelName, out UdpServer udpServer) == false)
+                 if (clientInfoCaching.GetUdpserver(model.RawData.FromId, out UdpServer udpServer) == false)
                  {
-                     Logger.Instance.Error($"udp 找不到通道服务器：{model.RawData.TunnelName}");
-                     await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
+                     Logger.Instance.Error($"udp 找不到通道服务器：{model.RawData.FromId}");
+                     await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
                      return;
                  }
 
@@ -275,11 +260,11 @@ namespace client.realize.messengers.punchHole.udp
                  if (connection != null)
                  {
                      await CryptoSwap(connection).ConfigureAwait(false);
-                     await SendStep3(connection, model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
+                     await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
                  }
                  else
                  {
-                     await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
+                     await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
                  }
              });
         }
@@ -287,7 +272,7 @@ namespace client.realize.messengers.punchHole.udp
         {
             if (config.Client.Encode)
             {
-                ICrypto crypto = await cryptoSwap.Swap(null, connection, config.Client.EncodePassword);
+                ICrypto crypto = await cryptoSwap.Swap(connection, config.Client.EncodePassword);
                 if (crypto == null)
                 {
                     Logger.Instance.Error("udp打洞交换密钥失败，可能是两端密钥不一致，A如果设置了密钥，则B必须设置相同的密钥，如果B未设置密钥，则A必须留空");
@@ -302,7 +287,7 @@ namespace client.realize.messengers.punchHole.udp
         private async Task OnStep21(PunchHoleStepModel model)
         {
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
-            if (clientInfoCaching.GetUdpserver(model.RawData.TunnelName, out UdpServer udpServer))
+            if (clientInfoCaching.GetUdpserver(model.RawData.FromId, out UdpServer udpServer))
             {
                 foreach (var ip in data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false))
                 {
@@ -321,13 +306,13 @@ namespace client.realize.messengers.punchHole.udp
         private void OnStep2Fail(PunchHoleStepModel model)
         {
         }
-        private async Task SendStep2Fail(ulong tunname, ulong toid)
+        private async Task SendStep2Fail(ulong toid, byte newTunnel)
         {
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2FailInfo>
             {
-                Connection = connection,
-                TunnelName = tunname,
+                Connection = Connection,
                 ToId = toid,
+                NewTunnel = newTunnel,
                 Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleUdpSteps.STEP_2_Fail, PunchType = PunchHoleTypes.UDP }
             }).ConfigureAwait(false);
 
@@ -348,24 +333,23 @@ namespace client.realize.messengers.punchHole.udp
             {
                 OnStepHandler?.Invoke(this, new PunchHoleStepModel
                 {
-                    Connection = connection,
+                    Connection = Connection,
                     RawData = new PunchHoleRequestInfo
                     {
                         PunchStep = (byte)PunchHoleUdpSteps.STEP_2_Fail,
-                        FromId = toid,
-                        TunnelName = tunname
+                        FromId = toid
                     }
                 });
             }
         }
 
-        private async Task SendStep3(IConnection connection, ulong tunnelName, ulong toid)
+        private async Task SendStep3(IConnection connection, ulong toid, byte newTunnel)
         {
             AddSendTimeout(toid);
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep3Info>
             {
-                TunnelName = tunnelName,
                 Connection = connection,
+                NewTunnel = newTunnel,
                 Data = new PunchHoleStep3Info
                 {
                     Step = (byte)PunchHoleUdpSteps.STEP_3,
@@ -378,7 +362,6 @@ namespace client.realize.messengers.punchHole.udp
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep4Info>
             {
                 Connection = model.Connection,
-                TunnelName = model.RawData.TunnelName,
                 Data = new PunchHoleStep4Info
                 {
                     Step = (byte)PunchHoleUdpSteps.STEP_4,

@@ -49,10 +49,7 @@ namespace client.messengers.clients
         /// </summary>
         public bool UseRelay { get; init; }
         public bool UseAutoRelay { get; init; }
-        /// <summary>
-        /// 原端口打洞
-        /// </summary>
-        public bool UseOriginPort { get; init; }
+
         /// <summary>
         /// ping值
         /// </summary>
@@ -106,7 +103,17 @@ namespace client.messengers.clients
         [JsonIgnore]
         public IConnection Connection { get; set; }
 
-        public ulong TunnelName { get; set; } = (ulong)TunnelDefaults.MIN;
+        /// <summary>
+        /// 通道服务
+        /// </summary>
+        [JsonIgnore]
+        public IServer TunnelServer { get; set; }
+        /// <summary>
+        /// 通道端口
+        /// </summary>
+        [JsonIgnore]
+        public int TunnelPort { get; set; }
+
         /// <summary>
         /// 下线
         /// </summary>
@@ -118,6 +125,9 @@ namespace client.messengers.clients
             OfflineType = offlineType;
             Connection?.Disponse();
             Connection = null;
+
+            TunnelServer?.Disponse();
+            TunnelServer = null;
         }
         /// <summary>
         /// 上线
@@ -125,14 +135,13 @@ namespace client.messengers.clients
         /// <param name="connection"></param>
         /// <param name="connectType"></param>
         /// <param name="onlineType"></param>
-        public void Online(IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType, ulong tunnelName)
+        public void Online(IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType)
         {
             IConnection _connection = Connection;
             Connection = connection;
             ConnectType = connectType;
             OnlineType = onlineType;
             Connecting = false;
-            TunnelName = tunnelName;
 
             if(onlineType == ClientOnlineTypes.Active)
             {

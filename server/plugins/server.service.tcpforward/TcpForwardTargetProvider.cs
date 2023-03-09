@@ -53,7 +53,7 @@ namespace server.service.tcpforward
                 {
                     if(clientRegisterCaching.Get(cacheInfo.Id,out RegisterCacheInfo client))
                     {
-                        cacheInfo.Connection = client.OnLineConnection;
+                        cacheInfo.Connection = client.Connection;
                     }
                 }
                 info.Connection = cacheInfo.Connection;

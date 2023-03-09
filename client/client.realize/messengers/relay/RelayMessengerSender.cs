@@ -77,7 +77,7 @@ namespace client.realize.messengers.relay
             {
                 MessengerId = (ushort)RelayMessengerIds.AskConnects,
                 Encode = false,
-                Connection = registerStateInfo.OnlineConnection
+                Connection = registerStateInfo.Connection
             }).ConfigureAwait(false);
         }
         /// <summary>
@@ -91,7 +91,7 @@ namespace client.realize.messengers.relay
             {
                 MessengerId = (ushort)RelayMessengerIds.Connects,
                 Encode = false,
-                Connection = registerStateInfo.OnlineConnection,
+                Connection = registerStateInfo.Connection,
                 Payload = connects.ToBytes(),
             }).ConfigureAwait(false);
         }

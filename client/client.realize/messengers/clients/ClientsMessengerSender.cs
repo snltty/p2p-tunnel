@@ -27,46 +27,26 @@ namespace client.realize.messengers.clients
         public SimpleSubPushHandler<ClientsInfo> OnServerClientsData { get; } = new SimpleSubPushHandler<ClientsInfo>();
 
         /// <summary>
-        /// 获取通道端口
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
-        public async Task<ushort> GetTunnelPort(IConnection connection)
-        {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
-            {
-                Connection = connection,
-                MessengerId = (ushort)ClientsMessengerIds.Port,
-                Timeout = 2000
-            }).ConfigureAwait(false);
-
-            if (resp.Code == MessageResponeCodes.OK)
-            {
-                return resp.Data.Span.ToUInt16();
-            }
-            return 0;
-        }
-        /// <summary>
         /// 添加通道
         /// </summary>
         /// <param name="connection"></param>
-        /// <param name="tunnelName"></param>
+        /// <param name="targetId"></param>
         /// <param name="port"></param>
         /// <param name="localPort"></param>
         /// <returns></returns>
-        public async Task<ulong> AddTunnel(IConnection connection, ulong tunnelName, ushort port, ushort localPort)
+        public async Task<ushort> AddTunnel(IConnection connection,ulong selfId, ulong targetId, ushort localPort)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                Payload = new TunnelRegisterInfo { LocalPort = localPort, Port = port, TunnelName = tunnelName }.ToBytes(),
+                Payload = new TunnelRegisterInfo { LocalPort = localPort, SelfId = selfId, TargetId = targetId }.ToBytes(),
                 MessengerId = (ushort)ClientsMessengerIds.AddTunnel,
                 Timeout = 2000
             }).ConfigureAwait(false);
 
             if (resp.Code == MessageResponeCodes.OK)
             {
-                return resp.Data.Span.ToUInt64();
+                return resp.Data.Span.ToUInt16();
             }
             return 0;
         }

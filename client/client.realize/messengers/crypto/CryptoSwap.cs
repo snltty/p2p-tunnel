@@ -32,10 +32,9 @@ namespace client.realize.messengers.crypto
         /// 交换秘钥
         /// </summary>
         /// <param name="tcp"></param>
-        /// <param name="udp"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async Task<ICrypto> Swap(IConnection tcp, IConnection udp, string password)
+        public async Task<ICrypto> Swap(IConnection tcp, string password)
         {
             try
             {
@@ -44,7 +43,7 @@ namespace client.realize.messengers.crypto
                 {
                     MessageResponeInfo publicKeyResponse = await messengerSender.SendReply(new MessageRequestWrap
                     {
-                        Connection = tcp ?? udp,
+                        Connection = tcp,
                         Encode = false,
                         MessengerId = (ushort)CryptoMessengerIds.Key,
                     }).ConfigureAwait(false);
@@ -67,20 +66,6 @@ namespace client.realize.messengers.crypto
                     MessageResponeInfo setResponse = await messengerSender.SendReply(new MessageRequestWrap
                     {
                         Connection = tcp,
-                        Encode = false,
-                        MessengerId = (ushort)CryptoMessengerIds.Set,
-                        Payload = encodedData
-                    }).ConfigureAwait(false);
-                    if (setResponse.Code != MessageResponeCodes.OK || setResponse.Data.Span.SequenceEqual(Helper.TrueArray) == false)
-                    {
-                        return null;
-                    }
-                }
-                if (udp != null)
-                {
-                    MessageResponeInfo setResponse = await messengerSender.SendReply(new MessageRequestWrap
-                    {
-                        Connection = udp,
                         Encode = false,
                         MessengerId = (ushort)CryptoMessengerIds.Set,
                         Payload = encodedData

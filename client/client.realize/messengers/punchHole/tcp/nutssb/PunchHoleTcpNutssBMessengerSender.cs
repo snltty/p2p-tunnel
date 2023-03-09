@@ -44,7 +44,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             this.clientsTunnel = clientsTunnel;
         }
 
-        private IConnection TcpServer => registerState.TcpConnection;
+        private IConnection Connection => registerState.Connection;
 
         private int RouteLevel => registerState.LocalInfo.RouteLevel + 2;
 #if DEBUG
@@ -59,18 +59,20 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         public async Task<ConnectResultModel> Send(ConnectParams param)
         {
-            if (param.TunnelName == (ulong)TunnelDefaults.MIN)
+            if (param.NewTunnel == 1)
             {
-                (ulong tunnelName, int localPort) = await clientsTunnel.NewBind(ServerType.TCP, (ulong)TunnelDefaults.MIN);
-                param.TunnelName = tunnelName;
-                param.LocalPort = localPort;
+                param.LocalPort = await clientsTunnel.NewBind(ServerType.TCP, Connection.ConnectId, param.Id);
+            }
+            else
+            {
+                clientInfoCaching.AddTunnelPort(param.Id, registerState.LocalInfo.Port);
             }
 
             var ceche = new ConnectCacheModel
             {
                 Tcs = new TaskCompletionSource<ConnectResultModel>(),
-                TunnelName = param.TunnelName,
-                LocalPort = param.LocalPort
+                LocalPort = param.LocalPort,
+                NewTunnel = param.NewTunnel,
             };
             connectTcpCache.TryAdd(param.Id, ceche);
 
@@ -164,7 +166,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 if (connectTcpCache.TryGetValue(toid, out ConnectCacheModel cache))
                 {
                     cache.Canceled = true;
-                    _ = SendStep2Fail(cache.TunnelName, toid);
+                    _ = SendStep2Fail(toid, cache.NewTunnel);
                 }
             }
             catch (Exception ex)
@@ -193,22 +195,26 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             AddSendTimeout(param.Id);
             bool res = await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
             {
-                TunnelName = param.TunnelName,
-                Connection = TcpServer,
+                NewTunnel = param.NewTunnel,
+                Connection = Connection,
                 ToId = param.Id,
                 Data = new PunchHoleStep1Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_1, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
         }
         private async Task OnStep1(PunchHoleStepModel model)
         {
-            if (model.RawData.TunnelName > (ulong)TunnelDefaults.MAX)
+            if (model.RawData.NewTunnel == 1)
             {
-                await clientsTunnel.NewBind(model.Connection.ServerType, model.RawData.TunnelName);
+                await clientsTunnel.NewBind(ServerType.TCP, Connection.ConnectId, model.RawData.FromId);
+            }
+            else
+            {
+                clientInfoCaching.AddTunnelPort(model.RawData.FromId, registerState.LocalInfo.Port);
             }
 
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
 
-            if (clientInfoCaching.GetTunnelPort(model.RawData.TunnelName, out int localPort))
+            if (clientInfoCaching.GetTunnelPort(model.RawData.FromId, out int localPort))
             {
                 List<IPEndPoint> ips = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
                 ips.Add(new IPEndPoint(data.Ip, data.Port));
@@ -242,8 +248,8 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
             else
             {
-                Logger.Instance.Warning($"OnStep1 未找到通道：{model.RawData.TunnelName}");
-                await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
+                Logger.Instance.Warning($"tcp OnStep1 未找到通道：{model.RawData.FromId}");
+                await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
             }
         }
 
@@ -251,7 +257,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         {
             if (config.Client.Encode)
             {
-                ICrypto crypto = await cryptoSwap.Swap(connection, null, config.Client.EncodePassword);
+                ICrypto crypto = await cryptoSwap.Swap(connection, config.Client.EncodePassword);
                 if (crypto == null)
                 {
                     Logger.Instance.Error("tcp打洞交换密钥失败，可能是两端密钥不一致，A如果设置了密钥，则B必须设置相同的密钥，如果B未设置密钥，则A必须留空");
@@ -269,8 +275,8 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             AddSendTimeout(model.RawData.FromId);
             bool res = await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2Info>
             {
-                TunnelName = model.RawData.TunnelName,
-                Connection = TcpServer,
+                NewTunnel = model.RawData.NewTunnel,
+                Connection = Connection,
                 ToId = model.RawData.FromId,
                 Data = new PunchHoleStep2Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
@@ -282,7 +288,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 if (connectTcpCache.TryGetValue(model.RawData.FromId, out ConnectCacheModel cache) == false)
                 {
                     Logger.Instance.Warning($"OnStep2 未找到缓存：{model.RawData.FromId}");
-                    await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
+                    await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
                     return;
                 }
 
@@ -341,7 +347,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
                             IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: config.Client.TcpBufferSize);
                             await CryptoSwap(connection);
-                            await SendStep3(connection, model.RawData.TunnelName, model.RawData.FromId);
+                            await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel);
                             success = true;
                             break;
                         }
@@ -370,7 +376,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
                 if (success == false)
                 {
-                    await SendStep2Fail(model.RawData.TunnelName, model.RawData.FromId).ConfigureAwait(false);
+                    await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
                 }
 
             }).ConfigureAwait(false);
@@ -384,7 +390,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
 
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
-            if (clientInfoCaching.GetTunnelPort(model.RawData.TunnelName, out int localPort))
+            if (clientInfoCaching.GetTunnelPort(model.RawData.FromId, out int localPort))
             {
                 if (NotIPv6Support(data.Ip))
                 {
@@ -398,7 +404,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         IPEndPoint target = new IPEndPoint(data.Ip, data.Port);
                         targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                         targetSocket.IPv6Only(target.AddressFamily, false);
-                        targetSocket.Ttl = (short)(RouteLevel + model.RawData.Index);
+                        targetSocket.Ttl = (short)(RouteLevel);
                         targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                         targetSocket.Bind(new IPEndPoint(data.Ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
                         _ = targetSocket.ConnectAsync(target);
@@ -419,12 +425,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
         }
 
-        private async Task SendStep2Fail(ulong tunname, ulong toid)
+        private async Task SendStep2Fail(ulong toid, byte newTunnel)
         {
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2FailInfo>
             {
-                TunnelName = tunname,
-                Connection = TcpServer,
+                NewTunnel = newTunnel,
+                Connection = Connection,
                 ToId = toid,
                 Data = new PunchHoleStep2FailInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
@@ -445,12 +451,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             {
                 OnStepHandler?.Invoke(this, new PunchHoleStepModel
                 {
-                    Connection = TcpServer,
+                    Connection = Connection,
                     RawData = new PunchHoleRequestInfo
                     {
                         PunchStep = (byte)PunchHoleTcpNutssBSteps.STEP_2_FAIL,
                         FromId = toid,
-                        TunnelName = tunname
+                        NewTunnel = 0
                     }
                 });
             }
@@ -459,14 +465,14 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         public void OnStep2Fail(PunchHoleStepModel model)
         {
         }
-        public async Task SendStep2Stop(ulong toid)
+        public async Task SendStep2Stop(ulong toid, byte newTunnel)
         {
             if (connectTcpCache.TryGetValue(toid, out ConnectCacheModel cache))
             {
                 await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2StopInfo>
                 {
-                    TunnelName = cache.TunnelName,
-                    Connection = TcpServer,
+                    NewTunnel = newTunnel,
+                    Connection = Connection,
                     ToId = toid,
                     Data = new PunchHoleStep2StopInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_STOP, PunchType = PunchHoleTypes.TCP_NUTSSB }
                 }).ConfigureAwait(false);
@@ -478,12 +484,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             Cancel(model.RawData.FromId);
         }
 
-        private async Task SendStep3(IConnection connection, ulong tunnelName, ulong toid)
+        private async Task SendStep3(IConnection connection, ulong toid, byte newTunnel)
         {
             AddSendTimeout(toid);
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep3Info>
             {
-                TunnelName = tunnelName,
+                NewTunnel = newTunnel,
                 Connection = connection,
                 Data = new PunchHoleStep3Info
                 {
@@ -501,7 +507,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         {
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep4Info>
             {
-                TunnelName = model.RawData.TunnelName,
+                NewTunnel = model.RawData.NewTunnel,
                 Connection = model.Connection,
                 Data = new PunchHoleStep4Info
                 {

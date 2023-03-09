@@ -30,15 +30,6 @@ namespace client.realize.messengers.clients
         /// </summary>
         public Action<IConnection, IConnection> OnDisConnect { get; set; } = (IConnection connection, IConnection connection1) => { };
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientsMessengerSender"></param>
-        /// <param name="clientInfoCaching"></param>
-        /// <param name="registerState"></param>
-        /// <param name="config"></param>
-        /// <param name="udpServer"></param>
-        /// <param name="tcpServer"></param>
         public ClientsTunnel(ClientsMessengerSender clientsMessengerSender, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerState, Config config, IUdpServer udpServer, ITcpServer tcpServer
         )
         {
@@ -49,27 +40,29 @@ namespace client.realize.messengers.clients
             this.udpServer = udpServer;
             this.tcpServer = tcpServer;
         }
+
         /// <summary>
         /// 新绑定
         /// </summary>
         /// <param name="serverType"></param>
-        /// <param name="tunnelName"></param>
+        /// <param name="selfId"></param>
+        /// <param name="targetId"></param>
         /// <returns></returns>
-        public async Task<(ulong, ushort)> NewBind(ServerType serverType, ulong tunnelName)
+        public async Task<ushort> NewBind(ServerType serverType, ulong selfId, ulong targetId)
         {
             IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
             while (true)
             {
                 try
                 {
-                    ushort port = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<ushort> { registerState.LocalInfo.UdpPort, registerState.LocalInfo.TcpPort });
-
-                    return serverType switch
+                    ushort localPort = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<ushort> { registerState.LocalInfo.Port });
+                    _ = serverType switch
                     {
-                        ServerType.TCP => (await NewBindTcp(port, serverAddress, tunnelName), port),
-                        ServerType.UDP => (await NewBindUdp(port, serverAddress, tunnelName), port),
-                        _ => (0, port),
+                        ServerType.TCP => await NewBindTcp(localPort, serverAddress, selfId, targetId),
+                        ServerType.UDP => await NewBindUdp(localPort, serverAddress, selfId, targetId),
+                        _ => 0,
                     };
+                    return localPort;
                 }
                 catch (Exception ex)
                 {
@@ -82,44 +75,50 @@ namespace client.realize.messengers.clients
         /// </summary>
         /// <param name="localport"></param>
         /// <param name="serverAddress"></param>
-        /// <param name="tunnelName"></param>
+        /// <param name="selfId"></param>
+        /// <param name="targetId"></param>
         /// <returns></returns>
-        private async Task<ulong> NewBindUdp(ushort localport, IPAddress serverAddress, ulong tunnelName)
+        private async Task<ushort> NewBindUdp(ushort localport, IPAddress serverAddress, ulong selfId, ulong targetId)
         {
-            ValuePacket<ulong> model = new ValuePacket<ulong> { Value = tunnelName };
-
             IConnection connection = null;
             UdpServer tempUdpServer = new UdpServer();
             tempUdpServer.OnPacket = udpServer.InputData;
 
-            tempUdpServer.OnDisconnect.Sub((IConnection _connection) =>
+            tempUdpServer.OnDisconnect += (IConnection _connection) =>
             {
                 Task.Run(() =>
                 {
                     //不是跟服务器的连接对象，那就是打洞的
                     if (ReferenceEquals(connection, _connection) == false)
                     {
-                        OnDisConnect(_connection, registerState.UdpConnection);
-                        clientInfoCaching.RemoveUdpserver(model.Value);
+                        OnDisConnect(_connection, registerState.Connection);
+                        clientInfoCaching.RemoveUdpserver(targetId);
                         tempUdpServer.Disponse();
                     }
                 });
-            });
+            };
             tempUdpServer.Start(localport, config.Client.TimeoutDelay);
             tempUdpServer.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
-            connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
-            while (connection == null)
+
+            var tcs = new TaskCompletionSource<ushort>();
+            tempUdpServer.OnMessage += (remoteEndpoint, data) =>
             {
-                connection = await tempUdpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
-            }
+                tcs.SetResult(data.ToUInt16());
+            };
+            Console.WriteLine($"udp 新端口:{selfId}->{targetId} {localport}");
+            tempUdpServer.SendUnconnectedMessage(new TunnelRegisterInfo
+            {
+                LocalPort = localport,
+                SelfId = selfId,
+                TargetId = targetId
+            }.ToBytes(), new IPEndPoint(serverAddress, config.Server.UdpPort));
 
-            ushort port = await clientsMessengerSender.GetTunnelPort(connection);
-            model.Value = await clientsMessengerSender.AddTunnel(registerState.UdpConnection, model.Value, port, localport);
+            ushort port = await tcs.Task.ConfigureAwait(false);
 
-            clientInfoCaching.AddTunnelPort(model.Value, port);
-            clientInfoCaching.AddUdpserver(model.Value, tempUdpServer);
+            clientInfoCaching.AddTunnelPort(targetId, localport);
+            clientInfoCaching.AddUdpserver(targetId, tempUdpServer);
 
-            return model.Value;
+            return port;
         }
 
         /// <summary>
@@ -127,9 +126,10 @@ namespace client.realize.messengers.clients
         /// </summary>
         /// <param name="localport"></param>
         /// <param name="serverAddress"></param>
-        /// <param name="tunnelName"></param>
+        /// <param name="selfId"></param>
+        /// <param name="targetId"></param>
         /// <returns></returns>
-        private async Task<ulong> NewBindTcp(ushort localport, IPAddress serverAddress, ulong tunnelName)
+        private async Task<ushort> NewBindTcp(ushort localport, IPAddress serverAddress, ulong selfId, ulong targetId)
         {
             TcpServer tempTcpServer = new TcpServer();
             tempTcpServer.SetBufferSize(config.Client.TcpBufferSize);
@@ -152,12 +152,11 @@ namespace client.realize.messengers.clients
 
             IConnection connection = tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
 
-            ushort port = await clientsMessengerSender.GetTunnelPort(connection);
-            tunnelName = await clientsMessengerSender.AddTunnel(registerState.TcpConnection, tunnelName, port, localport);
+            ushort port = await clientsMessengerSender.AddTunnel(connection, selfId, targetId, localport);
 
-            clientInfoCaching.AddTunnelPort(tunnelName, port);
+            clientInfoCaching.AddTunnelPort(targetId, port);
 
-            return tunnelName;
+            return port;
         }
     }
 }

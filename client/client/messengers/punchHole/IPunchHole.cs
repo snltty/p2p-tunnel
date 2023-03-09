@@ -35,7 +35,7 @@ namespace client.messengers.punchHole
         /// <summary>
         /// 通道
         /// </summary>
-        public ulong TunnelName { get; set; }
+        public byte NewTunnel { get; set; }
         /// <summary>
         /// 本地端口
         /// </summary>
@@ -74,10 +74,6 @@ namespace client.messengers.punchHole
         /// task
         /// </summary>
         public TaskCompletionSource<ConnectResultModel> Tcs { get; set; }
-        /// <summary>
-        /// 通道
-        /// </summary>
-        public ulong TunnelName { get; set; }
 
         /// <summary>
         /// 发送超时
@@ -88,6 +84,11 @@ namespace client.messengers.punchHole
         /// 是否已成功
         /// </summary>
         public bool Success { get; set; } = false;
+
+        /// <summary>
+        /// 新端口
+        /// </summary>
+        public byte NewTunnel { get; set; } = 0;
 
         /// <summary>
         /// 本地端口

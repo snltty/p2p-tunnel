@@ -39,7 +39,7 @@ export default {
         });
 
         const loading = computed(() => registerState.LocalInfo.IsConnecting);
-        const connected = computed(() => registerState.LocalInfo.UdpConnected || registerState.LocalInfo.TcpConnected);
+        const connected = computed(() => registerState.LocalInfo.Connected);
         const handleConnect = () => {
             if (loading.value) {
                 ElMessageBox.confirm('正在连接，是否确定操作', '提示').then(() => {

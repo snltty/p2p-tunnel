@@ -15,9 +15,6 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.register
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class RegisterTransfer : IRegisterTransfer
     {
         private readonly RegisterMessengerSender registerMessengerSender;
@@ -29,17 +26,7 @@ namespace client.realize.messengers.register
         private readonly IIPv6AddressRequest iPv6AddressRequest;
         private CancellationTokenSource cancellationToken = null;
         private int lockObject = 0;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="registerMessengerSender"></param>
-        /// <param name="clientInfoCaching"></param>
-        /// <param name="tcpServer"></param>
-        /// <param name="udpServer"></param>
-        /// <param name="config"></param>
-        /// <param name="registerState"></param>
-        /// <param name="cryptoSwap"></param>
-        /// <param name="iPv6AddressRequest"></param>
+        
         public RegisterTransfer(
             RegisterMessengerSender registerMessengerSender, IClientInfoCaching clientInfoCaching,
             ITcpServer tcpServer, IUdpServer udpServer,
@@ -57,8 +44,7 @@ namespace client.realize.messengers.register
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
 
-            tcpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.TcpConnection));
-            udpServer.OnDisconnect.Sub((connection) => Disconnect(connection, registerState.UdpConnection));
+            tcpServer.OnDisconnect+= (connection) => Disconnect(connection, registerState.Connection);
         }
         private void Disconnect(IConnection connection, IConnection regConnection)
         {
@@ -77,9 +63,6 @@ namespace client.realize.messengers.register
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public void Exit()
         {
             if (cancellationToken != null && cancellationToken.IsCancellationRequested == false)
@@ -110,11 +93,6 @@ namespace client.realize.messengers.register
                 success.ErrorMsg = "注册操作中...";
                 return success;
             }
-            if (config.Client.UseUdp == false && config.Client.UseTcp == false)
-            {
-                success.ErrorMsg = "udp tcp至少要启用一种...";
-                return success;
-            }
 
             return await Task.Run(async () =>
             {
@@ -137,45 +115,24 @@ namespace client.realize.messengers.register
 
                         Logger.Instance.Info($"开始注册");
                         registerState.LocalInfo.IsConnecting = true;
-                        if (interval > 0)
-                        {
-                            await Task.Delay((int)interval, cancellationToken.Token);
-                        }
+                        await Task.Delay((int)interval, cancellationToken.Token);
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
+                        registerState.LocalInfo.Port = NetworkHelper.GetRandomPort();
                         config.Client.UseIpv6 = serverAddress.AddressFamily == AddressFamily.InterNetworkV6;
-                        registerState.LocalInfo.UdpPort = registerState.LocalInfo.TcpPort = NetworkHelper.GetRandomPort();
                         registerState.OnRegisterBind.Push(true);
 
-                        if (config.Client.UseUdp)
-                        {
-                            //绑定udp
-                            await UdpBind(serverAddress);
-                            if (registerState.UdpConnection == null)
-                            {
-                                registerState.LocalInfo.IsConnecting = false;
-                                success.ErrorMsg = "udp连接失败";
-                                Logger.Instance.Error(success.ErrorMsg);
-                                continue;
-                            }
-                        }
-                        if (config.Client.UseTcp)
-                        {
-                            //绑定tcp
-                            TcpBind(serverAddress);
-                        }
+                        TcpBind(serverAddress);
                         //交换密钥
-                        if (config.Server.Encode)
-                        {
-                            await SwapCryptoTcp();
-                        }
+                        await SwapCryptoTcp();
+                        
 
                         //注册
                         RegisterResult result = await GetRegisterResult();
                         config.Client.ShortId = result.Data.ShortId;
                         config.Client.GroupId = result.Data.GroupId;
                         registerState.RemoteInfo.Relay = result.Data.Relay;
-                        registerState.Online(result.Data.Id, result.Data.Ip, result.Data.UdpPort, result.Data.TcpPort);
+                        registerState.Online(result.Data.Id, result.Data.Ip);
                         await registerMessengerSender.Notify().ConfigureAwait(false);
 
                         success.ErrorMsg = "注册成功~";
@@ -208,45 +165,38 @@ namespace client.realize.messengers.register
                 return success;
             });
         }
-        private async Task UdpBind(IPAddress serverAddress)
-        {
-            //UDP 开始监听
-            udpServer.Start(registerState.LocalInfo.UdpPort, config.Client.TimeoutDelay);
-            if (udpServer is UdpServer udp)
-            {
-                udp.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
-            }
-            registerState.UdpConnection = await udpServer.CreateConnection(new IPEndPoint(serverAddress, config.Server.UdpPort));
-        }
         private void TcpBind(IPAddress serverAddress)
         {
             //TCP 本地开始监听
             tcpServer.SetBufferSize(config.Client.TcpBufferSize);
-            tcpServer.Start(registerState.LocalInfo.TcpPort);
+            tcpServer.Start(registerState.LocalInfo.Port);
 
             //TCP 连接服务器
-            IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.TcpPort);
+            IPEndPoint bindEndpoint = new IPEndPoint(config.Client.BindIp, registerState.LocalInfo.Port);
             Socket tcpSocket = new(bindEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             tcpSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
             tcpSocket.IPv6Only(config.Client.BindIp.AddressFamily, false);
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             registerState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;
-            registerState.TcpConnection = tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
+            registerState.Connection = tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
         }
         private async Task SwapCryptoTcp()
         {
-            ICrypto crypto = await cryptoSwap.Swap(registerState.TcpConnection, registerState.UdpConnection, config.Server.EncodePassword);
+            if (config.Server.Encode == false)
+            {
+                return;
+            }
+            ICrypto crypto = await cryptoSwap.Swap(registerState.Connection,config.Server.EncodePassword);
             if (crypto == null)
             {
                 throw new Exception("注册交换密钥失败，如果客户端设置了密钥，则服务器必须设置相同的密钥，如果服务器未设置密钥，则客户端必须留空");
             }
 
-            registerState.TcpConnection?.EncodeEnable(crypto);
-            registerState.UdpConnection?.EncodeEnable(crypto);
+            registerState.Connection?.EncodeEnable(crypto);
 
 #if DEBUG
-            await cryptoSwap.Test(registerState.OnlineConnection);
+            await cryptoSwap.Test(registerState.Connection);
 #endif
         }
         private async Task<RegisterResult> GetRegisterResult()
@@ -263,8 +213,7 @@ namespace client.realize.messengers.register
                     ShortId = config.Client.ShortId,
                     ClientName = config.Client.Name,
                     GroupId = config.Client.GroupId,
-                    LocalUdpPort = registerState.LocalInfo.UdpPort,
-                    LocalTcpPort = registerState.LocalInfo.TcpPort,
+                    LocalTcpPort = registerState.LocalInfo.Port,
                     LocalIps = localIps,
                     Timeout = 15 * 1000,
                     ClientAccess = config.Client.GetAccess()

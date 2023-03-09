@@ -146,7 +146,7 @@ namespace client.service.ui.api.service.clientServer.services
             IConnection sourceConnection = null;
             if (connectId == 0)
             {
-                sourceConnection = registerStateInfo.OnlineConnection;
+                sourceConnection = registerStateInfo.Connection;
             }
             else if (clientInfoCaching.Get(connectId, out ClientInfo sourceClient))
             {

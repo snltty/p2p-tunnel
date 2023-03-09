@@ -11,9 +11,6 @@ using System.Net;
 
 namespace server.service.messengers.register
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class ClientRegisterCaching : IClientRegisterCaching
     {
         private readonly ConcurrentDictionary<ulong, RegisterCacheInfo> cache = new();
@@ -21,29 +18,14 @@ namespace server.service.messengers.register
         private NumberSpace idNs = new NumberSpace(0);
         private readonly Config config;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<RegisterCacheInfo> OnChanged { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
-        /// <summary>
-        /// 
-        /// </summary>
         public SimpleSubPushHandler<RegisterCacheInfo> OnOffline { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
         private readonly WheelTimer<IConnection> wheelTimer = new WheelTimer<IConnection>();
 
         private readonly IRateLimit<IPAddress> rateLimit;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public int Count { get => cache.Count; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="udpServer"></param>
-        /// <param name="tcpServer"></param>
         public ClientRegisterCaching(Config config, IUdpServer udpServer, ITcpServer tcpServer)
         {
             this.config = config;
@@ -53,8 +35,7 @@ namespace server.service.messengers.register
                 rateLimit = new TokenBucketRatelimit<IPAddress>(config.ConnectLimit);
             }
 
-            tcpServer.OnDisconnect.Sub(Disconnected);
-            udpServer.OnDisconnect.Sub(Disconnected);
+            tcpServer.OnDisconnect+= Disconnected;
             tcpServer.OnConnected = AddConnectedTimeout;
             udpServer.OnConnected = AddConnectedTimeout;
         }
@@ -88,11 +69,6 @@ namespace server.service.messengers.register
                 Remove(connection.ConnectId);
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
         public ulong Add(RegisterCacheInfo model)
         {
             if (model.Id == 0)
@@ -112,23 +88,10 @@ namespace server.service.messengers.register
             cache.TryAdd(model.Id, model);
             return model.Id;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="client"></param>
-        /// <returns></returns>
         public bool Get(ulong id, out RegisterCacheInfo client)
         {
             return cache.TryGetValue(id, out client);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="groupid"></param>
-        /// <param name="name"></param>
-        /// <param name="client"></param>
-        /// <returns></returns>
         public bool Get(string groupid, string name, out RegisterCacheInfo client)
         {
             client = null;
@@ -138,11 +101,6 @@ namespace server.service.messengers.register
             }
             return false;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="groupid"></param>
-        /// <returns></returns>
         public IEnumerable<RegisterCacheInfo> Get(string groupid)
         {
             if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<string, RegisterCacheInfo> value))
@@ -151,24 +109,15 @@ namespace server.service.messengers.register
             }
             return Enumerable.Empty<RegisterCacheInfo>();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public List<RegisterCacheInfo> Get()
         {
             return cache.Values.ToList();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
         public void Remove(ulong id)
         {
             if (cache.TryRemove(id, out RegisterCacheInfo client))
             {
-                client.UdpConnection?.Disponse();
-                client.TcpConnection?.Disponse();
+                client.Connection?.Disponse();
                 OnChanged.Push(client);
                 OnOffline.Push(client);
 
@@ -183,11 +132,6 @@ namespace server.service.messengers.register
                 GC.Collect();
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         public bool Notify(IConnection connection)
         {
             if (Get(connection.ConnectId, out RegisterCacheInfo client))

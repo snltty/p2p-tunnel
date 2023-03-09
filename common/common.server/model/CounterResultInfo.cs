@@ -27,19 +27,11 @@ namespace common.server.model
         /// <summary>
         /// 
         /// </summary>
-        public long TcpSendBytes { get; set; }
+        public long SendBytes { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public long TcpReceiveBytes { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public long UdpSendBytes { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public long UdpReceiveBytes { get; set; }
+        public long ReceiveBytes { get; set; }
 
         /// <summary>
         /// 
@@ -47,7 +39,7 @@ namespace common.server.model
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var bytes = new byte[4 + 8 + 8 + 4 + 8 + 8 + 8 + 8];
+            var bytes = new byte[4 + 8 + 8 + 4 + 8 + 8];
             var memory = bytes.AsMemory();
             int index = 0;
 
@@ -63,16 +55,10 @@ namespace common.server.model
             RunTime.ToBytes(memory.Slice(index));
             index += 4;
 
-            TcpSendBytes.ToBytes(memory.Slice(index));
+            SendBytes.ToBytes(memory.Slice(index));
             index += 8;
 
-            TcpReceiveBytes.ToBytes(memory.Slice(index));
-            index += 8;
-
-            UdpSendBytes.ToBytes(memory.Slice(index));
-            index += 8;
-
-            UdpReceiveBytes.ToBytes(memory.Slice(index));
+            ReceiveBytes.ToBytes(memory.Slice(index));
             index += 8;
 
             return bytes;
@@ -99,16 +85,10 @@ namespace common.server.model
             RunTime = span.Slice(index, 4).ToInt32();
             index += 4;
 
-            TcpSendBytes = span.Slice(index, 8).ToInt64();
+            SendBytes = span.Slice(index, 8).ToInt64();
             index += 8;
 
-            TcpReceiveBytes = span.Slice(index, 8).ToInt64();
-            index += 8;
-
-            UdpSendBytes = span.Slice(index, 8).ToInt64();
-            index += 8;
-
-            UdpReceiveBytes = span.Slice(index, 8).ToInt64();
+            ReceiveBytes = span.Slice(index, 8).ToInt64();
             index += 8;
         }
     }

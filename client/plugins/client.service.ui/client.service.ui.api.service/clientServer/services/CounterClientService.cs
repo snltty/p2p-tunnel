@@ -34,12 +34,12 @@ namespace client.service.ui.api.service.clientServer.services
         /// <returns></returns>
         public async Task<CounterResultInfo> Info(ClientServiceParamsInfo arg)
         {
-            if (registerState.OnlineConnection != null)
+            if (registerState.Connection != null)
             {
                 var resp = await messengerSender.SendReply(new MessageRequestWrap
                 {
                     MessengerId = (ushort)CounterMessengerIds.Info,
-                    Connection = registerState.OnlineConnection,
+                    Connection = registerState.Connection,
                     Timeout = 15000
                 }).ConfigureAwait(false);
                 if (resp.Code == MessageResponeCodes.OK)

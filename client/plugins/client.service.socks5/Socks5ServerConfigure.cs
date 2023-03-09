@@ -58,7 +58,7 @@ namespace client.service.udpforward
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 MessengerId = (ushort)Socks5MessengerIds.GetSetting,
-                Connection = registerStateInfo.OnlineConnection,
+                Connection = registerStateInfo.Connection,
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
             {
@@ -77,7 +77,7 @@ namespace client.service.udpforward
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 MessengerId = (ushort)Socks5MessengerIds.Setting,
-                Connection = registerStateInfo.OnlineConnection,
+                Connection = registerStateInfo.Connection,
                 Payload = jsonStr.ToUTF8Bytes()
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray))

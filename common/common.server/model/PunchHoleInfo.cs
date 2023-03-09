@@ -11,9 +11,6 @@ namespace common.server.model
     /// </summary>
     public sealed class PunchHoleRequestInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleRequestInfo() { }
         /// <summary>
         /// 数据交换分两种，一种是a让服务器把a的公网数据发给b，另一种是，a把一些数据通过服务器原样交给b
@@ -28,9 +25,9 @@ namespace common.server.model
         /// </summary>
         public byte PunchType { get; set; }
         /// <summary>
-        /// 
+        /// 是否新端口
         /// </summary>
-        public byte Index { get; set; }
+        public byte NewTunnel { get; set; }
         /// <summary>
         /// 来自谁
         /// </summary>
@@ -39,13 +36,6 @@ namespace common.server.model
         /// 给谁
         /// </summary>
         public ulong ToId { get; set; }
-        /// <summary>
-        /// 通道名，可能会有多个通道
-        /// </summary>
-        public ulong TunnelName { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public ulong RequestId { get; set; }
 
         /// <summary>
@@ -53,20 +43,15 @@ namespace common.server.model
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public ReadOnlyMemory<byte> Data { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var bytes = new byte[
                 1  //PunchForwardType
                 + 1 //PunchStep
                 + 1   //PunchType
-                + 1 //Index
+                + 1   //NewTunnel
                 + 8  //FromId
                 + 8 //ToId
-                + 8 //TunnelName 
                 + 8 //RequestId
                 + Data.Length
                 ];
@@ -80,16 +65,13 @@ namespace common.server.model
             index += 1;
             bytes[index] = PunchType;
             index += 1;
-            bytes[index] = Index;
+            bytes[index] = NewTunnel;
             index += 1;
 
             FromId.ToBytes(memory.Slice(index));
             index += 8;
 
             ToId.ToBytes(memory.Slice(index));
-            index += 8;
-
-            TunnelName.ToBytes(memory.Slice(index));
             index += 8;
 
             RequestId.ToBytes(memory.Slice(index));
@@ -100,10 +82,6 @@ namespace common.server.model
             return bytes;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -115,16 +93,13 @@ namespace common.server.model
             index += 1;
             PunchType = span[index];
             index += 1;
-            Index = span[index];
+            NewTunnel = span[index];
             index += 1;
 
             FromId = span.Slice(index, 8).ToUInt64();
             index += 8;
 
             ToId = span.Slice(index, 8).ToUInt64();
-            index += 8;
-
-            TunnelName = span.Slice(index, 8).ToUInt64();
             index += 8;
 
             RequestId = span.Slice(index, 8).ToUInt64();
@@ -215,40 +190,12 @@ namespace common.server.model
     /// </summary>
     public sealed class PunchHoleNotifyInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleNotifyInfo() { }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public IPAddress[] LocalIps { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool IsDefault { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public byte Index { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public IPAddress Ip { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public int Port { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public int LocalPort { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             int length = 0;
@@ -258,9 +205,6 @@ namespace common.server.model
                 length += 1 + LocalIps[i].Length();
             }
             length += 1;
-
-            length += 1; //IsDefault
-            length += 1; //Index
 
             length += 1 + Ip.Length();
 
@@ -280,11 +224,6 @@ namespace common.server.model
                 bytes[index] = (byte)ll;
                 index += 1 + ll;
             }
-
-            bytes[index] = (byte)(IsDefault ? 1 : 0);
-            index += 1;
-            bytes[index] = Index;
-            index += 1;
 
 
             Ip.TryWriteBytes(memory.Span.Slice(index + 1), out int l);
@@ -318,11 +257,6 @@ namespace common.server.model
                 index += 1 + span[index];
             }
 
-            IsDefault = span[index] == 1;
-            index += 1;
-
-            Index = span[index];
-            index += 1;
             Ip = new IPAddress(span.Slice(index + 1, span[index]));
             index += 1 + span[index];
 

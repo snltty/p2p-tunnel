@@ -8,22 +8,11 @@ using System.Threading.Tasks;
 
 namespace common.server.servers.rudp
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class UdpServer : IUdpServer
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public Func<IConnection, Task> OnPacket { get; set; } = async (connection) => { await Task.CompletedTask; };
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<IConnection> OnDisconnect { get; private set; } = new SimpleSubPushHandler<IConnection>();
-        /// <summary>
-        /// 
-        /// </summary>
+        public Action<IPEndPoint, Memory<byte>> OnMessage { get; set; } = (endpoint, data) => { };
+        public Action<IConnection> OnDisconnect { get; set; } = (IConnection connection) => { };
         public Action<IConnection> OnConnected { get; set; } = (IConnection connection) => { };
 
         Semaphore maxNumberConnectings = new Semaphore(1, 1);
@@ -32,23 +21,15 @@ namespace common.server.servers.rudp
         private NetManager server;
         private EventBasedNetListener listener;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="port"></param>
         public void Start(int port)
         {
             Start(port, 20000);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="port"></param>
-        /// <param name="timeout"></param>
         public void Start(int port, int timeout = 20000)
         {
             listener = new EventBasedNetListener();
             server = new NetManager(listener);
+            server.UnconnectedMessagesEnabled = true;
             server.UnsyncedEvents = true;
             server.UpdateTime = 5;
             server.PingInterval = Math.Max(timeout / 5, 5000);
@@ -77,7 +58,7 @@ namespace common.server.servers.rudp
             {
                 if (peer.Tag is IConnection connection)
                 {
-                    OnDisconnect.Push(connection);
+                    OnDisconnect?.Invoke(connection);
                     connection.Disponse();
                 }
             };
@@ -97,10 +78,12 @@ namespace common.server.servers.rudp
                 {
                 }
             };
+            listener.NetworkReceiveUnconnectedEvent += (IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) =>
+            {
+                OnMessage?.Invoke(remoteEndPoint, reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize));
+            };
         }
-        /// <summary>
-        /// 
-        /// </summary>
+
         public void Stop()
         {
             if (server != null)
@@ -117,15 +100,13 @@ namespace common.server.servers.rudp
             }
             Release();
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public void Disponse()
         {
             try
             {
                 Stop();
                 OnPacket = null;
+                OnMessage = null;
                 OnDisconnect = null;
                 OnConnected = null;
             }
@@ -134,21 +115,12 @@ namespace common.server.servers.rudp
                 Logger.Instance.Error(ex);
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         public async Task InputData(IConnection connection)
         {
             if (OnPacket != null)
                 await OnPacket(connection);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
+
         public async Task<IConnection> CreateConnection(IPEndPoint address)
         {
             maxNumberConnectings.WaitOne();
@@ -179,20 +151,12 @@ namespace common.server.servers.rudp
                 Release();
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="address"></param>
-        /// <returns></returns>
+
         public bool SendUnconnectedMessage(byte[] message, IPEndPoint address)
         {
             return server.SendUnconnectedMessage(message, address);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="limit"></param>
+
         public void SetSpeedLimit(int limit)
         {
             if (server != null)

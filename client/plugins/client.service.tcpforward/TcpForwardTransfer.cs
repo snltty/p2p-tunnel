@@ -470,7 +470,7 @@ namespace client.service.tcpforward
         /// <returns></returns>
         public async Task<ushort[]> GetServerPorts()
         {
-            var resp = await tcpForwardMessengerSender.GetPorts(registerStateInfo.OnlineConnection);
+            var resp = await tcpForwardMessengerSender.GetPorts(registerStateInfo.Connection);
             if (resp.Code == MessageResponeCodes.OK)
             {
                 return resp.Data.ToUInt16Array();
@@ -485,7 +485,7 @@ namespace client.service.tcpforward
         /// <returns></returns>
         public async Task<string> AddServerForward(ServerForwardItemInfo forward)
         {
-            var resp = await tcpForwardMessengerSender.Register(registerStateInfo.OnlineConnection, new TcpForwardRegisterParamsInfo
+            var resp = await tcpForwardMessengerSender.Register(registerStateInfo.Connection, new TcpForwardRegisterParamsInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -532,7 +532,7 @@ namespace client.service.tcpforward
             {
                 return "未找到操作对象";
             }
-            var resp = await tcpForwardMessengerSender.Register(registerStateInfo.OnlineConnection, new TcpForwardRegisterParamsInfo
+            var resp = await tcpForwardMessengerSender.Register(registerStateInfo.Connection, new TcpForwardRegisterParamsInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -569,7 +569,7 @@ namespace client.service.tcpforward
             {
                 return "未找到操作对象";
             }
-            var resp = await tcpForwardMessengerSender.UnRegister(registerStateInfo.OnlineConnection, new TcpForwardUnRegisterParamsInfo
+            var resp = await tcpForwardMessengerSender.UnRegister(registerStateInfo.Connection, new TcpForwardUnRegisterParamsInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -603,7 +603,7 @@ namespace client.service.tcpforward
             {
                 return "未找到删除对象";
             }
-            var resp = await tcpForwardMessengerSender.UnRegister(registerStateInfo.OnlineConnection, new TcpForwardUnRegisterParamsInfo
+            var resp = await tcpForwardMessengerSender.UnRegister(registerStateInfo.Connection, new TcpForwardUnRegisterParamsInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -654,7 +654,7 @@ namespace client.service.tcpforward
         }
         private void SendRegister(ServerForwardItemInfo item, TcpForwardAliveTypes type)
         {
-            tcpForwardMessengerSender.Register(registerStateInfo.OnlineConnection, new TcpForwardRegisterParamsInfo
+            tcpForwardMessengerSender.Register(registerStateInfo.Connection, new TcpForwardRegisterParamsInfo
             {
                 AliveType = type,
                 SourceIp = item.Domain,

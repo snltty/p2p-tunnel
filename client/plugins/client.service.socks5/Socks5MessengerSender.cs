@@ -105,7 +105,7 @@ namespace client.service.socks5
                 targetName = config.TargetName;
                 if (config.TargetName == "/")
                 {
-                    connection = registerStateInfo.OnlineConnection;
+                    connection = registerStateInfo.Connection;
                 }
                 else
                 {

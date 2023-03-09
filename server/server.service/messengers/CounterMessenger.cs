@@ -18,11 +18,6 @@ namespace server.service.messengers
         private readonly DateTime startTime = DateTime.Now;
         private CounterResultInfo counterResultInfo = new CounterResultInfo();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientRegisterCaching"></param>
-        /// <param name="wheelTimer"></param>
         public CounterMessenger(IClientRegisterCaching clientRegisterCaching, WheelTimer<object> wheelTimer)
         {
             wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object>
@@ -35,19 +30,10 @@ namespace server.service.messengers
                     counterResultInfo.Cpu = ProcessHelper.GetCpu(proc);
                     counterResultInfo.Memory = ProcessHelper.GetMemory(proc);
                     counterResultInfo.RunTime = (int)(DateTime.Now - startTime).TotalSeconds;
-                    counterResultInfo.TcpSendBytes = clients.Sum(c => (c.TcpConnection?.SendBytes ?? 0));
-                    counterResultInfo.TcpReceiveBytes = clients.Sum(c => (c.TcpConnection?.ReceiveBytes ?? 0));
-                    counterResultInfo.UdpSendBytes = clients.Sum(c => (c.UdpConnection?.SendBytes ?? 0));
-                    counterResultInfo.UdpReceiveBytes = clients.Sum(c => (c.UdpConnection?.ReceiveBytes ?? 0));
                 }
             }, 1000, true);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)CounterMessengerIds.Info)]
         public byte[] Info(IConnection connection)
         {

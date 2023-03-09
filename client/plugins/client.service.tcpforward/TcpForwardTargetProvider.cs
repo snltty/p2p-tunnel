@@ -65,7 +65,7 @@ namespace client.service.tcpforward
         {
             if (cacheInfo.Name == "/")
             {
-                return registerStateInfo.OnlineConnection;
+                return registerStateInfo.Connection;
             }
 
             if (clientInfoCaching.GetByName(cacheInfo.Name, out ClientInfo client))
