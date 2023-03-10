@@ -17,21 +17,19 @@ namespace common.server
         private readonly Dictionary<ushort, MessengerCacheInfo> messengers = new();
 
         private readonly ITcpServer tcpserver;
-        private readonly IUdpServer udpserver;
         private readonly MessengerSender messengerSender;
         private readonly IRelaySourceConnectionSelector sourceConnectionSelector;
         private readonly IRelayValidator relayValidator;
 
 
-        public MessengerResolver(IUdpServer udpserver, ITcpServer tcpserver, MessengerSender messengerSender,
+        public MessengerResolver(ITcpServer tcpserver, MessengerSender messengerSender,
             IRelaySourceConnectionSelector sourceConnectionSelector, IRelayValidator relayValidator)
         {
             this.tcpserver = tcpserver;
-            this.udpserver = udpserver;
             this.messengerSender = messengerSender;
 
             this.tcpserver.OnPacket = InputData;
-            this.udpserver.OnPacket = InputData;
+            //this.udpserver.OnPacket = InputData;
             this.sourceConnectionSelector = sourceConnectionSelector;
             this.relayValidator = relayValidator;
         }
