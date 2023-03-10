@@ -10,8 +10,9 @@ mkdir public\\publish-zip
 set DOTNET_TieredPGO=1
 
 rem 托盘程序
+dotnet publish ./client/client.service.tray -c release -f net7.0-windows -o ./public/publish/tray-x64 -r win-x64 -p:PublishSingleFile=true  -p:DebugType=none -p:DebugSymbols=false --no-self-contained
+dotnet publish ./client/client.service.tray -c release -f net7.0-windows -o ./public/publish/tray-arm64 -r win-arm64 -p:PublishSingleFile=true  -p:DebugType=none -p:DebugSymbols=false --no-self-contained
 rem dotnet publish ./client/client.service.tray -c release -f net7.0-windows -o ./public/publish/tray-x64 -r win-x64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=true
-rem dotnet publish ./client/client.service.tray -c release -f net7.0-windows -o ./public/publish/tray-arm64 -r win-arm64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=true
 rem 客户端和服务端
 for %%f in (client,server) do (
 	for %%r in (win-x64,win-arm64,linux-x64,linux-arm64,linux-arm,osx-x64,osx-arm64) do (
