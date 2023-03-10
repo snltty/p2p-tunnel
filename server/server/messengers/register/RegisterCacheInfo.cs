@@ -30,15 +30,15 @@ namespace server.messengers.register
         private ConcurrentDictionary<ulong, TunnelRegisterCacheInfo> tunnels = new ConcurrentDictionary<ulong, TunnelRegisterCacheInfo>();
         public void AddTunnel(TunnelRegisterCacheInfo model)
         {
-            tunnels.AddOrUpdate(model.TargetId, model, (a, b) => model);
+            tunnels.AddOrUpdate(model.SourceId, model, (a, b) => model);
         }
-        public void RemoveTunnel(ulong targetId)
+        public void RemoveTunnel(ulong sourceId)
         {
-            tunnels.TryRemove(targetId, out _);
+            tunnels.TryRemove(sourceId, out _);
         }
-        public bool GetTunnel(ulong targetId, out TunnelRegisterCacheInfo model)
+        public bool GetTunnel(ulong sourceId, out TunnelRegisterCacheInfo model)
         {
-            return tunnels.TryGetValue(targetId, out model);
+            return tunnels.TryGetValue(sourceId, out model);
         }
     }
 
@@ -46,6 +46,6 @@ namespace server.messengers.register
     {
         public int Port { get; set; } = 0;
         public int LocalPort { get; set; } = 0;
-        public ulong TargetId { get; set; }
+        public ulong SourceId { get; set; }
     }
 }

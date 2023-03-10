@@ -21,6 +21,9 @@ export const sendClientOffline = (id) => {
 export const sendPing = () => {
     return sendWebsocketMsg(`clients/ping`);
 }
+export const sendTest = (id) => {
+    return sendWebsocketMsg(`clients/test`, id);
+}
 
 
 export const getConnects = () => {

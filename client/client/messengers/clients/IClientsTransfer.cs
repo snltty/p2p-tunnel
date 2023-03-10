@@ -47,6 +47,7 @@ namespace client.messengers.clients
         /// </summary>
         /// <returns></returns>
         public Task Ping();
+        public Task<bool> Test(ulong id, Memory<byte> data);
 
         /// <summary>
         /// 各个客户端连接信息

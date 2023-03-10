@@ -321,7 +321,7 @@ namespace common.server.model
             int index = 0;
             SelfId.ToBytes(memory);
             index += 8;
-            TargetId.ToBytes(memory);
+            TargetId.ToBytes(memory.Slice(index));
             index += 8;
 
             LocalPort.ToBytes(memory.Slice(index));

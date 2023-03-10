@@ -16,6 +16,7 @@ namespace common.server.model
         /// 活着
         /// </summary>
         Alive = 301,
+        Test = 302,
         /// <summary>
         /// 
         /// </summary>

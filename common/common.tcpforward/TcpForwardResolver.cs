@@ -142,8 +142,8 @@ namespace common.tcpforward
                     token.SendArg.StateType = TcpForwardStateTypes.Success;
                     await ReceiveAsync(token, Helper.EmptyArray);
 
-                    token.TargetSocket.SendBufferSize = config.BufferSize;
-                    token.TargetSocket.ReceiveBufferSize = config.BufferSize;
+                    //token.TargetSocket.SendBufferSize = config.BufferSize;
+                    //token.TargetSocket.ReceiveBufferSize = config.BufferSize;
                     token.PoolBuffer = new byte[config.BufferSize];
                     e.SetBuffer(token.PoolBuffer, 0, config.BufferSize);
 

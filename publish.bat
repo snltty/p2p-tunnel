@@ -10,8 +10,8 @@ mkdir public\\publish-zip
 set DOTNET_TieredPGO=1
 
 rem 托盘程序
-rem dotnet publish ./client/client.service.tray -c release -f net6.0-windows -o ./public/publish/tray-x64 -r win-x64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=true
-rem dotnet publish ./client/client.service.tray -c release -f net6.0-windows -o ./public/publish/tray-arm64 -r win-arm64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=true
+rem dotnet publish ./client/client.service.tray -c release -f net7.0-windows -o ./public/publish/tray-x64 -r win-x64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=true
+rem dotnet publish ./client/client.service.tray -c release -f net7.0-windows -o ./public/publish/tray-arm64 -r win-arm64 --self-contained true  -p:DebugType=none -p:DebugSymbols=false  -p:PublishSingleFile=true -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=true
 rem 客户端和服务端
 for %%f in (client,server) do (
 	for %%r in (win-x64,win-arm64,linux-x64,linux-arm64,linux-arm,osx-x64,osx-arm64) do (
@@ -20,8 +20,8 @@ for %%f in (client,server) do (
 	dotnet publish ./%%f/%%f.service -c release -f net7.0 -o ./public/publish/any/%%f 
 )
 rem app 改为自己的Android sdk地址, 可以在 工具->选项->Xamarin->Android设置 里查看sdk地址
-dotnet publish ./client/client.service.app -c:Release -f:net7.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSdkDirectory=%sdkpath%
-echo F|xcopy "client\\client.service.app\\bin\\Release\\net7.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" "public\\publish-zip\\p2p-tunnel.apk"  /s /f /h /y
+rem dotnet publish ./client/client.service.app -c:Release -f:net7.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSdkDirectory=%sdkpath%
+rem echo F|xcopy "client\\client.service.app\\bin\\Release\\net7.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" "public\\publish-zip\\p2p-tunnel.apk"  /s /f /h /y
 
 
 for %%r in (x64,arm64,arm) do (

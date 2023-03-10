@@ -35,7 +35,6 @@ namespace client.realize.messengers.clients
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly Config config;
-        private readonly IUdpServer udpServer;
         private readonly HeartMessengerSender heartMessengerSender;
         private readonly RelayMessengerSender relayMessengerSender;
         private readonly IClientConnectsCaching connecRouteCaching;
@@ -44,11 +43,11 @@ namespace client.realize.messengers.clients
 
         private object lockObject = new();
 
-       
+
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
             RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
-            IUdpServer udpServer, ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
+            ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
             RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnectsCaching connecRouteCaching,
             PunchHoleDirectionConfig punchHoleDirectionConfig, CryptoSwap cryptoSwap
         )
@@ -59,7 +58,6 @@ namespace client.realize.messengers.clients
             this.registerState = registerState;
             this.clientInfoCaching = clientInfoCaching;
             this.config = config;
-            this.udpServer = udpServer;
             this.heartMessengerSender = heartMessengerSender;
             this.relayMessengerSender = relayMessengerSender;
             this.connecRouteCaching = connecRouteCaching;
@@ -168,7 +166,7 @@ namespace client.realize.messengers.clients
         }
         private void OnDisconnect(IConnection connection, IConnection regConnection)
         {
-            if (IConnection.Equals2(connection, regConnection))
+            if (IConnection.Equals2(connection, regConnection) || connection?.Address.Port == config.Server.TcpPort)
             {
                 return;
             }
@@ -372,7 +370,7 @@ namespace client.realize.messengers.clients
                 ConnectResultModel result = await punchHoleTcp.Send(new ConnectParams
                 {
                     Id = client.Id,
-                    NewTunnel  = tunnelNames[i],
+                    NewTunnel = tunnelNames[i],
                     LocalPort = registerState.LocalInfo.Port
                 }).ConfigureAwait(false);
                 if (result.State)
@@ -397,7 +395,7 @@ namespace client.realize.messengers.clients
                 try
                 {
                     var start = DateTime.Now;
-                    var res = await heartMessengerSender.Heart(item.Connection);
+                    var res = await heartMessengerSender.Alive(item.Connection);
                     if (res)
                     {
                         item.Connection.RoundTripTime = (ushort)(DateTime.Now - start).TotalMilliseconds;
@@ -411,6 +409,14 @@ namespace client.realize.messengers.clients
                 {
                 }
             }
+        }
+        public async Task<bool> Test(ulong id,Memory<byte> data)
+        {
+            if(clientInfoCaching.Get(id,out ClientInfo client))
+            {
+                return await heartMessengerSender.Test(client.Connection, data);
+            }
+            return false;
         }
 
         private void OnRegisterBind(bool state)

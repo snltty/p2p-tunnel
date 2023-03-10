@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -17,12 +18,14 @@ namespace client.service.tray
             this.Hide();
             InitializeComponent();
             InitialTray();
-            //OpenExe();
         }
 
+        Image unright = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right1.png"));
+        Image right = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right.png"));
         private void InitialTray()
         {
             notifyIcon = new NotifyIcon();
+            notifyIcon.BalloonTipTitle = "p2p-tunnel";
             notifyIcon.BalloonTipText = "p2p-tunnel托盘程序已启动";
             notifyIcon.Text = "p2p-tunnel托盘程序";
 
@@ -30,32 +33,44 @@ namespace client.service.tray
             notifyIcon.Visible = true;
 
             notifyIcon.ContextMenuStrip = new ContextMenuStrip();
-            notifyIcon.ContextMenuStrip.Items.Add("管理页面");
-            notifyIcon.ContextMenuStrip.Items.Add("退出");
-            notifyIcon.ContextMenuStrip.ItemClicked += ContextMenuStrip_ItemClicked;
-            notifyIcon.ContextMenuStrip.MouseDoubleClick += ContextMenuStrip_MouseDoubleClick;
+            notifyIcon.ContextMenuStrip.Items.Add("服务托管", unright, Service);
+            notifyIcon.ContextMenuStrip.Items.Add("管理页面", null, OpenWeb);
+            notifyIcon.ContextMenuStrip.Items.Add("退出", null, Close);
+            notifyIcon.DoubleClick += ContextMenuStrip_MouseDoubleClick;
+
+            Service(null, null);
         }
 
-        private void ContextMenuStrip_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void ContextMenuStrip_MouseDoubleClick(object sender, EventArgs e)
         {
-            OpenWeb();
+            OpenWeb(null, null);
         }
-        private void ContextMenuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+
+        private void Service(object sender, EventArgs e)
         {
-            switch (e.ClickedItem.Text)
+            if (proc == null)
             {
-                case "退出":
-                    this.Close();
-                    break;
-                case "管理页面":
-                    OpenWeb();
-                    break;
-                default:
-                    break;
+                if (OpenExe())
+                {
+                    notifyIcon.BalloonTipText = "已托管服务";
+                    notifyIcon.ContextMenuStrip.Items[0].Image = right;
+                }
+                else
+                {
+                    notifyIcon.BalloonTipText = "托管服务失败";
+                    notifyIcon.ContextMenuStrip.Items[0].Image = unright;
+                }
+                notifyIcon.ShowBalloonTip(1000);
+            }
+            else
+            {
+                notifyIcon.BalloonTipText = "已取消托管服务";
+                notifyIcon.ShowBalloonTip(1000);
+                notifyIcon.ContextMenuStrip.Items[0].Image = unright;
+                KillExe();
             }
         }
-
-        private void OpenExe()
+        private bool OpenExe()
         {
             try
             {
@@ -75,21 +90,50 @@ namespace client.service.tray
                 proc.StartInfo.CreateNoWindow = true;
 
                 proc.Start();
-                // proc.StandardInput.AutoFlush = true;
-                //proc.StandardInput.WriteLine("client.service.exe");
+
+                return true;
             }
-            catch (System.Exception ex)
+            catch (Exception)
             {
-                notifyIcon.BalloonTipText = ex.Message;
+                try
+                {
+                    proc.Kill();
+                    proc.Dispose();
+                }
+                catch (Exception)
+                {
+                }
+                proc = null;
+                notifyIcon.BalloonTipText = "托管服务失败";
                 notifyIcon.ShowBalloonTip(1000);
+            }
+            return false;
+        }
+        private void KillExe()
+        {
+            try
+            {
+                proc?.Kill();
+                proc?.Dispose();
+
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                proc = null;
             }
         }
 
-        private void OpenWeb()
+        private void OpenWeb(object sender, EventArgs e)
         {
-
             Web web = new Web("http://127.0.0.1:8080");
             web.Show();
+        }
+        private void Close(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         private new void Closing(object sender, FormClosingEventArgs e)

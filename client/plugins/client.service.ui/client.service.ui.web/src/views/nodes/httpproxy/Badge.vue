@@ -35,7 +35,6 @@ export default {
         });
         const loadData = () => {
             getListProxy().then((res) => {
-                console.log(res);
                 state.targetName = res.Name;
             }).catch(() => {
 

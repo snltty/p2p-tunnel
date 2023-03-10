@@ -179,8 +179,8 @@ namespace common.socks5
             };
             //socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
             //socket.SendTimeout = 5000;
-            socket.SendBufferSize = bufferSize;
-            socket.ReceiveBufferSize = bufferSize;
+            //socket.SendBufferSize = bufferSize;
+            //socket.ReceiveBufferSize = bufferSize;
             token.PoolBuffer = new byte[bufferSize];
             readEventArgs.SetBuffer(token.PoolBuffer, 0, bufferSize);
             readEventArgs.Completed += IO_Completed;

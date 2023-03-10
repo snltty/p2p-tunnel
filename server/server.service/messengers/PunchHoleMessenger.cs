@@ -71,7 +71,7 @@ namespace server.service.messengers
                             }
                             else
                             {
-                                if (source.GetTunnel(model.ToId, out tunnel) == false)
+                                if (target.GetTunnel(connection.ConnectId, out tunnel) == false)
                                 {
                                     return;
                                 }

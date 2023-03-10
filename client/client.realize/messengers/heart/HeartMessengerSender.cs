@@ -13,10 +13,6 @@ namespace client.realize.messengers.heart
     public sealed class HeartMessengerSender
     {
         private readonly MessengerSender messengerSender;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
         public HeartMessengerSender(MessengerSender messengerSender)
         {
             this.messengerSender = messengerSender;
@@ -26,15 +22,26 @@ namespace client.realize.messengers.heart
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public async Task<bool> Heart(IConnection connection)
+        public async Task<bool> Alive(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
                 MessengerId = (ushort)HeartMessengerIds.Alive,
                 Timeout = 2000
-            },true).ConfigureAwait(false);
+            }, true).ConfigureAwait(false);
             return resp.Code == MessageResponeCodes.OK && Helper.TrueArray.AsSpan().SequenceEqual(resp.Data.Span);
+        }
+
+        public async Task<bool> Test(IConnection connection, Memory<byte> data)
+        {
+            return await messengerSender.SendOnly(new MessageRequestWrap
+            {
+                Connection = connection,
+                MessengerId = (ushort)HeartMessengerIds.Alive,
+                Timeout = 2000,
+                Payload = data
+            }, true).ConfigureAwait(false);
         }
     }
 }

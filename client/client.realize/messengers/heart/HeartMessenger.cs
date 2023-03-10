@@ -27,5 +27,10 @@ namespace client.realize.messengers.heart
         {
             return Helper.TrueArray;
         }
+
+        [MessengerId((ushort)HeartMessengerIds.Test)]
+        public void Test(IConnection connection)
+        {
+        }
     }
 }

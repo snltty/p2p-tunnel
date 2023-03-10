@@ -24,6 +24,7 @@ namespace client.service
         static void Main(string[] args)
         {
             Startup.Start();
+
             Console.ReadLine();
         }
     }
@@ -114,4 +115,5 @@ namespace client.service
              });
         }
     }
+
 }

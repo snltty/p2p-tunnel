@@ -80,7 +80,8 @@ export const provideRegister = () => {
                 setTimeout(fn, 1000);
             });
         } else {
-            state.Connected = false;
+            state.LocalInfo.Connected = false;
+            state.LocalInfo.IsConnecting = false;
             setTimeout(fn, 1000);
         }
     }

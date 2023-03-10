@@ -49,7 +49,6 @@ export default {
             state.loading = true;
             get().then((res) => {
                 res.TargetName = state.targetName;
-                console.log(JSON.stringify(res));
                 set(res).then((res) => {
                     state.loading = false;
                     loadData();

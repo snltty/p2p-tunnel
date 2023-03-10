@@ -133,8 +133,8 @@ namespace common.tcpforward
 
             token.SourceSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
             token.SourceSocket.SendTimeout = 5000;
-            token.SourceSocket.SendBufferSize = receiveBufferSize;
-            token.SourceSocket.ReceiveBufferSize = receiveBufferSize;
+            //token.SourceSocket.SendBufferSize = receiveBufferSize;
+            //token.SourceSocket.ReceiveBufferSize = receiveBufferSize;
             token.PoolBuffer = new byte[receiveBufferSize];
             readEventArgs.SetBuffer(token.PoolBuffer, 0, receiveBufferSize);
             readEventArgs.Completed += IO_Completed;

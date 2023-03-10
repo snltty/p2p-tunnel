@@ -122,16 +122,13 @@ namespace server.service
                     model.DeBytes(data);
                     if (clientsMessenger != null)
                     {
-
-                        Console.WriteLine($"{model.SelfId} -> {model.TargetId} : {model.LocalPort} {remoteEndpoint.Port}");
-
-                        clientsMessenger?.AddTunnel(model, remoteEndpoint.Port);
+                        clientsMessenger.AddTunnel(model, remoteEndpoint.Port);
                         udpServer.SendUnconnectedMessage(((ushort)remoteEndpoint.Port).ToBytes(), remoteEndpoint);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.Error(ex);
+                    Logger.Instance.DebugError(ex);
                 }
             };
         }

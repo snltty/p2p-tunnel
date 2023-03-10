@@ -3,6 +3,7 @@ using client.messengers.register;
 using client.service.ui.api.clientServer;
 using common.libs.extends;
 using common.server;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,17 +18,14 @@ namespace client.service.ui.api.service.clientServer.services
         private readonly IClientsTransfer clientsTransfer;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly RegisterStateInfo registerStateInfo;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientsTransfer"></param>
-        /// <param name="clientInfoCaching"></param>
-        /// <param name="registerStateInfo"></param>
-        public ClientsClientService(IClientsTransfer clientsTransfer, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerStateInfo)
+        private readonly IClientServer clientServer;
+
+        public ClientsClientService(IClientsTransfer clientsTransfer, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerStateInfo, IClientServer clientServer)
         {
             this.clientsTransfer = clientsTransfer;
             this.clientInfoCaching = clientInfoCaching;
             this.registerStateInfo = registerStateInfo;
+            this.clientServer = clientServer;
         }
 
         /// <summary>
@@ -110,6 +108,73 @@ namespace client.service.ui.api.service.clientServer.services
         {
             await clientsTransfer.Ping();
             return true;
+        }
+
+
+        private bool running = false;
+        /// <summary>
+        /// 速度测试
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public void Test(ClientServiceParamsInfo arg)
+        {
+            SpeedModel model = arg.Content.DeJson<SpeedModel>();
+            if (model.Id == 0)
+            {
+                running = false;
+                return;
+            }
+            if (running)
+            {
+                return;
+            }
+
+            int current = 0;
+            int prev = 0;
+            var bytes = new byte[model.Packet * 1024];
+            running = true;
+
+            _ = Task.Run(async () =>
+            {
+                while (running)
+                {
+                    clientServer.Notify(new ClientServiceResponseInfo
+                    {
+                        Code = ClientServiceResponseCodes.Success,
+                        Path = "speed_test",
+                        RequestId = 0,
+                        Content = new
+                        {
+                            current = current,
+                            prev = prev
+                        }
+                    });
+                    prev = current;
+                    await Task.Delay(1000);
+
+                }
+            });
+
+            _ = Task.Run(async () =>
+            {
+                while (running)
+                {
+                    bool res = await clientsTransfer.Test(model.Id, bytes);
+                    current += bytes.Length;
+                    if (res == false)
+                    {
+                        running = res;
+                        break;
+                    }
+                }
+            });
+        }
+
+        class SpeedModel
+        {
+            public ulong Id { get; set; }
+            public int Packet { get; set; }
         }
 
         /// <summary>

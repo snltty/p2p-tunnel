@@ -40,13 +40,13 @@ namespace server.service.messengers
         }
         public void AddTunnel(TunnelRegisterInfo model, int port)
         {
-            if (clientRegisterCache.Get(model.SelfId, out RegisterCacheInfo source))
+            if (clientRegisterCache.Get(model.TargetId, out RegisterCacheInfo target))
             {
-                source.AddTunnel(new TunnelRegisterCacheInfo
+                target.AddTunnel(new TunnelRegisterCacheInfo
                 {
                     LocalPort = model.LocalPort,
                     Port = port,
-                    TargetId = model.TargetId
+                    SourceId = model.SelfId
                 });
             }
         }

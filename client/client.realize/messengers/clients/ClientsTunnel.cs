@@ -104,8 +104,8 @@ namespace client.realize.messengers.clients
             tempUdpServer.OnMessage += (remoteEndpoint, data) =>
             {
                 tcs.SetResult(data.ToUInt16());
+                tempUdpServer.OnMessage = null;
             };
-            Console.WriteLine($"udp 新端口:{selfId}->{targetId} {localport}");
             tempUdpServer.SendUnconnectedMessage(new TunnelRegisterInfo
             {
                 LocalPort = localport,

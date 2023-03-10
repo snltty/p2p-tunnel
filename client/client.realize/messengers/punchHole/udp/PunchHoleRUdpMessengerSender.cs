@@ -68,7 +68,7 @@ namespace client.realize.messengers.punchHole.udp
             {
                 Connection = Connection,
                 ToId = param.Id,
-                NewTunnel = 0,
+                NewTunnel = param.NewTunnel,
                 Data = new PunchHoleStep1Info { Step = (byte)PunchHoleUdpSteps.STEP_1, PunchType = PunchHoleTypes.UDP }
             }).ConfigureAwait(false);
             return await tcs.Task.ConfigureAwait(false);
@@ -182,12 +182,9 @@ namespace client.realize.messengers.punchHole.udp
                         continue;
                     }
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.LocalPort));
-                    Console.WriteLine($"Unconnected {Connection.ConnectId} -> {model.RawData.FromId} : {data.LocalPort}");
                 }
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port));
                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + 1));
-                Console.WriteLine($"Unconnected {Connection.ConnectId} -> {model.RawData.FromId} : {data.Port}");
-                Console.WriteLine($"Unconnected {Connection.ConnectId} -> {model.RawData.FromId} : {data.Port + 1}");
 
                 AddSendTimeout(model.RawData.FromId);
                 await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2Info>

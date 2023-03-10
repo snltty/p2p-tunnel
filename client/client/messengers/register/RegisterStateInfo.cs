@@ -72,13 +72,9 @@ namespace client.messengers.register
             RemoteInfo.Ip = IPAddress.Any;
 
             ConnectId = 0;
-            var tcp = Connection;
+            Connection?.Disponse();
             Connection = null;
-            if (tcp != null)
-            {
-                tcp.Disponse();
-            }
-          
+
             OnRegisterBind.Push(false);
             if (online != Connected)
             {

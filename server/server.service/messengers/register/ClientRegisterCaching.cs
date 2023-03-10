@@ -35,7 +35,7 @@ namespace server.service.messengers.register
                 rateLimit = new TokenBucketRatelimit<IPAddress>(config.ConnectLimit);
             }
 
-            tcpServer.OnDisconnect+= Disconnected;
+            tcpServer.OnDisconnect += Disconnected;
             tcpServer.OnConnected = AddConnectedTimeout;
             udpServer.OnConnected = AddConnectedTimeout;
         }
@@ -127,6 +127,10 @@ namespace server.service.messengers.register
                     if (value.Count == 0)
                     {
                         cacheGroups.TryRemove(client.GroupId, out _);
+                    }
+                    foreach (var item in value)
+                    {
+                        item.Value.RemoveTunnel(id);
                     }
                 }
                 GC.Collect();
