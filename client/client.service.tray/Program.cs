@@ -15,6 +15,8 @@ namespace client.service.tray
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new MainForm());
+
+            //webview2 https://go.microsoft.com/fwlink/p/?LinkId=2124703
         }
     }
 }
