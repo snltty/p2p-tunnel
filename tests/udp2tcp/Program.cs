@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -41,15 +42,17 @@ namespace udp2tcp
                 try
                 {
                     var rawTcp = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
-                    rawTcp.Bind(new IPEndPoint(IPAddress.Any, 5000));
-
+                    rawTcp.Bind(new IPEndPoint(IPAddress.Loopback, 5000));
+                    SetSocketOption(rawTcp);
+                    
                     var bytes = new byte[65536];
                     while (true)
                     {
                         int len = rawTcp.Receive(bytes);
-
+                        /*
                         var ipPacket = bytes.AsMemory(0, len);
                         var ipPacketSpan = ipPacket.Span;
+
 
                         //只处理tcp
                         int proto = ipPacketSpan[9];
@@ -62,27 +65,30 @@ namespace udp2tcp
                         Memory<byte> sourceIp = ipPacket.Slice(12, 4);
                         Memory<byte> targetIp = ipPacket.Slice(16, 4);
 
-
+                        //tcp包
                         Memory<byte> tcp = ipPacket.Slice((ipPacketSpan[0] & 0b00001111) * 4);
                         var tcpSpan = tcp.Span;
-                        //tcp包端口
+                        //tcp包来源端口
                         ushort sourcePort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(tcpSpan));
+                        //tcp包目标端口
                         Span<byte> targetPorts = tcpSpan.Slice(2);
                         ushort targetPort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(targetPorts));
                         //重写tcp目标端口
-                        var newPorts = BitConverter.GetBytes(6000);
-                        targetPorts[0] = newPorts[1];
-                        targetPorts[1] = newPorts[0];
-
-                        targetPort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(targetPorts));
-                        //Console.WriteLine($"目标端口：{targetPort}");
+                        byte[] newPorts = BitConverter.GetBytes(6000);
+                        //targetPorts[0] = newPorts[1];
+                        //targetPorts[1] = newPorts[0];
+                        //校验和
+                        ushort checkSum = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(tcpSpan.Slice(16, 2)));
 
                         IPEndPoint sourceEp = new IPEndPoint(new IPAddress(sourceIp.Span), sourcePort);
                         if (dic.TryGetValue(sourceEp, out Socket socket) == false)
                         {
                             socket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
                             dic.Add(sourceEp, socket);
+
+                            //SetSocketOption(socket);
                             socket.SendTo(ipPacketSpan, new IPEndPoint(IPAddress.Loopback, 6000));
+                          
                             Task.Run(() =>
                             {
                                 var bytes = new byte[65536];
@@ -93,24 +99,18 @@ namespace udp2tcp
                                     var ipPacket = bytes.AsMemory(0, len);
                                     var ipPacketSpan = ipPacket.Span;
 
+                                    //tcp包
                                     Memory<byte> tcp = ipPacket.Slice((ipPacketSpan[0] & 0b00001111) * 4);
                                     var tcpSpan = tcp.Span;
+                                    //来源端口
                                     ushort sourcePort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(tcpSpan));
-                                    // Console.WriteLine($"源端口：{sourcePort}");
+                                    //目标端口
                                     ushort targetPort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(tcpSpan));
-                                    //Console.WriteLine($"目标端口1：{targetPort}");
-
-                                    var newPorts = BitConverter.GetBytes(5000);
-                                    tcpSpan[0] = newPorts[1];
-                                    tcpSpan[1] = newPorts[0];
-
-                                    sourcePort = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(tcpSpan));
-                                    // Console.WriteLine($"源端口1：{sourcePort}");
-
-                                    rawTcp.SendTo(ipPacket.Span, sourceEp);
-
-
-                                    //Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]:receive:{length}");
+                                    //重写目标端口
+                                   // var newPorts = BitConverter.GetBytes(sourceEp.Port);
+                                    //tcpSpan[0] = newPorts[1];
+                                   // tcpSpan[1] = newPorts[0];
+                                   // rawTcp.SendTo(ipPacket.Span, sourceEp);
                                 }
                             });
                         }
@@ -118,44 +118,14 @@ namespace udp2tcp
                         {
                             socket.SendTo(ipPacketSpan, new IPEndPoint(IPAddress.Loopback, 6000));
                         }
+                        */
                     }
+                    
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex + "");
                 }
-
-                /*
-                UdpClient udp = new UdpClient(5000);
-
-                Dictionary<IPEndPoint, Socket> clients = new Dictionary<IPEndPoint, Socket>();
-                IPEndPoint ep = new IPEndPoint(IPAddress.Any, 0);
-                while (true)
-                {
-                    byte[] bytes = udp.Receive(ref ep);
-
-                    if (clients.TryGetValue(ep, out Socket socket) == false)
-                    {
-                        IPEndPoint _ep = ep;
-                        socket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Tcp);
-                        clients.Add(ep, socket);
-                        socket.SendTo(bytes, new IPEndPoint(IPAddress.Loopback, 6000));
-
-                        Task.Run(() =>
-                        {
-                            var bytes = new byte[64 * 1024];
-                            while (true)
-                            {
-                                int len = socket.Receive(bytes);
-                                udp.Send(bytes.AsMemory(0, len).Span, _ep);
-                            }
-                        });
-                    }
-                    else
-                    {
-                        socket.SendTo(bytes, new IPEndPoint(IPAddress.Loopback, 6000));
-                    }
-                }*/
             });
         }
 
@@ -180,6 +150,29 @@ namespace udp2tcp
                 }
 
             });
+        }
+
+        const int SIO_RCVALL = unchecked((int)0x98000001);//监听所有的数据包
+        static bool SetSocketOption(Socket socket) //设置raw socket 
+        {
+            bool ret_value = true;
+            try
+            {
+                socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.HeaderIncluded, 1);
+                byte[] IN = new byte[4] { 1, 0, 0, 0 };
+                byte[] OUT = new byte[4];
+
+                //低级别操作模式,接受所有的数据包，这一步是关键，必须把socket设成raw和IP Level才可用　　SIO_RCVALL 
+                int ret_code = socket.IOControl(SIO_RCVALL, IN, OUT);
+                ret_code = OUT[0] + OUT[1] + OUT[2] + OUT[3];//把4个8位字节合成一个32位整数 
+                if (ret_code != 0) ret_value = false;
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine(ex+"");
+                ret_value = false;
+            }
+            return ret_value;
         }
     }
 }
