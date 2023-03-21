@@ -1,5 +1,5 @@
 ﻿using client.messengers.clients;
-using client.messengers.register;
+using client.messengers.singnin;
 using common.libs;
 using common.server;
 using System;
@@ -19,7 +19,7 @@ namespace client.service.wakeup
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly WakeUpMessengerSender wakeUpMessengerSender;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
         private readonly ConcurrentDictionary<string, List<ConfigItem>> macs = new ConcurrentDictionary<string, List<ConfigItem>>();
         /// <summary>
         /// 
@@ -27,12 +27,12 @@ namespace client.service.wakeup
         /// <param name="clientInfoCaching"></param>
         /// <param name="wakeUpMessengerSender"></param>
         /// <param name="config"></param>
-        /// <param name="registerStateInfo"></param>
-        public WakeUpTransfer(IClientInfoCaching clientInfoCaching, WakeUpMessengerSender wakeUpMessengerSender, Config config, RegisterStateInfo registerStateInfo)
+        /// <param name="signInStateInfo"></param>
+        public WakeUpTransfer(IClientInfoCaching clientInfoCaching, WakeUpMessengerSender wakeUpMessengerSender, Config config, SignInStateInfo signInStateInfo)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.wakeUpMessengerSender = wakeUpMessengerSender;
-            this.registerStateInfo = registerStateInfo;
+            this.signInStateInfo = signInStateInfo;
 
             clientInfoCaching.OnOnline.Sub((client) =>
             {
@@ -66,7 +66,7 @@ namespace client.service.wakeup
         /// </summary>
         public void UpdateMac()
         {
-            foreach (var item in clientInfoCaching.All().Where(c => c.Id != registerStateInfo.ConnectId))
+            foreach (var item in clientInfoCaching.All().Where(c => c.Id != signInStateInfo.ConnectId))
             {
                 IConnection connection = item.Connection;
                 var client = item;

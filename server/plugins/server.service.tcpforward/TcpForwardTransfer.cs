@@ -1,6 +1,6 @@
 ﻿using common.libs;
 using common.tcpforward;
-using server.messengers.register;
+using server.messengers.singnin;
 using System.Linq;
 
 namespace server.service.tcpforward
@@ -14,14 +14,14 @@ namespace server.service.tcpforward
         /// 
         /// </summary>
         /// <param name="config"></param>
-        /// <param name="clientRegisterCaching"></param>
+        /// <param name="clientSignInCaching"></param>
         /// <param name="tcpForwardTargetCaching"></param>
         /// <param name="tcpForwardServer"></param>
         /// <param name="tcpForwardMessengerSender"></param>
         /// <param name="tcpForwardTargetProvider"></param>
         public TcpForwardTransfer(
 
-            common.tcpforward.Config config, IClientRegisterCaching clientRegisterCaching,
+            common.tcpforward.Config config, IClientSignInCaching clientSignInCaching,
             ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching,
             ITcpForwardServer tcpForwardServer,
             TcpForwardMessengerSender tcpForwardMessengerSender,
@@ -32,7 +32,7 @@ namespace server.service.tcpforward
                 tcpForwardServer.Init(config.NumConnections, config.BufferSize);
 
                 //离线删除其监听
-                clientRegisterCaching.OnOffline.Sub((client) =>
+                clientSignInCaching.OnOffline.Sub((client) =>
                 {
                     var keys = tcpForwardTargetCaching.Remove(client.Name);
                     if (keys.Any())

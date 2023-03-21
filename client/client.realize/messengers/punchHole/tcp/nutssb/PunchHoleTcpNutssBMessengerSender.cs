@@ -1,7 +1,7 @@
 ﻿using client.messengers.clients;
 using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
-using client.messengers.register;
+using client.messengers.singnin;
 using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;
@@ -24,7 +24,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly ITcpServer tcpServer;
-        private readonly RegisterStateInfo registerState;
+        private readonly SignInStateInfo signInState;
         private readonly CryptoSwap cryptoSwap;
         private readonly Config config;
         private readonly WheelTimer<object> wheelTimer;
@@ -32,11 +32,11 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         private readonly IClientsTunnel clientsTunnel;
 
         public PunchHoleTcpNutssBMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, ITcpServer tcpServer,
-            RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching, IClientsTunnel clientsTunnel)
+            SignInStateInfo signInState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching, IClientsTunnel clientsTunnel)
         {
             this.punchHoleMessengerSender = punchHoleMessengerSender;
             this.tcpServer = tcpServer;
-            this.registerState = registerState;
+            this.signInState = signInState;
             this.cryptoSwap = cryptoSwap;
             this.config = config;
             this.wheelTimer = wheelTimer;
@@ -44,9 +44,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             this.clientsTunnel = clientsTunnel;
         }
 
-        private IConnection Connection => registerState.Connection;
+        private IConnection Connection => signInState.Connection;
 
-        private int RouteLevel => registerState.LocalInfo.RouteLevel + 2;
+        private int RouteLevel => signInState.LocalInfo.RouteLevel + 2;
 #if DEBUG
         private bool UseLocalPort = true;
 #else
@@ -65,7 +65,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
             else
             {
-                clientInfoCaching.AddTunnelPort(param.Id, registerState.LocalInfo.Port);
+                clientInfoCaching.AddTunnelPort(param.Id, signInState.LocalInfo.Port);
             }
 
             var ceche = new ConnectCacheModel
@@ -209,7 +209,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
             else
             {
-                clientInfoCaching.AddTunnelPort(model.RawData.FromId, registerState.LocalInfo.Port);
+                clientInfoCaching.AddTunnelPort(model.RawData.FromId, signInState.LocalInfo.Port);
             }
 
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
@@ -526,11 +526,11 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         private bool NotIPv6Support(IPAddress ip)
         {
-            return ip.AddressFamily == AddressFamily.InterNetworkV6 && (NetworkHelper.IPv6Support == false || registerState.LocalInfo.Ipv6s.Length == 0);
+            return ip.AddressFamily == AddressFamily.InterNetworkV6 && (NetworkHelper.IPv6Support == false || signInState.LocalInfo.Ipv6s.Length == 0);
         }
         private bool IPv6Support()
         {
-            return NetworkHelper.IPv6Support == true && registerState.LocalInfo.Ipv6s.Length > 0;
+            return NetworkHelper.IPv6Support == true && signInState.LocalInfo.Ipv6s.Length > 0;
         }
 
 

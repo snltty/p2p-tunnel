@@ -1,7 +1,7 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
-using server.messengers.register;
+using server.messengers.singnin;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -18,15 +18,15 @@ namespace server.service.messengers
         private readonly DateTime startTime = DateTime.Now;
         private CounterResultInfo counterResultInfo = new CounterResultInfo();
 
-        public CounterMessenger(IClientRegisterCaching clientRegisterCaching, WheelTimer<object> wheelTimer)
+        public CounterMessenger(IClientSignInCaching clientSignInCaching, WheelTimer<object> wheelTimer)
         {
             wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object>
             {
                 Callback = (state) =>
                 {
                     proc.Refresh();
-                    var clients = clientRegisterCaching.Get();
-                    counterResultInfo.OnlineCount = clientRegisterCaching.Count;
+                    var clients = clientSignInCaching.Get();
+                    counterResultInfo.OnlineCount = clientSignInCaching.Count;
                     counterResultInfo.Cpu = ProcessHelper.GetCpu(proc);
                     counterResultInfo.Memory = ProcessHelper.GetMemory(proc);
                     counterResultInfo.RunTime = (int)(DateTime.Now - startTime).TotalSeconds;

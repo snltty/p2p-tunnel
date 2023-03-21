@@ -3,7 +3,7 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers;
-using server.messengers.register;
+using server.messengers.singnin;
 using System.Threading.Tasks;
 
 namespace server.service.socks5
@@ -14,29 +14,18 @@ namespace server.service.socks5
     [MessengerIdRange((ushort)ServiceAccessValidatorMessengerIds.Min, (ushort)ServiceAccessValidatorMessengerIds.Max)]
     public sealed class ServiceAccessMessenger : IMessenger
     {
-        private readonly IClientRegisterCaching clientRegisterCaching;
+        private readonly IClientSignInCaching clientSignInCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientRegisterCaching"></param>
-        /// <param name="serviceAccessValidator"></param>
-        public ServiceAccessMessenger(IClientRegisterCaching clientRegisterCaching, IServiceAccessValidator serviceAccessValidator)
+        public ServiceAccessMessenger(IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator)
         {
-            this.clientRegisterCaching = clientRegisterCaching;
+            this.clientSignInCaching = clientSignInCaching;
             this.serviceAccessValidator = serviceAccessValidator;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)ServiceAccessValidatorMessengerIds.GetSetting)]
         public async Task GetSetting(IConnection connection)
         {
-            if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
+            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
                 return;
             }
@@ -49,15 +38,10 @@ namespace server.service.socks5
             connection.WriteUTF8(str);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)ServiceAccessValidatorMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
-            if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
+            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
                 return Helper.FalseArray;
             }

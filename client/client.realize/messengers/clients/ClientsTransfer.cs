@@ -2,7 +2,7 @@
 using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using client.messengers.punchHole.udp;
-using client.messengers.register;
+using client.messengers.singnin;
 using client.messengers.relay;
 using client.realize.messengers.crypto;
 using client.realize.messengers.heart;
@@ -31,7 +31,7 @@ namespace client.realize.messengers.clients
         private readonly ClientsMessengerSender clientsMessengerSender;
         private readonly IPunchHoleUdp punchHoleUdp;
         private readonly IPunchHoleTcp punchHoleTcp;
-        private readonly RegisterStateInfo registerState;
+        private readonly SignInStateInfo signInState;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
         private readonly Config config;
@@ -46,7 +46,7 @@ namespace client.realize.messengers.clients
 
         public ClientsTransfer(ClientsMessengerSender clientsMessengerSender,
             IPunchHoleUdp punchHoleUdp, IPunchHoleTcp punchHoleTcp, IClientInfoCaching clientInfoCaching,
-            RegisterStateInfo registerState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
+            SignInStateInfo signInState, PunchHoleMessengerSender punchHoleMessengerSender, Config config,
             ITcpServer tcpServer, HeartMessengerSender heartMessengerSender,
             RelayMessengerSender relayMessengerSender, IClientsTunnel clientsTunnel, IClientConnectsCaching connecRouteCaching,
             PunchHoleDirectionConfig punchHoleDirectionConfig, CryptoSwap cryptoSwap
@@ -55,7 +55,7 @@ namespace client.realize.messengers.clients
             this.clientsMessengerSender = clientsMessengerSender;
             this.punchHoleUdp = punchHoleUdp;
             this.punchHoleTcp = punchHoleTcp;
-            this.registerState = registerState;
+            this.signInState = signInState;
             this.clientInfoCaching = clientInfoCaching;
             this.config = config;
             this.heartMessengerSender = heartMessengerSender;
@@ -69,7 +69,7 @@ namespace client.realize.messengers.clients
             punchHoleTcp.OnStepHandler += OnPunchHoleStep;
 
             //掉线的
-            tcpServer.OnDisconnect += (connection) => OnDisconnect(connection, registerState.Connection);
+            tcpServer.OnDisconnect += (connection) => OnDisconnect(connection, signInState.Connection);
             clientsTunnel.OnDisConnect = OnDisconnect;
             clientInfoCaching.OnOffline.Sub(OnOffline);
             clientInfoCaching.OnOfflineAfter.Sub(OnOfflineAfter);
@@ -83,13 +83,13 @@ namespace client.realize.messengers.clients
             //有人要求反向链接
             punchHoleMessengerSender.OnReverse.Sub(OnReverse);
 
-            registerState.OnRegisterBind.Sub(OnRegisterBind);
+            signInState.OnBind.Sub(OnBind);
 
             //收到来自服务器的 在线客户端 数据
             clientsMessengerSender.OnServerClientsData.Sub(OnServerSendClients);
 
             Logger.Instance.Info("获取外网距离ing...");
-            registerState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();
+            signInState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();
         }
 
         private void OnPunchHoleStep(object sender, PunchHoleStepModel arg)
@@ -120,7 +120,7 @@ namespace client.realize.messengers.clients
                     //3是被动方 4是主动方
                     ClientOnlineTypes onlineType = arg.RawData.PunchStep == step3 ? ClientOnlineTypes.Passive : ClientOnlineTypes.Active;
                     clientInfoCaching.Online(arg.RawData.FromId, arg.Connection, ClientConnectTypes.P2P, onlineType);
-                    _ = clientsMessengerSender.RemoveTunnel(registerState.Connection, arg.RawData.FromId);
+                    _ = clientsMessengerSender.RemoveTunnel(signInState.Connection, arg.RawData.FromId);
                     //主动方 记录一下，是我这边主动打洞成功的，下次由我这边开始尝试
                     if (arg.RawData.PunchStep == step4)
                     {
@@ -144,11 +144,11 @@ namespace client.realize.messengers.clients
         {
             if (clientInfoCaching.Get(client.Id, out _))
             {
-                registerState.LocalInfo.IsConnecting = true;
+                signInState.LocalInfo.IsConnecting = true;
                 client.SetConnecting(true);
                 punchHoleMessengerSender.SendOffline(client.Id).Wait();
                 client.SetConnecting(false);
-                registerState.LocalInfo.IsConnecting = false;
+                signInState.LocalInfo.IsConnecting = false;
             }
 
         }
@@ -203,12 +203,12 @@ namespace client.realize.messengers.clients
         /// <param name="client"></param>
         public void ConnectClient(ClientInfo client)
         {
-            if (client.Id == registerState.ConnectId)
+            if (client.Id == signInState.ConnectId)
             {
                 Logger.Instance.Error($"canot connect you self");
                 return;
             }
-            if (registerState.LocalInfo.IsConnecting)
+            if (signInState.LocalInfo.IsConnecting)
             {
                 return;
             }
@@ -366,12 +366,12 @@ namespace client.realize.messengers.clients
             byte[] tunnelNames = new byte[] { 0, 1 };
             for (int i = 0; i < tunnelNames.Length; i++)
             {
-                clientInfoCaching.AddTunnelPort(client.Id, registerState.LocalInfo.Port);
+                clientInfoCaching.AddTunnelPort(client.Id, signInState.LocalInfo.Port);
                 ConnectResultModel result = await punchHoleTcp.Send(new ConnectParams
                 {
                     Id = client.Id,
                     NewTunnel = tunnelNames[i],
-                    LocalPort = registerState.LocalInfo.Port
+                    LocalPort = signInState.LocalInfo.Port
                 }).ConfigureAwait(false);
                 if (result.State)
                 {
@@ -419,7 +419,7 @@ namespace client.realize.messengers.clients
             return false;
         }
 
-        private void OnRegisterBind(bool state)
+        private void OnBind(bool state)
         {
             firstClients.Reset();
             clientInfoCaching.Clear();
@@ -430,7 +430,7 @@ namespace client.realize.messengers.clients
             try
             {
 
-                if (registerState.Connection == null || clients.Clients == null)
+                if (signInState.Connection == null || clients.Clients == null)
                 {
                     return;
                 }
@@ -438,14 +438,14 @@ namespace client.realize.messengers.clients
                 {
                     IEnumerable<ulong> remoteIds = clients.Clients.Select(c => c.Id);
                     //下线了的
-                    IEnumerable<ulong> offlines = clientInfoCaching.AllIds().Except(remoteIds).Where(c => c != registerState.ConnectId);
+                    IEnumerable<ulong> offlines = clientInfoCaching.AllIds().Except(remoteIds).Where(c => c != signInState.ConnectId);
                     foreach (ulong offid in offlines)
                     {
                         clientInfoCaching.Remove(offid);
                     }
                     //新上线的
                     IEnumerable<ulong> upLines = remoteIds.Except(clientInfoCaching.AllIds());
-                    IEnumerable<ClientsClientInfo> upLineClients = clients.Clients.Where(c => upLines.Contains(c.Id) && c.Id != registerState.ConnectId && c.Name != config.Client.Name);
+                    IEnumerable<ClientsClientInfo> upLineClients = clients.Clients.Where(c => upLines.Contains(c.Id) && c.Id != signInState.ConnectId && c.Name != config.Client.Name);
 
                     foreach (ClientsClientInfo item in upLineClients)
                     {
@@ -519,7 +519,7 @@ namespace client.realize.messengers.clients
                 IConnection connection = null;
                 if (item[1] == 0)
                 {
-                    connection = registerState.Connection;
+                    connection = signInState.Connection;
                 }
                 else
                 {
@@ -546,18 +546,18 @@ namespace client.realize.messengers.clients
 
         private async Task Relay(ClientInfo client, bool notify = false)
         {
-            if (registerState.RemoteInfo.Relay == false)
+            if (signInState.RemoteInfo.Relay == false)
             {
                 Logger.Instance.Warning($"server relay not available");
                 return;
             }
 
-            IConnection connection = registerState.Connection;
+            IConnection connection = signInState.Connection;
             if (client.Connected == true)
             {
                 return;
             }
-            await Relay(connection, new ulong[] { registerState.ConnectId, 0, client.Id }, notify);
+            await Relay(connection, new ulong[] { signInState.ConnectId, 0, client.Id }, notify);
         }
 
         /// <summary>

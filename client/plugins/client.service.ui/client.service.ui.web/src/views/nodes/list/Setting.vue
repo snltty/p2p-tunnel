@@ -33,6 +33,24 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <el-form-item label="账号" prop="Account">
+                                <el-tooltip class="box-item" effect="dark" content="账号" placement="top-start">
+                                    <el-input size="default" v-model="model.Account" placeholder="账号"></el-input>
+                                </el-tooltip>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <el-form-item label="密码" prop="Password">
+                                <el-tooltip class="box-item" effect="dark" content="密码" placement="top-start">
+                                    <el-input type="password" size="default" placeholder="密码" v-model="model.Password" show-password></el-input>
+                                </el-tooltip>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <el-row>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="掉线超时" prop="TimeoutDelay">
                                 <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top-start">
                                     <el-input size="default" v-model="model.TimeoutDelay" placeholder="掉线超时"></el-input>
@@ -118,16 +136,18 @@
 
 <script>
 import { ref, toRefs, reactive } from '@vue/reactivity';
-import { getRegisterInfo, updateConfig } from '../../../apis/register'
+import { getSignInInfo, updateConfig } from '../../../apis/signin'
 import { onMounted } from '@vue/runtime-core';
 export default {
-    service: 'RegisterClientService',
+    service: 'SignInClientService',
     components: {},
     setup() {
         const formDom = ref(null);
         const state = reactive({
             model: {
                 Name: '',
+                Account: '',
+                Password: '',
                 AutoReg: false,
                 GroupId: '',
                 GroupIds: [],
@@ -162,8 +182,10 @@ export default {
         });
 
         const loadConfig = () => {
-            getRegisterInfo().then((json) => {
+            getSignInInfo().then((json) => {
                 state.model.Name = json.ClientConfig.Name;
+                state.model.Account = json.ClientConfig.Account;
+                state.model.Password = json.ClientConfig.Password;
                 state.model.GroupId = json.ClientConfig.GroupId;
                 state.model.GroupIds = json.ClientConfig.GroupIds;
 
@@ -184,8 +206,10 @@ export default {
 
         const getJson = () => {
             return new Promise((resolve, reject) => {
-                getRegisterInfo().then((json) => {
+                getSignInInfo().then((json) => {
                     json.ClientConfig.Name = state.model.Name;
+                    json.ClientConfig.Account = state.model.Account;
+                    json.ClientConfig.Password = state.model.Password;
                     json.ClientConfig.GroupId = state.model.GroupId;
                     json.ClientConfig.AutoReg = state.model.AutoReg;
                     json.ClientConfig.UsePunchHole = state.model.UsePunchHole;

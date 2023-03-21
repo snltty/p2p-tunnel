@@ -1,5 +1,5 @@
 ﻿using common.tcpforward;
-using server.messengers.register;
+using server.messengers.singnin;
 
 namespace server.service.tcpforward
 {
@@ -8,20 +8,20 @@ namespace server.service.tcpforward
     /// </summary>
     internal sealed class TcpForwardTargetProvider : ITcpForwardTargetProvider
     {
-        private readonly IClientRegisterCaching clientRegisterCaching;
+        private readonly IClientSignInCaching clientSignInCaching;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="clientRegisterCaching"></param>
+        /// <param name="clientSignInCaching"></param>
         /// <param name="tcpForwardTargetCaching"></param>
-        public TcpForwardTargetProvider(IClientRegisterCaching clientRegisterCaching, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching)
+        public TcpForwardTargetProvider(IClientSignInCaching clientSignInCaching, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching)
         {
-            this.clientRegisterCaching = clientRegisterCaching;
+            this.clientSignInCaching = clientSignInCaching;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
 
-            clientRegisterCaching.OnOffline.Sub((client) =>
+            clientSignInCaching.OnOffline.Sub((client) =>
             {
                 tcpForwardTargetCaching.ClearConnection(client.Id);
             });
@@ -51,7 +51,7 @@ namespace server.service.tcpforward
             {
                 if (cacheInfo.Connection == null || cacheInfo.Connection.Connected == false)
                 {
-                    if(clientRegisterCaching.Get(cacheInfo.Id,out RegisterCacheInfo client))
+                    if(clientSignInCaching.Get(cacheInfo.Id,out SignInCacheInfo client))
                     {
                         cacheInfo.Connection = client.Connection;
                     }

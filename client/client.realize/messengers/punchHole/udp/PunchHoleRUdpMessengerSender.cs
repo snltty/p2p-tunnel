@@ -1,7 +1,7 @@
 ﻿using client.messengers.clients;
 using client.messengers.punchHole;
 using client.messengers.punchHole.udp;
-using client.messengers.register;
+using client.messengers.singnin;
 using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;
@@ -25,24 +25,24 @@ namespace client.realize.messengers.punchHole.udp
     public sealed class PunchHoleRUdpMessengerSender : IPunchHoleUdp
     {
         private readonly PunchHoleMessengerSender punchHoleMessengerSender;
-        private readonly RegisterStateInfo registerState;
+        private readonly SignInStateInfo signInState;
         private readonly CryptoSwap cryptoSwap;
         private readonly Config config;
         private readonly WheelTimer<object> wheelTimer;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly IClientsTunnel clientsTunnel;
 
-        public PunchHoleRUdpMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, RegisterStateInfo registerState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching, IClientsTunnel clientsTunnel)
+        public PunchHoleRUdpMessengerSender(PunchHoleMessengerSender punchHoleMessengerSender, SignInStateInfo signInState, CryptoSwap cryptoSwap, Config config, WheelTimer<object> wheelTimer, IClientInfoCaching clientInfoCaching, IClientsTunnel clientsTunnel)
         {
             this.punchHoleMessengerSender = punchHoleMessengerSender;
-            this.registerState = registerState;
+            this.signInState = signInState;
             this.cryptoSwap = cryptoSwap;
             this.config = config;
             this.wheelTimer = wheelTimer;
             this.clientInfoCaching = clientInfoCaching;
             this.clientsTunnel = clientsTunnel;
         }
-        private IConnection Connection => registerState.Connection;
+        private IConnection Connection => signInState.Connection;
 #if DEBUG
         private bool UseLocalPort = true;
 #else
@@ -377,11 +377,11 @@ namespace client.realize.messengers.punchHole.udp
 
         private bool NotIPv6Support(IPAddress ip)
         {
-            return ip.AddressFamily == AddressFamily.InterNetworkV6 && (NetworkHelper.IPv6Support == false || registerState.LocalInfo.Ipv6s.Length == 0);
+            return ip.AddressFamily == AddressFamily.InterNetworkV6 && (NetworkHelper.IPv6Support == false || signInState.LocalInfo.Ipv6s.Length == 0);
         }
         private bool IPv6Support()
         {
-            return NetworkHelper.IPv6Support == true && registerState.LocalInfo.Ipv6s.Length > 0;
+            return NetworkHelper.IPv6Support == true && signInState.LocalInfo.Ipv6s.Length > 0;
         }
 
     }

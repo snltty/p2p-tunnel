@@ -1,4 +1,4 @@
-﻿using client.messengers.register;
+﻿using client.messengers.singnin;
 using common.server;
 using common.server.model;
 using System.Threading.Tasks;
@@ -12,11 +12,6 @@ namespace client.realize.messengers.clients
     public sealed class ClientsMessenger : IMessenger
     {
         private readonly ClientsMessengerSender clientsMessengerSender;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientsMessengerSender"></param>
-        /// <param name="registerTransfer"></param>
         public ClientsMessenger(ClientsMessengerSender clientsMessengerSender)
         {
             this.clientsMessengerSender = clientsMessengerSender;

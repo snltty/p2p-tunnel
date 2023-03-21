@@ -8,8 +8,8 @@ using common.server;
 using common.server.servers.iocp;
 using common.server.servers.rudp;
 using System.Reflection;
-using server.service.messengers.register;
-using server.messengers.register;
+using server.service.messengers.singnin;
+using server.messengers.singnin;
 using common.libs.database;
 using server.messengers;
 using server.service.validators;
@@ -29,10 +29,10 @@ namespace server.service
             services.AddSingleton<ITcpServer, TcpServer>();
             services.AddSingleton<IUdpServer, UdpServer>();
 
-            services.AddSingleton<IClientRegisterCaching, ClientRegisterCaching>();
+            services.AddSingleton<IClientSignInCaching, ClientSignInCaching>();
             services.AddSingleton<IRelaySourceConnectionSelector, messengers.RelaySourceConnectionSelector>();
 
-            services.AddSingleton<IRegisterKeyValidator, RegisterValidator>();
+            services.AddSingleton<ISignInValidator, SignInValidator>();
             services.AddSingleton<IServiceAccessValidator, JsonFileServiceAccessValidator>();
             services.AddSingleton<IRelayValidator, RelayValidator>();
 
@@ -51,7 +51,7 @@ namespace server.service
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             var config = services.GetService<Config>();
-            services.GetService<IRegisterKeyValidator>();
+            services.GetService<ISignInValidator>();
 
             var server = services.GetService<ITcpServer>();
             server.SetBufferSize(config.TcpBufferSize);
@@ -74,13 +74,13 @@ namespace server.service
 
         private void Loop(ServiceProvider services)
         {
-            IClientRegisterCaching clientRegisterCache = services.GetService<IClientRegisterCaching>();
+            IClientSignInCaching clientSignInCache = services.GetService<IClientSignInCaching>();
             MessengerResolver messengerResolver = services.GetService<MessengerResolver>();
             MessengerSender messengerSender = services.GetService<MessengerSender>();
 
-            clientRegisterCache.OnChanged.Sub((changeClient) =>
+            clientSignInCache.OnChanged.Sub((changeClient) =>
             {
-                List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.Connection != null && c.Connection.Connected).OrderBy(c => c.Id).Select(c => new ClientsClientInfo
+                List<ClientsClientInfo> clients = clientSignInCache.Get(changeClient.GroupId).Where(c => c.Connection != null && c.Connection.Connected).OrderBy(c => c.Id).Select(c => new ClientsClientInfo
                 {
                     Connection = c.Connection,
                     Id = c.Id,

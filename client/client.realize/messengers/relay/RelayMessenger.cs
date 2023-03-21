@@ -1,5 +1,5 @@
 ﻿using client.messengers.clients;
-using client.messengers.register;
+using client.messengers.singnin;
 using client.messengers.relay;
 using common.libs;
 using common.libs.extends;
@@ -20,7 +20,7 @@ namespace client.realize.messengers.relay
         private readonly RelayMessengerSender relayMessengerSender;
         private readonly IRelayValidator relayValidator;
         private readonly IClientConnectsCaching connecRouteCaching;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
         private readonly Config config;
 
         /// <summary>
@@ -30,17 +30,17 @@ namespace client.realize.messengers.relay
         /// <param name="relayMessengerSender"></param>
         /// <param name="relayValidator"></param>
         /// <param name="connecRouteCaching"></param>
-        /// <param name="registerStateInfo"></param>
+        /// <param name="signInStateInfo"></param>
         /// <param name="config"></param>
         public RelayMessenger(IClientInfoCaching clientInfoCaching,
             RelayMessengerSender relayMessengerSender, IRelayValidator relayValidator,
-            IClientConnectsCaching connecRouteCaching, RegisterStateInfo registerStateInfo, Config config)
+            IClientConnectsCaching connecRouteCaching, SignInStateInfo signInStateInfo, Config config)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.relayMessengerSender = relayMessengerSender;
             this.relayValidator = relayValidator;
             this.connecRouteCaching = connecRouteCaching;
-            this.registerStateInfo = registerStateInfo;
+            this.signInStateInfo = signInStateInfo;
             this.config = config;
         }
 
@@ -88,7 +88,7 @@ namespace client.realize.messengers.relay
                 ulong fromid = connection.ReceiveRequestWrap.Payload.Span.ToUInt64();
                 _ = relayMessengerSender.Connects(new ConnectsInfo
                 {
-                    Id = registerStateInfo.ConnectId,
+                    Id = signInStateInfo.ConnectId,
                     ToId = fromid,
                     Connects = clientInfoCaching.All().Where(c => c.Connected && c.ConnectType == ClientConnectTypes.P2P).Select(c => c.Id).ToArray(),
                 });

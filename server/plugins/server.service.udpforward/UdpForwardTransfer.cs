@@ -1,6 +1,6 @@
 ﻿using common.libs;
 using common.udpforward;
-using server.messengers.register;
+using server.messengers.singnin;
 using System.Linq;
 
 namespace server.service.udpforward
@@ -14,14 +14,14 @@ namespace server.service.udpforward
         /// 
         /// </summary>
         /// <param name="config"></param>
-        /// <param name="clientRegisterCaching"></param>
+        /// <param name="clientSignInCaching"></param>
         /// <param name="udpForwardTargetCaching"></param>
         /// <param name="udpForwardServer"></param>
         /// <param name="udpForwardMessengerSender"></param>
         /// <param name="udpForwardTargetProvider"></param>
         public UdpForwardTransfer(
 
-            common.udpforward.Config config, IClientRegisterCaching clientRegisterCaching,
+            common.udpforward.Config config, IClientSignInCaching clientSignInCaching,
             IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching,
             IUdpForwardServer udpForwardServer,
             UdpForwardMessengerSender udpForwardMessengerSender,
@@ -30,7 +30,7 @@ namespace server.service.udpforward
             if (config.ConnectEnable)
             {
                 //离线删除其监听
-                clientRegisterCaching.OnOffline.Sub((client) =>
+                clientSignInCaching.OnOffline.Sub((client) =>
                 {
                     var keys = udpForwardTargetCaching.Remove(client.Name);
                     if (keys.Any())

@@ -1,4 +1,4 @@
-import { getRegisterInfo, updateConfig } from '../../../apis/register'
+import { getSignInInfo, updateConfig } from '../../../apis/signin'
 
 const hasNodes = (services) => {
     return services.length == 0 || services.indexOf('ClientsClientService') >= 0;
@@ -14,7 +14,7 @@ export const remarks = (services) => {
 };
 export const update = (services) => {
     return new Promise((resolve, reject) => {
-        getRegisterInfo().then((json) => {
+        getSignInInfo().then((json) => {
             let _hasNodes = hasNodes(services);
             json.ClientConfig.AutoReg = true;
             json.ClientConfig.UseUdp = _hasNodes;

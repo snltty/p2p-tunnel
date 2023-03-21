@@ -22,7 +22,7 @@
 import Menu from "./components/Menu.vue";
 import Background from "./components/Background.vue";
 import StatusBar from "./components/statusBar/Index.vue";
-import { provideRegister } from "./states/register";
+import { provideSignIn } from "./states/signin";
 import { provideWebsocket } from "./states/websocket";
 import { provideClients } from "./states/clients";
 import { provideShareData } from "./states/shareData";
@@ -31,7 +31,7 @@ import zhCn from "element-plus/lib/locale/lang/zh-cn";
 export default {
     components: { Menu, Background, StatusBar, ElConfigProvider },
     setup() {
-        provideRegister();
+        provideSignIn();
         provideWebsocket();
         provideClients();
         provideShareData();

@@ -1,4 +1,4 @@
-﻿using client.messengers.register;
+﻿using client.messengers.singnin;
 using client.service.ui.api.clientServer;
 using common.libs;
 using common.libs.extends;
@@ -14,17 +14,17 @@ namespace client.service.ui.api.service.clientServer.services
     public sealed class CounterClientService : IClientService
     {
         private readonly MessengerSender messengerSender;
-        private readonly RegisterStateInfo registerState;
+        private readonly SignInStateInfo signInState;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="messengerSender"></param>
-        /// <param name="registerState"></param>
-        public CounterClientService(MessengerSender messengerSender, RegisterStateInfo registerState)
+        /// <param name="signInState"></param>
+        public CounterClientService(MessengerSender messengerSender, SignInStateInfo signInState)
         {
             this.messengerSender = messengerSender;
-            this.registerState = registerState;
+            this.signInState = signInState;
         }
 
         /// <summary>
@@ -34,12 +34,12 @@ namespace client.service.ui.api.service.clientServer.services
         /// <returns></returns>
         public async Task<CounterResultInfo> Info(ClientServiceParamsInfo arg)
         {
-            if (registerState.Connection != null)
+            if (signInState.Connection != null)
             {
                 var resp = await messengerSender.SendReply(new MessageRequestWrap
                 {
                     MessengerId = (ushort)CounterMessengerIds.Info,
-                    Connection = registerState.Connection,
+                    Connection = signInState.Connection,
                     Timeout = 15000
                 }).ConfigureAwait(false);
                 if (resp.Code == MessageResponeCodes.OK)

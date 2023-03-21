@@ -1,6 +1,6 @@
 ﻿using server.messengers;
 using common.server;
-using server.messengers.register;
+using server.messengers.singnin;
 using common.server.model;
 
 namespace server.service.validators
@@ -13,18 +13,18 @@ namespace server.service.validators
 
         private readonly Config config;
         private readonly IServiceAccessValidator serviceAccessProvider;
-        private readonly IClientRegisterCaching clientRegisterCache;
+        private readonly IClientSignInCaching clientSignInCache;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="config"></param>
         /// <param name="serviceAccessProvider"></param>
-        /// <param name="clientRegisterCache"></param>
-        public RelayValidator(Config config, IServiceAccessValidator serviceAccessProvider, IClientRegisterCaching clientRegisterCache)
+        /// <param name="clientSignInCache"></param>
+        public RelayValidator(Config config, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCache)
         {
             this.config = config;
             this.serviceAccessProvider = serviceAccessProvider;
-            this.clientRegisterCache = clientRegisterCache;
+            this.clientSignInCache = clientSignInCache;
         }
         /// <summary>
         /// 
@@ -33,7 +33,7 @@ namespace server.service.validators
         /// <returns></returns>
         public bool Validate(IConnection connection)
         {
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+            if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
             {
                 return config.RelayEnable || serviceAccessProvider.Validate(source.GroupId, EnumServiceAccess.Relay);
             }

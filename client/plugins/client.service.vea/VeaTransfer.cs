@@ -1,5 +1,5 @@
 ﻿using client.messengers.clients;
-using client.messengers.register;
+using client.messengers.singnin;
 using client.service.vea.socks5;
 using common.libs;
 using common.libs.extends;
@@ -42,7 +42,7 @@ namespace client.service.vea
         private readonly IVeaSocks5ClientListener socks5ClientListener;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaMessengerSender veaMessengerSender;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
 
         /// <summary>
         /// 
@@ -51,14 +51,14 @@ namespace client.service.vea
         /// <param name="clientInfoCaching"></param>
         /// <param name="veaMessengerSender"></param>
         /// <param name="socks5ClientListener"></param>
-        /// <param name="registerStateInfo"></param>
-        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener, RegisterStateInfo registerStateInfo)
+        /// <param name="signInStateInfo"></param>
+        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener, SignInStateInfo signInStateInfo)
         {
             this.config = config;
             this.socks5ClientListener = socks5ClientListener;
             this.clientInfoCaching = clientInfoCaching;
             this.veaMessengerSender = veaMessengerSender;
-            this.registerStateInfo = registerStateInfo;
+            this.signInStateInfo = signInStateInfo;
 
             clientInfoCaching.OnOnline.Sub((client) =>
             {
@@ -122,7 +122,7 @@ namespace client.service.vea
         /// </summary>
         public void UpdateIp()
         {
-            foreach (var item in clientInfoCaching.All().Where(c => c.Id != registerStateInfo.ConnectId))
+            foreach (var item in clientInfoCaching.All().Where(c => c.Id != signInStateInfo.ConnectId))
             {
                 var connection = item.Connection;
                 var client = item;

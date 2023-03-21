@@ -1,34 +1,21 @@
-﻿using server.messengers.register;
+﻿using server.messengers.singnin;
 using server.messengers;
 using common.server.model;
 
 namespace server.service.validators
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public sealed class RegisterValidator : IRegisterKeyValidator
+    public sealed class SignInValidator : ISignInValidator
     {
         private readonly Config config;
         private readonly IServiceAccessValidator serviceAccessProvider;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="serviceAccessProvider"></param>
-        public RegisterValidator(Config config, IServiceAccessValidator serviceAccessProvider)
+        public SignInValidator(Config config, IServiceAccessValidator serviceAccessProvider)
         {
             this.config = config;
             this.serviceAccessProvider = serviceAccessProvider;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public bool Validate(string key)
+        public bool Validate(string groupid)
         {
-            return config.RegisterEnable || serviceAccessProvider.Validate(key, EnumServiceAccess.Register);
+            return config.RegisterEnable || serviceAccessProvider.Validate(groupid, EnumServiceAccess.SignIn);
         }
     }
 

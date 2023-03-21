@@ -34,7 +34,7 @@
 <script>
 import { onMounted, onUnmounted, provide, reactive, ref, watch } from '@vue/runtime-core'
 import Signal from '../../components/Signal.vue'
-import { getRegisterInfo, sendPing, updateConfig } from '../../apis/register'
+import { getSignInInfo, sendPing, updateConfig } from '../../apis/signin'
 import { ElLoading } from 'element-plus'
 import { ElMessage } from 'element-plus/lib/components'
 import { injectShareData } from '../../states/shareData'
@@ -64,7 +64,7 @@ export default {
             clearTimeout(timer);
             state.servers = [];
             state.pings = [];
-            getRegisterInfo().then((info) => {
+            getSignInInfo().then((info) => {
                 state.servers = JSON.parse(JSON.stringify(info.ServerConfig.Items));
                 loadPingData(state.servers.map(c => c.Ip));
             });
@@ -98,7 +98,7 @@ export default {
             state.servers.splice(index, 1);
             state.pings.splice(index, 1);
             loadingInstance = ElLoading.service({ target: rootDom.value });
-            getRegisterInfo().then((json) => {
+            getSignInInfo().then((json) => {
                 json.ServerConfig.Items = JSON.parse(JSON.stringify(state.servers));
                 updateConfig(json).then(() => {
                     loadingInstance.close();
@@ -130,7 +130,7 @@ export default {
         let loadingInstance = null;
         const handleSelect = (item) => {
             loadingInstance = ElLoading.service({ target: rootDom.value });
-            getRegisterInfo().then((json) => {
+            getSignInInfo().then((json) => {
                 json.ServerConfig.Ip = item.Ip;
                 json.ServerConfig.UdpPort = item.UdpPort;
                 json.ServerConfig.TcpPort = item.TcpPort;

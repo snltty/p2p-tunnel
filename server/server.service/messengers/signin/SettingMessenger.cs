@@ -3,30 +3,30 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers;
-using server.messengers.register;
+using server.messengers.singnin;
 using System.Threading.Tasks;
 
-namespace server.service.messengers.register
+namespace server.service.messengers.singnin
 {
     /// <summary>
     /// 服务端配置
     /// </summary>
-    [MessengerIdRange((ushort)RegisterMessengerIds.Min, (ushort)RegisterMessengerIds.Max)]
+    [MessengerIdRange((ushort)SignInMessengerIds.Min, (ushort)SignInMessengerIds.Max)]
     public sealed class SettingMessenger : IMessenger
     {
-        private readonly IClientRegisterCaching clientRegisterCaching;
+        private readonly IClientSignInCaching clientSignInCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly Config config;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="clientRegisterCaching"></param>
+        /// <param name="clientSignInCaching"></param>
         /// <param name="serviceAccessValidator"></param>
         /// <param name="config"></param>
-        public SettingMessenger(IClientRegisterCaching clientRegisterCaching, IServiceAccessValidator serviceAccessValidator, Config config)
+        public SettingMessenger(IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator, Config config)
         {
-            this.clientRegisterCaching = clientRegisterCaching;
+            this.clientSignInCaching = clientSignInCaching;
             this.serviceAccessValidator = serviceAccessValidator;
             this.config = config;
         }
@@ -36,10 +36,10 @@ namespace server.service.messengers.register
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
-        [MessengerId((ushort)RegisterMessengerIds.GetSetting)]
+        [MessengerId((ushort)SignInMessengerIds.GetSetting)]
         public async Task GetSetting(IConnection connection)
         {
-            if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
+            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
                 return;
             }
@@ -56,10 +56,10 @@ namespace server.service.messengers.register
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
-        [MessengerId((ushort)RegisterMessengerIds.Setting)]
+        [MessengerId((ushort)SignInMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
-            if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
+            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
                 return Helper.FalseArray;
             }

@@ -12,19 +12,10 @@ namespace common.tcpforward
     public sealed class TcpForwardMessengerSender
     {
         private readonly MessengerSender messengerSender;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
         public TcpForwardMessengerSender(MessengerSender messengerSender)
         {
             this.messengerSender = messengerSender;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
         public async Task<bool> SendRequest(TcpForwardInfo arg)
         {
             byte[] bytes = arg.ToBytes(out int length);
@@ -39,11 +30,6 @@ namespace common.tcpforward
 
             return res;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <param name="connection"></param>
         public async Task<bool> SendResponse(TcpForwardInfo arg, IConnection connection)
         {
             byte[] bytes = arg.ToBytes(out int length);
@@ -59,11 +45,6 @@ namespace common.tcpforward
 
             return res;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="Connection"></param>
-        /// <returns></returns>
         public async Task<MessageResponeInfo> GetPorts(IConnection Connection)
         {
             return await messengerSender.SendReply(new MessageRequestWrap
@@ -72,12 +53,6 @@ namespace common.tcpforward
                 Connection = Connection
             }).ConfigureAwait(false);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="Connection"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
         public async Task<MessageResponeInfo> UnRegister(IConnection Connection, TcpForwardUnRegisterParamsInfo data)
         {
             return await messengerSender.SendReply(new MessageRequestWrap
@@ -87,12 +62,6 @@ namespace common.tcpforward
                 Payload = data.ToBytes()
             }).ConfigureAwait(false);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="Connection"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
         public async Task<MessageResponeInfo> Register(IConnection Connection, TcpForwardRegisterParamsInfo data)
         {
             return await messengerSender.SendReply(new MessageRequestWrap

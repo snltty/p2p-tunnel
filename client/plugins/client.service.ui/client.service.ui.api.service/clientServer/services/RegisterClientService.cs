@@ -1,11 +1,7 @@
-﻿using client.messengers.register;
+﻿using client.messengers.singnin;
 using client.service.ui.api.clientServer;
 using common.libs.extends;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
@@ -14,22 +10,16 @@ namespace client.service.ui.api.service.clientServer.services
     /// <summary>
     /// 注册
     /// </summary>
-    public sealed class RegisterClientService : IClientService
+    public sealed class SignInClientService : IClientService
     {
 
-        private readonly IRegisterTransfer registerTransfer;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly ISignInTransfer signinTransfer;
+        private readonly SignInStateInfo signInStateInfo;
         private readonly client.Config config;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="registerTransfer"></param>
-        /// <param name="registerStateInfo"></param>
-        /// <param name="config"></param>
-        public RegisterClientService(IRegisterTransfer registerTransfer, RegisterStateInfo registerStateInfo, client.Config config)
+        public SignInClientService(ISignInTransfer signinTransfer, SignInStateInfo signInStateInfo, client.Config config)
         {
-            this.registerTransfer = registerTransfer;
-            this.registerStateInfo = registerStateInfo;
+            this.signinTransfer = signinTransfer;
+            this.signInStateInfo = signInStateInfo;
             this.config = config;
         }
 
@@ -40,7 +30,7 @@ namespace client.service.ui.api.service.clientServer.services
         /// <returns></returns>
         public async Task<bool> Start(ClientServiceParamsInfo arg)
         {
-            var result = await registerTransfer.Register().ConfigureAwait(false);
+            var result = await signinTransfer.SignIn().ConfigureAwait(false);
             if (!result.Data)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, result.ErrorMsg);
@@ -53,21 +43,21 @@ namespace client.service.ui.api.service.clientServer.services
         /// <param name="arg"></param>
         public void Exit(ClientServiceParamsInfo arg)
         {
-            registerTransfer.Exit();
+            signinTransfer.Exit();
         }
         /// <summary>
         /// 获取配置文件和信息
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public RegisterInfo Info(ClientServiceParamsInfo arg)
+        public SignInInfo Info(ClientServiceParamsInfo arg)
         {
-            return new RegisterInfo
+            return new SignInInfo
             {
                 ClientConfig = config.Client,
                 ServerConfig = config.Server,
-                LocalInfo = registerStateInfo.LocalInfo,
-                RemoteInfo = registerStateInfo.RemoteInfo,
+                LocalInfo = signInStateInfo.LocalInfo,
+                RemoteInfo = signInStateInfo.RemoteInfo,
             };
         }
         /// <summary>
@@ -134,7 +124,7 @@ namespace client.service.ui.api.service.clientServer.services
     /// <summary>
     /// 注册信息
     /// </summary>
-    public class RegisterInfo
+    public class SignInInfo
     {
         /// <summary>
         /// 客户端配置

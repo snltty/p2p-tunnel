@@ -8,7 +8,7 @@ using System;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading.Tasks;
-using client.messengers.register;
+using client.messengers.singnin;
 using common.libs.extends;
 
 namespace client.realize.messengers.clients
@@ -18,7 +18,7 @@ namespace client.realize.messengers.clients
     /// </summary>
     public sealed class ClientsTunnel : IClientsTunnel
     {
-        private readonly RegisterStateInfo registerState;
+        private readonly SignInStateInfo signInState;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly Config config;
         private readonly IUdpServer udpServer;
@@ -30,11 +30,11 @@ namespace client.realize.messengers.clients
         /// </summary>
         public Action<IConnection, IConnection> OnDisConnect { get; set; } = (IConnection connection, IConnection connection1) => { };
 
-        public ClientsTunnel(ClientsMessengerSender clientsMessengerSender, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerState, Config config, IUdpServer udpServer, ITcpServer tcpServer
+        public ClientsTunnel(ClientsMessengerSender clientsMessengerSender, IClientInfoCaching clientInfoCaching, SignInStateInfo signInState, Config config, IUdpServer udpServer, ITcpServer tcpServer
         )
         {
             this.clientsMessengerSender = clientsMessengerSender;
-            this.registerState = registerState;
+            this.signInState = signInState;
             this.clientInfoCaching = clientInfoCaching;
             this.config = config;
             this.udpServer = udpServer;
@@ -55,7 +55,7 @@ namespace client.realize.messengers.clients
             {
                 try
                 {
-                    ushort localPort = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<ushort> { registerState.LocalInfo.Port });
+                    ushort localPort = NetworkHelper.GetRandomPort(new System.Collections.Generic.List<ushort> { signInState.LocalInfo.Port });
                     _ = serverType switch
                     {
                         ServerType.TCP => await NewBindTcp(localPort, serverAddress, selfId, targetId),
@@ -91,7 +91,7 @@ namespace client.realize.messengers.clients
                     //不是跟服务器的连接对象，那就是打洞的
                     if (ReferenceEquals(connection, _connection) == false)
                     {
-                        OnDisConnect(_connection, registerState.Connection);
+                        OnDisConnect(_connection, signInState.Connection);
                         clientInfoCaching.RemoveUdpserver(targetId);
                         tempUdpServer.Disponse();
                     }

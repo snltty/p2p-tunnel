@@ -14,7 +14,7 @@
                                 <dl>
                                     <dt class="flex">
                                         <span>长连接</span>
-                                        <span class="flex-1 t-c">{{registerState.ServerConfig.Ip}}:{{item.ServerPort}}</span>
+                                        <span class="flex-1 t-c">{{signinState.ServerConfig.Ip}}:{{item.ServerPort}}</span>
                                         <span>
                                             <el-switch size="small" @click.stop @change="onListeningChange(item)" v-model="item.Listening" style="margin-top:-6px;"></el-switch>
                                         </span>
@@ -46,14 +46,14 @@ import { getServerForwards, startServerForward, stopServerForward, removeServerF
 import { onMounted, provide } from '@vue/runtime-core'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../states/shareData'
-import { injectRegister } from '../../../states/register'
+import { injectSignIn } from '../../../states/signin'
 export default {
     service: 'ServerUdpForwardClientService',
     components: { AddListen },
     setup() {
 
         const shareData = injectShareData();
-        const registerState = injectRegister();
+        const signinState = injectSignIn();
         const state = reactive({
             loading: false,
             list: [],
@@ -89,7 +89,7 @@ export default {
         });
 
         return {
-            ...toRefs(state), registerState, shareData, getData,
+            ...toRefs(state), signinState, shareData, getData,
             handleRemoveListen, handleAddListen, onListeningChange
         }
     }

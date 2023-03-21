@@ -22,7 +22,7 @@
 //国旗图片：http://icon.mobanwang.com/2010/467.html
 import Signal from '../../components/Signal.vue'
 import { injectShareData } from '../../states/shareData'
-import { getRegisterInfo, sendPing } from '../../apis/register'
+import { getSignInInfo, sendPing } from '../../apis/signin'
 import { onMounted, onUnmounted, reactive } from '@vue/runtime-core';
 export default {
     components: { Signal },
@@ -37,12 +37,12 @@ export default {
 
         const update = () => {
             clearTimeout(timer);
-            getRegisterInfo().then((info) => {
+            getSignInInfo().then((info) => {
                 let ip = info.ServerConfig.Ip;
                 let items = info.ServerConfig.Items.filter(c => c.Ip == ip);
                 if (items.length > 0) {
                     state.item = items[0];
-                }else{
+                } else {
                     state.item.Ip = ip;
                 }
                 loadPingData([state.item.Ip]);

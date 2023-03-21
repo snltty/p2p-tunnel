@@ -65,7 +65,7 @@
 import { onMounted, provide, reactive, ref } from '@vue/runtime-core';
 import { getServerPorts, getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../apis/tcp-forward'
 import { injectShareData } from '../../../states/shareData'
-import { injectRegister } from '../../../states/register'
+import { injectSignIn } from '../../../states/signin'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
 export default {
@@ -74,7 +74,7 @@ export default {
     setup() {
 
         const shareData = injectShareData();
-        const registerState = injectRegister();
+        const signinState = injectSignIn();
         const state = reactive({
             loading: false,
             list: [],
@@ -97,7 +97,7 @@ export default {
                 state.list = ports.splice(0, ports.length - 2).map(c => {
                     return {
                         ServerPort: c,
-                        Domain: registerState.ServerConfig.Ip,
+                        Domain: signinState.ServerConfig.Ip,
                         Desc: '短链接',
                         AliveType: shareData.aliveTypesName.web,
                         Forwards: forwards.filter(d => d.AliveType == shareData.aliveTypesName.web && d.ServerPort == c).map(d => {
@@ -115,7 +115,7 @@ export default {
                 }).concat(forwards.filter(c => c.AliveType == shareData.aliveTypesName.tunnel).map(d => {
                     return {
                         ServerPort: d.ServerPort,
-                        Domain: registerState.ServerConfig.Ip,
+                        Domain: signinState.ServerConfig.Ip,
                         Desc: d.Desc || '长连接',
                         AliveType: shareData.aliveTypesName.tunnel,
                         Listening: d.Listening,
@@ -126,7 +126,7 @@ export default {
                                 Desc: d.Desc,
                                 LocalIp: d.LocalIp,
                                 LocalPort: d.LocalPort,
-                                sourceText: `${registerState.ServerConfig.Ip}:${d.ServerPort}`,
+                                sourceText: `${signinState.ServerConfig.Ip}:${d.ServerPort}`,
                                 distText: `${d.LocalIp}:${d.LocalPort}`
                             }
                         ]

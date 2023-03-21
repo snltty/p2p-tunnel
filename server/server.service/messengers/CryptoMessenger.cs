@@ -2,7 +2,7 @@
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using server.messengers.register;
+using server.messengers.singnin;
 using System.Text;
 
 namespace server.service.messengers
@@ -15,20 +15,20 @@ namespace server.service.messengers
     {
         private readonly IAsymmetricCrypto asymmetricCrypto;
         private readonly ICryptoFactory cryptoFactory;
-        private readonly IClientRegisterCaching clientRegisterCache;
+        private readonly IClientSignInCaching clientSignInCache;
         private readonly Config config;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="asymmetricCrypto"></param>
         /// <param name="cryptoFactory"></param>
-        /// <param name="clientRegisterCache"></param>
+        /// <param name="clientSignInCache"></param>
         /// <param name="config"></param>
-        public CryptoMessenger(IAsymmetricCrypto asymmetricCrypto, ICryptoFactory cryptoFactory, IClientRegisterCaching clientRegisterCache, Config config)
+        public CryptoMessenger(IAsymmetricCrypto asymmetricCrypto, ICryptoFactory cryptoFactory, IClientSignInCaching clientSignInCache, Config config)
         {
             this.asymmetricCrypto = asymmetricCrypto;
             this.cryptoFactory = cryptoFactory;
-            this.clientRegisterCache = clientRegisterCache;
+            this.clientSignInCache = clientSignInCache;
             this.config = config;
         }
 
@@ -91,7 +91,7 @@ namespace server.service.messengers
         [MessengerId((ushort)CryptoMessengerIds.Clear)]
         public byte[] Clear(IConnection connection)
         {
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo client))
+            if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo client))
             {
                 client.Connection?.EncodeDisable();
             }

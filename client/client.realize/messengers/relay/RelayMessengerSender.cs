@@ -1,4 +1,4 @@
-﻿using client.messengers.register;
+﻿using client.messengers.singnin;
 using common.libs;
 using common.server;
 using common.server.model;
@@ -17,16 +17,16 @@ namespace client.realize.messengers.relay
         /// </summary>
         public SimpleSubPushHandler<RelayInfo> OnRelay { get; } = new SimpleSubPushHandler<RelayInfo>();
         private readonly MessengerSender messengerSender;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="messengerSender"></param>
-        /// <param name="registerStateInfo"></param>
-        public RelayMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerStateInfo)
+        /// <param name="signInStateInfo"></param>
+        public RelayMessengerSender(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
         {
             this.messengerSender = messengerSender;
-            this.registerStateInfo = registerStateInfo;
+            this.signInStateInfo = signInStateInfo;
         }
         /// <summary>
         /// 通知其要使用中继
@@ -77,7 +77,7 @@ namespace client.realize.messengers.relay
             {
                 MessengerId = (ushort)RelayMessengerIds.AskConnects,
                 Encode = false,
-                Connection = registerStateInfo.Connection
+                Connection = signInStateInfo.Connection
             }).ConfigureAwait(false);
         }
         /// <summary>
@@ -91,7 +91,7 @@ namespace client.realize.messengers.relay
             {
                 MessengerId = (ushort)RelayMessengerIds.Connects,
                 Encode = false,
-                Connection = registerStateInfo.Connection,
+                Connection = signInStateInfo.Connection,
                 Payload = connects.ToBytes(),
             }).ConfigureAwait(false);
         }

@@ -10,9 +10,9 @@ namespace common.server.model
     public enum EnumServiceAccess : uint
     {
         /// <summary>
-        /// 注册
+        /// 登入
         /// </summary>
-        Register = 0,
+        SignIn = 0,
         /// <summary>
         /// 中继
         /// </summary>

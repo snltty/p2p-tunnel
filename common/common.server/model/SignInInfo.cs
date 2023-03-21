@@ -1,5 +1,4 @@
-﻿using common.libs;
-using common.libs.extends;
+﻿using common.libs.extends;
 using System;
 using System.ComponentModel;
 using System.Net;
@@ -9,12 +8,12 @@ namespace common.server.model
     /// <summary>
     /// 客户端注册数据
     /// </summary>
-    public sealed class RegisterParamsInfo
+    public sealed class SignInParamsInfo
     {
         /// <summary>
         /// 
         /// </summary>
-        public RegisterParamsInfo() { }
+        public SignInParamsInfo() { }
 
         /// <summary>
         /// 本地ip，loopback 、LAN ip
@@ -36,6 +35,8 @@ namespace common.server.model
         /// 名称
         /// </summary>
         public string Name { get; set; }
+        public string Account { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
 
         /// <summary>
         /// 本机tcp端口
@@ -62,11 +63,15 @@ namespace common.server.model
 
             var groupidBytes = GroupId.GetUTF16Bytes();
             var nameBytes = Name.GetUTF16Bytes();
+            var accountBytes = Account.GetUTF16Bytes();
+            var passwordBytes = Password.GetUTF16Bytes();
             length +=
                 8 //Id
                 + 1 //ShortId
                 + 1 + 1 + groupidBytes.Length
                 + 1 + 1 + nameBytes.Length
+                + 1 + 1 + accountBytes.Length
+                + 1 + 1 + passwordBytes.Length
                 + 2 //LocalTcpPort
                 + 4; //ClientAccess
 
@@ -101,6 +106,21 @@ namespace common.server.model
             index += 1;
             nameBytes.CopyTo(memory.Span.Slice(index));
             index += nameBytes.Length;
+
+
+            bytes[index] = (byte)accountBytes.Length;
+            index += 1;
+            bytes[index] = (byte)Account.Length;
+            index += 1;
+            accountBytes.CopyTo(memory.Span.Slice(index));
+            index += accountBytes.Length;
+
+            bytes[index] = (byte)passwordBytes.Length;
+            index += 1;
+            bytes[index] = (byte)Password.Length;
+            index += 1;
+            passwordBytes.CopyTo(memory.Span.Slice(index));
+            index += passwordBytes.Length;
 
 
             LocalTcpPort.ToBytes(memory.Slice(index));
@@ -152,21 +172,23 @@ namespace common.server.model
     /// <summary>
     /// 客户端注册服务器返回的数据
     /// </summary>
-    public sealed class RegisterResultInfo
+    public sealed class SignInResultInfo
     {
-        public RegisterResultInfo() { }
+        public SignInResultInfo() { }
 
-        public RegisterResultInfoCodes Code { get; set; }
+        public SignInResultInfoCodes Code { get; set; }
 
         /// <summary>
         /// 服务器是否支持中继
         /// </summary>
         public bool Relay { get; set; }
-
         /// <summary>
         /// 连接id
         /// </summary>
         public ulong Id { get; set; }
+        /// <summary>
+        /// 短id
+        /// </summary>
         public byte ShortId { get; set; }
         /// <summary>
         /// 连接ip
@@ -227,7 +249,7 @@ namespace common.server.model
             var span = data.Span;
 
             int index = 0;
-            Code = (RegisterResultInfoCodes)span[index];
+            Code = (SignInResultInfoCodes)span[index];
             index += 1;
 
             Relay = span[index] != 0;
@@ -257,7 +279,7 @@ namespace common.server.model
         /// 注册结果类别
         /// </summary>
         [Flags]
-        public enum RegisterResultInfoCodes : byte
+        public enum SignInResultInfoCodes : byte
         {
             /// <summary>
             /// 
@@ -370,10 +392,10 @@ namespace common.server.model
     }
 
     /// <summary>
-    /// 注册相关的消息id
+    /// 登入相关的消息id
     /// </summary>
     [Flags, MessengerIdEnum]
-    public enum RegisterMessengerIds : ushort
+    public enum SignInMessengerIds : ushort
     {
         /// <summary>
         /// 

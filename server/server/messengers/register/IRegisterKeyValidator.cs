@@ -1,6 +1,6 @@
-﻿namespace server.messengers.register
+﻿namespace server.messengers.singnin
 {
-    public interface IRegisterKeyValidator
+    public interface ISignInValidator
     {
         public bool Validate(string key);
     }

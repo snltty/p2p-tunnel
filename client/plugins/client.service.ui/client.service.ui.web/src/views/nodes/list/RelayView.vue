@@ -31,7 +31,7 @@ import { computed, reactive } from '@vue/reactivity';
 import { inject, onMounted, onUnmounted, watch } from '@vue/runtime-core';
 import { getDelay, getConnects } from '../../../apis/clients'
 import { injectClients } from '../../../states/clients'
-import { injectRegister } from '../../../states/register'
+import { injectSignIn } from '../../../states/signin'
 import Signal from '../../../components/Signal.vue'
 export default {
     service: 'ClientsClientService',
@@ -42,12 +42,12 @@ export default {
 
         const shareData = inject('share-data');
         const clientsState = injectClients();
-        const registerState = injectRegister();
+        const signinState = injectSignIn();
         const state = reactive({
             show: props.modelValue,
             loading: false,
             connects: {},
-            start: registerState.RemoteInfo.ConnectId,
+            start: signinState.RemoteInfo.ConnectId,
             end: shareData.toId,
             paths: []
 
@@ -88,7 +88,7 @@ export default {
                 let starts = _connects.filter(c => c.Connects.filter(c => c == state.start).length > 0 && c.Connects.length > 1);
                 let paths = fun(starts, [state.start], [state.start], []);
                 //服务器开启了中继
-                if (registerState.RemoteInfo.Relay) {
+                if (signinState.RemoteInfo.Relay) {
                     paths.push([state.start, 0, state.end]);
                 }
                 //直连的不要
@@ -111,7 +111,7 @@ export default {
                                 delay: delays[index],
                                 path: path,
                                 pathName: path.map(c => {
-                                    if (c == state.start) return registerState.ClientConfig.Name;
+                                    if (c == state.start) return signinState.ClientConfig.Name;
                                     else if (c == 0) return '服务器';
                                     return clients[c].Name;
                                 })

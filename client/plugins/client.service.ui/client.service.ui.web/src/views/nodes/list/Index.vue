@@ -39,7 +39,7 @@
 <script>
 import { computed, reactive } from '@vue/reactivity';
 import { injectClients } from '../../../states/clients'
-import { injectRegister } from '../../../states/register'
+import { injectSignIn } from '../../../states/signin'
 import { injectShareData } from '../../../states/shareData'
 import { sendClientConnect, sendClientConnectReverse, sendClientReset, sendClientOffline, sendPing, setRelay } from '../../../apis/clients'
 import Signal from '../../../components/Signal.vue'
@@ -58,7 +58,7 @@ export default {
         const components = files.keys().map(c => files(c).default).filter(c => accessService(c.service, servicesState));
 
         const clientsState = injectClients();
-        const registerState = injectRegister();
+        const signinState = injectSignIn();
         const shareDataState = injectShareData();
         const connectTypeColors = {
             0: 'color:#333;',
@@ -158,7 +158,7 @@ export default {
 
 
         return {
-            components, registerState, clients, handleConnect, handleConnectReverse, handleConnectReset, handleConnectOffline,
+            components, signinState, clients, handleConnect, handleConnectReverse, handleConnectReset, handleConnectOffline,
             state, handleShowDelay, handleOnRelay
         }
 

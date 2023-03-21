@@ -1,15 +1,17 @@
 import { provide, inject, reactive } from "vue";
 import { websocketState } from '../apis/request'
-import { getRegisterInfo } from '../apis/register'
+import { getSignInInfo } from '../apis/signin'
 
-const provideRegisterKey = Symbol();
-export const provideRegister = () => {
+const provideSignInKey = Symbol();
+export const provideSignIn = () => {
     const state = reactive({
         ClientConfig: {
             ShortId: 0,
             GroupId: '',
             GroupIds: [],
             Name: '',
+            Account: '',
+            Password: '',
             AutoReg: false,
             Encode: false,
             EncodePassword: "",
@@ -39,15 +41,17 @@ export const provideRegister = () => {
             Relay: false
         }
     });
-    provide(provideRegisterKey, state);
+    provide(provideSignInKey, state);
 
     const fn = () => {
         if (websocketState.connected) {
-            getRegisterInfo().then((json) => {
+            getSignInInfo().then((json) => {
                 state.LocalInfo.Connected = json.LocalInfo.Connected;
 
                 state.ClientConfig.ShortId = json.ClientConfig.ShortId;
                 state.ClientConfig.Name = json.ClientConfig.Name;
+                state.ClientConfig.Account = json.ClientConfig.Account;
+                state.ClientConfig.Password = json.ClientConfig.Password;
                 state.ClientConfig.GroupIds = json.ClientConfig.GroupIds;
                 state.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
@@ -87,6 +91,6 @@ export const provideRegister = () => {
     }
     fn();
 }
-export const injectRegister = () => {
-    return inject(provideRegisterKey);
+export const injectSignIn = () => {
+    return inject(provideSignInKey);
 }

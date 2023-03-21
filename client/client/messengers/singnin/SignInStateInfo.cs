@@ -3,12 +3,12 @@ using common.server;
 using System;
 using System.Net;
 
-namespace client.messengers.register
+namespace client.messengers.singnin
 {
     /// <summary>
     /// 本地注册状态
     /// </summary>
-    public class RegisterStateInfo
+    public class SignInStateInfo
     {
         /// <summary>
         /// TCP连接对象
@@ -31,11 +31,11 @@ namespace client.messengers.register
         /// <summary>
         /// 当注册状态发生变化
         /// </summary>
-        public SimpleSubPushHandler<bool> OnRegisterStateChange { get; } = new SimpleSubPushHandler<bool>();
+        public SimpleSubPushHandler<bool> OnChange { get; } = new SimpleSubPushHandler<bool>();
         /// <summary>
         /// 当注册开始绑定
         /// </summary>
-        public SimpleSubPushHandler<bool> OnRegisterBind { get; } = new SimpleSubPushHandler<bool>();
+        public SimpleSubPushHandler<bool> OnBind { get; } = new SimpleSubPushHandler<bool>();
 
         private ulong connectid = 0;
         /// <summary>
@@ -75,10 +75,10 @@ namespace client.messengers.register
             Connection?.Disponse();
             Connection = null;
 
-            OnRegisterBind.Push(false);
+            OnBind.Push(false);
             if (online != Connected)
             {
-                OnRegisterStateChange.Push(false);
+                OnChange.Push(false);
             }
 
         }
@@ -95,7 +95,7 @@ namespace client.messengers.register
             RemoteInfo.Ip = ip;
             ConnectId = id;
 
-            OnRegisterStateChange.Push(true);
+            OnChange.Push(true);
         }
     }
 

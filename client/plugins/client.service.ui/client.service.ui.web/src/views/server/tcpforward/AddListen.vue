@@ -27,13 +27,13 @@ import { computed, reactive, ref, toRefs } from '@vue/reactivity';
 import { inject, watch } from '@vue/runtime-core';
 import { AddServerForward } from '../../../apis/tcp-forward'
 import { injectShareData } from '../../../states/shareData'
-import { injectRegister } from '../../../states/register'
+import { injectSignIn } from '../../../states/signin'
 export default {
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],
     setup(props, { emit }) {
 
-        const registerState = injectRegister();
+        const signinState = injectSignIn();
         const addListenData = inject('add-listen-data');
         const shareData = injectShareData();
         const state = reactive({
@@ -42,7 +42,7 @@ export default {
             form: {
                 AliveType: addListenData.value.AliveType,
                 ServerPort: 0,
-                Domain: registerState.ServerConfig.Ip,
+                Domain: signinState.ServerConfig.Ip,
                 Desc: '',
                 LocalIp: '127.0.0.1',
                 LocalPort: 80
@@ -78,7 +78,7 @@ export default {
 
         const remark = computed(() => {
             return [
-                `服务器(${registerState.ServerConfig.Ip}:${state.form.ServerPort})`,
+                `服务器(${signinState.ServerConfig.Ip}:${state.form.ServerPort})`,
                 ` -> `,
                 `本机(${state.form.LocalIp}:${state.form.LocalPort})`
             ].join('');

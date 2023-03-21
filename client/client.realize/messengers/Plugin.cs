@@ -2,14 +2,14 @@
 using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using client.messengers.punchHole.udp;
-using client.messengers.register;
+using client.messengers.singnin;
 using client.realize.messengers.clients;
 using client.realize.messengers.crypto;
 using client.realize.messengers.heart;
 using client.realize.messengers.punchHole;
 using client.realize.messengers.punchHole.tcp.nutssb;
 using client.realize.messengers.punchHole.udp;
-using client.realize.messengers.register;
+using client.realize.messengers.singnin;
 using common.libs;
 using Microsoft.Extensions.DependencyInjection;
 using common.server;
@@ -83,9 +83,9 @@ namespace client.realize.messengers
             services.AddSingleton<ClientsMessengerSender>();
 
             //注册
-            services.AddSingleton<RegisterMessengerSender>();
-            services.AddSingleton<IRegisterTransfer, RegisterTransfer>();
-            services.AddSingleton<RegisterStateInfo>();
+            services.AddSingleton<SignInMessengerSender>();
+            services.AddSingleton<ISignInTransfer, SignInTransfer>();
+            services.AddSingleton<SignInStateInfo>();
 
             //打洞
             services.AddSingleton<PunchHoleMessengerSender>();

@@ -2,31 +2,31 @@
 using common.libs.extends;
 using common.libs.rateLimit;
 using common.server;
-using server.messengers.register;
+using server.messengers.singnin;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace server.service.messengers.register
+namespace server.service.messengers.singnin
 {
-    public sealed class ClientRegisterCaching : IClientRegisterCaching
+    public sealed class ClientSignInCaching : IClientSignInCaching
     {
-        private readonly ConcurrentDictionary<ulong, RegisterCacheInfo> cache = new();
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, RegisterCacheInfo>> cacheGroups = new();
+        private readonly ConcurrentDictionary<ulong, SignInCacheInfo> cache = new();
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, SignInCacheInfo>> cacheGroups = new();
         private NumberSpace idNs = new NumberSpace(0);
         private readonly Config config;
 
-        public SimpleSubPushHandler<RegisterCacheInfo> OnChanged { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
-        public SimpleSubPushHandler<RegisterCacheInfo> OnOffline { get; } = new SimpleSubPushHandler<RegisterCacheInfo>();
+        public SimpleSubPushHandler<SignInCacheInfo> OnChanged { get; } = new SimpleSubPushHandler<SignInCacheInfo>();
+        public SimpleSubPushHandler<SignInCacheInfo> OnOffline { get; } = new SimpleSubPushHandler<SignInCacheInfo>();
         private readonly WheelTimer<IConnection> wheelTimer = new WheelTimer<IConnection>();
 
         private readonly IRateLimit<IPAddress> rateLimit;
 
         public int Count { get => cache.Count; }
 
-        public ClientRegisterCaching(Config config, IUdpServer udpServer, ITcpServer tcpServer)
+        public ClientSignInCaching(Config config, IUdpServer udpServer, ITcpServer tcpServer)
         {
             this.config = config;
 
@@ -69,7 +69,7 @@ namespace server.service.messengers.register
                 Remove(connection.ConnectId);
             }
         }
-        public ulong Add(RegisterCacheInfo model)
+        public ulong Add(SignInCacheInfo model)
         {
             if (model.Id == 0)
             {
@@ -79,49 +79,49 @@ namespace server.service.messengers.register
             {
                 model.GroupId = Guid.NewGuid().ToString().Md5();
             }
-            if (cacheGroups.TryGetValue(model.GroupId, out ConcurrentDictionary<string, RegisterCacheInfo> value) == false)
+            if (cacheGroups.TryGetValue(model.GroupId, out ConcurrentDictionary<string, SignInCacheInfo> value) == false)
             {
-                value = new ConcurrentDictionary<string, RegisterCacheInfo>();
+                value = new ConcurrentDictionary<string, SignInCacheInfo>();
                 cacheGroups.TryAdd(model.GroupId, value);
             }
             value.TryAdd(model.Name, model);
             cache.TryAdd(model.Id, model);
             return model.Id;
         }
-        public bool Get(ulong id, out RegisterCacheInfo client)
+        public bool Get(ulong id, out SignInCacheInfo client)
         {
             return cache.TryGetValue(id, out client);
         }
-        public bool Get(string groupid, string name, out RegisterCacheInfo client)
+        public bool Get(string groupid, string name, out SignInCacheInfo client)
         {
             client = null;
-            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<string, RegisterCacheInfo> value))
+            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<string, SignInCacheInfo> value))
             {
                 return value.TryGetValue(name, out client);
             }
             return false;
         }
-        public IEnumerable<RegisterCacheInfo> Get(string groupid)
+        public IEnumerable<SignInCacheInfo> Get(string groupid)
         {
-            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<string, RegisterCacheInfo> value))
+            if (cacheGroups.TryGetValue(groupid, out ConcurrentDictionary<string, SignInCacheInfo> value))
             {
                 return value.Values;
             }
-            return Enumerable.Empty<RegisterCacheInfo>();
+            return Enumerable.Empty<SignInCacheInfo>();
         }
-        public List<RegisterCacheInfo> Get()
+        public List<SignInCacheInfo> Get()
         {
             return cache.Values.ToList();
         }
         public void Remove(ulong id)
         {
-            if (cache.TryRemove(id, out RegisterCacheInfo client))
+            if (cache.TryRemove(id, out SignInCacheInfo client))
             {
                 client.Connection?.Disponse();
                 OnChanged.Push(client);
                 OnOffline.Push(client);
 
-                if (cacheGroups.TryGetValue(client.GroupId, out ConcurrentDictionary<string, RegisterCacheInfo> value))
+                if (cacheGroups.TryGetValue(client.GroupId, out ConcurrentDictionary<string, SignInCacheInfo> value))
                 {
                     value.TryRemove(client.Name, out _);
                     if (value.Count == 0)
@@ -138,7 +138,7 @@ namespace server.service.messengers.register
         }
         public bool Notify(IConnection connection)
         {
-            if (Get(connection.ConnectId, out RegisterCacheInfo client))
+            if (Get(connection.ConnectId, out SignInCacheInfo client))
             {
                 OnChanged.Push(client);
             }

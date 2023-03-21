@@ -1,4 +1,4 @@
-﻿using client.messengers.register;
+﻿using client.messengers.singnin;
 using client.service.ui.api.clientServer;
 using common.libs;
 using common.libs.extends;
@@ -15,16 +15,16 @@ namespace client.service.udpforward
     public sealed class ServerConfigure : IClientConfigure
     {
         private readonly MessengerSender messengerSender;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="messengerSender"></param>
-        /// <param name="registerStateInfo"></param>
-        public ServerConfigure(MessengerSender messengerSender, RegisterStateInfo registerStateInfo)
+        /// <param name="signInStateInfo"></param>
+        public ServerConfigure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
         {
             this.messengerSender = messengerSender;
-            this.registerStateInfo = registerStateInfo;
+            this.signInStateInfo = signInStateInfo;
         }
         /// <summary>
         /// 名字
@@ -50,8 +50,8 @@ namespace client.service.udpforward
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)RegisterMessengerIds.GetSetting,
-                Connection = registerStateInfo.Connection,
+                MessengerId = (ushort)SignInMessengerIds.GetSetting,
+                Connection = signInStateInfo.Connection,
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
             {
@@ -68,8 +68,8 @@ namespace client.service.udpforward
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)RegisterMessengerIds.Setting,
-                Connection = registerStateInfo.Connection,
+                MessengerId = (ushort)SignInMessengerIds.Setting,
+                Connection = signInStateInfo.Connection,
                 Payload = jsonStr.ToUTF8Bytes()
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray))

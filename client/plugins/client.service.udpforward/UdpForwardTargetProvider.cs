@@ -1,5 +1,5 @@
 ﻿using client.messengers.clients;
-using client.messengers.register;
+using client.messengers.singnin;
 using common.server;
 using common.udpforward;
 
@@ -12,14 +12,14 @@ namespace client.service.udpforward
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
 
-        public UdpForwardTargetProvider(IClientInfoCaching clientInfoCaching, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching, RegisterStateInfo registerStateInfo)
+        public UdpForwardTargetProvider(IClientInfoCaching clientInfoCaching, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching, SignInStateInfo signInStateInfo)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.udpForwardTargetCaching = udpForwardTargetCaching;
-            this.registerStateInfo = registerStateInfo;
-            registerStateInfo.OnRegisterStateChange.Sub((state) =>
+            this.signInStateInfo = signInStateInfo;
+            signInStateInfo.OnChange.Sub((state) =>
             {
                 udpForwardTargetCaching.ClearConnection();
             });
@@ -53,7 +53,7 @@ namespace client.service.udpforward
         {
             if (string.IsNullOrWhiteSpace(cacheInfo.Name))
             {
-                return registerStateInfo.Connection;
+                return signInStateInfo.Connection;
             }
 
             if (clientInfoCaching.GetByName(cacheInfo.Name, out ClientInfo client))

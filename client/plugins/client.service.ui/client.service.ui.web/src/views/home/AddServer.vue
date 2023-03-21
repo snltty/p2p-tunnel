@@ -36,7 +36,7 @@
 <script>
 import { reactive, ref } from '@vue/reactivity';
 import { inject, watch } from '@vue/runtime-core';
-import { getRegisterInfo, updateConfig } from '../../apis/register'
+import { getSignInInfo, updateConfig } from '../../apis/signin'
 import { injectShareData } from '../../states/shareData'
 import { ElMessage } from 'element-plus/lib/components';
 export default {
@@ -92,7 +92,7 @@ export default {
                 }
                 state.loading = true;
 
-                getRegisterInfo().then((json) => {
+                getSignInInfo().then((json) => {
                     if (json.ServerConfig.Items.filter((c, index) => c.Ip == state.form.Ip && index != stateEdit.value.index).length > 0) {
                         state.loading = false;
                         ElMessage.error('已存在相同地址');

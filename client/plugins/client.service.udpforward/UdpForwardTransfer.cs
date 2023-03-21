@@ -1,4 +1,4 @@
-﻿using client.messengers.register;
+﻿using client.messengers.singnin;
 using common.libs;
 using common.libs.database;
 using common.libs.extends;
@@ -35,7 +35,7 @@ namespace client.service.udpforward
         public readonly ServerConfigInfo serverConfigInfo;
         private readonly IConfigDataProvider<ServerConfigInfo> serverConfigDataProvider;
         private readonly Config clientConfig;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
 
         private readonly UdpForwardMessengerSender udpForwardMessengerSender;
 
@@ -47,7 +47,7 @@ namespace client.service.udpforward
         /// <param name="p2pConfigDataProvider"></param>
         /// <param name="serverConfigDataProvider"></param>
         /// <param name="clientConfig"></param>
-        /// <param name="registerStateInfo"></param>
+        /// <param name="signInStateInfo"></param>
         /// <param name="udpForwardMessengerSender"></param>
         /// <param name="tcpForwardTargetProvider"></param>
         public UdpForwardTransfer(
@@ -58,7 +58,7 @@ namespace client.service.udpforward
             IConfigDataProvider<ServerConfigInfo> serverConfigDataProvider,
 
             Config clientConfig,
-            RegisterStateInfo registerStateInfo,
+            SignInStateInfo signInStateInfo,
 
            UdpForwardMessengerSender udpForwardMessengerSender,
            IUdpForwardTargetProvider tcpForwardTargetProvider) : base(udpForwardServer, udpForwardMessengerSender, tcpForwardTargetProvider)
@@ -71,7 +71,7 @@ namespace client.service.udpforward
             serverConfigInfo = ReadServerConfig();
 
             this.clientConfig = clientConfig;
-            this.registerStateInfo = registerStateInfo;
+            this.signInStateInfo = signInStateInfo;
 
             this.udpForwardServer = udpForwardServer;
             this.udpForwardMessengerSender = udpForwardMessengerSender;
@@ -87,7 +87,7 @@ namespace client.service.udpforward
                     GetP2PByPort(model.Port).Listening = model.State;
                 }
             });
-            registerStateInfo.OnRegisterStateChange.Sub((state) =>
+            signInStateInfo.OnChange.Sub((state) =>
             {
                 if (state)
                 {
@@ -269,7 +269,7 @@ namespace client.service.udpforward
         /// <returns></returns>
         public async Task<ushort[]> GetServerPorts()
         {
-            var resp = await udpForwardMessengerSender.GetPorts(registerStateInfo.Connection);
+            var resp = await udpForwardMessengerSender.GetPorts(signInStateInfo.Connection);
             if (resp.Code == MessageResponeCodes.OK)
             {
                 return resp.Data.ToUInt16Array();
@@ -284,7 +284,7 @@ namespace client.service.udpforward
         /// <returns></returns>
         public async Task<string> AddServerForward(ServerForwardItemInfo forward)
         {
-            var resp = await udpForwardMessengerSender.SignIn(registerStateInfo.Connection, new UdpForwardRegisterParamsInfo
+            var resp = await udpForwardMessengerSender.SignIn(signInStateInfo.Connection, new UdpForwardRegisterParamsInfo
             {
                 SourcePort = forward.ServerPort,
                 TargetIp = forward.LocalIp,
@@ -319,7 +319,7 @@ namespace client.service.udpforward
             {
                 return "未找到操作对象";
             }
-            var resp = await udpForwardMessengerSender.SignIn(registerStateInfo.Connection, new UdpForwardRegisterParamsInfo
+            var resp = await udpForwardMessengerSender.SignIn(signInStateInfo.Connection, new UdpForwardRegisterParamsInfo
             {
                 SourcePort = forwardInfo.ServerPort,
                 TargetIp = forwardInfo.LocalIp,
@@ -346,7 +346,7 @@ namespace client.service.udpforward
             {
                 return "未找到操作对象";
             }
-            var resp = await udpForwardMessengerSender.SignOut(registerStateInfo.Connection, (ushort)port).ConfigureAwait(false);
+            var resp = await udpForwardMessengerSender.SignOut(signInStateInfo.Connection, (ushort)port).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
                 return resp.Code.GetDesc((byte)resp.Code);
@@ -367,7 +367,7 @@ namespace client.service.udpforward
             {
                 return "未找到删除对象";
             }
-            var resp = await udpForwardMessengerSender.SignOut(registerStateInfo.Connection, (ushort)port).ConfigureAwait(false);
+            var resp = await udpForwardMessengerSender.SignOut(signInStateInfo.Connection, (ushort)port).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
                 return resp.Code.GetDesc((byte)resp.Code);
@@ -397,7 +397,7 @@ namespace client.service.udpforward
         }
         private void SendRegister(ServerForwardItemInfo item)
         {
-            udpForwardMessengerSender.SignIn(registerStateInfo.Connection, new UdpForwardRegisterParamsInfo
+            udpForwardMessengerSender.SignIn(signInStateInfo.Connection, new UdpForwardRegisterParamsInfo
             {
                 SourcePort = item.ServerPort,
                 TargetIp = item.LocalIp,

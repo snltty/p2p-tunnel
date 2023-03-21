@@ -2,20 +2,20 @@
 using common.server;
 using System.Collections.Generic;
 
-namespace server.messengers.register
+namespace server.messengers.singnin
 {
-    public interface IClientRegisterCaching
+    public interface IClientSignInCaching
     {
-        public SimpleSubPushHandler<RegisterCacheInfo> OnChanged { get; }
-        public SimpleSubPushHandler<RegisterCacheInfo> OnOffline { get; }
+        public SimpleSubPushHandler<SignInCacheInfo> OnChanged { get; }
+        public SimpleSubPushHandler<SignInCacheInfo> OnOffline { get; }
         public int Count { get; }
 
-        public ulong Add(RegisterCacheInfo model);
+        public ulong Add(SignInCacheInfo model);
 
-        public bool Get(ulong id, out RegisterCacheInfo client);
-        public bool Get(string groupid, string name, out RegisterCacheInfo client);
-        public IEnumerable<RegisterCacheInfo> Get(string groupid);
-        public List<RegisterCacheInfo> Get();
+        public bool Get(ulong id, out SignInCacheInfo client);
+        public bool Get(string groupid, string name, out SignInCacheInfo client);
+        public IEnumerable<SignInCacheInfo> Get(string groupid);
+        public List<SignInCacheInfo> Get();
         public void Remove(ulong id);
 
         public bool Notify(IConnection connection);

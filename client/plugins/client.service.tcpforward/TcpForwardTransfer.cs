@@ -1,4 +1,4 @@
-﻿using client.messengers.register;
+﻿using client.messengers.singnin;
 using common.libs;
 using common.libs.database;
 using common.libs.extends;
@@ -39,7 +39,7 @@ namespace client.service.tcpforward
         private readonly IConfigDataProvider<ServerForwardConfigInfo> serverConfigDataProvider;
 
         private readonly Config clientConfig;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
         private readonly ui.api.Config uiconfig;
 
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
@@ -53,7 +53,7 @@ namespace client.service.tcpforward
         /// <param name="serverConfigDataProvider"></param>
         /// <param name="config"></param>
         /// <param name="clientConfig"></param>
-        /// <param name="registerStateInfo"></param>
+        /// <param name="signInStateInfo"></param>
         /// <param name="tcpForwardMessengerSender"></param>
         /// <param name="tcpForwardTargetProvider"></param>
         /// <param name="uiconfig"></param>
@@ -66,7 +66,7 @@ namespace client.service.tcpforward
 
             common.tcpforward.Config config,
             Config clientConfig,
-            RegisterStateInfo registerStateInfo,
+            SignInStateInfo signInStateInfo,
 
            TcpForwardMessengerSender tcpForwardMessengerSender,
            ITcpForwardTargetProvider tcpForwardTargetProvider, ui.api.Config uiconfig) : base(tcpForwardServer, tcpForwardMessengerSender, tcpForwardTargetProvider)
@@ -77,7 +77,7 @@ namespace client.service.tcpforward
             this.serverConfigDataProvider = serverConfigDataProvider;
 
             this.clientConfig = clientConfig;
-            this.registerStateInfo = registerStateInfo;
+            this.signInStateInfo = signInStateInfo;
 
             this.tcpForwardServer = tcpForwardServer;
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
@@ -103,7 +103,7 @@ namespace client.service.tcpforward
                 }
 
             });
-            registerStateInfo.OnRegisterStateChange.Sub((state) =>
+            signInStateInfo.OnChange.Sub((state) =>
             {
                 if (state)
                 {
@@ -470,7 +470,7 @@ namespace client.service.tcpforward
         /// <returns></returns>
         public async Task<ushort[]> GetServerPorts()
         {
-            var resp = await tcpForwardMessengerSender.GetPorts(registerStateInfo.Connection);
+            var resp = await tcpForwardMessengerSender.GetPorts(signInStateInfo.Connection);
             if (resp.Code == MessageResponeCodes.OK)
             {
                 return resp.Data.ToUInt16Array();
@@ -485,7 +485,7 @@ namespace client.service.tcpforward
         /// <returns></returns>
         public async Task<string> AddServerForward(ServerForwardItemInfo forward)
         {
-            var resp = await tcpForwardMessengerSender.Register(registerStateInfo.Connection, new TcpForwardRegisterParamsInfo
+            var resp = await tcpForwardMessengerSender.Register(signInStateInfo.Connection, new TcpForwardRegisterParamsInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -532,7 +532,7 @@ namespace client.service.tcpforward
             {
                 return "未找到操作对象";
             }
-            var resp = await tcpForwardMessengerSender.Register(registerStateInfo.Connection, new TcpForwardRegisterParamsInfo
+            var resp = await tcpForwardMessengerSender.Register(signInStateInfo.Connection, new TcpForwardRegisterParamsInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -569,7 +569,7 @@ namespace client.service.tcpforward
             {
                 return "未找到操作对象";
             }
-            var resp = await tcpForwardMessengerSender.UnRegister(registerStateInfo.Connection, new TcpForwardUnRegisterParamsInfo
+            var resp = await tcpForwardMessengerSender.UnRegister(signInStateInfo.Connection, new TcpForwardUnRegisterParamsInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -603,7 +603,7 @@ namespace client.service.tcpforward
             {
                 return "未找到删除对象";
             }
-            var resp = await tcpForwardMessengerSender.UnRegister(registerStateInfo.Connection, new TcpForwardUnRegisterParamsInfo
+            var resp = await tcpForwardMessengerSender.UnRegister(signInStateInfo.Connection, new TcpForwardUnRegisterParamsInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -654,7 +654,7 @@ namespace client.service.tcpforward
         }
         private void SendRegister(ServerForwardItemInfo item, TcpForwardAliveTypes type)
         {
-            tcpForwardMessengerSender.Register(registerStateInfo.Connection, new TcpForwardRegisterParamsInfo
+            tcpForwardMessengerSender.Register(signInStateInfo.Connection, new TcpForwardRegisterParamsInfo
             {
                 AliveType = type,
                 SourceIp = item.Domain,

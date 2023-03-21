@@ -19,11 +19,11 @@
 </template>
 
 <script>
-import { reactive,computed } from '@vue/reactivity'
-import { getRegisterInfo, updateConfig } from '../../apis/register'
-import {injectServices} from '../../states/services'
+import { reactive, computed } from '@vue/reactivity'
+import { getSignInInfo, updateConfig } from '../../apis/signin'
+import { injectServices } from '../../states/services'
 import { ElMessage } from 'element-plus/lib/components';
-import { ElLoading,ElMessageBox } from 'element-plus';
+import { ElLoading, ElMessageBox } from 'element-plus';
 export default {
     setup() {
 
@@ -31,7 +31,7 @@ export default {
             "ServerTcpForwardClientService", "TcpForwardClientService",
             "ServerUdpForwardClientService", "UdpForwardClientService",
             "ClientsClientService", "ConfigureClientService",
-            "CounterClientService", "RegisterClientService",
+            "CounterClientService", "SignInClientService",
             "Socks5ClientService", "VeaClientService",
             "WakeUpClientService"];
 
@@ -39,10 +39,10 @@ export default {
         const funcs = files.keys().map(c => files(c));
 
         const servicesState = injectServices();
-        const name = computed(()=>{
+        const name = computed(() => {
             let name = servicesState.services[0] || 'full';
-            let _modes =  state.modes.filter(c=>c.name == name);
-            if(_modes.length > 0){
+            let _modes = state.modes.filter(c => c.name == name);
+            if (_modes.length > 0) {
                 return _modes[0].text;
             }
             return state.modes[0].text;
@@ -52,20 +52,20 @@ export default {
                 { name: 'full', text: '完全功能', services: [] },
                 {
                     name: 'p2p', text: '仅打洞穿透', services: [
-                        'full','LoggerClientService', 'ConfigureClientService', 'RegisterClientService', 'ClientsClientService',
+                        'full', 'LoggerClientService', 'ConfigureClientService', 'SignInClientService', 'ClientsClientService',
                         'HttpProxyClientService', 'TcpForwardClientService', 'UdpForwardClientService',
                         'Socks5ClientService', 'VeaClientService', 'WakeUpClientService'
                     ]
                 },
                 {
                     name: 'rproxy', text: '仅代理穿透', services: [
-                        'rproxy','LoggerClientService', 'ConfigureClientService', 'RegisterClientService',
+                        'rproxy', 'LoggerClientService', 'ConfigureClientService', 'SignInClientService',
                         'ServerTcpForwardClientService', 'ServerUdpForwardClientService'
                     ]
                 },
                 {
                     name: 'proxy', text: '仅代理翻越', services: [
-                        'proxy','LoggerClientService', 'ConfigureClientService', 'RegisterClientService',
+                        'proxy', 'LoggerClientService', 'ConfigureClientService', 'SignInClientService',
                         'HttpProxyClientService', 'Socks5ClientService'
                     ]
                 }
@@ -73,50 +73,50 @@ export default {
         });
 
         let loadingInstance = null;
-        const _updateConfig = (funcs,command)=>{
-           return new Promise((resolve, reject) => {
-                const fn = (index = 0)=>{
-                    if(index>=funcs.length){
+        const _updateConfig = (funcs, command) => {
+            return new Promise((resolve, reject) => {
+                const fn = (index = 0) => {
+                    if (index >= funcs.length) {
                         resolve();
                         return;
                     }
-                    funcs[index].update(command.services,command.name).then(()=>{
+                    funcs[index].update(command.services, command.name).then(() => {
                         fn(++index);
                     }).catch(reject);
                 }
                 fn();
-           });
+            });
         }
         const handleCommand = (command) => {
-            let remarks = funcs.reduce((value,item)=>value.concat(item.remarks(command.services,command.name)),[]);
-            ElMessageBox.confirm(remarks.join('</br>'),'提示',{type: 'warning', confirmButtonText: '确定',cancelButtonText: '取消',dangerouslyUseHTMLString:true})
-            .then(() => {
-                loadingInstance = ElLoading.service({ target: '.wrap' });
-                _updateConfig(funcs,command).then(()=>{
-                    getRegisterInfo().then((json) => {
-                        json.ClientConfig.Services = command.services;
-                        updateConfig(json).then(() => {
-                            loadingInstance.close()
-                            ElMessage.success('成功，刷新生效');
+            let remarks = funcs.reduce((value, item) => value.concat(item.remarks(command.services, command.name)), []);
+            ElMessageBox.confirm(remarks.join('</br>'), '提示', { type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消', dangerouslyUseHTMLString: true })
+                .then(() => {
+                    loadingInstance = ElLoading.service({ target: '.wrap' });
+                    _updateConfig(funcs, command).then(() => {
+                        getSignInInfo().then((json) => {
+                            json.ClientConfig.Services = command.services;
+                            updateConfig(json).then(() => {
+                                loadingInstance.close()
+                                ElMessage.success('成功，刷新生效');
+                            }).catch((e) => {
+                                console.log(e);
+                                ElMessage.error('失败' + e);
+                                loadingInstance.close();
+                            });
                         }).catch((e) => {
-                            console.log(e);
-                            ElMessage.error('失败'+e);
+                            ElMessage.error('失败' + e);
                             loadingInstance.close();
                         });
                     }).catch((e) => {
-                        ElMessage.error('失败'+e);
+                        ElMessage.error('失败' + e);
                         loadingInstance.close();
                     });
-                }).catch((e)=>{
-                    ElMessage.error('失败'+e);
-                    loadingInstance.close();
+                }).catch(() => {
                 });
-            }).catch(() => {
-            });
         }
 
         return {
-            name,  state, handleCommand
+            name, state, handleCommand
         }
     }
 }

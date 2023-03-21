@@ -1,5 +1,5 @@
 ﻿using client.messengers.clients;
-using client.messengers.register;
+using client.messengers.singnin;
 using common.libs;
 using common.server;
 using common.server.model;
@@ -16,7 +16,7 @@ namespace client.service.socks5
     {
         private readonly MessengerSender messengerSender;
         private readonly common.socks5.Config config;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
         private readonly IClientInfoCaching clientInfoCaching;
 
         private IConnection connection;
@@ -28,13 +28,13 @@ namespace client.service.socks5
         /// </summary>
         /// <param name="messengerSender"></param>
         /// <param name="config"></param>
-        /// <param name="registerStateInfo"></param>
+        /// <param name="signInStateInfo"></param>
         /// <param name="clientInfoCaching"></param>
-        public Socks5MessengerSender(MessengerSender messengerSender, common.socks5.Config config, RegisterStateInfo registerStateInfo, IClientInfoCaching clientInfoCaching)
+        public Socks5MessengerSender(MessengerSender messengerSender, common.socks5.Config config, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching)
         {
             this.messengerSender = messengerSender;
             this.config = config;
-            this.registerStateInfo = registerStateInfo;
+            this.signInStateInfo = signInStateInfo;
             this.clientInfoCaching = clientInfoCaching;
         }
 
@@ -105,7 +105,7 @@ namespace client.service.socks5
                 targetName = config.TargetName;
                 if (config.TargetName == "/")
                 {
-                    connection = registerStateInfo.Connection;
+                    connection = signInStateInfo.Connection;
                 }
                 else
                 {

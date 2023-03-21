@@ -1,5 +1,5 @@
 ﻿using client.messengers.clients;
-using client.messengers.register;
+using client.messengers.singnin;
 using client.service.ui.api.clientServer;
 using common.libs.extends;
 using common.server;
@@ -17,14 +17,14 @@ namespace client.service.ui.api.service.clientServer.services
     {
         private readonly IClientsTransfer clientsTransfer;
         private readonly IClientInfoCaching clientInfoCaching;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
         private readonly IClientServer clientServer;
 
-        public ClientsClientService(IClientsTransfer clientsTransfer, IClientInfoCaching clientInfoCaching, RegisterStateInfo registerStateInfo, IClientServer clientServer)
+        public ClientsClientService(IClientsTransfer clientsTransfer, IClientInfoCaching clientInfoCaching, SignInStateInfo signInStateInfo, IClientServer clientServer)
         {
             this.clientsTransfer = clientsTransfer;
             this.clientInfoCaching = clientInfoCaching;
-            this.registerStateInfo = registerStateInfo;
+            this.signInStateInfo = signInStateInfo;
             this.clientServer = clientServer;
         }
 
@@ -211,7 +211,7 @@ namespace client.service.ui.api.service.clientServer.services
             IConnection sourceConnection = null;
             if (connectId == 0)
             {
-                sourceConnection = registerStateInfo.Connection;
+                sourceConnection = signInStateInfo.Connection;
             }
             else if (clientInfoCaching.Get(connectId, out ClientInfo sourceClient))
             {

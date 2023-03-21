@@ -1,4 +1,4 @@
-﻿using client.messengers.register;
+﻿using client.messengers.singnin;
 using client.realize.messengers.punchHole;
 using client.service.logger;
 using client.service.socks5;
@@ -73,7 +73,7 @@ namespace client.service
             //自动注册
             if (config.Client.AutoReg)
             {
-                serviceProvider.GetService<IRegisterTransfer>().Register();
+                serviceProvider.GetService<ISignInTransfer>().SignIn();
             }
         }
 

@@ -22,8 +22,8 @@
 
 <script>
 import { computed, reactive, ref } from '@vue/reactivity'
-import { injectRegister } from '../../states/register'
-import { sendRegisterMsg, sendExit } from '../../apis/register'
+import { injectSignIn } from '../../states/signin'
+import { sendSignInMsg, sendExit } from '../../apis/signin'
 import ConnectButton from '../../components/ConnectButton.vue'
 import ServerLine from './ServerLine.vue'
 import Servers from './Servers.vue'
@@ -33,13 +33,13 @@ export default {
     components: { ConnectButton, ServerLine, Servers },
     setup() {
 
-        const registerState = injectRegister();
+        const signinState = injectSignIn();
         const state = reactive({
             showServers: false,
         });
 
-        const loading = computed(() => registerState.LocalInfo.IsConnecting);
-        const connected = computed(() => registerState.LocalInfo.Connected);
+        const loading = computed(() => signinState.LocalInfo.IsConnecting);
+        const connected = computed(() => signinState.LocalInfo.Connected);
         const handleConnect = () => {
             if (loading.value) {
                 ElMessageBox.confirm('正在连接，是否确定操作', '提示').then(() => {
@@ -48,7 +48,7 @@ export default {
             } else if (connected.value) {
                 sendExit();
             } else {
-                sendRegisterMsg().then((res) => {
+                sendSignInMsg().then((res) => {
                 }).catch((msg) => {
                     ElMessage.error(msg);
                 });
@@ -68,7 +68,7 @@ export default {
 
 
         return {
-            registerState, state,
+            signinState, state,
             loading, connected, handleConnect,
             serverLineDom, handleSelectServer, handleSelectServerSuccess
         }

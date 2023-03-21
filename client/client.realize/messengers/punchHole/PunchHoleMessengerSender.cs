@@ -1,5 +1,5 @@
 ﻿using client.messengers.punchHole;
-using client.messengers.register;
+using client.messengers.singnin;
 using common.libs;
 using Microsoft.Extensions.DependencyInjection;
 using common.server;
@@ -22,17 +22,17 @@ namespace client.realize.messengers.punchHole
         private Dictionary<PunchHoleTypes, IPunchHole> plugins = new Dictionary<PunchHoleTypes, IPunchHole>();
 
         private readonly MessengerSender messengerSender;
-        private readonly RegisterStateInfo registerState;
+        private readonly SignInStateInfo signInState;
         private readonly ServiceProvider serviceProvider;
 
         private NumberSpace numberSpace = new NumberSpace();
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
         private ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<ulong, WheelTimerTimeout<TimeoutState>>();
 
-        public PunchHoleMessengerSender(MessengerSender messengerSender, RegisterStateInfo registerState, ServiceProvider serviceProvider)
+        public PunchHoleMessengerSender(MessengerSender messengerSender, SignInStateInfo signInState, ServiceProvider serviceProvider)
         {
             this.messengerSender = messengerSender;
-            this.registerState = registerState;
+            this.signInState = signInState;
             this.serviceProvider = serviceProvider;
         }
 
@@ -94,7 +94,7 @@ namespace client.realize.messengers.punchHole
                     RequestId = requestid,
                     Data = msg.ToBytes(),
                     PunchForwardType = msg.ForwardType,
-                    FromId = registerState.ConnectId,
+                    FromId = signInState.ConnectId,
                     PunchStep = msg.Step,
                     PunchType = (byte)msg.PunchType,
                     ToId = arg.ToId,
@@ -149,7 +149,7 @@ namespace client.realize.messengers.punchHole
             byte times = info.TryReverseValue;
             await Request(new SendPunchHoleArg<PunchHoleReverseInfo>
             {
-                Connection = registerState.Connection,
+                Connection = signInState.Connection,
                 ToId = info.Id,
                 Data = new PunchHoleReverseInfo { Value = times }
             }).ConfigureAwait(false);
@@ -164,7 +164,7 @@ namespace client.realize.messengers.punchHole
         {
             await Request(new SendPunchHoleArg<PunchHoleResetInfo>
             {
-                Connection = registerState.Connection,
+                Connection = signInState.Connection,
                 ToId = toid,
                 Data = new PunchHoleResetInfo { }
             }).ConfigureAwait(false);
@@ -178,7 +178,7 @@ namespace client.realize.messengers.punchHole
         {
             await Request(new SendPunchHoleArg<PunchHoleOfflineInfo>
             {
-                Connection = registerState.Connection,
+                Connection = signInState.Connection,
                 ToId = toid,
                 Data = new PunchHoleOfflineInfo { }
             }).ConfigureAwait(false);

@@ -4,7 +4,7 @@ using common.server;
 using common.server.model;
 using common.socks5;
 using server.messengers;
-using server.messengers.register;
+using server.messengers.singnin;
 using System.Threading.Tasks;
 
 namespace server.service.socks5
@@ -16,18 +16,18 @@ namespace server.service.socks5
     public sealed class Socks5SettingMessenger : IMessenger
     {
         private readonly common.socks5.Config config;
-        private readonly IClientRegisterCaching clientRegisterCaching;
+        private readonly IClientSignInCaching clientSignInCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="config"></param>
-        /// <param name="clientRegisterCaching"></param>
+        /// <param name="clientSignInCaching"></param>
         /// <param name="serviceAccessValidator"></param>
-        public Socks5SettingMessenger(common.socks5.Config config, IClientRegisterCaching clientRegisterCaching, IServiceAccessValidator serviceAccessValidator)
+        public Socks5SettingMessenger(common.socks5.Config config, IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator)
         {
             this.config = config;
-            this.clientRegisterCaching = clientRegisterCaching;
+            this.clientSignInCaching = clientSignInCaching;
             this.serviceAccessValidator = serviceAccessValidator;
         }
 
@@ -52,7 +52,7 @@ namespace server.service.socks5
         {
             string str = connection.ReceiveRequestWrap.Payload.GetUTF8String();
 
-            if (clientRegisterCaching.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
+            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
                 return Helper.FalseArray;
             }

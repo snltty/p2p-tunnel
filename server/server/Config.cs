@@ -61,6 +61,10 @@ namespace server
         public int RegisterTimeout { get; set; } = 5000;
 
         /// <summary>
+        /// 验证账号
+        /// </summary>
+        public bool VerifyAccount { get; set; } = false;
+        /// <summary>
         /// 允许注册
         /// </summary>
         public bool RegisterEnable { get; set; } = true;

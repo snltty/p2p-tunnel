@@ -1,7 +1,7 @@
 ﻿using common.libs.extends;
 using common.server;
 using common.server.model;
-using server.messengers.register;
+using server.messengers.singnin;
 
 namespace server.service.messengers
 {
@@ -11,10 +11,10 @@ namespace server.service.messengers
     [MessengerIdRange((ushort)ClientsMessengerIds.Min, (ushort)ClientsMessengerIds.Max)]
     public sealed class ClientsMessenger : IMessenger
     {
-        private readonly IClientRegisterCaching clientRegisterCache;
-        public ClientsMessenger(IClientRegisterCaching clientRegisterCache)
+        private readonly IClientSignInCaching clientSignInCache;
+        public ClientsMessenger(IClientSignInCaching clientSignInCache)
         {
-            this.clientRegisterCache = clientRegisterCache;
+            this.clientSignInCache = clientSignInCache;
         }
 
         [MessengerId((ushort)ClientsMessengerIds.IP)]
@@ -40,7 +40,7 @@ namespace server.service.messengers
         }
         public void AddTunnel(TunnelRegisterInfo model, int port)
         {
-            if (clientRegisterCache.Get(model.TargetId, out RegisterCacheInfo target))
+            if (clientSignInCache.Get(model.TargetId, out SignInCacheInfo target))
             {
                 target.AddTunnel(new TunnelRegisterCacheInfo
                 {
@@ -54,7 +54,7 @@ namespace server.service.messengers
         [MessengerId((ushort)ClientsMessengerIds.RemoveTunnel)]
         public void RemoveTunnel(IConnection connection)
         {
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+            if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
             {
                 ulong targetId = connection.ReceiveRequestWrap.Payload.Span.ToUInt64();
                 source.RemoveTunnel(targetId);

@@ -1,4 +1,5 @@
-﻿using PseudoTcp;
+﻿using Lidgren.Network;
+using PseudoTcp;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
@@ -15,6 +16,95 @@ namespace udp2tcp
         static void Main(string[] args)
         {
 
+            Test1();
+            Console.ReadLine();
+        }
+
+        static void Test2()
+        {
+            NetPeerConfiguration config = new NetPeerConfiguration("ImageTransfer");
+            config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
+            config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
+            config.EnableMessageType(NetIncomingMessageType.DebugMessage);
+            config.AutoExpandMTU = true;
+            config.Port = 14242;
+            NetServer Server = new NetServer(config);
+            Task.Run(() =>
+            {
+                Server.Start();
+                NetIncomingMessage inc;
+                while ((inc = Server.WaitMessage(100)) != null)
+                {
+                    switch (inc.MessageType)
+                    {
+                        case NetIncomingMessageType.Error:
+                            break;
+                        case NetIncomingMessageType.StatusChanged:
+                            break;
+                        case NetIncomingMessageType.UnconnectedData:
+                            break;
+                        case NetIncomingMessageType.ConnectionApproval:
+                            break;
+                        case NetIncomingMessageType.Data:
+
+                            Console.WriteLine(BitConverter.ToInt32(inc.Data));
+
+                            break;
+                        case NetIncomingMessageType.Receipt:
+                            break;
+                        case NetIncomingMessageType.DiscoveryRequest:
+                            break;
+                        case NetIncomingMessageType.DiscoveryResponse:
+                            break;
+                        case NetIncomingMessageType.VerboseDebugMessage:
+                            break;
+                        case NetIncomingMessageType.DebugMessage:
+                            break;
+                        case NetIncomingMessageType.WarningMessage:
+                            break;
+                        case NetIncomingMessageType.ErrorMessage:
+                            break;
+                        case NetIncomingMessageType.NatIntroductionSuccess:
+                            break;
+                        case NetIncomingMessageType.ConnectionLatencyUpdated:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+
+            System.Threading.Thread.Sleep(1000);
+
+            NetPeerConfiguration config1 = new NetPeerConfiguration("ImageTransfer");
+            config1.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
+            config1.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
+            config1.EnableMessageType(NetIncomingMessageType.DebugMessage);
+            config1.AutoExpandMTU = true;
+
+            NetClient Client = new NetClient(config1);
+            Client.Start();
+            var connection = Client.Connect(new IPEndPoint(IPAddress.Loopback, 14242));
+
+            Console.WriteLine(connection.Status);
+            while (connection.Status != NetConnectionStatus.Connected)
+            {
+                Console.WriteLine(connection.Status);
+                System.Threading.Thread.Sleep(1000);
+            }
+
+            NetOutgoingMessage msg = new NetOutgoingMessage();
+            msg.Data = new byte[1024];
+            for (int i = 0; i < 10; i++)
+            {
+                BitConverter.GetBytes(i).AsSpan().CopyTo(msg.Data.AsSpan());
+                Client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
+
+            }
+        }
+
+        static void Test1()
+        {
             int packsize = 1024;
             int packlen = 10000;
             int current = 0;
@@ -61,15 +151,16 @@ namespace udp2tcp
                     var bytes = new byte[packsize];
                     for (int i = 1; i <= packlen; i++)
                     {
-                        uint available_space = PseudoTcpFifo.GetWriteRemaining(leftSocket.priv.sbuf);
-                        while (available_space < packsize)
-                        {
-                            await Task.Delay(0);
-                            available_space = PseudoTcpFifo.GetWriteRemaining(leftSocket.priv.sbuf);
-                        }
+                        //uint available_space = PseudoTcpFifo.GetWriteRemaining(leftSocket.priv.sbuf);
+                        //while (available_space < packsize)
+                        //{
+                        //    await Task.Delay(0);
+                        //    available_space = PseudoTcpFifo.GetWriteRemaining(leftSocket.priv.sbuf);
+                        //}
 
                         int len = leftSocket.Send(bytes, (uint)bytes.Length);
                         Console.WriteLine($"{i}:send {len}");
+                        await Task.Delay(30);
                     }
                 });
             };
@@ -185,17 +276,10 @@ namespace udp2tcp
                         res = true;
                         rightSocket.NotifyClock();
                     }
-                    if (res == false)
-                    {
-                        await Task.Delay(0);
-                    }
+                    await Task.Delay(15);
                 }
             });
-
-
-            Console.ReadLine();
         }
-
     }
 
 }

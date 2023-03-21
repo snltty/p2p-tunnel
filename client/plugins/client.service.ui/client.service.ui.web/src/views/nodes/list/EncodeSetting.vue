@@ -45,10 +45,10 @@
 
 <script>
 import { ref, toRefs, reactive } from '@vue/reactivity';
-import { getRegisterInfo, updateConfig } from '../../../apis/register'
+import { getSignInInfo, updateConfig } from '../../../apis/signin'
 import { onMounted } from '@vue/runtime-core';
 export default {
-    service: 'RegisterClientService',
+    service: 'SignInClientService',
     setup() {
         const formDom = ref(null);
         const state = reactive({
@@ -63,7 +63,7 @@ export default {
         });
 
         const loadConfig = () => {
-            getRegisterInfo().then((json) => {
+            getSignInInfo().then((json) => {
                 state.model.ClientEncode = json.ClientConfig.Encode;
                 state.model.ClientEncodePassword = json.ClientConfig.EncodePassword;
 
@@ -74,7 +74,7 @@ export default {
         }
         const getJson = () => {
             return new Promise((resolve, reject) => {
-                getRegisterInfo().then((json) => {
+                getSignInInfo().then((json) => {
                     json.ClientConfig.Encode = state.model.ClientEncode;
                     json.ClientConfig.EncodePassword = state.model.ClientEncodePassword;
                     json.ServerConfig.Encode = state.model.ServerEncode;

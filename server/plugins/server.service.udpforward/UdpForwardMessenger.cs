@@ -4,7 +4,7 @@ using common.server;
 using common.server.model;
 using common.udpforward;
 using server.messengers;
-using server.messengers.register;
+using server.messengers.singnin;
 using System;
 using System.Threading.Tasks;
 
@@ -16,7 +16,7 @@ namespace server.service.udpforward
     [MessengerIdRange((ushort)UdpForwardMessengerIds.Min, (ushort)UdpForwardMessengerIds.Max)]
     public sealed class UdpForwardMessenger : IMessenger
     {
-        private readonly IClientRegisterCaching clientRegisterCache;
+        private readonly IClientSignInCaching clientSignInCache;
         private readonly common.udpforward.Config config;
         private readonly IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching;
         private readonly UdpForwardMessengerSender tcpForwardMessengerSender;
@@ -27,17 +27,17 @@ namespace server.service.udpforward
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="clientRegisterCache"></param>
+        /// <param name="clientSignInCache"></param>
         /// <param name="config"></param>
         /// <param name="udpForwardTargetCaching"></param>
         /// <param name="tcpForwardMessengerSender"></param>
         /// <param name="tcpForwardServer"></param>
         /// <param name="udpForwardValidator"></param>
         /// <param name="serviceAccessValidator"></param>
-        public UdpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.udpforward.Config config, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching,
+        public UdpForwardMessenger(IClientSignInCaching clientSignInCache, common.udpforward.Config config, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching,
             UdpForwardMessengerSender tcpForwardMessengerSender, IUdpForwardServer tcpForwardServer, IUdpForwardValidator udpForwardValidator, IServiceAccessValidator serviceAccessValidator)
         {
-            this.clientRegisterCache = clientRegisterCache;
+            this.clientSignInCache = clientSignInCache;
             this.config = config;
             this.udpForwardTargetCaching = udpForwardTargetCaching;
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
@@ -97,7 +97,7 @@ namespace server.service.udpforward
             try
             {
                 ushort port = connection.ReceiveRequestWrap.Payload.Span.ToUInt16();
-                if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+                if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
                 {
                     if (udpForwardValidator.Validate(source.GroupId) == false)
                     {
@@ -133,7 +133,7 @@ namespace server.service.udpforward
                 model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
                 //取出注册缓存，没取出来就说明没注册
-                if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+                if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
                 {
                     if (udpForwardValidator.Validate(source.GroupId) == false)
                     {
@@ -195,7 +195,7 @@ namespace server.service.udpforward
         [MessengerId((ushort)UdpForwardMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
+            if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
                 return Helper.FalseArray;
             }

@@ -1,5 +1,5 @@
 ﻿using client.messengers.clients;
-using client.messengers.register;
+using client.messengers.singnin;
 using common.server;
 using common.tcpforward;
 
@@ -12,14 +12,14 @@ namespace client.service.tcpforward
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;
-        private readonly RegisterStateInfo registerStateInfo;
+        private readonly SignInStateInfo signInStateInfo;
 
-        public TcpForwardTargetProvider(IClientInfoCaching clientInfoCaching, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, RegisterStateInfo registerStateInfo)
+        public TcpForwardTargetProvider(IClientInfoCaching clientInfoCaching, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, SignInStateInfo signInStateInfo)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
-            this.registerStateInfo = registerStateInfo;
-            registerStateInfo.OnRegisterStateChange.Sub((state) =>
+            this.signInStateInfo = signInStateInfo;
+            signInStateInfo.OnChange.Sub((state) =>
             {
                 tcpForwardTargetCaching.ClearConnection();
             });
@@ -65,7 +65,7 @@ namespace client.service.tcpforward
         {
             if (cacheInfo.Name == "/")
             {
-                return registerStateInfo.Connection;
+                return signInStateInfo.Connection;
             }
 
             if (clientInfoCaching.GetByName(cacheInfo.Name, out ClientInfo client))

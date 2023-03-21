@@ -1,12 +1,11 @@
 ﻿using common.server;
-using common.server.model;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Text.Json.Serialization;
 
-namespace server.messengers.register
+namespace server.messengers.singnin
 {
-    public sealed class RegisterCacheInfo
+    public sealed class SignInCacheInfo
     {
         [JsonIgnore]
         public IConnection Connection { get; private set; }
@@ -17,7 +16,6 @@ namespace server.messengers.register
         [JsonIgnore]
         public IPAddress[] LocalIps { get; set; }
         public uint ClientAccess { get; set; } = 0;
-
         public int Port { get; set; } = 0;
         public int LocalPort { get; set; } = 0;
 

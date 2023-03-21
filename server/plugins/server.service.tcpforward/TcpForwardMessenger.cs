@@ -4,7 +4,7 @@ using common.server;
 using common.server.model;
 using common.tcpforward;
 using server.messengers;
-using server.messengers.register;
+using server.messengers.singnin;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +17,7 @@ namespace server.service.tcpforward
     [MessengerIdRange((ushort)TcpForwardMessengerIds.Min, (ushort)TcpForwardMessengerIds.Max)]
     public sealed class TcpForwardMessenger : IMessenger
     {
-        private readonly IClientRegisterCaching clientRegisterCache;
+        private readonly IClientSignInCaching clientSignInCache;
         private readonly common.tcpforward.Config config;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;
         private readonly ITcpForwardServer tcpForwardServer;
@@ -27,18 +27,18 @@ namespace server.service.tcpforward
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="clientRegisterCache"></param>
+        /// <param name="clientSignInCache"></param>
         /// <param name="config"></param>
         /// <param name="tcpForwardTargetCaching"></param>
         /// <param name="tcpForwardServer"></param>
         /// <param name="tcpForwardValidator"></param>
         /// <param name="tcpForwardResolver"></param>
         /// <param name="serviceAccessValidator"></param>
-        public TcpForwardMessenger(IClientRegisterCaching clientRegisterCache, common.tcpforward.Config config,
+        public TcpForwardMessenger(IClientSignInCaching clientSignInCache, common.tcpforward.Config config,
             ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, ITcpForwardServer tcpForwardServer,
             ITcpForwardValidator tcpForwardValidator, TcpForwardResolver tcpForwardResolver, IServiceAccessValidator serviceAccessValidator)
         {
-            this.clientRegisterCache = clientRegisterCache;
+            this.clientSignInCache = clientSignInCache;
             this.config = config;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
             this.tcpForwardServer = tcpForwardServer;
@@ -96,7 +96,7 @@ namespace server.service.tcpforward
                 TcpForwardUnRegisterParamsInfo model = new TcpForwardUnRegisterParamsInfo();
                 model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
-                if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+                if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
                 {
                     TcpForwardTargetCacheInfo cache = model.AliveType == TcpForwardAliveTypes.Web ? tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort) : tcpForwardTargetCaching.Get(model.SourcePort);
 
@@ -135,7 +135,7 @@ namespace server.service.tcpforward
                 model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
                 //取出注册缓存，没取出来就说明没注册
-                if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+                if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
                 {
                     if (tcpForwardValidator.Validate(source.GroupId) == false)
                     {
@@ -220,7 +220,7 @@ namespace server.service.tcpforward
         [MessengerId((ushort)TcpForwardMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo client) == false)
+            if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
                 return Helper.FalseArray;
             }

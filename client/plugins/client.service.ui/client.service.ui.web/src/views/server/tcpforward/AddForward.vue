@@ -27,13 +27,13 @@ import { computed, reactive, ref, toRefs } from '@vue/reactivity';
 import { inject, watch } from '@vue/runtime-core';
 import { AddServerForward } from '../../../apis/tcp-forward'
 import { injectShareData } from '../../../states/shareData'
-import { injectRegister } from '../../../states/register'
+import { injectSignIn } from '../../../states/signin'
 export default {
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],
     setup(props, { emit }) {
 
-        const registerState = injectRegister();
+        const signinState = injectSignIn();
         const addForwardData = inject('add-forward-data');
         const shareData = injectShareData();
         const state = reactive({
@@ -42,7 +42,7 @@ export default {
             form: {
                 AliveType: addForwardData.value.AliveType,
                 ServerPort: addForwardData.value.ServerPort,
-                Domain: registerState.ServerConfig.Ip,
+                Domain: signinState.ServerConfig.Ip,
                 Desc: '',
                 LocalIp: '127.0.0.1',
                 LocalPort: 80

@@ -1,7 +1,7 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
-using server.messengers.register;
+using server.messengers.singnin;
 using System.Threading.Tasks;
 
 namespace server.service.messengers
@@ -9,12 +9,12 @@ namespace server.service.messengers
     [MessengerIdRange((ushort)PunchHoleMessengerIds.Min, (ushort)PunchHoleMessengerIds.Max)]
     public sealed class PunchHoleMessenger : IMessenger
     {
-        private readonly IClientRegisterCaching clientRegisterCache;
+        private readonly IClientSignInCaching clientSignInCache;
         private readonly MessengerSender messengerSender;
 
-        public PunchHoleMessenger(IClientRegisterCaching clientRegisterCache, MessengerSender messengerSender)
+        public PunchHoleMessenger(IClientSignInCaching clientSignInCache, MessengerSender messengerSender)
         {
-            this.clientRegisterCache = clientRegisterCache;
+            this.clientSignInCache = clientSignInCache;
             this.messengerSender = messengerSender;
         }
 
@@ -24,10 +24,10 @@ namespace server.service.messengers
             PunchHoleResponseInfo model = new PunchHoleResponseInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+            if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
             {
                 //B已注册
-                if (clientRegisterCache.Get(model.ToId, out RegisterCacheInfo target))
+                if (clientSignInCache.Get(model.ToId, out SignInCacheInfo target))
                 {
                     //是否在同一个组
                     if (source.GroupId == target.GroupId)
@@ -54,10 +54,10 @@ namespace server.service.messengers
             model.FromId = connection.ConnectId;
 
             //A已注册
-            if (clientRegisterCache.Get(connection.ConnectId, out RegisterCacheInfo source))
+            if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
             {
                 //B已注册
-                if (clientRegisterCache.Get(model.ToId, out RegisterCacheInfo target))
+                if (clientSignInCache.Get(model.ToId, out SignInCacheInfo target))
                 {
                     //是否在同一个组
                     if (source.GroupId == target.GroupId)

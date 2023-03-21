@@ -2,7 +2,7 @@
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using server.messengers.register;
+using server.messengers.singnin;
 using System.Linq;
 
 namespace server.service.messengers
@@ -13,12 +13,12 @@ namespace server.service.messengers
     [MessengerIdRange((ushort)RelayMessengerIds.Min, (ushort)RelayMessengerIds.Max)]
     public sealed class RelayMessenger : IMessenger
     {
-        private readonly IClientRegisterCaching clientRegisterCache;
+        private readonly IClientSignInCaching clientSignInCache;
         private readonly MessengerSender messengerSender;
 
-        public RelayMessenger(IClientRegisterCaching clientRegisterCache, MessengerSender messengerSender)
+        public RelayMessenger(IClientSignInCaching clientSignInCache, MessengerSender messengerSender)
         {
-            this.clientRegisterCache = clientRegisterCache;
+            this.clientSignInCache = clientSignInCache;
             this.messengerSender = messengerSender;
         }
 
@@ -31,9 +31,9 @@ namespace server.service.messengers
         [MessengerId((ushort)RelayMessengerIds.AskConnects)]
         public void AskConnects(IConnection connection)
         {
-            if(clientRegisterCache.Get(connection.ConnectId,out RegisterCacheInfo cache))
+            if(clientSignInCache.Get(connection.ConnectId,out SignInCacheInfo cache))
             {
-                foreach (var item in clientRegisterCache.Get(cache.GroupId).Where(c => c.Id != connection.ConnectId))
+                foreach (var item in clientSignInCache.Get(cache.GroupId).Where(c => c.Id != connection.ConnectId))
                 {
                     _ = messengerSender.SendOnly(new MessageRequestWrap
                     {
@@ -49,7 +49,7 @@ namespace server.service.messengers
         public void Connects(IConnection connection)
         {
             ulong toid = ConnectsInfo.ReadToId(connection.ReceiveRequestWrap.Payload);
-            if (clientRegisterCache.Get(toid, out RegisterCacheInfo client))
+            if (clientSignInCache.Get(toid, out SignInCacheInfo client))
             {
                 _ = messengerSender.SendOnly(new MessageRequestWrap
                 {
@@ -63,18 +63,18 @@ namespace server.service.messengers
 
     public class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
     {
-        private readonly IClientRegisterCaching clientRegisterCaching;
+        private readonly IClientSignInCaching clientSignInCaching;
 
-        public RelaySourceConnectionSelector(IClientRegisterCaching clientRegisterCaching)
+        public RelaySourceConnectionSelector(IClientSignInCaching clientSignInCaching)
         {
-            this.clientRegisterCaching = clientRegisterCaching;
+            this.clientSignInCaching = clientSignInCaching;
         }
 
         public IConnection Select(IConnection connection, ulong relayid)
         {
             if (relayid > 0)
             {
-                if (clientRegisterCaching.Get(relayid, out RegisterCacheInfo client))
+                if (clientSignInCaching.Get(relayid, out SignInCacheInfo client))
                 {
                     return client.Connection;
                 }

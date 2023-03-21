@@ -4,7 +4,7 @@ using common.libs.extends;
 using common.socks5;
 using server.messengers;
 using common.server;
-using server.messengers.register;
+using server.messengers.singnin;
 using common.server.model;
 
 namespace server.service.socks5
@@ -16,18 +16,18 @@ namespace server.service.socks5
     {
         private readonly IServiceAccessValidator serviceAccessProvider;
         private readonly common.socks5.Config config;
-        private readonly IClientRegisterCaching clientRegisterCaching;
+        private readonly IClientSignInCaching clientSignInCaching;
         /// <summary>
         /// 
         /// </summary>
         /// <param name="serviceAccessProvider"></param>
         /// <param name="config"></param>
-        /// <param name="clientRegisterCaching"></param>
-        public Socks5Validator(IServiceAccessValidator serviceAccessProvider, common.socks5.Config config, IClientRegisterCaching clientRegisterCaching)
+        /// <param name="clientSignInCaching"></param>
+        public Socks5Validator(IServiceAccessValidator serviceAccessProvider, common.socks5.Config config, IClientSignInCaching clientSignInCaching)
         {
             this.serviceAccessProvider = serviceAccessProvider;
             this.config = config;
-            this.clientRegisterCaching = clientRegisterCaching;
+            this.clientSignInCaching = clientSignInCaching;
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace server.service.socks5
                 return false;
             }
 
-            if (clientRegisterCaching.Get(info.ClientId, out RegisterCacheInfo client))
+            if (clientSignInCaching.Get(info.ClientId, out SignInCacheInfo client))
             {
                 return config.ConnectEnable || serviceAccessProvider.Validate(client.GroupId, EnumServiceAccess.Socks5);
             }

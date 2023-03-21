@@ -12,10 +12,6 @@ namespace client.realize.messengers.clients
     public sealed class ClientsMessengerSender
     {
         private readonly MessengerSender messengerSender;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
         public ClientsMessengerSender(MessengerSender messengerSender)
         {
             this.messengerSender = messengerSender;
