@@ -3,19 +3,11 @@ using server.messengers.singnin;
 
 namespace server.service.tcpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     internal sealed class TcpForwardTargetProvider : ITcpForwardTargetProvider
     {
         private readonly IClientSignInCaching clientSignInCaching;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientSignInCaching"></param>
-        /// <param name="tcpForwardTargetCaching"></param>
         public TcpForwardTargetProvider(IClientSignInCaching clientSignInCaching, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching)
         {
             this.clientSignInCaching = clientSignInCaching;
@@ -23,23 +15,15 @@ namespace server.service.tcpforward
 
             clientSignInCaching.OnOffline.Sub((client) =>
             {
-                tcpForwardTargetCaching.ClearConnection(client.Id);
+                tcpForwardTargetCaching.ClearConnection(client.ConnectionId);
             });
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="host"></param>
-        /// <param name="info"></param>
+
         public void Get(string host, TcpForwardInfo info)
         {
             GetTarget(tcpForwardTargetCaching.Get(host), info);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="port"></param>
-        /// <param name="info"></param>
+
         public void Get(ushort port, TcpForwardInfo info)
         {
             GetTarget(tcpForwardTargetCaching.Get(port), info);

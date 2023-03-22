@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
+using server.messengers;
 using server.messengers.singnin;
 using System;
 using System.Threading.Tasks;
@@ -15,16 +16,16 @@ namespace server.service.messengers.singnin
     public sealed class SignInMessenger : IMessenger
     {
         private readonly IClientSignInCaching clientSignInCache;
-        private readonly ISignInValidator registerKeyValidator;
+        private readonly ISignInValidator signInValidator;
         private readonly MessengerSender messengerSender;
-        private readonly IRelayValidator relayValidator;
+        private readonly IUserStore userStore;
 
-        public SignInMessenger(IClientSignInCaching clientSignInCache, ISignInValidator registerKeyValidator, MessengerSender messengerSender, IRelayValidator relayValidator)
+        public SignInMessenger(IClientSignInCaching clientSignInCache, ISignInValidator signInValidator, MessengerSender messengerSender, IUserStore userStore)
         {
             this.clientSignInCache = clientSignInCache;
-            this.registerKeyValidator = registerKeyValidator;
+            this.signInValidator = signInValidator;
             this.messengerSender = messengerSender;
-            this.relayValidator = relayValidator;
+            this.userStore = userStore;
         }
 
         [MessengerId((ushort)SignInMessengerIds.SignIn)]
@@ -33,13 +34,16 @@ namespace server.service.messengers.singnin
             SignInParamsInfo model = new SignInParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
-            //验证key
-            if (registerKeyValidator.Validate(model.GroupId) == false)
+            //获取用户
+            userStore.Get(model.Account, model.Password, out UserInfo user);
+            //验证登入权限
+            SignInResultInfo.SignInResultInfoCodes code = signInValidator.Validate(ref user);
+            if (code != SignInResultInfo.SignInResultInfoCodes.OK)
             {
-                return new SignInResultInfo { Code = SignInResultInfo.SignInResultInfoCodes.KEY_VERIFY }.ToBytes();
+                return new SignInResultInfo { Code = code }.ToBytes();
             }
 
-            (SignInResultInfo verify, SignInCacheInfo client) = VerifyAndAdd(model, connection);
+            (SignInResultInfo verify, SignInCacheInfo client) = VerifyAndAdd(model, user, connection);
             if (verify != null)
             {
                 return verify.ToBytes();
@@ -49,10 +53,12 @@ namespace server.service.messengers.singnin
             return new SignInResultInfo
             {
                 ShortId = client.ShortId,
-                Id = client.Id,
+                Id = client.ConnectionId,
                 Ip = connection.Address.Address,
                 GroupId = client.GroupId,
-                Relay = relayValidator.Validate(connection)
+                Access = user.Access,
+                EndTime = user.EndTime,
+                NetFlow = user.NetFlow
             }.ToBytes();
 
         }
@@ -83,13 +89,13 @@ namespace server.service.messengers.singnin
             Console.WriteLine(res.Code);
         }
 
-        private (SignInResultInfo, SignInCacheInfo) VerifyAndAdd(SignInParamsInfo model, IConnection connection)
+        private (SignInResultInfo, SignInCacheInfo) VerifyAndAdd(SignInParamsInfo model, UserInfo user, IConnection connection)
         {
             SignInResultInfo verify = null;
             ///第一次注册，检查有没有重名
             if (clientSignInCache.Get(model.GroupId, model.Name, out SignInCacheInfo client))
             {
-                clientSignInCache.Remove(client.Id);
+                clientSignInCache.Remove(client.ConnectionId);
                 verify = new SignInResultInfo { Code = SignInResultInfo.SignInResultInfoCodes.SAME_NAMES };
             }
             else
@@ -100,10 +106,13 @@ namespace server.service.messengers.singnin
                     GroupId = model.GroupId,
                     LocalIps = model.LocalIps,
                     ClientAccess = model.ClientAccess,
-                    Id = 0,
+                    ConnectionId = 0,
+                    UserId = user.ID,
                     ShortId = model.ShortId,
                     LocalPort = model.LocalTcpPort,
-                    Port = connection.Address.Port
+                    Port = connection.Address.Port,
+                    NetFlow = user.NetFlow,
+                    UserAccess = user.Access
                 };
                 clientSignInCache.Add(client);
             }

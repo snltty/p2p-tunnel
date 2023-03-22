@@ -33,7 +33,7 @@ namespace server.service.messengers
         {
             if(clientSignInCache.Get(connection.ConnectId,out SignInCacheInfo cache))
             {
-                foreach (var item in clientSignInCache.Get(cache.GroupId).Where(c => c.Id != connection.ConnectId))
+                foreach (var item in clientSignInCache.Get(cache.GroupId).Where(c => c.ConnectionId != connection.ConnectId))
                 {
                     _ = messengerSender.SendOnly(new MessageRequestWrap
                     {

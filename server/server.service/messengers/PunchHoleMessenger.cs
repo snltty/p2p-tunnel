@@ -64,10 +64,10 @@ namespace server.service.messengers
                     {
                         if (model.PunchForwardType == PunchForwardTypes.NOTIFY)
                         {
-                            TunnelRegisterCacheInfo tunnel;
+                            TunnelCacheInfo tunnel;
                             if (model.NewTunnel == 0)
                             {
-                                tunnel = new TunnelRegisterCacheInfo { LocalPort = source.LocalPort, Port = source.Port };
+                                tunnel = new TunnelCacheInfo { LocalPort = source.LocalPort, Port = source.Port };
                             }
                             else
                             {

@@ -29,7 +29,7 @@ namespace server.service.socks5
             {
                 return;
             }
-            if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
                 return;
             }
@@ -45,7 +45,7 @@ namespace server.service.socks5
             {
                 return Helper.FalseArray;
             }
-            if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
                 return Helper.FalseArray;
             }

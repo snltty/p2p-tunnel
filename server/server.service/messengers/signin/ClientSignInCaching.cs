@@ -71,9 +71,9 @@ namespace server.service.messengers.singnin
         }
         public ulong Add(SignInCacheInfo model)
         {
-            if (model.Id == 0)
+            if (model.ConnectionId == 0)
             {
-                model.Id = idNs.Increment();
+                model.ConnectionId = idNs.Increment();
             }
             if (string.IsNullOrWhiteSpace(model.GroupId))
             {
@@ -85,8 +85,8 @@ namespace server.service.messengers.singnin
                 cacheGroups.TryAdd(model.GroupId, value);
             }
             value.TryAdd(model.Name, model);
-            cache.TryAdd(model.Id, model);
-            return model.Id;
+            cache.TryAdd(model.ConnectionId, model);
+            return model.ConnectionId;
         }
         public bool Get(ulong id, out SignInCacheInfo client)
         {
@@ -143,6 +143,11 @@ namespace server.service.messengers.singnin
                 OnChanged.Push(client);
             }
             return false;
+        }
+
+        public int UserCount(ulong uid)
+        {
+            return cache.Count(c => c.Value.UserId == uid);
         }
     }
 }

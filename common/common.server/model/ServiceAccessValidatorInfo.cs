@@ -12,27 +12,27 @@ namespace common.server.model
         /// <summary>
         /// 登入
         /// </summary>
-        SignIn = 0,
+        SignIn = 1,
         /// <summary>
         /// 中继
         /// </summary>
-        Relay = 1,
+        Relay = 2,
         /// <summary>
         /// tcp转发
         /// </summary>
-        TcpForward = 2,
+        TcpForward = 4,
         /// <summary>
         /// udp转发
         /// </summary>
-        UdpForward = 4,
+        UdpForward = 8,
         /// <summary>
         /// socks5
         /// </summary>
-        Socks5 = 8,
+        Socks5 = 16,
         /// <summary>
         /// 配置
         /// </summary>
-        Setting = 16
+        Setting = 32
     }
 
     /// <summary>

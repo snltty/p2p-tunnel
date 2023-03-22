@@ -18,12 +18,6 @@ namespace server.service.socks5
         private readonly common.socks5.Config config;
         private readonly IClientSignInCaching clientSignInCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="clientSignInCaching"></param>
-        /// <param name="serviceAccessValidator"></param>
         public Socks5SettingMessenger(common.socks5.Config config, IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator)
         {
             this.config = config;
@@ -31,22 +25,12 @@ namespace server.service.socks5
             this.serviceAccessValidator = serviceAccessValidator;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)Socks5MessengerIds.GetSetting)]
         public async Task GetSetting(IConnection connection)
         {
             connection.WriteUTF8(await config.ReadString());
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)Socks5MessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
@@ -56,7 +40,7 @@ namespace server.service.socks5
             {
                 return Helper.FalseArray;
             }
-            if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
                 return Helper.FalseArray;
             }

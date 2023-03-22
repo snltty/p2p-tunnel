@@ -46,19 +46,13 @@ namespace server.service.tcpforward
             this.tcpForwardResolver = tcpForwardResolver;
             this.serviceAccessValidator = serviceAccessValidator;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
+
         [MessengerId((ushort)TcpForwardMessengerIds.Request)]
         public async Task Request(IConnection connection)
         {
             await tcpForwardResolver.InputData(connection);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
+
         [MessengerId((ushort)TcpForwardMessengerIds.Response)]
         public async Task Response(IConnection connection)
         {
@@ -68,11 +62,7 @@ namespace server.service.tcpforward
             await tcpForwardServer.Response(data);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
+
         [MessengerId((ushort)TcpForwardMessengerIds.Ports)]
         public void Ports(IConnection connection)
         {
@@ -83,11 +73,6 @@ namespace server.service.tcpforward
                 }).ToArray());
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)TcpForwardMessengerIds.SignOut)]
         public byte[] SignOut(IConnection connection)
         {
@@ -100,7 +85,7 @@ namespace server.service.tcpforward
                 {
                     TcpForwardTargetCacheInfo cache = model.AliveType == TcpForwardAliveTypes.Web ? tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort) : tcpForwardTargetCaching.Get(model.SourcePort);
 
-                    if (cache != null && cache.Id == source.Id)
+                    if (cache != null && cache.Id == source.ConnectionId)
                     {
                         if (model.AliveType == TcpForwardAliveTypes.Web)
                         {
@@ -121,11 +106,7 @@ namespace server.service.tcpforward
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
+
         [MessengerId((ushort)TcpForwardMessengerIds.SignIn)]
         public byte[] SignIn(IConnection connection)
         {
@@ -137,7 +118,7 @@ namespace server.service.tcpforward
                 //取出注册缓存，没取出来就说明没注册
                 if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
                 {
-                    if (tcpForwardValidator.Validate(source.GroupId) == false)
+                    if (tcpForwardValidator.Validate(connection) == false)
                     {
                         return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes();
                     }
@@ -147,13 +128,13 @@ namespace server.service.tcpforward
                     {
                         TcpForwardTargetCacheInfo target = tcpForwardTargetCaching.Get(model.SourceIp, model.SourcePort);
                         //已存在相同的注册
-                        if (target != null && target.Id != source.Id)
+                        if (target != null && target.Id != source.ConnectionId)
                         {
                             return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes();
                         }
                         tcpForwardTargetCaching.AddOrUpdate(model.SourceIp, model.SourcePort, new TcpForwardTargetCacheInfo
                         {
-                            Id = source.Id,
+                            Id = source.ConnectionId,
                             Name = source.Name,
                             Connection = connection,
                             Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort),
@@ -171,13 +152,13 @@ namespace server.service.tcpforward
 
                         TcpForwardTargetCacheInfo target = tcpForwardTargetCaching.Get(model.SourcePort);
                         //已存在相同的注册
-                        if (target != null && target.Id != source.Id)
+                        if (target != null && target.Id != source.ConnectionId)
                         {
                             return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes();
                         }
                         tcpForwardTargetCaching.AddOrUpdate(model.SourcePort, new TcpForwardTargetCacheInfo
                         {
-                            Id = source.Id,
+                            Id = source.ConnectionId,
                             Name = source.Name,
                             Connection = connection,
                             Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort),
@@ -201,22 +182,13 @@ namespace server.service.tcpforward
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)TcpForwardMessengerIds.GetSetting)]
         public async Task GetSetting(IConnection connection)
         {
             string str = await config.ReadString();
             connection.WriteUTF8(str);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
+
         [MessengerId((ushort)TcpForwardMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
@@ -224,7 +196,7 @@ namespace server.service.tcpforward
             {
                 return Helper.FalseArray;
             }
-            if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
                 return Helper.FalseArray;
             }

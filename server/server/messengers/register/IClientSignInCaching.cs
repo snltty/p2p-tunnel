@@ -12,6 +12,7 @@ namespace server.messengers.singnin
 
         public ulong Add(SignInCacheInfo model);
 
+        public int UserCount(ulong uid);
         public bool Get(ulong id, out SignInCacheInfo client);
         public bool Get(string groupid, string name, out SignInCacheInfo client);
         public IEnumerable<SignInCacheInfo> Get(string groupid);

@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.server;
 using System.Linq;
 
 namespace common.udpforward
@@ -8,18 +9,8 @@ namespace common.udpforward
     /// </summary>
     public interface IUdpForwardValidator
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="info"></param>
-        /// <returns></returns>
         public bool Validate(UdpForwardInfo info);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public bool Validate(string key);
+        public bool Validate(IConnection connection);
     }
     /// <summary>
     /// 
@@ -27,19 +18,11 @@ namespace common.udpforward
     public class DefaultUdpForwardValidator : IUdpForwardValidator
     {
         private readonly Config config;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
         public DefaultUdpForwardValidator(Config config)
         {
             this.config = config;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="info"></param>
-        /// <returns></returns>
+
         public bool Validate(UdpForwardInfo info)
         {
             if (config.ConnectEnable == false)
@@ -59,12 +42,8 @@ namespace common.udpforward
 
             return true;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public bool Validate(string key)
+
+        public bool Validate(IConnection connection)
         {
             return true;
         }

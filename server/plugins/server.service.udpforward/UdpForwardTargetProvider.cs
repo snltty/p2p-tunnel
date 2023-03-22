@@ -18,7 +18,7 @@ namespace server.service.udpforward
 
             clientSignInCaching.OnOffline.Sub((client) =>
             {
-                udpForwardTargetCaching.ClearConnection(client.Id);
+                udpForwardTargetCaching.ClearConnection(client.ConnectionId);
             });
         }
 

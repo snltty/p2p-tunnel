@@ -8,15 +8,14 @@ using common.server;
 using common.server.servers.iocp;
 using common.server.servers.rudp;
 using System.Reflection;
-using server.service.messengers.singnin;
-using server.messengers.singnin;
 using common.libs.database;
 using server.messengers;
 using server.service.validators;
-using System.Runtime.Intrinsics.Arm;
 using System.Net;
 using server.service.messengers;
 using common.libs.extends;
+using server.messengers.singnin;
+using server.service.messengers.singnin;
 
 namespace server.service
 {
@@ -33,8 +32,11 @@ namespace server.service
             services.AddSingleton<IRelaySourceConnectionSelector, messengers.RelaySourceConnectionSelector>();
 
             services.AddSingleton<ISignInValidator, SignInValidator>();
-            services.AddSingleton<IServiceAccessValidator, JsonFileServiceAccessValidator>();
+            services.AddSingleton<IServiceAccessValidator, ServiceAccessValidator>();
             services.AddSingleton<IRelayValidator, RelayValidator>();
+
+
+            services.AddSingleton<IUserStore, UserStore>();
 
 
             services.AddSingleton<MessengerResolver>();
@@ -74,16 +76,16 @@ namespace server.service
 
         private void Loop(ServiceProvider services)
         {
-            IClientSignInCaching clientSignInCache = services.GetService<IClientSignInCaching>();
+            IClientSignInCaching clientRegisterCache = services.GetService<IClientSignInCaching>();
             MessengerResolver messengerResolver = services.GetService<MessengerResolver>();
             MessengerSender messengerSender = services.GetService<MessengerSender>();
 
-            clientSignInCache.OnChanged.Sub((changeClient) =>
+            clientRegisterCache.OnChanged.Sub((changeClient) =>
             {
-                List<ClientsClientInfo> clients = clientSignInCache.Get(changeClient.GroupId).Where(c => c.Connection != null && c.Connection.Connected).OrderBy(c => c.Id).Select(c => new ClientsClientInfo
+                List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.Connection != null && c.Connection.Connected).OrderBy(c => c.ConnectionId).Select(c => new ClientsClientInfo
                 {
                     Connection = c.Connection,
-                    Id = c.Id,
+                    Id = c.ConnectionId,
                     Name = c.Name,
                     Access = c.ClientAccess,
                 }).ToList();

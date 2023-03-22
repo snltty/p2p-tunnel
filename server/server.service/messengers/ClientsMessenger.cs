@@ -42,7 +42,7 @@ namespace server.service.messengers
         {
             if (clientSignInCache.Get(model.TargetId, out SignInCacheInfo target))
             {
-                target.AddTunnel(new TunnelRegisterCacheInfo
+                target.AddTunnel(new TunnelCacheInfo
                 {
                     LocalPort = model.LocalPort,
                     Port = port,

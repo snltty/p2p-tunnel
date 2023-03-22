@@ -10,9 +10,6 @@ using System.Threading.Tasks;
 
 namespace server.service.udpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [MessengerIdRange((ushort)UdpForwardMessengerIds.Min, (ushort)UdpForwardMessengerIds.Max)]
     public sealed class UdpForwardMessenger : IMessenger
     {
@@ -24,16 +21,6 @@ namespace server.service.udpforward
         private readonly IUdpForwardValidator udpForwardValidator;
         private readonly IServiceAccessValidator serviceAccessValidator;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientSignInCache"></param>
-        /// <param name="config"></param>
-        /// <param name="udpForwardTargetCaching"></param>
-        /// <param name="tcpForwardMessengerSender"></param>
-        /// <param name="tcpForwardServer"></param>
-        /// <param name="udpForwardValidator"></param>
-        /// <param name="serviceAccessValidator"></param>
         public UdpForwardMessenger(IClientSignInCaching clientSignInCache, common.udpforward.Config config, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching,
             UdpForwardMessengerSender tcpForwardMessengerSender, IUdpForwardServer tcpForwardServer, IUdpForwardValidator udpForwardValidator, IServiceAccessValidator serviceAccessValidator)
         {
@@ -46,10 +33,6 @@ namespace server.service.udpforward
             this.serviceAccessValidator = serviceAccessValidator;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
         [MessengerId((ushort)UdpForwardMessengerIds.Request)]
         public async Task Request(IConnection connection)
         {
@@ -59,10 +42,6 @@ namespace server.service.udpforward
             await tcpForwardMessengerSender.OnRequest(data);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
         [MessengerId((ushort)UdpForwardMessengerIds.Response)]
         public async Task Response(IConnection connection)
         {
@@ -72,11 +51,6 @@ namespace server.service.udpforward
             await tcpForwardMessengerSender.OnResponse(data);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.Ports)]
         public void Ports(IConnection connection)
         {
@@ -86,11 +60,6 @@ namespace server.service.udpforward
                 });
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.SignOut)]
         public byte[] SignOut(IConnection connection)
         {
@@ -99,13 +68,13 @@ namespace server.service.udpforward
                 ushort port = connection.ReceiveRequestWrap.Payload.Span.ToUInt16();
                 if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
                 {
-                    if (udpForwardValidator.Validate(source.GroupId) == false)
+                    if (udpForwardValidator.Validate(connection) == false)
                     {
                         return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
                     }
 
                     UdpForwardTargetCacheInfo cache = udpForwardTargetCaching.Get(port);
-                    if (cache != null && cache.Id == source.Id)
+                    if (cache != null && cache.Id == source.ConnectionId)
                     {
                         udpForwardTargetCaching.Remove(port);
                         tcpForwardServer.Stop(port);
@@ -119,11 +88,6 @@ namespace server.service.udpforward
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.SignIn)]
         public byte[] SignIn(IConnection connection)
         {
@@ -135,7 +99,7 @@ namespace server.service.udpforward
                 //取出注册缓存，没取出来就说明没注册
                 if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
                 {
-                    if (udpForwardValidator.Validate(source.GroupId) == false)
+                    if (udpForwardValidator.Validate(connection) == false)
                     {
                         return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
                     }
@@ -154,7 +118,7 @@ namespace server.service.udpforward
                     }
                     udpForwardTargetCaching.Add(model.SourcePort, new UdpForwardTargetCacheInfo
                     {
-                        Id = source.Id,
+                        Id = source.ConnectionId,
                         Name = source.Name,
                         Connection = connection,
                         Endpoint = NetworkHelper.EndpointToArray(model.TargetIp, model.TargetPort)
@@ -176,22 +140,12 @@ namespace server.service.udpforward
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.GetSetting)]
         public async Task GetSetting(IConnection connection)
         {
             connection.WriteUTF8(await config.ReadString());
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)UdpForwardMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
@@ -199,7 +153,7 @@ namespace server.service.udpforward
             {
                 return Helper.FalseArray;
             }
-            if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
                 return Helper.FalseArray;
             }

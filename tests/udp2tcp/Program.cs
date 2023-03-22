@@ -265,15 +265,12 @@ namespace udp2tcp
                 ulong timeout = 0;
                 while (true)
                 {
-                    bool res = false;
                     if (leftSocket.GetNextClock(ref timeout))
                     {
-                        res = true;
                         leftSocket.NotifyClock();
                     }
                     if (rightSocket.GetNextClock(ref timeout))
                     {
-                        res = true;
                         rightSocket.NotifyClock();
                     }
                     await Task.Delay(15);

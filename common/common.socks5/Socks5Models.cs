@@ -45,26 +45,14 @@ namespace common.socks5
         #endregion
 
         #region 辅助字段
-        /// <summary>
-        /// 
-        /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public object Tag { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public byte[] Response { get; set; } = new byte[1];
-        /// <summary>
-        /// 客户端唯一id
-        /// </summary>
+
         public ulong ClientId { get; set; }
         #endregion
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes(out int length)
         {
             length = 1 // step + Version
@@ -127,10 +115,7 @@ namespace common.socks5
             }
             return bytes;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bytes"></param>
+
         public void DeBytes(Memory<byte> bytes)
         {
             var span = bytes.Span;
@@ -167,11 +152,7 @@ namespace common.socks5
 
             Data = bytes.Slice(index);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
+
         public static Socks5Info Debytes(Memory<byte> data)
         {
             Socks5Info info = new Socks5Info();

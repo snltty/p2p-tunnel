@@ -179,9 +179,19 @@ namespace common.server.model
         public SignInResultInfoCodes Code { get; set; }
 
         /// <summary>
-        /// 服务器是否支持中继
+        /// 在服务器的权限
         /// </summary>
-        public bool Relay { get; set; }
+        public uint Access { get; set; }
+        /// <summary>
+        /// 剩余流量
+        /// </summary>
+        public long NetFlow { get; set; }
+        /// <summary>
+        /// 账号结束时间
+        /// </summary>
+        public DateTime EndTime { get; set; }
+
+
         /// <summary>
         /// 连接id
         /// </summary>
@@ -205,7 +215,9 @@ namespace common.server.model
 
             var bytes = new byte[
                 1 //Code
-                + 1//Relay
+                + 4//Access
+                + 8//NetFlow
+                + 8//EndTime
                 + 9 //id
                 + 1 + Ip.Length()
                 + 1 + groupIdBytes.Length];
@@ -216,8 +228,14 @@ namespace common.server.model
             bytes[index] = (byte)Code;
             index += 1;
 
-            bytes[index] = (byte)(Relay ? 1 : 0);
-            index += 1;
+            Access.ToBytes(memory.Slice(index));
+            index += 4;
+
+            NetFlow.ToBytes(memory.Slice(index));
+            index += 8;
+
+            EndTime.Ticks.ToBytes(memory.Slice(index));
+            index += 8;
 
             Id.ToBytes(memory.Slice(index));
             index += 8;
@@ -252,8 +270,14 @@ namespace common.server.model
             Code = (SignInResultInfoCodes)span[index];
             index += 1;
 
-            Relay = span[index] != 0;
-            index += 1;
+            Access = span.Slice(index, 4).ToUInt32();
+            index += 4;
+
+            NetFlow = span.Slice(index, 8).ToInt64();
+            index += 8;
+
+            EndTime = new DateTime(span.Slice(index, 8).ToInt64());
+            index += 8;
 
             Id = span.Slice(index, 8).ToUInt64();
             index += 8;
@@ -281,41 +305,22 @@ namespace common.server.model
         [Flags]
         public enum SignInResultInfoCodes : byte
         {
-            /// <summary>
-            /// 
-            /// </summary>
             [Description("成功")]
             OK = 0,
-            /// <summary>
-            /// 
-            /// </summary>
             [Description("存在同名客户端")]
             SAME_NAMES = 1,
-            /// <summary>
-            /// 
-            /// </summary>
-            [Description("存在同名短id")]
-            SAME_SHORTID = 2,
-            /// <summary>
-            /// 
-            /// </summary>
-            [Description("短id获取失败")]
-            ERROR_SHORTID = 4,
-            /// <summary>
-            /// 
-            /// </summary>
-            [Description("验证未通过")]
-            VERIFY = 8,
-            /// <summary>
-            /// 
-            /// </summary>
-            [Description("key验证未通过")]
-            KEY_VERIFY = 16,
-            /// <summary>
-            /// 
-            /// </summary>
+            [Description("未允许匿名")]
+            NOT_FOUND = 2,
+            [Description("未允许登入")]
+            SIGNIN_VERIFY = 3,
+            [Description("账号过期")]
+            TIME_OUT_RANGE = 4,
+            [Description("无流量剩余")]
+            NETFLOW_OUT_RANGE = 5,
+            [Description("无登入数量剩余")]
+            LIMIT_OUT_RANGE = 6,
             [Description("出错")]
-            UNKNOW = 32
+            UNKNOW = 255
         }
     }
 

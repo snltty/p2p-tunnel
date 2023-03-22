@@ -18,12 +18,6 @@ namespace server.service.messengers.singnin
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly Config config;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientSignInCaching"></param>
-        /// <param name="serviceAccessValidator"></param>
-        /// <param name="config"></param>
         public SettingMessenger(IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator, Config config)
         {
             this.clientSignInCaching = clientSignInCaching;
@@ -31,11 +25,6 @@ namespace server.service.messengers.singnin
             this.config = config;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)SignInMessengerIds.GetSetting)]
         public async Task GetSetting(IConnection connection)
         {
@@ -43,7 +32,7 @@ namespace server.service.messengers.singnin
             {
                 return;
             }
-            if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
                 return;
             }
@@ -51,11 +40,6 @@ namespace server.service.messengers.singnin
             connection.WriteUTF8(str);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)SignInMessengerIds.Setting)]
         public async Task<byte[]> Setting(IConnection connection)
         {
@@ -63,7 +47,7 @@ namespace server.service.messengers.singnin
             {
                 return Helper.FalseArray;
             }
-            if (serviceAccessValidator.Validate(client.GroupId, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
                 return Helper.FalseArray;
             }
