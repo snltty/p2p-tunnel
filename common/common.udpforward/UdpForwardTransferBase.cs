@@ -47,7 +47,6 @@ namespace common.udpforward
             else
             {
                 request.Connection = request.Connection;
-                request.Connection.ReceiveBytes += request.Buffer.Length;
                 await udpForwardMessengerSender.SendRequest(request);
             }
         }

@@ -11,9 +11,6 @@ using System.Threading.Tasks;
 
 namespace server.service.tcpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [MessengerIdRange((ushort)TcpForwardMessengerIds.Min, (ushort)TcpForwardMessengerIds.Max)]
     public sealed class TcpForwardMessenger : IMessenger
     {
@@ -24,16 +21,6 @@ namespace server.service.tcpforward
         private readonly ITcpForwardValidator tcpForwardValidator;
         private readonly TcpForwardResolver tcpForwardResolver;
         private readonly IServiceAccessValidator serviceAccessValidator;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientSignInCache"></param>
-        /// <param name="config"></param>
-        /// <param name="tcpForwardTargetCaching"></param>
-        /// <param name="tcpForwardServer"></param>
-        /// <param name="tcpForwardValidator"></param>
-        /// <param name="tcpForwardResolver"></param>
-        /// <param name="serviceAccessValidator"></param>
         public TcpForwardMessenger(IClientSignInCaching clientSignInCache, common.tcpforward.Config config,
             ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, ITcpForwardServer tcpForwardServer,
             ITcpForwardValidator tcpForwardValidator, TcpForwardResolver tcpForwardResolver, IServiceAccessValidator serviceAccessValidator)

@@ -9,18 +9,8 @@ namespace common.server.model
     /// </summary>
     public sealed class RelayInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public IConnection Connection { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public Memory<ulong> RelayIds { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var bytes = new byte[RelayIds.Length * MessageRequestWrap.RelayIdSize];
@@ -28,10 +18,6 @@ namespace common.server.model
             return bytes;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;

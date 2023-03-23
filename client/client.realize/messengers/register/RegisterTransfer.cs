@@ -24,7 +24,7 @@ namespace client.realize.messengers.singnin
         private readonly IIPv6AddressRequest iPv6AddressRequest;
         private CancellationTokenSource cancellationToken = null;
         private int lockObject = 0;
-        
+
         public SignInTransfer(
             SignInMessengerSender signinMessengerSender, IClientInfoCaching clientInfoCaching,
             ITcpServer tcpServer, IUdpServer udpServer,
@@ -42,11 +42,11 @@ namespace client.realize.messengers.singnin
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
 
-            tcpServer.OnDisconnect+= (connection) => Disconnect(connection, signInState.Connection);
+            tcpServer.OnDisconnect += (connection) => Disconnect(connection, signInState.Connection);
         }
         private void Disconnect(IConnection connection, IConnection regConnection)
         {
-            if(IConnection.Equals(connection, regConnection) == false || signInState.LocalInfo.IsConnecting)
+            if (IConnection.Equals(connection, regConnection) == false || signInState.LocalInfo.IsConnecting)
             {
                 return;
             }
@@ -94,7 +94,7 @@ namespace client.realize.messengers.singnin
 
             return await Task.Run(async () =>
             {
-                double interval = autoReg ? 5000 : 0;
+                double interval = autoReg ? 1000 : 0;
                 int times = autoReg ? 10000 : 2;
                 for (int i = 0; i < times; i++)
                 {
@@ -124,13 +124,13 @@ namespace client.realize.messengers.singnin
                         TcpBind(serverAddress);
                         //交换密钥
                         await SwapCryptoTcp();
-                        
+
 
                         //注册
                         SignInResult result = await GetSignInResult();
                         config.Client.ShortId = result.Data.ShortId;
                         config.Client.GroupId = result.Data.GroupId;
-                        signInState.RemoteInfo.Relay = result.Data.Relay;
+                        signInState.RemoteInfo.Access = result.Data.Access;
                         signInState.Online(result.Data.Id, result.Data.Ip);
                         await signinMessengerSender.Notify().ConfigureAwait(false);
 
@@ -141,20 +141,20 @@ namespace client.realize.messengers.singnin
                     }
                     catch (TaskCanceledException tex)
                     {
-                        Logger.Instance.Error(tex.Message);
+                        Logger.Instance.Error(tex + "");
                         success.ErrorMsg = tex.Message;
                         isex = true;
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.Error(ex.Message);
+                        Logger.Instance.Error(ex + "");
                         success.ErrorMsg = ex.Message;
                     }
 
                     signInState.LocalInfo.IsConnecting = false;
                     if ((config.Client.AutoReg || autoReg) && isex == false)
                     {
-                        interval *= 0.1;
+                        interval *= 2;
                     }
                     else
                     {
@@ -186,7 +186,7 @@ namespace client.realize.messengers.singnin
             {
                 return;
             }
-            ICrypto crypto = await cryptoSwap.Swap(signInState.Connection,config.Server.EncodePassword);
+            ICrypto crypto = await cryptoSwap.Swap(signInState.Connection, config.Server.EncodePassword);
             if (crypto == null)
             {
                 throw new Exception("注册交换密钥失败，如果客户端设置了密钥，则服务器必须设置相同的密钥，如果服务器未设置密钥，则客户端必须留空");
@@ -204,7 +204,10 @@ namespace client.realize.messengers.singnin
             do
             {
                 result = await signinMessengerSender.SignIn().ConfigureAwait(false);
-
+                if (result.NetState.Code != MessageResponeCodes.OK)
+                {
+                    break;
+                }
                 if (result.Data.Code == SignInResultInfo.SignInResultInfoCodes.SAME_NAMES)
                 {
                     await Task.Delay(1000);

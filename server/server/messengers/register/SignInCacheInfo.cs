@@ -44,7 +44,6 @@ namespace server.messengers.singnin
         /// </summary>
         public int Port { get; set; }
        
-
         /// <summary>
         /// 客户端自己的权限，客户端开放了哪些权限
         /// </summary>

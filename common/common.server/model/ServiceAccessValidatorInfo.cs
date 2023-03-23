@@ -35,27 +35,4 @@ namespace common.server.model
         Setting = 32
     }
 
-    /// <summary>
-    /// 权限相关的消息id
-    /// </summary>
-    [Flags, MessengerIdEnum]
-    public enum ServiceAccessValidatorMessengerIds : ushort
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        Min = 1200,
-        /// <summary>
-        /// 获取配置
-        /// </summary>
-        GetSetting = 1201,
-        /// <summary>
-        /// 配置
-        /// </summary>
-        Setting = 1202,
-        /// <summary>
-        /// 
-        /// </summary>
-        Max = 1299,
-    }
 }

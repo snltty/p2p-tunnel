@@ -546,7 +546,7 @@ namespace client.realize.messengers.clients
 
         private async Task Relay(ClientInfo client, bool notify = false)
         {
-            if (signInState.RemoteInfo.Relay == false)
+            if (((EnumServiceAccess)signInState.RemoteInfo.Access & EnumServiceAccess.Relay) != EnumServiceAccess.Relay)
             {
                 Logger.Instance.Warning($"server relay not available");
                 return;

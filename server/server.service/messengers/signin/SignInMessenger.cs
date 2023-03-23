@@ -37,10 +37,10 @@ namespace server.service.messengers.singnin
             //获取用户
             userStore.Get(model.Account, model.Password, out UserInfo user);
             //验证登入权限
-            SignInResultInfo.SignInResultInfoCodes code = signInValidator.Validate(ref user);
+            (SignInResultInfo.SignInResultInfoCodes code,string msg) = signInValidator.Validate(ref user);
             if (code != SignInResultInfo.SignInResultInfoCodes.OK)
             {
-                return new SignInResultInfo { Code = code }.ToBytes();
+                return new SignInResultInfo { Code = code, Msg = msg }.ToBytes();
             }
 
             (SignInResultInfo verify, SignInCacheInfo client) = VerifyAndAdd(model, user, connection);

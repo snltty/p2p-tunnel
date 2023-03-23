@@ -25,6 +25,7 @@ namespace common.server
         /// </summary>
         public bool Connected { get; }
 
+        #region 中继
         /// <summary>
         /// 是否是中继
         /// </summary>
@@ -37,7 +38,9 @@ namespace common.server
         /// 来源客户端，中继时，数据来源可能不是给你发数据的那个
         /// </summary>
         public IConnection FromConnection { get; set; }
+        #endregion
 
+        #region 加密
         /// <summary>
         /// 加密
         /// </summary>
@@ -55,6 +58,7 @@ namespace common.server
         /// 移除加密
         /// </summary>
         public void EncodeDisable();
+        #endregion
 
         /// <summary>
         /// 错误
@@ -68,7 +72,12 @@ namespace common.server
         /// 连接类型
         /// </summary>
         public ServerType ServerType { get; }
+        /// <summary>
+        /// rtt
+        /// </summary>
+        public int RoundTripTime { get; set; }
 
+        #region 接收数据
         /// <summary>
         /// 请求数据包装对象
         /// </summary>
@@ -81,22 +90,7 @@ namespace common.server
         /// 接收到的原始数据
         /// </summary>
         public Memory<byte> ReceiveData { get; set; }
-
-        public byte[] ResponseData { get; set; }
-        public int ResponseDataLength { get; set; }
-
-        /// <summary>
-        /// 已发送字节
-        /// </summary>
-        public long SendBytes { get; set; }
-        /// <summary>
-        /// 已接收字节
-        /// </summary>
-        public long ReceiveBytes { get; set; }
-        /// <summary>
-        /// rtt
-        /// </summary>
-        public int RoundTripTime { get; set; }
+        #endregion
 
         /// <summary>
         /// 发送
@@ -116,38 +110,194 @@ namespace common.server
         /// 销毁
         /// </summary>
         public void Disponse();
-
         /// <summary>
         /// 克隆，主要用于中继
         /// </summary>
         /// <returns></returns>
         public IConnection Clone();
 
+
+
         #region 回复消息相关
+
+        public byte[] ResponseData { get; }
+        public int ResponseDataLength { get;}
+        public void Write(ulong num);
+        public void Write(ushort num);
+        public void Write(ushort[] nums);
         /// <summary>
-        /// 
+        /// 英文多用这个
         /// </summary>
-        /// <param name="num"></param>
+        /// <param name="str"></param>
+        public void WriteUTF8(string str);
+        /// <summary>
+        /// 中文多用这个
+        /// </summary>
+        /// <param name="str"></param>
+        public void WriteUTF16(string str);
+        /// <summary>
+        /// 归还池
+        /// </summary>
+        public void Return();
+        #endregion
+
+
+        public Task WaitOne();
+        public void Release();
+
+        /// <summary>
+        /// 发送了多少数据
+        /// </summary>
+        public Action<long> DataSendt { get; set; }
+        /// <summary>
+        /// 流量限制回调，false被限制，true同行
+        /// </summary>
+        public Func<bool> NetFlow { get; set; }
+
+        /// <summary>
+        /// 引用相等
+        /// </summary>
+        /// <param name="connection1"></param>
+        /// <param name="connection2"></param>
+        /// <returns></returns>
+        public static bool Equals(IConnection connection1, IConnection connection2)
+        {
+            if (connection1 == null || connection2 == null)
+            {
+                return false;
+            }
+            return ReferenceEquals(connection1, connection2);
+        }
+        /// <summary>
+        /// 引用相等或者地址相等
+        /// </summary>
+        /// <param name="connection1"></param>
+        /// <param name="connection2"></param>
+        /// <returns></returns>
+        public static bool Equals2(IConnection connection1, IConnection connection2)
+        {
+            if (connection1 == null || connection2 == null)
+            {
+                return false;
+            }
+            return ReferenceEquals(connection1, connection2) || connection1.Address.Equals(connection2.Address);
+        }
+    }
+
+    public abstract class Connection : IConnection
+    {
+        public Connection()
+        {
+        }
+
+        private ulong connectId = 0;
+        /// <summary>
+        /// 连接id
+        /// </summary>
+        public ulong ConnectId
+        {
+            get
+            {
+                return connectId;
+            }
+            set
+            {
+                connectId = value;
+            }
+        }
+        /// <summary>
+        /// 已连接
+        /// </summary>
+        public virtual bool Connected => false;
+        /// <summary>
+        /// 错误
+        /// </summary>
+        public SocketError SocketError { get; set; } = SocketError.Success;
+        /// <summary>
+        /// 地址
+        /// </summary>
+        public IPEndPoint Address { get; protected set; }
+        /// <summary>
+        /// 连接类型
+        /// </summary>
+        public virtual ServerType ServerType => ServerType.UDP;
+        /// <summary>
+        /// rtt
+        /// </summary>
+        public virtual int RoundTripTime { get; set; }
+
+
+        #region 中继
+        /// <summary>
+        /// 已中继
+        /// </summary>
+        public bool Relay { get; set; } = false;
+        /// <summary>
+        /// 中继路线
+        /// </summary>
+        public Memory<ulong> RelayId { get; set; }
+        /// <summary>
+        /// 来源连接
+        /// </summary>
+        public IConnection FromConnection { get; set; }
+        #endregion
+
+        #region 加密
+        /// <summary>
+        /// 启用加密
+        /// </summary>
+        public bool EncodeEnabled => Crypto != null;
+        /// <summary>
+        /// 加密类
+        /// </summary>
+        public ICrypto Crypto { get; private set; }
+        /// <summary>
+        /// 启用加密
+        /// </summary>
+        /// <param name="crypto"></param>
+        public void EncodeEnable(ICrypto crypto)
+        {
+            Crypto = crypto;
+        }
+        /// <summary>
+        /// 移除加密
+        /// </summary>
+        public void EncodeDisable()
+        {
+            Crypto = null;
+        }
+        #endregion
+
+        #region 接收数据
+        /// <summary>
+        /// 接收请求数据
+        /// </summary>
+        public MessageRequestWrap ReceiveRequestWrap { get; set; }
+        /// <summary>
+        /// 接收回执数据
+        /// </summary>
+        public MessageResponseWrap ReceiveResponseWrap { get; set; }
+        /// <summary>
+        /// 接收数据
+        /// </summary>
+        public Memory<byte> ReceiveData { get; set; }
+        #endregion
+
+        #region 回复数据
+        public byte[] ResponseData { get; private set; }
+        public int ResponseDataLength { get; private set; }
         public void Write(ulong num)
         {
             ResponseDataLength = 8;
             ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
             num.ToBytes(ResponseData);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="num"></param>
         public void Write(ushort num)
         {
             ResponseDataLength = 2;
             ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
             num.ToBytes(ResponseData);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="nums"></param>
         public void Write(ushort[] nums)
         {
             ResponseDataLength = nums.Length * 2;
@@ -197,151 +347,6 @@ namespace common.server
         #endregion
 
 
-
-        public Task WaitOne();
-        public void Release();
-
-
-        public static bool Equals(IConnection connection1, IConnection connection2)
-        {
-            if (connection1 == null || connection2 == null)
-            {
-                return false;
-            }
-            return ReferenceEquals(connection1, connection2);
-        }
-        public static bool Equals2(IConnection connection1, IConnection connection2)
-        {
-            if (connection1 == null || connection2 == null)
-            {
-                return false;
-            }
-            return ReferenceEquals(connection1, connection2) || connection1.Address.Equals(connection2.Address);
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public abstract class Connection : IConnection
-    {
-        public Connection()
-        {
-        }
-
-        private ulong connectId = 0;
-        /// <summary>
-        /// 连接id
-        /// </summary>
-        public ulong ConnectId
-        {
-            get
-            {
-                return connectId;
-            }
-            set
-            {
-                connectId = value;
-            }
-        }
-        /// <summary>
-        /// 已连接
-        /// </summary>
-        public virtual bool Connected => false;
-
-        /// <summary>
-        /// 已中继
-        /// </summary>
-        public bool Relay { get; set; } = false;
-        /// <summary>
-        /// 中继路线
-        /// </summary>
-        public Memory<ulong> RelayId { get; set; }
-        /// <summary>
-        /// 来源连接
-        /// </summary>
-        public IConnection FromConnection { get; set; }
-
-        /// <summary>
-        /// 启用加密
-        /// </summary>
-        public bool EncodeEnabled => Crypto != null;
-        /// <summary>
-        /// 加密类
-        /// </summary>
-        public ICrypto Crypto { get; private set; }
-        /// <summary>
-        /// 启用加密
-        /// </summary>
-        /// <param name="crypto"></param>
-        public void EncodeEnable(ICrypto crypto)
-        {
-            Crypto = crypto;
-        }
-        /// <summary>
-        /// 移除加密
-        /// </summary>
-        public void EncodeDisable()
-        {
-            Crypto = null;
-        }
-
-        /// <summary>
-        /// 错误
-        /// </summary>
-        public SocketError SocketError { get; set; } = SocketError.Success;
-
-        /// <summary>
-        /// 地址
-        /// </summary>
-        public IPEndPoint Address { get; protected set; }
-        /// <summary>
-        /// 连接类型
-        /// </summary>
-        public virtual ServerType ServerType => ServerType.UDP;
-
-        /// <summary>
-        /// 接收请求数据
-        /// </summary>
-        public MessageRequestWrap ReceiveRequestWrap { get; set; }
-        /// <summary>
-        /// 接收回执数据
-        /// </summary>
-        public MessageResponseWrap ReceiveResponseWrap { get; set; }
-
-
-        private Memory<byte> receiveData;
-        /// <summary>
-        /// 接收数据
-        /// </summary>
-        public Memory<byte> ReceiveData
-        {
-            get
-            {
-                return receiveData;
-            }
-            set
-            {
-                receiveData = value;
-                ReceiveBytes += receiveData.Length;
-            }
-        }
-        public byte[] ResponseData { get; set; }
-        public int ResponseDataLength { get; set; }
-
-        /// <summary>
-        /// 已发送字节
-        /// </summary>
-        public long SendBytes { get; set; }
-        /// <summary>
-        /// 已接收字节
-        /// </summary>
-        public long ReceiveBytes { get; set; }
-        /// <summary>
-        /// rtt
-        /// </summary>
-        public virtual int RoundTripTime { get; set; }
-
         /// <summary>
         /// 发送
         /// </summary>
@@ -381,12 +386,12 @@ namespace common.server
             //ReceiveRequestWrap = null;
             //ReceiveResponseWrap = null;
         }
-
         /// <summary>
         /// 克隆
         /// </summary>
         /// <returns></returns>
         public abstract IConnection Clone();
+
 
         SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         bool locked = false;
@@ -421,18 +426,14 @@ namespace common.server
                 Logger.Instance.Error(ex);
             }
         }
+
+
+        public Action<long> DataSendt { get; set; } = (length) => { };
+        public Func<bool> NetFlow { get; set; } = () => true;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class RudpConnection : Connection
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="peer"></param>
-        /// <param name="address"></param>
         public RudpConnection(NetPeer peer, IPEndPoint address) : base()
         {
             NetPeer = peer;
@@ -462,6 +463,8 @@ namespace common.server
         /// </summary>
         public override int RoundTripTime { get; set; }
 
+
+        public static TokenBucketRatelimit tokenBucketRatelimit = new TokenBucketRatelimit(50 * 1024);
         /// <summary>
         /// 发送
         /// </summary>
@@ -472,9 +475,6 @@ namespace common.server
         {
             return await Send(data.AsMemory(0, length), logger);
         }
-
-
-        public static TokenBucketRatelimit tokenBucketRatelimit = new TokenBucketRatelimit(50 * 1024);
         /// <summary>
         /// 发送
         /// </summary>
@@ -482,7 +482,7 @@ namespace common.server
         /// <returns></returns>
         public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
         {
-            if (Connected)
+            if (Connected && NetFlow() == false)
             {
                 try
                 {
@@ -510,7 +510,7 @@ namespace common.server
 
                     NetPeer.Send(data, 0, data.Length, DeliveryMethod.ReliableOrdered);
                     NetPeer.Update();
-                    SendBytes += data.Length;
+                    DataSendt(data.Length);
 
                     return true;
                 }
@@ -556,15 +556,8 @@ namespace common.server
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class TcpConnection : Connection
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tcpSocket"></param>
         public TcpConnection(Socket tcpSocket) : base()
         {
             TcpSocket = tcpSocket;
@@ -602,12 +595,12 @@ namespace common.server
         /// <returns></returns>
         public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
         {
-            if (Connected)
+            if (Connected && NetFlow() == false)
             {
                 try
                 {
                     await TcpSocket.SendAsync(data, SocketFlags.None);
-                    SendBytes += data.Length;
+                    DataSendt(data.Length);
                     return true;
                 }
                 catch (Exception ex)
@@ -656,7 +649,6 @@ namespace common.server
             return clone;
         }
     }
-
 
 
     public class TokenBucketRatelimit

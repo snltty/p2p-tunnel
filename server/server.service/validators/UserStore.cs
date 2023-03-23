@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.server.model;
 using server.messengers;
 using System;
 using System.Collections.Concurrent;
@@ -28,8 +29,15 @@ namespace server.service.validators
                     storeModel = result.Result;
                 }
             });
+            AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) =>
+            {
+                configDataProvider.Save(storeModel);
+            };
         }
-
+        public int Count()
+        {
+            return storeModel.Users.Count;
+        }
 
         public IEnumerable<UserInfo> Get()
         {
@@ -92,8 +100,10 @@ namespace server.service.validators
         }
         public bool Remove(ulong id)
         {
-            return users.TryRemove(id, out UserInfo user);
+            return storeModel.Users.TryRemove(id, out UserInfo user);
         }
+
+       
     }
 
     [Table("users")]

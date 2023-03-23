@@ -37,7 +37,7 @@ export const accessServiceOr = (names, state = null) => {
     if (!state) {
         state = inject(provideServicesKey);
     }
-    if (!names || names.length == 0) return true;
+    if (!names || names.length == 0 || state.services.length == 0) return true;
 
     for (let i = 0; i < names.length; i++) {
         if (state.services.indexOf(names[i]) >= 0) {

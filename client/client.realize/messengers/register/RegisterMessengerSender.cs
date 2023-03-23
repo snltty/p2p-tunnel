@@ -1,6 +1,7 @@
 ﻿using client.messengers.singnin;
 using common.server;
 using common.server.model;
+using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -50,6 +51,7 @@ namespace client.realize.messengers.singnin
 
             SignInResultInfo tcpres = new SignInResultInfo();
             tcpres.DeBytes(tcpResult.Data);
+
             config.Client.ShortId = tcpres.ShortId;
 
             return new SignInResult { NetState = tcpResult, Data = tcpres };

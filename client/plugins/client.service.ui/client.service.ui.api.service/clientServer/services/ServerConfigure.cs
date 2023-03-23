@@ -16,11 +16,6 @@ namespace client.service.udpforward
     {
         private readonly MessengerSender messengerSender;
         private readonly SignInStateInfo signInStateInfo;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
-        /// <param name="signInStateInfo"></param>
         public ServerConfigure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
         {
             this.messengerSender = messengerSender;
@@ -78,5 +73,9 @@ namespace client.service.udpforward
             }
             return "配置失败";
         }
+    }
+    public sealed class ServerClientService : IClientService
+    {
+
     }
 }

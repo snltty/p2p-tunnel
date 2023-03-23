@@ -16,22 +16,12 @@ namespace client.service.ui.api.service.clientServer.services
         private readonly MessengerSender messengerSender;
         private readonly SignInStateInfo signInState;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
-        /// <param name="signInState"></param>
         public CounterClientService(MessengerSender messengerSender, SignInStateInfo signInState)
         {
             this.messengerSender = messengerSender;
             this.signInState = signInState;
         }
 
-        /// <summary>
-        /// 获取服务端信息
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
         public async Task<CounterResultInfo> Info(ClientServiceParamsInfo arg)
         {
             if (signInState.Connection != null)

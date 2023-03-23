@@ -17,22 +17,22 @@
                 <el-icon>
                     <Link />
                 </el-icon>
-                <span>节点</span>
+                <span>应用</span>
             </router-link>
-            <auth-item-or :names="['ServerTcpForwardClientService','ServerUdpForwardClientService']">
-                <router-link :to="{name:'Servers'}">
-                    <el-icon>
-                        <Position />
-                    </el-icon>
-                    <span>代理穿透</span>
-                </router-link>
-            </auth-item-or>
             <router-link :to="{name:'Settings'}">
                 <el-icon>
                     <Setting />
                 </el-icon>
-                <span>设置</span>
+                <span>配置</span>
             </router-link>
+            <auth-item-or :names="names">
+                <router-link :to="{name:'Servers'}">
+                    <el-icon>
+                        <Position />
+                    </el-icon>
+                    <span>服务器</span>
+                </router-link>
+            </auth-item-or>
         </div>
         <div class="flex-1"></div>
         <div class="meta"></div>
@@ -40,11 +40,30 @@
 </template>
 <script>
 import AuthItem from './auth/AuthItem.vue';
+import { useRouter } from 'vue-router'
+import { injectSignIn } from '../states/signin'
+import { accessService, injectServices } from '../states/services'
+import { computed } from 'vue';
 export default {
     components: { AuthItem },
     setup() {
 
-        return {}
+        const router = useRouter();
+        const servicesState = injectServices();
+        const signinState = injectSignIn();
+        const serviceAccess = computed(() => signinState.RemoteInfo.Access);
+
+        const names = computed(() => {
+            let menus = router.options.routes
+                .filter(c => c.name == 'Servers')[0].children
+                .filter(c => accessService(c.meta.service, servicesState) && (c.meta.access & serviceAccess.value) == c.meta.access)
+                .map(c => c.meta.service);
+            return menus;
+        });
+
+        return {
+            names
+        }
     }
 }
 </script>

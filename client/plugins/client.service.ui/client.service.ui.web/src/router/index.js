@@ -54,12 +54,6 @@ const routes = [
                 component: () => import('../views/nodes/vea/Index.vue'),
                 meta: { name: '虚拟网卡组网', service: 'VeaClientService' }
             },
-            // {
-            //     path: '/nodes/wakeup.html',
-            //     name: 'NodesWakeUp',
-            //     component: () => import('../views/nodes/wakeup/Index.vue'),
-            //     meta: { name: '远程唤醒', service: 'WakeUpClientService' }
-            // },
             {
                 path: '/nodes/logger.html',
                 name: 'NodesLogger',
@@ -81,16 +75,22 @@ const routes = [
         redirect: { name: 'ServerTcpForward' },
         children: [
             {
+                path: '/server-settings.html',
+                name: 'ServerSettings',
+                component: () => import('../views/server/settings/Index.vue'),
+                meta: { name: '配置', service: 'ServerClientService', access: 32 }
+            },
+            {
                 path: '/server-tcp-forward.html',
                 name: 'ServerTcpForward',
                 component: () => import('../views/server/tcpforward/Index.vue'),
-                meta: { name: 'tcp转发', service: 'ServerTcpForwardClientService' }
+                meta: { name: 'tcp转发', service: 'ServerTcpForwardClientService', access: 4 }
             },
             {
                 path: '/server-udp-forward.html',
                 name: 'ServerUdpForward',
                 component: () => import('../views/server/udpforward/Index.vue'),
-                meta: { name: 'udp转发', service: 'ServerUdpForwardClientService' }
+                meta: { name: 'udp转发', service: 'ServerUdpForwardClientService', access: 8 }
             },
         ]
     }

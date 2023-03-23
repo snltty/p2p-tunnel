@@ -24,11 +24,6 @@ namespace client.service.ui.api.service.clientServer
         private readonly ServiceProvider serviceProvider;
         private WebSocketServer server;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="serviceProvider"></param>
         public ClientServer(Config config, ServiceProvider serviceProvider)
         {
             this.config = config;

@@ -10,20 +10,21 @@ namespace server.service.validators
         private readonly Config config;
         private readonly IServiceAccessValidator serviceAccessProvider;
         private readonly IUserStore userStore;
-        private readonly IClientSignInCaching clientSignInCaching;
+        private readonly SignInMiddlewareHandler signInMiddlewareHandler;
 
-        public SignInValidator(Config config, IServiceAccessValidator serviceAccessProvider, IUserStore userStore, IClientSignInCaching clientSignInCaching)
+        public SignInValidator(Config config, IServiceAccessValidator serviceAccessProvider, IUserStore userStore, SignInMiddlewareHandler signInMiddlewareHandler)
         {
             this.config = config;
             this.serviceAccessProvider = serviceAccessProvider;
             this.userStore = userStore;
-            this.clientSignInCaching = clientSignInCaching;
+            this.signInMiddlewareHandler = signInMiddlewareHandler;
         }
-        public SignInResultInfo.SignInResultInfoCodes Validate(ref UserInfo user)
+        public (SignInResultInfo.SignInResultInfoCodes, string) Validate(ref UserInfo user)
         {
+            //未开启登入
             if (config.RegisterEnable == false)
             {
-                return SignInResultInfo.SignInResultInfoCodes.SIGNIN_VERIFY;
+                return (SignInResultInfo.SignInResultInfoCodes.SIGNIN_VERIFY, string.Empty);
             }
 
             //验证账号
@@ -31,30 +32,19 @@ namespace server.service.validators
             {
                 if (user == null)
                 {
-                    return SignInResultInfo.SignInResultInfoCodes.NOT_FOUND;
+                    return (SignInResultInfo.SignInResultInfoCodes.NOT_FOUND, string.Empty);
                 }
                 //该账号不允许登入
                 if (serviceAccessProvider.Validate(user.Access, EnumServiceAccess.SignIn) == false)
                 {
-                    return SignInResultInfo.SignInResultInfoCodes.SIGNIN_VERIFY;
+                    return (SignInResultInfo.SignInResultInfoCodes.SIGNIN_VERIFY, string.Empty);
                 }
-                //账号到期
-                if (user.EndTime <= DateTime.Now)
+
+                //其它自定义验证
+                string msg = signInMiddlewareHandler.Execute(user);
+                if (string.IsNullOrWhiteSpace(msg) == false)
                 {
-                    return SignInResultInfo.SignInResultInfoCodes.TIME_OUT_RANGE;
-                }
-                //流量为0
-                if (user.NetFlow == 0)
-                {
-                    return SignInResultInfo.SignInResultInfoCodes.NETFLOW_OUT_RANGE;
-                }
-                //登入数量限制
-                if (user.SignLimit > 0)
-                {
-                    if (clientSignInCaching.UserCount(user.ID) >= user.SignLimit)
-                    {
-                        return SignInResultInfo.SignInResultInfoCodes.LIMIT_OUT_RANGE;
-                    }
+                    return (SignInResultInfo.SignInResultInfoCodes.UNKNOW, msg);
                 }
             }
             else
@@ -63,8 +53,50 @@ namespace server.service.validators
                 user = userStore.DefaultUser;
             }
 
-            return SignInResultInfo.SignInResultInfoCodes.OK;
+            return (SignInResultInfo.SignInResultInfoCodes.OK, string.Empty);
         }
     }
 
+    public sealed class SignInEndTimeMiddleware : SignInMiddleware
+    {
+        public override string Validate(UserInfo user)
+        {
+            if (user.EndTime <= DateTime.Now)
+            {
+                return "账号过期";
+            }
+            return string.Empty;
+        }
+    }
+    public sealed class SignInNetFlowMiddleware : SignInMiddleware
+    {
+        public override string Validate(UserInfo user)
+        {
+            if (user.NetFlow == 0)
+            {
+                return "无流量剩余";
+            }
+            return string.Empty;
+        }
+    }
+    public sealed class SignInSignLimitMiddleware : SignInMiddleware
+    {
+        private readonly IClientSignInCaching clientSignInCaching;
+        public SignInSignLimitMiddleware(IClientSignInCaching clientSignInCaching)
+        {
+            this.clientSignInCaching = clientSignInCaching;
+        }
+
+        public override string Validate(UserInfo user)
+        {
+            if (user.SignLimit > 0)
+            {
+                if (clientSignInCaching.UserCount(user.ID) >= user.SignLimit)
+                {
+                    return "无登入数量剩余";
+                }
+            }
+            return string.Empty;
+        }
+    }
 }

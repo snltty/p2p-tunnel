@@ -38,7 +38,8 @@ export const provideSignIn = () => {
         RemoteInfo: {
             Ip: '',
             ConnectId: 0,
-            Relay: false
+            Access: 0,
+            Relay: false,
         }
     });
     provide(provideSignInKey, state);
@@ -64,7 +65,8 @@ export const provideSignIn = () => {
 
                 state.RemoteInfo.Ip = json.RemoteInfo.Ip;
                 state.RemoteInfo.ConnectId = json.RemoteInfo.ConnectId;
-                state.RemoteInfo.Relay = json.RemoteInfo.Relay;
+                state.RemoteInfo.Access = json.RemoteInfo.Access;
+                state.RemoteInfo.Relay = (json.RemoteInfo.Access & 2) == 2;
 
                 state.LocalInfo.IsConnecting = json.LocalInfo.IsConnecting;
                 if (state.ClientConfig.ShortId == 0) {
@@ -86,6 +88,10 @@ export const provideSignIn = () => {
         } else {
             state.LocalInfo.Connected = false;
             state.LocalInfo.IsConnecting = false;
+
+            state.RemoteInfo.Access = 0xffffffff;
+            state.RemoteInfo.Relay = (state.RemoteInfo.Access & 2) == 2;
+
             setTimeout(fn, 1000);
         }
     }

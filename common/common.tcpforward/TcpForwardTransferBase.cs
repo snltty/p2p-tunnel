@@ -48,7 +48,6 @@ namespace common.tcpforward
                 await tcpForwardServer.Response(request);
                 return true;
             }
-            request.Connection.ReceiveBytes += request.Buffer.Length;
             return await tcpForwardMessengerSender.SendRequest(request);
         }
 

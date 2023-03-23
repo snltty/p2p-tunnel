@@ -111,6 +111,7 @@ namespace server
             config.RegisterEnable = RegisterEnable;
             config.RelayEnable = RelayEnable;
             config.EncodePassword = EncodePassword;
+            config.VerifyAccount = VerifyAccount;
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }

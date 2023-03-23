@@ -96,9 +96,11 @@ export default {
 
     ul {
         padding: 1rem 1rem;
+        overflow: hidden;
 
         li {
             margin-bottom: 1rem;
+            white-space: nowrap;
 
             a {
                 padding: 0.6rem 1rem;

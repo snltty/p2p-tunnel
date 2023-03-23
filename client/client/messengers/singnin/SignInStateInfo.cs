@@ -111,12 +111,12 @@ namespace client.messengers.singnin
         /// <summary>
         /// 客户端连接ID
         /// </summary>
-        public ulong ConnectId { get; set; } = 0;
+        public ulong ConnectId { get; set; }
 
         /// <summary>
-        /// 服务器中继是否开启
+        /// 服务器权限
         /// </summary>
-        public bool Relay { get; set; } = false;
+        public uint Access { get; set; }
     }
 
     /// <summary>

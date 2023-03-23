@@ -32,10 +32,12 @@ namespace server.service
             services.AddSingleton<IRelaySourceConnectionSelector, messengers.RelaySourceConnectionSelector>();
 
             services.AddSingleton<ISignInValidator, SignInValidator>();
+            services.AddSingleton<SignInMiddlewareHandler>();
+            services.AddSingleton<SignInEndTimeMiddleware>();
+            services.AddSingleton<SignInNetFlowMiddleware>();
+            services.AddSingleton<SignInSignLimitMiddleware>();
             services.AddSingleton<IServiceAccessValidator, ServiceAccessValidator>();
             services.AddSingleton<IRelayValidator, RelayValidator>();
-
-
             services.AddSingleton<IUserStore, UserStore>();
 
 
@@ -62,7 +64,6 @@ namespace server.service
 
             var udpServer = services.GetService<IUdpServer>();
             udpServer.Start(config.Udp, timeout: config.TimeoutDelay);
-
             Logger.Instance.Info("UDP服务已开启");
 
             MessengerResolver messenger = services.GetService<MessengerResolver>();
@@ -70,6 +71,15 @@ namespace server.service
             {
                 messenger.LoadMessenger(item, services.GetService(item));
             }
+
+            //启用一些账号验证，想修改的话，可以参照 server.service.validators.SignInValidator 里的任一实现了 SignInMiddleware的类
+            //比如我想把账号的过期时间单独处理，而不是吧数据保存在用户信息里，或者想加入一些别的验证
+            SignInMiddlewareHandler signInMiddlewareHandler = services.GetService<SignInMiddlewareHandler>();
+            signInMiddlewareHandler
+                .Use(services.GetService<SignInEndTimeMiddleware>())
+                .Use(services.GetService<SignInNetFlowMiddleware>())
+                .Use(services.GetService<SignInSignLimitMiddleware>());
+
             Loop(services);
             Udp((UdpServer)udpServer, messenger);
         }

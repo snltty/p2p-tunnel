@@ -48,10 +48,6 @@ namespace common.server.model
         /// </summary>
         public uint ClientAccess { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             int length = 1;
@@ -132,10 +128,6 @@ namespace common.server.model
             return bytes;
 
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -161,6 +153,12 @@ namespace common.server.model
             Name = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
             index += 2 + span[index];
 
+            Account = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 2 + span[index];
+
+            Password = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 2 + span[index];
+
             LocalTcpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
 
@@ -176,7 +174,14 @@ namespace common.server.model
     {
         public SignInResultInfo() { }
 
+        /// <summary>
+        /// 状态
+        /// </summary>
         public SignInResultInfoCodes Code { get; set; }
+        /// <summary>
+        /// 状态说明
+        /// </summary>
+        public string Msg { get; set; } = string.Empty;
 
         /// <summary>
         /// 在服务器的权限
@@ -212,6 +217,7 @@ namespace common.server.model
         public byte[] ToBytes()
         {
             var groupIdBytes = GroupId.GetUTF16Bytes();
+            var msgBytes = Msg.GetUTF16Bytes();
 
             var bytes = new byte[
                 1 //Code
@@ -220,7 +226,9 @@ namespace common.server.model
                 + 8//EndTime
                 + 9 //id
                 + 1 + Ip.Length()
-                + 1 + groupIdBytes.Length];
+                + 2 + groupIdBytes.Length
+                + 2 + msgBytes.Length
+                ];
 
             var memory = bytes.AsMemory();
 
@@ -256,8 +264,18 @@ namespace common.server.model
 
             bytes[index] = (byte)GroupId.Length;
             index += 1;
+            bytes[index] = (byte)groupIdBytes.Length;
+            index += 1;
             groupIdBytes.CopyTo(memory.Span.Slice(index));
             index += groupIdBytes.Length;
+
+
+            bytes[index] = (byte)Msg.Length;
+            index += 1;
+            bytes[index] = (byte)msgBytes.Length;
+            index += 1;
+            msgBytes.CopyTo(memory.Span.Slice(index));
+            index += msgBytes.Length;
 
             return bytes;
         }
@@ -296,7 +314,10 @@ namespace common.server.model
             index += 1 + span[index];
 
 
-            GroupId = span.Slice(index + 1).GetUTF16String(span[index]);
+            GroupId = span.Slice(index + 1, span[index + 1]).GetUTF16String(span[index]);
+            index += 1 + span[index];
+
+            Msg = span.Slice(index + 1, span[index + 1]).GetUTF16String(span[index]);
         }
 
         /// <summary>
