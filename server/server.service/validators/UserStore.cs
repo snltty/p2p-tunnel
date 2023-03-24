@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.libs.extends;
 using common.server.model;
 using server.messengers;
 using System;
@@ -12,7 +13,7 @@ namespace server.service.validators
     internal class UserStore : IUserStore
     {
         private readonly IConfigDataProvider<UserStoreModel> configDataProvider;
-        UserStoreModel storeModel = new UserStoreModel { Users = new ConcurrentDictionary<ulong, UserInfo>() };
+        UserStoreModel storeModel = new UserStoreModel { Users = new Dictionary<ulong, UserInfo>() };
         public UserInfo DefaultUser { get; } = new UserInfo
         {
             ID = 0,
@@ -21,13 +22,13 @@ namespace server.service.validators
         public UserStore(IConfigDataProvider<UserStoreModel> configDataProvider)
         {
             this.configDataProvider = configDataProvider;
-
             configDataProvider.Load().ContinueWith((result) =>
             {
                 if (result.Result != null)
                 {
                     storeModel = result.Result;
                 }
+                Console.WriteLine(storeModel.ToJson());
             });
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) =>
             {
@@ -100,7 +101,7 @@ namespace server.service.validators
         }
         public bool Remove(ulong id)
         {
-            return storeModel.Users.TryRemove(id, out UserInfo user);
+            return storeModel.Users.Remove(id, out UserInfo user);
         }
 
        
@@ -109,6 +110,6 @@ namespace server.service.validators
     [Table("users")]
     public class UserStoreModel
     {
-        public ConcurrentDictionary<ulong, UserInfo> Users { get; set; }
+        public Dictionary<ulong, UserInfo> Users { get; set; }
     }
 }

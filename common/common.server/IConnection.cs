@@ -150,7 +150,7 @@ namespace common.server
         /// </summary>
         public Action<long> DataSendt { get; set; }
         /// <summary>
-        /// 流量限制回调，false被限制，true同行
+        /// 流量限制回调，false被限制，true通行
         /// </summary>
         public Func<bool> NetFlow { get; set; }
 
@@ -482,7 +482,7 @@ namespace common.server
         /// <returns></returns>
         public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
         {
-            if (Connected && NetFlow() == false)
+            if (Connected && NetFlow() == true)
             {
                 try
                 {
@@ -595,7 +595,7 @@ namespace common.server
         /// <returns></returns>
         public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
         {
-            if (Connected && NetFlow() == false)
+            if (Connected && NetFlow() == true)
             {
                 try
                 {

@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { shareData } from '../states/shareData'
 const routes = [
     {
         path: '/',
@@ -78,19 +79,19 @@ const routes = [
                 path: '/server-settings.html',
                 name: 'ServerSettings',
                 component: () => import('../views/server/settings/Index.vue'),
-                meta: { name: '配置', service: 'ServerClientService', access: 32 }
+                meta: { name: '配置', service: 'ServerClientService', access: shareData.serverAccess.setting.value }
             },
             {
                 path: '/server-tcp-forward.html',
                 name: 'ServerTcpForward',
                 component: () => import('../views/server/tcpforward/Index.vue'),
-                meta: { name: 'tcp转发', service: 'ServerTcpForwardClientService', access: 4 }
+                meta: { name: 'tcp转发', service: 'ServerTcpForwardClientService', access: shareData.serverAccess.tcpforward.value }
             },
             {
                 path: '/server-udp-forward.html',
                 name: 'ServerUdpForward',
                 component: () => import('../views/server/udpforward/Index.vue'),
-                meta: { name: 'udp转发', service: 'ServerUdpForwardClientService', access: 8 }
+                meta: { name: 'udp转发', service: 'ServerUdpForwardClientService', access: shareData.serverAccess.udpforward.value }
             },
         ]
     }

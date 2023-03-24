@@ -43,6 +43,7 @@ import AuthItem from './auth/AuthItem.vue';
 import { useRouter } from 'vue-router'
 import { injectSignIn } from '../states/signin'
 import { accessService, injectServices } from '../states/services'
+import { shareData } from '../states/shareData'
 import { computed } from 'vue';
 export default {
     components: { AuthItem },
@@ -56,7 +57,7 @@ export default {
         const names = computed(() => {
             let menus = router.options.routes
                 .filter(c => c.name == 'Servers')[0].children
-                .filter(c => accessService(c.meta.service, servicesState) && (c.meta.access & serviceAccess.value) == c.meta.access)
+                .filter(c => accessService(c.meta.service, servicesState) && shareData.serverAccessHas(serviceAccess.value, c.meta.access))
                 .map(c => c.meta.service);
             return menus;
         });

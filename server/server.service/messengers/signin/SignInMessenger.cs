@@ -1,5 +1,4 @@
-﻿using common.libs;
-using common.server;
+﻿using common.server;
 using common.server.model;
 using server.messengers;
 using server.messengers.singnin;
@@ -16,16 +15,16 @@ namespace server.service.messengers.singnin
     public sealed class SignInMessenger : IMessenger
     {
         private readonly IClientSignInCaching clientSignInCache;
-        private readonly ISignInValidator signInValidator;
         private readonly MessengerSender messengerSender;
         private readonly IUserStore userStore;
+        private readonly ISignInMiddlewareHandler signInMiddlewareHandler;
 
-        public SignInMessenger(IClientSignInCaching clientSignInCache, ISignInValidator signInValidator, MessengerSender messengerSender, IUserStore userStore)
+        public SignInMessenger(IClientSignInCaching clientSignInCache, MessengerSender messengerSender, IUserStore userStore, ISignInMiddlewareHandler signInMiddlewareHandler)
         {
             this.clientSignInCache = clientSignInCache;
-            this.signInValidator = signInValidator;
             this.messengerSender = messengerSender;
             this.userStore = userStore;
+            this.signInMiddlewareHandler = signInMiddlewareHandler;
         }
 
         [MessengerId((ushort)SignInMessengerIds.SignIn)]
@@ -33,32 +32,40 @@ namespace server.service.messengers.singnin
         {
             SignInParamsInfo model = new SignInParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
-
             //获取用户
             userStore.Get(model.Account, model.Password, out UserInfo user);
+
             //验证登入权限
-            (SignInResultInfo.SignInResultInfoCodes code,string msg) = signInValidator.Validate(ref user);
+            SignInResultInfo.SignInResultInfoCodes code = signInMiddlewareHandler.Validate(ref user);
             if (code != SignInResultInfo.SignInResultInfoCodes.OK)
             {
-                return new SignInResultInfo { Code = code, Msg = msg }.ToBytes();
+                return new SignInResultInfo { Code = code }.ToBytes();
             }
 
+            //缓存
             (SignInResultInfo verify, SignInCacheInfo client) = VerifyAndAdd(model, user, connection);
             if (verify != null)
             {
                 return verify.ToBytes();
             }
-
             client.UpdateConnection(connection);
+
+            //权限
+            client.UserAccess = user.Access;
+            client.NetFlow = user.NetFlow;
+            client.EndTime = user.EndTime;
+            signInMiddlewareHandler.Access(client);
+
             return new SignInResultInfo
             {
                 ShortId = client.ShortId,
                 Id = client.ConnectionId,
                 Ip = connection.Address.Address,
                 GroupId = client.GroupId,
-                Access = user.Access,
-                EndTime = user.EndTime,
-                NetFlow = user.NetFlow
+                Access = client.UserAccess,
+                EndTime = client.EndTime,
+                NetFlow = client.NetFlow,
+                SignLimit = user.SignLimit
             }.ToBytes();
 
         }

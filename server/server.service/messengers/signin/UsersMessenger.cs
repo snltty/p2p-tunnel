@@ -5,7 +5,6 @@ using common.server.model;
 using server.messengers;
 using server.messengers.singnin;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace server.service.messengers.signin
 {
@@ -30,7 +29,6 @@ namespace server.service.messengers.signin
         {
             if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
-
                 return;
             }
             if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)

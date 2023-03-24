@@ -31,10 +31,10 @@ import zhCn from "element-plus/lib/locale/lang/zh-cn";
 export default {
     components: { Menu, Background, StatusBar, ElConfigProvider },
     setup() {
+        provideShareData();
         provideSignIn();
         provideWebsocket();
         provideClients();
-        provideShareData();
 
         return {
             locale: zhCn,

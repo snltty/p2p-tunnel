@@ -23,21 +23,11 @@ import { reactive, computed } from '@vue/reactivity'
 import { getSignInInfo, updateConfig } from '../../apis/signin'
 import { injectServices } from '../../states/services'
 import { ElMessage } from 'element-plus/lib/components';
-import { ElLoading, ElMessageBox } from 'element-plus';
+import { ElLoading } from 'element-plus';
 export default {
     setup() {
 
-        const services = ["LoggerClientService", "HttpProxyClientService",
-            "ServerTcpForwardClientService", "TcpForwardClientService",
-            "ServerUdpForwardClientService", "UdpForwardClientService",
-            "ClientsClientService", "ConfigureClientService",
-            "CounterClientService", "SignInClientService",
-            "Socks5ClientService", "VeaClientService",
-            "WakeUpClientService"];
-
-        const files = require.context('../../views/', true, /mode\.js/);
-        const funcs = files.keys().map(c => files(c));
-
+        const services = ["LoggerClientService", "ServerClientService", "ConfigureClientService", "SignInClientService"];
         const servicesState = injectServices();
         const name = computed(() => {
             let name = servicesState.services[0] || 'full';
@@ -52,67 +42,45 @@ export default {
                 { name: 'full', text: '完全功能', services: [] },
                 {
                     name: 'p2p', text: '仅打洞穿透', services: [
-                        'full', 'LoggerClientService', 'ConfigureClientService', 'SignInClientService', 'ClientsClientService',
-                        'HttpProxyClientService', 'TcpForwardClientService', 'UdpForwardClientService',
-                        'Socks5ClientService', 'VeaClientService', 'WakeUpClientService'
-                    ]
+                        'full', 'ClientsClientService', 'HttpProxyClientService', 'TcpForwardClientService', 'UdpForwardClientService',
+                        'Socks5ClientService', 'VeaClientService'
+                    ].concat(services)
+                },
+                {
+                    name: 'relay', text: '仅中继组网', services: [
+                        'relay', 'ClientsClientService', 'VeaClientService'
+                    ].concat(services)
                 },
                 {
                     name: 'rproxy', text: '仅代理穿透', services: [
-                        'rproxy', 'LoggerClientService', 'ConfigureClientService', 'SignInClientService',
-                        'ServerTcpForwardClientService', 'ServerUdpForwardClientService'
-                    ]
+                        'rproxy', 'ServerTcpForwardClientService', 'ServerUdpForwardClientService'
+                    ].concat(services)
                 },
                 {
                     name: 'proxy', text: '仅代理翻越', services: [
-                        'proxy', 'LoggerClientService', 'ConfigureClientService', 'SignInClientService',
-                        'HttpProxyClientService', 'Socks5ClientService'
-                    ]
+                        'proxy', 'HttpProxyClientService', 'Socks5ClientService'
+                    ].concat(services)
                 }
             ]
         });
 
         let loadingInstance = null;
-        const _updateConfig = (funcs, command) => {
-            return new Promise((resolve, reject) => {
-                const fn = (index = 0) => {
-                    if (index >= funcs.length) {
-                        resolve();
-                        return;
-                    }
-                    funcs[index].update(command.services, command.name).then(() => {
-                        fn(++index);
-                    }).catch(reject);
-                }
-                fn();
-            });
-        }
         const handleCommand = (command) => {
-            let remarks = funcs.reduce((value, item) => value.concat(item.remarks(command.services, command.name)), []);
-            ElMessageBox.confirm(remarks.join('</br>'), '提示', { type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消', dangerouslyUseHTMLString: true })
-                .then(() => {
-                    loadingInstance = ElLoading.service({ target: '.wrap' });
-                    _updateConfig(funcs, command).then(() => {
-                        getSignInInfo().then((json) => {
-                            json.ClientConfig.Services = command.services;
-                            updateConfig(json).then(() => {
-                                loadingInstance.close()
-                                ElMessage.success('成功，刷新生效');
-                            }).catch((e) => {
-                                console.log(e);
-                                ElMessage.error('失败' + e);
-                                loadingInstance.close();
-                            });
-                        }).catch((e) => {
-                            ElMessage.error('失败' + e);
-                            loadingInstance.close();
-                        });
-                    }).catch((e) => {
-                        ElMessage.error('失败' + e);
-                        loadingInstance.close();
-                    });
-                }).catch(() => {
+            loadingInstance = ElLoading.service({ target: '.wrap' });
+            getSignInInfo().then((json) => {
+                json.ClientConfig.Services = command.services;
+                updateConfig(json).then(() => {
+                    loadingInstance.close()
+                    ElMessage.success('成功，刷新生效');
+                }).catch((e) => {
+                    console.log(e);
+                    ElMessage.error('失败' + e);
+                    loadingInstance.close();
                 });
+            }).catch((e) => {
+                ElMessage.error('失败' + e);
+                loadingInstance.close();
+            });
         }
 
         return {

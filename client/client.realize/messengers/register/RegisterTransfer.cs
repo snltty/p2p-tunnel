@@ -131,6 +131,8 @@ namespace client.realize.messengers.singnin
                         config.Client.ShortId = result.Data.ShortId;
                         config.Client.GroupId = result.Data.GroupId;
                         signInState.RemoteInfo.Access = result.Data.Access;
+                        signInState.RemoteInfo.NetFlow = result.Data.NetFlow;
+                        signInState.RemoteInfo.EndTime = result.Data.EndTime;
                         signInState.Online(result.Data.Id, result.Data.Ip);
                         await signinMessengerSender.Notify().ConfigureAwait(false);
 

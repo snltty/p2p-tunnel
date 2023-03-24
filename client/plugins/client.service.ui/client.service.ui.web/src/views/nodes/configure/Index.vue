@@ -43,6 +43,8 @@ export default {
                 } else {
                     state.content = JSON.stringify(JSON.parse(res), null, 4)
                 }
+            }).catch(() => {
+                state.content = '';
             });
         }
         const handleChange = (name) => {

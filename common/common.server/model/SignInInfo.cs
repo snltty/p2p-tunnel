@@ -178,10 +178,6 @@ namespace common.server.model
         /// 状态
         /// </summary>
         public SignInResultInfoCodes Code { get; set; }
-        /// <summary>
-        /// 状态说明
-        /// </summary>
-        public string Msg { get; set; } = string.Empty;
 
         /// <summary>
         /// 在服务器的权限
@@ -195,7 +191,10 @@ namespace common.server.model
         /// 账号结束时间
         /// </summary>
         public DateTime EndTime { get; set; }
-
+        /// <summary>
+        /// 允许登录数
+        /// </summary>
+        public uint SignLimit { get; set; }
 
         /// <summary>
         /// 连接id
@@ -217,17 +216,16 @@ namespace common.server.model
         public byte[] ToBytes()
         {
             var groupIdBytes = GroupId.GetUTF16Bytes();
-            var msgBytes = Msg.GetUTF16Bytes();
 
             var bytes = new byte[
                 1 //Code
                 + 4//Access
+                + 4//SignLimit
                 + 8//NetFlow
                 + 8//EndTime
                 + 9 //id
                 + 1 + Ip.Length()
                 + 2 + groupIdBytes.Length
-                + 2 + msgBytes.Length
                 ];
 
             var memory = bytes.AsMemory();
@@ -237,6 +235,8 @@ namespace common.server.model
             index += 1;
 
             Access.ToBytes(memory.Slice(index));
+            index += 4;
+            SignLimit.ToBytes(memory.Slice(index));
             index += 4;
 
             NetFlow.ToBytes(memory.Slice(index));
@@ -262,20 +262,12 @@ namespace common.server.model
                 index += 1 + 0;
             }
 
-            bytes[index] = (byte)GroupId.Length;
-            index += 1;
             bytes[index] = (byte)groupIdBytes.Length;
+            index += 1;
+            bytes[index] = (byte)GroupId.Length;
             index += 1;
             groupIdBytes.CopyTo(memory.Span.Slice(index));
             index += groupIdBytes.Length;
-
-
-            bytes[index] = (byte)Msg.Length;
-            index += 1;
-            bytes[index] = (byte)msgBytes.Length;
-            index += 1;
-            msgBytes.CopyTo(memory.Span.Slice(index));
-            index += msgBytes.Length;
 
             return bytes;
         }
@@ -290,6 +282,9 @@ namespace common.server.model
 
             Access = span.Slice(index, 4).ToUInt32();
             index += 4;
+            SignLimit = span.Slice(index, 4).ToUInt32();
+            index += 4;
+            
 
             NetFlow = span.Slice(index, 8).ToInt64();
             index += 8;
@@ -314,10 +309,8 @@ namespace common.server.model
             index += 1 + span[index];
 
 
-            GroupId = span.Slice(index + 1, span[index + 1]).GetUTF16String(span[index]);
-            index += 1 + span[index];
-
-            Msg = span.Slice(index + 1, span[index + 1]).GetUTF16String(span[index]);
+            GroupId = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 2 + span[index];
         }
 
         /// <summary>
@@ -330,10 +323,10 @@ namespace common.server.model
             OK = 0,
             [Description("存在同名客户端")]
             SAME_NAMES = 1,
-            [Description("未允许匿名")]
+            [Description("账号或密码有误")]
             NOT_FOUND = 2,
             [Description("未允许登入")]
-            SIGNIN_VERIFY = 3,
+            ENABLE = 3,
             [Description("账号过期")]
             TIME_OUT_RANGE = 4,
             [Description("无流量剩余")]
@@ -357,10 +350,6 @@ namespace common.server.model
         public ulong TargetId { get; set; }
         public ushort LocalPort { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var bytes = new byte[18];
@@ -377,10 +366,7 @@ namespace common.server.model
 
             return bytes;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
+
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             int index = 0;

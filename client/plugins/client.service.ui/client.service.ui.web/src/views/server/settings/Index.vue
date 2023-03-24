@@ -23,6 +23,7 @@ import Setting from '../Setting.vue'
 // import Socks5 from '../../nodes/socks5/ServerSetting.vue'
 import { getCurrentInstance, nextTick, onBeforeUnmount, computed, onMounted, reactive, ref, shallowRef } from '@vue/runtime-core'
 import { injectServices, accessService } from '../../../states/services'
+import { shareData } from '../../../states/shareData'
 import { injectSignIn } from '../../../states/signin'
 import { ElMessage } from 'element-plus/lib/components'
 export default {
@@ -39,7 +40,7 @@ export default {
         ];
         const servicesState = injectServices();
         const leftMenus = computed(() => {
-            let menus = _menus.filter(c => accessService(c.component.value.service, servicesState) && (c.component.value.access & serviceAccess.value) == c.component.value.access)
+            let menus = _menus.filter(c => accessService(c.component.value.service, servicesState) && shareData.serverAccessHas(serviceAccess.value, c.component.value.access))
                 .map(c => {
                     return {
                         text: c.text, component: c.component

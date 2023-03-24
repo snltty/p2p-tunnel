@@ -4,17 +4,11 @@ using System.Linq;
 
 namespace common.udpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public interface IUdpForwardValidator
     {
         public bool Validate(UdpForwardInfo info);
         public bool Validate(IConnection connection);
     }
-    /// <summary>
-    /// 
-    /// </summary>
     public class DefaultUdpForwardValidator : IUdpForwardValidator
     {
         private readonly Config config;

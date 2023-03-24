@@ -17,12 +17,14 @@ namespace server.service.messengers.singnin
         private readonly IClientSignInCaching clientSignInCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly Config config;
+        private readonly ITcpServer tcpServer;
 
-        public SettingMessenger(IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator, Config config)
+        public SettingMessenger(IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator, Config config, ITcpServer tcpServer)
         {
             this.clientSignInCaching = clientSignInCaching;
             this.serviceAccessValidator = serviceAccessValidator;
             this.config = config;
+            this.tcpServer = tcpServer;
         }
 
         [MessengerId((ushort)SignInMessengerIds.GetSetting)]
@@ -54,6 +56,8 @@ namespace server.service.messengers.singnin
 
             string str = connection.ReceiveRequestWrap.Payload.GetUTF8String();
             await config.SaveConfig(str);
+
+            tcpServer.SetBufferSize(config.TcpBufferSize);
 
             return Helper.TrueArray;
         }
