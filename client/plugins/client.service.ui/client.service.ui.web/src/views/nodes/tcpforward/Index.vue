@@ -2,7 +2,7 @@
     <div class="forward-wrap">
         <div class="inner">
             <div class="head flex">
-                <el-button type="primary" size="small" @click="handleAddListen">增加转发监听</el-button>
+                <el-button type="primary" size="small" @click="handleAddListen">增加tcp转发监听</el-button>
                 <el-button size="small" @click="getData">刷新列表</el-button>
             </div>
             <div class="content">

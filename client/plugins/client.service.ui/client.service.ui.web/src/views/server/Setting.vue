@@ -42,12 +42,16 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="允许登入" prop="RegisterEnable">
-                                <el-checkbox size="default" v-model="model.RegisterEnable">开启</el-checkbox>
+                                <el-tooltip class="box-item" effect="dark" content="不允许登入则所有账号均不可登入" placement="top-start">
+                                    <el-checkbox size="default" v-model="model.RegisterEnable">开启</el-checkbox>
+                                </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="验证账号" prop="VerifyAccount">
-                                <el-checkbox size="default" v-model="model.VerifyAccount">开启</el-checkbox>
+                                <el-tooltip class="box-item" effect="dark" content="开启验证账号后，不可匿名使用" placement="top-start">
+                                    <el-checkbox size="default" v-model="model.VerifyAccount">开启</el-checkbox>
+                                </el-tooltip>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -56,7 +60,9 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="允许中继" prop="RelayEnable">
-                                <el-checkbox size="default" v-model="model.RelayEnable">开启</el-checkbox>
+                                <el-tooltip class="box-item" effect="dark" content="允许所有账号使用中继" placement="top-start">
+                                    <el-checkbox size="default" v-model="model.RelayEnable">开启</el-checkbox>
+                                </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">

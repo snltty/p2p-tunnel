@@ -76,6 +76,9 @@ namespace client.service.udpforward
     }
     public sealed class ServerClientService : IClientService
     {
+        public void Default()
+        {
 
+        }
     }
 }

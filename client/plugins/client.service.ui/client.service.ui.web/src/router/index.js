@@ -73,7 +73,7 @@ const routes = [
         path: '/server.html',
         name: 'Servers',
         component: () => import('../views/server/Index.vue'),
-        redirect: { name: 'ServerTcpForward' },
+        redirect: { name: 'ServerSettings' },
         children: [
             {
                 path: '/server-settings.html',

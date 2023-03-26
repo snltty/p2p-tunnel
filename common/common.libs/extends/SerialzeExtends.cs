@@ -13,7 +13,7 @@ namespace common.libs.extends
             ReadCommentHandling = JsonCommentHandling.Skip,
             PropertyNameCaseInsensitive = true,
             WriteIndented = true,
-            Converters = { new IPAddressJsonConverter(), new IPEndpointJsonConverter() }
+            Converters = { new IPAddressJsonConverter(), new IPEndpointJsonConverter(), new DateTimeConverter() }
         };
         private static JsonSerializerOptions jsonSerializerOptionsIndented = new JsonSerializerOptions
         {
@@ -22,7 +22,7 @@ namespace common.libs.extends
             ReadCommentHandling = JsonCommentHandling.Skip,
             PropertyNameCaseInsensitive = true,
             WriteIndented = true,
-            Converters = { new IPAddressJsonConverter(), new IPEndpointJsonConverter() }
+            Converters = { new IPAddressJsonConverter(), new IPEndpointJsonConverter(), new DateTimeConverter() }
         };
         public static string ToJson(this object obj)
         {

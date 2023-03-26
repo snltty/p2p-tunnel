@@ -28,7 +28,6 @@ namespace server.service.validators
                 {
                     storeModel = result.Result;
                 }
-                Console.WriteLine(storeModel.ToJson());
             });
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) =>
             {
