@@ -2,14 +2,16 @@
 using client.realize.messengers.punchHole;
 using client.service.logger;
 using client.service.socks5;
+using client.service.socks5.server;
 using client.service.tcpforward;
+using client.service.tcpforward.server;
 using client.service.udpforward;
+using client.service.udpforward.server;
 using client.service.ui.api.service.clientServer;
 using client.service.vea.socks5;
 using client.service.wakeup;
 using common.libs;
 using common.server;
-using common.server.middleware;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
@@ -43,26 +45,25 @@ namespace client.service
             Assembly[] assemblys = new Assembly[] {
                 typeof(LoggerClientService).Assembly,
                 typeof(TcpForwardMessenger).Assembly,
+                typeof(ServerTcpForwardClientService).Assembly,
                 typeof(UdpForwardMessenger).Assembly,
+                typeof(ServerUdpForwardClientService).Assembly,
                 typeof(ClientServer).Assembly,
                 typeof(Socks5ClientService).Assembly,
-                typeof(Socks5Messenger).Assembly,
+                typeof(ServerSocks5Configure).Assembly,
                 typeof(PunchHoleMessenger).Assembly,
                 typeof(VeaSocks5Messenger).Assembly,
                 typeof(WakeUpMessenger).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
-            //Assembly.LoadFile();
 
             ServiceCollection serviceCollection = new ServiceCollection();
             ServiceProvider serviceProvider = null;
             //注入 依赖注入服务供应 使得可以在别的地方通过注入的方式获得 ServiceProvider 以用来获取其它服务
             serviceCollection.AddSingleton((e) => serviceProvider);
 
-            serviceCollection.AddMiddleware(assemblys);
             IPlugin[] plugins = PluginLoader.LoadBefore(serviceCollection, assemblys);
 
             serviceProvider = serviceCollection.BuildServiceProvider();
-            serviceProvider.UseMiddleware(assemblys);
             PluginLoader.LoadAfter(plugins, serviceProvider, assemblys);
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));

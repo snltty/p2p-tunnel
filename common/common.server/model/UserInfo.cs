@@ -2,6 +2,7 @@
 using common.server;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace common.server.model
 {
@@ -26,6 +27,12 @@ namespace common.server.model
         /// 账号结束时间
         /// </summary>
         public DateTime EndTime { get; set; }
+
+        /// <summary>
+        /// 游客账号
+        /// </summary>
+        [JsonIgnore]
+        public bool IsDefault { get; set; } = false;
     }
 
     public class UserInfoPageModel

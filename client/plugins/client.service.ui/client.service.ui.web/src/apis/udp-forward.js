@@ -26,23 +26,3 @@ export const addListen = (model) => {
 export const removeListen = (port) => {
     return sendWebsocketMsg(`udpforward/RemoveListen`, port);
 }
-
-export const getServerPorts = () => {
-    return sendWebsocketMsg(`userverdpforward/ServerPorts`);
-}
-export const getServerForwards = () => {
-    return sendWebsocketMsg(`serverudpforward/ServerForwards`);
-}
-
-export const AddServerForward = (model) => {
-    return sendWebsocketMsg(`serverudpforward/AddServerForward`, model);
-}
-export const startServerForward = (port) => {
-    return sendWebsocketMsg(`serverudpforward/StartServerForward`, port);
-}
-export const stopServerForward = (port) => {
-    return sendWebsocketMsg(`serverudpforward/StopServerForward`, port);
-}
-export const removeServerForward = (port) => {
-    return sendWebsocketMsg(`serverudpforward/RemoveServerForward`, port);
-}

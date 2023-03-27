@@ -3,19 +3,12 @@ using common.tcpforward;
 using common.libs;
 using common.server;
 using System.Reflection;
+using server.messengers.singnin;
 
 namespace server.service.tcpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class Plugin : IPlugin
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="assemblys"></param>
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             services.GetService<TcpForwardTransfer>();
@@ -34,11 +27,7 @@ namespace server.service.tcpforward
             }
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="assemblys"></param>
+
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<common.tcpforward.Config>();//启动器

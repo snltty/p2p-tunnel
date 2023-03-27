@@ -23,7 +23,7 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="注册加密" prop="ServerEncode">
+                            <el-form-item label="登入加密" prop="ServerEncode">
                                 <el-tooltip class="box-item" effect="dark" content="客户端与服务端之间通信使用加密" placement="top-start">
                                     <el-checkbox v-model="model.ServerEncode">开启</el-checkbox>
                                 </el-tooltip>

@@ -5,60 +5,66 @@ using System;
 
 namespace server.service.validators
 {
-    public sealed class SignInDefaultValidator : SignInMiddleware
+    /// <summary>
+    /// 登入权限验证
+    /// </summary>
+    public sealed class SignInAccessMiddleware : ISignInValidator, ISignInAccess
     {
-        private readonly IServiceAccessValidator serviceAccessProvider;
-
-        public SignInDefaultValidator(IServiceAccessValidator serviceAccessProvider)
+        private readonly IServiceAccessValidator serviceAccessValidator;
+        public SignInAccessMiddleware(IServiceAccessValidator serviceAccessValidator)
         {
-            this.serviceAccessProvider = serviceAccessProvider;
+            this.serviceAccessValidator = serviceAccessValidator;
         }
 
-        public override void Access(SignInCacheInfo cache)
+        public EnumServiceAccess Access()
         {
+            return EnumServiceAccess.None;
         }
 
-        public override SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
+        public SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
         {
             //该账号不允许登入
-            if (serviceAccessProvider.Validate(user.Access, EnumServiceAccess.SignIn) == false)
+            if (serviceAccessValidator.Validate(user.Access, EnumServiceAccess.SignIn) == false)
             {
-                return  SignInResultInfo.SignInResultInfoCodes.ENABLE;
+                return SignInResultInfo.SignInResultInfoCodes.ENABLE;
             }
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
     }
 
-    public sealed class SignInRelayMiddleware : SignInMiddleware
+    /// <summary>
+    /// 中继验证
+    /// </summary>
+    public sealed class SignInRelayMiddleware : ISignInValidator, ISignInAccess
     {
         private readonly Config config;
         public SignInRelayMiddleware(Config config)
         {
             this.config = config;
         }
-        public override void Access(SignInCacheInfo cache)
-        {
-            //开启了全局允许中继，那就只要登入成功了就加上中继权限
-            if (config.RelayEnable)
-            {
-                cache.UserAccess |= (uint)EnumServiceAccess.Relay;
-            }
-        }
 
-        public override SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
+        public EnumServiceAccess Access()
+        {
+            return config.RelayEnable ? EnumServiceAccess.Relay : EnumServiceAccess.None;
+        }
+        public SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
         {
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
     }
 
-    public sealed class SignInEndTimeMiddleware : SignInMiddleware
+    /// <summary>
+    /// 账号过期时间验证
+    /// </summary>
+    public sealed class SignInEndTimeMiddleware : ISignInValidator, ISignInAccess
     {
-        public override void Access(SignInCacheInfo cache)
+        public EnumServiceAccess Access()
         {
+            return EnumServiceAccess.None;
         }
-
-        public override SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
+        public SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
         {
+            //账号过期了
             if (user.EndTime <= DateTime.Now)
             {
                 return SignInResultInfo.SignInResultInfoCodes.TIME_OUT_RANGE;
@@ -67,12 +73,17 @@ namespace server.service.validators
         }
 
     }
-    public sealed class SignInNetFlowMiddleware : SignInMiddleware
+
+    /// <summary>
+    /// 流量剩余验证
+    /// </summary>
+    public sealed class SignInNetFlowMiddleware : ISignInValidator, ISignInAccess
     {
-        public override void Access(SignInCacheInfo cache)
+        public EnumServiceAccess Access()
         {
+            return EnumServiceAccess.None;
         }
-        public override SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
+        public SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
         {
             if (user.NetFlow == 0)
             {
@@ -81,7 +92,11 @@ namespace server.service.validators
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
     }
-    public sealed class SignInSignLimitMiddleware : SignInMiddleware
+
+    /// <summary>
+    /// 登入数量验证
+    /// </summary>
+    public sealed class SignInSignLimitMiddleware : ISignInValidator, ISignInAccess
     {
         private readonly IClientSignInCaching clientSignInCaching;
         public SignInSignLimitMiddleware(IClientSignInCaching clientSignInCaching)
@@ -89,10 +104,11 @@ namespace server.service.validators
             this.clientSignInCaching = clientSignInCaching;
         }
 
-        public override void Access(SignInCacheInfo cache)
+        public EnumServiceAccess Access()
         {
+            return EnumServiceAccess.None;
         }
-        public override SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
+        public SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user)
         {
             if (user.SignLimit > 0)
             {

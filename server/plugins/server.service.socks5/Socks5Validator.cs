@@ -1,12 +1,11 @@
 ﻿using common.socks5;
 using server.messengers;
-using common.server;
 using server.messengers.singnin;
 using common.server.model;
 
 namespace server.service.socks5
 {
-    public sealed class Socks5Validator : ISocks5Validator
+    public sealed class Socks5Validator : ISignInAccess, ISocks5Validator
     {
         private readonly IServiceAccessValidator serviceAccessProvider;
         private readonly common.socks5.Config config;
@@ -19,6 +18,11 @@ namespace server.service.socks5
             this.clientSignInCaching = clientSignInCaching;
         }
 
+        public EnumServiceAccess Access()
+        {
+            return config.ConnectEnable ? EnumServiceAccess.Socks5 : EnumServiceAccess.None;
+        }
+
         public bool Validate(Socks5Info info)
         {
             if (Socks5Parser.GetIsLanAddress(info.Data))
@@ -28,11 +32,10 @@ namespace server.service.socks5
 
             if (clientSignInCaching.Get(info.ClientId, out SignInCacheInfo client))
             {
-                return config.ConnectEnable || serviceAccessProvider.Validate(info.ClientId, EnumServiceAccess.Socks5);
+                return config.ConnectEnable || serviceAccessProvider.Validate(client.UserAccess, EnumServiceAccess.Socks5);
             }
 
             return config.ConnectEnable;
         }
     }
-
 }

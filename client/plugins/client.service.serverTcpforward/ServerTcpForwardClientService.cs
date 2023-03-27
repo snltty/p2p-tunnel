@@ -1,18 +1,17 @@
 ﻿using client.service.ui.api.clientServer;
 using common.libs.extends;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace client.service.tcpforward
+namespace client.service.tcpforward.server
 {
     /// <summary>
     /// 服务器tcp转发
     /// </summary>
     public sealed class ServerTcpForwardClientService : IClientService
     {
-        private readonly TcpForwardTransfer tcpForwardTransfer;
-        public ServerTcpForwardClientService(TcpForwardTransfer tcpForwardTransfer)
+        private readonly ServerTcpForwardTransfer tcpForwardTransfer;
+        public ServerTcpForwardClientService(ServerTcpForwardTransfer tcpForwardTransfer)
         {
             this.tcpForwardTransfer = tcpForwardTransfer;
         }
@@ -22,7 +21,7 @@ namespace client.service.tcpforward
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public List<ServerForwardItemInfo> ServerForwards(ClientServiceParamsInfo arg)
+        public List<ServerForwardItemInfo> List(ClientServiceParamsInfo arg)
         {
             return tcpForwardTransfer.serverForwards;
         }
@@ -31,7 +30,7 @@ namespace client.service.tcpforward
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public async Task<ushort[]> ServerPorts(ClientServiceParamsInfo arg)
+        public async Task<ushort[]> Ports(ClientServiceParamsInfo arg)
         {
             return await tcpForwardTransfer.GetServerPorts();
         }
@@ -40,7 +39,7 @@ namespace client.service.tcpforward
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public async Task<bool> AddServerForward(ClientServiceParamsInfo arg)
+        public async Task<bool> Add(ClientServiceParamsInfo arg)
         {
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
             string res = await tcpForwardTransfer.AddServerForward(forward);
@@ -55,7 +54,7 @@ namespace client.service.tcpforward
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public async Task<bool> StartServerForward(ClientServiceParamsInfo arg)
+        public async Task<bool> Start(ClientServiceParamsInfo arg)
         {
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
             string res = await tcpForwardTransfer.StartServerForward(forward);
@@ -70,7 +69,7 @@ namespace client.service.tcpforward
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public async Task<bool> StopServerForward(ClientServiceParamsInfo arg)
+        public async Task<bool> Stop(ClientServiceParamsInfo arg)
         {
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
             string res = await tcpForwardTransfer.StopServerForward(forward);
@@ -85,7 +84,7 @@ namespace client.service.tcpforward
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public async Task<bool> RemoveServerForward(ClientServiceParamsInfo arg)
+        public async Task<bool> Remove(ClientServiceParamsInfo arg)
         {
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
             string res = await tcpForwardTransfer.RemoveServerForward(forward);

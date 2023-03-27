@@ -9,6 +9,7 @@ namespace common.server.model
     [Flags]
     public enum EnumServiceAccess : uint
     {
+        None = 0,
         /// <summary>
         /// 登入
         /// </summary>

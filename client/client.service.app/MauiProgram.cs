@@ -8,12 +8,7 @@ using client.service.ui.api.service.clientServer;
 using client.service.ui.api.service.webServer;
 using common.libs;
 using common.libs.database;
-using common.libs.extends;
 using common.server;
-using common.server.middleware;
-using common.socks5;
-using System.Net.Sockets;
-using System.Net;
 using System.Reflection;
 using client.service.wakeup;
 
@@ -29,7 +24,7 @@ namespace client.service.app
             builder.UseMauiApp<App>().ConfigureMauiHandlers(handlers =>
             {
             });
-           // builder.Services.AddMauiBlazorWebView();
+            // builder.Services.AddMauiBlazorWebView();
 
             MauiApp app = builder.Build();
 
@@ -64,7 +59,6 @@ namespace client.service.app
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
 
-            serviceCollection.AddMiddleware(assemblys);
             IPlugin[] plugins = PluginLoader.LoadBefore(serviceCollection, assemblys);
 
             //覆盖几个实现，由于平台实现不一样
@@ -73,7 +67,6 @@ namespace client.service.app
             serviceCollection.AddSingleton<IIPv6AddressRequest, IPv6AddressRequest>();
 
             serviceProvider = serviceCollection.BuildServiceProvider();
-            serviceProvider.UseMiddleware(assemblys);
             PluginLoader.LoadAfter(plugins, serviceProvider, assemblys);
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));

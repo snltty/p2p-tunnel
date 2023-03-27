@@ -20,9 +20,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="server-tcp-forwards.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
 		<Content Include="p2p-tcp-forwards.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>

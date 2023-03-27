@@ -3,15 +3,15 @@ using common.libs.extends;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace client.service.udpforward
+namespace client.service.udpforward.server
 {
     /// <summary>
     /// 服务器udp转发相关
     /// </summary>
     public sealed class ServerUdpForwardClientService : IClientService
     {
-        private readonly UdpForwardTransfer udpForwardTransfer;
-        public ServerUdpForwardClientService(UdpForwardTransfer udpForwardTransfer)
+        private readonly ServerUdpForwardTransfer udpForwardTransfer;
+        public ServerUdpForwardClientService(ServerUdpForwardTransfer udpForwardTransfer)
         {
             this.udpForwardTransfer = udpForwardTransfer;
         }
@@ -22,7 +22,7 @@ namespace client.service.udpforward
         /// <param name="arg"></param>
         /// <returns></returns>
         [ClientService(null)]
-        public List<ServerForwardItemInfo> ServerForwards(ClientServiceParamsInfo arg)
+        public List<ServerForwardItemInfo> List(ClientServiceParamsInfo arg)
         {
             return udpForwardTransfer.serverConfigInfo.Tunnels;
         }
@@ -33,7 +33,7 @@ namespace client.service.udpforward
         /// <param name="arg"></param>
         /// <returns></returns>
         [ClientService(null)]
-        public async Task<ushort[]> ServerPorts(ClientServiceParamsInfo arg)
+        public async Task<ushort[]> Ports(ClientServiceParamsInfo arg)
         {
             return await udpForwardTransfer.GetServerPorts();
         }
@@ -44,7 +44,7 @@ namespace client.service.udpforward
         /// <param name="arg"></param>
         /// <returns></returns>
         [ClientService(typeof(ServerForwardItemInfo))]
-        public async Task<bool> AddServerForward(ClientServiceParamsInfo arg)
+        public async Task<bool> Add(ClientServiceParamsInfo arg)
         {
             ServerForwardItemInfo forward = arg.Content.DeJson<ServerForwardItemInfo>();
             string res = await udpForwardTransfer.AddServerForward(forward);
@@ -61,7 +61,7 @@ namespace client.service.udpforward
         /// <param name="arg"></param>
         /// <returns></returns>
         [ClientService(typeof(ushort))]
-        public async Task<bool> StartServerForward(ClientServiceParamsInfo arg)
+        public async Task<bool> Start(ClientServiceParamsInfo arg)
         {
             string res = await udpForwardTransfer.StartServerForward(ushort.Parse(arg.Content));
             if (string.IsNullOrWhiteSpace(res) == false)
@@ -77,7 +77,7 @@ namespace client.service.udpforward
         /// <param name="arg"></param>
         /// <returns></returns>
         [ClientService(typeof(ushort))]
-        public async Task<bool> StopServerForward(ClientServiceParamsInfo arg)
+        public async Task<bool> Stop(ClientServiceParamsInfo arg)
         {
             string res = await udpForwardTransfer.StopServerForward(ushort.Parse(arg.Content));
             if (string.IsNullOrWhiteSpace(res) == false)
@@ -93,7 +93,7 @@ namespace client.service.udpforward
         /// <param name="arg"></param>
         /// <returns></returns>
         [ClientService(typeof(ushort))]
-        public async Task<bool> RemoveServerForward(ClientServiceParamsInfo arg)
+        public async Task<bool> Remove(ClientServiceParamsInfo arg)
         {
             string res = await udpForwardTransfer.RemoveServerForward(ushort.Parse(arg.Content));
             if (string.IsNullOrWhiteSpace(res) == false)

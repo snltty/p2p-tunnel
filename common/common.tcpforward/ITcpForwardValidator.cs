@@ -37,7 +37,7 @@ namespace common.tcpforward
         }
         public bool Validate(IConnection connection)
         {
-            return true;
+            return config.ConnectEnable;
         }
     }
 

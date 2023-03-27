@@ -3,9 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
 using server.service.tcpforward;
-using common.server.middleware;
 using System.Linq;
-using common.socks5;
 using server.service.socks5;
 using server.service.udpforward;
 using System.Threading;
@@ -31,11 +29,9 @@ namespace server.service
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();
-            serviceCollection.AddMiddleware(assemblys);
             IPlugin[] plugins = PluginLoader.LoadBefore(serviceCollection, assemblys);
 
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-            serviceProvider.UseMiddleware(assemblys);
             PluginLoader.LoadAfter(plugins, serviceProvider, assemblys);
 
             var config = serviceProvider.GetService<Config>();

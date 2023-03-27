@@ -8,44 +8,24 @@ using common.tcpforward;
 using System;
 using System.Threading.Tasks;
 
-namespace client.service.udpforward
+namespace client.service.tcpforward.server
 {
     /// <summary>
     /// tcp转发服务端配置文件
     /// </summary>
-    public sealed class TcpForwardServerConfigure : IClientConfigure
+    public sealed class ServerTcpForwardConfigure : IClientConfigure
     {
         private readonly MessengerSender messengerSender;
         private readonly SignInStateInfo signInStateInfo;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
-        /// <param name="signInStateInfo"></param>
-        public TcpForwardServerConfigure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
+        public ServerTcpForwardConfigure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
         {
             this.messengerSender = messengerSender;
             this.signInStateInfo = signInStateInfo;
         }
 
-        /// <summary>
-        /// 名字
-        /// </summary>
         public string Name => "Tcp转发服务端";
-
-        /// <summary>
-        /// 作者
-        /// </summary>
         public string Author => "snltty";
-
-        /// <summary>
-        /// 描述
-        /// </summary>
         public string Desc => "白名单不为空时只允许白名单内端口";
-
-        /// <summary>
-        /// 启用
-        /// </summary>
         public bool Enable => true;
 
         /// <summary>

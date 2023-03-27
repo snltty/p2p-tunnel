@@ -24,16 +24,8 @@ using client.messengers.relay;
 
 namespace client.realize.messengers
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class Plugin : IPlugin
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="assemblys"></param>
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             services.GetService<IClientsTransfer>();
@@ -49,11 +41,6 @@ namespace client.realize.messengers
             services.GetService<PunchHoleMessengerSender>().LoadPlugins(assemblys);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="assemblys"></param>
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<Config>();

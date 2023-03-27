@@ -23,11 +23,10 @@
 
 <script>
 import { reactive, ref, toRefs } from '@vue/reactivity';
-import { AddServerForward } from '../../../apis/udp-forward'
+import { AddServerForward } from '../../../apis/udp-forward-server'
 import { injectShareData } from '../../../states/shareData'
 import { injectClients } from '../../../states/clients'
 import { inject, watch } from '@vue/runtime-core';
-import { ElMessage } from 'element-plus/lib/components';
 export default {
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],

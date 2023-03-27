@@ -8,45 +8,25 @@ using common.socks5;
 using System;
 using System.Threading.Tasks;
 
-namespace client.service.udpforward
+namespace client.service.socks5.server
 {
     /// <summary>
     /// socks5服务端配置文件
     /// </summary>
-    public sealed class Socks5ServerConfigure : IClientConfigure
+    public sealed class ServerSocks5Configure : IClientConfigure
     {
         private readonly MessengerSender messengerSender;
         private readonly SignInStateInfo signInStateInfo;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
-        /// <param name="signInStateInfo"></param>
-        public Socks5ServerConfigure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
+        public ServerSocks5Configure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
         {
             this.messengerSender = messengerSender;
             this.signInStateInfo = signInStateInfo;
         }
 
-        /// <summary>
-        /// 名称
-        /// </summary>
         public string Name => "Socks5服务端";
-
-        /// <summary>
-        /// 作者
-        /// </summary>
         public string Author => "snltty";
-
-        /// <summary>
-        /// 描述
-        /// </summary>
         public string Desc => "";
-
-        /// <summary>
-        /// 启用
-        /// </summary>
         public bool Enable => true;
 
         /// <summary>

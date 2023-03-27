@@ -8,22 +8,22 @@ const routes = [
         meta: { name: '首页' }
     },
     {
-        path: '/settings.html',
-        name: 'Settings',
-        component: () => import('../views/settings/Index.vue'),
-        meta: { name: '设置' }
-    },
-    {
         path: '/nodes.html',
         name: 'Nodes',
         component: () => import('../views/nodes/Index.vue'),
-        redirect: { name: 'NodesList' },
+        redirect: { name: 'NodesSettings' },
         children: [
+            {
+                path: '/nodes/settings.html',
+                name: 'NodesSettings',
+                component: () => import('../views/nodes/settings/Index.vue'),
+                meta: { name: '节点设置' }
+            },
             {
                 path: '/nodes/list.html',
                 name: 'NodesList',
                 component: () => import('../views/nodes/list/Index.vue'),
-                meta: { name: '节点', service: 'ClientsClientService' }
+                meta: { name: '节点列表', service: 'ClientsClientService' }
             },
             {
                 path: '/nodes/tcp-forward.html',
@@ -79,19 +79,19 @@ const routes = [
                 path: '/server-settings.html',
                 name: 'ServerSettings',
                 component: () => import('../views/server/settings/Index.vue'),
-                meta: { name: '配置', service: 'ServerClientService', access: shareData.serverAccess.setting.value }
+                meta: { name: '服务器设置', service: 'ServerClientService', access: shareData.serverAccess.setting.value }
             },
             {
                 path: '/server-tcp-forward.html',
                 name: 'ServerTcpForward',
                 component: () => import('../views/server/tcpforward/Index.vue'),
-                meta: { name: 'tcp转发', service: 'ServerTcpForwardClientService', access: shareData.serverAccess.tcpforward.value }
+                meta: { name: 'tcp代理穿透', service: 'ServerTcpForwardClientService', access: shareData.serverAccess.tcpforward.value }
             },
             {
                 path: '/server-udp-forward.html',
                 name: 'ServerUdpForward',
                 component: () => import('../views/server/udpforward/Index.vue'),
-                meta: { name: 'udp转发', service: 'ServerUdpForwardClientService', access: shareData.serverAccess.udpforward.value }
+                meta: { name: 'udp代理穿透', service: 'ServerUdpForwardClientService', access: shareData.serverAccess.udpforward.value }
             },
         ]
     }

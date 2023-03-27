@@ -2,10 +2,12 @@
 using common.server.model;
 using common.tcpforward;
 using server.messengers;
+using server.messengers.singnin;
 
 namespace server.service.tcpforward
 {
-    public sealed class ServerTcpForwardValidator : DefaultTcpForwardValidator, ITcpForwardValidator
+
+    public sealed class ServerTcpForwardValidator : DefaultTcpForwardValidator, ITcpForwardValidator, ISignInAccess
     {
         private readonly common.tcpforward.Config config;
         private readonly IServiceAccessValidator serviceAccessProvider;
@@ -15,6 +17,10 @@ namespace server.service.tcpforward
             this.serviceAccessProvider = serviceAccessProvider;
         }
 
+        public EnumServiceAccess Access()
+        {
+            return config.ConnectEnable ? EnumServiceAccess.TcpForward : EnumServiceAccess.None;
+        }
         public new bool Validate(IConnection connection)
         {
             return config.ConnectEnable || serviceAccessProvider.Validate(connection, EnumServiceAccess.TcpForward);

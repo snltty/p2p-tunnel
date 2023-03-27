@@ -1,17 +1,11 @@
-﻿using client.messengers.singnin;
-using common.libs;
+﻿using common.libs;
 using common.libs.database;
-using common.libs.extends;
-using common.server;
-using common.server.model;
 using common.tcpforward;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace client.service.tcpforward
 {
@@ -31,61 +25,23 @@ namespace client.service.tcpforward
         NumberSpaceUInt32 listenNS = new NumberSpaceUInt32();
         NumberSpaceUInt32 forwardNS = new NumberSpaceUInt32();
 
-        private readonly ServerForwardConfigInfo serverForwardConfigInfo;
-        /// <summary>
-        /// 服务器转发列表
-        /// </summary>
-        public List<ServerForwardItemInfo> serverForwards = new List<ServerForwardItemInfo>();
-        private readonly IConfigDataProvider<ServerForwardConfigInfo> serverConfigDataProvider;
-
-        private readonly Config clientConfig;
-        private readonly SignInStateInfo signInStateInfo;
         private readonly ui.api.Config uiconfig;
 
-        private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="p2pConfigDataProvider"></param>
-        /// <param name="tcpForwardTargetCaching"></param>
-        /// <param name="tcpForwardServer"></param>
-        /// <param name="serverConfigDataProvider"></param>
-        /// <param name="config"></param>
-        /// <param name="clientConfig"></param>
-        /// <param name="signInStateInfo"></param>
-        /// <param name="tcpForwardMessengerSender"></param>
-        /// <param name="tcpForwardTargetProvider"></param>
-        /// <param name="uiconfig"></param>
         public TcpForwardTransfer(
             IConfigDataProvider<P2PConfigInfo> p2pConfigDataProvider,
             ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching,
             ITcpForwardServer tcpForwardServer,
-
-            IConfigDataProvider<ServerForwardConfigInfo> serverConfigDataProvider,
-
             common.tcpforward.Config config,
-            Config clientConfig,
-            SignInStateInfo signInStateInfo,
-
            TcpForwardMessengerSender tcpForwardMessengerSender,
            ITcpForwardTargetProvider tcpForwardTargetProvider, ui.api.Config uiconfig) : base(tcpForwardServer, tcpForwardMessengerSender, tcpForwardTargetProvider)
         {
             this.p2pConfigDataProvider = p2pConfigDataProvider;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
-
-            this.serverConfigDataProvider = serverConfigDataProvider;
-
-            this.clientConfig = clientConfig;
-            this.signInStateInfo = signInStateInfo;
-
-            this.tcpForwardServer = tcpForwardServer;
-            this.tcpForwardMessengerSender = tcpForwardMessengerSender;
             this.uiconfig = uiconfig;
 
             p2PConfigInfo = ReadP2PConfig();
-            serverForwardConfigInfo = ReadServerConfig();
 
+            this.tcpForwardServer = tcpForwardServer;
             tcpForwardServer.Init(config.NumConnections, config.BufferSize);
             tcpForwardServer.OnListeningChange.Sub((model) =>
             {
@@ -103,19 +59,8 @@ namespace client.service.tcpforward
                 }
 
             });
-            signInStateInfo.OnChange.Sub((state) =>
-            {
-                if (state)
-                {
-                    RegisterServerForward();
-                }
-            });
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => ClearPac();
-            //安卓注释
-            //Console.CancelKeyPress += (s, e) => ClearPac();
-
-
             StartP2PAllWithListening();
         }
 
@@ -462,240 +407,6 @@ namespace client.service.tcpforward
         }
         #endregion
 
-        #region 服务器代理
-
-        /// <summary>
-        /// 获取服务器端口
-        /// </summary>
-        /// <returns></returns>
-        public async Task<ushort[]> GetServerPorts()
-        {
-            var resp = await tcpForwardMessengerSender.GetPorts(signInStateInfo.Connection);
-            if (resp.Code == MessageResponeCodes.OK)
-            {
-                return resp.Data.ToUInt16Array();
-            }
-
-            return Array.Empty<ushort>();
-        }
-        /// <summary>
-        /// 添加服务器转发
-        /// </summary>
-        /// <param name="forward"></param>
-        /// <returns></returns>
-        public async Task<string> AddServerForward(ServerForwardItemInfo forward)
-        {
-            var resp = await tcpForwardMessengerSender.Register(signInStateInfo.Connection, new TcpForwardRegisterParamsInfo
-            {
-                AliveType = forward.AliveType,
-                SourceIp = forward.Domain,
-                SourcePort = forward.ServerPort,
-                TargetIp = forward.LocalIp,
-                TargetPort = forward.LocalPort,
-                TargetName = clientConfig.Client.Name,
-
-            }).ConfigureAwait(false);
-            if (resp.Code != MessageResponeCodes.OK)
-            {
-                return resp.Code.GetDesc((byte)resp.Code);
-            }
-
-            TcpForwardRegisterResult result = new TcpForwardRegisterResult();
-            result.DeBytes(resp.Data);
-            if (result.Code != TcpForwardRegisterResultCodes.OK)
-            {
-                return $"{result.Code.GetDesc((byte)result.Code)},{result.Msg}";
-            }
-
-            serverForwards.Remove(serverForwards.FirstOrDefault(c => c.Domain == forward.Domain && c.ServerPort == forward.ServerPort));
-            serverForwards.Add(forward);
-            SaveServerConfig();
-            return string.Empty;
-        }
-        /// <summary>
-        /// 开启服务器转发
-        /// </summary>
-        /// <param name="forward"></param>
-        /// <returns></returns>
-        public async Task<string> StartServerForward(ServerForwardItemInfo forward)
-        {
-            ServerForwardItemInfo forwardInfo;
-            if (forward.AliveType == TcpForwardAliveTypes.Web)
-            {
-                forwardInfo = serverForwards.FirstOrDefault(c => c.Domain == forward.Domain && c.ServerPort == forward.ServerPort);
-            }
-            else
-            {
-                forwardInfo = serverForwards.FirstOrDefault(c => c.ServerPort == forward.ServerPort);
-            }
-            if (forwardInfo == null)
-            {
-                return "未找到操作对象";
-            }
-            var resp = await tcpForwardMessengerSender.Register(signInStateInfo.Connection, new TcpForwardRegisterParamsInfo
-            {
-                AliveType = forward.AliveType,
-                SourceIp = forward.Domain,
-                SourcePort = forward.ServerPort,
-                TargetIp = forward.LocalIp,
-                TargetName = clientConfig.Client.Name,
-                TargetPort = forward.LocalPort,
-            }).ConfigureAwait(false);
-            if (resp.Code != MessageResponeCodes.OK)
-            {
-                return resp.Code.GetDesc((byte)resp.Code);
-            }
-            forwardInfo.Listening = true;
-            SaveServerConfig();
-            return string.Empty;
-        }
-        /// <summary>
-        /// 停止服务器转发
-        /// </summary>
-        /// <param name="forward"></param>
-        /// <returns></returns>
-        public async Task<string> StopServerForward(ServerForwardItemInfo forward)
-        {
-            ServerForwardItemInfo forwardInfo;
-            if (forward.AliveType == TcpForwardAliveTypes.Web)
-            {
-                forwardInfo = serverForwards.FirstOrDefault(c => c.Domain == forward.Domain && c.ServerPort == forward.ServerPort);
-            }
-            else
-            {
-                forwardInfo = serverForwards.FirstOrDefault(c => c.ServerPort == forward.ServerPort);
-            }
-            if (forwardInfo == null)
-            {
-                return "未找到操作对象";
-            }
-            var resp = await tcpForwardMessengerSender.UnRegister(signInStateInfo.Connection, new TcpForwardUnRegisterParamsInfo
-            {
-                AliveType = forward.AliveType,
-                SourceIp = forward.Domain,
-                SourcePort = forward.ServerPort,
-            }).ConfigureAwait(false);
-            if (resp.Code != MessageResponeCodes.OK)
-            {
-                return resp.Code.GetDesc((byte)resp.Code);
-            }
-            forwardInfo.Listening = false;
-            SaveServerConfig();
-            return string.Empty;
-        }
-        /// <summary>
-        /// 删除服务器转发
-        /// </summary>
-        /// <param name="forward"></param>
-        /// <returns></returns>
-        public async Task<string> RemoveServerForward(ServerForwardItemInfo forward)
-        {
-            ServerForwardItemInfo forwardInfo;
-            if (forward.AliveType == TcpForwardAliveTypes.Web)
-            {
-                forwardInfo = serverForwards.FirstOrDefault(c => c.Domain == forward.Domain && c.ServerPort == forward.ServerPort);
-            }
-            else
-            {
-                forwardInfo = serverForwards.FirstOrDefault(c => c.ServerPort == forward.ServerPort);
-            }
-            if (forwardInfo == null)
-            {
-                return "未找到删除对象";
-            }
-            var resp = await tcpForwardMessengerSender.UnRegister(signInStateInfo.Connection, new TcpForwardUnRegisterParamsInfo
-            {
-                AliveType = forward.AliveType,
-                SourceIp = forward.Domain,
-                SourcePort = forward.ServerPort,
-            }).ConfigureAwait(false);
-            if (resp.Code != MessageResponeCodes.OK)
-            {
-                return resp.Code.GetDesc((byte)resp.Code);
-            }
-            serverForwards.Remove(forwardInfo);
-            SaveServerConfig();
-
-            return string.Empty;
-        }
-
-
-        private ServerForwardConfigInfo ReadServerConfig()
-        {
-            var config = serverConfigDataProvider.Load().Result;
-            foreach (var item in config.Webs)
-            {
-                item.AliveType = TcpForwardAliveTypes.Web;
-            }
-            foreach (var item in config.Tunnels)
-            {
-                item.AliveType = TcpForwardAliveTypes.Tunnel;
-            }
-            serverForwards = config.Webs.Concat(config.Tunnels).ToList();
-            return config;
-        }
-        private void SaveServerConfig()
-        {
-            serverForwardConfigInfo.Webs = serverForwards.Where(c => c.AliveType == TcpForwardAliveTypes.Web).ToArray();
-            serverForwardConfigInfo.Tunnels = serverForwards.Where(c => c.AliveType == TcpForwardAliveTypes.Tunnel).ToArray();
-            serverConfigDataProvider.Save(serverForwardConfigInfo);
-        }
-
-        private void RegisterServerForward()
-        {
-            foreach (var item in serverForwardConfigInfo.Webs)
-            {
-                SendRegister(item, TcpForwardAliveTypes.Web);
-            }
-            foreach (var item in serverForwardConfigInfo.Tunnels.Where(c => c.Listening == true))
-            {
-                SendRegister(item, TcpForwardAliveTypes.Tunnel);
-            }
-        }
-        private void SendRegister(ServerForwardItemInfo item, TcpForwardAliveTypes type)
-        {
-            tcpForwardMessengerSender.Register(signInStateInfo.Connection, new TcpForwardRegisterParamsInfo
-            {
-                AliveType = type,
-                SourceIp = item.Domain,
-                SourcePort = item.ServerPort,
-                TargetIp = item.LocalIp,
-                TargetPort = item.LocalPort,
-                TargetName = clientConfig.Client.Name,
-            }).ContinueWith((result) =>
-            {
-                PrintResult(item, result.Result, type);
-            });
-        }
-        private void PrintResult(ServerForwardItemInfo item, MessageResponeInfo resp, TcpForwardAliveTypes type)
-        {
-            bool success = false;
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append($"注册服务器代理Tcp转发【{type.GetDesc((byte)type)}】代理 {item.Domain}:{item.ServerPort} -> {item.LocalIp}:{item.LocalPort}");
-            if (resp.Code != MessageResponeCodes.OK)
-            {
-                sb.Append($" 【{resp.Code.GetDesc((byte)resp.Code)}】");
-            }
-            else
-            {
-                TcpForwardRegisterResult result = new TcpForwardRegisterResult();
-                result.DeBytes(resp.Data);
-                sb.Append($" 【{result.Code.GetDesc((byte)result.Code)},{result.Msg}】{result.Msg}");
-                success = result.Code == TcpForwardRegisterResultCodes.OK;
-            }
-            if (success)
-            {
-                Logger.Instance.Info(sb.ToString());
-            }
-            else
-            {
-                Logger.Instance.Warning(sb.ToString());
-            }
-        }
-
-        #endregion
-
         /// <summary>
         /// 获取pac
         /// </summary>
@@ -775,9 +486,6 @@ namespace client.service.tcpforward
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class P2PListenAddParams
     {
         /// <summary>
@@ -821,9 +529,6 @@ namespace client.service.tcpforward
         /// </summary>
         public string Pac { get; set; } = string.Empty;
     }
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class P2PForwardAddParams
     {
         /// <summary>
@@ -835,9 +540,6 @@ namespace client.service.tcpforward
         /// </summary>
         public P2PForwardInfo Forward { get; set; } = new P2PForwardInfo();
     }
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class P2PForwardRemoveParams
     {
         /// <summary>
@@ -849,10 +551,6 @@ namespace client.service.tcpforward
         /// </summary>
         public uint ForwardID { get; set; } = 0;
     }
-
-    /// <summary>
-    /// 
-    /// </summary>
     [Table("p2p-tcp-forwards")]
     public sealed class P2PConfigInfo
     {
@@ -869,9 +567,6 @@ namespace client.service.tcpforward
         /// </summary>
         public List<P2PListenInfo> Tunnels { get; set; } = new List<P2PListenInfo>();
     }
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class P2PListenInfo
     {
         /// <summary>
@@ -921,9 +616,6 @@ namespace client.service.tcpforward
         /// </summary>
         public string Pac { get; set; } = string.Empty;
     }
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class P2PForwardInfo
     {
         /// <summary>
@@ -952,53 +644,4 @@ namespace client.service.tcpforward
         public string Desc { get; set; } = string.Empty;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [Table("server-tcp-forwards")]
-    public sealed class ServerForwardConfigInfo
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        public ServerForwardItemInfo[] Webs { get; set; } = Array.Empty<ServerForwardItemInfo>();
-        /// <summary>
-        /// 
-        /// </summary>
-        public ServerForwardItemInfo[] Tunnels { get; set; } = Array.Empty<ServerForwardItemInfo>();
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    public sealed class ServerForwardItemInfo
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
-        /// <summary>
-        /// 
-        /// </summary>
-        public string Domain { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public ushort ServerPort { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public string LocalIp { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public ushort LocalPort { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public string Desc { get; set; } = string.Empty;
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool Listening { get; set; } = false;
-    }
 }

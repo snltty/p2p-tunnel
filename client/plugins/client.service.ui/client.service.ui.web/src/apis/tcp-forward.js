@@ -44,24 +44,3 @@ export const removeForward = (listenid, forwardid) => {
         ForwardID: forwardid
     });
 }
-
-
-export const getServerPorts = () => {
-    return sendWebsocketMsg(`servertcpforward/ServerPorts`);
-}
-export const getServerForwards = () => {
-    return sendWebsocketMsg(`servertcpforward/ServerForwards`);
-}
-
-export const AddServerForward = (model) => {
-    return sendWebsocketMsg(`servertcpforward/AddServerForward`, model);
-}
-export const startServerForward = (model) => {
-    return sendWebsocketMsg(`servertcpforward/StartServerForward`, model);
-}
-export const stopServerForward = (model) => {
-    return sendWebsocketMsg(`servertcpforward/StopServerForward`, model);
-}
-export const removeServerForward = (model) => {
-    return sendWebsocketMsg(`servertcpforward/RemoveServerForward`, model);
-}

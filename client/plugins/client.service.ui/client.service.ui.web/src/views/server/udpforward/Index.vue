@@ -42,7 +42,7 @@
 </template>
 <script>
 import { reactive, ref, toRefs } from '@vue/reactivity'
-import { getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../apis/udp-forward'
+import { getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../apis/udp-forward-server'
 import { onMounted, provide } from '@vue/runtime-core'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../states/shareData'

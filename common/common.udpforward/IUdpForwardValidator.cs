@@ -39,7 +39,7 @@ namespace common.udpforward
 
         public bool Validate(IConnection connection)
         {
-            return true;
+            return config.ConnectEnable;
         }
     }
 

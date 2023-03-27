@@ -1,9 +1,7 @@
 ﻿using common.libs.database;
-using common.libs.extends;
 using common.server.model;
 using server.messengers;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -14,10 +12,6 @@ namespace server.service.validators
     {
         private readonly IConfigDataProvider<UserStoreModel> configDataProvider;
         UserStoreModel storeModel = new UserStoreModel { Users = new Dictionary<ulong, UserInfo>() };
-        public UserInfo DefaultUser { get; } = new UserInfo
-        {
-            ID = 0,
-        };
 
         public UserStore(IConfigDataProvider<UserStoreModel> configDataProvider)
         {
@@ -52,7 +46,7 @@ namespace server.service.validators
         {
             if (uid == 0)
             {
-                user = DefaultUser;
+                user = DefaultUser();
                 return true;
             }
 
@@ -103,7 +97,14 @@ namespace server.service.validators
             return storeModel.Users.Remove(id, out UserInfo user);
         }
 
-       
+        public UserInfo DefaultUser()
+        {
+            return new UserInfo
+            {
+                ID = 0,
+                IsDefault = true,
+            };
+        }
     }
 
     [Table("users")]

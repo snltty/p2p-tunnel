@@ -17,9 +17,9 @@ namespace server.service.messengers.singnin
         private readonly IClientSignInCaching clientSignInCache;
         private readonly MessengerSender messengerSender;
         private readonly IUserStore userStore;
-        private readonly ISignInMiddlewareHandler signInMiddlewareHandler;
+        private readonly ISignInValidatorHandler signInMiddlewareHandler;
 
-        public SignInMessenger(IClientSignInCaching clientSignInCache, MessengerSender messengerSender, IUserStore userStore, ISignInMiddlewareHandler signInMiddlewareHandler)
+        public SignInMessenger(IClientSignInCaching clientSignInCache, MessengerSender messengerSender, IUserStore userStore, ISignInValidatorHandler signInMiddlewareHandler)
         {
             this.clientSignInCache = clientSignInCache;
             this.messengerSender = messengerSender;
@@ -43,18 +43,32 @@ namespace server.service.messengers.singnin
             }
 
             //缓存
-            (SignInResultInfo verify, SignInCacheInfo client) = VerifyAndAdd(model, user, connection);
-            if (verify != null)
+            if (clientSignInCache.Get(model.GroupId, model.Name, out SignInCacheInfo client))
             {
-                return verify.ToBytes();
+                clientSignInCache.Remove(client.ConnectionId);
+                return new SignInResultInfo { Code = SignInResultInfo.SignInResultInfoCodes.SAME_NAMES }.ToBytes(); ;
             }
+            client = new()
+            {
+                Name = model.Name,
+                GroupId = model.GroupId,
+                LocalIps = model.LocalIps,
+                ClientAccess = model.ClientAccess,
+                ConnectionId = 0,
+                UserId = user.ID,
+                ShortId = model.ShortId,
+                LocalPort = model.LocalTcpPort,
+                Port = connection.Address.Port,
+                NetFlow = user.NetFlow,
+                UserAccess = user.Access,
+            };
+            clientSignInCache.Add(client);
             client.UpdateConnection(connection);
 
             //权限
-            client.UserAccess = user.Access;
+            client.UserAccess = user.Access | (uint)signInMiddlewareHandler.Access();
             client.NetFlow = user.NetFlow;
             client.EndTime = user.EndTime;
-            signInMiddlewareHandler.Access(client);
 
             return new SignInResultInfo
             {
@@ -94,36 +108,6 @@ namespace server.service.messengers.singnin
 
             });
             Console.WriteLine(res.Code);
-        }
-
-        private (SignInResultInfo, SignInCacheInfo) VerifyAndAdd(SignInParamsInfo model, UserInfo user, IConnection connection)
-        {
-            SignInResultInfo verify = null;
-            ///第一次注册，检查有没有重名
-            if (clientSignInCache.Get(model.GroupId, model.Name, out SignInCacheInfo client))
-            {
-                clientSignInCache.Remove(client.ConnectionId);
-                verify = new SignInResultInfo { Code = SignInResultInfo.SignInResultInfoCodes.SAME_NAMES };
-            }
-            else
-            {
-                client = new()
-                {
-                    Name = model.Name,
-                    GroupId = model.GroupId,
-                    LocalIps = model.LocalIps,
-                    ClientAccess = model.ClientAccess,
-                    ConnectionId = 0,
-                    UserId = user.ID,
-                    ShortId = model.ShortId,
-                    LocalPort = model.LocalTcpPort,
-                    Port = connection.Address.Port,
-                    NetFlow = user.NetFlow,
-                    UserAccess = user.Access
-                };
-                clientSignInCache.Add(client);
-            }
-            return (verify, client);
         }
     }
 }

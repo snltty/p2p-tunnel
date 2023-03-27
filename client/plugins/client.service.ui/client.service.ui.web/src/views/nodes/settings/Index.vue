@@ -1,8 +1,5 @@
 <template>
     <div class="absolute flex">
-        <div class="menu h-100">
-            <LeftMenu :menus="leftMenus" v-model="state.currentMenu" @handle="handleJumpScroll"></LeftMenu>
-        </div>
         <div class="content h-100 flex-1 flex flex-column">
             <div class="inner flex-1 scrollbar" ref="contentDom">
                 <template v-for="(item,index) in leftMenus" :key="index">
@@ -20,21 +17,19 @@
 </template> 
 
 <script>
-import Client from '../nodes/list/Setting.vue'
-import Encode from '../nodes/list/EncodeSetting.vue'
-import TcpForward from '../nodes/tcpforward/Setting.vue'
-import UdpForward from '../nodes/udpforward/Setting.vue'
-import HttpProxy from '../nodes/httpproxy/Setting.vue'
-import Socks5 from '../nodes/socks5/Setting.vue'
-import Vea from '../nodes/vea/Setting.vue'
-import Logger from '../nodes/logger/Setting.vue'
-import { getCurrentInstance, nextTick, onBeforeUnmount, computed, watch, onMounted, reactive, ref, shallowRef } from '@vue/runtime-core'
+import Client from '../../nodes/list/Setting.vue'
+import Encode from '../../nodes/list/EncodeSetting.vue'
+import TcpForward from '../../nodes/tcpforward/Setting.vue'
+import UdpForward from '../../nodes/udpforward/Setting.vue'
+import HttpProxy from '../../nodes/httpproxy/Setting.vue'
+import Socks5 from '../../nodes/socks5/Setting.vue'
+import Vea from '../../nodes/vea/Setting.vue'
+import Logger from '../../nodes/logger/Setting.vue'
+import { getCurrentInstance, computed, watch, reactive, ref, shallowRef } from '@vue/runtime-core'
 import { useRouter } from 'vue-router'
-import { injectServices, accessService } from '../../states/services'
+import { injectServices, accessService } from '../../../states/services'
 import { ElMessage } from 'element-plus/lib/components'
-import LeftMenu from '../../components/LeftMenu.vue'
 export default {
-    components: { LeftMenu },
     setup() {
 
         const instance = getCurrentInstance();
@@ -84,34 +79,6 @@ export default {
         });
 
         const contentDom = ref(null);
-        const onScroll = (e) => {
-            let stop = contentDom.value.scrollTop;
-            var dividers = contentDom.value.querySelectorAll('.el-divider');
-            for (let i = 0; i < dividers.length; i++) {
-                if (dividers[i].offsetTop - 10 <= stop) {
-                    state.currentMenu = i;
-                }
-            }
-        }
-        const listenScroll = () => {
-            contentDom.value.addEventListener('scroll', onScroll);
-        }
-        const removeListenScroll = () => {
-            contentDom.value.removeEventListener('scroll', onScroll);
-        }
-        const handleJumpScroll = (index) => {
-            var dividers = contentDom.value.querySelectorAll('.el-divider');
-            contentDom.value.scrollTop = dividers[index].offsetTop - 10;
-        }
-
-        onMounted(() => {
-            nextTick(() => {
-                listenScroll();
-            });
-        });
-        onBeforeUnmount(() => {
-            removeListenScroll();
-        });
 
         const getFuns = () => {
             const refs = instance.refs;
@@ -143,7 +110,7 @@ export default {
             fun();
         }
 
-        return { state, contentDom, leftMenus, handleJumpScroll, handleSave }
+        return { state, contentDom, leftMenus, handleSave }
     }
 }
 </script>

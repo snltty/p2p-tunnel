@@ -63,7 +63,7 @@
 
 <script>
 import { onMounted, provide, reactive, ref } from '@vue/runtime-core';
-import { getServerPorts, getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../apis/tcp-forward'
+import { getServerPorts, getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../apis/tcp-forward-server'
 import { injectShareData } from '../../../states/shareData'
 import { injectSignIn } from '../../../states/signin'
 import AddForward from './AddForward.vue'

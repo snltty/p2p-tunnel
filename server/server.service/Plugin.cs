@@ -32,12 +32,7 @@ namespace server.service
             services.AddSingleton<IRelaySourceConnectionSelector, messengers.RelaySourceConnectionSelector>();
 
 
-            services.AddSingleton<ISignInMiddlewareHandler, SignInMiddlewareHandler>();
-            services.AddSingleton<SignInDefaultValidator>();
-            services.AddSingleton<SignInRelayMiddleware>();
-            services.AddSingleton<SignInEndTimeMiddleware>();
-            services.AddSingleton<SignInNetFlowMiddleware>();
-            services.AddSingleton<SignInSignLimitMiddleware>();
+            services.AddSingleton<ISignInValidatorHandler, SignInValidatorHandler>();
             services.AddSingleton<IServiceAccessValidator, ServiceAccessValidator>();
             services.AddSingleton<IRelayValidator, RelayValidator>();
             services.AddSingleton<IUserStore, UserStore>();
@@ -50,6 +45,14 @@ namespace server.service
             services.AddSingleton<WheelTimer<object>>();
 
             foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)))
+            {
+                services.AddSingleton(item);
+            }
+            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)))
+            {
+                services.AddSingleton(item);
+            }
+            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInAccess)))
             {
                 services.AddSingleton(item);
             }
@@ -73,15 +76,16 @@ namespace server.service
                 messenger.LoadMessenger(item, services.GetService(item));
             }
 
-            //启用一些账号验证，想修改的话，可以参照 server.service.validators.SignInValidator 里的任一实现了 SignInMiddleware的类
-            //比如我想把账号的过期时间单独处理，而不是吧数据保存在用户信息里，或者想加入一些别的验证
-            ISignInMiddlewareHandler signInMiddlewareHandler = services.GetService<ISignInMiddlewareHandler>();
-            signInMiddlewareHandler
-                .Use(services.GetService<SignInDefaultValidator>())
-                .Use(services.GetService<SignInRelayMiddleware>())
-                .Use(services.GetService<SignInEndTimeMiddleware>())
-                .Use(services.GetService<SignInNetFlowMiddleware>())
-                .Use(services.GetService<SignInSignLimitMiddleware>());
+
+            ISignInValidatorHandler signInMiddlewareHandler = services.GetService<ISignInValidatorHandler>();
+            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct())
+            {
+                signInMiddlewareHandler.LoadValidator((ISignInValidator)services.GetService(item));
+            }
+            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInAccess)).Distinct())
+            {
+                signInMiddlewareHandler.LoadAccess((ISignInAccess)services.GetService(item));
+            }
 
             Loop(services);
             Udp((UdpServer)udpServer, messenger);

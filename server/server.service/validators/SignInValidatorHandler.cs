@@ -4,33 +4,49 @@ using server.messengers;
 
 namespace server.service.validators
 {
-    public class SignInMiddlewareHandler : ISignInMiddlewareHandler
+    public class SignInValidatorHandler : ISignInValidatorHandler
     {
-        SignInMiddleware first;
-        SignInMiddleware last;
+        Wrap<ISignInValidator> first;
+        Wrap<ISignInValidator> last;
+
+        Wrap<ISignInAccess> firstAccess;
+        Wrap<ISignInAccess> lastAccess;
 
         private readonly Config config;
         private readonly IUserStore userStore;
-        public SignInMiddlewareHandler(Config config, IUserStore userStore)
+        public SignInValidatorHandler(Config config, IUserStore userStore)
         {
             this.config = config;
             this.userStore = userStore;
         }
 
-        public ISignInMiddlewareHandler Use(SignInMiddleware middle)
+        public void LoadValidator(ISignInValidator validator)
         {
             if (first == null)
             {
-                first = middle;
+                first = new Wrap<ISignInValidator> { Value = validator };
                 last = first;
             }
             else
             {
-                last.Next = middle;
-                last = middle;
+                last.Next = new Wrap<ISignInValidator> { Value = validator };
+                last = last.Next;
             }
-            return this;
         }
+        public void LoadAccess(ISignInAccess access)
+        {
+            if (firstAccess == null)
+            {
+                firstAccess = new Wrap<ISignInAccess> { Value = access };
+                lastAccess = firstAccess;
+            }
+            else
+            {
+                lastAccess.Next = new Wrap<ISignInAccess> { Value = access };
+                lastAccess = lastAccess.Next;
+            }
+        }
+
 
         public SignInResultInfo.SignInResultInfoCodes Validate(ref UserInfo user)
         {
@@ -47,12 +63,11 @@ namespace server.service.validators
                 {
                     return SignInResultInfo.SignInResultInfoCodes.NOT_FOUND;
                 }
-
                 //其它自定义验证
-                SignInMiddleware current = first;
+                Wrap<ISignInValidator> current = first;
                 while (current != null)
                 {
-                    SignInResultInfo.SignInResultInfoCodes code = current.Validate(user);
+                    SignInResultInfo.SignInResultInfoCodes code = current.Value.Validate(user);
                     if (code != SignInResultInfo.SignInResultInfoCodes.OK)
                     {
                         return code;
@@ -65,21 +80,30 @@ namespace server.service.validators
                 if (user == null)
                 {
                     //不验证账号，给个游客账号
-                    user = userStore.DefaultUser;
+                    user = userStore.DefaultUser();
                 }
             }
 
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
 
-        public void Access(SignInCacheInfo cache)
+        public EnumServiceAccess Access()
         {
-            SignInMiddleware current = first;
+            EnumServiceAccess enumServiceAccess = EnumServiceAccess.None;
+            Wrap<ISignInAccess> current = firstAccess;
             while (current != null)
             {
-                current.Access(cache);
+                enumServiceAccess |= current.Value.Access();
                 current = current.Next;
             }
+            return enumServiceAccess;
+        }
+
+
+        class Wrap<T>
+        {
+            public T Value { get; set; }
+            public Wrap<T> Next { get; set; }
         }
     }
 }

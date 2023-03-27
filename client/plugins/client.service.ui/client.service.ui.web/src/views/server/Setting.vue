@@ -104,7 +104,7 @@ export default {
                 ConnectLimit: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: 1, max: 1000, message: '数字 1-1000', trigger: 'blur', transform(value) {
+                        type: 'number', min: 0, max: 1000, message: '数字 0-1000', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }
@@ -128,7 +128,7 @@ export default {
                 TcpBufferSize: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: 1026, max: 65536, message: '数字 1024-65536', trigger: 'blur', transform(value) {
+                        type: 'number', min: 1024, max: 65536, message: '数字 1024-65536', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }
@@ -137,22 +137,12 @@ export default {
         });
 
         const loadConfig = () => {
-            getConfigure('ServerConfigure').then((json) => {
-                console.log(json);
-                // state.model.Name = json.ClientConfig.Name;
-            }).catch((msg) => {
-            });
-        }
-
-        const getJson = () => {
             return new Promise((resolve, reject) => {
                 getConfigure('ServerConfigure').then((json) => {
-                    // json.ClientConfig.Name = state.model.Name;
-                    resolve(json);
+                    resolve(new Function(`return ${json}`)());
                 }).catch(reject);
-            })
+            });
         }
-
         const submit = () => {
             return new Promise((resolve, reject) => {
                 formDom.value.validate((valid) => {
@@ -160,15 +150,32 @@ export default {
                         reject();
                         return false;
                     }
-                    getJson().then((json) => {
-                        saveConfigure('ServerConfigure', json).then(resolve).catch(reject);
+                    loadConfig().then((json) => {
+                        json.ConnectLimit = +state.model.ConnectLimit;
+                        json.TcpBufferSize = +state.model.TcpBufferSize;
+                        json.TimeoutDelay = +state.model.TimeoutDelay;
+                        json.RegisterTimeout = +state.model.RegisterTimeout;
+                        json.RegisterEnable = state.model.RegisterEnable;
+                        json.RelayEnable = state.model.RelayEnable;
+                        json.VerifyAccount = state.model.VerifyAccount;
+                        json.EncodePassword = state.model.EncodePassword;
+                        saveConfigure('ServerConfigure', JSON.stringify(json)).then(resolve).catch(reject);
                     }).catch(reject);
                 });
             })
         }
 
         onMounted(() => {
-            loadConfig();
+            loadConfig().then((json) => {
+                state.model.ConnectLimit = json.ConnectLimit;
+                state.model.TcpBufferSize = json.TcpBufferSize;
+                state.model.TimeoutDelay = json.TimeoutDelay;
+                state.model.RegisterTimeout = json.RegisterTimeout;
+                state.model.RegisterEnable = json.RegisterEnable;
+                state.model.RelayEnable = json.RelayEnable;
+                state.model.VerifyAccount = json.VerifyAccount;
+                state.model.EncodePassword = json.EncodePassword;
+            });
         });
 
         return {

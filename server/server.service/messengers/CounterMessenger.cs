@@ -4,7 +4,6 @@ using common.server.model;
 using server.messengers.singnin;
 using System;
 using System.Diagnostics;
-using System.Linq;
 
 namespace server.service.messengers
 {
@@ -25,7 +24,6 @@ namespace server.service.messengers
                 Callback = (state) =>
                 {
                     proc.Refresh();
-                    var clients = clientSignInCaching.Get();
                     counterResultInfo.OnlineCount = clientSignInCaching.Count;
                     counterResultInfo.Cpu = ProcessHelper.GetCpu(proc);
                     counterResultInfo.Memory = ProcessHelper.GetMemory(proc);

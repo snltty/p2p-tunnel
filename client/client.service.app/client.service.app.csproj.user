@@ -4,7 +4,7 @@
     <ActiveDebugFramework>net7.0-android</ActiveDebugFramework>
     <IsFirstTimeProjectOpen>False</IsFirstTimeProjectOpen>
     <ActiveDebugProfile>Android Emulator</ActiveDebugProfile>
-    <SelectedPlatformGroup>PhysicalDevice</SelectedPlatformGroup>
+    <SelectedPlatformGroup>Emulator</SelectedPlatformGroup>
     <DefaultDevice>pixel_5_-_api_31</DefaultDevice>
     <SelectedDevice>pixel_5_-_api_31</SelectedDevice>
   </PropertyGroup>

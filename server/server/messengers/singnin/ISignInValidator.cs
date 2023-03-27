@@ -3,19 +3,21 @@
 namespace server.messengers.singnin
 {
 
-    public interface ISignInMiddlewareHandler
+    public interface ISignInValidatorHandler
     {
-        public ISignInMiddlewareHandler Use(SignInMiddleware middle);
+        public void LoadValidator(ISignInValidator validator);
+        public void LoadAccess(ISignInAccess access);
         public SignInResultInfo.SignInResultInfoCodes Validate(ref UserInfo user);
-        public void Access(SignInCacheInfo cache);
+        public EnumServiceAccess Access();
     }
 
-    public abstract class SignInMiddleware
+    public interface ISignInValidator
     {
-        public SignInMiddleware Next { get; set; }
-        public abstract SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user);
-        public abstract void Access(SignInCacheInfo cache);
+        public SignInResultInfo.SignInResultInfoCodes Validate(UserInfo user);
     }
 
-
+    public interface ISignInAccess
+    {
+        public EnumServiceAccess Access();
+    }
 }

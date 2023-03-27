@@ -9,26 +9,20 @@
         <div class="navs">
             <router-link :to="{name:'Home'}">
                 <el-icon>
-                    <House />
+                    <HomeFilled />
                 </el-icon>
                 <span>首页</span>
             </router-link>
             <router-link :to="{name:'Nodes'}">
                 <el-icon>
-                    <Link />
+                    <Share />
                 </el-icon>
-                <span>应用</span>
-            </router-link>
-            <router-link :to="{name:'Settings'}">
-                <el-icon>
-                    <Setting />
-                </el-icon>
-                <span>配置</span>
+                <span>节点</span>
             </router-link>
             <auth-item-or :names="names">
                 <router-link :to="{name:'Servers'}">
                     <el-icon>
-                        <Position />
+                        <Promotion />
                     </el-icon>
                     <span>服务器</span>
                 </router-link>
