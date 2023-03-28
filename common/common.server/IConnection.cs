@@ -120,8 +120,8 @@ namespace common.server
 
         #region 回复消息相关
 
-        public byte[] ResponseData { get; }
-        public int ResponseDataLength { get;}
+        public Memory<byte> ResponseData { get; }
+        public void Write(Memory<byte> data);
         public void Write(ulong num);
         public void Write(ushort num);
         public void Write(ushort[] nums);
@@ -284,25 +284,34 @@ namespace common.server
         #endregion
 
         #region 回复数据
-        public byte[] ResponseData { get; private set; }
-        public int ResponseDataLength { get; private set; }
+        public Memory<byte> ResponseData { get; private set; }
+        private byte[] responseData;
+        private int length = 0;
+
+        public void Write(Memory<byte> data)
+        {
+            ResponseData = data;
+        }
         public void Write(ulong num)
         {
-            ResponseDataLength = 8;
-            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
-            num.ToBytes(ResponseData);
+            length = 8;
+            responseData = ArrayPool<byte>.Shared.Rent(length);
+            num.ToBytes(responseData);
+            ResponseData = responseData.AsMemory(0, length);
         }
         public void Write(ushort num)
         {
-            ResponseDataLength = 2;
-            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
-            num.ToBytes(ResponseData);
+            length = 2;
+            responseData = ArrayPool<byte>.Shared.Rent(length);
+            num.ToBytes(responseData);
+            ResponseData = responseData.AsMemory(0, length);
         }
         public void Write(ushort[] nums)
         {
-            ResponseDataLength = nums.Length * 2;
-            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
-            nums.ToBytes(ResponseData);
+            length = nums.Length * 2;
+            responseData = ArrayPool<byte>.Shared.Rent(length);
+            nums.ToBytes(responseData);
+            ResponseData = responseData.AsMemory(0, length);
         }
         /// <summary>
         /// 英文多用这个
@@ -311,13 +320,15 @@ namespace common.server
         public void WriteUTF8(string str)
         {
             var span = str.AsSpan();
-            ResponseData = ArrayPool<byte>.Shared.Rent((span.Length + 1) * 3 + 8);
-            var memory = ResponseData.AsMemory();
+            responseData = ArrayPool<byte>.Shared.Rent((span.Length + 1) * 3 + 8);
+            var memory = responseData.AsMemory();
 
             int utf8Length = span.ToUTF8Bytes(memory.Slice(8));
             span.Length.ToBytes(memory);
             utf8Length.ToBytes(memory.Slice(4));
-            ResponseDataLength = utf8Length + 8;
+            length = utf8Length + 8;
+
+            ResponseData = responseData.AsMemory(0, length);
         }
         /// <summary>
         /// 中文多用这个
@@ -326,23 +337,25 @@ namespace common.server
         public void WriteUTF16(string str)
         {
             var span = str.GetUTF16Bytes();
+            length = span.Length + 4;
+            responseData = ArrayPool<byte>.Shared.Rent(length);
+            str.Length.ToBytes(responseData);
+            span.CopyTo(responseData.AsSpan(4));
 
-            ResponseDataLength = span.Length + 4;
-            ResponseData = ArrayPool<byte>.Shared.Rent(ResponseDataLength);
-            str.Length.ToBytes(ResponseData);
-            span.CopyTo(ResponseData.AsSpan(4));
+            ResponseData = responseData.AsMemory(0, length);
         }
         /// <summary>
         /// 归还池
         /// </summary>
         public void Return()
         {
-            if (ResponseData != null && ResponseData.Length > 0)
+            if (length > 0 && ResponseData.Length > 0)
             {
-                ArrayPool<byte>.Shared.Return(ResponseData);
+                ArrayPool<byte>.Shared.Return(responseData);
             }
-            ResponseData = null;
-            ResponseDataLength = 0;
+            ResponseData = Helper.EmptyArray;
+            responseData = null;
+            length = 0;
         }
         #endregion
 

@@ -32,22 +32,24 @@ namespace server.service.socks5
         }
 
         [MessengerId((ushort)Socks5MessengerIds.Setting)]
-        public async Task<byte[]> Setting(IConnection connection)
+        public async Task Setting(IConnection connection)
         {
             string str = connection.ReceiveRequestWrap.Payload.GetUTF8String();
 
             if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
             if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
 
             await config.SaveConfig(str);
 
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
     }
 }

@@ -52,7 +52,7 @@ namespace server.service
                 Directory.CreateDirectory("log");
             }
 
-            Logger.Instance.OnLogger.Sub((model) =>
+            Logger.Instance.OnLogger += (model) =>
             {
                 ConsoleColor currentForeColor = Console.ForegroundColor;
                 switch (model.Type)
@@ -82,7 +82,7 @@ namespace server.service
                 sw.Flush();
                 sw.Close();
                 sw.Dispose();
-            });
+            };
         }
     }
 }

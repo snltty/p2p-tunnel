@@ -10,15 +10,6 @@ namespace server.service.tcpforward
     /// </summary>
     public sealed class TcpForwardTransfer : TcpForwardTransferBase
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="clientSignInCaching"></param>
-        /// <param name="tcpForwardTargetCaching"></param>
-        /// <param name="tcpForwardServer"></param>
-        /// <param name="tcpForwardMessengerSender"></param>
-        /// <param name="tcpForwardTargetProvider"></param>
         public TcpForwardTransfer(
 
             common.tcpforward.Config config, IClientSignInCaching clientSignInCaching,
@@ -32,7 +23,7 @@ namespace server.service.tcpforward
                 tcpForwardServer.Init(config.NumConnections, config.BufferSize);
 
                 //离线删除其监听
-                clientSignInCaching.OnOffline.Sub((client) =>
+                clientSignInCaching.OnOffline += (client) =>
                 {
                     var keys = tcpForwardTargetCaching.Remove(client.Name);
                     if (keys.Any())
@@ -42,7 +33,7 @@ namespace server.service.tcpforward
                             tcpForwardServer.Stop(item);
                         }
                     }
-                });
+                };
 
                 Logger.Instance.Info("TCP转发服务已启动...");
                 //转发监听

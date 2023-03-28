@@ -13,6 +13,8 @@ namespace common.server
     /// </summary>
     public sealed class MessengerResolver
     {
+        delegate void VoidDelegate(IConnection connection);
+        delegate Task TaskDelegate(IConnection connection);
 
         private readonly Dictionary<ushort, MessengerCacheInfo> messengers = new();
 
@@ -49,12 +51,18 @@ namespace common.server
                     {
                         MessengerCacheInfo cache = new MessengerCacheInfo
                         {
-                            IsVoid = method.ReturnType == voidType,
-                            Method = method,
                             Target = obj,
-                            IsTask = method.ReturnType.GetProperty("IsCompleted") != null && method.ReturnType.GetMethod("GetAwaiter") != null,
-                            IsTaskResult = method.ReturnType.GetProperty("Result") != null
+                            //IsTaskResult = method.ReturnType.GetProperty("Result") != null
                         };
+                        if (method.ReturnType == voidType)
+                        {
+                            cache.VoidMethod = (VoidDelegate)Delegate.CreateDelegate(typeof(VoidDelegate), obj, method);
+                        }
+                        else if (method.ReturnType.GetProperty("IsCompleted") != null && method.ReturnType.GetMethod("GetAwaiter") != null)
+                        {
+                            cache.TaskMethod = (TaskDelegate)Delegate.CreateDelegate(typeof(TaskDelegate), obj, method);
+                        }
+
                         messengers.TryAdd(mid.Id, cache);
                     }
                     else
@@ -168,63 +176,26 @@ namespace common.server
                 if (messengers.ContainsKey(requestWrap.MessengerId) == false)
                 {
                     Logger.Instance.DebugError($"{requestWrap.MessengerId},{connection.ServerType}, not found");
-                    if (requestWrap.Reply)
-                    {
-                        await messengerSender.ReplyOnly(new MessageResponseWrap
-                        {
-                            Connection = responseConnection,
-                            Encode = requestWrap.Encode,
-                            RequestId = requestWrap.RequestId,
-                            RelayIds = requestWrap.RelayIds,
-                            Code = MessageResponeCodes.NOT_FOUND
-                        }).ConfigureAwait(false);
-                    }
                     return;
                 }
 
                 MessengerCacheInfo plugin = messengers[requestWrap.MessengerId];
-                object resultAsync = plugin.Method.Invoke(plugin.Target, new object[] { connection });
-                Memory<byte> resultObject = null;
-                if (plugin.IsVoid)
+                if (plugin.VoidMethod != null)
                 {
-                    if (connection.ResponseDataLength > 0)
-                    {
-                        resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
-                    }
+                    plugin.VoidMethod(connection);
                 }
-                else
+                else if (plugin.TaskMethod != null)
                 {
-                    if (plugin.IsTask)
-                    {
-                        if (plugin.IsTaskResult)
-                        {
-                            var task = resultAsync as Task<byte[]>;
-                            await task.ConfigureAwait(false);
-                            resultObject = task.Result;
-                        }
-                        else
-                        {
-                            var task = resultAsync as Task;
-                            await task.ConfigureAwait(false);
+                    await plugin.TaskMethod(connection);
+                }
 
-                            if (connection.ResponseDataLength > 0)
-                            {
-                                resultObject = connection.ResponseData.AsMemory(0, connection.ResponseDataLength);
-                            }
-                        }
-                    }
-                    else if (resultAsync != null)
-                    {
-                        resultObject = resultAsync as byte[];
-                    }
-                }
                 if (requestWrap.Reply == true)
                 {
                     bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
                     {
                         Connection = responseConnection,
                         Encode = requestWrap.Encode,
-                        Payload = resultObject,
+                        Payload = connection.ResponseData,
                         RelayIds = requestWrap.RelayIds,
                         RequestId = requestWrap.RequestId
                     }).ConfigureAwait(false);
@@ -260,21 +231,13 @@ namespace common.server
             /// </summary>
             public object Target { get; set; }
             /// <summary>
-            /// 方法
+            /// 空返回方法
             /// </summary>
-            public MethodInfo Method { get; set; }
+            public VoidDelegate VoidMethod { get; set; }
             /// <summary>
-            /// 是否void
+            /// Task返回方法
             /// </summary>
-            public bool IsVoid { get; set; }
-            /// <summary>
-            /// 是否task
-            /// </summary>
-            public bool IsTask { get; set; }
-            /// <summary>
-            /// 是否task 带result
-            /// </summary>
-            public bool IsTaskResult { get; set; }
+            public TaskDelegate TaskMethod { get; set; }
         }
     }
 }

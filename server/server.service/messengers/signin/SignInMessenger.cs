@@ -1,4 +1,5 @@
-﻿using common.server;
+﻿using common.libs;
+using common.server;
 using common.server.model;
 using server.messengers;
 using server.messengers.singnin;
@@ -17,18 +18,18 @@ namespace server.service.messengers.singnin
         private readonly IClientSignInCaching clientSignInCache;
         private readonly MessengerSender messengerSender;
         private readonly IUserStore userStore;
-        private readonly ISignInValidatorHandler signInMiddlewareHandler;
+        private readonly ISignInValidatorHandler signInValidatorHandler;
 
-        public SignInMessenger(IClientSignInCaching clientSignInCache, MessengerSender messengerSender, IUserStore userStore, ISignInValidatorHandler signInMiddlewareHandler)
+        public SignInMessenger(IClientSignInCaching clientSignInCache, MessengerSender messengerSender, IUserStore userStore, ISignInValidatorHandler signInValidatorHandler)
         {
             this.clientSignInCache = clientSignInCache;
             this.messengerSender = messengerSender;
             this.userStore = userStore;
-            this.signInMiddlewareHandler = signInMiddlewareHandler;
+            this.signInValidatorHandler = signInValidatorHandler;
         }
 
         [MessengerId((ushort)SignInMessengerIds.SignIn)]
-        public byte[] SignIn(IConnection connection)
+        public void SignIn(IConnection connection)
         {
             SignInParamsInfo model = new SignInParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
@@ -36,17 +37,19 @@ namespace server.service.messengers.singnin
             userStore.Get(model.Account, model.Password, out UserInfo user);
 
             //验证登入权限
-            SignInResultInfo.SignInResultInfoCodes code = signInMiddlewareHandler.Validate(ref user);
+            SignInResultInfo.SignInResultInfoCodes code = signInValidatorHandler.Validate(ref user);
             if (code != SignInResultInfo.SignInResultInfoCodes.OK)
             {
-                return new SignInResultInfo { Code = code }.ToBytes();
+                connection.Write(new SignInResultInfo { Code = code }.ToBytes());
+                return;
             }
 
             //缓存
             if (clientSignInCache.Get(model.GroupId, model.Name, out SignInCacheInfo client))
             {
                 clientSignInCache.Remove(client.ConnectionId);
-                return new SignInResultInfo { Code = SignInResultInfo.SignInResultInfoCodes.SAME_NAMES }.ToBytes(); ;
+                connection.Write(new SignInResultInfo { Code = SignInResultInfo.SignInResultInfoCodes.SAME_NAMES }.ToBytes());
+                return;
             }
             client = new()
             {
@@ -66,11 +69,11 @@ namespace server.service.messengers.singnin
             client.UpdateConnection(connection);
 
             //权限
-            client.UserAccess = user.Access | (uint)signInMiddlewareHandler.Access();
+            client.UserAccess = user.Access | (uint)signInValidatorHandler.Access();
             client.NetFlow = user.NetFlow;
             client.EndTime = user.EndTime;
 
-            return new SignInResultInfo
+            connection.Write(new SignInResultInfo
             {
                 ShortId = client.ShortId,
                 Id = client.ConnectionId,
@@ -80,8 +83,7 @@ namespace server.service.messengers.singnin
                 EndTime = client.EndTime,
                 NetFlow = client.NetFlow,
                 SignLimit = user.SignLimit
-            }.ToBytes();
-
+            }.ToBytes());
         }
 
         [MessengerId((ushort)SignInMessengerIds.Notify)]

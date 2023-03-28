@@ -2187,12 +2187,12 @@ namespace Lidgren.Network
 					b = u.Mod(bs);
 					if (b.m_sign == 0)
 					{
-						S.Push("0");
+						S?.Invoke("0");
 					}
 					else
 					{
 						// see how to interact with different bases
-						S.Push(b.m_magnitude[0].ToString("d"));
+						S?.Invoke(b.m_magnitude[0].ToString("d"));
 					}
 					u = u.Divide(bs);
 				}

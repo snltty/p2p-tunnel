@@ -16,10 +16,10 @@ namespace server.service.udpforward
             this.clientSignInCaching = clientSignInCaching;
             this.udpForwardTargetCaching = udpForwardTargetCaching;
 
-            clientSignInCaching.OnOffline.Sub((client) =>
+            clientSignInCaching.OnOffline += (client) =>
             {
                 udpForwardTargetCaching.ClearConnection(client.ConnectionId);
-            });
+            };
         }
 
         /// <summary>

@@ -35,13 +35,13 @@ namespace client.service.udpforward.server
             this.clientConfig = clientConfig;
             this.signInStateInfo = signInStateInfo;
 
-            signInStateInfo.OnChange.Sub((state) =>
+            signInStateInfo.OnChange+=(state) =>
             {
                 if (state)
                 {
                     RegisterServerForward();
                 }
-            });
+            };
         }
 
         #region 服务器代理

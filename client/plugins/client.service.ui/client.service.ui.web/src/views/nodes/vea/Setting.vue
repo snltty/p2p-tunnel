@@ -7,8 +7,8 @@
                         <div class="w-100">
                             <el-row :gutter="10">
                                 <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                    <el-form-item label="代理端口" prop="SocksPort">
-                                        <el-tooltip class="box-item" effect="dark" content="代理端口，无所谓，填写一个未被占用的端口即可" placement="top-start">
+                                    <el-form-item label="监听端口" prop="SocksPort">
+                                        <el-tooltip class="box-item" effect="dark" content="监听端口，无所谓，填写一个未被占用的端口即可" placement="top-start">
                                             <el-input size="default" v-model="state.form.SocksPort"></el-input>
                                         </el-tooltip>
 

@@ -31,11 +31,11 @@ namespace client.messengers.singnin
         /// <summary>
         /// 当注册状态发生变化
         /// </summary>
-        public SimpleSubPushHandler<bool> OnChange { get; } = new SimpleSubPushHandler<bool>();
+        public Action<bool> OnChange { get; set; } = (param) => { };
         /// <summary>
         /// 当注册开始绑定
         /// </summary>
-        public SimpleSubPushHandler<bool> OnBind { get; } = new SimpleSubPushHandler<bool>();
+        public Action<bool> OnBind { get; set; } = (param) => { };
 
         private ulong connectid = 0;
         /// <summary>
@@ -75,10 +75,10 @@ namespace client.messengers.singnin
             Connection?.Disponse();
             Connection = null;
 
-            OnBind.Push(false);
+            OnBind?.Invoke(false);
             if (online != Connected)
             {
-                OnChange.Push(false);
+                OnChange?.Invoke(false);
             }
 
         }
@@ -95,7 +95,7 @@ namespace client.messengers.singnin
             RemoteInfo.Ip = ip;
             ConnectId = id;
 
-            OnChange.Push(true);
+            OnChange?.Invoke(true);
         }
     }
 

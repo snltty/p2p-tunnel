@@ -16,21 +16,11 @@ namespace client.realize.messengers.crypto
     {
         private readonly IAsymmetricCrypto asymmetricCrypto;
         private readonly ICryptoFactory cryptoFactory;
-        private readonly IClientInfoCaching clientInfoCaching;
         private readonly Config config;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="asymmetricCrypto"></param>
-        /// <param name="cryptoFactory"></param>
-        /// <param name="clientInfoCaching"></param>
-        /// <param name="config"></param>
-        public CryptoMessenger(IAsymmetricCrypto asymmetricCrypto, ICryptoFactory cryptoFactory, IClientInfoCaching clientInfoCaching, Config config)
+        public CryptoMessenger(IAsymmetricCrypto asymmetricCrypto, ICryptoFactory cryptoFactory, Config config)
         {
             this.asymmetricCrypto = asymmetricCrypto;
             this.cryptoFactory = cryptoFactory;
-            this.clientInfoCaching = clientInfoCaching;
             this.config = config;
         }
 
@@ -52,7 +42,7 @@ namespace client.realize.messengers.crypto
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Set)]
-        public byte[] Set(IConnection connection)
+        public void Set(IConnection connection)
         {
             string password;
             if (connection.ReceiveRequestWrap.Payload.Length > 0)
@@ -66,11 +56,13 @@ namespace client.realize.messengers.crypto
             }
             if (string.IsNullOrWhiteSpace(password))
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
             ISymmetricCrypto encoder = cryptoFactory.CreateSymmetric(password);
             connection.FromConnection.EncodeEnable(encoder);
-            return Helper.TrueArray;
+
+            connection.Write(Helper.TrueArray);
         }
 
         /// <summary>
@@ -79,10 +71,10 @@ namespace client.realize.messengers.crypto
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Clear)]
-        public byte[] Clear(IConnection connection)
+        public void Clear(IConnection connection)
         {
             connection.FromConnection.EncodeDisable();
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
 
         /// <summary>
@@ -91,11 +83,11 @@ namespace client.realize.messengers.crypto
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Test)]
-        public byte[] Test(IConnection connection)
+        public void Test(IConnection connection)
         {
             Console.WriteLine($"{connection.ServerType},encoder test : {Encoding.UTF8.GetString(connection.FromConnection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");
 
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
     }
 }

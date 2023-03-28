@@ -49,37 +49,41 @@ namespace server.service.messengers.signin
         }
 
         [MessengerId((ushort)UsersMessengerIds.Add)]
-        public byte[] Add(IConnection connection)
+        public void Add(IConnection connection)
         {
             if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
             if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
 
-            userStore.Add(connection.ReceiveRequestWrap.Payload.GetUTF8String().DeJson<UserInfo>());
+            bool res = userStore.Add(connection.ReceiveRequestWrap.Payload.GetUTF8String().DeJson<UserInfo>());
 
-            return Helper.TrueArray;
+            connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
         }
 
         [MessengerId((ushort)UsersMessengerIds.Remove)]
-        public byte[] Remove(IConnection connection)
+        public void Remove(IConnection connection)
         {
             if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
             if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
 
-            userStore.Remove(connection.ReceiveRequestWrap.Payload.ToUInt64());
+            bool res = userStore.Remove(connection.ReceiveRequestWrap.Payload.ToUInt64());
 
-            return Helper.TrueArray;
+            connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
         }
     }
 }

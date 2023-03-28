@@ -19,14 +19,14 @@ namespace client.service.tcpforward
             this.clientInfoCaching = clientInfoCaching;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
             this.signInStateInfo = signInStateInfo;
-            signInStateInfo.OnChange.Sub((state) =>
+            signInStateInfo.OnChange += (state) =>
             {
                 tcpForwardTargetCaching.ClearConnection();
-            });
-            clientInfoCaching.OnOffline.Sub((client) =>
+            };
+            clientInfoCaching.OnOffline += (client) =>
             {
                 tcpForwardTargetCaching.ClearConnection(client.Name);
-            });
+            };
         }
 
         /// <summary>

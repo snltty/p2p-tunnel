@@ -36,25 +36,26 @@ namespace client.realize.messengers.relay
         }
 
         [MessengerId((ushort)RelayMessengerIds.Relay)]
-        public byte[] Relay(IConnection connection)
+        public void Relay(IConnection connection)
         {
             if (relayValidator.Validate(connection) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
 
             RelayInfo relayInfo = new RelayInfo();
             relayInfo.Connection = connection;
             relayInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
-            relayMessengerSender.OnRelay.Push(relayInfo);
+            relayMessengerSender.OnRelay?.Invoke(relayInfo);
 
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
 
         [MessengerId((ushort)RelayMessengerIds.Delay)]
-        public byte[] Delay(IConnection connection)
+        public void Delay(IConnection connection)
         {
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
 
         [MessengerId((ushort)RelayMessengerIds.AskConnects)]

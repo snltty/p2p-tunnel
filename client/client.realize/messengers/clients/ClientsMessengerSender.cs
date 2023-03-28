@@ -2,6 +2,7 @@
 using common.libs.extends;
 using common.server;
 using common.server.model;
+using System;
 using System.Threading.Tasks;
 
 namespace client.realize.messengers.clients
@@ -20,7 +21,7 @@ namespace client.realize.messengers.clients
         /// <summary>
         /// 收到服务器的客户端列表信息
         /// </summary>
-        public SimpleSubPushHandler<ClientsInfo> OnServerClientsData { get; } = new SimpleSubPushHandler<ClientsInfo>();
+        public Action<ClientsInfo> OnServerClientsData { get; set; } = (param) => { };
 
         /// <summary>
         /// 添加通道

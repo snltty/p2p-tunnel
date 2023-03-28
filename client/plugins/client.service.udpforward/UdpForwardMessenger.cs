@@ -11,10 +11,6 @@ namespace client.service.udpforward
     public sealed class UdpForwardMessenger : IMessenger
     {
         private readonly UdpForwardMessengerSender udpForwardMessengerSender;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="udpForwardMessengerSender"></param>
         public UdpForwardMessenger(UdpForwardMessengerSender udpForwardMessengerSender)
         {
             this.udpForwardMessengerSender = udpForwardMessengerSender;

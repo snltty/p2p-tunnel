@@ -71,22 +71,22 @@ namespace client.realize.messengers.clients
             //掉线的
             tcpServer.OnDisconnect += (connection) => OnDisconnect(connection, signInState.Connection);
             clientsTunnel.OnDisConnect = OnDisconnect;
-            clientInfoCaching.OnOffline.Sub(OnOffline);
-            clientInfoCaching.OnOfflineAfter.Sub(OnOfflineAfter);
+            clientInfoCaching.OnOffline+=OnOffline;
+            clientInfoCaching.OnOfflineAfter+=OnOfflineAfter;
 
             //中继连线
-            relayMessengerSender.OnRelay.Sub((param) =>
+            relayMessengerSender.OnRelay += (param) =>
             {
                 _ = Relay(param.Connection, param.RelayIds, false);
-            });
+            };
 
             //有人要求反向链接
-            punchHoleMessengerSender.OnReverse.Sub(OnReverse);
+            punchHoleMessengerSender.OnReverse+=OnReverse;
 
-            signInState.OnBind.Sub(OnBind);
+            signInState.OnBind+=OnBind;
 
             //收到来自服务器的 在线客户端 数据
-            clientsMessengerSender.OnServerClientsData.Sub(OnServerSendClients);
+            clientsMessengerSender.OnServerClientsData+=OnServerSendClients;
 
             Logger.Instance.Info("获取外网距离ing...");
             signInState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();

@@ -60,11 +60,11 @@ namespace client.service.vea
             this.veaMessengerSender = veaMessengerSender;
             this.signInStateInfo = signInStateInfo;
 
-            clientInfoCaching.OnOnline.Sub((client) =>
+            clientInfoCaching.OnOnline += (client) =>
             {
                 UpdateIp();
-            });
-            clientInfoCaching.OnOffline.Sub((client) =>
+            };
+            clientInfoCaching.OnOffline += (client) =>
             {
                 var value = ips.FirstOrDefault(c => c.Value.Client.Id == client.Id);
                 if (value.Key != null)
@@ -74,7 +74,7 @@ namespace client.service.vea
                         RemoveLanMasks(cache.LanIPs);
                     }
                 }
-            });
+            };
 
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) => Stop();
         }

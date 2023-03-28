@@ -97,7 +97,7 @@ namespace server.service
             MessengerResolver messengerResolver = services.GetService<MessengerResolver>();
             MessengerSender messengerSender = services.GetService<MessengerSender>();
 
-            clientRegisterCache.OnChanged.Sub((changeClient) =>
+            clientRegisterCache.OnChanged += (changeClient) =>
             {
                 List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.Connection != null && c.Connection.Connected).OrderBy(c => c.ConnectionId).Select(c => new ClientsClientInfo
                 {
@@ -123,7 +123,7 @@ namespace server.service
                         }).Wait();
                     }
                 }
-            });
+            };
         }
 
         ClientsMessenger clientsMessenger;

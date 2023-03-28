@@ -1,4 +1,5 @@
-﻿using common.libs.database;
+﻿using common.libs;
+using common.libs.database;
 using common.server.model;
 using server.messengers;
 using System;
@@ -26,6 +27,11 @@ namespace server.service.validators
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) =>
             {
                 configDataProvider.Save(storeModel);
+            };
+            AppDomain.CurrentDomain.UnhandledException += (a, b) =>
+            {
+                configDataProvider.Save(storeModel);
+                Logger.Instance.DebugError(b.ExceptionObject + "");
             };
         }
         public int Count()
@@ -69,6 +75,10 @@ namespace server.service.validators
                     {
                         return false;
                     }
+                    if (storeModel.Users.Values.FirstOrDefault(c => c.Account == user.Account) != null)
+                    {
+                        return false;
+                    }
 
                     user.ID = storeModel.Users.Values.Max(c => c.ID) + 1;
                     storeModel.Users.TryAdd(user.ID, user);
@@ -80,7 +90,7 @@ namespace server.service.validators
                 {
                     if (storeModel.Users.TryGetValue(user.ID, out UserInfo _user) == false)
                     {
-                        _user.Account = user.Account;
+                        //_user.Account = user.Account;
                         _user.Password = user.Password;
                         _user.Access = user.Access;
                         _user.NetFlow = user.NetFlow;

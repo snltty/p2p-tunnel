@@ -28,7 +28,7 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import {
     CircleClose, HomeFilled, Link, Position, OfficeBuilding
     , SwitchButton, Loading, ArrowRightBold, Setting, ArrowDown
-    , DArrowLeft, DArrowRight, Edit, Delete, Promotion, Share
+    , DArrowLeft, DArrowRight, Edit, Delete, Promotion, Share, Select
 }
     from '@element-plus/icons'
 app.component(CircleClose.name, CircleClose);
@@ -47,5 +47,6 @@ app.component(Edit.name, Edit);
 app.component(Delete.name, Delete);
 app.component(Promotion.name, Promotion);
 app.component(Share.name, Share);
+app.component(Select.name, Select);
 
 app.use(ElementPlus, { size: 'default' }).use(router).mount('#app');

@@ -1626,8 +1626,8 @@ namespace PseudoTcp
                 sseg.seq = (size_t)(priv.snd_una + snd_buffered);
                 sseg.len = len;
                 sseg.flags = flags;
-                GQueue.PushTail(priv.slist, sseg);
-                GQueue.PushTail(priv.unsent_slist, sseg);
+                GQueue?.InvokeTail(priv.slist, sseg);
+                GQueue?.InvokeTail(priv.unsent_slist, sseg);
             }
 
             //LOG(LS_INFO) << "PseudoTcp::queue - priv.slen = " << priv.slen;

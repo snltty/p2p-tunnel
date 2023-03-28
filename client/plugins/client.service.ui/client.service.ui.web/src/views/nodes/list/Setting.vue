@@ -5,12 +5,12 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="名称" prop="Name">
+                            <el-form-item label="节点名称" prop="Name">
                                 <el-input size="default" v-model="model.Name" maxlength="32" show-word-limit placeholder="设置你的注册名称"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="分组" prop="GroupId">
+                            <el-form-item label="所在分组" prop="GroupId">
                                 <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top-start">
                                     <el-select size="default" v-model="model.GroupId" @change="handleGroupIdChange" allow-create clearable filterable default-first-option placeholder="选择或输入分组编号">
                                         <el-option v-for="(item,index) in model.GroupIds" :key="index" :label="item" :value="item">
@@ -69,7 +69,7 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="自动注册" prop="AutoReg">
+                            <el-form-item label="自动登入" prop="AutoReg">
                                 <el-checkbox size="default" v-model="model.AutoReg">开启</el-checkbox>
                             </el-form-item>
                         </el-col>
@@ -78,14 +78,14 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="使用tcp" prop="UseTcp">
+                            <el-form-item label="tcp打洞" prop="UseTcp">
                                 <el-tooltip class="box-item" effect="dark" content="是否使用tcp打洞" placement="top-start">
                                     <el-checkbox v-model="model.UseTcp">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="使用udp" prop="UseUdp">
+                            <el-form-item label="udp打洞" prop="UseUdp">
                                 <el-tooltip class="box-item" effect="dark" content="是否使用udp打洞" placement="top-start">
                                     <el-checkbox v-model="model.UseUdp">开启</el-checkbox>
                                 </el-tooltip>

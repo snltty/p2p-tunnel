@@ -43,15 +43,17 @@ namespace server.service.messengers.singnin
         }
 
         [MessengerId((ushort)SignInMessengerIds.Setting)]
-        public async Task<byte[]> Setting(IConnection connection)
+        public async Task Setting(IConnection connection)
         {
             if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
             if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
 
             string str = connection.ReceiveRequestWrap.Payload.GetUTF8String();
@@ -59,7 +61,7 @@ namespace server.service.messengers.singnin
 
             tcpServer.SetBufferSize(config.TcpBufferSize);
 
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
     }
 }

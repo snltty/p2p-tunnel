@@ -48,7 +48,7 @@ namespace common.server.model
             Page.ToBytes(bytes);
             index += 4;
 
-            PageSize.ToBytes(bytes);
+            PageSize.ToBytes(bytes.AsMemory(index));
             index += 4;
             return bytes;
 

@@ -7,16 +7,11 @@ namespace client.service.vea
     /// <summary>
     /// 组网消息
     /// </summary>
-    [MessengerIdRange((ushort)VeaSocks5MessengerIds.Min,(ushort)VeaSocks5MessengerIds.Max)]
+    [MessengerIdRange((ushort)VeaSocks5MessengerIds.Min, (ushort)VeaSocks5MessengerIds.Max)]
     public sealed class VeaMessenger : IMessenger
     {
         private readonly VeaTransfer veaTransfer;
         private readonly Config config;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="veaTransfer"></param>
-        /// <param name="config"></param>
         public VeaMessenger(VeaTransfer veaTransfer, Config config)
         {
             this.veaTransfer = veaTransfer;
@@ -29,10 +24,11 @@ namespace client.service.vea
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)VeaSocks5MessengerIds.Ip)]
-        public byte[] IP(IConnection connection)
+        public void IP(IConnection connection)
         {
             veaTransfer.OnNotify(connection);
-            return new IPAddressInfo { IP = config.IP, LanIPs = config.LanIPs }.ToBytes();
+
+            connection.Write(new IPAddressInfo { IP = config.IP, LanIPs = config.LanIPs }.ToBytes());
         }
 
         /// <summary>
@@ -41,10 +37,11 @@ namespace client.service.vea
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)VeaSocks5MessengerIds.Reset)]
-        public byte[] Reset(IConnection connection)
+        public void Reset(IConnection connection)
         {
             veaTransfer.Run();
-            return Helper.TrueArray;
+
+            connection.Write(Helper.TrueArray);
         }
     }
 }

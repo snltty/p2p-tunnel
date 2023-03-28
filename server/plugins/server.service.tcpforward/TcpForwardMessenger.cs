@@ -61,7 +61,7 @@ namespace server.service.tcpforward
         }
 
         [MessengerId((ushort)TcpForwardMessengerIds.SignOut)]
-        public byte[] SignOut(IConnection connection)
+        public void SignOut(IConnection connection)
         {
             try
             {
@@ -85,17 +85,19 @@ namespace server.service.tcpforward
                         }
                     }
                 }
-                return new TcpForwardRegisterResult { }.ToBytes();
+                connection.Write(new TcpForwardRegisterResult { }.ToBytes());
+                return ;
             }
             catch (Exception ex)
             {
-                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes();
+                connection.Write(new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes());
+                return ;
             }
         }
 
 
         [MessengerId((ushort)TcpForwardMessengerIds.SignIn)]
-        public byte[] SignIn(IConnection connection)
+        public void SignIn(IConnection connection)
         {
             try
             {
@@ -107,7 +109,8 @@ namespace server.service.tcpforward
                 {
                     if (tcpForwardValidator.Validate(connection) == false)
                     {
-                        return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes();
+                        connection.Write(new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.DISABLED }.ToBytes());
+                        return ;
                     }
 
                     //短连接转发注册，一个 host:port组合只能注册一次，被占用时不可再次注册
@@ -117,7 +120,8 @@ namespace server.service.tcpforward
                         //已存在相同的注册
                         if (target != null && target.Id != source.ConnectionId)
                         {
-                            return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes();
+                            connection.Write(new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes());
+                            return ;
                         }
                         tcpForwardTargetCaching.AddOrUpdate(model.SourceIp, model.SourcePort, new TcpForwardTargetCacheInfo
                         {
@@ -134,14 +138,16 @@ namespace server.service.tcpforward
                         //限制的端口范围
                         if (model.SourcePort < config.TunnelListenRange.Min || model.SourcePort > config.TunnelListenRange.Max)
                         {
-                            return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.OUT_RANGE, Msg = $"{config.TunnelListenRange.Min}-{config.TunnelListenRange.Max}" }.ToBytes();
+                            connection.Write(new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.OUT_RANGE, Msg = $"{config.TunnelListenRange.Min}-{config.TunnelListenRange.Max}" }.ToBytes());
+                            return ;
                         }
 
                         TcpForwardTargetCacheInfo target = tcpForwardTargetCaching.Get(model.SourcePort);
                         //已存在相同的注册
                         if (target != null && target.Id != source.ConnectionId)
                         {
-                            return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes();
+                            connection.Write(new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.EXISTS }.ToBytes());
+                            return ;
                         }
                         tcpForwardTargetCaching.AddOrUpdate(model.SourcePort, new TcpForwardTargetCacheInfo
                         {
@@ -161,11 +167,13 @@ namespace server.service.tcpforward
                         }
                     }
                 }
-                return new TcpForwardRegisterResult { }.ToBytes();
+                connection.Write(new TcpForwardRegisterResult { }.ToBytes());
+                return ;
             }
             catch (Exception ex)
             {
-                return new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes();
+                connection.Write(new TcpForwardRegisterResult { Code = TcpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes());
+                return ;
             }
         }
 
@@ -177,15 +185,17 @@ namespace server.service.tcpforward
         }
 
         [MessengerId((ushort)TcpForwardMessengerIds.Setting)]
-        public async Task<byte[]> Setting(IConnection connection)
+        public async Task Setting(IConnection connection)
         {
             if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return ;
             }
             if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return ;
             }
 
             string jsonStr = connection.ReceiveRequestWrap.Payload.GetUTF8String();
@@ -201,7 +211,7 @@ namespace server.service.tcpforward
                 tcpForwardServer.Start(config.WebListens[i], TcpForwardAliveTypes.Web);
             }
 
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
 
     }

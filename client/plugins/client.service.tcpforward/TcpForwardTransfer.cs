@@ -43,7 +43,7 @@ namespace client.service.tcpforward
 
             this.tcpForwardServer = tcpForwardServer;
             tcpForwardServer.Init(config.NumConnections, config.BufferSize);
-            tcpForwardServer.OnListeningChange.Sub((model) =>
+            tcpForwardServer.OnListeningChange+=(model) =>
             {
                 if (model.Port == 0)
                 {
@@ -58,7 +58,7 @@ namespace client.service.tcpforward
                     listen.Listening = model.State;
                 }
 
-            });
+            };
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => ClearPac();
             StartP2PAllWithListening();

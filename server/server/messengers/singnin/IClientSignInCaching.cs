@@ -1,13 +1,14 @@
 ﻿using common.libs;
 using common.server;
+using System;
 using System.Collections.Generic;
 
 namespace server.messengers.singnin
 {
     public interface IClientSignInCaching
     {
-        public SimpleSubPushHandler<SignInCacheInfo> OnChanged { get; }
-        public SimpleSubPushHandler<SignInCacheInfo> OnOffline { get; }
+        public Action<SignInCacheInfo> OnChanged { get; set; }
+        public Action<SignInCacheInfo> OnOffline { get; set; }
         public int Count { get; }
 
         public ulong Add(SignInCacheInfo model);

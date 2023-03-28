@@ -20,23 +20,23 @@ namespace client.realize.messengers.clients
         /// <summary>
         /// 下线
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnOffline { get; } = new SimpleSubPushHandler<ClientInfo>();
+        public Action<ClientInfo> OnOffline { get; set; } = (param) => { };
         /// <summary>
         /// 下线后
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnOfflineAfter { get; } = new SimpleSubPushHandler<ClientInfo>();
+        public Action<ClientInfo> OnOfflineAfter { get; set; } = (param) => { };
         /// <summary>
         /// 上线
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnOnline { get; } = new SimpleSubPushHandler<ClientInfo>();
+        public Action<ClientInfo> OnOnline { get; set; } = (param) => { };
         /// <summary>
         /// 添加
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnAdd { get; } = new SimpleSubPushHandler<ClientInfo>();
+        public Action<ClientInfo> OnAdd { get; set; } = (param) => { };
         /// <summary>
         /// 删除
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnRemove { get; } = new SimpleSubPushHandler<ClientInfo>();
+        public Action<ClientInfo> OnRemove { get; set; } = (param) => { };
 
         /// <summary>
         /// 添加
@@ -51,7 +51,7 @@ namespace client.realize.messengers.clients
                 clientsByName.TryAdd(client.Name, client);
             }
 
-            OnAdd.Push(client);
+            OnAdd?.Invoke(client);
             return result;
         }
 
@@ -117,12 +117,12 @@ namespace client.realize.messengers.clients
             {
                 if (client.ConnectType != ClientConnectTypes.Unknow)
                 {
-                    OnOffline.Push(client);
+                    OnOffline?.Invoke(client);
                 }
                 client.Offline(offlineType);
                 if (client.ConnectType != ClientConnectTypes.Unknow)
                 {
-                    OnOfflineAfter.Push(client);
+                    OnOfflineAfter?.Invoke(client);
                 }
             }
         }
@@ -139,7 +139,7 @@ namespace client.realize.messengers.clients
                 clientsByName.TryRemove(client.Name, out _);
                 //udpservers.TryRemove(id, out _);
                 //tunnelPorts.TryRemove(id, out _);
-                OnRemove.Push(client);
+                OnRemove?.Invoke(client);
             }
         }
 
@@ -156,7 +156,7 @@ namespace client.realize.messengers.clients
             {
                 connection.ConnectId = id;
                 client.Online(connection, connectType, onlineType);
-                OnOnline.Push(client);
+                OnOnline?.Invoke(client);
             }
         }
 
@@ -244,11 +244,11 @@ namespace client.realize.messengers.clients
             var _clients = clients.Values;
             foreach (var item in _clients)
             {
-                OnOffline.Push(item);
+                OnOffline?.Invoke(item);
                 item.Offline(ClientOfflineTypes.Manual);
-                OnOfflineAfter.Push(item);
+                OnOfflineAfter?.Invoke(item);
                 clients.TryRemove(item.Id, out _);
-                OnRemove.Push(item);
+                OnRemove?.Invoke(item);
             }
             clientsByName.Clear();
         }

@@ -23,9 +23,9 @@ namespace server.service.messengers
         }
 
         [MessengerId((ushort)RelayMessengerIds.Delay)]
-        public byte[] Delay(IConnection connection)
+        public void Delay(IConnection connection)
         {
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
 
         [MessengerId((ushort)RelayMessengerIds.AskConnects)]

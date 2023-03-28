@@ -26,7 +26,7 @@ namespace client.realize.messengers.clients
         {
             ClientsInfo res = new ClientsInfo();
             res.DeBytes(connection.ReceiveRequestWrap.Payload);
-            clientsMessengerSender.OnServerClientsData.Push(res);
+            clientsMessengerSender.OnServerClientsData?.Invoke(res);
         }
     }
 }

@@ -34,7 +34,7 @@ namespace client.service.udpforward
 
             this.udpForwardServer = udpForwardServer;
 
-            udpForwardServer.OnListenChange.Sub((model) =>
+            udpForwardServer.OnListenChange+=(model) =>
             {
                 if (model.Port == 0)
                 {
@@ -44,7 +44,7 @@ namespace client.service.udpforward
                 {
                     GetP2PByPort(model.Port).Listening = model.State;
                 }
-            });
+            };
             StartP2PAllWithListening();
         }
 

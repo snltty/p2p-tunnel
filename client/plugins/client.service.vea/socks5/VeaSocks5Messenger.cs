@@ -14,11 +14,6 @@ namespace client.service.vea.socks5
     {
         private readonly IVeaSocks5ClientHandler socks5ClientHandler;
         private readonly IVeaSocks5ServerHandler socks5ServerHandler;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="socks5ClientHandler"></param>
-        /// <param name="socks5ServerHandler"></param>
         public VeaSocks5Messenger(IVeaSocks5ClientHandler socks5ClientHandler, IVeaSocks5ServerHandler socks5ServerHandler)
         {
             this.socks5ClientHandler = socks5ClientHandler;

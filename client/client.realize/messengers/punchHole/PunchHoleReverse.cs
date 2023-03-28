@@ -20,7 +20,7 @@ namespace client.realize.messengers.punchHole
         public PunchHoleTypes Type => PunchHoleTypes.REVERSE;
         public async Task Execute(IConnection connection, PunchHoleRequestInfo info)
         {
-            punchHoleMessengerSender.OnReverse.Push(info);
+            punchHoleMessengerSender.OnReverse?.Invoke(info);
             await Task.CompletedTask;
         }
     }

@@ -23,9 +23,9 @@ namespace client.realize.messengers.heart
         /// <param name="connection"></param>
         /// <returns></returns>
         [MessengerId((ushort)HeartMessengerIds.Alive)]
-        public byte[] Alive(IConnection connection)
+        public void Alive(IConnection connection)
         {
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
 
         [MessengerId((ushort)HeartMessengerIds.Test)]

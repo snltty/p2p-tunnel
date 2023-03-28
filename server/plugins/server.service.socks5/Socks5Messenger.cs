@@ -12,10 +12,6 @@ namespace server.service.socks5
     public class Socks5Messenger : IMessenger
     {
         private readonly ISocks5ServerHandler socks5ServerHandler;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="socks5ServerHandler"></param>
         public Socks5Messenger(ISocks5ServerHandler socks5ServerHandler)
         {
             this.socks5ServerHandler = socks5ServerHandler;

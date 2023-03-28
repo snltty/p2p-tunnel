@@ -19,14 +19,14 @@ namespace client.service.udpforward
             this.clientInfoCaching = clientInfoCaching;
             this.udpForwardTargetCaching = udpForwardTargetCaching;
             this.signInStateInfo = signInStateInfo;
-            signInStateInfo.OnChange.Sub((state) =>
+            signInStateInfo.OnChange += (state) =>
             {
                 udpForwardTargetCaching.ClearConnection();
-            });
-            clientInfoCaching.OnOffline.Sub((client) =>
+            };
+            clientInfoCaching.OnOffline += (client) =>
             {
                 udpForwardTargetCaching.ClearConnection(client.Name);
-            });
+            };
         }
 
         /// <summary>

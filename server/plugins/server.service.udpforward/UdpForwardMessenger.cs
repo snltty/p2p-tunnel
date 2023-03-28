@@ -61,7 +61,7 @@ namespace server.service.udpforward
         }
 
         [MessengerId((ushort)UdpForwardMessengerIds.SignOut)]
-        public byte[] SignOut(IConnection connection)
+        public void SignOut(IConnection connection)
         {
             try
             {
@@ -70,7 +70,8 @@ namespace server.service.udpforward
                 {
                     if (udpForwardValidator.Validate(connection) == false)
                     {
-                        return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
+                        connection.Write(new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes());
+                        return;
                     }
 
                     UdpForwardTargetCacheInfo cache = udpForwardTargetCaching.Get(port);
@@ -80,16 +81,18 @@ namespace server.service.udpforward
                         tcpForwardServer.Stop(port);
                     }
                 }
-                return new UdpForwardRegisterResult { }.ToBytes();
+                connection.Write(new UdpForwardRegisterResult { }.ToBytes());
+                return;
             }
             catch (Exception ex)
             {
-                return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes();
+                connection.Write(new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes());
+                return;
             }
         }
 
         [MessengerId((ushort)UdpForwardMessengerIds.SignIn)]
-        public byte[] SignIn(IConnection connection)
+        public void SignIn(IConnection connection)
         {
             try
             {
@@ -101,20 +104,23 @@ namespace server.service.udpforward
                 {
                     if (udpForwardValidator.Validate(connection) == false)
                     {
-                        return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes();
+                        connection.Write(new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.DISABLED }.ToBytes());
+                        return;
                     }
 
                     //限制的端口范围
                     if (model.SourcePort < config.TunnelListenRange.Min || model.SourcePort > config.TunnelListenRange.Max)
                     {
-                        return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.OUT_RANGE, Msg = $"{config.TunnelListenRange.Min}-{config.TunnelListenRange.Max}" }.ToBytes();
+                        connection.Write(new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.OUT_RANGE, Msg = $"{config.TunnelListenRange.Min}-{config.TunnelListenRange.Max}" }.ToBytes());
+                        return;
                     }
 
                     UdpForwardTargetCacheInfo target = udpForwardTargetCaching.Get(model.SourcePort);
                     //已存在相同的注册
                     if (target != null && target.Name != source.Name)
                     {
-                        return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.EXISTS }.ToBytes();
+                        connection.Write(new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.EXISTS }.ToBytes());
+                        return;
                     }
                     udpForwardTargetCaching.Add(model.SourcePort, new UdpForwardTargetCacheInfo
                     {
@@ -132,11 +138,13 @@ namespace server.service.udpforward
                         udpForwardTargetCaching.Remove(model.SourcePort);
                     }
                 }
-                return new UdpForwardRegisterResult { }.ToBytes();
+                connection.Write(new UdpForwardRegisterResult { }.ToBytes());
+                return;
             }
             catch (Exception ex)
             {
-                return new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes();
+                connection.Write(new UdpForwardRegisterResult { Code = UdpForwardRegisterResultCodes.UNKNOW, Msg = ex.Message }.ToBytes());
+                return;
             }
         }
 
@@ -147,21 +155,23 @@ namespace server.service.udpforward
         }
 
         [MessengerId((ushort)UdpForwardMessengerIds.Setting)]
-        public async Task<byte[]> Setting(IConnection connection)
+        public async Task Setting(IConnection connection)
         {
             if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo client) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
             if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
             string jsonStr = connection.ReceiveRequestWrap.Payload.GetUTF8String();
 
             await config.SaveConfig(jsonStr);
 
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
     }
 }

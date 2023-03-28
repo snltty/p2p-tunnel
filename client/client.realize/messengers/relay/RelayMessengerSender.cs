@@ -7,22 +7,11 @@ using System.Threading.Tasks;
 
 namespace client.realize.messengers.relay
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class RelayMessengerSender
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<RelayInfo> OnRelay { get; } = new SimpleSubPushHandler<RelayInfo>();
+        public Action<RelayInfo> OnRelay { get; set; } = (param) => { };
         private readonly MessengerSender messengerSender;
         private readonly SignInStateInfo signInStateInfo;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
-        /// <param name="signInStateInfo"></param>
         public RelayMessengerSender(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
         {
             this.messengerSender = messengerSender;

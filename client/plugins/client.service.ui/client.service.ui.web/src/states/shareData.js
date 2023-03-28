@@ -16,27 +16,6 @@ export const shareData = {
         'socks5': { text: 'socks5代理', value: 16 },
         'setting': { text: '服务器配置', value: 32 },
     },
-    serverAccessHas: (access, value) => {
-        return (access & value) == value;
-    },
-    serverAccessHasSignin: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.signin);
-    },
-    serverAccessHasRelay: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.relay);
-    },
-    serverAccessHasTcpForward: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.tcpforward);
-    },
-    serverAccessHasUdpForward: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.udpforward);
-    },
-    serverAccessHasSocks5: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.socks5);
-    },
-    serverAccessHasSetting: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.setting);
-    },
     serverImgs: {
         'zg': { img: require('../assets/zg.png'), name: '中国' },
         'zgxg': { img: require('../assets/zgxg.png'), name: '中国香港' },
@@ -44,6 +23,33 @@ export const shareData = {
         'hg': { img: require('../assets/hg.png'), name: '韩国' },
         'rb': { img: require('../assets/rb.png'), name: '日本' },
         'mg': { img: require('../assets/mg.png'), name: '美国' },
+    },
+    serverAccessHas: (access, value) => {
+        return (((access >>> 0) & (value >>> 0)) >>> 0) == value;
+    },
+    serverAccessDel: (access, value) => {
+        return (((access >>> 0) & (~value >>> 0)) >>> 0);
+    },
+    serverAccessAdd: (access, value) => {
+        return (((access >>> 0) | (value >>> 0)) >>> 0);
+    },
+    serverAccessHasSignin: (access) => {
+        return shareData.serverAccessHas(access, shareData.serverAccess.signin.value);
+    },
+    serverAccessHasRelay: (access) => {
+        return shareData.serverAccessHas(access, shareData.serverAccess.relay.value);
+    },
+    serverAccessHasTcpForward: (access) => {
+        return shareData.serverAccessHas(access, shareData.serverAccess.tcpforward);
+    },
+    serverAccessHasUdpForward: (access) => {
+        return shareData.serverAccessHas(access, shareData.serverAccess.udpforward.value);
+    },
+    serverAccessHasSocks5: (access) => {
+        return shareData.serverAccessHas(access, shareData.serverAccess.socks5.value);
+    },
+    serverAccessHasSetting: (access) => {
+        return shareData.serverAccessHas(access, shareData.serverAccess.setting.value);
     }
 };
 

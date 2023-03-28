@@ -9,48 +9,18 @@ namespace common.udpforward
     /// </summary>
     public interface IUdpForwardServer
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sourcePort"></param>
         public void Start(ushort sourcePort);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="model"></param>
         public Task Response(UdpForwardInfo model);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sourcePort"></param>
         public void Stop(ushort sourcePort);
-        /// <summary>
-        /// 
-        /// </summary>
         public void Stop();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public Func<UdpForwardInfo,Task> OnRequest { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<UdpforwardListenChangeInfo> OnListenChange { get; }
+        public Func<UdpForwardInfo, Task> OnRequest { get; set; }
+        public Action<UdpforwardListenChangeInfo> OnListenChange { get; set; }
     }
-   
-    /// <summary>
-    /// 
-    /// </summary>
+
     public sealed class UdpforwardListenChangeInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public int Port { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public bool State { get; set; }
 
     }

@@ -12,41 +12,27 @@ using System.Threading.Tasks;
 
 namespace client.service.wakeup
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class WakeUpTransfer
     {
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly WakeUpMessengerSender wakeUpMessengerSender;
         private readonly SignInStateInfo signInStateInfo;
         private readonly ConcurrentDictionary<string, List<ConfigItem>> macs = new ConcurrentDictionary<string, List<ConfigItem>>();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientInfoCaching"></param>
-        /// <param name="wakeUpMessengerSender"></param>
-        /// <param name="config"></param>
-        /// <param name="signInStateInfo"></param>
         public WakeUpTransfer(IClientInfoCaching clientInfoCaching, WakeUpMessengerSender wakeUpMessengerSender, Config config, SignInStateInfo signInStateInfo)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.wakeUpMessengerSender = wakeUpMessengerSender;
             this.signInStateInfo = signInStateInfo;
 
-            clientInfoCaching.OnOnline.Sub((client) =>
+            clientInfoCaching.OnOnline += (client) =>
             {
                 UpdateMac();
-            });
-            clientInfoCaching.OnOffline.Sub((client) =>
+            };
+            clientInfoCaching.OnOffline += (client) =>
             {
                 macs.TryRemove(client.Name, out _);
-            });
+            };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
         public void OnNotify(IConnection connection)
         {
             if (connection.FromConnection != null)
@@ -61,9 +47,6 @@ namespace client.service.wakeup
         {
             macs.AddOrUpdate(client.Name, mac, (a, b) => mac);
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public void UpdateMac()
         {
             foreach (var item in clientInfoCaching.All().Where(c => c.Id != signInStateInfo.ConnectId))
@@ -79,20 +62,10 @@ namespace client.service.wakeup
                 }
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public Dictionary<string, List<ConfigItem>> Get()
         {
             return macs.ToDictionary(c => c.Key, d => d.Value);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="mac"></param>
-        /// <returns></returns>
         public async Task<bool> WakeUp(string name, string mac)
         {
             if (clientInfoCaching.GetByName(name, out ClientInfo client))
@@ -105,10 +78,6 @@ namespace client.service.wakeup
             }
             return true;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mac"></param>
         public void WakeUp(string mac)
         {
             var packet = NetworkHelper.MagicPacket(mac);

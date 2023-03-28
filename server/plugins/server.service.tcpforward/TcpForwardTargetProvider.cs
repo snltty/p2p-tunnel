@@ -13,10 +13,10 @@ namespace server.service.tcpforward
             this.clientSignInCaching = clientSignInCaching;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
 
-            clientSignInCaching.OnOffline.Sub((client) =>
+            clientSignInCaching.OnOffline+=(client) =>
             {
                 tcpForwardTargetCaching.ClearConnection(client.ConnectionId);
-            });
+            };
         }
 
         public void Get(string host, TcpForwardInfo info)

@@ -41,13 +41,13 @@ namespace client.service.tcpforward.server
             this.tcpForwardMessengerSender = tcpForwardMessengerSender;
 
             serverForwardConfigInfo = ReadServerConfig();
-            signInStateInfo.OnChange.Sub((state) =>
+            signInStateInfo.OnChange += (state) =>
             {
                 if (state)
                 {
                     RegisterServerForward();
                 }
-            });
+            };
         }
 
 

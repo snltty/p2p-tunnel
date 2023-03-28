@@ -8,8 +8,8 @@ using client.service.tcpforward.server;
 using client.service.udpforward;
 using client.service.udpforward.server;
 using client.service.ui.api.service.clientServer;
+using client.service.users.server;
 using client.service.vea.socks5;
-using client.service.wakeup;
 using common.libs;
 using common.server;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,7 +53,7 @@ namespace client.service
                 typeof(ServerSocks5Configure).Assembly,
                 typeof(PunchHoleMessenger).Assembly,
                 typeof(VeaSocks5Messenger).Assembly,
-                typeof(WakeUpMessenger).Assembly,
+                typeof(ServerUsersClientService).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();
@@ -84,7 +84,7 @@ namespace client.service
             {
                 Directory.CreateDirectory("log");
             }
-            Logger.Instance.OnLogger.Sub((model) =>
+            Logger.Instance.OnLogger += (model) =>
              {
                  ConsoleColor currentForeColor = Console.ForegroundColor;
                  switch (model.Type)
@@ -113,7 +113,7 @@ namespace client.service
                  sw.Flush();
                  sw.Close();
                  sw.Dispose();
-             });
+             };
         }
     }
 

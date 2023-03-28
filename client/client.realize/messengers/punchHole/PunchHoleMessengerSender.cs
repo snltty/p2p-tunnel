@@ -138,7 +138,7 @@ namespace client.realize.messengers.punchHole
         /// <summary>
         /// 收到反向连接
         /// </summary>
-        public SimpleSubPushHandler<PunchHoleRequestInfo> OnReverse { get; } = new SimpleSubPushHandler<PunchHoleRequestInfo>();
+        public Action<PunchHoleRequestInfo> OnReverse { get; set; } = (param) => { };
         /// <summary>
         /// 通知其反向连接
         /// </summary>

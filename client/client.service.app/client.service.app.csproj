@@ -59,7 +59,7 @@
 		<ProjectReference Include="..\plugins\client.service.tcpforward\client.service.tcpforward.csproj" />
 		<ProjectReference Include="..\plugins\client.service.udpforward\client.service.udpforward.csproj" />
 		<ProjectReference Include="..\plugins\client.service.ui\client.service.ui.api.service\client.service.ui.api.service.csproj" />
-		<ProjectReference Include="..\plugins\client.service.wakeup\client.service.wakeup.csproj" />
+		<ProjectReference Include="..\plugins\client.service.users.server\client.service.users.server.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

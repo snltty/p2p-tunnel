@@ -93,6 +93,12 @@ const routes = [
                 component: () => import('../views/server/udpforward/Index.vue'),
                 meta: { name: 'udp代理穿透', service: 'ServerUdpForwardClientService', access: shareData.serverAccess.udpforward.value }
             },
+            {
+                path: '/server-users.html',
+                name: 'ServerUsers',
+                component: () => import('../views/server/users/Index.vue'),
+                meta: { name: '账号管理', service: 'ServerUsersClientService', access: shareData.serverAccess.setting.value }
+            },
         ]
     }
 ]

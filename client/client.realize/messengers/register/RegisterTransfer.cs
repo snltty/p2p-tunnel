@@ -119,7 +119,7 @@ namespace client.realize.messengers.singnin
                         signInState.LocalInfo.Port = NetworkHelper.GetRandomPort();
                         config.Client.UseIpv6 = serverAddress.AddressFamily == AddressFamily.InterNetworkV6;
                         signInState.LocalInfo.Ipv6s = iPv6AddressRequest.GetIPV6();
-                        signInState.OnBind.Push(true);
+                        signInState.OnBind?.Invoke(true);
 
                         TcpBind(serverAddress);
                         //交换密钥

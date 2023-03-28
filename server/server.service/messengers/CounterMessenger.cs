@@ -33,9 +33,9 @@ namespace server.service.messengers
         }
 
         [MessengerId((ushort)CounterMessengerIds.Info)]
-        public byte[] Info(IConnection connection)
+        public void Info(IConnection connection)
         {
-            return counterResultInfo.ToBytes();
+            connection.Write(counterResultInfo.ToBytes());
         }
     }
 

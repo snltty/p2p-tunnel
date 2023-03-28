@@ -18,8 +18,8 @@ namespace server.service.messengers.singnin
         private NumberSpace idNs = new NumberSpace(0);
         private readonly Config config;
 
-        public SimpleSubPushHandler<SignInCacheInfo> OnChanged { get; } = new SimpleSubPushHandler<SignInCacheInfo>();
-        public SimpleSubPushHandler<SignInCacheInfo> OnOffline { get; } = new SimpleSubPushHandler<SignInCacheInfo>();
+        public Action<SignInCacheInfo> OnChanged { get; set; } = (param) => { };
+        public Action<SignInCacheInfo> OnOffline { get; set; } = (param) => { };
         private readonly WheelTimer<IConnection> wheelTimer = new WheelTimer<IConnection>();
 
         private readonly IRateLimit<IPAddress> rateLimit;
@@ -118,8 +118,8 @@ namespace server.service.messengers.singnin
             if (cache.TryRemove(id, out SignInCacheInfo client))
             {
                 client.Connection?.Disponse();
-                OnChanged.Push(client);
-                OnOffline.Push(client);
+                OnChanged?.Invoke(client);
+                OnOffline?.Invoke(client);
 
                 if (cacheGroups.TryGetValue(client.GroupId, out ConcurrentDictionary<string, SignInCacheInfo> value))
                 {
@@ -140,7 +140,7 @@ namespace server.service.messengers.singnin
         {
             if (Get(connection.ConnectId, out SignInCacheInfo client))
             {
-                OnChanged.Push(client);
+                OnChanged?.Invoke(client);
             }
             return false;
         }

@@ -13,11 +13,6 @@ namespace client.service.tcpforward
         private readonly TcpForwardResolver tcpForwardResolver;
         private readonly ITcpForwardServer tcpForwardServer;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tcpForwardResolver"></param>
-        /// <param name="tcpForwardServer"></param>
         public TcpForwardMessenger(TcpForwardResolver tcpForwardResolver, ITcpForwardServer tcpForwardServer)
         {
             this.tcpForwardResolver = tcpForwardResolver;

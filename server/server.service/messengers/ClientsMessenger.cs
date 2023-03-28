@@ -1,4 +1,5 @@
-﻿using common.libs.extends;
+﻿using common.libs;
+using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.singnin;
@@ -18,9 +19,9 @@ namespace server.service.messengers
         }
 
         [MessengerId((ushort)ClientsMessengerIds.IP)]
-        public byte[] Ip(IConnection connection)
+        public void Ip(IConnection connection)
         {
-            return connection.Address.Address.GetAddressBytes();
+            connection.Write(connection.Address.Address.GetAddressBytes());
         }
 
         [MessengerId((ushort)ClientsMessengerIds.Port)]

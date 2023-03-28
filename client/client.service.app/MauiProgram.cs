@@ -10,7 +10,7 @@ using common.libs;
 using common.libs.database;
 using common.server;
 using System.Reflection;
-using client.service.wakeup;
+using client.service.users.server;
 
 namespace client.service.app
 {
@@ -55,7 +55,7 @@ namespace client.service.app
                 typeof(Socks5ClientService).Assembly,
                 typeof(Socks5Messenger).Assembly,
                 typeof(PunchHoleMessenger).Assembly,
-                typeof(WakeUpMessenger).Assembly,
+                typeof(ServerUsersClientService).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
 

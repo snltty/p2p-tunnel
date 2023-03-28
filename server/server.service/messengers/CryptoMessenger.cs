@@ -10,20 +10,13 @@ namespace server.service.messengers
     /// <summary>
     /// 加密
     /// </summary>
-    [MessengerIdRange((ushort)CryptoMessengerIds.Min,(ushort)CryptoMessengerIds.Max)]
+    [MessengerIdRange((ushort)CryptoMessengerIds.Min, (ushort)CryptoMessengerIds.Max)]
     public sealed class CryptoMessenger : IMessenger
     {
         private readonly IAsymmetricCrypto asymmetricCrypto;
         private readonly ICryptoFactory cryptoFactory;
         private readonly IClientSignInCaching clientSignInCache;
         private readonly Config config;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="asymmetricCrypto"></param>
-        /// <param name="cryptoFactory"></param>
-        /// <param name="clientSignInCache"></param>
-        /// <param name="config"></param>
         public CryptoMessenger(IAsymmetricCrypto asymmetricCrypto, ICryptoFactory cryptoFactory, IClientSignInCaching clientSignInCache, Config config)
         {
             this.asymmetricCrypto = asymmetricCrypto;
@@ -32,24 +25,14 @@ namespace server.service.messengers
             this.config = config;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Key)]
         public void Key(IConnection connection)
         {
             connection.WriteUTF8(asymmetricCrypto.Key.PublicKey);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Set)]
-        public byte[] Set(IConnection connection)
+        public void Set(IConnection connection)
         {
             string password;
             if (connection.ReceiveRequestWrap.Payload.Length > 0)
@@ -63,39 +46,30 @@ namespace server.service.messengers
             }
             if (string.IsNullOrWhiteSpace(password))
             {
-                return Helper.FalseArray;
+                connection.Write(Helper.FalseArray);
+                return;
             }
 
             ISymmetricCrypto encoder = cryptoFactory.CreateSymmetric(password);
             connection.EncodeEnable(encoder);
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Test)]
-        public byte[] Test(IConnection connection)
+        public void Test(IConnection connection)
         {
             Logger.Instance.DebugDebug($"encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");
-            return Helper.TrueArray;
+            connection.Write(Helper.TrueArray);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)CryptoMessengerIds.Clear)]
-        public byte[] Clear(IConnection connection)
+        public void Clear(IConnection connection)
         {
             if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo client))
             {
                 client.Connection?.EncodeDisable();
             }
-            return Helper.FalseArray;
+            connection.Write(Helper.TrueArray);
         }
     }
 }

@@ -1,47 +1,30 @@
-﻿using common.libs.extends;
+﻿using common.libs;
+using common.libs.extends;
 using common.server;
 using System;
 
 namespace client.service.wakeup
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [MessengerIdRange((ushort)WakeUpMessengerIds.Min, (ushort)WakeUpMessengerIds.Max)]
     public sealed class WakeUpMessenger : IMessenger
     {
         private readonly WakeUpTransfer wakeUpTransfer;
         private readonly Config config;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="wakeUpTransfer"></param>
-        /// <param name="config"></param>
         public WakeUpMessenger(WakeUpTransfer wakeUpTransfer, Config config)
         {
             this.wakeUpTransfer = wakeUpTransfer;
             this.config = config;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         [MessengerId((ushort)WakeUpMessengerIds.Macs)]
-        public byte[] Macs(IConnection connection)
+        public void Macs(IConnection connection)
         {
             if (connection.ReceiveRequestWrap.Payload.Length > 0)
             {
                 wakeUpTransfer.OnNotify(connection);
             }
-            return config.ToBytes();
+            connection.Write(config.ToBytes());
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
         [MessengerId((ushort)WakeUpMessengerIds.WakeUp)]
         public void WakeUp(IConnection connection)
         {

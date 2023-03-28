@@ -10,27 +10,14 @@ using System.Threading.Tasks;
 
 namespace common.udpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class UdpForwardServer : IUdpForwardServer
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public Func<UdpForwardInfo, Task> OnRequest { get; set; } = async (a) => await Task.CompletedTask;
-        /// <summary>
-        /// 
-        /// </summary>
-        public SimpleSubPushHandler<UdpforwardListenChangeInfo> OnListenChange { get; } = new SimpleSubPushHandler<UdpforwardListenChangeInfo>();
+        public Action<UdpforwardListenChangeInfo> OnListenChange { get; set; } = (param) => { };
 
         private readonly ServersManager serversManager = new ServersManager();
         private readonly ClientsManager clientsManager = new ClientsManager();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="wheelTimer"></param>
         public UdpForwardServer(WheelTimer<object> wheelTimer)
         {
             wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object>
@@ -40,10 +27,6 @@ namespace common.udpforward
             }, 1000, true);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sourcePort"></param>
         public void Start(ushort sourcePort)
         {
             if (serversManager.Contains(sourcePort))
@@ -58,7 +41,7 @@ namespace common.udpforward
 
             IAsyncResult result = udpClient.BeginReceive(ProcessReceiveUdp, token);
 
-            OnListenChange.Push(new UdpforwardListenChangeInfo { Port = sourcePort, State = true });
+            OnListenChange?.Invoke(new UdpforwardListenChangeInfo { Port = sourcePort, State = true });
         }
         private async void ProcessReceiveUdp(IAsyncResult result)
         {
@@ -86,10 +69,7 @@ namespace common.udpforward
                 Logger.Instance.Error(ex);
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="model"></param>
+
         public async Task Response(UdpForwardInfo model)
         {
             if (clientsManager.TryGetValue(model.SourceEndpoint, out ForwardAsyncUserToken token))
@@ -111,27 +91,22 @@ namespace common.udpforward
                 }
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sourcePort"></param>
+
         public void Stop(ushort sourcePort)
         {
             if (serversManager.TryRemove(sourcePort, out ForwardAsyncServerToken model))
             {
                 clientsManager.Clear(model.SourcePort);
-                OnListenChange.Push(new UdpforwardListenChangeInfo { Port = model.SourcePort, State = false });
+                OnListenChange?.Invoke(new UdpforwardListenChangeInfo { Port = model.SourcePort, State = false });
             }
 
         }
-        /// <summary>
-        /// 
-        /// </summary>
+
         public void Stop()
         {
             serversManager.Clear();
             clientsManager.Clear();
-            OnListenChange.Push(new UdpforwardListenChangeInfo { Port = 0, State = false });
+            OnListenChange?.Invoke(new UdpforwardListenChangeInfo { Port = 0, State = false });
         }
 
     }

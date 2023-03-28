@@ -14,7 +14,7 @@ namespace common.tcpforward
     public sealed class TcpForwardServerPre : ITcpForwardServer
     {
         public Func<TcpForwardInfo, Task<bool>> OnRequest { get; set; } = (info) => Task.FromResult(true);
-        public SimpleSubPushHandler<ListeningChangeInfo> OnListeningChange { get; } = new SimpleSubPushHandler<ListeningChangeInfo>();
+        public Action<ListeningChangeInfo> OnListeningChange { get; set; } = (param) => { };
         private readonly ServersManager serversManager = new ServersManager();
         private readonly ClientsManager clientsManager = new ClientsManager();
 
@@ -38,7 +38,7 @@ namespace common.tcpforward
             }
 
             BindAccept(port, aliveType);
-            OnListeningChange.Push(new ListeningChangeInfo { Port = port, State = true });
+            OnListeningChange?.Invoke(new ListeningChangeInfo { Port = port, State = true });
         }
 
         private void BindAccept(ushort port, TcpForwardAliveTypes aliveType)
@@ -291,7 +291,7 @@ namespace common.tcpforward
         {
             if (serversManager.TryRemove(sourcePort, out ServerInfo model))
             {
-                OnListeningChange.Push(new ListeningChangeInfo
+                OnListeningChange?.Invoke(new ListeningChangeInfo
                 {
                     Port = model.SourcePort,
                     State = false
@@ -304,7 +304,7 @@ namespace common.tcpforward
         {
             serversManager.Clear();
             clientsManager.Clear();
-            OnListeningChange.Push(new ListeningChangeInfo { Port = 0, State = true });
+            OnListeningChange?.Invoke(new ListeningChangeInfo { Port = 0, State = true });
         }
     }
 

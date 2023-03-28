@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using common.server;
 using common.server.servers.rudp;
+using System;
 using System.Collections.Generic;
 
 namespace client.messengers.clients
@@ -13,23 +14,23 @@ namespace client.messengers.clients
         /// <summary>
         /// 掉线
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnOffline { get; }
+        public Action<ClientInfo> OnOffline { get; set; }
         /// <summary>
         /// 掉线后
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnOfflineAfter { get; }
+        public Action<ClientInfo> OnOfflineAfter { get; set; }
         /// <summary>
         /// 上线
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnOnline { get; }
+        public Action<ClientInfo> OnOnline { get; set; }
         /// <summary>
         /// 添加
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnAdd { get; }
+        public Action<ClientInfo> OnAdd { get; set; }
         /// <summary>
         /// 删除
         /// </summary>
-        public SimpleSubPushHandler<ClientInfo> OnRemove { get; }
+        public Action<ClientInfo> OnRemove { get; set; }
 
         /// <summary>
         /// 添加
