@@ -32,7 +32,7 @@ namespace client.service.app
         }
     }
 
-    public class Startup
+    public sealed class Startup
     {
         static ServiceProvider serviceProvider = null;
         public static void Start()

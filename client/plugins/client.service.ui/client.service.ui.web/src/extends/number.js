@@ -1,7 +1,7 @@
 Number.prototype.sizeFormat = function () {
     let unites = ['B', 'KB', 'MB', 'GB', 'TB'];
     let unit = unites[0], size = this;
-    while ((unit = unites.shift()) && size > 1024) {
+    while ((unit = unites.shift()) && size.toFixed(2) >= 1024) {
         size /= 1024;
     }
     return unit == 'B' ? [size, unit] : [size.toFixed(2), unit];

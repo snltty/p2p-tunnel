@@ -4,7 +4,7 @@ using server.messengers;
 
 namespace server.service.validators
 {
-    public class SignInValidatorHandler : ISignInValidatorHandler
+    public sealed class SignInValidatorHandler : ISignInValidatorHandler
     {
         Wrap<ISignInValidator> first;
         Wrap<ISignInValidator> last;

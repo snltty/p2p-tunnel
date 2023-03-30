@@ -2,35 +2,13 @@
 
 namespace common.libs
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public static class QuickLZ
     {
         #region "bytes compress - decompress"
-        /// <summary>
-        /// 
-        /// </summary>
         public const int QLZ_VERSION_MAJOR = 1;
-        /// <summary>
-        /// 
-        /// </summary>
         public const int QLZ_VERSION_MINOR = 5;
-        /// <summary>
-        /// 
-        /// </summary>
         public const int QLZ_VERSION_REVISION = 0;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        // Streaming mode not supported
         public const int QLZ_STREAMING_BUFFER = 0;
-
-        // Bounds checking not supported  Use try...catch instead
-        /// <summary>
-        /// 
-        /// </summary>
         public const int QLZ_MEMORY_SAFE = 0;
 
         // Decrease QLZ_POINTERS_3 to increase level 3 compression speed. Do not edit any other values!
@@ -48,11 +26,6 @@ namespace common.libs
             return ((source[0] & 2) == 2) ? 9 : 3;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
         public static int SizeDecompressed(byte[] source)
         {
             if (HeaderLen(source) == 9)
@@ -61,11 +34,6 @@ namespace common.libs
                 return source[2];
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
         public static int SizeCompressed(byte[] source)
         {
             if (HeaderLen(source) == 9)
@@ -84,13 +52,6 @@ namespace common.libs
             FastWrite(dst, 5, size_compressed, 4);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="level"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
         public static byte[] Compress(byte[] source, int level)
         {
             int src = 0;
@@ -115,7 +76,7 @@ namespace common.libs
                 hashtable = new int[HASH_VALUES, QLZ_POINTERS_3];
 
             if (source.Length == 0)
-                return new byte[0];
+                return Helper.EmptyArray;
 
             if (src <= last_matchstart)
                 fetch = source[src] | (source[src + 1] << 8) | (source[src + 2] << 16);
@@ -323,12 +284,6 @@ namespace common.libs
                 a[i + j] = (byte)(value >> (j * 8));
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
         public static byte[] Decompress(byte[] source)
         {
             int level;

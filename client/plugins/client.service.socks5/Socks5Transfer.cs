@@ -12,11 +12,6 @@ namespace client.service.socks5
     {
         private readonly common.socks5.Config config;
         private readonly ui.api.Config uiconfig;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="uiconfig"></param>
         public Socks5Transfer(common.socks5.Config config, ui.api.Config uiconfig)
         {
             this.config = config;
@@ -114,7 +109,7 @@ namespace client.service.socks5
     /// <summary>
     /// 设置pac
     /// </summary>
-    public class PacSetParamsInfo
+    public sealed class PacSetParamsInfo
     {
         /// <summary>
         /// 是否自定义

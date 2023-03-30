@@ -9,7 +9,7 @@ namespace client.messengers.clients
     /// <summary>
     /// 客户端信息
     /// </summary>
-    public class ClientInfo
+    public sealed class ClientInfo
     {
         /// <summary>
         /// 连接中

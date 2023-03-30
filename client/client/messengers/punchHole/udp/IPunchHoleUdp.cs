@@ -50,29 +50,12 @@ namespace client.messengers.punchHole.udp
         STEP_4 = 6,
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class PunchHoleStep21Info : IPunchHoleStepInfo
+    public sealed class PunchHoleStep21Info : IPunchHoleStepInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.UDP;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.NOTIFY;
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; } = (byte)PunchHoleUdpSteps.STEP_2_1;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             return new byte[] {
@@ -81,10 +64,6 @@ namespace client.messengers.punchHole.udp
                 Step,
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;

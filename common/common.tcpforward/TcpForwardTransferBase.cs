@@ -5,21 +5,12 @@ using System.Threading.Tasks;
 
 namespace common.tcpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public class TcpForwardTransferBase
+    public  class TcpForwardTransferBase
     {
         private readonly ITcpForwardServer tcpForwardServer;
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
         private readonly ITcpForwardTargetProvider tcpForwardTargetProvider;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tcpForwardServer"></param>
-        /// <param name="tcpForwardMessengerSender"></param>
-        /// <param name="tcpForwardTargetProvider"></param>
         public TcpForwardTransferBase(ITcpForwardServer tcpForwardServer, TcpForwardMessengerSender tcpForwardMessengerSender, ITcpForwardTargetProvider tcpForwardTargetProvider)
         {
             this.tcpForwardServer = tcpForwardServer;

@@ -3,21 +3,12 @@ using System.Threading.Tasks;
 
 namespace common.udpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class UdpForwardTransferBase
     {
         private readonly IUdpForwardServer udpForwardServer;
         private readonly UdpForwardMessengerSender udpForwardMessengerSender;
         private readonly IUdpForwardTargetProvider udpForwardTargetProvider;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="udpForwardServer"></param>
-        /// <param name="udpForwardMessengerSender"></param>
-        /// <param name="udpForwardTargetProvider"></param>
         public UdpForwardTransferBase(IUdpForwardServer udpForwardServer, UdpForwardMessengerSender udpForwardMessengerSender, IUdpForwardTargetProvider udpForwardTargetProvider)
         {
             this.udpForwardServer = udpForwardServer;

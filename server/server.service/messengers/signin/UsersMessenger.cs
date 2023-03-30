@@ -4,6 +4,7 @@ using common.server;
 using common.server.model;
 using server.messengers;
 using server.messengers.singnin;
+using System;
 using System.Linq;
 
 namespace server.service.messengers.signin
@@ -44,7 +45,7 @@ namespace server.service.messengers.signin
                 Count = userStore.Count(),
                 Page = userInfoPage.Page,
                 PageSize = userInfoPage.PageSize,
-                Data = userStore.Get(userInfoPage.Page, userInfoPage.PageSize).ToList()
+                Data = userStore.Get(userInfoPage.Page, userInfoPage.PageSize, userInfoPage.Sort, userInfoPage.Account).ToList()
             }.ToJson());
         }
 
@@ -67,6 +68,19 @@ namespace server.service.messengers.signin
             connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
         }
 
+        [MessengerId((ushort)UsersMessengerIds.Password)]
+        public void Password(IConnection connection)
+        {
+            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
+            {
+                connection.Write(Helper.FalseArray);
+                return;
+            }
+            bool res = userStore.UpdatePassword(client.UserId, connection.ReceiveRequestWrap.Payload.GetUTF8String());
+
+            connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
+        }
+
         [MessengerId((ushort)UsersMessengerIds.Remove)]
         public void Remove(IConnection connection)
         {
@@ -80,8 +94,14 @@ namespace server.service.messengers.signin
                 connection.Write(Helper.FalseArray);
                 return;
             }
-
-            bool res = userStore.Remove(connection.ReceiveRequestWrap.Payload.ToUInt64());
+            bool res = false;
+            try
+            {
+                res = userStore.Remove(connection.ReceiveRequestWrap.Payload.ToUInt64());
+            }
+            catch (Exception)
+            {
+            }
 
             connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
         }

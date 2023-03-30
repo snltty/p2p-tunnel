@@ -10,15 +10,10 @@ namespace client.service.ui.api.service.webServer
     /// <summary>
     /// 本地web管理端服务器
     /// </summary>
-    public class WebServer : IWebServer
+    public sealed class WebServer : IWebServer
     {
         private readonly Config config;
         private readonly IWebServerFileReader webServerFileReader;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="webServerFileReader"></param>
         public WebServer(Config config, IWebServerFileReader webServerFileReader)
         {
             this.config = config;

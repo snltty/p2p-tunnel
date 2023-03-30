@@ -114,7 +114,7 @@ namespace common.libs
         }
     }
 
-    public class LoggerModel
+    public sealed class LoggerModel
     {
         public LoggerTypes Type { get; set; } = LoggerTypes.INFO;
         public DateTime Time { get; set; } = DateTime.Now;

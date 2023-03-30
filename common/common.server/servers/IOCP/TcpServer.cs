@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace common.server.servers.iocp
 {
-    public class TcpServer : ITcpServer
+    public sealed class TcpServer : ITcpServer
     {
         private int bufferSize = 8 * 1024;
         private int port = 0;
@@ -289,7 +289,7 @@ namespace common.server.servers.iocp
     }
 
    
-    public class AsyncUserToken
+    public sealed class AsyncUserToken
     {
         public IConnection Connection { get; set; }
         public Socket Socket { get; set; }

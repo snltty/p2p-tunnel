@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace common.server.servers.iocp
 {
-    public class SocketAsyncEventArgsPool
+    public sealed class SocketAsyncEventArgsPool
     {
         Stack<SocketAsyncEventArgs> pool;
         public SocketAsyncEventArgsPool(int capacity)

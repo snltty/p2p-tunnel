@@ -20,29 +20,11 @@ namespace client.messengers.punchHole.tcp
         public Task InputData(PunchHoleStepModel model);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class PunchHoleStep2TryInfo : IPunchHoleStepInfo
+    public sealed class PunchHoleStep2TryInfo : IPunchHoleStepInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.NOTIFY;
-
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; } = (byte)PunchHoleTcpNutssBSteps.STEP_2_TRY;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             return new byte[] {
@@ -51,10 +33,6 @@ namespace client.messengers.punchHole.tcp
                 Step
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -63,30 +41,12 @@ namespace client.messengers.punchHole.tcp
             Step = span[2];
         }
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class PunchHoleStep2StopInfo : IPunchHoleStepInfo
+    public sealed class PunchHoleStep2StopInfo : IPunchHoleStepInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.TCP_NUTSSB;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.FORWARD;
-
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; } = (byte)PunchHoleTcpNutssBSteps.STEP_2_STOP;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             return new byte[] {
@@ -95,10 +55,6 @@ namespace client.messengers.punchHole.tcp
                 Step,
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;

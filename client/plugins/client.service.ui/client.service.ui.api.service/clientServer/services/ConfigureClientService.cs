@@ -81,7 +81,7 @@ namespace client.service.ui.api.service.clientServer.services
     /// <summary>
     /// 保存
     /// </summary>
-    public class SaveParamsInfo
+    public sealed class SaveParamsInfo
     {
         /// <summary>
         /// 类名

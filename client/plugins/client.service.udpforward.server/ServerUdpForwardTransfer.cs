@@ -226,7 +226,7 @@ namespace client.service.udpforward.server
     /// 服务器 udp转发配置文件
     /// </summary>
     [Table("server-udp-forwards")]
-    public class ServerConfigInfo
+    public sealed class ServerConfigInfo
     {
         /// <summary>
         /// 
@@ -240,7 +240,7 @@ namespace client.service.udpforward.server
     /// <summary>
     /// 服务器转发
     /// </summary>
-    public class ServerForwardItemInfo
+    public sealed class ServerForwardItemInfo
     {
         /// <summary>
         /// 服务器端口

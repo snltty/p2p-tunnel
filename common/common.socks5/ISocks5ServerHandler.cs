@@ -31,7 +31,7 @@ namespace common.socks5
         Socks5EnumAuthState Validate(Memory<byte> data, Socks5EnumAuthType authType);
     }
 
-    public class Socks5AuthValidator : ISocks5AuthValidator
+    public sealed class Socks5AuthValidator : ISocks5AuthValidator
     {
         public Socks5EnumAuthType GetAuthType(Socks5EnumAuthType[] authTypes)
         {

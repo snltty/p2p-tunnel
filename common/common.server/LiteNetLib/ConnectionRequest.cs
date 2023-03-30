@@ -11,23 +11,14 @@ namespace LiteNetLib
         Reject,
         RejectForce
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class ConnectionRequest
+    public sealed class ConnectionRequest
     {
         private readonly NetManager _listener;
         private int _used;
-        /// <summary>
-        /// 
-        /// </summary>
         public NetDataReader Data => InternalPacket.Data;
 
         internal ConnectionRequestResult Result { get; private set; }
         internal NetConnectRequestPacket InternalPacket;
-        /// <summary>
-        /// 
-        /// </summary>
         public readonly IPEndPoint RemoteEndPoint;
 
         internal void UpdateRequest(NetConnectRequestPacket connectRequest)
@@ -54,11 +45,6 @@ namespace LiteNetLib
             RemoteEndPoint = remoteEndPoint;
             _listener = listener;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
         public NetPeer AcceptIfKey(string key)
         {
             if (!TryActivate())

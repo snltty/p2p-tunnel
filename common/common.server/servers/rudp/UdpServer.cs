@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace common.server.servers.rudp
 {
-    public class UdpServer : IUdpServer
+    public sealed class UdpServer : IUdpServer
     {
         public Func<IConnection, Task> OnPacket { get; set; } = async (connection) => { await Task.CompletedTask; };
         public Action<IPEndPoint, Memory<byte>> OnMessage { get; set; } = (endpoint, data) => { };

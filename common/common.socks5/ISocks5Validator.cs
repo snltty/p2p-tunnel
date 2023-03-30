@@ -5,7 +5,7 @@
         public bool Validate(Socks5Info info);
     }
 
-    public class DefaultSocks5Validator : ISocks5Validator
+    public sealed class DefaultSocks5Validator : ISocks5Validator
     {
         private readonly Config config;
         public DefaultSocks5Validator(Config config)

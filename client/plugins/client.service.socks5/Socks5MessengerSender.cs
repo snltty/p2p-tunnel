@@ -12,7 +12,7 @@ namespace client.service.socks5
     /// <summary>
     /// socks5消息发送
     /// </summary>
-    public class Socks5MessengerSender : ISocks5MessengerSender
+    public sealed class Socks5MessengerSender : ISocks5MessengerSender
     {
         private readonly MessengerSender messengerSender;
         private readonly common.socks5.Config config;
@@ -21,15 +21,6 @@ namespace client.service.socks5
 
         private IConnection connection;
         private string targetName;
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
-        /// <param name="config"></param>
-        /// <param name="signInStateInfo"></param>
-        /// <param name="clientInfoCaching"></param>
         public Socks5MessengerSender(MessengerSender messengerSender, common.socks5.Config config, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching)
         {
             this.messengerSender = messengerSender;
@@ -38,12 +29,6 @@ namespace client.service.socks5
             this.clientInfoCaching = clientInfoCaching;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         public async Task<bool> Request(Socks5Info data)
         {
             GetConnection();
@@ -59,11 +44,6 @@ namespace client.service.socks5
             data.Return(bytes);
             return res;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="connection"></param>
         public async Task<bool> Response(Socks5Info data)
         {
             byte[] bytes = data.ToBytes(out int length);
@@ -76,22 +56,12 @@ namespace client.service.socks5
             data.Return(bytes);
             return res;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="connection"></param>
         public async Task ResponseClose(Socks5Info data)
         {
             data.Data = Helper.EmptyArray;
             await Response(data);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="connection"></param>
         public async Task RequestClose(Socks5Info data)
         {
             data.Data = Helper.EmptyArray;

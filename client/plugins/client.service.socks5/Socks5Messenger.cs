@@ -9,15 +9,10 @@ namespace client.service.socks5
     /// socks5消息
     /// </summary>
     [MessengerIdRange((ushort)Socks5MessengerIds.Min, (ushort)Socks5MessengerIds.Max)]
-    public class Socks5Messenger : IMessenger
+    public sealed class Socks5Messenger : IMessenger
     {
         private readonly ISocks5ClientHandler socks5ClientHandler;
         private readonly ISocks5ServerHandler socks5ServerHandler;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="socks5ClientHandler"></param>
-        /// <param name="socks5ServerHandler"></param>
         public Socks5Messenger(ISocks5ClientHandler socks5ClientHandler, ISocks5ServerHandler socks5ServerHandler)
         {
             this.socks5ClientHandler = socks5ClientHandler;

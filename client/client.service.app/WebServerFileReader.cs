@@ -3,7 +3,7 @@ using common.libs.extends;
 
 namespace client.service.app
 {
-    public class WebServerFileReader : IWebServerFileReader
+    public sealed class WebServerFileReader : IWebServerFileReader
     {
         public byte[] Read(string fileName)
         {

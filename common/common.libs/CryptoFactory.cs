@@ -5,9 +5,6 @@ using System.Text;
 
 namespace common.libs
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public interface ICryptoFactory
     {
         /// <summary>

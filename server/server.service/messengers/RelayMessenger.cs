@@ -61,7 +61,7 @@ namespace server.service.messengers
         }
     }
 
-    public class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
+    public sealed class RelaySourceConnectionSelector : IRelaySourceConnectionSelector
     {
         private readonly IClientSignInCaching clientSignInCaching;
 

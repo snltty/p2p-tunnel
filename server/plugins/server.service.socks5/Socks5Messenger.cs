@@ -9,7 +9,7 @@ namespace server.service.socks5
     /// socks5消息
     /// </summary>
     [MessengerIdRange((ushort)Socks5MessengerIds.Min, (ushort)Socks5MessengerIds.Max)]
-    public class Socks5Messenger : IMessenger
+    public sealed class Socks5Messenger : IMessenger
     {
         private readonly ISocks5ServerHandler socks5ServerHandler;
         public Socks5Messenger(ISocks5ServerHandler socks5ServerHandler)

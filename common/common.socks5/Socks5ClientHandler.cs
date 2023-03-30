@@ -9,34 +9,20 @@ namespace common.socks5
     /// <summary>
     /// socks5客户端
     /// </summary>
-    public class Socks5ClientHandler : ISocks5ClientHandler
+    public  class Socks5ClientHandler : ISocks5ClientHandler
     {
         private readonly ISocks5MessengerSender socks5MessengerSender;
         private readonly ISocks5ClientListener socks5ClientListener;
         private readonly ISocks5DstEndpointProvider socks5DstEndpointProvider;
-        private readonly ISocks5AuthValidator socks5AuthValidator;
 
-        /// <summary>
-        /// 
-        /// </summary>
         protected Dictionary<Socks5EnumStep, Func<Socks5Info, Task<bool>>> handles = new Dictionary<Socks5EnumStep, Func<Socks5Info, Task<bool>>>();
-        /// <summary>
-        /// 
-        /// </summary>
         protected Dictionary<Socks5EnumStep, Action<Socks5Info>> buildHandles = new Dictionary<Socks5EnumStep, Action<Socks5Info>>();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="socks5MessengerSender"></param>
-        /// <param name="socks5DstEndpointProvider"></param>
-        /// <param name="socks5ClientListener"></param>
-        public Socks5ClientHandler(ISocks5MessengerSender socks5MessengerSender, ISocks5DstEndpointProvider socks5DstEndpointProvider, ISocks5ClientListener socks5ClientListener, ISocks5AuthValidator socks5AuthValidator)
+        public Socks5ClientHandler(ISocks5MessengerSender socks5MessengerSender, ISocks5DstEndpointProvider socks5DstEndpointProvider, ISocks5ClientListener socks5ClientListener)
         {
             this.socks5MessengerSender = socks5MessengerSender;
             this.socks5DstEndpointProvider = socks5DstEndpointProvider;
             this.socks5ClientListener = socks5ClientListener;
-            this.socks5AuthValidator = socks5AuthValidator;
 
             socks5ClientListener.OnData = OnData;
             socks5ClientListener.OnClose = OnClose;

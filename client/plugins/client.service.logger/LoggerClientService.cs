@@ -54,7 +54,7 @@ namespace client.service.logger
     /// <summary>
     /// 日志分页参数
     /// </summary>
-    public class PageParamsInfo
+    public sealed class PageParamsInfo
     {
         /// <summary>
         /// 当前页
@@ -72,7 +72,7 @@ namespace client.service.logger
     /// <summary>
     /// 日志分页返回
     /// </summary>
-    public class PageInfo
+    public sealed class PageInfo
     {
         /// <summary>
         /// 当前页

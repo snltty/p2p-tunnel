@@ -103,7 +103,7 @@ namespace common.tcpforward
     /// <summary>
     /// 长链接端口范围
     /// </summary>
-    public class TunnelListenRangeInfo
+    public sealed class TunnelListenRangeInfo
     {
         /// <summary>
         /// 最小

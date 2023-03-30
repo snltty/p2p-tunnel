@@ -217,7 +217,7 @@ namespace client.service.udpforward
     /// p2p udp转发配置文件
     /// </summary>
     [Table("p2p-udp-forwards")]
-    public class P2PConfigInfo
+    public sealed class P2PConfigInfo
     {
         /// <summary>
         /// 
@@ -231,7 +231,7 @@ namespace client.service.udpforward
     /// <summary>
     /// p2p转发监听
     /// </summary>
-    public class P2PListenInfo
+    public sealed class P2PListenInfo
     {
         /// <summary>
         /// id

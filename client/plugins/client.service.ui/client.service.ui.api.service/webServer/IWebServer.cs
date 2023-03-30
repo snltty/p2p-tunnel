@@ -32,13 +32,9 @@ namespace client.service.ui.api.service.webServer
     /// <summary>
     /// web服务文件读取器
     /// </summary>
-    public class WebServerFileReader : IWebServerFileReader
+    public sealed class WebServerFileReader : IWebServerFileReader
     {
         private readonly Config config;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
         public WebServerFileReader(Config config)
         {
             this.config = config;

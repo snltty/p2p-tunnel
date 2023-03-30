@@ -11,26 +11,13 @@ using System.Reflection;
 
 namespace client.service.ui.api.service
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public class Plugin : IPlugin
+    public sealed class Plugin : IPlugin
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="assemblys"></param>
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             LoadWebAfter(services, assemblys);
             LoadApiAfter(services, assemblys);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="assemblys"></param>
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<Config>();

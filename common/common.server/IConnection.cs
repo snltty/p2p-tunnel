@@ -664,7 +664,7 @@ namespace common.server
     }
 
 
-    public class TokenBucketRatelimit
+    public sealed class TokenBucketRatelimit
     {
         double ticks = 1000.0d * TimeSpan.TicksPerMillisecond;
         TokenBucketRateInfo info;

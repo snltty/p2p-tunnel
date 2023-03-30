@@ -13,7 +13,7 @@ namespace common.server.servers.websocket
     /// <summary>
     /// websocket服务端
     /// </summary>
-    public class WebSocketServer
+    public sealed class WebSocketServer
     {
         private Socket socket;
         private int BufferSize = 4 * 1024;
@@ -504,14 +504,8 @@ namespace common.server.servers.websocket
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class AsyncUserToken
+    public sealed class AsyncUserToken
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public WebsocketConnection Connectrion { get; set; }
 
         /// <summary>
@@ -530,17 +524,8 @@ namespace common.server.servers.websocket
         /// 当前帧的数据类型
         /// </summary>
         public WebSocketFrameInfo.EnumOpcode Opcode { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public byte[] PoolBuffer { get; set; }
-        /// <summary>
-        ///
-        /// </summary>
         public bool Disposabled { get; private set; } = false;
-        /// <summary>
-        /// 
-        /// </summary>
         public void Clear()
         {
             Disposabled = true;

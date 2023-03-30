@@ -26,7 +26,7 @@ namespace client.messengers.punchHole
     /// <summary>
     /// 打洞参数
     /// </summary>
-    public class ConnectParams
+    public sealed class ConnectParams
     {
         /// <summary>
         /// 打谁
@@ -45,7 +45,7 @@ namespace client.messengers.punchHole
     /// <summary>
     /// 打洞步骤基类
     /// </summary>
-    public class PunchHoleStepModel
+    public sealed class PunchHoleStepModel
     {
         /// <summary>
         /// 连接对象
@@ -64,7 +64,7 @@ namespace client.messengers.punchHole
     /// <summary>
     /// 打洞缓存
     /// </summary>
-    public class ConnectCacheModel
+    public sealed class ConnectCacheModel
     {
         /// <summary>
         /// 是否已取消
@@ -99,7 +99,7 @@ namespace client.messengers.punchHole
     /// <summary>
     /// 打洞结果
     /// </summary>
-    public class ConnectResultModel
+    public sealed class ConnectResultModel
     {
         /// <summary>
         /// 是否成功
@@ -113,7 +113,7 @@ namespace client.messengers.punchHole
     /// <summary>
     /// 打洞失败信息
     /// </summary>
-    public class ConnectFailModel
+    public sealed class ConnectFailModel
     {
         /// <summary>
         /// 失败原因

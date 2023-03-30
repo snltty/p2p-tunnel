@@ -166,18 +166,9 @@ namespace client.service.wakeup
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class ConfigItem
+    public sealed class ConfigItem
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public string Mac { get; set; } = string.Empty;
-        /// <summary>
-        /// 
-        /// </summary>
         public string Name { get; set; } = string.Empty;
     }
 }

@@ -264,7 +264,7 @@ namespace common.server.servers.websocket
     /// <summary>
     /// 
     /// </summary>
-    public class WebSocketFrameRemarkInfo
+    public sealed class WebSocketFrameRemarkInfo
     {
         /// <summary>
         /// 是否是结束帧，如果只有一帧，那必定是结束帧
@@ -305,7 +305,7 @@ namespace common.server.servers.websocket
     /// <summary>
     /// 数据帧解析
     /// </summary>
-    public class WebSocketFrameInfo
+    public sealed class WebSocketFrameInfo
     {
         /// <summary>
         /// 是否是结束帧
@@ -634,7 +634,7 @@ namespace common.server.servers.websocket
     /// <summary>
     /// 请求头解析
     /// </summary>
-    public class WebsocketHeaderInfo
+    public sealed class WebsocketHeaderInfo
     {
         static byte[][] bytes = new byte[][] {
             Encoding.ASCII.GetBytes("Connection: "),

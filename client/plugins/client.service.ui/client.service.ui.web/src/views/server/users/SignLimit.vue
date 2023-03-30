@@ -1,11 +1,11 @@
 <template>
-    <el-dialog title="增加账号" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
-        <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="80px">
-            <el-form-item label="账号" prop="Account">
-                <el-input v-model="state.form.Account"></el-input>
+    <el-dialog title="设置登录限制" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
+        <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="60">
+            <el-form-item label="" label-width="0">
+                <el-switch v-model="state.type" active-text="限制登录数" inactive-text="无限制" />
             </el-form-item>
-            <el-form-item label="密码" prop="Password">
-                <el-input v-model="state.form.Password"></el-input>
+            <el-form-item label="数量" prop="signLimit" v-if="state.type">
+                <el-input v-model="state.form.signLimit" />
             </el-form-item>
         </el-form>
         <template #footer>
@@ -16,34 +16,36 @@
 </template>
 
 <script>
-import { reactive, ref, toRefs } from '@vue/reactivity';
+import { reactive, ref } from '@vue/reactivity';
 import { add } from '../../../apis/users-server'
-import { watch } from '@vue/runtime-core';
+import { inject, watch } from '@vue/runtime-core';
+import { ElMessage } from 'element-plus';
 export default {
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],
     setup(props, { emit }) {
+        const addData = inject('add-data');
+
+
         const state = reactive({
             show: props.modelValue,
             loading: false,
+            type: addData.value.SignLimit != 0,
             form: {
-                ID: 0,
-                Account: '',
-                Password: '',
-                Access: 0,
-                SignLimit: 0,
-                NetFlow: -1,
-                EndTime: '9999-12-31 23:59:59',
+                signLimit: addData.value.SignLimit,
             },
             rules: {
-                Account: [
-                    { required: true, message: '必填', min: 1, max: 32, message: '1-32个字符', trigger: 'blur' }
+                signLimit: [
+                    { required: true, message: '必填', trigger: 'blur' },
+                    {
+                        type: 'number', min: 0, max: 65535, message: '数字 0-65535', trigger: 'blur', transform(value) {
+                            return Number(value)
+                        }
+                    }
                 ],
-                Password: [
-                    { required: true, message: '必填', min: 6, max: 32, message: '6-32个字符', trigger: 'blur' }
-                ]
             }
         });
+
         watch(() => state.show, (val) => {
             if (!val) {
                 setTimeout(() => {
@@ -51,27 +53,28 @@ export default {
                 }, 300);
             }
         });
-
         const formDom = ref(null);
         const handleSubmit = () => {
             formDom.value.validate((valid) => {
                 if (!valid) {
                     return false;
                 }
-                state.loading = true;
 
-                const json = JSON.parse(JSON.stringify(state.form));
+                let json = JSON.parse(JSON.stringify(addData.value));
+                json.SignLimit = state.type ? +state.form.signLimit : -1;
+                state.loading = true;
                 add(json).then((msg) => {
                     state.loading = false;
                     if (!msg) {
-                        state.show = false;
+                        ElMessage.success('操作成功');
                         emit('success');
+                        state.show = false;
                     } else {
                         ElMessage.error(msg);
                     }
-                }).catch((e) => {
-                    state.loading = false;
+                }).catch(() => {
                     ElMessage.error('操作失败');
+                    state.loading = false;
                 });
             })
         }

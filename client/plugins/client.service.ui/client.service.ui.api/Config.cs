@@ -67,7 +67,7 @@ namespace client.service.ui.api
     /// <summary>
     /// 本地web管理端配置
     /// </summary>
-    public class WebConfig
+    public sealed class WebConfig
     {
         /// <summary>
         /// 端口
@@ -86,7 +86,7 @@ namespace client.service.ui.api
     /// <summary>
     /// 本地websocket
     /// </summary>
-    public class WebsocketConfig
+    public sealed class WebsocketConfig
     {
         /// <summary>
         /// 端口

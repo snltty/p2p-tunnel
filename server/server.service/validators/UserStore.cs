@@ -43,9 +43,23 @@ namespace server.service.validators
         {
             return storeModel.Users.Values;
         }
-        public IEnumerable<UserInfo> Get(int p = 1, int ps = 10)
+        public IEnumerable<UserInfo> Get(int p = 1, int ps = 10, byte sort = 0, string account = "")
         {
-            return storeModel.Users.Values.Skip((p - 1) * ps).Take(ps);
+            var values = storeModel.Users.Values.Select(c => c);
+            //if (string.IsNullOrWhiteSpace(account) == false)
+            //{
+            //    values = values.Where(c => c.Account.Contains(account));
+            //}
+
+            //byte sortType = sort >> 7;
+            //byte sortField = sort & 0b01111111;
+            //if (sort == UserInfo.SortID)
+            //{
+            //    if (sortType == 1)
+            //        values.OrderDescending().Skip((p - 1) * ps).Take(ps);
+            //}
+
+            return values.Skip((p - 1) * ps).Take(ps);
         }
 
         public bool Get(ulong uid, out UserInfo user)
@@ -88,7 +102,7 @@ namespace server.service.validators
                 }
                 else
                 {
-                    if (storeModel.Users.TryGetValue(user.ID, out UserInfo _user) == false)
+                    if (storeModel.Users.TryGetValue(user.ID, out UserInfo _user))
                     {
                         //_user.Account = user.Account;
                         _user.Password = user.Password;
@@ -99,6 +113,16 @@ namespace server.service.validators
                         return true;
                     }
                 }
+            }
+            return false;
+        }
+        public bool UpdatePassword(ulong id, string password)
+        {
+            if (storeModel.Users.TryGetValue(id, out UserInfo _user))
+            {
+                _user.Password = password;
+                configDataProvider.Save(storeModel);
+                return true;
             }
             return false;
         }
@@ -118,7 +142,7 @@ namespace server.service.validators
     }
 
     [Table("users")]
-    public class UserStoreModel
+    public sealed class UserStoreModel
     {
         public Dictionary<ulong, UserInfo> Users { get; set; }
     }

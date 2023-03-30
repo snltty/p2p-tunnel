@@ -109,7 +109,7 @@ namespace client.service.ui.api.service.clientServer.services
     /// <summary>
     /// 配置信息
     /// </summary>
-    public class ConfigureParamsInfo
+    public sealed class ConfigureParamsInfo
     {
         /// <summary>
         /// 客户端配置信息
@@ -124,7 +124,7 @@ namespace client.service.ui.api.service.clientServer.services
     /// <summary>
     /// 注册信息
     /// </summary>
-    public class SignInInfo
+    public sealed class SignInInfo
     {
         /// <summary>
         /// 客户端配置

@@ -9,7 +9,7 @@ namespace client.messengers.punchHole
     /// 打洞类型
     /// </summary>
     [Flags]
-    public enum PunchHoleTypes : byte
+    public  enum PunchHoleTypes : byte
     {
         /// <summary>
         /// 
@@ -80,24 +80,11 @@ namespace client.messengers.punchHole
     /// <summary>
     /// 步骤1
     /// </summary>
-    public class PunchHoleStep1Info : IPunchHoleStepInfo
+    public sealed class PunchHoleStep1Info : IPunchHoleStepInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.NOTIFY;
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             return new byte[] {
@@ -106,10 +93,6 @@ namespace client.messengers.punchHole
                 Step,
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -122,27 +105,11 @@ namespace client.messengers.punchHole
    /// <summary>
    /// 步骤2
    /// </summary>
-    public class PunchHoleStep2Info : IPunchHoleStepInfo
+    public sealed class PunchHoleStep2Info : IPunchHoleStepInfo
     {
-       /// <summary>
-       /// 
-       /// </summary>
         public PunchHoleTypes PunchType { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; set; } = PunchForwardTypes.NOTIFY;
-
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             return new byte[] {
@@ -151,10 +118,6 @@ namespace client.messengers.punchHole
                 Step,
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -163,29 +126,13 @@ namespace client.messengers.punchHole
             Step = span[2];
         }
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class PunchHoleStep2FailInfo : IPunchHoleStepInfo
+    public sealed class PunchHoleStep2FailInfo : IPunchHoleStepInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             return new byte[] {
@@ -194,10 +141,6 @@ namespace client.messengers.punchHole
                 Step,
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -206,28 +149,11 @@ namespace client.messengers.punchHole
             Step = span[2];
         }
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class PunchHoleStep3Info : IPunchHoleStepInfo
+    public sealed class PunchHoleStep3Info : IPunchHoleStepInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var bytes = new byte[3];
@@ -236,10 +162,6 @@ namespace client.messengers.punchHole
             bytes[2] = Step;
             return bytes;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -249,30 +171,11 @@ namespace client.messengers.punchHole
         }
 
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class PunchHoleStep4Info : IPunchHoleStepInfo
+    public sealed class PunchHoleStep4Info : IPunchHoleStepInfo
     {
-
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var bytes = new byte[3 + 8];
@@ -282,10 +185,6 @@ namespace client.messengers.punchHole
 
             return bytes;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -295,24 +194,10 @@ namespace client.messengers.punchHole
         }
 
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class PunchHoleReverseInfo : IPunchHoleStepInfo
+    public sealed class PunchHoleReverseInfo : IPunchHoleStepInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; set; } = PunchHoleTypes.REVERSE;
-
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; set; } 
-
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; } 
 
         /// <summary>
@@ -320,10 +205,6 @@ namespace client.messengers.punchHole
         /// </summary>
         public byte Value { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             return new byte[] {
@@ -333,10 +214,6 @@ namespace client.messengers.punchHole
                 Value
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -347,30 +224,12 @@ namespace client.messengers.punchHole
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class PunchHoleOfflineInfo : IPunchHoleStepInfo
+    public sealed class PunchHoleOfflineInfo : IPunchHoleStepInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; private set; } = PunchHoleTypes.OFFLINE;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; private set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             return new byte[] {
@@ -379,10 +238,6 @@ namespace client.messengers.punchHole
                 Step,
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -392,30 +247,14 @@ namespace client.messengers.punchHole
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class PunchHoleResetInfo : IPunchHoleStepInfo
+    public sealed class PunchHoleResetInfo : IPunchHoleStepInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchHoleTypes PunchType { get; private set; } = PunchHoleTypes.RESET;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public PunchForwardTypes ForwardType { get; private set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public byte Step { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             return new byte[] {
@@ -424,10 +263,6 @@ namespace client.messengers.punchHole
                 Step,
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;

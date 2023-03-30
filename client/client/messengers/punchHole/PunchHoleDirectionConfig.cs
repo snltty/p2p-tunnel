@@ -10,7 +10,7 @@ namespace client.messengers.punchHole
     /// <summary>
     /// 打洞方向缓存，记录下我主动连接别人成功的记录，几下谁被我主动连是成功的，下次还是由我主动
     /// </summary>
-    public class PunchHoleDirectionConfig
+    public sealed class PunchHoleDirectionConfig
     {
         private readonly IConfigDataProvider<PunchHoleDirectionConfig1> configDataProvider;
 
@@ -70,7 +70,7 @@ namespace client.messengers.punchHole
     /// 打洞方向缓存配置文件
     /// </summary>
     [Table("punchhole-direction")]
-    public class PunchHoleDirectionConfig1
+    public sealed class PunchHoleDirectionConfig1
     {
         /// <summary>
         /// 客户端名字列表

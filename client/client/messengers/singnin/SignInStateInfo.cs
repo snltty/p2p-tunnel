@@ -8,7 +8,7 @@ namespace client.messengers.singnin
     /// <summary>
     /// 本地注册状态
     /// </summary>
-    public class SignInStateInfo
+    public sealed class SignInStateInfo
     {
         /// <summary>
         /// TCP连接对象
@@ -102,7 +102,7 @@ namespace client.messengers.singnin
     /// <summary>
     /// 远程信息
     /// </summary>
-    public class RemoteInfo
+    public sealed class RemoteInfo
     {
         /// <summary>
         /// 客户端在远程的ip
@@ -131,7 +131,7 @@ namespace client.messengers.singnin
     /// <summary>
     /// 本地信息
     /// </summary>
-    public class LocalInfo
+    public sealed class LocalInfo
     {
         /// <summary>
         /// 外网距离

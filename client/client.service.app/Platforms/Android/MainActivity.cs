@@ -27,7 +27,7 @@ namespace client.service.app
     }
 
     [Service]
-    public class ForegroundService : Service
+    public sealed class ForegroundService : Service
     {
         private static readonly int SERVICE_ID = 10000;
 
@@ -94,7 +94,7 @@ namespace client.service.app
             base.OnDestroy();
         }
     }
-    public class KeepManager
+    public sealed class KeepManager
     {
         private static readonly KeepManager mInstance = new KeepManager();
 

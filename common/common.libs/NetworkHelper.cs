@@ -34,10 +34,10 @@ namespace common.libs
                 int len = 6;
                 SendARP(ldest, 0, ref macinfo, ref len);
                 string tmpMac = Convert.ToString(macinfo, 16).PadLeft(12, '0');
-                mac = tmpMac.Substring(0, 2).ToUpper();
+                mac = tmpMac[..2].ToUpper(System.Globalization.CultureInfo.CurrentCulture);
                 for (int i = 2; i < tmpMac.Length; i += 2)
                 {
-                    mac = tmpMac.Substring(i, 2).ToUpper() + ":" + mac;
+                    mac = tmpMac.Substring(i, 2).ToUpper(System.Globalization.CultureInfo.CurrentCulture) + ":" + mac;
                 }
             }
             catch (Exception)
@@ -60,7 +60,7 @@ namespace common.libs
                 for (ushort i = 0; i < list.Count(); i++)
                 {
                     string ip = list.ElementAt(i).ToString();
-                    if (ip.StartsWith(starts[0]) || ip.StartsWith(starts[1]) || ip.StartsWith(starts[2]))
+                    if (ip.StartsWith(starts[0], StringComparison.Ordinal) || ip.StartsWith(starts[1], StringComparison.Ordinal) || ip.StartsWith(starts[2], StringComparison.Ordinal))
                     {
 
                     }
@@ -307,7 +307,7 @@ namespace common.libs
         /// <returns></returns>
         public static byte[] Mac2Bytes(string mac)
         {
-            mac = mac.Replace("-", "").Replace(":", "");
+            mac = mac.Replace("-", "", StringComparison.Ordinal).Replace(":", "", StringComparison.Ordinal);
             byte[] res = new byte[mac.Length / 2];
             for (int i = 0; i < res.Length; i++)
             {
@@ -347,9 +347,7 @@ namespace common.libs
            public static bool   IPv6Support = Socket.SupportsIPv6;
 #pragma warning restore 618
 #else
-        /// <summary>
-        /// 
-        /// </summary>
+
         public static bool IPv6Support = Socket.OSSupportsIPv6;
 #endif
     }

@@ -65,6 +65,7 @@ export const onWebsocketMsg = (msg) => {
             callback.resolve(json.Content);
         } else if (json.Code == 1) {
             console.error(json.Content);
+            callback.reject(json.Content);
         }
         else if (json.Code == 255) {
             callback.reject(json.Content);

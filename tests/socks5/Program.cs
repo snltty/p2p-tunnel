@@ -26,7 +26,7 @@ namespace socks5
             listener.Start(config.ListenPort, config.BufferSize);
 
             //客户端处理
-            ISocks5ClientHandler client = new Socks5ClientHandler(socks5MessengerSender, socks5DstEndpointProvider, listener, socks5AuthValidator);
+            ISocks5ClientHandler client = new Socks5ClientHandler(socks5MessengerSender, socks5DstEndpointProvider, listener);
             //服务端处理
             ISocks5ServerHandler server = new Socks5ServerHandler(socks5MessengerSender, config, wheelTimer, validator, socks5AuthValidator);
 
@@ -40,7 +40,7 @@ namespace socks5
 
         static void LoggerConsole()
         {
-            Logger.Instance.OnLogger.Sub((model) =>
+            Logger.Instance.OnLogger+=(model) =>
             {
                 ConsoleColor currentForeColor = Console.ForegroundColor;
                 switch (model.Type)
@@ -63,7 +63,7 @@ namespace socks5
                 string line = $"[{model.Type,-7}][{model.Time:yyyy-MM-dd HH:mm:ss}]:{model.Content}";
                 Console.WriteLine(line);
                 Console.ForegroundColor = currentForeColor;
-            });
+            };
         }
     }
 
@@ -72,7 +72,7 @@ namespace socks5
     /// 如果是socks5客户端和socks5服务端都放在服务器，不分离，那就如下面这也，直接流转即可
     /// 分离的话，就要自己使用socket和服务端通信
     /// </summary>
-    public class Socks5MessengerSender : ISocks5MessengerSender
+    public sealed class Socks5MessengerSender : ISocks5MessengerSender
     {
         public ISocks5ClientHandler Client { get; set; }
         public ISocks5ServerHandler Server { get; set; }

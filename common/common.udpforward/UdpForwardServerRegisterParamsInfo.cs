@@ -98,28 +98,11 @@ namespace common.udpforward
         }
 
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class UdpForwardRegisterResult
+    public sealed class UdpForwardRegisterResult
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public UdpForwardRegisterResultCodes Code { get; set; } = UdpForwardRegisterResultCodes.OK;
-        /// <summary>
-        /// 
-        /// </summary>
         public ulong ID { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public string Msg { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var msgBytes = Msg.GetUTF16Bytes();
@@ -147,10 +130,6 @@ namespace common.udpforward
 
             return bytes;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -166,35 +145,17 @@ namespace common.udpforward
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [Flags]
     public enum UdpForwardRegisterResultCodes : byte
     {
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("成功")]
         OK = 1,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("插件未开启")]
         DISABLED = 2,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("已存在")]
         EXISTS = 4,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("端口超出范围")]
         OUT_RANGE = 8,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("未知")]
         UNKNOW = 16,
     }

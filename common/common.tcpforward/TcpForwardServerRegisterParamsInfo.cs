@@ -122,31 +122,12 @@ namespace common.tcpforward
         }
 
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class TcpForwardUnRegisterParamsInfo
+    public sealed class TcpForwardUnRegisterParamsInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public TcpForwardUnRegisterParamsInfo() { }
-        /// <summary>
-        /// 
-        /// </summary>
         public string SourceIp { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public ushort SourcePort { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public TcpForwardAliveTypes AliveType { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var ipBytes = SourceIp.GetUTF16Bytes();
@@ -167,10 +148,6 @@ namespace common.tcpforward
 
             return bytes;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(Memory<byte> data)
         {
             var span = data.Span;
@@ -185,27 +162,11 @@ namespace common.tcpforward
             SourceIp = span.Slice(index + 1).GetUTF16String(span[index]);
         }
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class TcpForwardRegisterResult
+    public sealed class TcpForwardRegisterResult
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public TcpForwardRegisterResultCodes Code { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public ulong ID { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public string Msg { get; set; } = string.Empty;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var msgBytes = Msg.GetUTF16Bytes();
@@ -230,10 +191,6 @@ namespace common.tcpforward
 
             return bytes;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -249,35 +206,17 @@ namespace common.tcpforward
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [Flags]
     public enum TcpForwardRegisterResultCodes : byte
     {
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("成功")]
         OK = 0,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("插件未开启")]
         DISABLED = 1,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("已存在")]
         EXISTS = 2,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("端口超出范围")]
         OUT_RANGE = 4,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("未知")]
         UNKNOW = 8,
     }

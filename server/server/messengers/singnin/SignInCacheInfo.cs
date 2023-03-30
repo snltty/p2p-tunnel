@@ -83,7 +83,7 @@ namespace server.messengers.singnin
         }
     }
 
-    public class TunnelCacheInfo
+    public sealed class TunnelCacheInfo
     {
         public int Port { get; set; }
         public int LocalPort { get; set; }

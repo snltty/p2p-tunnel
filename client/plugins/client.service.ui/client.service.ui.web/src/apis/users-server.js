@@ -6,3 +6,13 @@ export const getPage = (p = 1, ps = 10) => {
         PageSize: ps
     });
 }
+
+export const add = (row) => {
+    return sendWebsocketMsg(`serverusers/add`, row);
+}
+export const remove = (id) => {
+    return sendWebsocketMsg(`serverusers/remove`, id);
+}
+export const setPassword = (password) => {
+    return sendWebsocketMsg(`serverusers/password`, password);
+}

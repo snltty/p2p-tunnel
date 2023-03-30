@@ -18,7 +18,7 @@ namespace common.libs.extends
                 FieldInfo[] fields = type.GetFields();
                 for (int i = 0; i < fields.Length; i++)
                 {
-                    if (fields[i].Name != enumFirstName)
+                    if (string.Equals(fields[i].Name, enumFirstName))
                     {
                         object[] attrs = fields[i].GetCustomAttributes(typeof(DescriptionAttribute), false);
                         byte key = (byte)fields[i].GetValue(obj)!;

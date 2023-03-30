@@ -189,7 +189,7 @@ namespace client.realize.messengers.punchHole
     /// 发送打洞消息的参数
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class SendPunchHoleArg<T>
+    public sealed class SendPunchHoleArg<T>
     {
         /// <summary>
         /// 连接
@@ -212,7 +212,7 @@ namespace client.realize.messengers.punchHole
     /// <summary>
     /// 请求消息超时缓存
     /// </summary>
-    public class TimeoutState
+    public sealed class TimeoutState
     {
         /// <summary>
         /// 请求id

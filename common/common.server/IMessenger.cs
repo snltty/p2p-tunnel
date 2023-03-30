@@ -13,7 +13,7 @@ namespace common.server
     /// 消息id范围
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class MessengerIdRangeAttribute : Attribute
+    public sealed class MessengerIdRangeAttribute : Attribute
     {
         /// <summary>
         /// 最小
@@ -38,7 +38,7 @@ namespace common.server
     /// 消息id
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class MessengerIdAttribute : Attribute
+    public sealed class MessengerIdAttribute : Attribute
     {
         /// <summary>
         /// id
@@ -59,7 +59,7 @@ namespace common.server
     /// </summary>
 
     [AttributeUsage(AttributeTargets.Enum)]
-    public class MessengerIdEnumAttribute : Attribute
+    public sealed class MessengerIdEnumAttribute : Attribute
     {
     }
 }

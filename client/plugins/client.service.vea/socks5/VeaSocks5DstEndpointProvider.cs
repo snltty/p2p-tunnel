@@ -8,7 +8,7 @@ namespace client.service.vea.socks5
 
     }
 
-    public class VeaSocks5DstEndpointProvider : Socks5DstEndpointProvider, IVeaSocks5DstEndpointProvider
+    public sealed class VeaSocks5DstEndpointProvider : Socks5DstEndpointProvider, IVeaSocks5DstEndpointProvider
     {
     }
 }

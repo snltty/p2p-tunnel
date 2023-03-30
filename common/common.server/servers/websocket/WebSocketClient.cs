@@ -11,7 +11,7 @@ namespace common.server.servers.websocket
     /// <summary>
     /// wensocket客户端
     /// </summary>
-    public class WebSocketClient : IDisposable
+    public sealed class WebSocketClient : IDisposable
     {
         private int bufferSize = 4 * 1024;
         private SocketAsyncEventArgs readEventArgs;
@@ -386,22 +386,12 @@ namespace common.server.servers.websocket
             connecSuccess = true;
             OnOpen(header);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public int SendRaw(byte[] buffer)
         {
             var socket = (readEventArgs.UserToken as AsyncServerUserToken).TargetSocket;
 
             return socket.Send(buffer, SocketFlags.None);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="remark"></param>
-        /// <returns></returns>
         public int SendFrame(WebSocketFrameRemarkInfo remark)
         {
             remark.Mask = WebSocketFrameInfo.EnumMask.Mask;
@@ -409,20 +399,10 @@ namespace common.server.servers.websocket
             var frame = WebSocketParser.BuildFrameData(remark);
             return SendRaw(frame);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="txt"></param>
-        /// <returns></returns>
         public int SendFrameText(string txt)
         {
             return SendFrameText(txt.ToBytes());
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public int SendFrameText(byte[] buffer)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -431,11 +411,6 @@ namespace common.server.servers.websocket
                 Data = buffer
             });
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public int SendFrameBinary(byte[] buffer)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -444,27 +419,14 @@ namespace common.server.servers.websocket
                 Data = buffer
             });
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public int SendFramePoing()
         {
             return SendRaw(WebSocketParser.BuildPingData());
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public int SendFramePong()
         {
             return SendRaw(WebSocketParser.BuildPongData());
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
         public int SendFrameClose(WebSocketFrameInfo.EnumCloseStatus status)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -473,9 +435,6 @@ namespace common.server.servers.websocket
                 Data = ((ushort)status).ToBytes()
             });
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public void Dispose()
         {
             CloseClientSocket();
@@ -483,14 +442,8 @@ namespace common.server.servers.websocket
             //GC.SuppressFinalize(this);
         }
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class AsyncServerUserToken
+    public sealed class AsyncServerUserToken
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public Socket TargetSocket { get; set; }
 
         /// <summary>
@@ -509,18 +462,9 @@ namespace common.server.servers.websocket
         /// 当前帧的数据类型
         /// </summary>
         public WebSocketFrameInfo.EnumOpcode Opcode { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public Memory<byte> SecWebSocketKey { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public byte[] PoolBuffer { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public void Clear()
         {
             TargetSocket?.SafeClose();

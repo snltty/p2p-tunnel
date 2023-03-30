@@ -33,13 +33,60 @@ namespace client.service.users.server
                 MessengerId = (ushort)UsersMessengerIds.Page,
                 Payload = page.ToBytes()
             });
-            if(resp.Code == MessageResponeCodes.OK)
+            if (resp.Code == MessageResponeCodes.OK)
             {
                 return resp.Data.GetUTF8String();
             }
             return string.Empty;
         }
 
+        [ClientService(null)]
+        public async Task<string> Add(ClientServiceParamsInfo arg)
+        {
+            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            {
+                Connection = signInStateInfo.Connection,
+                MessengerId = (ushort)UsersMessengerIds.Add,
+                Payload = arg.Content.ToUTF8Bytes()
+            });
+            if (resp.Code != MessageResponeCodes.OK)
+            {
+                return resp.Data.GetUTF8String();
+            }
+            return string.Empty;
+        }
+
+        [ClientService(null)]
+        public async Task<string> Password(ClientServiceParamsInfo arg)
+        {
+            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            {
+                Connection = signInStateInfo.Connection,
+                MessengerId = (ushort)UsersMessengerIds.Password,
+                Payload = arg.Content.ToUTF8Bytes()
+            });
+            if (resp.Code != MessageResponeCodes.OK)
+            {
+                return resp.Data.GetUTF8String();
+            }
+            return string.Empty;
+        }
+
+        [ClientService(null)]
+        public async Task<string> Remove(ClientServiceParamsInfo arg)
+        {
+            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            {
+                Connection = signInStateInfo.Connection,
+                MessengerId = (ushort)UsersMessengerIds.Remove,
+                Payload = ulong.Parse(arg.Content).ToBytes()
+            });
+            if (resp.Code != MessageResponeCodes.OK)
+            {
+                return resp.Data.GetUTF8String();
+            }
+            return string.Empty;
+        }
 
     }
 }

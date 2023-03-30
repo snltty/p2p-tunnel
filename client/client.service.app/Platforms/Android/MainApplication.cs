@@ -34,7 +34,7 @@ namespace client.service.app
     }
 
 
-    public class BootReceiver : BroadcastReceiver
+    public sealed class BootReceiver : BroadcastReceiver
     {
         public override void OnReceive(Context context, Intent intent)
         {
