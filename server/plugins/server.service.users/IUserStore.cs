@@ -1,7 +1,7 @@
-﻿using common.server.model;
+﻿using server.service.users.model;
 using System.Collections.Generic;
 
-namespace server.messengers
+namespace server.service.users
 {
     public interface IUserStore
     {
@@ -12,7 +12,7 @@ namespace server.messengers
         public bool Get(string account, string password, out UserInfo user);
 
         public bool Add(UserInfo user);
-        public bool UpdatePassword(ulong id,string password);
+        public bool UpdatePassword(ulong id, string password);
         public bool Remove(ulong uid);
 
         public UserInfo DefaultUser();

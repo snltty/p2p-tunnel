@@ -10,15 +10,8 @@ namespace server
     [Table("appsettings")]
     public sealed class Config
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="configDataProvider"></param>
         public Config(IConfigDataProvider<Config> configDataProvider)
         {
             this.configDataProvider = configDataProvider;
@@ -61,10 +54,6 @@ namespace server
         public int RegisterTimeout { get; set; } = 5000;
 
         /// <summary>
-        /// 验证账号
-        /// </summary>
-        public bool VerifyAccount { get; set; } = false;
-        /// <summary>
         /// 允许注册
         /// </summary>
         public bool RegisterEnable { get; set; } = true;
@@ -77,27 +66,14 @@ namespace server
         /// </summary>
         public string EncodePassword { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         private async Task<Config> ReadConfig()
         {
             return await configDataProvider.Load();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public async Task<string> ReadString()
         {
             return await configDataProvider.LoadString();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="jsonStr"></param>
-        /// <returns></returns>
         public async Task SaveConfig(string jsonStr)
         {
             Config config = await ReadConfig().ConfigureAwait(false);
@@ -111,7 +87,6 @@ namespace server
             config.RegisterEnable = RegisterEnable;
             config.RelayEnable = RelayEnable;
             config.EncodePassword = EncodePassword;
-            config.VerifyAccount = VerifyAccount;
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }

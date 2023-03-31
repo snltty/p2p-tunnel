@@ -1,8 +1,8 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
-using server.messengers;
 using server.messengers.singnin;
+using server.service.validators;
 using System;
 using System.Threading.Tasks;
 
@@ -17,14 +17,12 @@ namespace server.service.messengers.singnin
     {
         private readonly IClientSignInCaching clientSignInCache;
         private readonly MessengerSender messengerSender;
-        private readonly IUserStore userStore;
         private readonly ISignInValidatorHandler signInValidatorHandler;
 
-        public SignInMessenger(IClientSignInCaching clientSignInCache, MessengerSender messengerSender, IUserStore userStore, ISignInValidatorHandler signInValidatorHandler)
+        public SignInMessenger(IClientSignInCaching clientSignInCache, MessengerSender messengerSender, ISignInValidatorHandler signInValidatorHandler)
         {
             this.clientSignInCache = clientSignInCache;
             this.messengerSender = messengerSender;
-            this.userStore = userStore;
             this.signInValidatorHandler = signInValidatorHandler;
         }
 
@@ -33,63 +31,44 @@ namespace server.service.messengers.singnin
         {
             SignInParamsInfo model = new SignInParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
-            //获取用户
-            userStore.Get(model.Account, model.Password, out UserInfo user);
 
-            //验证登入权限
-            SignInResultInfo.SignInResultInfoCodes code = signInValidatorHandler.Validate(ref user);
+            uint access = (uint)EnumServiceAccess.None;
+            //登入验证
+            SignInResultInfo.SignInResultInfoCodes code = signInValidatorHandler.Validate(model, ref access);
             if (code != SignInResultInfo.SignInResultInfoCodes.OK)
             {
                 connection.Write(new SignInResultInfo { Code = code }.ToBytes());
                 return;
             }
 
-            //缓存
-            if (clientSignInCache.Get(model.GroupId, model.Name, out SignInCacheInfo client))
-            {
-                clientSignInCache.Remove(client.ConnectionId);
-                connection.Write(new SignInResultInfo { Code = SignInResultInfo.SignInResultInfoCodes.SAME_NAMES }.ToBytes());
-                return;
-            }
-            client = new()
+            SignInCacheInfo client = clientSignInCache.Add(new SignInCacheInfo
             {
                 Name = model.Name,
                 GroupId = model.GroupId,
                 LocalIps = model.LocalIps,
                 ClientAccess = model.ClientAccess,
-                ConnectionId = 0,
-                UserId = user.ID,
                 ShortId = model.ShortId,
                 LocalPort = model.LocalTcpPort,
-                Port = connection.Address.Port,
-                NetFlow = user.NetFlow,
-                UserAccess = user.Access,
-            };
-            clientSignInCache.Add(client);
-            client.UpdateConnection(connection);
-
-            //权限
-            client.UserAccess = user.Access | (uint)signInValidatorHandler.Access();
-            client.NetFlow = user.NetFlow;
-            client.EndTime = user.EndTime;
+                Connection = connection,
+                UserAccess = access,
+                Args = model.Args
+            });
+            signInValidatorHandler.Validated(client);
 
             connection.Write(new SignInResultInfo
             {
                 ShortId = client.ShortId,
-                Id = client.ConnectionId,
+                ConnectionId = client.ConnectionId,
                 Ip = connection.Address.Address,
                 GroupId = client.GroupId,
-                Access = client.UserAccess,
-                EndTime = client.EndTime,
-                NetFlow = client.NetFlow,
-                SignLimit = user.SignLimit
+                UserAccess = client.UserAccess
             }.ToBytes());
         }
 
         [MessengerId((ushort)SignInMessengerIds.Notify)]
         public void Notify(IConnection connection)
         {
-            clientSignInCache.Notify(connection);
+            clientSignInCache.Notify(connection.ConnectId);
         }
 
         [MessengerId((ushort)SignInMessengerIds.SignOut)]

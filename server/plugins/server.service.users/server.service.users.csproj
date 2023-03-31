@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
@@ -18,9 +18,20 @@
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\server\plugins\server.service.users.model\server.service.users.model.csproj" />
-    <ProjectReference Include="..\client.service.ui\client.service.ui.api\client.service.ui.api.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <None Remove="users.json" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="users-appsettings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="users.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\server\server.csproj" />
+	  <ProjectReference Include="..\server.service.users.model\server.service.users.model.csproj" />
+	</ItemGroup>
 
 </Project>

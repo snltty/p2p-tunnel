@@ -66,7 +66,7 @@ namespace server.service.messengers
                             TunnelCacheInfo tunnel;
                             if (model.NewTunnel == 0)
                             {
-                                tunnel = new TunnelCacheInfo { LocalPort = source.LocalPort, Port = source.Port };
+                                tunnel = new TunnelCacheInfo { LocalPort = source.LocalPort, Port = connection.Address.Port };
                             }
                             else
                             {

@@ -1,5 +1,6 @@
 ﻿using common.libs.extends;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
 
@@ -10,9 +11,6 @@ namespace common.server.model
     /// </summary>
     public sealed class SignInParamsInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public SignInParamsInfo() { }
 
         /// <summary>
@@ -23,9 +21,6 @@ namespace common.server.model
         /// 连接id，因为分两次注册，第二次带上第一次的注册后获得的id
         /// </summary>
         public ulong Id { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public byte ShortId { get; set; }
         /// <summary>
         /// 分组
@@ -35,8 +30,11 @@ namespace common.server.model
         /// 名称
         /// </summary>
         public string Name { get; set; }
-        public string Account { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 参数
+        /// </summary>
+        public Dictionary<string, string> Args { get; init; } = new Dictionary<string, string>();
 
         /// <summary>
         /// 本机tcp端口
@@ -59,15 +57,18 @@ namespace common.server.model
 
             var groupidBytes = GroupId.GetUTF16Bytes();
             var nameBytes = Name.GetUTF16Bytes();
-            var accountBytes = Account.GetUTF16Bytes();
-            var passwordBytes = Password.GetUTF16Bytes();
+            foreach (var item in Args)
+            {
+                length += 1 + 1 + item.Key.GetUTF16Bytes().Length;
+                length += 1 + 1 + item.Value.GetUTF16Bytes().Length;
+            }
+            length += 1;
+
             length +=
                 8 //Id
                 + 1 //ShortId
                 + 1 + 1 + groupidBytes.Length
                 + 1 + 1 + nameBytes.Length
-                + 1 + 1 + accountBytes.Length
-                + 1 + 1 + passwordBytes.Length
                 + 2 //LocalTcpPort
                 + 4; //ClientAccess
 
@@ -104,26 +105,35 @@ namespace common.server.model
             index += nameBytes.Length;
 
 
-            bytes[index] = (byte)accountBytes.Length;
-            index += 1;
-            bytes[index] = (byte)Account.Length;
-            index += 1;
-            accountBytes.CopyTo(memory.Span.Slice(index));
-            index += accountBytes.Length;
-
-            bytes[index] = (byte)passwordBytes.Length;
-            index += 1;
-            bytes[index] = (byte)Password.Length;
-            index += 1;
-            passwordBytes.CopyTo(memory.Span.Slice(index));
-            index += passwordBytes.Length;
-
-
             LocalTcpPort.ToBytes(memory.Slice(index));
             index += 2;
 
             ClientAccess.ToBytes(memory.Slice(index));
             index += 4;
+
+
+            bytes[index] = (byte)Args.Count;
+            index += 1;
+            foreach (var item in Args)
+            {
+                var keySpan = item.Key.GetUTF16Bytes();
+                bytes[index] = (byte)keySpan.Length;
+                index += 1;
+                bytes[index] = (byte)item.Key.Length;
+                index += 1;
+                keySpan.CopyTo(memory.Span.Slice(index));
+                index += keySpan.Length;
+
+
+                var valueSpan = item.Value.GetUTF16Bytes();
+                bytes[index] = (byte)valueSpan.Length;
+                index += 1;
+                bytes[index] = (byte)item.Value.Length;
+                index += 1;
+                valueSpan.CopyTo(memory.Span.Slice(index));
+                index += valueSpan.Length;
+            }
+
 
             return bytes;
 
@@ -153,17 +163,24 @@ namespace common.server.model
             Name = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
             index += 2 + span[index];
 
-            Account = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
-            index += 2 + span[index];
-
-            Password = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
-            index += 2 + span[index];
-
             LocalTcpPort = span.Slice(index, 2).ToUInt16();
             index += 2;
 
             ClientAccess = span.Slice(index, 4).ToUInt32();
             index += 4;
+
+            byte length = span[index];
+            index += 1;
+            for (int i = 0; i < length; i++)
+            {
+                string key = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+                index += 2 + span[index];
+                string value = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+                index += 2 + span[index];
+
+                if (Args.ContainsKey(key) == false)
+                    Args.TryAdd(key, value);
+            }
         }
     }
 
@@ -182,24 +199,12 @@ namespace common.server.model
         /// <summary>
         /// 在服务器的权限
         /// </summary>
-        public uint Access { get; set; }
-        /// <summary>
-        /// 剩余流量
-        /// </summary>
-        public long NetFlow { get; set; }
-        /// <summary>
-        /// 账号结束时间
-        /// </summary>
-        public DateTime EndTime { get; set; }
-        /// <summary>
-        /// 允许登录数
-        /// </summary>
-        public uint SignLimit { get; set; }
+        public uint UserAccess { get; set; }
 
         /// <summary>
         /// 连接id
         /// </summary>
-        public ulong Id { get; set; }
+        public ulong ConnectionId { get; set; }
         /// <summary>
         /// 短id
         /// </summary>
@@ -220,9 +225,6 @@ namespace common.server.model
             var bytes = new byte[
                 1 //Code
                 + 4//Access
-                + 4//SignLimit
-                + 8//NetFlow
-                + 8//EndTime
                 + 9 //id
                 + 1 + Ip.Length()
                 + 2 + groupIdBytes.Length
@@ -234,18 +236,10 @@ namespace common.server.model
             bytes[index] = (byte)Code;
             index += 1;
 
-            Access.ToBytes(memory.Slice(index));
-            index += 4;
-            SignLimit.ToBytes(memory.Slice(index));
+            UserAccess.ToBytes(memory.Slice(index));
             index += 4;
 
-            NetFlow.ToBytes(memory.Slice(index));
-            index += 8;
-
-            EndTime.Ticks.ToBytes(memory.Slice(index));
-            index += 8;
-
-            Id.ToBytes(memory.Slice(index));
+            ConnectionId.ToBytes(memory.Slice(index));
             index += 8;
             bytes[index] = ShortId;
             index += 1;
@@ -280,19 +274,10 @@ namespace common.server.model
             Code = (SignInResultInfoCodes)span[index];
             index += 1;
 
-            Access = span.Slice(index, 4).ToUInt32();
+            UserAccess = span.Slice(index, 4).ToUInt32();
             index += 4;
-            SignLimit = span.Slice(index, 4).ToUInt32();
-            index += 4;
-            
-
-            NetFlow = span.Slice(index, 8).ToInt64();
-            index += 8;
-
-            EndTime = new DateTime(span.Slice(index, 8).ToInt64());
-            index += 8;
-
-            Id = span.Slice(index, 8).ToUInt64();
+           
+            ConnectionId = span.Slice(index, 8).ToUInt64();
             index += 8;
             ShortId = span[index];
             index += 1;

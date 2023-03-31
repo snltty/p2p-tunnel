@@ -30,24 +30,9 @@
                         </el-col>
                     </el-row>
                 </el-form-item>
-                <el-form-item label="" label-width="0">
-                    <el-row>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="账号" prop="Account">
-                                <el-tooltip class="box-item" effect="dark" content="账号" placement="top-start">
-                                    <el-input size="default" v-model="model.Account" placeholder="账号"></el-input>
-                                </el-tooltip>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="密码" prop="Password">
-                                <el-tooltip class="box-item" effect="dark" content="密码" placement="top-start">
-                                    <el-input type="password" size="default" placeholder="密码" v-model="model.Password" show-password></el-input>
-                                </el-tooltip>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form-item>
+                <template v-for="(item1,index) in components" :key="index">
+                    <component :is="item1" :ref="`setting_item_${index}`"></component>
+                </template>
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -137,17 +122,22 @@
 <script>
 import { ref, toRefs, reactive } from '@vue/reactivity';
 import { getSignInInfo, updateConfig } from '../../../apis/signin'
-import { onMounted } from '@vue/runtime-core';
+import { injectServices, accessService } from '../../../states/services';
+import { getCurrentInstance, onMounted } from '@vue/runtime-core';
 export default {
     service: 'SignInClientService',
     components: {},
     setup() {
+
+        const instance = getCurrentInstance();
+        const servicesState = injectServices();
+        const files = require.context('../../../', true, /Args\.vue/);
+        const components = files.keys().map(c => files(c).default).filter(c => accessService(c.service, servicesState));
+
         const formDom = ref(null);
         const state = reactive({
             model: {
                 Name: '',
-                Account: '',
-                Password: '',
                 AutoReg: false,
                 GroupId: '',
                 GroupIds: [],
@@ -184,8 +174,7 @@ export default {
         const loadConfig = () => {
             getSignInInfo().then((json) => {
                 state.model.Name = json.ClientConfig.Name;
-                state.model.Account = json.ClientConfig.Account;
-                state.model.Password = json.ClientConfig.Password;
+                state.model.Args = json.ClientConfig.Args;
                 state.model.GroupId = json.ClientConfig.GroupId;
                 state.model.GroupIds = json.ClientConfig.GroupIds;
 
@@ -208,8 +197,7 @@ export default {
             return new Promise((resolve, reject) => {
                 getSignInInfo().then((json) => {
                     json.ClientConfig.Name = state.model.Name;
-                    json.ClientConfig.Account = state.model.Account;
-                    json.ClientConfig.Password = state.model.Password;
+                    json.ClientConfig.Args = state.model.Args;
                     json.ClientConfig.GroupId = state.model.GroupId;
                     json.ClientConfig.AutoReg = state.model.AutoReg;
                     json.ClientConfig.UsePunchHole = state.model.UsePunchHole;
@@ -224,6 +212,16 @@ export default {
                 }).catch(reject);
             })
         }
+        const getArgs = () => {
+            const refs = instance.refs;
+            const args = {};
+            for (let j in refs) {
+                if (j.indexOf('setting_item') == 0) {
+                    Object.assign(args, refs[j][0].submit());
+                }
+            }
+            return args;
+        }
         const submit = () => {
             return new Promise((resolve, reject) => {
                 formDom.value.validate((valid) => {
@@ -232,6 +230,7 @@ export default {
                         return false;
                     }
                     getJson().then((json) => {
+                        json.Args = getArgs();
                         updateConfig(json).then(resolve).catch(reject);
                     }).catch(reject);
                 });
@@ -259,7 +258,7 @@ export default {
         });
 
         return {
-            ...toRefs(state), formDom, submit, handleGroupIdChange, handleRemoveGroupId
+            components, ...toRefs(state), formDom, submit, handleGroupIdChange, handleRemoveGroupId
         }
     }
 }

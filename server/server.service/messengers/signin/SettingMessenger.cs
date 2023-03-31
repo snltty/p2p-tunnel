@@ -34,7 +34,7 @@ namespace server.service.messengers.singnin
             {
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 return;
             }
@@ -50,7 +50,7 @@ namespace server.service.messengers.singnin
                 connection.Write(Helper.FalseArray);
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;

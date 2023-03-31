@@ -13,11 +13,11 @@ namespace server.service.validators
             this.clientSignInCaching = clientSignInCaching;
         }
 
-        public bool Validate(IConnection connection, EnumServiceAccess service)
+        public bool Validate(IConnection connection, uint service)
         {
             return Validate(connection.ConnectId, service);
         }
-        public bool Validate(ulong connectionid, EnumServiceAccess service)
+        public bool Validate(ulong connectionid, uint service)
         {
             if (clientSignInCaching.Get(connectionid, out SignInCacheInfo user))
             {
@@ -25,14 +25,14 @@ namespace server.service.validators
             }
             return false;
         }
-        public bool Validate(SignInCacheInfo cache, EnumServiceAccess service)
+        public bool Validate(SignInCacheInfo cache, uint service)
         {
             if (cache == null) return false;
             return Validate(cache.UserAccess, service);
         }
-        public bool Validate(uint access, EnumServiceAccess service)
+        public bool Validate(uint access, uint service)
         {
-            return ((EnumServiceAccess)access & service) == service;
+            return (access & service) == service;
         }
     }
 }

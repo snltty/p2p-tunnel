@@ -19,6 +19,7 @@ namespace server.service.messengers.singnin
         private readonly Config config;
 
         public Action<SignInCacheInfo> OnChanged { get; set; } = (param) => { };
+        public Action<SignInCacheInfo> OnLine { get; set; } = (param) => { };
         public Action<SignInCacheInfo> OnOffline { get; set; } = (param) => { };
         private readonly WheelTimer<IConnection> wheelTimer = new WheelTimer<IConnection>();
 
@@ -69,28 +70,37 @@ namespace server.service.messengers.singnin
                 Remove(connection.ConnectId);
             }
         }
-        public ulong Add(SignInCacheInfo model)
+        public SignInCacheInfo Add(SignInCacheInfo model)
         {
-            if (model.ConnectionId == 0)
+            lock (idNs)
             {
-                model.ConnectionId = idNs.Increment();
+                if (model.ConnectionId == 0)
+                {
+                    model.ConnectionId = idNs.Increment();
+                }
+                if (string.IsNullOrWhiteSpace(model.GroupId))
+                {
+                    model.GroupId = Guid.NewGuid().ToString().Md5();
+                }
+                if (cacheGroups.TryGetValue(model.GroupId, out ConcurrentDictionary<string, SignInCacheInfo> value) == false)
+                {
+                    value = new ConcurrentDictionary<string, SignInCacheInfo>();
+                    cacheGroups.TryAdd(model.GroupId, value);
+                }
+                if (model.Connection != null)
+                {
+                    model.Connection.ConnectId = model.ConnectionId;
+                }
+                value.TryAdd(model.Name, model);
+                cache.TryAdd(model.ConnectionId, model);
             }
-            if (string.IsNullOrWhiteSpace(model.GroupId))
-            {
-                model.GroupId = Guid.NewGuid().ToString().Md5();
-            }
-            if (cacheGroups.TryGetValue(model.GroupId, out ConcurrentDictionary<string, SignInCacheInfo> value) == false)
-            {
-                value = new ConcurrentDictionary<string, SignInCacheInfo>();
-                cacheGroups.TryAdd(model.GroupId, value);
-            }
-            value.TryAdd(model.Name, model);
-            cache.TryAdd(model.ConnectionId, model);
-            return model.ConnectionId;
+
+            OnLine?.Invoke(model);
+            return model;
         }
-        public bool Get(ulong id, out SignInCacheInfo client)
+        public bool Get(ulong connectionid, out SignInCacheInfo client)
         {
-            return cache.TryGetValue(id, out client);
+            return cache.TryGetValue(connectionid, out client);
         }
         public bool Get(string groupid, string name, out SignInCacheInfo client)
         {
@@ -113,9 +123,9 @@ namespace server.service.messengers.singnin
         {
             return cache.Values.ToList();
         }
-        public void Remove(ulong id)
+        public void Remove(ulong connectionid)
         {
-            if (cache.TryRemove(id, out SignInCacheInfo client))
+            if (cache.TryRemove(connectionid, out SignInCacheInfo client))
             {
                 client.Connection?.Disponse();
                 OnChanged?.Invoke(client);
@@ -130,24 +140,19 @@ namespace server.service.messengers.singnin
                     }
                     foreach (var item in value)
                     {
-                        item.Value.RemoveTunnel(id);
+                        item.Value.RemoveTunnel(connectionid);
                     }
                 }
                 GC.Collect();
             }
         }
-        public bool Notify(IConnection connection)
+        public bool Notify(ulong connectionid)
         {
-            if (Get(connection.ConnectId, out SignInCacheInfo client))
+            if (Get(connectionid, out SignInCacheInfo client))
             {
                 OnChanged?.Invoke(client);
             }
             return false;
-        }
-
-        public int UserCount(ulong uid)
-        {
-            return cache.Count(c => c.Value.UserId == uid);
         }
     }
 }

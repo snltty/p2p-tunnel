@@ -1,6 +1,8 @@
 ﻿using common.server.model;
 using server.messengers.singnin;
 using server.messengers;
+using common.server;
+using System.Reflection;
 
 namespace server.service.validators
 {
@@ -9,15 +11,12 @@ namespace server.service.validators
         Wrap<ISignInValidator> first;
         Wrap<ISignInValidator> last;
 
-        Wrap<ISignInAccess> firstAccess;
-        Wrap<ISignInAccess> lastAccess;
-
         private readonly Config config;
-        private readonly IUserStore userStore;
-        public SignInValidatorHandler(Config config, IUserStore userStore)
+        private readonly IClientSignInCaching clientSignInCache;
+        public SignInValidatorHandler(Config config, IClientSignInCaching clientSignInCache)
         {
             this.config = config;
-            this.userStore = userStore;
+            this.clientSignInCache = clientSignInCache;
         }
 
         public void LoadValidator(ISignInValidator validator)
@@ -33,22 +32,8 @@ namespace server.service.validators
                 last = last.Next;
             }
         }
-        public void LoadAccess(ISignInAccess access)
-        {
-            if (firstAccess == null)
-            {
-                firstAccess = new Wrap<ISignInAccess> { Value = access };
-                lastAccess = firstAccess;
-            }
-            else
-            {
-                lastAccess.Next = new Wrap<ISignInAccess> { Value = access };
-                lastAccess = lastAccess.Next;
-            }
-        }
 
-
-        public SignInResultInfo.SignInResultInfoCodes Validate(ref UserInfo user)
+        public SignInResultInfo.SignInResultInfoCodes Validate(SignInParamsInfo model, ref uint access)
         {
             //未开启登入
             if (config.RegisterEnable == false)
@@ -56,49 +41,37 @@ namespace server.service.validators
                 return SignInResultInfo.SignInResultInfoCodes.ENABLE;
             }
 
-            //验证账号
-            if (config.VerifyAccount)
+            //重名
+            if (clientSignInCache.Get(model.GroupId, model.Name, out SignInCacheInfo client))
             {
-                if (user == null)
-                {
-                    return SignInResultInfo.SignInResultInfoCodes.NOT_FOUND;
-                }
-                //其它自定义验证
-                Wrap<ISignInValidator> current = first;
-                while (current != null)
-                {
-                    SignInResultInfo.SignInResultInfoCodes code = current.Value.Validate(user);
-                    if (code != SignInResultInfo.SignInResultInfoCodes.OK)
-                    {
-                        return code;
-                    }
-                    current = current.Next;
-                }
+                return SignInResultInfo.SignInResultInfoCodes.SAME_NAMES;
             }
-            else
+
+            //验证账号
+            //其它自定义验证
+            Wrap<ISignInValidator> current = first;
+            while (current != null)
             {
-                if (user == null)
+                SignInResultInfo.SignInResultInfoCodes code = current.Value.Validate(model.Args, ref access);
+                if (code != SignInResultInfo.SignInResultInfoCodes.OK)
                 {
-                    //不验证账号，给个游客账号
-                    user = userStore.DefaultUser();
+                    return code;
                 }
+                current = current.Next;
             }
 
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
 
-        public EnumServiceAccess Access()
+        public void Validated(SignInCacheInfo cache)
         {
-            EnumServiceAccess enumServiceAccess = EnumServiceAccess.None;
-            Wrap<ISignInAccess> current = firstAccess;
+            Wrap<ISignInValidator> current = first;
             while (current != null)
             {
-                enumServiceAccess |= current.Value.Access();
+                current.Value.Validated(cache);
                 current = current.Next;
             }
-            return enumServiceAccess;
         }
-
 
         class Wrap<T>
         {

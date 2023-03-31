@@ -2,12 +2,13 @@
 using common.libs.database;
 using common.server.model;
 using server.messengers;
+using server.service.users.model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
-namespace server.service.validators
+namespace server.service.users
 {
     internal class UserStore : IUserStore
     {
@@ -46,30 +47,54 @@ namespace server.service.validators
         public IEnumerable<UserInfo> Get(int p = 1, int ps = 10, byte sort = 0, string account = "")
         {
             var values = storeModel.Users.Values.Select(c => c);
-            //if (string.IsNullOrWhiteSpace(account) == false)
-            //{
-            //    values = values.Where(c => c.Account.Contains(account));
-            //}
+            if (string.IsNullOrWhiteSpace(account) == false)
+            {
+                values = values.Where(c => c.Account.Contains(account));
+            }
 
-            //byte sortType = sort >> 7;
-            //byte sortField = sort & 0b01111111;
-            //if (sort == UserInfo.SortID)
-            //{
-            //    if (sortType == 1)
-            //        values.OrderDescending().Skip((p - 1) * ps).Take(ps);
-            //}
+            byte sortType = (byte)(sort >> 7);
+            byte sortField = (byte)(sort & 0b01111111);
+            if (sort == UserInfo.SortID)
+            {
+                if (sortType == UserInfo.SortDesc)
+                    values = values.OrderByDescending(c => c.ID);
+                else
+                    values = values.OrderBy(c => c.ID);
+            }
+            else if (sort == UserInfo.SortAddTime)
+            {
+                if (sortType == UserInfo.SortDesc)
+                    values = values.OrderByDescending(c => c.AddTime);
+                else
+                    values = values.OrderBy(c => c.AddTime);
+            }
+            else if (sort == UserInfo.SortEndTime)
+            {
+                if (sortType == UserInfo.SortDesc)
+                    values = values.OrderByDescending(c => c.EndTime);
+                else
+                    values = values.OrderBy(c => c.EndTime);
+            }
+            else if (sort == UserInfo.SortNetFlow)
+            {
+                if (sortType == UserInfo.SortDesc)
+                    values = values.OrderByDescending(c => c.NetFlow);
+                else
+                    values = values.OrderBy(c => c.NetFlow);
+            }
+            else if (sort == UserInfo.SortSignLimit)
+            {
+                if (sortType == UserInfo.SortDesc)
+                    values = values.OrderByDescending(c => c.SignLimit);
+                else
+                    values = values.OrderBy(c => c.SignLimit);
+            }
 
             return values.Skip((p - 1) * ps).Take(ps);
         }
 
         public bool Get(ulong uid, out UserInfo user)
         {
-            if (uid == 0)
-            {
-                user = DefaultUser();
-                return true;
-            }
-
             return storeModel.Users.TryGetValue(uid, out user);
         }
         public bool Get(string account, string password, out UserInfo user)
@@ -136,7 +161,6 @@ namespace server.service.validators
             return new UserInfo
             {
                 ID = 0,
-                IsDefault = true,
             };
         }
     }

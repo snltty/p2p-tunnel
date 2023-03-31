@@ -1,10 +1,11 @@
 ﻿using common.libs.extends;
 using common.server;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace common.server.model
+namespace server.service.users.model
 {
     public sealed class UserInfo
     {
@@ -19,6 +20,9 @@ namespace common.server.model
         /// 限制登录数，0无限制
         /// </summary>
         public uint SignLimit { get; set; }
+        [JsonIgnore]
+        public ConcurrentDictionary<ulong, IConnection> Connections { get; set; } = new ConcurrentDictionary<ulong, IConnection>();
+
         /// <summary>
         /// 限制流量 -1 无限制
         /// </summary>
@@ -33,11 +37,6 @@ namespace common.server.model
         /// </summary>
         public DateTime EndTime { get; set; }
 
-        /// <summary>
-        /// 游客账号
-        /// </summary>
-        [JsonIgnore]
-        public bool IsDefault { get; set; } = false;
 
         public const byte SortID = 0b0000_0001;
         public const byte SortAddTime = 0b0000_0010;

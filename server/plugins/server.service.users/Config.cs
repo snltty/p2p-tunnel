@@ -1,0 +1,49 @@
+﻿using common.libs.database;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks;
+
+namespace server.service.users
+{
+    [Table("users-appsettings")]
+    public sealed class Config
+    {
+        public Config() { }
+        private readonly IConfigDataProvider<Config> configDataProvider;
+        public Config(IConfigDataProvider<Config> configDataProvider)
+        {
+            this.configDataProvider = configDataProvider;
+
+            Config config = ReadConfig().Result;
+            Enable = config.Enable;
+        }
+
+        /// <summary>
+        /// 启用账号验证
+        /// </summary>
+        public bool Enable { get; set; }
+        /// <summary>
+        /// 强制显现
+        /// </summary>
+        public bool ForceOffline { get; set; }
+        
+
+        private async Task<Config> ReadConfig()
+        {
+            return await configDataProvider.Load();
+        }
+        public async Task<string> ReadString()
+        {
+            return await configDataProvider.LoadString();
+        }
+
+        public async Task SaveConfig(string jsonStr)
+        {
+            Config config = await ReadConfig().ConfigureAwait(false);
+
+            config.Enable = Enable;
+
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+        }
+    }
+
+}

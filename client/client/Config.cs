@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using common.libs.database;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using System.Text.Json.Serialization;
@@ -82,13 +83,9 @@ namespace client
         /// </summary>
         public string Name { get; set; } = string.Empty;
         /// <summary>
-        /// 账号
+        /// 参数
         /// </summary>
-        public string Account { get; set; } = string.Empty;
-        /// <summary>
-        /// 密码
-        /// </summary>
-        public string Password { get; set; } = string.Empty;
+        public Dictionary<string,string> Args { get; set; } = new Dictionary<string, string>();
         /// <summary>
         /// 自动注册
         /// </summary>
@@ -138,7 +135,7 @@ namespace client
         /// <summary>
         /// udp限速
         /// </summary>
-        public int UdpUploadSpeedLimit { get; set; } = 0;
+        public int UdpUploadSpeedLimit { get; set; }
 
         public string[] Services { get; set; } = Array.Empty<string>();
 

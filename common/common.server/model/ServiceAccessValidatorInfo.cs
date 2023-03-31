@@ -9,31 +9,15 @@ namespace common.server.model
     [Flags]
     public enum EnumServiceAccess : uint
     {
-        None = 0,
-        /// <summary>
-        /// 登入
-        /// </summary>
-        SignIn = 1,
+        None = 0b00000000_00000000_00000000_00000000,
         /// <summary>
         /// 中继
         /// </summary>
-        Relay = 2,
-        /// <summary>
-        /// tcp转发
-        /// </summary>
-        TcpForward = 4,
-        /// <summary>
-        /// udp转发
-        /// </summary>
-        UdpForward = 8,
-        /// <summary>
-        /// socks5
-        /// </summary>
-        Socks5 = 16,
+        Relay = 0b00000000_00000000_00000000_00000001,
         /// <summary>
         /// 配置
         /// </summary>
-        Setting = 32
+        Setting = 0b00000000_00000000_00000000_00000010
     }
 
 }

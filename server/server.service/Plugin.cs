@@ -35,7 +35,6 @@ namespace server.service
             services.AddSingleton<ISignInValidatorHandler, SignInValidatorHandler>();
             services.AddSingleton<IServiceAccessValidator, ServiceAccessValidator>();
             services.AddSingleton<IRelayValidator, RelayValidator>();
-            services.AddSingleton<IUserStore, UserStore>();
 
 
             services.AddSingleton<MessengerResolver>();
@@ -49,10 +48,6 @@ namespace server.service
                 services.AddSingleton(item);
             }
             foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)))
-            {
-                services.AddSingleton(item);
-            }
-            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInAccess)))
             {
                 services.AddSingleton(item);
             }
@@ -78,13 +73,9 @@ namespace server.service
 
 
             ISignInValidatorHandler signInMiddlewareHandler = services.GetService<ISignInValidatorHandler>();
-            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct())
+            foreach (ISignInValidator validator in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct().Select(c => (ISignInValidator)services.GetService(c)).OrderBy(c => c.Order))
             {
-                signInMiddlewareHandler.LoadValidator((ISignInValidator)services.GetService(item));
-            }
-            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInAccess)).Distinct())
-            {
-                signInMiddlewareHandler.LoadAccess((ISignInAccess)services.GetService(item));
+                signInMiddlewareHandler.LoadValidator(validator);
             }
 
             Loop(services);

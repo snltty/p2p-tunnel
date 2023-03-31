@@ -24,10 +24,6 @@
 	  <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	  <DockerfileContext>..\..</DockerfileContext>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <None Remove="users.json" />
-	</ItemGroup>
 	
 	<ItemGroup>
 		<Content Include="appsettings.json">
@@ -36,9 +32,6 @@
 		<Content Include="logo.ico" />
 		<Content Include="public\nssm.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="users.json">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 	
@@ -52,6 +45,7 @@
 	  <ProjectReference Include="..\plugins\server.service.socks5\server.service.socks5.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.tcpforward\server.service.tcpforward.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.udpforward\server.service.udpforward.csproj" />
+	  <ProjectReference Include="..\plugins\server.service.users\server.service.users.csproj" />
 	  <ProjectReference Include="..\server\server.csproj" />
 	</ItemGroup>
 

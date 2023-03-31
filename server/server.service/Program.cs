@@ -9,6 +9,7 @@ using server.service.udpforward;
 using System.Threading;
 using common.server;
 using System.IO;
+using server.service.users;
 
 namespace server.service
 {
@@ -26,6 +27,7 @@ namespace server.service
                 typeof(TcpForwardMessenger).Assembly,
                 typeof(UdpForwardMessenger).Assembly,
                 typeof(Socks5Messenger).Assembly,
+                typeof(UsersMessenger).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();

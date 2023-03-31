@@ -41,7 +41,7 @@ namespace server.service.socks5
                 connection.Write(Helper.FalseArray);
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;

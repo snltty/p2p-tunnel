@@ -130,10 +130,8 @@ namespace client.realize.messengers.singnin
                         SignInResult result = await GetSignInResult();
                         config.Client.ShortId = result.Data.ShortId;
                         config.Client.GroupId = result.Data.GroupId;
-                        signInState.RemoteInfo.Access = result.Data.Access;
-                        signInState.RemoteInfo.NetFlow = result.Data.NetFlow;
-                        signInState.RemoteInfo.EndTime = result.Data.EndTime;
-                        signInState.Online(result.Data.Id, result.Data.Ip);
+                        signInState.RemoteInfo.Access = result.Data.UserAccess;
+                        signInState.Online(result.Data.ConnectionId, result.Data.Ip);
                         await signinMessengerSender.Notify().ConfigureAwait(false);
 
                         success.ErrorMsg = "注册成功~";

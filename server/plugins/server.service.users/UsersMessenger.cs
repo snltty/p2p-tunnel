@@ -4,10 +4,11 @@ using common.server;
 using common.server.model;
 using server.messengers;
 using server.messengers.singnin;
+using server.service.users.model;
 using System;
 using System.Linq;
 
-namespace server.service.messengers.signin
+namespace server.service.users
 {
     /// <summary>
     /// 服务端权限配置
@@ -32,7 +33,7 @@ namespace server.service.messengers.signin
             {
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 return;
             }
@@ -57,7 +58,7 @@ namespace server.service.messengers.signin
                 connection.Write(Helper.FalseArray);
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;
@@ -76,9 +77,13 @@ namespace server.service.messengers.signin
                 connection.Write(Helper.FalseArray);
                 return;
             }
-            bool res = userStore.UpdatePassword(client.UserId, connection.ReceiveRequestWrap.Payload.GetUTF8String());
-
-            connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
+            if (SignInAccessValidator.GetAccountPassword(client.Args, out string account, out string password) && userStore.Get(account, password, out UserInfo user))
+            {
+                bool res = userStore.UpdatePassword(user.ID, connection.ReceiveRequestWrap.Payload.GetUTF8String());
+                connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
+                return;
+            }
+            connection.Write(Helper.FalseArray);
         }
 
         [MessengerId((ushort)UsersMessengerIds.Remove)]
@@ -89,7 +94,7 @@ namespace server.service.messengers.signin
                 connection.Write(Helper.FalseArray);
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;

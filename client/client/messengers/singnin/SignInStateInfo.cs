@@ -117,15 +117,6 @@ namespace client.messengers.singnin
         /// 服务器权限
         /// </summary>
         public uint Access { get; set; }
-
-        /// <summary>
-        /// 剩余流量
-        /// </summary>
-        public long NetFlow { get; set; }
-        /// <summary>
-        /// 账号结束时间
-        /// </summary>
-        public DateTime EndTime { get; set; }
     }
 
     /// <summary>

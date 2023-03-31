@@ -54,8 +54,7 @@ export const provideSignIn = () => {
 
                 state.ClientConfig.ShortId = json.ClientConfig.ShortId;
                 state.ClientConfig.Name = json.ClientConfig.Name;
-                state.ClientConfig.Account = json.ClientConfig.Account;
-                state.ClientConfig.Password = json.ClientConfig.Password;
+                state.ClientConfig.Args = json.ClientConfig.Args;
                 state.ClientConfig.GroupIds = json.ClientConfig.GroupIds;
                 state.ClientConfig.UseUdp = json.ClientConfig.UseUdp;
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
@@ -69,8 +68,6 @@ export const provideSignIn = () => {
                 state.RemoteInfo.Ip = json.RemoteInfo.Ip;
                 state.RemoteInfo.ConnectId = json.RemoteInfo.ConnectId;
                 state.RemoteInfo.Access = json.RemoteInfo.Access;
-                state.RemoteInfo.NetFlow = json.RemoteInfo.NetFlow;
-                state.RemoteInfo.EndTime = json.RemoteInfo.EndTime;
                 state.RemoteInfo.Relay = shareData.serverAccessHasRelay(json.RemoteInfo.Access);
 
                 state.LocalInfo.IsConnecting = json.LocalInfo.IsConnecting;
