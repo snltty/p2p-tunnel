@@ -54,35 +54,35 @@ namespace server.service.users
 
             byte sortType = (byte)(sort >> 7);
             byte sortField = (byte)(sort & 0b01111111);
-            if (sort == UserInfo.SortID)
+            if (sortField == UserInfo.SortID)
             {
                 if (sortType == UserInfo.SortDesc)
                     values = values.OrderByDescending(c => c.ID);
                 else
                     values = values.OrderBy(c => c.ID);
             }
-            else if (sort == UserInfo.SortAddTime)
+            else if (sortField == UserInfo.SortAddTime)
             {
                 if (sortType == UserInfo.SortDesc)
                     values = values.OrderByDescending(c => c.AddTime);
                 else
                     values = values.OrderBy(c => c.AddTime);
             }
-            else if (sort == UserInfo.SortEndTime)
+            else if (sortField == UserInfo.SortEndTime)
             {
                 if (sortType == UserInfo.SortDesc)
                     values = values.OrderByDescending(c => c.EndTime);
                 else
                     values = values.OrderBy(c => c.EndTime);
             }
-            else if (sort == UserInfo.SortNetFlow)
+            else if (sortField == UserInfo.SortNetFlow)
             {
                 if (sortType == UserInfo.SortDesc)
                     values = values.OrderByDescending(c => c.NetFlow);
                 else
                     values = values.OrderBy(c => c.NetFlow);
             }
-            else if (sort == UserInfo.SortSignLimit)
+            else if (sortField == UserInfo.SortSignLimit)
             {
                 if (sortType == UserInfo.SortDesc)
                     values = values.OrderByDescending(c => c.SignLimit);
@@ -120,6 +120,7 @@ namespace server.service.users
                     }
 
                     user.ID = storeModel.Users.Values.Max(c => c.ID) + 1;
+                    user.AddTime = DateTime.UtcNow;
                     storeModel.Users.TryAdd(user.ID, user);
 
                     configDataProvider.Save(storeModel);

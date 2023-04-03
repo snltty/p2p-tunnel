@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace common.server.model
+namespace server.messengers
 {
 
     /// <summary>
@@ -17,7 +17,11 @@ namespace common.server.model
         /// <summary>
         /// 配置
         /// </summary>
-        Setting = 0b00000000_00000000_00000000_00000010
+        Setting = 0b00000000_00000000_00000000_00000010,
+        /// <summary>
+        /// 全部权限
+        /// </summary>
+        All = uint.MaxValue
     }
 
 }

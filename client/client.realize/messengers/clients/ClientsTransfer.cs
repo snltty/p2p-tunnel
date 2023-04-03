@@ -71,8 +71,8 @@ namespace client.realize.messengers.clients
             //掉线的
             tcpServer.OnDisconnect += (connection) => OnDisconnect(connection, signInState.Connection);
             clientsTunnel.OnDisConnect = OnDisconnect;
-            clientInfoCaching.OnOffline+=OnOffline;
-            clientInfoCaching.OnOfflineAfter+=OnOfflineAfter;
+            clientInfoCaching.OnOffline += OnOffline;
+            clientInfoCaching.OnOfflineAfter += OnOfflineAfter;
 
             //中继连线
             relayMessengerSender.OnRelay += (param) =>
@@ -81,12 +81,12 @@ namespace client.realize.messengers.clients
             };
 
             //有人要求反向链接
-            punchHoleMessengerSender.OnReverse+=OnReverse;
+            punchHoleMessengerSender.OnReverse += OnReverse;
 
-            signInState.OnBind+=OnBind;
+            signInState.OnBind += OnBind;
 
             //收到来自服务器的 在线客户端 数据
-            clientsMessengerSender.OnServerClientsData+=OnServerSendClients;
+            clientsMessengerSender.OnServerClientsData += OnServerSendClients;
 
             Logger.Instance.Info("获取外网距离ing...");
             signInState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();
@@ -410,9 +410,9 @@ namespace client.realize.messengers.clients
                 }
             }
         }
-        public async Task<bool> Test(ulong id,Memory<byte> data)
+        public async Task<bool> Test(ulong id, Memory<byte> data)
         {
-            if(clientInfoCaching.Get(id,out ClientInfo client))
+            if (clientInfoCaching.Get(id, out ClientInfo client))
             {
                 return await heartMessengerSender.Test(client.Connection, data);
             }
@@ -546,7 +546,7 @@ namespace client.realize.messengers.clients
 
         private async Task Relay(ClientInfo client, bool notify = false)
         {
-            if (((EnumServiceAccess)signInState.RemoteInfo.Access & EnumServiceAccess.Relay) != EnumServiceAccess.Relay)
+            if ((signInState.RemoteInfo.Access & 1) != 1)
             {
                 Logger.Instance.Warning($"server relay not available");
                 return;

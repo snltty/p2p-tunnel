@@ -10,6 +10,7 @@ using System.Threading;
 using common.server;
 using System.IO;
 using server.service.users;
+using common.libs.database;
 
 namespace server.service
 {
@@ -17,6 +18,12 @@ namespace server.service
     {
         static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.UnhandledException += (a, b) =>
+            {
+                Logger.Instance.Error(b.ExceptionObject + "");
+            };
+
+
             ThreadPool.SetMinThreads(150, 150);
             Logger.Instance.Info("正在启动...");
             LoggerConsole();

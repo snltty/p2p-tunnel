@@ -1,6 +1,6 @@
 <template>
     <el-dialog title="增加账号" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
-        <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="80px">
+        <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="60px">
             <el-form-item label="账号" prop="Account">
                 <el-input v-model="state.form.Account"></el-input>
             </el-form-item>
@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { reactive, ref, toRefs } from '@vue/reactivity';
+import { reactive, ref } from '@vue/reactivity';
 import { add } from '../../../apis/users-server'
 import { watch } from '@vue/runtime-core';
 export default {
@@ -33,7 +33,7 @@ export default {
                 Access: 0,
                 SignLimit: 0,
                 NetFlow: -1,
-                EndTime: '9999-12-31 23:59:59',
+                EndTime: new Date().format('yyyy-MM-dd hh:mm:ss'),
             },
             rules: {
                 Account: [

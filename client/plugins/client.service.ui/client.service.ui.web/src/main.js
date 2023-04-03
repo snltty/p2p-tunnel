@@ -24,13 +24,11 @@ import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/display.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 
-
 import {
     CircleClose, HomeFilled, Link, Position, OfficeBuilding
     , SwitchButton, Loading, ArrowRightBold, Setting, ArrowDown
     , DArrowLeft, DArrowRight, Edit, Delete, Promotion, Share, Select
-}
-    from '@element-plus/icons'
+} from '@element-plus/icons'
 app.component(CircleClose.name, CircleClose);
 app.component(HomeFilled.name, HomeFilled);
 app.component(Link.name, Link);

@@ -17,6 +17,8 @@ namespace server.service.validators
 
         public uint Access => (uint)EnumServiceAccess.Relay;
 
+        public string Name => "中继";
+
         public RelayValidator(Config config, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCache)
         {
             this.config = config;

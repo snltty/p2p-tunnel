@@ -1,10 +1,7 @@
 import { sendWebsocketMsg } from "./request";
 
-export const getPage = (p = 1, ps = 10) => {
-    return sendWebsocketMsg(`serverusers/list`, {
-        Page: p,
-        PageSize: ps
-    });
+export const getPage = (arg) => {
+    return sendWebsocketMsg(`serverusers/list`, arg);
 }
 
 export const add = (row) => {

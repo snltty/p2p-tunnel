@@ -97,10 +97,6 @@ namespace common.server.model
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var nameBytes = Name.GetUTF16Bytes();
@@ -130,11 +126,6 @@ namespace common.server.model
             return bytes;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
         public int DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -184,6 +175,7 @@ namespace common.server.model
         /// 通知
         /// </summary>
         Notify = 105,
+        Exit = 106,
         /// <summary>
         /// 
         /// </summary>

@@ -8,7 +8,11 @@
                         <Menu></Menu>
                     </div>
                     <div class="content flex-1 relative scrollbar-10">
-                        <router-view />
+                        <router-view v-slot="{ Component }">
+                            <transition name="route-animate">
+                                <component :is="Component" />
+                            </transition>
+                        </router-view>
                     </div>
                     <div class="status-bar">
                         <StatusBar></StatusBar>
@@ -61,6 +65,10 @@ export default {
     border: 1px solid #297c5c;
     overflow: hidden;
     box-sizing: border-box;
+}
+
+.content {
+    overflow: hidden;
 }
 
 @media screen and (max-width: 800px) {

@@ -31,7 +31,7 @@
                     </el-row>
                 </el-form-item>
                 <template v-for="(item1,index) in components" :key="index">
-                    <component :is="item1" :ref="`setting_item_${index}`"></component>
+                    <component :is="item1" :args="model.Args" :ref="`setting_item_${index}`"></component>
                 </template>
                 <el-form-item label="" label-width="0">
                     <el-row>
@@ -138,8 +138,9 @@ export default {
         const state = reactive({
             model: {
                 Name: '',
-                AutoReg: false,
                 GroupId: '',
+                Args: {},
+                AutoReg: false,
                 GroupIds: [],
                 UsePunchHole: false,
                 TimeoutDelay: 20000,
@@ -197,7 +198,7 @@ export default {
             return new Promise((resolve, reject) => {
                 getSignInInfo().then((json) => {
                     json.ClientConfig.Name = state.model.Name;
-                    json.ClientConfig.Args = state.model.Args;
+                    json.ClientConfig.Args = getArgs();
                     json.ClientConfig.GroupId = state.model.GroupId;
                     json.ClientConfig.AutoReg = state.model.AutoReg;
                     json.ClientConfig.UsePunchHole = state.model.UsePunchHole;
@@ -230,7 +231,6 @@ export default {
                         return false;
                     }
                     getJson().then((json) => {
-                        json.Args = getArgs();
                         updateConfig(json).then(resolve).catch(reject);
                     }).catch(reject);
                 });

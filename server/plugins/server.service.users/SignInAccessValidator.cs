@@ -1,4 +1,5 @@
-﻿using common.server.model;
+﻿using common.server;
+using common.server.model;
 using server.messengers;
 using server.messengers.singnin;
 using server.service.users.model;
@@ -15,12 +16,14 @@ namespace server.service.users
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IUserStore userStore;
         private readonly Config config;
+        private readonly MessengerSender messengerSender;
 
-        public SignInAccessValidator(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, IClientSignInCaching clientSignInCaching, Config config)
+        public SignInAccessValidator(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, IClientSignInCaching clientSignInCaching, Config config, MessengerSender messengerSender)
         {
             this.serviceAccessValidator = serviceAccessValidator;
             this.userStore = userStore;
             this.config = config;
+            this.messengerSender = messengerSender;
             clientSignInCaching.OnOffline += (SignInCacheInfo cache) =>
             {
                 if (GetUser(cache.Args, out UserInfo user))
@@ -32,6 +35,8 @@ namespace server.service.users
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.None;
         public uint Access => 0b00000000_00000000_00000000_00100000;
+
+        public string Name => "登入";
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
@@ -60,7 +65,11 @@ namespace server.service.users
                         {
                             foreach (var item in user.Connections)
                             {
-                                item.Value?.Disponse();
+                                _ = messengerSender.SendOnly(new MessageRequestWrap
+                                {
+                                    Connection = item.Value,
+                                    MessengerId = (ushort)ClientsMessengerIds.Exit,
+                                });
                             }
                             user.Connections.Clear();
                         }

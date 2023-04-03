@@ -35,6 +35,11 @@ namespace client.service
     {
         public static void Start()
         {
+            AppDomain.CurrentDomain.UnhandledException += (a, b) =>
+            {
+                Logger.Instance.Error(b.ExceptionObject + "");
+            };
+
             ThreadPool.SetMinThreads(1024, 1024);
             ThreadPool.SetMaxThreads(65535, 65535);
             LoggerConsole();

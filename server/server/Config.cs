@@ -65,6 +65,12 @@ namespace server
         /// 加密密码
         /// </summary>
         public string EncodePassword { get; set; } = string.Empty;
+        /// <summary>
+        /// 管理员分组
+        /// </summary>
+        public string AdminGroup { get; set; } = string.Empty;
+
+        
 
         private async Task<Config> ReadConfig()
         {

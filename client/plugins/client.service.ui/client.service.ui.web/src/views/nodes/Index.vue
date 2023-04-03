@@ -4,7 +4,11 @@
             <LeftMenu :menus="leftMenus" v-model="state.currentMenu"></LeftMenu>
         </div>
         <div class="content relative h-100 flex-1 scrollbar">
-            <router-view v-if="accessService($route.meta.service,servicesState)"></router-view>
+            <router-view v-if="accessService($route.meta.service,servicesState)" v-slot="{ Component }">
+                <transition name="route-animate">
+                    <component :is="Component" />
+                </transition>
+            </router-view>
             <NotAccess v-else></NotAccess>
         </div>
     </div>

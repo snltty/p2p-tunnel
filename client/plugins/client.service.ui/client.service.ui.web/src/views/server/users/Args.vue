@@ -20,15 +20,26 @@
 </template>
 
 <script>
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 export default {
     service: 'ServerUsersClientService',
-    setup() {
+    props: {
+        args: {
+            type: Object,
+            default: {}
+        }
+    },
+    setup(props) {
 
         const state = reactive({
-            account: '',
-            password: '',
+            account: props.args.account,
+            password: props.args.password,
         });
+        watch(() => props.args, () => {
+            state.account = props.args.account;
+            state.password = props.args.password;
+        });
+
         const submit = () => {
             return {
                 account: state.account,

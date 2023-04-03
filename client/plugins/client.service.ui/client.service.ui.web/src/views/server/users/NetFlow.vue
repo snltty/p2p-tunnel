@@ -12,7 +12,7 @@
                     {{format}}
                 </div>
             </el-form-item>
-            <el-form-item label="" label-width="0">
+            <el-form-item label="" label-width="0" v-if="state.type">
                 <div class="flex w-100">
                     <div>
                         <el-input size="small" v-model="state.form.addTB" style="width:4rem"></el-input>TB

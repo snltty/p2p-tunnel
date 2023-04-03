@@ -25,6 +25,7 @@ namespace server.service.users
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<Config>();
+            services.AddSingleton<IUserStore,UserStore>();
         }
     }
 }

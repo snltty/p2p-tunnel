@@ -37,6 +37,11 @@ namespace client.service.app
         static ServiceProvider serviceProvider = null;
         public static void Start()
         {
+            AppDomain.CurrentDomain.UnhandledException += (a, b) =>
+            {
+                Logger.Instance.Error(b.ExceptionObject + "");
+            };
+
             Logger.Instance.PaddingWidth = 10;
             Logger.Instance.Info("正在启动...");
 

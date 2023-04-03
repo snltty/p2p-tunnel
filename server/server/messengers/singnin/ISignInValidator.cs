@@ -32,6 +32,10 @@ namespace server.messengers.singnin
         /// </summary>
         public uint Access { get; }
         /// <summary>
+        /// 名字
+        /// </summary>
+        public string Name { get; }
+        /// <summary>
         /// 登入前验证
         /// </summary>
         /// <param name="args"></param>

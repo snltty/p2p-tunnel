@@ -14,6 +14,7 @@ namespace server.service.socks5
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
         public uint Access => 0b00000000_00000000_00000000_00000100;
+        public string Name => "socks5";
 
         public Socks5Validator(IServiceAccessValidator serviceAccessProvider, common.socks5.Config config, IClientSignInCaching clientSignInCaching)
         {

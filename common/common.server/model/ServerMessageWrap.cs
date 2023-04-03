@@ -63,20 +63,20 @@ namespace common.server.model
         /// </summary>
         public ushort MessengerId { get; set; }
         /// <summary>
-        /// 每条数据都有个id，【只发发数据的话，不用填这里】
+        /// 每条数据都有个id，自动设置，无需填写【只发发数据的话，不用填这里】
         /// </summary>
         public uint RequestId { get; set; }
         /// <summary>
-        /// 是否等待回复
+        /// 是否等待回复，自动设置，无需填写
         /// </summary>
         public bool Reply { get; internal set; }
 
         /// <summary>
-        /// 是否中继
+        /// 是否中继，自动设置，无需填写
         /// </summary>
         public bool Relay { get; set; }
         /// <summary>
-        /// 加密
+        /// 加密，自动设置，无需填写
         /// </summary>
         public bool Encode { get; set; } = true;
 
@@ -86,15 +86,15 @@ namespace common.server.model
         /// </summary>
         public Memory<ulong> RelayId { get; set; }
         /// <summary>
-        /// 中继节点id列表，读取用
+        /// 中继节点id列表，读取用，自动设置，无需填写
         /// </summary>
-        public Memory<byte> RelayIds { get; set; }
+        public Memory<byte> RelayIds { get;private set; }
         /// <summary>
-        /// 
+        /// 中继经过节点数量，自动设置，无需填写
         /// </summary>
         public byte RelayIdLength { get; private set; }
         /// <summary>
-        /// 
+        /// 中继下，当前所在节点，自动设置，无需填写
         /// </summary>
         public byte RelayIdIndex { get; private set; }
 

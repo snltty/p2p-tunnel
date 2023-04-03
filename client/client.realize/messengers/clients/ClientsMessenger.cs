@@ -1,7 +1,7 @@
 ﻿using client.messengers.singnin;
+using client.realize.messengers.singnin;
 using common.server;
 using common.server.model;
-using System.Threading.Tasks;
 
 namespace client.realize.messengers.clients
 {
@@ -12,9 +12,12 @@ namespace client.realize.messengers.clients
     public sealed class ClientsMessenger : IMessenger
     {
         private readonly ClientsMessengerSender clientsMessengerSender;
-        public ClientsMessenger(ClientsMessengerSender clientsMessengerSender)
+        private readonly ISignInTransfer signInTransfer;
+
+        public ClientsMessenger(ClientsMessengerSender clientsMessengerSender, ISignInTransfer signInTransfer)
         {
             this.clientsMessengerSender = clientsMessengerSender;
+            this.signInTransfer = signInTransfer;
         }
 
         /// <summary>
@@ -27,6 +30,16 @@ namespace client.realize.messengers.clients
             ClientsInfo res = new ClientsInfo();
             res.DeBytes(connection.ReceiveRequestWrap.Payload);
             clientsMessengerSender.OnServerClientsData?.Invoke(res);
+        }
+
+        /// <summary>
+        /// 退出信息
+        /// </summary>
+        /// <param name="connection"></param>
+        [MessengerId((ushort)ClientsMessengerIds.Exit)]
+        public void Exit(IConnection connection)
+        {
+            signInTransfer.Exit();
         }
     }
 }

@@ -47,17 +47,25 @@ namespace server.service.validators
                 return SignInResultInfo.SignInResultInfoCodes.SAME_NAMES;
             }
 
-            //验证账号
-            //其它自定义验证
-            Wrap<ISignInValidator> current = first;
-            while (current != null)
+            //是管理员分组的
+            if (string.IsNullOrWhiteSpace(config.AdminGroup) == false && model.GroupId == config.AdminGroup)
             {
-                SignInResultInfo.SignInResultInfoCodes code = current.Value.Validate(model.Args, ref access);
-                if (code != SignInResultInfo.SignInResultInfoCodes.OK)
+                access |= (uint)EnumServiceAccess.All;
+            }
+            else
+            {
+                //验证账号
+                //其它自定义验证
+                Wrap<ISignInValidator> current = first;
+                while (current != null)
                 {
-                    return code;
+                    SignInResultInfo.SignInResultInfoCodes code = current.Value.Validate(model.Args, ref access);
+                    if (code != SignInResultInfo.SignInResultInfoCodes.OK)
+                    {
+                        return code;
+                    }
+                    current = current.Next;
                 }
-                current = current.Next;
             }
 
             return SignInResultInfo.SignInResultInfoCodes.OK;

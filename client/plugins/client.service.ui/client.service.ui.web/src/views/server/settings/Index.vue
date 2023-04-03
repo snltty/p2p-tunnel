@@ -21,6 +21,7 @@ import Setting from '../Setting.vue'
 import TcpForward from '../tcpforward/Setting.vue'
 import UdpForward from '../udpforward/Setting.vue'
 import Socks5 from '../socks5/Setting.vue'
+import Users from '../users/Setting.vue'
 import { getCurrentInstance, nextTick, onBeforeUnmount, computed, onMounted, reactive, ref, shallowRef } from '@vue/runtime-core'
 import { injectServices, accessService } from '../../../states/services'
 import { shareData } from '../../../states/shareData'
@@ -34,6 +35,7 @@ export default {
         const serviceAccess = computed(() => signinState.RemoteInfo.Access);
         const _menus = [
             { text: '服务器配置', component: shallowRef(Setting) },
+            { text: '账号管理', component: shallowRef(Users) },
             { text: 'tcp代理穿透', component: shallowRef(TcpForward) },
             { text: 'udp代理穿透', component: shallowRef(UdpForward) },
             { text: 'socks5代理', component: shallowRef(Socks5) },

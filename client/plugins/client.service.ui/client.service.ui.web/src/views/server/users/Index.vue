@@ -8,24 +8,24 @@
                 <span class="flex-1"></span>
             </div>
             <div class="content">
-                <el-table :data="state.data.Data" stripe border size="small">
-                    <el-table-column prop="ID" label="ID" width="50" />
-                    <el-table-column prop="Account" label="账号">
+                <el-table :data="state.data.Data" stripe border size="small" @sort-change="handleSort">
+                    <el-table-column prop="ID" sortable label="账号">
                         <template #default="scope">
-                            <a href="javascript:;" @click="handleAccount(scope.row)">{{scope.row.Account}}</a>
+                            <a href="javascript:;" @click="handleAccount(scope.row)">【{{scope.row.ID}}】{{scope.row.Account}}</a>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="EndTime" label="结束时间" width="140">
+                    <el-table-column prop="EndTime" sortable label="时间" width="140">
                         <template #default="scope">
-                            <a href="javascript:;" @click="handleEndTime(scope.row)">{{scope.row.EndTime}}</a>
+                            <p>{{scope.row.AddTime}}</p>
+                            <p><a href="javascript:;" @click="handleEndTime(scope.row)">{{scope.row.EndTime}}</a></p>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="NetFlow" label="剩余流量">
+                    <el-table-column prop="NetFlow" sortable label="流量">
                         <template #default="scope">
                             <a href="javascript:;" @click="handleNetFlow(scope.row)">{{scope.row.NetFlow == -1 ?'//无限制' :scope.row.NetFlow.sizeFormat().join('')}}</a>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="SignLimit" label="登录限制" width="70">
+                    <el-table-column prop="SignLimit" sortable label="登入数" width="90">
                         <template #default="scope">
                             <a href="javascript:;" @click="handleSignLimit(scope.row)">{{scope.row.SignLimit == 0 ?'//无限制':scope.row.SignLimit}}</a>
                         </template>
@@ -96,6 +96,7 @@ export default {
         const state = reactive({
             loading: false,
             account: '',
+            sort: 0,
             accesss: computed(() => {
                 return Object.keys(shareData.serverAccess).map(key => {
                     return shareData.serverAccess[key];
@@ -115,9 +116,17 @@ export default {
         });
 
         const getData = () => {
-            getPage(state.data.Page, state.data.PageSize).then((res) => {
+            state.loading = true;
+            getPage({
+                Page: state.data.Page, PageSize: state.data.PageSize,
+                account: state.account,
+                sort: state.sort
+            }).then((res) => {
                 let json = new Function(`return ${res}`)();
                 state.data = json;
+                state.loading = false;
+            }).catch(() => {
+                state.loading = false;
             });
         };
         onMounted(() => {
@@ -172,6 +181,25 @@ export default {
                 ElMessage.error('操作失败');
             });
         }
+        const handleSort = ({ column, prop, order }) => {
+            const sortField = {
+                'ID': 1,
+                'AddTime': 2,
+                'EndTime': 4,
+                'NetFlow': 8,
+                'SignLimit': 16
+            };
+            const types = {
+                'descending': 1,
+                'ascending': 0,
+            }
+            if (order == null) {
+                state.sort = 0;
+            } else {
+                state.sort = sortField[prop] | types[order] << 7;
+            }
+            getData();
+        }
 
 
         const addData = ref({ ID: 0, NetFlow: 0 });
@@ -183,7 +211,7 @@ export default {
 
         return {
             state, getData, Select, shareData, handleAccessCommand, handleAdd,
-            handleAccount, handleEndTime, handleNetFlow, handleSignLimit, handleDelete
+            handleAccount, handleEndTime, handleNetFlow, handleSignLimit, handleDelete, handleSort
         }
     }
 }

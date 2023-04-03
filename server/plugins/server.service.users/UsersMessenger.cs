@@ -7,6 +7,7 @@ using server.messengers.singnin;
 using server.service.users.model;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace server.service.users
 {
@@ -19,11 +20,13 @@ namespace server.service.users
         private readonly IClientSignInCaching clientSignInCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IUserStore userStore;
-        public UsersMessenger(IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator, IUserStore userStore)
+        private readonly Config config;
+        public UsersMessenger(IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator, IUserStore userStore, Config config)
         {
             this.clientSignInCaching = clientSignInCaching;
             this.serviceAccessValidator = serviceAccessValidator;
             this.userStore = userStore;
+            this.config = config;
         }
 
         [MessengerId((ushort)UsersMessengerIds.Page)]
@@ -109,6 +112,33 @@ namespace server.service.users
             }
 
             connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
+        }
+
+
+        [MessengerId((ushort)UsersMessengerIds.GetSetting)]
+        public async Task GetSetting(IConnection connection)
+        {
+            connection.WriteUTF8(await config.ReadString());
+        }
+
+        [MessengerId((ushort)UsersMessengerIds.Setting)]
+        public async Task Setting(IConnection connection)
+        {
+            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
+            {
+                connection.Write(Helper.FalseArray);
+                return;
+            }
+            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
+            {
+                connection.Write(Helper.FalseArray);
+                return;
+            }
+            string jsonStr = connection.ReceiveRequestWrap.Payload.GetUTF8String();
+
+            await config.SaveConfig(jsonStr);
+
+            connection.Write(Helper.TrueArray);
         }
     }
 }

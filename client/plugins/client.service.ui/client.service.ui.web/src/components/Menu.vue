@@ -115,7 +115,11 @@ export default {
         color: #fff;
         font-size: 1.4rem;
 
-        &.router-link-active, &:hover {
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        &.router-link-active {
             color: #15602d;
             background-color: #fff;
         }

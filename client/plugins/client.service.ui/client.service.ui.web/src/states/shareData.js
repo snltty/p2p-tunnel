@@ -1,5 +1,14 @@
 import { inject, provide, reactive } from "vue";
 
+const files = require.context('../views/', true, /access\.js/);
+const accesss = files.keys().map(c => files(c).default).reduce((all, value, index) => {
+    Object.assign(all, value);
+    return all;
+}, {
+    'relay': { text: '中继', value: 1 },
+    'setting': { text: '服务器配置', value: 2 }
+});
+
 const shareDataKey = Symbol();
 
 export const shareData = {
@@ -8,14 +17,7 @@ export const shareData = {
     forwardTypes: { 'forward': 0, 'proxy': 1 },
     clientConnectTypes: { 0: '未连接', 1: '打洞', 2: '节点中继', 4: '服务器中继' },
     serverTypes: { 1: 'TCP', 2: 'UDP', 3: '/' },
-    serverAccess: {
-        'signin': { text: '登入', value: 1 },
-        'relay': { text: '中继', value: 2 },
-        'tcpforward': { text: 'tcp转发', value: 4 },
-        'udpforward': { text: 'udp转发', value: 8 },
-        'socks5': { text: 'socks5代理', value: 16 },
-        'setting': { text: '服务器配置', value: 32 },
-    },
+    serverAccess: accesss,
     serverImgs: {
         'zg': { img: require('../assets/zg.png'), name: '中国' },
         'zgxg': { img: require('../assets/zgxg.png'), name: '中国香港' },

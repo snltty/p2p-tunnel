@@ -71,7 +71,6 @@ namespace server.service
                 messenger.LoadMessenger(item, services.GetService(item));
             }
 
-
             ISignInValidatorHandler signInMiddlewareHandler = services.GetService<ISignInValidatorHandler>();
             foreach (ISignInValidator validator in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct().Select(c => (ISignInValidator)services.GetService(c)).OrderBy(c => c.Order))
             {
@@ -80,6 +79,8 @@ namespace server.service
 
             Loop(services);
             Udp((UdpServer)udpServer, messenger);
+
+            AccessCheck(services, assemblys);
         }
 
         private void Loop(ServiceProvider services)
@@ -141,6 +142,21 @@ namespace server.service
                     Logger.Instance.DebugError(ex);
                 }
             };
+        }
+
+        private void AccessCheck(ServiceProvider services, Assembly[] assemblys)
+        {
+            var validators = ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct().Select(c => (ISignInValidator)services.GetService(c));
+
+            Logger.Instance.Debug("权限值,uint 每个权限占一位，最多32个权限");
+            if (validators.Select(c => c.Access).Distinct().Count() != validators.Count())
+            {
+                Logger.Instance.Error("有冲突");
+            }
+            foreach (var item in validators.OrderBy(c => c.Access))
+            {
+                Logger.Instance.Info($"{Convert.ToString(item.Access, 2).PadLeft(32, '0')}  {item.Name}");
+            }
         }
     }
 }

@@ -131,6 +131,16 @@ namespace server.service.users.model
         /// 删除
         /// </summary>
         Remove = 1204,
+
+        /// <summary>
+        /// 获取配置
+        /// </summary>
+        GetSetting = 1205,
+        /// <summary>
+        /// 设置配置
+        /// </summary>
+        Setting = 1206,
+
         Max = 1299,
     }
 }

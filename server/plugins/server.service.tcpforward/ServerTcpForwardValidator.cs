@@ -21,6 +21,8 @@ namespace server.service.tcpforward
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
         public uint Access => 0b00000000_00000000_00000000_00001000;
 
+        public string Name => "tcp代理穿透";
+
         public new bool Validate(IConnection connection)
         {
             return config.ConnectEnable || serviceAccessProvider.Validate(connection, Access);
