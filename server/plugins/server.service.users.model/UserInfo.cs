@@ -31,7 +31,7 @@ namespace server.service.users.model
         /// <summary>
         /// 账号添加时间
         /// </summary>
-        public DateTime AddTime { get; set; }
+        public DateTime AddTime { get; set; } = DateTime.Now;
         /// <summary>
         /// 账号结束时间
         /// </summary>

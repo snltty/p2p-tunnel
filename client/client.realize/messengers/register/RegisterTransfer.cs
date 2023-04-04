@@ -164,7 +164,8 @@ namespace client.realize.messengers.singnin
                     {
                         Logger.Instance.DebugError(ex + "");
                         success.ErrorMsg = ex.Message;
-                        break;
+                        await Task.Delay((int)interval, cancellationToken.Token);
+                        continue;
                     }
                 }
                 if(success.Data == false)
