@@ -1,25 +1,20 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Diagnostics;
-using System.Reflection;
-using System.Windows;
-using System.Windows.Forms;
 using System.Drawing;
 using System.IO;
-using Newtonsoft.Json.Linq;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace client.service.tray
 {
-    /// <summary>
-    /// MainWindow.xaml 的交互逻辑
-    /// </summary>
-    public partial class MainWindow : Window
+    public partial class Form1 : Form
     {
         private NotifyIcon notifyIcon = null;
         private Process proc;
-        public MainWindow()
+        public Form1()
         {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-
             ShowInTaskbar = false;
             this.Hide();
             InitializeComponent();
@@ -33,7 +28,7 @@ namespace client.service.tray
             notifyIcon = new NotifyIcon();
             notifyIcon.BalloonTipTitle = "p2p-tunnel";
             notifyIcon.BalloonTipText = "p2p-tunnel托盘程序已启动";
-            notifyIcon.Text = "p2p-tunnel托盘程序";
+            notifyIcon.Text = "p2p-tunnel客户端托盘程序";
 
             notifyIcon.Icon = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo.ico"));
             notifyIcon.Visible = true;
@@ -48,7 +43,6 @@ namespace client.service.tray
             Service(null, null);
             StartUp();
         }
-
 
 
         private void Service(object sender, EventArgs e)
@@ -79,8 +73,8 @@ namespace client.service.tray
         {
             try
             {
-                string dir = Path.Combine(Directory.GetCurrentDirectory());
-                string file = Path.Combine(dir, "../client.service.exe");
+                string dir = Directory.GetCurrentDirectory();
+                string file = Path.Combine(dir, "client.service.exe");
 
                 proc = new Process();
                 proc.StartInfo.WorkingDirectory = dir;
@@ -130,9 +124,9 @@ namespace client.service.tray
         }
 
 
-        private (string, string, string, Microsoft.Win32.RegistryKey) GetReg()
+        private Model GetReg()
         {
-            string currentPath = System.Windows.Forms.Application.StartupPath;
+            string currentPath = Application.StartupPath;
             string exeName = AppDomain.CurrentDomain.FriendlyName;
             string value = string.Empty;
             Microsoft.Win32.RegistryKey Rkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
@@ -155,41 +149,47 @@ namespace client.service.tray
             catch (Exception)
             {
             }
-            return (keyName, value, System.IO.Path.Combine(currentPath, exeName), Rkey);
+            return new Model
+            {
+                Key = keyName,
+                Value = value,
+                Path = System.IO.Path.Combine(currentPath, exeName),
+                RegKey = Rkey
 
+            };
         }
         private void StartUp(object sender, EventArgs e)
         {
-            (string keyName, string value, string path, Microsoft.Win32.RegistryKey Rkey) = GetReg();
+            Model model = GetReg();
             try
             {
-                if (string.IsNullOrWhiteSpace(value))
+                if (string.IsNullOrEmpty(model.Value))
                 {
-                    Rkey.SetValue(keyName, path);
+                    model.RegKey.SetValue(model.Key, model.Path);
                     notifyIcon.BalloonTipText = "已设置自启动";
                     notifyIcon.ShowBalloonTip(1000);
                 }
                 else
                 {
-                    Rkey.DeleteValue(keyName, false);
+                    model.RegKey.DeleteValue(model.Key, false);
                     notifyIcon.BalloonTipText = "已取消自启动";
                     notifyIcon.ShowBalloonTip(1000);
                 }
 
-                Rkey.Flush();
+                model.RegKey.Flush();
             }
             catch (Exception ex)
             {
                 notifyIcon.BalloonTipText = ex.Message;
                 notifyIcon.ShowBalloonTip(1000);
             }
-            Rkey.Close();
+            model.RegKey.Close();
             StartUp();
         }
         private void StartUp()
         {
-            (string keyName, string value, string path, Microsoft.Win32.RegistryKey Rkey) = GetReg();
-            if (string.IsNullOrWhiteSpace(value))
+            Model model = GetReg();
+            if (string.IsNullOrEmpty(model.Value))
             {
                 notifyIcon.ContextMenuStrip.Items[1].Image = unright;
             }
@@ -197,20 +197,17 @@ namespace client.service.tray
             {
                 notifyIcon.ContextMenuStrip.Items[1].Image = right;
             }
-            Rkey.Close();
+            model.RegKey.Close();
         }
 
 
-        Web web;
         private void OpenWeb(object sender, EventArgs e)
         {
-            if (File.Exists("../ui-appsettings.json"))
+            if (File.Exists("ui-appsettings.json"))
             {
-                string texts = File.ReadAllText("../ui-appsettings.json");
+                string texts = File.ReadAllText("ui-appsettings.json");
                 JObject jsObj = JObject.Parse(texts);
-                web = new Web($"http://127.0.0.1:{jsObj["web"]["Port"]}");
-                web.Show();
-                web.Closed += Web_Closed;
+                Process.Start($"http://127.0.0.1:{jsObj["web"]["Port"]}/#/?port={jsObj["websocket"]["Port"]}");
             }
             else
             {
@@ -221,10 +218,6 @@ namespace client.service.tray
         private void ContextMenuStrip_MouseDoubleClick(object sender, EventArgs e)
         {
             OpenWeb(null, null);
-        }
-        private void Web_Closed(object sender, EventArgs e)
-        {
-            web = null;
         }
 
         private void Close(object sender, EventArgs e)
@@ -241,7 +234,7 @@ namespace client.service.tray
 
         private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            string resourceName = "client.service.tray.res." + new AssemblyName(args.Name).Name + ".dll";
+            string resourceName = "client.service.tray." + new AssemblyName(args.Name).Name + ".dll";
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             {
                 if (stream != null)
@@ -253,6 +246,14 @@ namespace client.service.tray
 
                 return null;
             }
+        }
+
+        class Model
+        {
+            public string Key { get; set; }
+            public string Value { get; set; }
+            public string Path { get; set; }
+            public Microsoft.Win32.RegistryKey RegKey { get; set; }
         }
     }
 }
