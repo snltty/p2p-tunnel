@@ -74,7 +74,8 @@ namespace client.service.tray
             try
             {
                 string dir = Directory.GetCurrentDirectory();
-                string file = Path.Combine(dir, "client.service.exe");
+                MessageBox.Show(dir);
+                string file = Path.Combine(dir, "./client.service.exe");
 
                 proc = new Process();
                 proc.StartInfo.WorkingDirectory = dir;
@@ -203,9 +204,9 @@ namespace client.service.tray
 
         private void OpenWeb(object sender, EventArgs e)
         {
-            if (File.Exists("ui-appsettings.json"))
+            if (File.Exists("./ui-appsettings.json"))
             {
-                string texts = File.ReadAllText("ui-appsettings.json");
+                string texts = File.ReadAllText("./ui-appsettings.json");
                 JObject jsObj = JObject.Parse(texts);
                 Process.Start($"http://127.0.0.1:{jsObj["web"]["Port"]}/#/?port={jsObj["websocket"]["Port"]}");
             }

@@ -7,11 +7,15 @@
 <script>
 import { injectWebsocket } from '../../states/websocket'
 import { initWebsocket } from '../../apis/request'
-import { computed, onMounted, ref } from '@vue/runtime-core'
+import { computed, nextTick, onMounted, ref, watch } from '@vue/runtime-core'
 import { ElMessageBox } from 'element-plus'
+import { useRoute, useRouter } from 'vue-router'
 export default {
     components: {},
-    setup() {
+    setup(props) {
+
+        const route = useRoute();
+        const router = useRouter();
 
         const websocketState = injectWebsocket();
         const connected = computed(() => websocketState.connected);
@@ -26,8 +30,9 @@ export default {
                 initWebsocket(wsUrl.value);
             })
         }
-        const wsUrl = ref(localStorage.getItem('wsurl') || 'ws://127.0.0.1:59411');
-        onMounted(() => {
+        const wsUrl = ref('');
+        router.isReady().then(() => {
+            wsUrl.value = (localStorage.getItem('wsurl') || `ws://127.0.0.1:${route.query.port || 59411}`);
             initWebsocket(wsUrl.value);
         });
 
