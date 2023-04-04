@@ -61,8 +61,9 @@ export default {
                 }
 
                 let json = JSON.parse(JSON.stringify(addData.value));
-                json.SignLimit = state.type ? +state.form.signLimit : -1;
+                json.SignLimit = state.type ? +state.form.signLimit : 0;
                 state.loading = true;
+                console.log(json);
                 add(json).then((msg) => {
                     state.loading = false;
                     if (!msg) {

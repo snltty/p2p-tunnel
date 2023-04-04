@@ -30,7 +30,7 @@ export default {
     emits: ['update:modelValue', 'handle'],
     setup(props, { emit }) {
 
-        const state = ref(window.innerWidth > 799);
+        const state = ref(window.innerWidth > 798);
         const className = computed(c => state.value.toString());
         const current = computed(() => props.modelValue);
         const menus = computed(() => props.menus);

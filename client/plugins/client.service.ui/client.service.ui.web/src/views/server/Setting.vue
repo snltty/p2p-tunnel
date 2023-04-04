@@ -48,9 +48,9 @@
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="验证账号" prop="VerifyAccount">
-                                <el-tooltip class="box-item" effect="dark" content="开启验证账号后，不可匿名使用" placement="top-start">
-                                    <el-checkbox size="default" v-model="model.VerifyAccount">开启</el-checkbox>
+                            <el-form-item label="允许中继" prop="RelayEnable">
+                                <el-tooltip class="box-item" effect="dark" content="允许所有账号使用中继" placement="top-start">
+                                    <el-checkbox size="default" v-model="model.RelayEnable">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -59,16 +59,16 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="允许中继" prop="RelayEnable">
-                                <el-tooltip class="box-item" effect="dark" content="允许所有账号使用中继" placement="top-start">
-                                    <el-checkbox size="default" v-model="model.RelayEnable">开启</el-checkbox>
+                            <el-form-item label="加密秘钥" prop="EncodePassword">
+                                <el-tooltip class="box-item" effect="dark" content="如果服务器填写了秘钥，客户端选择加密时，必须填写相同秘钥" placement="top-start">
+                                    <el-input size="default" v-model="model.EncodePassword" placeholder="加密秘钥"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="加密秘钥" prop="EncodePassword">
-                                <el-tooltip class="box-item" effect="dark" content="如果服务器填写了秘钥，客户端选择加密时，必须填写相同秘钥" placement="top-start">
-                                    <el-input size="default" v-model="model.EncodePassword" placeholder="加密秘钥"></el-input>
+                            <el-form-item label="管理分组" prop="AdminGroup">
+                                <el-tooltip class="box-item" effect="dark" content="此分组下登录即为超级管理员" placement="top-start">
+                                    <el-input size="default" type="password" show-password v-model="model.AdminGroup" placeholder="管理分组"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -97,8 +97,8 @@ export default {
                 RegisterTimeout: 0,
                 RegisterEnable: true,
                 RelayEnable: true,
-                VerifyAccount: true,
                 EncodePassword: '',
+                AdminGroup: '',
             },
             rules: {
                 ConnectLimit: [
@@ -157,8 +157,9 @@ export default {
                         json.RegisterTimeout = +state.model.RegisterTimeout;
                         json.RegisterEnable = state.model.RegisterEnable;
                         json.RelayEnable = state.model.RelayEnable;
-                        json.VerifyAccount = state.model.VerifyAccount;
                         json.EncodePassword = state.model.EncodePassword;
+                        json.AdminGroup = state.model.AdminGroup;
+
                         saveConfigure('ServerConfigure', JSON.stringify(json)).then(resolve).catch(reject);
                     }).catch(reject);
                 });
@@ -173,8 +174,8 @@ export default {
                 state.model.RegisterTimeout = json.RegisterTimeout;
                 state.model.RegisterEnable = json.RegisterEnable;
                 state.model.RelayEnable = json.RelayEnable;
-                state.model.VerifyAccount = json.VerifyAccount;
                 state.model.EncodePassword = json.EncodePassword;
+                state.model.AdminGroup = json.AdminGroup;
             });
         });
 

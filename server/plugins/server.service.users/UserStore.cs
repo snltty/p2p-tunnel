@@ -135,6 +135,7 @@ namespace server.service.users
                         _user.Access = user.Access;
                         _user.NetFlow = user.NetFlow;
                         _user.EndTime = user.EndTime;
+                        _user.SignLimit = user.SignLimit;
                         configDataProvider.Save(storeModel);
                         return true;
                     }

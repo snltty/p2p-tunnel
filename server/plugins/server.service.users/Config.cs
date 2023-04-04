@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.libs.extends;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
@@ -39,10 +40,14 @@ namespace server.service.users
         public async Task SaveConfig(string jsonStr)
         {
             Config config = await ReadConfig().ConfigureAwait(false);
+            Config _config = jsonStr.DeJson<Config>();
+            Enable = _config.Enable;
+            ForceOffline = _config.ForceOffline;
 
             config.Enable = Enable;
+            config.ForceOffline = ForceOffline;
 
-            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+            await configDataProvider.Save(config).ConfigureAwait(false);
         }
     }
 

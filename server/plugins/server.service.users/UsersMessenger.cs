@@ -135,7 +135,6 @@ namespace server.service.users
                 return;
             }
             string jsonStr = connection.ReceiveRequestWrap.Payload.GetUTF8String();
-
             await config.SaveConfig(jsonStr);
 
             connection.Write(Helper.TrueArray);

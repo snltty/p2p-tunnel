@@ -81,7 +81,7 @@ namespace client.service.app
             //自动注册
             if (serviceProvider.GetService<Config>().Client.AutoReg)
             {
-                serviceProvider.GetService<ISignInTransfer>().SignIn();
+                serviceProvider.GetService<ISignInTransfer>().SignIn(config.Client.AutoReg);
             }
         }
     }

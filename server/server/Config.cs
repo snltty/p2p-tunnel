@@ -1,5 +1,7 @@
 ﻿using common.libs.database;
+using common.libs.extends;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 
 namespace server
@@ -83,6 +85,17 @@ namespace server
         public async Task SaveConfig(string jsonStr)
         {
             Config config = await ReadConfig().ConfigureAwait(false);
+            Config _config = jsonStr.DeJson<Config>();
+            Udp = _config.Udp;
+            Tcp = _config.Tcp;
+            ConnectLimit = _config.ConnectLimit;
+            TcpBufferSize = _config.TcpBufferSize;
+            TimeoutDelay = _config.TimeoutDelay;
+            RegisterTimeout = _config.RegisterTimeout;
+            RegisterEnable = _config.RegisterEnable;
+            RelayEnable = _config.RelayEnable;
+            EncodePassword = _config.EncodePassword;
+            AdminGroup = _config.AdminGroup;
 
             config.Udp = Udp;
             config.Tcp = Tcp;
@@ -93,8 +106,9 @@ namespace server
             config.RegisterEnable = RegisterEnable;
             config.RelayEnable = RelayEnable;
             config.EncodePassword = EncodePassword;
+            config.AdminGroup = AdminGroup;
 
-            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+            await configDataProvider.Save(config).ConfigureAwait(false);
         }
     }
 

@@ -11,7 +11,9 @@ using client.service.ui.api.service.clientServer;
 using client.service.users.server;
 using client.service.vea.socks5;
 using common.libs;
+using common.libs.extends;
 using common.server;
+using common.server.model;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
@@ -79,7 +81,7 @@ namespace client.service
             //自动注册
             if (config.Client.AutoReg)
             {
-                serviceProvider.GetService<ISignInTransfer>().SignIn();
+                serviceProvider.GetService<ISignInTransfer>().SignIn(config.Client.AutoReg);
             }
         }
 

@@ -35,8 +35,8 @@ namespace server.service.validators
 
         public SignInResultInfo.SignInResultInfoCodes Validate(SignInParamsInfo model, ref uint access)
         {
-            //未开启登入
-            if (config.RegisterEnable == false)
+            //未开启登入，且不是管理员分组
+            if (config.RegisterEnable == false && (string.IsNullOrWhiteSpace(config.AdminGroup) || model.GroupId != config.AdminGroup))
             {
                 return SignInResultInfo.SignInResultInfoCodes.ENABLE;
             }

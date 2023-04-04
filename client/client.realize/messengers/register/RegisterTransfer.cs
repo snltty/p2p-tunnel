@@ -26,7 +26,7 @@ namespace client.realize.messengers.singnin
         private int lockObject = 0;
 
         public SignInTransfer(
-            SignInMessengerSender signinMessengerSender, IClientInfoCaching clientInfoCaching,
+            SignInMessengerSender signinMessengerSender,
             ITcpServer tcpServer, IUdpServer udpServer,
             Config config, SignInStateInfo signInState,
             CryptoSwap cryptoSwap, IIPv6AddressRequest iPv6AddressRequest
@@ -94,11 +94,10 @@ namespace client.realize.messengers.singnin
 
             return await Task.Run(async () =>
             {
-                double interval = autoReg ? 1000 : 0;
+                double interval = autoReg ? 5000 : 0;
                 int times = autoReg ? 10000 : 2;
                 for (int i = 0; i < times; i++)
                 {
-                    bool isex = false;
                     try
                     {
                         if (signInState.LocalInfo.IsConnecting)
@@ -113,7 +112,6 @@ namespace client.realize.messengers.singnin
 
                         Logger.Instance.Info($"开始注册");
                         signInState.LocalInfo.IsConnecting = true;
-                        await Task.Delay((int)interval, cancellationToken.Token);
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
                         signInState.LocalInfo.Port = NetworkHelper.GetRandomPort();
@@ -127,7 +125,24 @@ namespace client.realize.messengers.singnin
 
 
                         //注册
-                        SignInResult result = await GetSignInResult();
+                        SignInResult result = await signinMessengerSender.SignIn().ConfigureAwait(false);
+                        if (result.NetState.Code != MessageResponeCodes.OK)
+                        {
+                            Logger.Instance.Error($"注册失败，网络问题:{result.NetState.Code.GetDesc((byte)result.NetState.Code)}");
+                            Logger.Instance.Error(success.ErrorMsg);
+                            signInState.LocalInfo.IsConnecting = false;
+                            await Task.Delay((int)interval, cancellationToken.Token);
+                            continue;
+                        }
+                        if (result.Data.Code != SignInResultInfo.SignInResultInfoCodes.OK)
+                        {
+                            success.ErrorMsg = $"注册失败:{result.Data.Code.GetDesc((byte)result.Data.Code)}";
+                            Logger.Instance.Error(success.ErrorMsg);
+                            signInState.LocalInfo.IsConnecting = false;
+                            break;
+                        }
+
+
                         config.Client.ShortId = result.Data.ShortId;
                         config.Client.GroupId = result.Data.GroupId;
                         signInState.RemoteInfo.Access = result.Data.UserAccess;
@@ -141,25 +156,20 @@ namespace client.realize.messengers.singnin
                     }
                     catch (TaskCanceledException tex)
                     {
-                        Logger.Instance.Error(tex + "");
+                        Logger.Instance.DebugError(tex + "");
                         success.ErrorMsg = tex.Message;
-                        isex = true;
+                        break;
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.Error(ex + "");
+                        Logger.Instance.DebugError(ex + "");
                         success.ErrorMsg = ex.Message;
-                    }
-
-                    signInState.LocalInfo.IsConnecting = false;
-                    if ((config.Client.AutoReg || autoReg) && isex == false)
-                    {
-                        interval *= 2;
-                    }
-                    else
-                    {
                         break;
                     }
+                }
+                if(success.Data == false)
+                {
+                    Exit1();
                 }
                 return success;
             });
@@ -198,33 +208,5 @@ namespace client.realize.messengers.singnin
             await cryptoSwap.Test(signInState.Connection);
 #endif
         }
-        private async Task<SignInResult> GetSignInResult()
-        {
-            SignInResult result;
-            do
-            {
-                result = await signinMessengerSender.SignIn().ConfigureAwait(false);
-                if (result.NetState.Code != MessageResponeCodes.OK)
-                {
-                    break;
-                }
-                if (result.Data.Code == SignInResultInfo.SignInResultInfoCodes.SAME_NAMES)
-                {
-                    await Task.Delay(1000);
-                }
-
-            } while (result.Data.Code == SignInResultInfo.SignInResultInfoCodes.SAME_NAMES);
-
-            if (result.NetState.Code != MessageResponeCodes.OK)
-            {
-                throw new Exception($"注册失败，网络问题:{result.NetState.Code.GetDesc((byte)result.NetState.Code)}");
-            }
-            if (result.Data.Code != SignInResultInfo.SignInResultInfoCodes.OK)
-            {
-                throw new Exception($"注册失败:{result.Data.Code.GetDesc((byte)result.Data.Code)}");
-            }
-            return result;
-        }
-
     }
 }
