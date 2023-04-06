@@ -2,7 +2,7 @@
     <div class="wrap" v-if="state.user.ID > 0">
         <el-row>
             <el-col :span="6">
-                <el-statistic title="最多登入数" :value="state.user.SignLimit"></el-statistic>
+                <el-statistic title="限制登入" :value="state.user.SignLimit"></el-statistic>
                 <div class="countdown-footer">{{state.user.SignLimit == -1 ? '//无限制':''}}</div>
             </el-col>
             <el-col :span="6">
@@ -14,7 +14,7 @@
                 <div class="countdown-footer">{{state.user.NetFlow == -1 ? '//无限制':''}}</div>
             </el-col>
             <el-col :span="6">
-                <el-statistic title="权限" :value="state.user.access">
+                <el-statistic title="拥有权限" :value="state.user.access">
                     <template #suffix><span class="suffix">/个</span></template>
                 </el-statistic>
                 <div class="countdown-footer">{{state.user.Access == 0 ? '//无权限':''}}</div>
@@ -67,11 +67,11 @@ export default {
             }
             return [num, txts[index - 1]];
         }
+
         const accessLength = (access) => {
             let length = 0;
-            while (access > 0) {
-                length++;
-                access = access >> 1;
+            for (length = 0; length < 32 && access > 0; length++) {
+                access = (((access >>> 0) & (~(1 << length) >>> 0)) >>> 0);
             }
             return length;
         }
@@ -81,9 +81,8 @@ export default {
                 let json = JSON.parse(res);
                 state.user.ID = json.ID;
 
-                let length = accessLength(json.Access);
                 state.user.Access = json.Access;
-                state.user.access = length;
+                state.user.access = json.Access.toString(2).split('').filter(c => c == '1').length;
 
                 state.user.SignLimit = json.SignLimit;
 
