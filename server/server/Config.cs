@@ -1,7 +1,6 @@
 ﻿using common.libs.database;
 using common.libs.extends;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 
 namespace server
