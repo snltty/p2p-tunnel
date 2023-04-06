@@ -12,10 +12,12 @@
                         <ServerLine ref="serverLineDom" @handle="handleSelectServer"></ServerLine>
                     </div>
                 </el-form-item>
-                <template v-for="(item,index) in infos" :key="index">
-                    <el-form-item>
-                        <component :is="item" />
-                    </el-form-item>
+                <template v-if="connected">
+                    <template v-for="(item,index) in infos" :key="index">
+                        <el-form-item>
+                            <component :is="item" />
+                        </el-form-item>
+                    </template>
                 </template>
             </el-form>
         </div>
@@ -26,7 +28,7 @@
 </template>
 
 <script>
-import { computed, reactive, ref, shallowRef } from '@vue/reactivity'
+import { computed, reactive, ref } from '@vue/reactivity'
 import { injectSignIn } from '../../states/signin'
 import { sendSignInMsg, sendExit } from '../../apis/signin'
 import ConnectButton from '../../components/ConnectButton.vue'
