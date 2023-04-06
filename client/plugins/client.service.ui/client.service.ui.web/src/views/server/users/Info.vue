@@ -7,19 +7,21 @@
             </el-col>
             <el-col :span="6">
                 <el-statistic title="剩余流量" :value="state.user.NetFlow">
-                    <template #suffix>{{state.user.NetFlow == -1? '': '/'+state.user.netFlow}}</template>
+                    <template #suffix>
+                        <template v-if="state.user.NetFlow != -1"><span class="suffix">/{{state.user.netFlow}}</span></template>
+                    </template>
                 </el-statistic>
                 <div class="countdown-footer">{{state.user.NetFlow == -1 ? '//无限制':''}}</div>
             </el-col>
             <el-col :span="6">
                 <el-statistic title="权限" :value="state.user.access">
-                    <template #suffix>/个</template>
+                    <template #suffix><span class="suffix">/个</span></template>
                 </el-statistic>
                 <div class="countdown-footer">{{state.user.Access == 0 ? '//无权限':''}}</div>
             </el-col>
             <el-col :span="6">
                 <el-statistic title="剩余时间" :value="state.user.endTime">
-                    <template #suffix>/{{state.user._endTime}}</template>
+                    <template #suffix><span class="suffix">/{{state.user._endTime}}</span></template>
                 </el-statistic>
                 <div class="countdown-footer">{{state.user.EndTime}}</div>
             </el-col>
@@ -52,27 +54,24 @@ export default {
             if (num <= 0) {
                 num = 0;
             }
-            num /= 1000;
 
-            let arr = [
-                [60, '秒'],
-                [60, '分'],
-                [60, '时'],
-                [24, '天'],
-            ];
+            let nums = [1000, 60, 60, 24, 365];
+            let txts = ['秒', '分', '时', '天', '年'];
+
             let index = 0;
-            while (index < arr.length - 1 && Math.ceil(num) >= arr[index][0]) {
-                console.log(`${index} - ${arr[index][0]} - ${arr[index][1]}`);
-                num /= arr[index][0];
-                index++;
+            for (index = 0; index < nums.length; index++) {
+                if (Math.ceil(num) < nums[index]) {
+                    break;
+                }
+                num /= nums[index];
             }
-            return [num, arr[index][1]];
+            return [num, txts[index - 1]];
         }
         const accessLength = (access) => {
             let length = 0;
             while (access > 0) {
                 length++;
-                access >> 1;
+                access = access >> 1;
             }
             return length;
         }
@@ -119,6 +118,10 @@ export default {
     .el-col {
         padding: 1rem;
         box-sizing: border-box;
+    }
+
+    .suffix {
+        font-size: 1.2rem;
     }
 }
 

@@ -78,8 +78,10 @@ namespace client.service.app
             Logger.Instance.Warning("没什么报红的，就说明运行成功了");
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
+
+            var config = serviceProvider.GetService<Config>();
             //自动注册
-            if (serviceProvider.GetService<Config>().Client.AutoReg)
+            if (config.Client.AutoReg)
             {
                 serviceProvider.GetService<ISignInTransfer>().SignIn(config.Client.AutoReg);
             }

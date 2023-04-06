@@ -1,7 +1,7 @@
 import { inject, provide, reactive } from "vue";
 
 const files = require.context('../views/', true, /plugin\.js/);
-const accesss = files.keys().map(c => files(c).default).reduce((all, value, index) => {
+const accesss = files.keys().map(c => files(c).default).filter(c => c.access > 0).reduce((all, value, index) => {
     all.push({
         text: value.text,
         value: value.access
