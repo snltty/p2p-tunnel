@@ -12,6 +12,11 @@
                         <ServerLine ref="serverLineDom" @handle="handleSelectServer"></ServerLine>
                     </div>
                 </el-form-item>
+                <template v-for="(item,index) in infos" :key="index">
+                    <el-form-item>
+                        <component :is="item" />
+                    </el-form-item>
+                </template>
             </el-form>
         </div>
         <div class="servers">
@@ -21,7 +26,7 @@
 </template>
 
 <script>
-import { computed, reactive, ref } from '@vue/reactivity'
+import { computed, reactive, ref, shallowRef } from '@vue/reactivity'
 import { injectSignIn } from '../../states/signin'
 import { sendSignInMsg, sendExit } from '../../apis/signin'
 import ConnectButton from '../../components/ConnectButton.vue'
@@ -32,6 +37,10 @@ export default {
     name: 'Home',
     components: { ConnectButton, ServerLine, Servers },
     setup() {
+
+
+        const files = require.context('../', true, /Info\.vue/);
+        const infos = files.keys().map(c => files(c).default);
 
         const signinState = injectSignIn();
         const state = reactive({
@@ -68,7 +77,7 @@ export default {
 
 
         return {
-            signinState, state,
+            infos, signinState, state,
             loading, connected, handleConnect,
             serverLineDom, handleSelectServer, handleSelectServerSuccess
         }

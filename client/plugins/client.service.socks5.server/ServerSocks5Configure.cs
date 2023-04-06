@@ -67,4 +67,13 @@ namespace client.service.socks5.server
             return "配置失败";
         }
     }
+
+    public sealed class ServerSocks5ClientService : IClientService
+    {
+        
+        public void Default(ClientServiceParamsInfo arg)
+        {
+        }
+
+    }
 }

@@ -1,7 +1,7 @@
 <template>
     <div class="absolute flex">
         <div class="content h-100 flex-1 flex flex-column">
-            <div class="inner flex-1 scrollbar" ref="contentDom">
+            <div class="inner flex-1 scrollbar">
                 <template v-for="(item,index) in leftMenus" :key="index">
                     <el-divider content-position="left" border-style="dotted">{{item.text}}</el-divider>
                     <div class="setting-item">
@@ -17,32 +17,31 @@
 </template> 
 
 <script>
-import Setting from '../Setting.vue'
-import TcpForward from '../tcpforward/Setting.vue'
-import UdpForward from '../udpforward/Setting.vue'
-import Socks5 from '../socks5/Setting.vue'
-import Users from '../users/Setting.vue'
-import { getCurrentInstance, nextTick, onBeforeUnmount, computed, onMounted, reactive, ref, shallowRef } from '@vue/runtime-core'
+import { getCurrentInstance, computed, reactive, shallowRef } from '@vue/runtime-core'
 import { injectServices, accessService } from '../../../states/services'
 import { shareData } from '../../../states/shareData'
 import { injectSignIn } from '../../../states/signin'
 import { ElMessage } from 'element-plus/lib/components'
+import plugin from './plugin'
 export default {
+    plugin: plugin,
     setup() {
 
         const instance = getCurrentInstance();
         const signinState = injectSignIn();
         const serviceAccess = computed(() => signinState.RemoteInfo.Access);
-        const _menus = [
-            { text: '服务器配置', component: shallowRef(Setting) },
-            { text: '账号管理', component: shallowRef(Users) },
-            { text: 'tcp代理穿透', component: shallowRef(TcpForward) },
-            { text: 'udp代理穿透', component: shallowRef(UdpForward) },
-            { text: 'socks5代理', component: shallowRef(Socks5) },
-        ];
+
+        const files = require.context('../', true, /Setting\.vue/);
+        const settings = files.keys().map(c => files(c).default);
+        const _menus = settings.map(c => {
+            return {
+                text: c.plugin.text,
+                component: shallowRef(c)
+            }
+        });
         const servicesState = injectServices();
         const leftMenus = computed(() => {
-            let menus = _menus.filter(c => accessService(c.component.value.service, servicesState) && shareData.serverAccessHas(serviceAccess.value, c.component.value.access))
+            let menus = _menus.filter(c => accessService(c.component.value.plugin.service, servicesState) && shareData.serverAccessHas(serviceAccess.value, c.component.value.plugin.access))
                 .map(c => {
                     return {
                         text: c.text, component: c.component
@@ -54,38 +53,8 @@ export default {
 
         const state = reactive({
             loading: false,
-            currentMenu: 0
         });
 
-        const contentDom = ref(null);
-        const onScroll = (e) => {
-            let stop = contentDom.value.scrollTop;
-            var dividers = contentDom.value.querySelectorAll('.el-divider');
-            for (let i = 0; i < dividers.length; i++) {
-                if (dividers[i].offsetTop - 10 <= stop) {
-                    state.currentMenu = i;
-                }
-            }
-        }
-        const listenScroll = () => {
-            contentDom.value.addEventListener('scroll', onScroll);
-        }
-        const removeListenScroll = () => {
-            contentDom.value.removeEventListener('scroll', onScroll);
-        }
-        const handleJumpScroll = (index) => {
-            var dividers = contentDom.value.querySelectorAll('.el-divider');
-            contentDom.value.scrollTop = dividers[index].offsetTop - 10;
-        }
-
-        onMounted(() => {
-            nextTick(() => {
-                listenScroll();
-            });
-        });
-        onBeforeUnmount(() => {
-            removeListenScroll();
-        });
 
         const getFuns = () => {
             const refs = instance.refs;
@@ -117,7 +86,7 @@ export default {
             fun();
         }
 
-        return { state, contentDom, leftMenus, handleJumpScroll, handleSave }
+        return { state, leftMenus, handleSave }
     }
 }
 </script>

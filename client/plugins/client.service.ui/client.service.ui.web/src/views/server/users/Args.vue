@@ -21,8 +21,9 @@
 
 <script>
 import { reactive, watch } from 'vue'
+import plugin from './plugin'
 export default {
-    service: 'ServerUsersClientService',
+    plugin: plugin,
     props: {
         args: {
             type: Object,

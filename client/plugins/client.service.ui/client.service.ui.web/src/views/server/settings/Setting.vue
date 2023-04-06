@@ -81,12 +81,11 @@
 
 <script>
 import { ref, toRefs, reactive } from '@vue/reactivity';
-import { getConfigure, saveConfigure } from '../../apis/configure'
-import { shareData } from '../../states/shareData'
+import { getConfigure, saveConfigure } from '../../../apis/configure'
 import { onMounted } from '@vue/runtime-core';
+import plugin from './plugin'
 export default {
-    service: 'ServerClientService',
-    access: shareData.serverAccess.setting.value,
+    plugin: plugin,
     setup() {
         const formDom = ref(null);
         const state = reactive({

@@ -22,6 +22,7 @@ namespace client.service.vea.socks5
         private readonly Config config;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaTransfer veaTransfer;
+        private readonly IClientsTransfer clientsTransfer;
 
         /// <summary>
         /// 组网socks5客户端
@@ -33,12 +34,13 @@ namespace client.service.vea.socks5
         /// <param name="veaTransfer"></param>
         /// <param name="veaSocks5DstEndpointProvider"></param>
         public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, IClientInfoCaching clientInfoCaching,
-            IVeaSocks5ClientListener socks5ClientListener, VeaTransfer veaTransfer, IVeaSocks5DstEndpointProvider veaSocks5DstEndpointProvider)
+            IVeaSocks5ClientListener socks5ClientListener, VeaTransfer veaTransfer, IVeaSocks5DstEndpointProvider veaSocks5DstEndpointProvider, IClientsTransfer clientsTransfer)
             : base(socks5MessengerSender, veaSocks5DstEndpointProvider, socks5ClientListener)
         {
             this.config = config;
             this.clientInfoCaching = clientInfoCaching;
             this.veaTransfer = veaTransfer;
+            this.clientsTransfer = clientsTransfer;
         }
 
         /// <summary>
@@ -67,33 +69,41 @@ namespace client.service.vea.socks5
 
         private IConnection GetConnection(IPAddress target)
         {
+            IConnection connection = null;
             if (veaTransfer.IPList.TryGetValue(target, out IPAddressCacheInfo cache))
             {
-                return cache.Client.Connection;
+                connection = cache.Client.Connection;
+            }
+            else
+            {
+                if (target.IsLan())
+                {
+                    int ip = target.GetAddressBytes().ToInt32();
+                    if (veaTransfer.LanIPList.TryGetValue(ip & 0xffffff, out cache))
+                    {
+                        connection = cache.Client.Connection;
+                    }
+                    if (veaTransfer.LanIPList.TryGetValue(ip & 0xffff, out cache))
+                    {
+                        connection = cache.Client.Connection;
+                    }
+                    if (veaTransfer.LanIPList.TryGetValue(ip & 0xff, out cache))
+                    {
+                        connection = cache.Client.Connection;
+                    }
+                }
+;
+                if (clientInfoCaching.GetByName(config.TargetName, out ClientInfo client))
+                {
+                    connection = client.Connection;
+                    if (connection == null || connection.Connected == false)
+                    {
+                        clientsTransfer.ConnectClient(client);
+                    }
+                }
             }
 
-            if (target.IsLan())
-            {
-                int ip = target.GetAddressBytes().ToInt32();
-                if (veaTransfer.LanIPList.TryGetValue(ip & 0xffffff, out cache))
-                {
-                    return cache.Client.Connection;
-                }
-                if (veaTransfer.LanIPList.TryGetValue(ip & 0xffff, out cache))
-                {
-                    return cache.Client.Connection;
-                }
-                if (veaTransfer.LanIPList.TryGetValue(ip & 0xff, out cache))
-                {
-                    return cache.Client.Connection;
-                }
-            }
-;
-            if (clientInfoCaching.GetByName(config.TargetName, out ClientInfo client))
-            {
-                return client.Connection;
-            }
-            return null;
+            return connection;
         }
 
     }

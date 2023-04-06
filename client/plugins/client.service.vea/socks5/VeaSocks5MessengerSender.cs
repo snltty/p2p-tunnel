@@ -25,12 +25,6 @@ namespace client.service.vea.socks5
             this.messengerSender = messengerSender;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         public async Task<bool> Request(Socks5Info data)
         {
             byte[] bytes = data.ToBytes(out int length);
@@ -43,11 +37,7 @@ namespace client.service.vea.socks5
             data.Return(bytes);
             return res;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="connection"></param>
+
         public async Task<bool> Response(Socks5Info data)
         {
             byte[] bytes = data.ToBytes(out int length);
@@ -60,21 +50,13 @@ namespace client.service.vea.socks5
             data.Return(bytes);
             return res;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="connection"></param>
+
         public async Task ResponseClose(Socks5Info data)
         {
             await Response(data);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="connection"></param>
+
         public async Task RequestClose(Socks5Info data)
         {
             data.Data = Helper.EmptyArray;

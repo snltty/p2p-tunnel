@@ -28,12 +28,10 @@
 <script>
 import { ref, toRefs, reactive } from "@vue/reactivity";
 import { getConfig, updateConfig } from "../../../apis/tcp-forward";
-import { accessServiceOr } from "../../../states/services";
 import { onMounted } from "@vue/runtime-core";
+import plugin from './plugin'
 export default {
-    serviceCallback: (state) => {
-        return accessServiceOr(['TcpForwardClientService', 'ServerTcpForwardClientService'], state);
-    },
+    plugin: plugin,
     setup() {
         const formDom = ref(null);
         const state = reactive({

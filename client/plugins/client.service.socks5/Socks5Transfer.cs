@@ -12,12 +12,20 @@ namespace client.service.socks5
     {
         private readonly common.socks5.Config config;
         private readonly ui.api.Config uiconfig;
+        bool set = false;
+
         public Socks5Transfer(common.socks5.Config config, ui.api.Config uiconfig)
         {
             this.config = config;
             this.uiconfig = uiconfig;
 
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => ClearPac();
+            AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+            {
+                if (set)
+                {
+                    ClearPac();
+                }
+            };
             //安卓注释
             //Console.CancelKeyPress += (s, e) => ClearPac();
         }
@@ -94,6 +102,7 @@ namespace client.service.socks5
         /// <param name="url"></param>
         public void SetPac(string url)
         {
+            set = true;
             ProxySystemSetting.Set(url);
         }
 
@@ -102,6 +111,7 @@ namespace client.service.socks5
         /// </summary>
         public void ClearPac()
         {
+            set = false;
             ProxySystemSetting.Clear();
         }
     }

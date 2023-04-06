@@ -18,15 +18,17 @@ namespace client.service.socks5
         private readonly common.socks5.Config config;
         private readonly SignInStateInfo signInStateInfo;
         private readonly IClientInfoCaching clientInfoCaching;
+        private readonly IClientsTransfer clientsTransfer;
 
         private IConnection connection;
         private string targetName;
-        public Socks5MessengerSender(MessengerSender messengerSender, common.socks5.Config config, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching)
+        public Socks5MessengerSender(MessengerSender messengerSender, common.socks5.Config config, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching, IClientsTransfer clientsTransfer)
         {
             this.messengerSender = messengerSender;
             this.config = config;
             this.signInStateInfo = signInStateInfo;
             this.clientInfoCaching = clientInfoCaching;
+            this.clientsTransfer = clientsTransfer;
         }
 
         public async Task<bool> Request(Socks5Info data)
@@ -82,6 +84,10 @@ namespace client.service.socks5
                     if (clientInfoCaching.GetByName(config.TargetName, out ClientInfo client))
                     {
                         connection = client.Connection;
+                        if(connection == null || connection.Connected == false)
+                        {
+                            clientsTransfer.ConnectClient(client);
+                        }
                     }
                 }
             }

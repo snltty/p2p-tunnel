@@ -31,8 +31,9 @@ import { websocketState } from '../../../apis/request'
 import { getList, reset, update } from '../../../apis/vea'
 import { reactive } from '@vue/reactivity'
 import { ElMessage } from 'element-plus'
+import plugin from './plugin'
 export default {
-    service: 'VeaClientService',
+    plugin: plugin,
     props: ['params'],
     setup(props) {
 

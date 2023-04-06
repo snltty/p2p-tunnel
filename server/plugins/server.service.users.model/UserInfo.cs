@@ -10,16 +10,16 @@ namespace server.service.users.model
     public sealed class UserInfo
     {
         public ulong ID { get; set; }
-        public string Account { get; set; }
-        public string Password { get; set; }
+        public string Account { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
         /// <summary>
         /// 权限，0无任何权限
         /// </summary>
         public uint Access { get; set; }
         /// <summary>
-        /// 限制登录数，0无限制
+        /// 限制登录数，-1无限制
         /// </summary>
-        public uint SignLimit { get; set; }
+        public int SignLimit { get; set; } = -1;
         [JsonIgnore]
         public ConcurrentDictionary<ulong, IConnection> Connections { get; set; } = new ConcurrentDictionary<ulong, IConnection>();
 
@@ -35,7 +35,7 @@ namespace server.service.users.model
         /// <summary>
         /// 账号结束时间
         /// </summary>
-        public DateTime EndTime { get; set; }
+        public DateTime EndTime { get; set; } = DateTime.Now;
 
 
         public const byte SortID = 0b0000_0001;
@@ -131,15 +131,19 @@ namespace server.service.users.model
         /// 删除
         /// </summary>
         Remove = 1204,
+        /// <summary>
+        /// 信息
+        /// </summary>
+        Info = 1205,
 
         /// <summary>
         /// 获取配置
         /// </summary>
-        GetSetting = 1205,
+        GetSetting = 1206,
         /// <summary>
         /// 设置配置
         /// </summary>
-        Setting = 1206,
+        Setting = 1207,
 
         Max = 1299,
     }

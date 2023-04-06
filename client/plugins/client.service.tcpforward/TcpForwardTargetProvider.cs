@@ -13,8 +13,9 @@ namespace client.service.tcpforward
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching;
         private readonly SignInStateInfo signInStateInfo;
+        private readonly IClientsTransfer clientsTransfer;
 
-        public TcpForwardTargetProvider(IClientInfoCaching clientInfoCaching, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, SignInStateInfo signInStateInfo)
+        public TcpForwardTargetProvider(IClientInfoCaching clientInfoCaching, ITcpForwardTargetCaching<TcpForwardTargetCacheInfo> tcpForwardTargetCaching, SignInStateInfo signInStateInfo, IClientsTransfer clientsTransfer)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.tcpForwardTargetCaching = tcpForwardTargetCaching;
@@ -27,6 +28,7 @@ namespace client.service.tcpforward
             {
                 tcpForwardTargetCaching.ClearConnection(client.Name);
             };
+            this.clientsTransfer = clientsTransfer;
         }
 
         /// <summary>
@@ -70,6 +72,10 @@ namespace client.service.tcpforward
 
             if (clientInfoCaching.GetByName(cacheInfo.Name, out ClientInfo client))
             {
+                if (client.Connection == null || client.Connection.Connected == false)
+                {
+                    clientsTransfer.ConnectClient(client);
+                }
                 return client.Connection;
             }
             return null;

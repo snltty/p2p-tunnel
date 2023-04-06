@@ -1,90 +1,88 @@
 <template>
-    <div class="modes-wrap">
-        <el-dropdown size="small" title="不同的模式，可能会隐藏部分功能，及自动修改部分配置" @command="handleCommand">
-            <span class="el-dropdown-link">
-                <span>{{name}}</span>
-                <el-icon class="el-icon--right">
-                    <arrow-down />
-                </el-icon>
-            </span>
-            <template #dropdown>
-                <el-dropdown-menu>
-                    <template v-for="(item,index) in state.modes" :key="index">
-                        <el-dropdown-item :command="item">{{item.text}}</el-dropdown-item>
+    <a href="javascript:;" class="modes-wrap" @click="handleShow">功能开关</a>
+    <el-dialog v-model="state.show" title="显示或隐藏一些功能" width="400" center top="1vh">
+        <div>
+            <h3>节点功能</h3>
+            <el-checkbox-group v-model="state.checkListNodes">
+                <template v-for="(item,index) in nodesPlugins" :key="index">
+                    <template v-if="item.checked">
+                        <el-checkbox :label="item.service" checked disabled>{{item.text}}</el-checkbox>
                     </template>
-                </el-dropdown-menu>
-            </template>
-        </el-dropdown>
-    </div>
+                    <template v-else>
+                        <el-checkbox :label="item.service" :checked="access(item.service)">{{item.text}}</el-checkbox>
+                    </template>
+                </template>
+            </el-checkbox-group>
+            <h3>服务器功能</h3>
+            <el-checkbox-group v-model="state.checkListServer">
+                <template v-for="(item,index) in serverPlugins" :key="index">
+                    <template v-if="item.checked">
+                        <el-checkbox :label="item.service" checked disabled>{{item.text}}</el-checkbox>
+                    </template>
+                    <template v-else>
+                        <el-checkbox :label="item.service" :checked="access(item.service)">{{item.text}}</el-checkbox>
+                    </template>
+                </template>
+            </el-checkbox-group>
+        </div>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button :loading="state.loading" @click="handleCancel">取消</el-button>
+                <el-button type="primary" :loading="state.loading" @click="handleConfirm">应用</el-button>
+            </span>
+        </template>
+    </el-dialog>
 </template>
 
 <script>
-import { reactive, computed } from '@vue/reactivity'
+import { reactive } from '@vue/reactivity'
 import { getSignInInfo, updateConfig } from '../../apis/signin'
-import { injectServices } from '../../states/services'
+import { injectServices, accessService } from '../../states/services'
 import { ElMessage } from 'element-plus/lib/components';
-import { ElLoading } from 'element-plus';
 export default {
     setup() {
 
-        const services = ["LoggerClientService", "ServerClientService", "ConfigureClientService", "SignInClientService"];
+        const nodesFiles = require.context('../../views/nodes/', true, /plugin\.js/);
+        const nodesPlugins = nodesFiles.keys().map(c => nodesFiles(c).default);
+
+        const serverFiles = require.context('../../views/server/', true, /plugin\.js/);
+        const serverPlugins = serverFiles.keys().map(c => serverFiles(c).default);
+
         const servicesState = injectServices();
-        const name = computed(() => {
-            let name = servicesState.services[0] || 'full';
-            let _modes = state.modes.filter(c => c.name == name);
-            if (_modes.length > 0) {
-                return _modes[0].text;
-            }
-            return state.modes[0].text;
-        });
         const state = reactive({
-            modes: [
-                { name: 'full', text: '完全功能', services: [] },
-                {
-                    name: 'p2p', text: '仅打洞穿透', services: [
-                        'full', 'ClientsClientService', 'HttpProxyClientService', 'TcpForwardClientService', 'UdpForwardClientService',
-                        'Socks5ClientService', 'VeaClientService'
-                    ].concat(services)
-                },
-                {
-                    name: 'relay', text: '仅中继组网', services: [
-                        'relay', 'ClientsClientService', 'VeaClientService'
-                    ].concat(services)
-                },
-                {
-                    name: 'rproxy', text: '仅代理穿透', services: [
-                        'rproxy', 'ServerTcpForwardClientService', 'ServerUdpForwardClientService'
-                    ].concat(services)
-                },
-                {
-                    name: 'proxy', text: '仅代理翻越', services: [
-                        'proxy', 'HttpProxyClientService', 'Socks5ClientService'
-                    ].concat(services)
-                }
-            ]
+            show: false,
+            checkListNodes: [],
+            checkListServer: [],
+            loading: false
         });
 
-        let loadingInstance = null;
-        const handleCommand = (command) => {
-            loadingInstance = ElLoading.service({ target: '.wrap' });
+        const access = (service) => {
+            return accessService(service, servicesState);
+        }
+        const handleCancel = () => {
+            state.show = false;
+        }
+        const handleShow = () => {
+            state.show = true;
+        }
+        const handleConfirm = () => {
+            state.loading = true;
             getSignInInfo().then((json) => {
-                json.ClientConfig.Services = command.services;
+                json.ClientConfig.Services = state.checkListNodes.concat(state.checkListServer);
+                state.loading = false;
                 updateConfig(json).then(() => {
-                    loadingInstance.close()
                     ElMessage.success('成功，刷新生效');
                 }).catch((e) => {
-                    console.log(e);
                     ElMessage.error('失败' + e);
-                    loadingInstance.close();
                 });
             }).catch((e) => {
                 ElMessage.error('失败' + e);
-                loadingInstance.close();
+                state.loading = false;
             });
         }
 
         return {
-            name, state, handleCommand
+            state, nodesPlugins, serverPlugins, handleCancel, handleShow, handleConfirm, access
         }
     }
 }
@@ -92,15 +90,9 @@ export default {
 
 <style lang="stylus" scoped>
 .modes-wrap {
-    padding-top: 0.7rem;
+    padding-top: 0.6rem;
     line-height: normal;
-
-    .el-dropdown-link {
-        font-size: 1.2rem;
-    }
-
-    .el-icon {
-        vertical-align: middle;
-    }
+    color: #666;
+    text-decoration: underline;
 }
 </style>

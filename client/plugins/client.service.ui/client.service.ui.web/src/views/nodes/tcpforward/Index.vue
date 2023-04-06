@@ -68,8 +68,9 @@ import { onMounted, provide } from '@vue/runtime-core'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../states/shareData'
+import plugin from './plugin'
 export default {
-    service: 'TcpForwardClientService',
+    plugin: plugin,
     components: { AddListen, AddForward },
     setup() {
 

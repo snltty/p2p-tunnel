@@ -39,14 +39,15 @@ import { reactive, toRefs } from '@vue/reactivity'
 import { getLoggers, clearLoggers } from '../../../apis/logger'
 import { onMounted } from '@vue/runtime-core'
 import { ElMessageBox } from 'element-plus/lib/components'
+import plugin from './plugin'
 export default {
-    service: 'LoggerClientService',
+    plugin: plugin,
     components: {},
     setup() {
 
         const state = reactive({
             loading: true,
-            page: { PageIndex: 1, PageSize: 20 },
+            page: { PageIndex: 1, PageSize: 20, Count: 0 },
             types: ['debug', 'info', 'warning', 'error'],
             Type: -1
         })

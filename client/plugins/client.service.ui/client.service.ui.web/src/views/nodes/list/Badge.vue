@@ -22,9 +22,10 @@
 import { sendTest } from '../../../apis/clients'
 import { subNotifyMsg, unsubNotifyMsg } from '../../../apis/request'
 import { reactive } from '@vue/reactivity'
-import { computed, onMounted, onUnmounted, watch } from '@vue/runtime-core';
+import { onMounted, onUnmounted, watch } from '@vue/runtime-core';
+import plugin from './plugin'
 export default {
-    service: 'ClientsClientService',
+    plugin: plugin,
     props: ['params'],
     setup(props) {
         const id = props.params.Id;

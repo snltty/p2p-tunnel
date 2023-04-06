@@ -29,7 +29,9 @@ import { getCurrentInstance, computed, watch, reactive, ref, shallowRef } from '
 import { useRouter } from 'vue-router'
 import { injectServices, accessService } from '../../../states/services'
 import { ElMessage } from 'element-plus/lib/components'
+import plugin from './plugin'
 export default {
+    plugin: plugin,
     setup() {
 
         const instance = getCurrentInstance();
@@ -59,7 +61,7 @@ export default {
                 if (c.component.value.serviceCallback) {
                     return c.component.value.serviceCallback(servicesState);
                 }
-                return accessService(c.component.value.service, servicesState);
+                return accessService(c.component.value.plugin.service, servicesState);
             }).map(c => {
                 return {
                     text: c.text, component: c.component

@@ -58,7 +58,7 @@ namespace server.service.users
                     return SignInResultInfo.SignInResultInfoCodes.TIME_OUT_RANGE;
                 }
                 //超过登录数量
-                if (user.SignLimit > 0)
+                if (user.SignLimit > -1)
                 {
                     if (user.Connections.Count >= user.SignLimit)
                     {

@@ -158,12 +158,14 @@ namespace client.realize.messengers.singnin
                     {
                         Logger.Instance.DebugError(tex + "");
                         success.ErrorMsg = tex.Message;
+                        signInState.LocalInfo.IsConnecting = false;
                         break;
                     }
                     catch (Exception ex)
                     {
                         Logger.Instance.DebugError(ex + "");
                         success.ErrorMsg = ex.Message;
+                        signInState.LocalInfo.IsConnecting = false;
                         await Task.Delay((int)interval, cancellationToken.Token);
                         continue;
                     }

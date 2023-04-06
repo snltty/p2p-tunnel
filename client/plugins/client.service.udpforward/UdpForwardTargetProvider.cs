@@ -13,8 +13,9 @@ namespace client.service.udpforward
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching;
         private readonly SignInStateInfo signInStateInfo;
+        private readonly IClientsTransfer clientsTransfer;
 
-        public UdpForwardTargetProvider(IClientInfoCaching clientInfoCaching, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching, SignInStateInfo signInStateInfo)
+        public UdpForwardTargetProvider(IClientInfoCaching clientInfoCaching, IUdpForwardTargetCaching<UdpForwardTargetCacheInfo> udpForwardTargetCaching, SignInStateInfo signInStateInfo, IClientsTransfer clientsTransfer)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.udpForwardTargetCaching = udpForwardTargetCaching;
@@ -27,6 +28,7 @@ namespace client.service.udpforward
             {
                 udpForwardTargetCaching.ClearConnection(client.Name);
             };
+            this.clientsTransfer = clientsTransfer;
         }
 
         /// <summary>
@@ -58,6 +60,10 @@ namespace client.service.udpforward
 
             if (clientInfoCaching.GetByName(cacheInfo.Name, out ClientInfo client))
             {
+                if (client.Connection == null || client.Connection.Connected == false)
+                {
+                    clientsTransfer.ConnectClient(client);
+                }
                 return client.Connection;
             }
             return null;

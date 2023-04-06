@@ -10,6 +10,10 @@ export const add = (row) => {
 export const remove = (id) => {
     return sendWebsocketMsg(`serverusers/remove`, id);
 }
+export const info = () => {
+    return sendWebsocketMsg(`serverusers/info`);
+}
+
 export const setPassword = (password) => {
     return sendWebsocketMsg(`serverusers/password`, password);
 }

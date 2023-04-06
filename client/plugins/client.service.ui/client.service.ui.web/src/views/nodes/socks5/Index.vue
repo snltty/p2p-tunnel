@@ -34,8 +34,9 @@ import { get, set } from '../../../apis/socks5'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 import ConnectButton from '../../../components/ConnectButton.vue'
+import plugin from './plugin'
 export default {
-    service: 'Socks5ClientService',
+    plugin: plugin,
     components: { ConnectButton },
     setup() {
 

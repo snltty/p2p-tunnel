@@ -27,7 +27,7 @@
                     </el-table-column>
                     <el-table-column prop="SignLimit" sortable label="登入数" width="90">
                         <template #default="scope">
-                            <a href="javascript:;" @click="handleSignLimit(scope.row)">{{scope.row.SignLimit == 0 ?'//无限制':scope.row.SignLimit}}</a>
+                            <a href="javascript:;" @click="handleSignLimit(scope.row)">{{scope.row.SignLimit == -1 ?'//无限制':scope.row.SignLimit}}</a>
                         </template>
                     </el-table-column>
                     <el-table-column prop="Access" label="权限" width="90">
@@ -87,9 +87,9 @@ import Password from './Password.vue'
 import EndTime from './EndTime.vue'
 import NetFlow from './NetFlow.vue'
 import SignLimit from './SignLimit.vue'
-
+import plugin from './plugin'
 export default {
-    service: 'ServerUdpForwardClientService',
+    plugin: plugin,
     components: { Add, Password, EndTime, NetFlow, SignLimit, Select },
     setup() {
 

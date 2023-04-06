@@ -77,8 +77,9 @@ import { computed, reactive, ref } from '@vue/reactivity'
 import { getConfig, setConfig } from '../../../apis/vea'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
+import plugin from './plugin'
 export default {
-    service: 'VeaClientService',
+    plugin: plugin,
     components: {},
     setup() {
 

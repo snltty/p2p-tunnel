@@ -23,8 +23,9 @@
 import { getListProxy, addListen } from '../../../apis/tcp-forward'
 import { reactive } from '@vue/reactivity'
 import { computed, onMounted } from '@vue/runtime-core';
+import plugin from './plugin'
 export default {
-    service: 'HttpProxyClientService',
+    plugin: plugin,
     props: ['params'],
     setup(props) {
         const name = props.params.Name;

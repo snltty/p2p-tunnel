@@ -23,8 +23,9 @@
 import { get, set } from '../../../apis/socks5'
 import { reactive } from '@vue/reactivity'
 import { computed, onMounted } from '@vue/runtime-core';
+import plugin from './plugin'
 export default {
-    service: 'Socks5ClientService',
+    plugin: plugin,
     props: ['params'],
     setup(props) {
         const name = props.params.Name;

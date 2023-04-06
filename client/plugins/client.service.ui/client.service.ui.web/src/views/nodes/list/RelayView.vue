@@ -33,8 +33,9 @@ import { getDelay, getConnects } from '../../../apis/clients'
 import { injectClients } from '../../../states/clients'
 import { injectSignIn } from '../../../states/signin'
 import Signal from '../../../components/Signal.vue'
+import plugin from './plugin'
 export default {
-    service: 'ClientsClientService',
+    plugin: plugin,
     props: ['modelValue'],
     emits: ["update:modelValue", 'success'],
     components: { Signal },

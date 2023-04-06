@@ -124,15 +124,16 @@ import { ref, toRefs, reactive } from '@vue/reactivity';
 import { getSignInInfo, updateConfig } from '../../../apis/signin'
 import { injectServices, accessService } from '../../../states/services';
 import { getCurrentInstance, onMounted } from '@vue/runtime-core';
+import plugin from './plugin'
 export default {
-    service: 'SignInClientService',
+    plugin: plugin,
     components: {},
     setup() {
 
         const instance = getCurrentInstance();
         const servicesState = injectServices();
         const files = require.context('../../../', true, /Args\.vue/);
-        const components = files.keys().map(c => files(c).default).filter(c => accessService(c.service, servicesState));
+        const components = files.keys().map(c => files(c).default).filter(c => accessService(c.plugin.service, servicesState));
 
         const formDom = ref(null);
         const state = reactive({

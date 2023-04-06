@@ -47,8 +47,9 @@
 import { ref, toRefs, reactive } from '@vue/reactivity';
 import { getSignInInfo, updateConfig } from '../../../apis/signin'
 import { onMounted } from '@vue/runtime-core';
+import plugin from './plugin'
 export default {
-    service: 'SignInClientService',
+    plugin: plugin,
     setup() {
         const formDom = ref(null);
         const state = reactive({

@@ -64,8 +64,9 @@ import { getListProxy, getPac, addListen } from '../../../apis/tcp-forward'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 import { injectShareData } from '../../../states/shareData'
+import plugin from './plugin'
 export default {
-    service: 'HttpProxyClientService',
+    plugin: plugin,
     components: {},
     setup() {
 

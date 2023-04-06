@@ -1,15 +1,15 @@
 import { inject, provide, reactive } from "vue";
 
-const files = require.context('../views/', true, /access\.js/);
+const files = require.context('../views/', true, /plugin\.js/);
 const accesss = files.keys().map(c => files(c).default).reduce((all, value, index) => {
-    Object.assign(all, value);
+    all.push({
+        text: value.text,
+        value: value.access
+    })
     return all;
-}, {
-    'relay': { text: '中继', value: 1 },
-    'setting': { text: '服务器配置', value: 2 }
-});
-
-const shareDataKey = Symbol();
+}, [
+    { text: '中继', value: 1 }
+]);
 
 export const shareData = {
     aliveTypes: { 0: '长连接', 1: '短链接' },
@@ -35,25 +35,12 @@ export const shareData = {
     serverAccessAdd: (access, value) => {
         return (((access >>> 0) | (value >>> 0)) >>> 0);
     },
-    serverAccessHasSignin: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.signin.value);
-    },
     serverAccessHasRelay: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.relay.value);
-    },
-    serverAccessHasTcpForward: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.tcpforward);
-    },
-    serverAccessHasUdpForward: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.udpforward.value);
-    },
-    serverAccessHasSocks5: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.socks5.value);
-    },
-    serverAccessHasSetting: (access) => {
-        return shareData.serverAccessHas(access, shareData.serverAccess.setting.value);
+        return shareData.serverAccessHas(access, 1);
     }
 };
+
+const shareDataKey = Symbol();
 
 export const provideShareData = () => {
     const state = reactive(shareData);

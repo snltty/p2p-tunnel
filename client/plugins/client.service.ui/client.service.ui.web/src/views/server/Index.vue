@@ -13,7 +13,6 @@
         </div>
     </div>
 </template>
-  
 <script>
 import LeftMenu from '../../components/LeftMenu.vue'
 import NotAccess from '../../components/NotAccess.vue'
@@ -51,7 +50,7 @@ export default {
                 .filter(c => c.name == 'Servers')[0].children
                 .filter(c => accessService(c.meta.service, servicesState) && hasAccess(c.meta.access)).map(c => {
                     return {
-                        text: c.meta.name,
+                        text: c.meta.text,
                         url: c.name
                     }
                 });

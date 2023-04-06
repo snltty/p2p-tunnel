@@ -43,7 +43,7 @@ namespace client.service.tcpforward
 
             this.tcpForwardServer = tcpForwardServer;
             tcpForwardServer.Init(config.NumConnections, config.BufferSize);
-            tcpForwardServer.OnListeningChange+=(model) =>
+            tcpForwardServer.OnListeningChange += (model) =>
             {
                 if (model.Port == 0)
                 {
@@ -60,7 +60,13 @@ namespace client.service.tcpforward
 
             };
 
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => ClearPac();
+            AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+            {
+                if (set == true)
+                {
+                    ClearPac();
+                }
+            };
             StartP2PAllWithListening();
         }
 
@@ -407,6 +413,8 @@ namespace client.service.tcpforward
         }
         #endregion
 
+
+        bool set = false;
         /// <summary>
         /// 获取pac
         /// </summary>
@@ -475,6 +483,7 @@ namespace client.service.tcpforward
         /// <param name="url"></param>
         public void SetPac(string url)
         {
+            set = true;
             ProxySystemSetting.Set(url);
         }
         /// <summary>
@@ -482,6 +491,7 @@ namespace client.service.tcpforward
         /// </summary>
         public void ClearPac()
         {
+            set = false;
             ProxySystemSetting.Clear();
         }
     }

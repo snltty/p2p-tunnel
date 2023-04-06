@@ -260,7 +260,7 @@ namespace client.realize.messengers.clients
                 }
                 else if (result == EnumConnectResult.BreakOff)
                 {
-                    Logger.Instance.Error($"打洞被跳过，最大的可能是，【{client.Name}】的打洞失败消息比本消息“反向连接”来的晚，可以重新手动尝试");
+                    //Logger.Instance.Error($"打洞被跳过，最大的可能是，【{client.Name}】的打洞失败消息比本消息“反向连接”来的晚，可以重新手动尝试");
                 }
                 client.TryReverseValue = ClientInfo.TryReverseDefault;
             });

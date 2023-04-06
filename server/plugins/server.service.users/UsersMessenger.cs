@@ -115,6 +115,24 @@ namespace server.service.users
         }
 
 
+        [MessengerId((ushort)UsersMessengerIds.Info)]
+        public void Info(IConnection connection)
+        {
+            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) )
+            {
+                if (SignInAccessValidator.GetAccountPassword(client.Args, out string account, out string password))
+                {
+                    if (userStore.Get(account, password, out UserInfo user))
+                    {
+                        connection.Write(user.ToJson().ToUTF8Bytes());
+                        return;
+                    }
+                }
+            }
+            connection.Write(Helper.FalseArray);
+        }
+
+
         [MessengerId((ushort)UsersMessengerIds.GetSetting)]
         public async Task GetSetting(IConnection connection)
         {

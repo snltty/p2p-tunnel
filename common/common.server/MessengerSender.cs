@@ -12,16 +12,11 @@ namespace common.server
     /// </summary>
     public sealed class MessengerSender
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public NumberSpaceUInt32 requestIdNumberSpace = new NumberSpaceUInt32(0);
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
         private ConcurrentDictionary<uint, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<uint, WheelTimerTimeout<TimeoutState>>();
+        public Action HandleUnConnect = () => { };
 
-        /// <summary>
-        /// 
-        /// </summary>
         public MessengerSender()
         {
         }
@@ -33,7 +28,7 @@ namespace common.server
         /// <returns></returns>
         public async Task<MessageResponeInfo> SendReply(MessageRequestWrap msg, bool logger = false)
         {
-            if (msg.Connection == null)
+            if (msg.Connection == null || msg.Connection.Connected == false)
             {
                 return new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT };
             }
@@ -66,7 +61,7 @@ namespace common.server
         /// <returns></returns>
         public async Task<bool> SendOnly(MessageRequestWrap msg, bool locked = false, bool logger = false)
         {
-            if (msg.Connection == null)
+            if (msg.Connection == null || msg.Connection.Connected == false)
             {
                 return false;
             }

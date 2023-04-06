@@ -30,7 +30,7 @@ export default {
         const state = reactive({
             show: props.modelValue,
             loading: false,
-            type: addData.value.SignLimit != 0,
+            type: addData.value.SignLimit != -1,
             form: {
                 signLimit: addData.value.SignLimit,
             },
@@ -38,7 +38,7 @@ export default {
                 signLimit: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: 0, max: 65535, message: '数字 0-65535', trigger: 'blur', transform(value) {
+                        type: 'number', min: -1, max: 65535, message: '数字 -1-65535', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }
@@ -61,9 +61,8 @@ export default {
                 }
 
                 let json = JSON.parse(JSON.stringify(addData.value));
-                json.SignLimit = state.type ? +state.form.signLimit : 0;
+                json.SignLimit = state.type ? +state.form.signLimit : -1;
                 state.loading = true;
-                console.log(json);
                 add(json).then((msg) => {
                     state.loading = false;
                     if (!msg) {

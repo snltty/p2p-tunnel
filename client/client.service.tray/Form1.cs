@@ -74,7 +74,6 @@ namespace client.service.tray
             try
             {
                 string dir = Directory.GetCurrentDirectory();
-                MessageBox.Show(dir);
                 string file = Path.Combine(dir, "./client.service.exe");
 
                 proc = new Process();

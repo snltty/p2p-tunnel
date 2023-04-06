@@ -1,7 +1,7 @@
 <template>
     <div class="wrap">
         <div class="content">
-            <el-row>
+            <el-row v-if="clients.length > 0">
                 <template v-for="(item,index) in clients" :key="index">
                     <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                         <div class="item">
@@ -31,6 +31,7 @@
                     </el-col>
                 </template>
             </el-row>
+            <el-empty v-else description="空的，请确保各节点使用了同一分组编号，同一服务器" />
         </div>
         <RelayView v-if="state.showDelay" v-model="state.showDelay" @success="handleOnRelay"></RelayView>
     </div>
@@ -47,15 +48,15 @@ import RelayView from './RelayView.vue'
 import { onMounted, onUnmounted, provide } from '@vue/runtime-core';
 import { ElMessageBox } from 'element-plus'
 import { injectServices, accessService } from '../../../states/services';
+import plugin from './plugin'
 export default {
-    service: 'ClientsClientService',
-    name: 'NodesList',
+    plugin: plugin,
     components: { Signal, RelayView },
     setup() {
 
         const servicesState = injectServices();
         const files = require.context('../../', true, /Badge\.vue/);
-        const components = files.keys().map(c => files(c).default).filter(c => accessService(c.service, servicesState));
+        const components = files.keys().map(c => files(c).default).filter(c => accessService(c.plugin.service, servicesState));
 
         const clientsState = injectClients();
         const signinState = injectSignIn();

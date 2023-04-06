@@ -44,7 +44,7 @@ export default {
                 .filter(c => c.name == 'Nodes')[0].children
                 .filter(c => accessService(c.meta.service, servicesState)).map(c => {
                     return {
-                        text: c.meta.name,
+                        text: c.meta.text,
                         url: c.name
                     }
                 });

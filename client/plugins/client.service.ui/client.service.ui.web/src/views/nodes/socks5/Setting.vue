@@ -82,8 +82,9 @@ import { get, set, getPac, updatePac } from "../../../apis/socks5";
 import { onMounted } from "@vue/runtime-core";
 import { injectClients } from "../../../states/clients";
 import { injectShareData } from "../../../states/shareData";
+import plugin from './plugin'
 export default {
-    service: 'Socks5ClientService',
+    plugin: plugin,
     components: {},
     setup() {
         const clientsState = injectClients();
