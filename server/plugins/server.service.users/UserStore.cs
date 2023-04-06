@@ -119,7 +119,15 @@ namespace server.service.users
                         return false;
                     }
 
-                    user.ID = storeModel.Users.Values.Max(c => c.ID) + 1;
+                    if (storeModel.Users.Count > 0)
+                    {
+                        user.ID = storeModel.Users.Values.Max(c => c.ID) + 1;
+                    }
+                    else
+                    {
+                        user.ID = 1;
+                    }
+
                     user.AddTime = DateTime.UtcNow;
                     storeModel.Users.TryAdd(user.ID, user);
 
