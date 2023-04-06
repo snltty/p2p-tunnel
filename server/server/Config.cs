@@ -28,6 +28,7 @@ namespace server
             RegisterEnable = config.RegisterEnable;
             RelayEnable = config.RelayEnable;
             EncodePassword = config.EncodePassword;
+            AdminGroup = config.AdminGroup;
         }
 
         /// <summary>
