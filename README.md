@@ -9,7 +9,7 @@
  * @FilePath: \client.service.ui.webd:\desktop\p2p-tunnel\README.md
 -->
 <div align="center">
-<p><img src="./logo.svg" height="150"></p> 
+<p><img src="./readme/logo.svg" height="150"></p> 
 
 # p2p-tunnel
 #### Visual Studio 2022 LTSC 17.4.1
@@ -76,4 +76,4 @@
 ## 支持作者
 请作者喝一杯咖啡，使其更有精力更新代码
 
-<p><img src="./qr.jpg" height="150"></p> 
+<p><img src="./readme/qr.jpg" height="150"></p> 

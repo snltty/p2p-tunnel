@@ -109,10 +109,6 @@ namespace common.libs
             MacExcute($"networksetup -setautoproxystate ethernet off");
             MacExcute($"networksetup -setautoproxystate Wi-Fi off");
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="url"></param>
         public static void Set(string url)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -128,9 +124,6 @@ namespace common.libs
 
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public static void Clear()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

@@ -2,7 +2,6 @@
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
-using Android.Text;
 using Android.Views;
 using AndroidX.Core.App;
 
@@ -16,6 +15,18 @@ namespace client.service.app
             Window.SetFlags(WindowManagerFlags.TranslucentStatus, WindowManagerFlags.TranslucentStatus);
             Window.SetStatusBarColor(Android.Graphics.Color.Transparent);
             Window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
+
+            KeepManager.GetInstance().RegisterKeep(this);
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
+            {
+                StartForegroundService(new Intent(this, typeof(ForegroundService)));
+            }
+
+            else
+            {
+                StartService(new Intent(this, typeof(ForegroundService)));
+            }
+
 
             base.OnCreate(savedInstanceState);
         }
@@ -67,6 +78,7 @@ namespace client.service.app
             return StartCommandResult.Sticky;
         }
     }
+
     public class AliveActivity : Activity
     {
         protected override void OnCreate(Bundle savedInstanceState)
@@ -126,6 +138,15 @@ namespace client.service.app
         public void SetKeep(AliveActivity keep)
         {
             mKeepActivity = new WeakReference<Activity>(keep);
+        }
+    }
+
+    public sealed class BootReceiver : BroadcastReceiver
+    {
+        public override void OnReceive(Context context, Intent intent)
+        {
+            Intent toIntent = context.PackageManager.GetLaunchIntentForPackage(context.PackageName);
+            context.StartActivity(toIntent);
         }
     }
 }
