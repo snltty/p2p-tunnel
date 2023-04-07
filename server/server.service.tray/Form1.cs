@@ -14,8 +14,9 @@ namespace server.service.tray
         public Form1()
         {
             ShowInTaskbar = false;
-            this.Hide();
+            Visible = false;
             InitializeComponent();
+            Hide();
             InitialTray();
         }
 
