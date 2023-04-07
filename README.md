@@ -8,10 +8,10 @@
  * @FilePath: \client.service.ui.webd:\desktop\p2p-tunnel\README.md
 -->
 <div align="center">
+<p><img src="./logo.svg" height="150"></p> 
 
 # p2p-tunnel
-## Visual Studio 2022 LTSC 17.4.1
-#### 使用前请确保你已知其中风险，本软件仅供学习交流，请勿用于违法犯罪
+#### Visual Studio 2022 LTSC 17.4.1
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/snltty/p2p-tunnel?style=social)
 ![GitHub Repo forks](https://img.shields.io/github/forks/snltty/p2p-tunnel?style=social)
@@ -19,33 +19,22 @@
 [![fork](https://gitee.com/snltty/p2p-tunnel/badge/fork.svg?theme=dark)](https://gitee.com/snltty/p2p-tunnel/members)
 
 #### 有任何想法，皆可进群(**1121552990**)了解
+#### 使用前请确保你已知其中风险，本软件仅供学习交流，请勿用于违法犯罪
+
 </div>
+
 
 这是一个内网穿透项目，包括p2p打洞穿透，服务器代理穿透，还包含了一些有趣的功能
 
 除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是撸出来的，所以代码量，内存占用率，都比较小，速度也比较快。通信速度能达到 800MB/s+
 
 ## 几种通信线路
-```mermaid
-    flowchart LR
-    id9((访问端)) <-->|交换数据| id3([客户端A]) <-->|交换数据| id5([客户端B]) <--> id13[(内网服务)]
-```
-```mermaid
-    flowchart LR
-    id6((访问端)) <--> |交换数据| id12[(服务器)] <-->|交换数据| id5([客户端B]) <--> id13[(内网服务)]
-```
-```mermaid
-    flowchart LR
-    id7((访问端)) <-->|交换数据| id3([客户端A])<-->|交换数据| id11[(服务器)] <-->|服务器中继| id5([客户端B]) <--> id13[(内网服务)]
-```
-```mermaid
-    flowchart LR
-    id8((访问端)) <-->|交换数据| id3([客户端A])<-->|交换数据| id10[(客户端XX)] <-->|节点中继| id5([客户端B]) <--> id13[(内网服务)]
-```
-```mermaid
-    flowchart LR
-    id7((访问端)) <-->|交换数据| id3([客户端A])<-->|交换数据| id11[(服务器)] <--> id13[(外网服务)]
-```
+1. (访问端) <----> **客户端A** <----> **客户端B** <----> [内网服务]
+2. (访问端) <----> [服务器] <----> **客户端B** <--> [内网服务]
+3. (访问端) <----> **客户端A** <----> [服务器] <----> **客户端B** <----> [内网服务]
+4. (访问端) <----> **客户端A** <----> **客户端XX** <----> **客户端B** <----> [内网服务]
+5. (访问端) <----> **客户端A** <----> [服务器] <----> [外网服务]
+
 
 ## 其它描述
 - [x] **【p2p打洞】** 打洞支持tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
@@ -84,3 +73,5 @@
 - 客户端端docker镜像  **snltty/p2p-tunnel-client**
 
 
+## 支持作者
+请作者喝一杯咖啡，使其更有精力更新代码
