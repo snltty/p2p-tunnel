@@ -72,12 +72,12 @@
 - 联机cs1.6 <a href="https://www.bilibili.com/video/BV18d4y1u7DN/">https://www.bilibili.com/video/BV18d4y1u7DN/</a>
 
 ## 部署和运行
-### windows 可使用托盘程序
+#### windows 可使用托盘程序
 > client.service.tray.exe    //客户端
 
 >server.service.tray.exe    //服务端
 
-### linux 按你喜欢的方式进行托管
+#### linux 按你喜欢的方式进行托管
 - <a href="./readme/server-linux.md">服务端 linux docker托管</a>
 - <a href="./readme/client-linux.md">客户端 linux supervisor托管</a>
 - 服务端docker镜像  **snltty/p2p-tunnel-server**
