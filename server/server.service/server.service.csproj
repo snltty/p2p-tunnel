@@ -30,9 +30,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="logo.ico" />
-		<Content Include="public\nssm.exe">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -47,6 +44,10 @@
 	  <ProjectReference Include="..\plugins\server.service.udpforward\server.service.udpforward.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.users\server.service.users.csproj" />
 	  <ProjectReference Include="..\server\server.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="public\" />
 	</ItemGroup>
 
 </Project>

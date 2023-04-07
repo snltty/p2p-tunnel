@@ -17,8 +17,8 @@ for %%f in (client,server) do (
 	dotnet publish ./%%f/%%f.service -c release -f net7.0 -o ./public/publish/any/%%f 
 )
 rem app 改为自己的Android sdk地址, 可以在 工具->选项->Xamarin->Android设置 里查看sdk地址
-dotnet publish ./client/client.service.app -c:Release -f:net7.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSdkDirectory=%sdkpath%
-echo F|xcopy "client\\client.service.app\\bin\\Release\\net7.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" "public\\publish-zip\\p2p-tunnel.apk"  /s /f /h /y
+rem dotnet publish ./client/client.service.app -c:Release -f:net7.0-android /p:AndroidSigningKeyPass=123321 /p:AndroidSdkDirectory=%sdkpath%
+rem echo F|xcopy "client\\client.service.app\\bin\\Release\\net7.0-android\\publish\\p2p_tunnel.p2p_tunnel-Signed.apk" "public\\publish-zip\\p2p-tunnel.apk"  /s /f /h /y
  
 
 for %%r in (x64,arm64,arm) do (
@@ -51,6 +51,7 @@ for %%r in (x64,arm64,arm) do (
 	echo F|xcopy "client-uninstall-windows service.bat" "public\\publish\\any\client\\"  /f /h /y
 	echo F|xcopy "server-uninstall-windows service.bat" "public\\publish\\any\server\\"  /f /h /y
 	echo F|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\client.service.tray.exe" "public\\publish\\win-%%r-single\\client\\client.service.tray.exe"  /s /f /h /y
+	echo F|xcopy "server\\server.service\\public\\server.service.tray.exe" "public\\publish\\win-%%r-single\\server\\server.service.tray.exe"  /s /f /h /y
 	
 )
 del  "public\\publish\\any\\server\\*.pac"
