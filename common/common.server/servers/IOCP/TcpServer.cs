@@ -119,7 +119,7 @@ namespace common.server.servers.iocp
         {
             try
             {
-                if (socket == null)
+                if (socket == null || socket.RemoteEndPoint == null)
                 {
                     return null;
                 }

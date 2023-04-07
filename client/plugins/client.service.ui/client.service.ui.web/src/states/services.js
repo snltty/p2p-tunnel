@@ -4,10 +4,6 @@ import { websocketState } from '../apis/request'
 
 const provideServicesKey = Symbol();
 export const provideServices = () => {
-    const state = reactive({
-        services: []
-    });
-    provide(provideServicesKey, state);
 
     const fn = () => {
         if (websocketState.connected) {
@@ -21,6 +17,12 @@ export const provideServices = () => {
             setTimeout(fn, 1000);
         }
     }
+
+    const state = reactive({
+        services: [],
+        update: fn
+    });
+    provide(provideServicesKey, state);
     fn();
 }
 export const injectServices = () => {

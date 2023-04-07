@@ -12,6 +12,17 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="所在分组" prop="GroupId">
                                 <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top-start">
+                                    <!-- <el-dropdown class="w-100">
+                                        <el-input v-model="model.GroupId" :suffix-icon="ArrowDown" readonly></el-input>
+                                        <template #dropdown>
+                                            <el-dropdown-menu>
+                                                <template v-for="(item,index) in model.GroupIds" :key="index">
+                                                    <el-dropdown-item>{{item}}</el-dropdown-item>
+                                                </template>
+                                                <el-dropdown-item divided>添加</el-dropdown-item>
+                                            </el-dropdown-menu>
+                                        </template>
+                                    </el-dropdown> -->
                                     <el-select size="default" v-model="model.GroupId" @change="handleGroupIdChange" allow-create clearable filterable default-first-option placeholder="选择或输入分组编号">
                                         <el-option v-for="(item,index) in model.GroupIds" :key="index" :label="item" :value="item">
                                             <div class="flex">

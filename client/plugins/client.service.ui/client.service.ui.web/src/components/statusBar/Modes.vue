@@ -72,6 +72,7 @@ export default {
                 state.loading = false;
                 updateConfig(json).then(() => {
                     ElMessage.success('成功，刷新生效');
+                    servicesState.update();
                 }).catch((e) => {
                     ElMessage.error('失败' + e);
                 });

@@ -575,7 +575,7 @@ namespace common.server
         {
             TcpSocket = tcpSocket;
 
-            IPEndPoint address = (TcpSocket.RemoteEndPoint as IPEndPoint);
+            IPEndPoint address = (TcpSocket.RemoteEndPoint as IPEndPoint) ?? new IPEndPoint(IPAddress.Any,0);
             if (address.Address.AddressFamily == AddressFamily.InterNetworkV6 && address.Address.IsIPv4MappedToIPv6)
             {
                 address = new IPEndPoint(new IPAddress(address.Address.GetAddressBytes()[^4..]), address.Port);
