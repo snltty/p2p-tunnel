@@ -2,6 +2,7 @@
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using Android.Util;
 using Android.Views;
 using AndroidX.Core.App;
 
@@ -16,23 +17,15 @@ namespace client.service.app
             Window.SetStatusBarColor(Android.Graphics.Color.Transparent);
             Window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
 
-            KeepManager.GetInstance().RegisterKeep(this);
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-            {
-                StartForegroundService(new Intent(this, typeof(ForegroundService)));
-            }
-
-            else
-            {
-                StartService(new Intent(this, typeof(ForegroundService)));
-            }
-
+            //KeepManager.GetInstance().RegisterKeep(this);
+            StartForegroundService(new Intent(this, typeof(ForegroundService)));
 
             base.OnCreate(savedInstanceState);
         }
 
         protected override void OnDestroy()
         {
+            Log.Debug("log", $"MainActivity OnDestroy=============================================");
             base.OnDestroy();
         }
     }
@@ -41,32 +34,29 @@ namespace client.service.app
     public sealed class ForegroundService : Service
     {
         private static readonly int SERVICE_ID = 10000;
+        private static readonly string CHANNEL_ID = "service";
+        private static readonly string CHANNEL_NAME = "service";
 
         public override IBinder OnBind(Intent intent)
         {
             return null;
         }
 
+        NotificationChannel notificationChannel;
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
-            NotificationChannel notificationChannel;
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-            {
-                notificationChannel = new NotificationChannel("service", "service", NotificationImportance.High);
-                notificationChannel.EnableLights(true);
-                notificationChannel.SetShowBadge(true);
-                notificationChannel.LockscreenVisibility = NotificationVisibility.Private;
-                NotificationManager manager = (NotificationManager)GetSystemService(NotificationService);
-                if (manager != null)
-                {
-                    manager.CreateNotificationChannel(notificationChannel);
-                }
-            }
+            notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High);
+            notificationChannel.EnableLights(true);
+            notificationChannel.SetShowBadge(true);
+            notificationChannel.LockscreenVisibility = NotificationVisibility.Private;
+            NotificationManager manager = (NotificationManager)GetSystemService(NotificationService);
+            manager.CreateNotificationChannel(notificationChannel);
 
-            //PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
-            Notification notification = new NotificationCompat.Builder(this, "service")
+            PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
+            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                   .SetSmallIcon(Resource.Drawable.appiconfg)
-                  //.SetContentIntent(pendingIntent)
+                  .SetChannelId(CHANNEL_ID)
+                  .SetContentIntent(pendingIntent)
                   .SetContentTitle("保活")
                   .SetContentText("保活")
                   .SetOngoing(true)
@@ -74,11 +64,38 @@ namespace client.service.app
             notification.Flags |= NotificationFlags.NoClear;
             StartForeground(SERVICE_ID, notification);
 
+            Task.Run(async () =>
+            {
+                int index = 0;
+                while (true)
+                {
+                    Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                      .SetSmallIcon(Resource.Drawable.appiconfg)
+                      .SetChannelId(CHANNEL_ID)
+                      .SetContentIntent(pendingIntent)
+                      .SetContentTitle("保活")
+                      .SetContentText((++index).ToString())
+                      .SetOngoing(true)
+                      .Build();
+                    notification.Flags |= NotificationFlags.NoClear;
+                    manager?.Notify(SERVICE_ID, notification);
+
+                    await Task.Delay(1000);
+                }
+            });
+
             Startup.Start();
             return StartCommandResult.Sticky;
         }
+
+        public override void OnDestroy()
+        {
+            Log.Debug("log", $"ForegroundService OnDestroy=============================================");
+            base.OnDestroy();
+        }
     }
 
+    [Activity(Theme = "@style/Maui.SplashTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
     public class AliveActivity : Activity
     {
         protected override void OnCreate(Bundle savedInstanceState)
