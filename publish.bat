@@ -37,14 +37,6 @@ for %%r in (x64,arm64,arm) do (
 		del  "public\\publish\\linux-%%r-single\\client\\%%f"
 		del  "public\\publish\\osx-%%r-single\\client\\%%f"
 	)
-	for %%f in (nssm.exe) do (
-		echo F|xcopy "client\\client.realize\\public\\%%f" "public\\publish\\win-%%r-single\\client\\public\\"  /f /h /y
-		echo F|xcopy "client\\client.realize\\public\\%%f" "public\\publish\\win-%%r-single\\server\\public\\"  /f /h /y
-		del  "public\\publish\\linux-%%r-single\\client\\public\\%%f"
-		del  "public\\publish\\linux-%%r-single\\server\\public\\%%f"
-		del  "public\\publish\\osx-%%r-single\\client\\public\\%%f"
-		del  "public\\publish\\osx-%%r-single\\server\\public\\%%f"
-	)
 	for %%p in (win,linux,osx) do (
 		echo D|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\web\\" "public\\publish\\%%p-%%r-single\\client\\public\\web\\" /s /f /h /y
 		del  "public\\publish\\%%p-%%r-single\\server\\*.pac"
