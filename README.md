@@ -22,7 +22,8 @@
 </div>
 
 这是一个内网穿透项目，包括p2p打洞穿透，服务器代理穿透，还包含了一些有趣的功能
-除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是撸出来的，所以代码量，内存占用率，都比较小，速度也比较快。
+
+除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是撸出来的，所以代码量，内存占用率，都比较小，速度也比较快。通信速度能达到 800MB/s+
 
 ## 几种通信线路
 ```mermaid
@@ -72,8 +73,9 @@
 
 ## 部署和运行
 ### windows 可使用托盘程序
-    client.service.tray.exe
-    server.service.tray.exe
+> client.service.tray.exe    //客户端
+
+>server.service.tray.exe    //服务端
 
 ### linux 按你喜欢的方式进行托管
 - <a href="./readme/server-linux.md">服务端 linux docker托管</a>
