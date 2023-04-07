@@ -19,9 +19,11 @@
 [![fork](https://gitee.com/snltty/p2p-tunnel/badge/fork.svg?theme=dark)](https://gitee.com/snltty/p2p-tunnel/members)
 
 #### 有任何想法，皆可进群(**1121552990**)了解
-#### <a href="https://update7.simplix.info/UpdatePack7R2.exe" target="_blank">win7补丁</a>
-
 </div>
+
+这是一个内网穿透项目，包括p2p打洞穿透，服务器代理穿透，还包含了一些有趣的功能
+
+除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是撸出来的，所以代码量，内存占用率，都比较小，速度也比较快。
 
 ## 几种通信线路
 ```mermaid
@@ -70,10 +72,13 @@
 - 联机cs1.6 <a href="https://www.bilibili.com/video/BV18d4y1u7DN/">https://www.bilibili.com/video/BV18d4y1u7DN/</a>
 
 ## 部署和运行
-### windows 下直接运行托盘程序即可，client.service.tray.exe、server.service.tray.exe
+### windows 可使用托盘程序
+    client.service.tray.exe
+    server.service.tray.exe
+
+### linux 按你喜欢的方式进行托管
 - <a href="./readme/server-linux.md">服务端 linux docker托管</a>
 - <a href="./readme/client-linux.md">客户端 linux supervisor托管</a>
-
 - 服务端docker镜像  **snltty/p2p-tunnel-server**
 - 客户端端docker镜像  **snltty/p2p-tunnel-client**
 
