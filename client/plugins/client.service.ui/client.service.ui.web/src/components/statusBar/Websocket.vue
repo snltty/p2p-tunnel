@@ -32,6 +32,9 @@ export default {
         }
         const wsUrl = ref('');
         router.isReady().then(() => {
+            if (route.query.port) {
+                localStorage.setItem('wsurl', `ws://127.0.0.1:${route.query.port}`);
+            }
             wsUrl.value = (localStorage.getItem('wsurl') || `ws://127.0.0.1:${route.query.port || 59411}`);
             initWebsocket(wsUrl.value);
         });

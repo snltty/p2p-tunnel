@@ -23,19 +23,12 @@
 		<DebugSymbols>false</DebugSymbols>
 		<Optimize>True</Optimize>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <None Remove="punchhole-direction.json" />
-	</ItemGroup>
-
+	
   <ItemGroup>
     <Content Include="punchhole-direction.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="public\nssm.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

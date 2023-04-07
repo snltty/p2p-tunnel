@@ -8,6 +8,7 @@ dotnet publish ./client/client.service -c release -f net7.0 -o ./public/publish/
 
 echo F|xcopy "client\\client.service\\Dockerfile" "public\\publish\\linux-alpine-x64\\client\\Dockerfile"  /s /f /h /y
 echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-linux" "public\\publish\\linux-alpine-x64\\client\\"  /f /h /y
+del  "public\\publish\\linux-alpine-x64\\client\\tun2socks-osx"
 del  "public\\publish\\linux-alpine-x64\\client\\tun2socks-windows.exe"
 del  "public\\publish\\linux-alpine-x64\\client\\wintun.dll"
 
