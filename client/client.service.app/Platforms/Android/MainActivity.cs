@@ -36,56 +36,58 @@ namespace client.service.app
         private static readonly string CHANNEL_ID = "service";
         private static readonly string CHANNEL_NAME = "service";
 
+        Intent intent;
         public override IBinder OnBind(Intent intent)
         {
+            intent.SetFlags(ActivityFlags.NewTask);
+            this.intent = intent;
             return null;
         }
 
-        NotificationChannel notificationChannel;
         public override void OnCreate()
         {
-            notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High);
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High);
             notificationChannel.EnableLights(true);
             notificationChannel.SetShowBadge(true);
-            notificationChannel.LockscreenVisibility = NotificationVisibility.Private;
+            notificationChannel.LockscreenVisibility = NotificationVisibility.Public;
             NotificationManager manager = (NotificationManager)GetSystemService(NotificationService);
             manager.CreateNotificationChannel(notificationChannel);
 
-            //PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
-            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                  .SetSmallIcon(Resource.Drawable.appiconfg)
-                  .SetChannelId(CHANNEL_ID)
-                  //  .SetContentIntent(pendingIntent)
-                  .SetContentTitle("保活")
-                  .SetContentText("保活")
-                  .SetOngoing(false).SetPriority(0)
-                  .Build();
-            notification.Flags |= NotificationFlags.NoClear;
-            StartForeground(SERVICE_ID, notification);
 
-            Task.Run(async () =>
+            StartForeground(SERVICE_ID, CreateNotification("保活"));
+            Java.Lang.Thread thread = new Java.Lang.Thread(() =>
             {
                 int index = 0;
                 while (true)
                 {
-                    Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                      .SetSmallIcon(Resource.Drawable.appiconfg)
-                      .SetChannelId(CHANNEL_ID)
-                     // .SetContentIntent(pendingIntent)
-                      .SetContentTitle("保活")
-                      .SetContentText((++index).ToString())
-                      .SetOngoing(false).SetPriority(0)
-                      .Build();
-                    notification.Flags |= NotificationFlags.NoClear;
-                    manager?.Notify(SERVICE_ID, notification);
+                    manager?.Notify(SERVICE_ID, CreateNotification((++index).ToString()));
 
-                    await Task.Delay(1000);
+                    Java.Lang.Thread.Sleep(1000);
                 }
             });
+            thread.Start();
 
             Startup.Start();
+
             base.OnCreate();
         }
+
+        private Notification CreateNotification(string content)
+        {
+
+            PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
+            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .SetSmallIcon(Resource.Drawable.appiconfg)
+                .SetChannelId(CHANNEL_ID)
+                 .SetContentIntent(pendingIntent)
+                .SetContentTitle("保活")
+                .SetContentText(content)
+                .SetOngoing(false).SetPriority(0)
+                .Build();
+            notification.Flags |= NotificationFlags.NoClear;
+            return notification;
+        }
+
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
             return StartCommandResult.Sticky;
@@ -97,6 +99,7 @@ namespace client.service.app
             base.OnDestroy();
         }
     }
+
 
     [Activity(Theme = "@style/Maui.SplashTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
     public class AliveActivity : Activity
