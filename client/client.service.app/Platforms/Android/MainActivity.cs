@@ -46,6 +46,10 @@ namespace client.service.app
 
         public override void OnCreate()
         {
+            base.OnCreate();
+            Startup.Start();
+           
+
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High);
             notificationChannel.EnableLights(true);
             notificationChannel.SetShowBadge(true);
@@ -67,15 +71,13 @@ namespace client.service.app
             });
             thread.Start();
 
-            Startup.Start();
-
-            base.OnCreate();
+           
         }
 
         private Notification CreateNotification(string content)
         {
 
-            PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
+            PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Immutable);
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .SetSmallIcon(Resource.Drawable.appiconfg)
                 .SetChannelId(CHANNEL_ID)
