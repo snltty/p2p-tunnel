@@ -25,7 +25,6 @@ namespace client.service.app
 
         protected override void OnDestroy()
         {
-            Log.Debug("log", $"MainActivity OnDestroy=============================================");
             base.OnDestroy();
         }
     }
@@ -43,7 +42,7 @@ namespace client.service.app
         }
 
         NotificationChannel notificationChannel;
-        public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
+        public override void OnCreate()
         {
             notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High);
             notificationChannel.EnableLights(true);
@@ -52,14 +51,14 @@ namespace client.service.app
             NotificationManager manager = (NotificationManager)GetSystemService(NotificationService);
             manager.CreateNotificationChannel(notificationChannel);
 
-            PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
+            //PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                   .SetSmallIcon(Resource.Drawable.appiconfg)
                   .SetChannelId(CHANNEL_ID)
-                  .SetContentIntent(pendingIntent)
+                  //  .SetContentIntent(pendingIntent)
                   .SetContentTitle("保活")
                   .SetContentText("保活")
-                  .SetOngoing(true)
+                  .SetOngoing(false).SetPriority(0)
                   .Build();
             notification.Flags |= NotificationFlags.NoClear;
             StartForeground(SERVICE_ID, notification);
@@ -72,10 +71,10 @@ namespace client.service.app
                     Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                       .SetSmallIcon(Resource.Drawable.appiconfg)
                       .SetChannelId(CHANNEL_ID)
-                      .SetContentIntent(pendingIntent)
+                     // .SetContentIntent(pendingIntent)
                       .SetContentTitle("保活")
                       .SetContentText((++index).ToString())
-                      .SetOngoing(true)
+                      .SetOngoing(false).SetPriority(0)
                       .Build();
                     notification.Flags |= NotificationFlags.NoClear;
                     manager?.Notify(SERVICE_ID, notification);
@@ -85,6 +84,10 @@ namespace client.service.app
             });
 
             Startup.Start();
+            base.OnCreate();
+        }
+        public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
+        {
             return StartCommandResult.Sticky;
         }
 
