@@ -35,7 +35,7 @@ namespace server.service.users
         }
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.None;
-        public uint Access => 0b00000000_00000000_00000000_00100000;
+        public uint Access => (uint)EnumServiceAccess.SignIn;
 
         public string Name => "登入";
 
@@ -47,8 +47,10 @@ namespace server.service.users
                 if (user == null)
                     return SignInResultInfo.SignInResultInfoCodes.NOT_FOUND;
 
+                access |= user.Access;
+
                 //该账号不允许登入
-                if (serviceAccessValidator.Validate(user.Access, Access) == false)
+                if (serviceAccessValidator.Validate(access, Access) == false)
                 {
                     return SignInResultInfo.SignInResultInfoCodes.ENABLE;
                 }
@@ -82,8 +84,6 @@ namespace server.service.users
                 }
 
             }
-
-            access |= user?.Access ?? (uint)EnumServiceAccess.None;
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
 

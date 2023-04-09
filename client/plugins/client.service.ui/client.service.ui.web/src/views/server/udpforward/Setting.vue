@@ -6,7 +6,7 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="开启" prop="ConnectEnable">
-                                <el-tooltip class="box-item" effect="dark" content="允许所有账号使用udp代理穿透，包括匿名" placement="top-start">
+                                <el-tooltip class="box-item" effect="dark" content="允许所有账号使用udp穿透，包括匿名" placement="top-start">
                                     <el-checkbox size="default" v-model="model.ConnectEnable">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>

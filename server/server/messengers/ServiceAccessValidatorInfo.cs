@@ -19,6 +19,10 @@ namespace server.messengers
         /// </summary>
         Setting = 0b00000000_00000000_00000000_00000010,
         /// <summary>
+        /// 登入
+        /// </summary>
+        SignIn = 0b00000000_00000000_00000000_00000100,
+        /// <summary>
         /// 全部权限
         /// </summary>
         All = uint.MaxValue

@@ -19,7 +19,7 @@ namespace server.service.tcpforward
         }
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
-        public uint Access => 0b00000000_00000000_00000000_00001000;
+        public uint Access => 0b00000000_00000000_00000000_00010000;
 
         public string Name => "tcp代理穿透";
 

@@ -48,7 +48,7 @@ namespace client.service.app
         {
             base.OnCreate();
             Startup.Start();
-           
+
 
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High);
             notificationChannel.EnableLights(true);
@@ -71,20 +71,20 @@ namespace client.service.app
             });
             thread.Start();
 
-           
+
         }
 
         private Notification CreateNotification(string content)
         {
 
-            PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Immutable);
+            PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .SetSmallIcon(Resource.Drawable.appiconfg)
                 .SetChannelId(CHANNEL_ID)
                  .SetContentIntent(pendingIntent)
                 .SetContentTitle("保活")
                 .SetContentText(content)
-                .SetOngoing(false).SetPriority(0)
+                .SetOngoing(true).SetPriority(0)
                 .Build();
             notification.Flags |= NotificationFlags.NoClear;
             return notification;
@@ -92,7 +92,7 @@ namespace client.service.app
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
-            return StartCommandResult.Sticky;
+            return StartCommandResult.NotSticky;
         }
 
         public override void OnDestroy()
