@@ -95,7 +95,7 @@
 #### 4、服务器代理
 ```mermaid
     flowchart LR
-    D((访问端\nwww.xx.com:11111))<-->id5[(服务器)]<-->A[A NAT]<-->id4([A客户端])<-->E[(内网服务\n8080端口)]
+    D((访问端\nwww.domain.com\n解析到服务器的域名))<-->id5[(服务器)]<-->A[A NAT]<-->id4([A客户端])<-->E[(内网服务\n8080端口)]
 ```
 
 ## 通信方法
@@ -114,5 +114,5 @@
 ### 代理
 ```mermaid
     flowchart LR
-   D((访问端\nwww.youtube.com)) <-->id4([A客户端])<--> F[(服务器/某节点)] <-->E[(外网服务\nwww.youtube.com)]
+   D((访问端\nwww.xx.com\n某科学网站)) <-->id4([A客户端])<--> F[(服务器/某节点)] <-->E[(某科学网站\nwww.xx.com)]
 ```
