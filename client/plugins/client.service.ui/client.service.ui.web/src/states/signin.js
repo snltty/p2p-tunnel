@@ -67,7 +67,6 @@ export const provideSignIn = () => {
 
                 state.RemoteInfo.Ip = json.RemoteInfo.Ip;
                 state.RemoteInfo.ConnectId = json.RemoteInfo.ConnectId;
-                console.log(json.RemoteInfo.Access);
                 state.RemoteInfo.Access = json.RemoteInfo.Access;
                 state.RemoteInfo.Relay = shareData.serverAccessHasRelay(json.RemoteInfo.Access);
 
