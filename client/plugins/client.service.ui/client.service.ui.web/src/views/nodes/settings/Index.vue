@@ -86,7 +86,7 @@ export default {
             const refs = instance.refs;
             const promises = [];
             for (let j in refs) {
-                if (j.indexOf('setting_item') == 0) {
+                if (j.indexOf('setting_item') == 0 && refs[j][0]) {
                     promises.push(refs[j][0].submit);
                 }
             }
