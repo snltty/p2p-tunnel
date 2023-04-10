@@ -12,8 +12,8 @@ namespace packUnpackSpeed
     {
         static void Main(string[] args)
         {
-            //var summary = BenchmarkRunner.Run<Test>();
-            var summary = BenchmarkRunner.Run<Socks5Pack>();
+            var summary = BenchmarkRunner.Run<Test>();
+            //var summary = BenchmarkRunner.Run<Socks5Pack>();
             Console.ReadLine();
         }
     }
