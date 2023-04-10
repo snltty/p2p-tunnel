@@ -45,11 +45,17 @@ namespace common.libs.database
     {
         public async Task<T> Load()
         {
-            string fileName = GetTableName(typeof(T));
-            if (File.Exists(fileName))
+            try
             {
-                string str = (await File.ReadAllTextAsync(fileName).ConfigureAwait(false));
-                return str.DeJson<T>();
+                string fileName = GetTableName(typeof(T));
+                if (File.Exists(fileName))
+                {
+                    string str = (await File.ReadAllTextAsync(fileName).ConfigureAwait(false));
+                    return str.DeJson<T>();
+                }
+            }
+            catch (Exception)
+            {
             }
             return default;
         }

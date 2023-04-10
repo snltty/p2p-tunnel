@@ -12,34 +12,18 @@ namespace server.service.users
     {
         private readonly IConfigDataProvider<UserStoreModel> configDataProvider;
         UserStoreModel storeModel = new UserStoreModel { Users = new Dictionary<ulong, UserInfo>() };
-        private bool loaded = false;
 
         public UserStore(IConfigDataProvider<UserStoreModel> configDataProvider)
         {
             this.configDataProvider = configDataProvider;
-            configDataProvider.Load().ContinueWith((result) =>
+            var result = configDataProvider.Load().Result;
+            if (result != null)
             {
-                if (result.Result != null)
-                {
-                    loaded = true;
-                    storeModel = result.Result;
-                }
-            });
+                storeModel = result;
+            }
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) =>
             {
-                if (loaded)
-                {
-                    configDataProvider.Save(storeModel);
-                }
-
-            };
-            AppDomain.CurrentDomain.UnhandledException += (a, b) =>
-            {
-                if (loaded)
-                {
-                    configDataProvider.Save(storeModel);
-                }
-                Logger.Instance.DebugError(b.ExceptionObject + "");
+                configDataProvider.Save(storeModel).Wait();
             };
         }
         public int Count()
@@ -170,7 +154,12 @@ namespace server.service.users
         }
         public bool Remove(ulong id)
         {
-            return storeModel.Users.Remove(id, out UserInfo user);
+            if (storeModel.Users.Remove(id, out UserInfo user))
+            {
+                configDataProvider.Save(storeModel);
+                return true;
+            }
+            return false;
         }
 
         public UserInfo DefaultUser()
