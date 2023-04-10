@@ -42,11 +42,15 @@
 
 ## 其它描述
 1. [x] **【p2p打洞】** 打洞支持tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
-2. [x] **【.NET7】** 跨平台，小尺寸，小内存<img src="./readme/size.jpg" height="150">
+2. [x] **【.NET7】** 跨平台，小尺寸，小内存
+<p><img src="./readme/size.jpg" height="150"></p>
+
 3. [x] **【UI界面】** 简单易用的web管理页面
 4. [x] **【加密】** 支持通信数据加密(预配置密钥或自动交换密钥)
 5. [x] **【插件式】** 可扩展的插件式
-6. [x] **【高效】** 高效的打包解包，作死的全手写序列化，通信速度<img src="./readme/speed.jpg" height="150">
+6. [x] **【高效】** 高效的打包解包，作死的全手写序列化，通信速度
+<p><img src="./readme/speed.jpg" height="150"></p>
+
 7. [x] **【节点中继】** 如果你有某个节点比较牛逼，可以允许某个节点作为中继节点，节省服务器带宽，节点中继可以任意节点数，中继过程不参与打包解包，仅网络消耗
 8. [x] **【自建服务器】** 自建服务器则可开启 服务器代理穿透，服务器中继
 9. [x] 免费的打洞服务器
