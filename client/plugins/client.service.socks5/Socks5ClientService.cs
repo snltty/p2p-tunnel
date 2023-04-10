@@ -1,6 +1,7 @@
 ﻿using client.service.ui.api.clientServer;
 using common.socks5;
 using System;
+using System.Threading.Tasks;
 
 namespace client.service.socks5
 {
@@ -50,9 +51,9 @@ namespace client.service.socks5
         /// 设置配置
         /// </summary>
         /// <param name="arg"></param>
-        public void Set(ClientServiceParamsInfo arg)
+        public async Task Set(ClientServiceParamsInfo arg)
         {
-            config.SaveConfig(arg.Content).Wait();
+            await config.SaveConfig(arg.Content);
         }
         public void Run(ClientServiceParamsInfo arg)
         {

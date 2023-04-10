@@ -41,13 +41,14 @@ namespace server.service.users
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
-            GetUser(args, out UserInfo user);
+            if(GetUser(args, out UserInfo user))
+            {
+                access |= user.Access;
+            }
             if (config.Enable)
             {
                 if (user == null)
                     return SignInResultInfo.SignInResultInfoCodes.NOT_FOUND;
-
-                access |= user.Access;
 
                 //该账号不允许登入
                 if (serviceAccessValidator.Validate(access, Access) == false)
