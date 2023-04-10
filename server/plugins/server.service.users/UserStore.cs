@@ -12,6 +12,7 @@ namespace server.service.users
     {
         private readonly IConfigDataProvider<UserStoreModel> configDataProvider;
         UserStoreModel storeModel = new UserStoreModel { Users = new Dictionary<ulong, UserInfo>() };
+        private bool loaded = false;
 
         public UserStore(IConfigDataProvider<UserStoreModel> configDataProvider)
         {
@@ -20,16 +21,24 @@ namespace server.service.users
             {
                 if (result.Result != null)
                 {
+                    loaded = true;
                     storeModel = result.Result;
                 }
             });
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) =>
             {
-                configDataProvider.Save(storeModel);
+                if (loaded)
+                {
+                    configDataProvider.Save(storeModel);
+                }
+
             };
             AppDomain.CurrentDomain.UnhandledException += (a, b) =>
             {
-                configDataProvider.Save(storeModel);
+                if (loaded)
+                {
+                    configDataProvider.Save(storeModel);
+                }
                 Logger.Instance.DebugError(b.ExceptionObject + "");
             };
         }
