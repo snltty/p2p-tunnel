@@ -9,6 +9,7 @@ export const provideServices = () => {
         if (websocketState.connected) {
             getServices().then((res) => {
                 state.services = res;
+                console.log(res);
             }).catch(() => {
                 setTimeout(fn, 1000);
             });
