@@ -45,9 +45,10 @@ namespace client.service.vea.client
         public void Set(ClientServiceParamsInfo arg)
         {
             config.SaveConfig(arg.Content).Wait();
-
             veaSocks5ServerHandler.UpdateConfig();
-
+        }
+        public void Run(ClientServiceParamsInfo arg)
+        {
             try
             {
                 VeaTransfer.Run();
@@ -57,6 +58,8 @@ namespace client.service.vea.client
                 arg.SetCode(ClientServiceResponseCodes.Error, ex.Message);
             }
         }
+
+
         /// <summary>
         /// 各个客户端
         /// </summary>

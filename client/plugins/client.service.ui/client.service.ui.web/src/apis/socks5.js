@@ -6,6 +6,9 @@ export const get = () => {
 export const set = (data) => {
     return sendWebsocketMsg(`socks5/set`, data);
 }
+export const run = (data) => {
+    return sendWebsocketMsg(`socks5/set`, data);
+}
 export const getPac = () => {
     return sendWebsocketMsg(`socks5/getpac`);
 }

@@ -22,7 +22,7 @@
 
 <script>
 import { computed, reactive } from '@vue/reactivity'
-import { getConfig, setConfig } from '../../../apis/vea'
+import { getConfig, setConfig, runVea } from '../../../apis/vea'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 import ConnectButton from '../../../components/ConnectButton.vue'
@@ -61,8 +61,12 @@ export default {
                 res.targetName = state.targetName;
                 res.Enable = state.enable;
                 setConfig(res).then(() => {
-                    state.loading = false;
                     loadConfig();
+                    runVea().then(() => {
+                        state.loading = false;
+                    }).catch(() => {
+                        state.loading = false;
+                    })
                 }).catch(() => {
                     state.loading = false;
                 });

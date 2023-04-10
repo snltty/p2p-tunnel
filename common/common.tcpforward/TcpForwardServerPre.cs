@@ -106,50 +106,56 @@ namespace common.tcpforward
 
         private void BindReceive(SocketAsyncEventArgs e)
         {
-            ForwardAsyncUserToken acceptToken = (e.UserToken as ForwardAsyncUserToken);
-
-            uint id = requestIdNs.Increment();
-            ForwardAsyncUserToken token = new ForwardAsyncUserToken
+            try
             {
-                SourceSocket = e.AcceptSocket,
-                Request = new TcpForwardInfo
+                ForwardAsyncUserToken acceptToken = (e.UserToken as ForwardAsyncUserToken);
+
+                uint id = requestIdNs.Increment();
+                ForwardAsyncUserToken token = new ForwardAsyncUserToken
                 {
-                    RequestId = id,
-                    AliveType = acceptToken.Request.AliveType,
-                    SourcePort = acceptToken.SourcePort,
-                    DataType = TcpForwardDataTypes.Connect,
-                    StateType = TcpForwardStateTypes.Success
-                },
-                SourcePort = acceptToken.SourcePort
-            };
-            clientsManager.TryAdd(token);
+                    SourceSocket = e.AcceptSocket,
+                    Request = new TcpForwardInfo
+                    {
+                        RequestId = id,
+                        AliveType = acceptToken.Request.AliveType,
+                        SourcePort = acceptToken.SourcePort,
+                        DataType = TcpForwardDataTypes.Connect,
+                        StateType = TcpForwardStateTypes.Success
+                    },
+                    SourcePort = acceptToken.SourcePort
+                };
+                clientsManager.TryAdd(token);
 
-            SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
-            {
-                UserToken = token,
-                SocketFlags = SocketFlags.None
-            };
-            token.Saea = readEventArgs;
-
-            token.SourceSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
-            token.SourceSocket.SendTimeout = 5000;
-            //token.SourceSocket.SendBufferSize = receiveBufferSize;
-            //token.SourceSocket.ReceiveBufferSize = receiveBufferSize;
-            token.PoolBuffer = new byte[receiveBufferSize];
-            readEventArgs.SetBuffer(token.PoolBuffer, 0, receiveBufferSize);
-            readEventArgs.Completed += IO_Completed;
-
-            if (token.Request.AliveType == TcpForwardAliveTypes.Tunnel)
-            {
-                token.FirstPacket = false;
-                Receive(token, Helper.EmptyArray).Wait();
-            }
-            else
-            {
-                if (token.SourceSocket.ReceiveAsync(readEventArgs) == false)
+                SocketAsyncEventArgs readEventArgs = new SocketAsyncEventArgs
                 {
-                    ProcessReceive(readEventArgs);
+                    UserToken = token,
+                    SocketFlags = SocketFlags.None
+                };
+                token.Saea = readEventArgs;
+
+                token.SourceSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
+                token.SourceSocket.SendTimeout = 5000;
+                //token.SourceSocket.SendBufferSize = receiveBufferSize;
+                //token.SourceSocket.ReceiveBufferSize = receiveBufferSize;
+                token.PoolBuffer = new byte[receiveBufferSize];
+                readEventArgs.SetBuffer(token.PoolBuffer, 0, receiveBufferSize);
+                readEventArgs.Completed += IO_Completed;
+
+                if (token.Request.AliveType == TcpForwardAliveTypes.Tunnel)
+                {
+                    token.FirstPacket = false;
+                    Receive(token, Helper.EmptyArray).Wait();
                 }
+                else
+                {
+                    if (token.SourceSocket.ReceiveAsync(readEventArgs) == false)
+                    {
+                        ProcessReceive(readEventArgs);
+                    }
+                }
+            }
+            catch (Exception)
+            {
             }
         }
         private async void ProcessReceive(SocketAsyncEventArgs e)

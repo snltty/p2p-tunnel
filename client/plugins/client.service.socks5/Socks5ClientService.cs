@@ -53,7 +53,9 @@ namespace client.service.socks5
         public void Set(ClientServiceParamsInfo arg)
         {
             config.SaveConfig(arg.Content).Wait();
-
+        }
+        public void Run(ClientServiceParamsInfo arg)
+        {
             socks5ClientListener.Stop();
             if (config.ListenEnable)
             {
@@ -69,7 +71,8 @@ namespace client.service.socks5
             socks5Transfer.UpdatePac();
         }
 
-       
+
+
         /// <summary>
         /// 更新pac内容
         /// </summary>

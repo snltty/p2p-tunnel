@@ -6,6 +6,9 @@ export const getConfig = () => {
 export const setConfig = (data) => {
     return sendWebsocketMsg(`vea/set`, data);
 }
+export const runVea = (data) => {
+    return sendWebsocketMsg(`vea/run`, data);
+}
 export const getList = () => {
     return sendWebsocketMsg(`vea/list`);
 }

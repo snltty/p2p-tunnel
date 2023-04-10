@@ -30,7 +30,7 @@
 
 <script>
 import { computed, reactive } from '@vue/reactivity'
-import { get, set } from '../../../apis/socks5'
+import { get, set, run } from '../../../apis/socks5'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 import ConnectButton from '../../../components/ConnectButton.vue'
@@ -70,8 +70,12 @@ export default {
                 res.TargetName = state.targetName;
                 res.ListenEnable = state.listenEnable;
                 set(res).then(() => {
-                    state.loading = false;
                     loadConfig();
+                    run().then(() => {
+                        state.loading = false;
+                    }).catch(() => {
+                        state.loading = false;
+                    });
                 }).catch(() => {
                     state.loading = false;
                 });
