@@ -30,25 +30,17 @@
 
 这是一个内网穿透项目，包括p2p打洞穿透，服务器代理穿透，还包含了一些有趣的功能
 
-除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是撸出来的，所以代码量，内存占用率，都比较小，速度也比较快。通信速度能达到 800MB/s+
-
-## 几种通信线路
-1. (访问端) <----> **客户端A** <----> **客户端B** <----> [内网服务]
-2. (访问端) <----> [服务器] <----> **客户端B** <--> [内网服务]
-3. (访问端) <----> **客户端A** <----> [服务器] <----> **客户端B** <----> [内网服务]
-4. (访问端) <----> **客户端A** <----> **客户端XX** <----> **客户端B** <----> [内网服务]
-5. (访问端) <----> **客户端A** <----> [服务器] <----> [外网服务]
-
+除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是手写，所以代码量，内存占用率，都比较小，速度也比较快。
 
 ## 其它描述
-1. [x] **【p2p打洞】** 打洞支持tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
-2. [x] **【.NET7】** 跨平台，小尺寸，小内存
+1. [x] **【.NET7】** 跨平台，小尺寸，小内存
 <p><img src="./readme/size.jpg" height="150"></p>
 
+2. [x] **【TCP、UDP打洞】** 打洞支持tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
 3. [x] **【UI界面】** 简单易用的web管理页面
 4. [x] **【加密】** 支持通信数据加密(预配置密钥或自动交换密钥)
 5. [x] **【插件式】** 可扩展的插件式
-6. [x] **【高效】** 高效的打包解包，作死的全手写序列化，通信速度
+6. [x] **【高效】** 高效的打包解包，作死的全手写序列化，通信速度极佳
 <p><img src="./readme/speed.jpg" height="150"></p>
 
 7. [x] **【节点中继】** 如果你有某个节点比较牛逼，可以允许某个节点作为中继节点，节省服务器带宽，节点中继可以任意节点数，中继过程不参与打包解包，仅网络消耗
@@ -66,10 +58,8 @@
 
 ## 部署和运行
 #### windows 可使用托盘程序
-```
-client.service.tray.exe    //客户端
-erver.service.tray.exe    //服务端
-```
+- client.service.tray.exe    //客户端
+- server.service.tray.exe    //服务端
 
 #### linux 按你喜欢的方式进行托管
 - <a href="./readme/server-linux.md">服务端 linux docker托管</a>
@@ -82,3 +72,51 @@ erver.service.tray.exe    //服务端
 请作者喝一杯咖啡，使其更有精力更新代码
 
 <p><img src="./readme/qr.jpg" height="150"></p> 
+
+
+### 穿透方式
+#### 1、打洞
+```mermaid
+    flowchart LR
+   D((访问端)) <--> id3([A客户端])<--> A[A NAT]<-->B[B NAT]<-->id4([B客户端])<-->E[(内网服务)]
+```
+#### 2、服务器中继
+```mermaid
+    flowchart LR
+    D((访问端))<-->id3([A客户端])<--> A[A NAT]<--> id5[(服务器)]<-->B[B NAT]<-->id4([B客户端])<-->E[(内网服务)]
+```
+
+#### 3、节点中继
+```mermaid
+    flowchart LR
+    D((访问端))<-->id3([A客户端])<--> A[A NAT]<--> id5[(某个节点,任意数量)]<-->B[B NAT]<-->id4([B客户端])<-->E[(内网服务)]
+```
+A客户端<-->C客户端<-->D客户端<-->E客户端<-->B客户端
+
+#### 4、服务器代理
+```mermaid
+    flowchart LR
+    D((访问端))<-->id5[(服务器)]<-->A[A NAT]<-->id4([A客户端])<-->E[(内网服务)]
+```
+www.mydomain.com:11111<-->服务器<-->A客户端<-->8080
+
+## 通信方法
+### 组网
+```mermaid
+    flowchart LR
+   D((访问端\n192.168.54.2:8080)) <--> id3([A客户端\n192.168.54.1])<--> A[A NAT]<-->|打洞/服务器中继/节点中继| B[B NAT]<-->id4([B客户端\n192.168.54.2])<-->E[(内网服务\n8080端口)]
+```
+
+### 转发
+```mermaid
+    flowchart LR
+   D((访问端)) <--> id3([A客户端])<--> A[A NAT]<-->|打洞/服务器中继/节点中继| B[B NAT]<-->id4([B客户端])<-->E[(内网服务)]
+```
+27.0.0.1:11111<-->A客户端<--**打洞/服务器中继/节点中继**-->B客户端<-->8080
+
+### 代理穿越（节点或服务器）
+```mermaid
+    flowchart LR
+   D((访问端)) <-->id4([A客户端])<--> F[(服务器/某节点)] <-->E[(外网服务)]
+```
+www.youtube.com<-->A客户端<-->服务器<-->www.youtube.com
