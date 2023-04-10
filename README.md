@@ -74,7 +74,7 @@
 <p><img src="./readme/qr.jpg" height="150"></p> 
 
 
-### 穿透方式
+## 穿透方式
 #### 1、打洞
 ```mermaid
     flowchart LR
