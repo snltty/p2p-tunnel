@@ -32,7 +32,7 @@
 
 除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是手写，所以代码量，内存占用率，都比较小，速度也比较快。
 
-## 其它描述
+## 一些说明
 1. [x] **【.NET7】** 跨平台，小尺寸，小内存
 <p><img src="./readme/size.jpg" height="150"></p>
 
@@ -114,9 +114,9 @@ www.mydomain.com:11111<-->服务器<-->A客户端<-->8080
 ```
 27.0.0.1:11111<-->A客户端<--**打洞/服务器中继/节点中继**-->B客户端<-->8080
 
-### 代理穿越（节点或服务器）
+### 代理
 ```mermaid
     flowchart LR
    D((访问端)) <-->id4([A客户端])<--> F[(服务器/某节点)] <-->E[(外网服务)]
 ```
-www.youtube.com<-->A客户端<-->服务器<-->www.youtube.com
+www.youtube.com<-->A客户端<-->服务器/某节点<-->www.youtube.com
