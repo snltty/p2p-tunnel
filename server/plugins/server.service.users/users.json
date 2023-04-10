@@ -5,12 +5,12 @@
       "Account": "admin",
       "Password": "admin",
       /*
-        1 注册
-        2 中继
-        4 tcp转发
-        8 udp转发
-        16 socks5
-        32 修改服务端配置
+        1 中继
+        2 修改服务端配置
+        4 登入
+        8 socks5
+        16 tcp转发
+        32 udp转发
         需要什么权限就加起来
       */
       "Access": 4294967295,
