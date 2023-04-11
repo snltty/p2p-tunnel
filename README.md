@@ -66,7 +66,9 @@
 - [x] **【socks5代理】** 以节点或者服务端作为代理目标
     - (访问端,访问www.domain.com) <----> A客户端 <--打洞/服务器中继/节点中继--> B客户端 <----> 外网服务(www.domain.com)
     - (访问端,访问www.domain.com) <----> A客户端 <----> 服务器 <----> 外网服务(www.domain.com)
-- [x] **【虚拟网卡组网】** <a href="https://github.com/xjasonlyu/tun2socks" target="_blank">tun2socks</a>虚拟网卡组网，让你的多个不同内网客户端组成一个网络，通过其ip访问，更有局域网网段绑定，访问目标局域网任意设备(**暂时仅支持windows、linux、osx**)，如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
+- [x] **【虚拟网卡组网】** 
+    - (访问端,访问192.168.54.2:8088) <----> A客户端(192.168.54.1) <--打洞/服务器中继/节点中继--> B客户端(192.168.54.2)<----> 内网服务(8088端口)
+    - <a href="https://github.com/xjasonlyu/tun2socks" target="_blank">tun2socks</a>虚拟网卡组网，让你的多个不同内网客户端组成一个网络，通过其ip访问，更有局域网网段绑定，访问目标局域网任意设备(**暂时仅支持windows、linux、osx**)，如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
 
 ## 部署和运行
 #### windows 可使用托盘程序
