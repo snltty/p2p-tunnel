@@ -15,7 +15,6 @@ namespace common.server
         public NumberSpaceUInt32 requestIdNumberSpace = new NumberSpaceUInt32(0);
         private WheelTimer<TimeoutState> wheelTimer = new WheelTimer<TimeoutState>();
         private ConcurrentDictionary<uint, WheelTimerTimeout<TimeoutState>> sends = new ConcurrentDictionary<uint, WheelTimerTimeout<TimeoutState>>();
-        public Action HandleUnConnect = () => { };
 
         public MessengerSender()
         {

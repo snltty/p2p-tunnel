@@ -146,15 +146,6 @@ namespace common.server
         public void Release();
 
         /// <summary>
-        /// 发送了多少数据
-        /// </summary>
-        public Action<long> DataSendt { get; set; }
-        /// <summary>
-        /// 流量限制回调，false被限制，true通行
-        /// </summary>
-        public Func<bool> NetFlow { get; set; }
-
-        /// <summary>
         /// 引用相等
         /// </summary>
         /// <param name="connection1"></param>
@@ -439,10 +430,6 @@ namespace common.server
                 Logger.Instance.Error(ex);
             }
         }
-
-
-        public Action<long> DataSendt { get; set; } = (length) => { };
-        public Func<bool> NetFlow { get; set; } = () => true;
     }
 
     public sealed class RudpConnection : Connection
@@ -495,7 +482,7 @@ namespace common.server
         /// <returns></returns>
         public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
         {
-            if (Connected && NetFlow() == true)
+            if (Connected)
             {
                 try
                 {
@@ -523,7 +510,6 @@ namespace common.server
 
                     NetPeer.Send(data, 0, data.Length, DeliveryMethod.ReliableOrdered);
                     NetPeer.Update();
-                    DataSendt(data.Length);
 
                     return true;
                 }
@@ -608,12 +594,11 @@ namespace common.server
         /// <returns></returns>
         public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
         {
-            if (Connected && NetFlow() == true)
+            if (Connected)
             {
                 try
                 {
                     await TcpSocket.SendAsync(data, SocketFlags.None);
-                    DataSendt(data.Length);
                     return true;
                 }
                 catch (Exception ex)
