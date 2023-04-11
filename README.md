@@ -33,22 +33,27 @@
 除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是手写，所以代码量，内存占用率，都比较小，速度也比较快。
 
 ## 一些说明
-1. [x] **【.NET7】** 跨平台，小尺寸，小内存
+1. [x] **【内网穿透】**
+    - [x] TCP、UDP打洞，tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
+        - A客户端<-->B客户端
+    - [x] 服务器中继
+        - A客户端<-->服务器<-->B客户端
+    - [x] 节点中继
+        - A客户端<-->某客户端(中间任意数量)<-->B客户端
+2. [x] **【.NET7】** 跨平台，小尺寸，小内存
 <p><img src="./readme/size.jpg"></p>
 
-2. [x] **【TCP、UDP打洞】** 打洞支持tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
 3. [x] **【UI界面】** 简单易用的web管理页面
 <p><img src="./readme/ui.jpg" ></p>
 
-4. [x] **【加密】** 支持通信数据加密(预配置密钥或自动交换密钥)
-5. [x] **【插件式】** 可扩展的插件式
-6. [x] **【高效】** 高效的打包解包，作死的全手写序列化，通信速度极佳，iperf3 原端口5201，和经过tcp转发的 11111 端口的测试结果
+4. [x] **【高效】** 高效的打包解包，作死的全手写序列化，通信速度极佳，iperf3 原端口5201，和经过tcp转发的 11111 端口的测试结果
 <p><img src="./readme/speed.jpg" ></p>
 
-7. [x] **【节点中继】** 如果你有某个节点比较牛逼，可以允许某个节点作为中继节点，节省服务器带宽，节点中继可以任意节点数，中继过程不参与打包解包，仅网络消耗
-8. [x] **【自建服务器】** 自建服务器则可开启 服务器代理穿透，服务器中继
-9. [x] 免费的打洞服务器
-10. [ ] android app
+5. [x] **【加密】** 支持通信数据加密(预配置密钥或自动交换密钥)
+6. [x] **【插件式】** 可扩展的插件式
+7. [x] **【自建服务器】** 自建服务器则可开启 服务器代理穿透，服务器中继
+8. [x] 免费的打洞服务器
+9. [ ] android app
 
 ## 一些写好的插件
 - [x] **【账号管理】** 简单的权限配置
