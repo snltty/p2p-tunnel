@@ -12,10 +12,6 @@ namespace client.service.tcpforward
     public sealed class TcpForwardClientService : IClientService
     {
         private readonly TcpForwardTransfer tcpForwardTransfer;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tcpForwardTransfer"></param>
         public TcpForwardClientService(TcpForwardTransfer tcpForwardTransfer)
         {
             this.tcpForwardTransfer = tcpForwardTransfer;

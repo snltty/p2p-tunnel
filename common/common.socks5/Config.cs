@@ -12,18 +12,13 @@ namespace common.socks5
     [Table("socks5-appsettings")]
     public sealed class Config
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="configDataProvider"></param>
-        public Config(IConfigDataProvider<Config> configDataProvider)
+        private readonly ISocks5ClientListener socks5ClientListener;
+        public Config(IConfigDataProvider<Config> configDataProvider, ISocks5ClientListener socks5ClientListener)
         {
             this.configDataProvider = configDataProvider;
+            this.socks5ClientListener = socks5ClientListener;
 
             Config config = ReadConfig().Result;
             ListenEnable = config.ListenEnable;
@@ -34,63 +29,29 @@ namespace common.socks5
             IsPac = config.IsPac;
             TargetName = config.TargetName;
             NumConnections = config.NumConnections;
+           
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public bool ListenEnable { get; set; } = false;
-        /// <summary>
-        /// 
-        /// </summary>
         public int ListenPort { get; set; } = 5412;
-        /// <summary>
-        /// 
-        /// </summary>
         public int BufferSize { get; set; } = 8 * 1024;
-        /// <summary>
-        /// 
-        /// </summary>
         public bool ConnectEnable { get; set; } = false;
-        /// <summary>
-        /// 
-        /// </summary>
         public bool IsCustomPac { get; set; } = false;
-        /// <summary>
-        /// 
-        /// </summary>
         public bool IsPac { get; set; } = false;
-        /// <summary>
-        /// 
-        /// </summary>
         public string TargetName { get; set; } = string.Empty;
-        /// <summary>
-        /// 
-        /// </summary>
         public int NumConnections { get; set; } = 1000;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public async Task<Config> ReadConfig()
         {
             var config =  await configDataProvider.Load();
             return config;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+
         public async Task<string> ReadString()
         {
             return await configDataProvider.LoadString();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="jsonStr"></param>
-        /// <returns></returns>
+
         public async Task SaveConfig(string jsonStr)
         {
             Config config = jsonStr.DeJson<Config>();
@@ -102,6 +63,8 @@ namespace common.socks5
             IsPac = config.IsPac;
             TargetName = config.TargetName;
             NumConnections = config.NumConnections;
+
+            socks5ClientListener.SetBufferSize(BufferSize);
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }

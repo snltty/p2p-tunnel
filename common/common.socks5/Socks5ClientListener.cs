@@ -4,51 +4,21 @@ using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace common.socks5
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public interface ISocks5ClientListener
     {
-        /// <summary>
-        /// 
-        /// </summary>
         ushort Port { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         Func<Socks5Info, Task<bool>> OnData { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         Action<Socks5Info> OnClose { get; set; }
 
         void SetBufferSize(int bufferSize);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="port"></param>
-        /// <param name="bufferSize"></param>
         void Start(int port, int bufferSize);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="info"></param>
         Task Response(Socks5Info info);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
         void Close(ulong id);
-        /// <summary>
-        /// 
-        /// </summary>
         void Stop();
     }
 

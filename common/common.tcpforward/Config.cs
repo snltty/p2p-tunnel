@@ -12,18 +12,14 @@ namespace common.tcpforward
     [Table("tcpforward-appsettings")]
     public sealed class Config
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="configDataProvider"></param>
-        public Config(IConfigDataProvider<Config> configDataProvider)
+        private readonly ITcpForwardServer tcpForwardServer;
+
+        public Config(IConfigDataProvider<Config> configDataProvider, ITcpForwardServer tcpForwardServer)
         {
             this.configDataProvider = configDataProvider;
+            this.tcpForwardServer = tcpForwardServer;
 
             Config config = ReadConfig().Result;
             ConnectEnable = config.ConnectEnable;
@@ -33,7 +29,7 @@ namespace common.tcpforward
             TunnelListenRange = config.TunnelListenRange;
             PortWhiteList = config.PortWhiteList;
             PortBlackList = config.PortBlackList;
-
+            
         }
 
         /// <summary>
@@ -96,6 +92,8 @@ namespace common.tcpforward
             TunnelListenRange = _config.TunnelListenRange;
             PortWhiteList = _config.PortWhiteList;
             PortBlackList = _config.PortBlackList;
+
+            tcpForwardServer.Init(0, BufferSize);
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
