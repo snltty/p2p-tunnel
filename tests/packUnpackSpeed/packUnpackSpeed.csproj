@@ -9,12 +9,13 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+    <PackageReference Include="MessagePack" Version="2.5.108" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\common\common.libs\common.libs.csproj" />
     <ProjectReference Include="..\..\common\common.server\common.server.csproj" />
-    <ProjectReference Include="..\..\server\plugins\server.service.socks5\server.service.socks5.csproj" />
+    <ProjectReference Include="..\..\common\common.tcpforward\common.tcpforward.csproj" />
   </ItemGroup>
 
 </Project>
