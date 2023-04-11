@@ -14,13 +14,6 @@ namespace client.service.socks5
         private readonly ISocks5ClientListener socks5ClientListener;
         private readonly Socks5Transfer socks5Transfer;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="socks5ClientListener"></param>
-        /// <param name="socks5Transfer"></param>
-        /// <param name="socks5ClientHandler"></param>
         public Socks5ClientService(common.socks5.Config config, ISocks5ClientListener socks5ClientListener, Socks5Transfer socks5Transfer)
         {
             this.config = config;
