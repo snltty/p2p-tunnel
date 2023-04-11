@@ -38,6 +38,8 @@
 
 2. [x] **【TCP、UDP打洞】** 打洞支持tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
 3. [x] **【UI界面】** 简单易用的web管理页面
+<p><img src="./readme/ui.jpg" ></p>
+
 4. [x] **【加密】** 支持通信数据加密(预配置密钥或自动交换密钥)
 5. [x] **【插件式】** 可扩展的插件式
 6. [x] **【高效】** 高效的打包解包，作死的全手写序列化，通信速度极佳，iperf3 原端口5201，和经过tcp转发的 11111 端口的测试结果
@@ -74,49 +76,4 @@
 
 ## 支持作者
 请作者喝一杯咖啡，使其更有精力更新代码
-
 <p><img src="./readme/qr.jpg"></p> 
-
-
-## 穿透方式
-#### 1、打洞
-```mermaid
-    flowchart LR
-   D((访问端)) <--> id3([A客户端])<--> A[A NAT]<-->B[B NAT]<-->id4([B客户端])<-->E[(内网服务)]
-```
-#### 2、服务器中继
-```mermaid
-    flowchart LR
-    D((访问端))<-->id3([A客户端])<--> A[A NAT]<--> id5[(服务器)]<-->B[B NAT]<-->id4([B客户端])<-->E[(内网服务)]
-```
-
-#### 3、节点中继
-```mermaid
-    flowchart LR
-    D((访问端))<-->id3([A客户端])<--> A[A NAT]<--> id5[(某个节点,任意数量)]<-->B[B NAT]<-->id4([B客户端])<-->E[(内网服务)]
-```
-
-#### 4、服务器代理
-```mermaid
-    flowchart LR
-    D((访问端\nwww.domain.com\n解析到服务器的域名))<-->id5[(服务器)]<-->A[A NAT]<-->id4([A客户端])<-->E[(内网服务\n8080端口)]
-```
-
-## 通信方法
-### 组网
-```mermaid
-    flowchart LR
-   D((访问端\n192.168.54.2:8080)) <--> id3([A客户端\n192.168.54.1])<--> A[A NAT]<-->|打洞/服务器中继/节点中继| B[B NAT]<-->id4([B客户端\n192.168.54.2])<-->E[(内网服务\n8080端口)]
-```
-
-### 转发
-```mermaid
-    flowchart LR
-   D((访问端\n27.0.0.1:11111)) <--> id3([A客户端])<--> A[A NAT]<-->|打洞/服务器中继/节点中继| B[B NAT]<-->id4([B客户端])<-->E[(内网服务\n8080端口)]
-```
-
-### 代理
-```mermaid
-    flowchart LR
-   D((访问端\nwww.xx.com\n某科学网站)) <-->id4([A客户端])<--> F[(服务器/某节点)] <-->E[(某科学网站\nwww.xx.com)]
-```
