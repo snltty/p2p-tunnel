@@ -34,11 +34,11 @@
 
 ## 一些说明
 1. [x] **【内网穿透】**
-    - [x] TCP、UDP打洞，tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
+    - TCP、UDP打洞，tcp、udp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
         - A客户端<-->B客户端
-    - [x] 服务器中继
+    - 服务器中继
         - A客户端<-->服务器<-->B客户端
-    - [x] 节点中继
+    - 节点中继
         - A客户端<-->某客户端(中间任意数量)<-->B客户端
 2. [x] **【.NET7】** 跨平台，小尺寸，小内存
 <p><img src="./readme/size.jpg"></p>
