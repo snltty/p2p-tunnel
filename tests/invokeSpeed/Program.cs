@@ -14,10 +14,17 @@ namespace invokeSpeed
     }
 
 
+    /// <summary>
+    /// 接口
+    /// </summary>
     public interface IMyInterface
     {
         public int Method();
     }
+
+    /// <summary>
+    /// 类
+    /// </summary>
     public class MyClass : IMyInterface
     {
         public int Method()
@@ -26,6 +33,10 @@ namespace invokeSpeed
         }
     }
 
+    /// <summary>
+    /// 委托
+    /// </summary>
+    /// <returns></returns>
     public delegate int MyDelegate();
 
 
