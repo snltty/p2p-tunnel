@@ -68,6 +68,8 @@ namespace common.socks5
             StartAccept(acceptEventArg);
 
             udpClient = new UdpClient(localEndPoint);
+            udpClient.EnableBroadcast = true;
+            //udpClient.JoinMulticastGroup(IPAddress.Parse("225.0.0.1"));
             udpClient.Client.WindowsUdpBug();
 
             IAsyncResult result = udpClient.BeginReceive(ProcessReceiveUdp, null);
@@ -148,7 +150,6 @@ namespace common.socks5
                 {
                     int totalLength = e.BytesTransferred;
                     token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
-
                     //有些客户端，会把一个包拆开发送，很奇怪，不得不验证一下数据完整性
                     if (token.DataWrap.Socks5Step < Socks5EnumStep.Forward)
                     {
@@ -262,10 +263,7 @@ namespace common.socks5
                 CloseClientSocket(e);
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="info"></param>
+
         public async Task Response(Socks5Info info)
         {
             if (connections.TryGetValue(info.Id, out AsyncUserToken token))

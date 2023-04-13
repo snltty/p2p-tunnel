@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="添加服务器节点" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
+    <el-dialog title="添加服务器节点" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px" @click.stop>
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="75px" @click.stop>
             <el-form-item label="地址" prop="Ip">
                 <el-input v-model="state.form.Ip"></el-input>

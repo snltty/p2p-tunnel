@@ -93,7 +93,7 @@ namespace common.tcpforward
             PortWhiteList = _config.PortWhiteList;
             PortBlackList = _config.PortBlackList;
 
-            tcpForwardServer.Init(0, BufferSize);
+            tcpForwardServer?.Init(0, BufferSize);
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }

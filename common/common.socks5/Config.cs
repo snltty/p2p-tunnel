@@ -64,7 +64,7 @@ namespace common.socks5
             TargetName = config.TargetName;
             NumConnections = config.NumConnections;
 
-            socks5ClientListener.SetBufferSize(BufferSize);
+            socks5ClientListener?.SetBufferSize(BufferSize);
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }

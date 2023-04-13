@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace client.service.vea
 {
@@ -29,13 +30,7 @@ namespace client.service.vea
 
         private readonly ConcurrentDictionary<IPAddress, IPAddressCacheInfo> ips = new ConcurrentDictionary<IPAddress, IPAddressCacheInfo>();
         private readonly ConcurrentDictionary<int, IPAddressCacheInfo> lanips = new ConcurrentDictionary<int, IPAddressCacheInfo>();
-        /// <summary>
-        /// 
-        /// </summary>
         public ConcurrentDictionary<IPAddress, IPAddressCacheInfo> IPList => ips;
-        /// <summary>
-        /// 
-        /// </summary>
         public ConcurrentDictionary<int, IPAddressCacheInfo> LanIPList => lanips;
 
         private readonly Config config;
@@ -44,14 +39,6 @@ namespace client.service.vea
         private readonly VeaMessengerSender veaMessengerSender;
         private readonly SignInStateInfo signInStateInfo;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="clientInfoCaching"></param>
-        /// <param name="veaMessengerSender"></param>
-        /// <param name="socks5ClientListener"></param>
-        /// <param name="signInStateInfo"></param>
         public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener, SignInStateInfo signInStateInfo)
         {
             this.config = config;
@@ -255,6 +242,7 @@ namespace client.service.vea
                             if (GetWindowsHasIp(config.IP))
                             {
                                 AddRoute();
+                                //Command.Windows(string.Empty, new string[] { $"route add 225.0.0.1 mask 255.255.255.255 {config.IP} metric 5 if {interfaceNumber}" });
                                 if (config.ProxyAll) //代理所有
                                 {
                                     //AddRoute(IPAddress.Any);

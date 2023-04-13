@@ -47,4 +47,28 @@ namespace server.service.validators
 
         }
     }
+
+
+    public sealed class SettingValidator : ISignInValidator
+    {
+        public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
+        public uint Access => (uint)EnumServiceAccess.Setting;
+
+        public string Name => "服务器配置";
+
+        public SettingValidator()
+        {
+
+        }
+
+        public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
+        {
+            return SignInResultInfo.SignInResultInfoCodes.OK;
+        }
+
+        public void Validated(SignInCacheInfo cache)
+        {
+
+        }
+    }
 }
