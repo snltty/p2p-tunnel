@@ -13,7 +13,7 @@
 
 # p2p-tunnel
 #### Visual Studio 2022 LTSC 17.4.1
-<a href="https://jq.qq.com/?_wv=1027&k=ucoIVfz4" target="_blank">QQ 群：1121552990</a> | <a href="https://www.bilibili.com/video/BV14M4y117MB">介绍视频</a>
+<a href="https://jq.qq.com/?_wv=1027&k=ucoIVfz4" target="_blank">QQ 群：1121552990</a> | <a href="https://www.bilibili.com/list/30392111?sid=3201898&oid=909766278">介绍视频</a>
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/snltty/p2p-tunnel?style=social)
 ![GitHub Repo forks](https://img.shields.io/github/forks/snltty/p2p-tunnel?style=social)

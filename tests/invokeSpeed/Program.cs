@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using System;
 using System.Reflection;
 
 namespace invokeSpeed
@@ -8,6 +9,22 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
+            /*
+            MyClass myClass = new MyClass();
+            IMyInterface myInterface = myClass;
+            MethodInfo method = myClass.GetType().GetMethod("Method")!;
+            MyDelegate myDelegat = (MyDelegate)Delegate.CreateDelegate(typeof(MyDelegate), myClass, method);
+
+            //直接调用
+            myClass.Method();
+            //接口调用
+            myInterface.Method();
+            //反射调用
+            method.Invoke(myClass, Array.Empty<object>());
+            //委托优化反射调用
+            myDelegat.Invoke();
+            */
+
             var summary = BenchmarkRunner.Run<InvokeTest>();
             Console.ReadLine();
         }
