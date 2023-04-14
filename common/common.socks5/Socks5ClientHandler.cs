@@ -9,7 +9,7 @@ namespace common.socks5
     /// <summary>
     /// socks5客户端
     /// </summary>
-    public  class Socks5ClientHandler : ISocks5ClientHandler
+    public class Socks5ClientHandler : ISocks5ClientHandler
     {
         private readonly ISocks5MessengerSender socks5MessengerSender;
         private readonly ISocks5ClientListener socks5ClientListener;
@@ -71,7 +71,6 @@ namespace common.socks5
         /// <returns></returns>
         protected async Task<bool> OnData(Socks5Info info)
         {
-            //Console.WriteLine($"OnData: {string.Join(",", info.Data.ToArray())}");
             if (handles.TryGetValue(info.Socks5Step, out Func<Socks5Info, Task<bool>> func))
             {
                 if (info.Socks5Step == Socks5EnumStep.Auth)
@@ -265,7 +264,6 @@ namespace common.socks5
         /// <returns></returns>
         protected virtual async Task<bool> HndleForwardUdp(Socks5Info data)
         {
-           // Console.WriteLine($"HndleForwardUdp: {string.Join(",", data.Data.ToArray())}");
             return await socks5MessengerSender.Request(data);
         }
 

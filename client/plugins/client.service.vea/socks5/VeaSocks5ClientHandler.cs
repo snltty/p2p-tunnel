@@ -2,6 +2,7 @@
 using common.libs.extends;
 using common.server;
 using common.socks5;
+using System;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -50,9 +51,12 @@ namespace client.service.vea.socks5
         /// <returns></returns>
         protected override async Task<bool> HandleCommand(Socks5Info data)
         {
-            var targetEp = Socks5Parser.GetRemoteAddress(data.Data);
-            data.Tag = GetConnection(targetEp);
-            return await base.HndleForwardUdp(data);
+            if (Socks5Parser.GetIsAnyAddress(data.Data) == false)
+            {
+                var targetEp = Socks5Parser.GetRemoteAddress(data.Data);
+                data.Tag = GetConnection(targetEp);
+            }
+            return await base.HandleCommand(data);
         }
 
         /// <summary>
@@ -62,8 +66,11 @@ namespace client.service.vea.socks5
         /// <returns></returns>
         protected override async Task<bool> HndleForwardUdp(Socks5Info data)
         {
-            IPAddress address = Socks5Parser.GetRemoteAddress(data.Data);
-            data.Tag = GetConnection(address);
+            if (Socks5Parser.GetIsAnyAddress(data.Data) == false)
+            {
+                IPAddress address = Socks5Parser.GetRemoteAddress(data.Data);
+                data.Tag = GetConnection(address);
+            }
             return await base.HndleForwardUdp(data);
         }
 
