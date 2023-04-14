@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace common.libs.extends
 {
@@ -161,26 +163,26 @@ namespace common.libs.extends
         #region double
         public static double ToDouble(this byte[] bytes, int startindex = 0)
         {
-            return BitConverter.ToDouble(bytes, startindex);
+            return Unsafe.As<byte, double>(ref bytes[startindex]);
         }
         public static double ToDouble(this Span<byte> span)
         {
-            return BitConverter.ToDouble(span);
+            return Unsafe.As<byte, double>(ref MemoryMarshal.GetReference(span));
         }
         public static double ToDouble(this ReadOnlySpan<byte> span)
         {
-            return BitConverter.ToDouble(span);
+            return Unsafe.As<byte, double>(ref MemoryMarshal.GetReference(span));
         }
         #endregion
 
         #region 64
         public static long ToInt64(this ReadOnlySpan<byte> span)
         {
-            return BitConverter.ToInt64(span);
+            return Unsafe.As<byte, long>(ref MemoryMarshal.GetReference(span));
         }
         public static long ToInt64(this Span<byte> span)
         {
-            return BitConverter.ToInt64(span);
+            return Unsafe.As<byte, long>(ref MemoryMarshal.GetReference(span));
         }
         public static long ToInt64(this ReadOnlyMemory<byte> memory)
         {
@@ -192,11 +194,11 @@ namespace common.libs.extends
         }
         public static ulong ToUInt64(this ReadOnlySpan<byte> span)
         {
-            return BitConverter.ToUInt64(span);
+            return Unsafe.As<byte, ulong>(ref MemoryMarshal.GetReference(span));
         }
         public static ulong ToUInt64(this Span<byte> span)
         {
-            return BitConverter.ToUInt64(span);
+            return Unsafe.As<byte, ulong>(ref MemoryMarshal.GetReference(span));
         }
         public static ulong ToUInt64(this ReadOnlyMemory<byte> memory)
         {
@@ -211,15 +213,15 @@ namespace common.libs.extends
         #region 32
         public static int ToInt32(this byte[] bytes, int startindex = 0)
         {
-            return BitConverter.ToInt32(bytes, startindex);
+            return Unsafe.As<byte, ushort>(ref bytes[startindex]);
         }
         public static int ToInt32(this ReadOnlySpan<byte> span)
         {
-            return BitConverter.ToInt32(span);
+            return Unsafe.As<byte, int>(ref MemoryMarshal.GetReference(span));
         }
         public static int ToInt32(this Span<byte> span)
         {
-            return BitConverter.ToInt32(span);
+            return Unsafe.As<byte, int>(ref MemoryMarshal.GetReference(span));
         }
         public static int ToInt32(this ReadOnlyMemory<byte> memory)
         {
@@ -231,11 +233,11 @@ namespace common.libs.extends
         }
         public static uint ToUInt32(this ReadOnlySpan<byte> span)
         {
-            return BitConverter.ToUInt32(span);
+            return Unsafe.As<byte, uint>(ref MemoryMarshal.GetReference(span));
         }
         public static uint ToUInt32(this Span<byte> span)
         {
-            return BitConverter.ToUInt32(span);
+            return Unsafe.As<byte, uint>(ref MemoryMarshal.GetReference(span));
         }
         public static uint ToUInt32(this ReadOnlyMemory<byte> memory)
         {
@@ -250,7 +252,7 @@ namespace common.libs.extends
         #region 16
         public static short ToInt16(this ReadOnlySpan<byte> span)
         {
-            return BitConverter.ToInt16(span);
+            return Unsafe.As<byte, short>(ref MemoryMarshal.GetReference(span));
         }
         public static short ToInt16(this ReadOnlyMemory<byte> memory)
         {
@@ -274,13 +276,13 @@ namespace common.libs.extends
 
         public static ushort ToUInt16(this ReadOnlySpan<byte> span)
         {
-            return BitConverter.ToUInt16(span);
+            return Unsafe.As<byte, ushort>(ref MemoryMarshal.GetReference(span));
         }
         public static ushort ToUInt16(this Span<byte> span)
         {
-            return BitConverter.ToUInt16(span);
+            return Unsafe.As<byte, ushort>(ref MemoryMarshal.GetReference(span));
         }
-        /// <summar
+
         public static ushort ToUInt16(this ReadOnlyMemory<byte> memory)
         {
             return memory.Span.ToUInt16();
