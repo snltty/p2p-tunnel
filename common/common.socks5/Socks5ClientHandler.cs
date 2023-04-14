@@ -235,6 +235,13 @@ namespace common.socks5
         /// <returns></returns>
         protected virtual async Task<bool> HandleCommand(Socks5Info data)
         {
+            /*
+            data.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
+            data.Data = data.Response;
+            CommandResponseData(data);
+            await socks5ClientListener.Response(data);
+            return true;
+            */
             //0.0.0.0  或者:0 都直接通过，这是udp中继的时候可能出现的情况
             if (Socks5Parser.GetIsAnyAddress(data.Data))
             {
@@ -264,6 +271,7 @@ namespace common.socks5
         /// <returns></returns>
         protected virtual async Task<bool> HndleForwardUdp(Socks5Info data)
         {
+            //return true;
             return await socks5MessengerSender.Request(data);
         }
 
