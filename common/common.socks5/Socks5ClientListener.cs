@@ -69,7 +69,6 @@ namespace common.socks5
 
             udpClient = new UdpClient(localEndPoint);
             udpClient.EnableBroadcast = true;
-            //udpClient.JoinMulticastGroup(IPAddress.Parse("225.0.0.1"));
             udpClient.Client.WindowsUdpBug();
 
             IAsyncResult result = udpClient.BeginReceive(ProcessReceiveUdp, null);

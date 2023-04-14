@@ -34,6 +34,9 @@
 3. 基于这些有的没的，就决定了自己实现，做一个自己喜欢的内网穿透工具，也是为了学习网络协议相关知识
 4. 除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是手写，所以代码量，内存占用率，都比较小，速度也比较快。
 
+## 大致原理
+<p><img src="./readme/path.jpg"></p>
+
 
 ## 一些说明
 1. [x] **【内网穿透】**

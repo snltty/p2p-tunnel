@@ -226,6 +226,7 @@ namespace client.service.vea
 
         private void RunWindows()
         {
+            //return;
             for (int i = 0; i < 10; i++)
             {
                 Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");

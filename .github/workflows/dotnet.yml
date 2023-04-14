@@ -37,7 +37,7 @@ jobs:
         
     - name: publish projects
       run: ./publish.bat "C:\\Android\\android-sdk"
-      
+
     - name: get current date
       id: date
       run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
