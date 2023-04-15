@@ -66,6 +66,17 @@ namespace client.service.vea.socks5
         /// <returns></returns>
         protected override async Task<bool> HndleForwardUdp(Socks5Info data)
         {
+            //广播数据包
+            if (Socks5Parser.GetIsBroadcastAddress(data.Data))
+            {
+                foreach (var item in veaTransfer.IPList.Values)
+                {
+                    data.Tag = item.Client.Connection ;
+                    await base.HndleForwardUdp(data);
+                }
+                return true;
+            }
+
             if (Socks5Parser.GetIsAnyAddress(data.Data) == false)
             {
                 IPAddress address = Socks5Parser.GetRemoteAddress(data.Data);

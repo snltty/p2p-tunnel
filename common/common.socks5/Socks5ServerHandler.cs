@@ -107,6 +107,12 @@ namespace common.socks5
                 {
                     data.TargetEP = remoteEndPoint;
                     Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+
+                    bool isBroadcast = Socks5Parser.GetIsBroadcastAddress(data.Data);
+                    if (isBroadcast)
+                    {
+                        socket.EnableBroadcast = true;
+                    }
                     socket.WindowsUdpBug();
                     token = new UdpToken { Data = data, TargetSocket = socket, Key = key };
                     token.PoolBuffer = new byte[65535];
@@ -114,7 +120,10 @@ namespace common.socks5
 
                     await token.TargetSocket.SendToAsync(sendData, SocketFlags.None, remoteEndPoint);
                     token.Data.Data = Helper.EmptyArray;
-                    IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
+                    if(isBroadcast == false)
+                    {
+                        IAsyncResult result = socket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
+                    }
                 }
                 else
                 {

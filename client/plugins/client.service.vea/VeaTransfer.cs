@@ -243,7 +243,6 @@ namespace client.service.vea
                             if (GetWindowsHasIp(config.IP))
                             {
                                 AddRoute();
-                                //Command.Windows(string.Empty, new string[] { $"route add 225.0.0.1 mask 255.255.255.255 {config.IP} metric 5 if {interfaceNumber}" });
                                 if (config.ProxyAll) //代理所有
                                 {
                                     //AddRoute(IPAddress.Any);

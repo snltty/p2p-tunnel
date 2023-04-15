@@ -184,21 +184,6 @@ namespace common.socks5
             RequestResponseData(data);
             await socks5ClientListener.Response(data);
             return true;
-            /*
-            if (config.AuthType == AuthTypes.Client)
-            {
-                data.AuthType = socks5AuthValidator.GetAuthType(Socks5Parser.GetAuthMethods(data.Data.Span));
-                data.Response[0] = (byte)data.AuthType;
-                data.Data = data.Response;
-                RequestResponseData(data);
-                socks5ClientListener.Response(data);
-                return true;
-            }
-            else
-            {
-                return socks5MessengerSender.Request(data);
-            }
-            */
         }
         /// <summary>
         /// 收到auth
@@ -212,21 +197,6 @@ namespace common.socks5
             AuthResponseData(data);
             await socks5ClientListener.Response(data);
             return true;
-
-            /*
-            if (config.AuthType == AuthTypes.Client)
-            {
-                data.Response[0] = (byte)socks5AuthValidator.Validate(data.Data, data.AuthType);
-                data.Data = data.Response;
-                AuthResponseData(data);
-                socks5ClientListener.Response(data);
-                return true;
-            }
-            else
-            {
-                return socks5MessengerSender.Request(data);
-            }
-            */
         }
         /// <summary>
         /// 收到command

@@ -4,6 +4,8 @@ using System;
 using System.Buffers.Binary;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace common.socks5
@@ -172,6 +174,23 @@ namespace common.socks5
                 Socks5EnumAddressType.Domain => false,
                 _ => false,
             };
+        }
+
+        /// <summary>
+        /// 是否是广播地址
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static bool GetIsBroadcastAddress(Memory<byte> data)
+        {
+            var span = data.Span.Slice(3);
+            if ((Socks5EnumAddressType)span[0] == Socks5EnumAddressType.IPV4)
+            {
+                span = span.Slice(1, 4);
+                uint ip = Unsafe.As<byte, uint>(ref MemoryMarshal.GetReference(span));
+                return ip >= 0xFF0000E0 && ip <= 0xFFFFFFEF;
+            }
+            return false;
         }
 
 
