@@ -33,6 +33,7 @@ namespace server.service.socks5
 
             services.AddSingleton<ISocks5Validator, Socks5Validator>();
             services.AddSingleton<ISocks5AuthValidator, Socks5AuthValidator>();
+            services.AddSingleton<ISocks5ClientListener, Socks5ClientListener>();
         }
     }
 
