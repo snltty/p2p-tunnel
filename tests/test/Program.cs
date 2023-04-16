@@ -1,6 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using System;
+using System.Buffers.Binary;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -11,7 +13,7 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<Test>();
+            // var summary = BenchmarkRunner.Run<Test>();
             Console.ReadLine();
         }
     }

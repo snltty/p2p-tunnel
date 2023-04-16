@@ -33,7 +33,7 @@
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
-                                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <!-- <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                     <el-form-item label="目标端" prop="TargetName">
                                         <el-tooltip class="box-item" effect="dark" content="当遇到不存在的ip时，目标端应该选择谁，为某个客户端" placement="top-start">
                                             <el-select size="default" v-model="state.form.TargetName" placeholder="选择目标">
@@ -42,7 +42,7 @@
                                             </el-select>
                                         </el-tooltip>
                                     </el-form-item>
-                                </el-col>
+                                </el-col> -->
                             </el-row>
                         </div>
                     </el-form-item>

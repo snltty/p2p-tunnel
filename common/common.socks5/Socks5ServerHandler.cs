@@ -97,8 +97,14 @@ namespace common.socks5
         {
             IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
             if (remoteEndPoint.Port == 0) return;
-            Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
 
+            bool isBroadcast = Socks5Parser.GetIsBroadcastAddress(data.Data);
+            if (isBroadcast)
+            {
+                remoteEndPoint.Address = IPAddress.Loopback;
+            }
+           
+            Memory<byte> sendData = Socks5Parser.GetUdpData(data.Data);
             ConnectionKeyUdp key = new ConnectionKeyUdp(data.ClientId, data.SourceEP);
             try
             {
@@ -108,7 +114,6 @@ namespace common.socks5
                     data.TargetEP = remoteEndPoint;
                     Socket socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
 
-                    bool isBroadcast = Socks5Parser.GetIsBroadcastAddress(data.Data);
                     if (isBroadcast)
                     {
                         socket.EnableBroadcast = true;

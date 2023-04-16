@@ -4,6 +4,8 @@ using common.server;
 using common.socks5;
 using System;
 using System.Net;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace client.service.vea.socks5
@@ -51,7 +53,8 @@ namespace client.service.vea.socks5
         /// <returns></returns>
         protected override async Task<bool> HandleCommand(Socks5Info data)
         {
-            if (Socks5Parser.GetIsAnyAddress(data.Data) == false)
+            if (Socks5Parser.GetIsIPV4(data.Data) == false) return false;
+            if (Socks5Parser.GetIsIPV4AnyAddress(data.Data) == false)
             {
                 var targetEp = Socks5Parser.GetRemoteAddress(data.Data);
                 data.Tag = GetConnection(targetEp);
@@ -66,25 +69,25 @@ namespace client.service.vea.socks5
         /// <returns></returns>
         protected override async Task<bool> HndleForwardUdp(Socks5Info data)
         {
+            if (Socks5Parser.GetIsIPV4(data.Data) == false) return false;
+            if (Socks5Parser.GetIsIPV4AnyAddress(data.Data) == false) return false;
             //广播数据包
             if (Socks5Parser.GetIsBroadcastAddress(data.Data))
             {
                 foreach (var item in veaTransfer.IPList.Values)
                 {
-                    data.Tag = item.Client.Connection ;
+                    data.Tag = item.Client.Connection;
                     await base.HndleForwardUdp(data);
                 }
                 return true;
             }
 
-            if (Socks5Parser.GetIsAnyAddress(data.Data) == false)
-            {
-                IPAddress address = Socks5Parser.GetRemoteAddress(data.Data);
-                data.Tag = GetConnection(address);
-            }
+            IPAddress address = Socks5Parser.GetRemoteAddress(data.Data);
+            data.Tag = GetConnection(address);
             return await base.HndleForwardUdp(data);
         }
 
+        byte[] ipBytes = new byte[4];
         private IConnection GetConnection(IPAddress target)
         {
             IConnection connection = null;
@@ -96,7 +99,8 @@ namespace client.service.vea.socks5
             {
                 if (target.IsLan())
                 {
-                    int ip = target.GetAddressBytes().ToInt32();
+                    target.TryWriteBytes(ipBytes, out int len);
+                    int ip = ipBytes.AsSpan().ToInt32();
                     if (veaTransfer.LanIPList.TryGetValue(ip & 0xffffff, out cache))
                     {
                         connection = cache.Client.Connection;
@@ -108,15 +112,6 @@ namespace client.service.vea.socks5
                     if (veaTransfer.LanIPList.TryGetValue(ip & 0xff, out cache))
                     {
                         connection = cache.Client.Connection;
-                    }
-                }
-;
-                if (clientInfoCaching.GetByName(config.TargetName, out ClientInfo client))
-                {
-                    connection = client.Connection;
-                    if (connection == null || connection.Connected == false)
-                    {
-                        clientsTransfer.ConnectClient(client);
                     }
                 }
             }

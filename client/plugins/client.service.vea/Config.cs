@@ -29,7 +29,6 @@ namespace client.service.vea
             Config config = ReadConfig().Result;
             Enable = config.Enable;
             ProxyAll = config.ProxyAll;
-            TargetName = config.TargetName;
             IP = config.IP;
             LanIPs = config.LanIPs;
             SocksPort = config.SocksPort;
@@ -46,10 +45,7 @@ namespace client.service.vea
         /// 代理所有
         /// </summary>
         public bool ProxyAll { get; set; } = false;
-        /// <summary>
-        /// 目标，当遇到不存在的ip时
-        /// </summary>
-        public string TargetName { get; set; } = string.Empty;
+
         /// <summary>
         /// 组网ip
         /// </summary>
@@ -103,7 +99,6 @@ namespace client.service.vea
 
             Enable = _config.Enable;
             ProxyAll = _config.ProxyAll;
-            TargetName = _config.TargetName;
             IP = _config.IP;
             LanIPs = _config.LanIPs;
             SocksPort = _config.SocksPort;

@@ -8,9 +8,6 @@ namespace client.service.vea.socks5
     /// </summary>
     public interface IVeaSocks5ServerHandler : ISocks5ServerHandler
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public void UpdateConfig();
     }
     /// <summary>
@@ -31,8 +28,7 @@ namespace client.service.vea.socks5
             {
                 ConnectEnable = config.ConnectEnable,
                 NumConnections = config.NumConnections,
-                BufferSize = config.BufferSize,
-                TargetName = config.TargetName
+                BufferSize = config.BufferSize
             }, wheelTimer, veaKeyValidator, socks5AuthValidator)
         {
             _config = config;

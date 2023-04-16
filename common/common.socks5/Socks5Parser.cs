@@ -187,10 +187,32 @@ namespace common.socks5
             if ((Socks5EnumAddressType)span[0] == Socks5EnumAddressType.IPV4)
             {
                 span = span.Slice(1, 4);
-                uint ip = Unsafe.As<byte, uint>(ref MemoryMarshal.GetReference(span));
-                return ip >= 0xFF0000E0 && ip <= 0xFFFFFFEF;
+                uint ip = BinaryPrimitives.ReverseEndianness(span.ToUInt32());
+                return ip >= 0xE0000000 && ip <= 0xEFFFFFFF;
             }
             return false;
+        }
+
+        /// <summary>
+        /// 是否是广播地址
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static bool GetIsIPV4(Memory<byte> data)
+        {
+            var span = data.Span.Slice(3);
+            return (Socks5EnumAddressType)span[0] == Socks5EnumAddressType.IPV4;
+        }
+        /// <summary>
+        /// 是ipv4的 0.0.0.0
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static bool GetIsIPV4AnyAddress(Memory<byte> data)
+        {
+            var span = data.Span.Slice(3);
+            return (Socks5EnumAddressType)span[0] == Socks5EnumAddressType.IPV4
+                && span.Slice(1, 4).SequenceEqual(Helper.AnyIpArray) || span.Slice(1 + 4, 2).SequenceEqual(Helper.AnyPoryArray);
         }
 
 
