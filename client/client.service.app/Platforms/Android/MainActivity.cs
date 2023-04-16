@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Media;
 using Android.OS;
 using Android.Util;
 using Android.Views;
@@ -18,9 +19,15 @@ namespace client.service.app
             Window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
 
             //KeepManager.GetInstance().RegisterKeep(this);
-            StartForegroundService(new Intent(this, typeof(ForegroundService)));
+            //StartForegroundService(new Intent(this, typeof(ForegroundService)));
 
             base.OnCreate(savedInstanceState);
+        }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+            //StartService(new Intent(this, typeof(ForegroundService)));
         }
 
         protected override void OnDestroy()
@@ -29,12 +36,15 @@ namespace client.service.app
         }
     }
 
-    [Service]
+
+
+    [Service(Name = "com.myapp.droid.BackgroundService", Exported = true)]
     public sealed class ForegroundService : Service
     {
         private static readonly int SERVICE_ID = 10000;
         private static readonly string CHANNEL_ID = "service";
         private static readonly string CHANNEL_NAME = "service";
+        static System.Timers.Timer timer;
 
         Intent intent;
         public override IBinder OnBind(Intent intent)
@@ -47,8 +57,7 @@ namespace client.service.app
         public override void OnCreate()
         {
             base.OnCreate();
-            Startup.Start();
-
+            //Startup.Start();
 
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High);
             notificationChannel.EnableLights(true);
@@ -57,31 +66,25 @@ namespace client.service.app
             NotificationManager manager = (NotificationManager)GetSystemService(NotificationService);
             manager.CreateNotificationChannel(notificationChannel);
 
-
             StartForeground(SERVICE_ID, CreateNotification("保活"));
-            Java.Lang.Thread thread = new Java.Lang.Thread(() =>
+
+            int index = 0;
+            timer = new System.Timers.Timer();
+            timer.Interval = 1000;
+            timer.Elapsed += (sender, e) =>
             {
-                int index = 0;
-                while (true)
-                {
-                    manager?.Notify(SERVICE_ID, CreateNotification((++index).ToString()));
-
-                    Java.Lang.Thread.Sleep(1000);
-                }
-            });
-            thread.Start();
-
-
+                manager?.Notify(SERVICE_ID, CreateNotification((++index).ToString()));
+            };
+            timer.Start();
         }
 
         private Notification CreateNotification(string content)
         {
-
             PendingIntent pendingIntent = PendingIntent.GetActivity(this, 0, intent, PendingIntentFlags.Mutable);
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .SetSmallIcon(Resource.Drawable.appiconfg)
                 .SetChannelId(CHANNEL_ID)
-                 .SetContentIntent(pendingIntent)
+                .SetContentIntent(pendingIntent)
                 .SetContentTitle("保活")
                 .SetContentText(content)
                 .SetOngoing(true).SetPriority(0)
@@ -92,13 +95,7 @@ namespace client.service.app
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
-            return StartCommandResult.NotSticky;
-        }
-
-        public override void OnDestroy()
-        {
-            Log.Debug("log", $"ForegroundService OnDestroy=============================================");
-            base.OnDestroy();
+            return StartCommandResult.Sticky;
         }
     }
 
