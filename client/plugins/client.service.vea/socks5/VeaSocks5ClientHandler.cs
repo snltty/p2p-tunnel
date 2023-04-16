@@ -22,10 +22,7 @@ namespace client.service.vea.socks5
     /// </summary>
     public sealed class VeaSocks5ClientHandler : Socks5ClientHandler, IVeaSocks5ClientHandler
     {
-        private readonly Config config;
-        private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaTransfer veaTransfer;
-        private readonly IClientsTransfer clientsTransfer;
 
         /// <summary>
         /// 组网socks5客户端
@@ -36,14 +33,11 @@ namespace client.service.vea.socks5
         /// <param name="socks5ClientListener"></param>
         /// <param name="veaTransfer"></param>
         /// <param name="veaSocks5DstEndpointProvider"></param>
-        public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender, Config config, IClientInfoCaching clientInfoCaching,
-            IVeaSocks5ClientListener socks5ClientListener, VeaTransfer veaTransfer, IVeaSocks5DstEndpointProvider veaSocks5DstEndpointProvider, IClientsTransfer clientsTransfer)
+        public VeaSocks5ClientHandler(IVeaSocks5MessengerSender socks5MessengerSender,
+            IVeaSocks5ClientListener socks5ClientListener, VeaTransfer veaTransfer, IVeaSocks5DstEndpointProvider veaSocks5DstEndpointProvider)
             : base(socks5MessengerSender, veaSocks5DstEndpointProvider, socks5ClientListener)
         {
-            this.config = config;
-            this.clientInfoCaching = clientInfoCaching;
             this.veaTransfer = veaTransfer;
-            this.clientsTransfer = clientsTransfer;
         }
 
         /// <summary>
