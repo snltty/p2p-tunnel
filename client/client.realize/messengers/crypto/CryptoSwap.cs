@@ -17,11 +17,6 @@ namespace client.realize.messengers.crypto
         private readonly MessengerSender messengerSender;
         private readonly ICryptoFactory cryptoFactory;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messengerSender"></param>
-        /// <param name="cryptoFactory"></param>
         public CryptoSwap(MessengerSender messengerSender, ICryptoFactory cryptoFactory)
         {
             this.messengerSender = messengerSender;
@@ -96,7 +91,7 @@ namespace client.realize.messengers.crypto
             {
                 Connection = connection,
                 MessengerId = (ushort)CryptoMessengerIds.Test,
-                Payload = connection.Crypto.Encode(Encoding.UTF8.GetBytes("test"))
+                Payload = connection.Crypto.Encode("test".ToBytes())
             }).ConfigureAwait(false);
 
             return resp.Code == MessageResponeCodes.OK;

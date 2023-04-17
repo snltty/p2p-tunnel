@@ -6,7 +6,7 @@ using common.tcpforward;
 using MessagePack;
 using System.Buffers;
 
-namespace packUnpackSpeed
+namespace toarray
 {
     internal class Program
     {

@@ -57,7 +57,7 @@ namespace common.tcpforward
         /// <returns></returns>
         public static byte[] BuildMessage(string msg)
         {
-            var bytes = Encoding.UTF8.GetBytes(msg);
+            var bytes = msg.ToBytes();
 
             StringBuilder sb = new StringBuilder();
             sb.Append("HTTP/1.1 200 OK\r\n");

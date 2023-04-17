@@ -58,7 +58,7 @@ namespace server.service.messengers
         [MessengerId((ushort)CryptoMessengerIds.Test)]
         public void Test(IConnection connection)
         {
-            Logger.Instance.DebugDebug($"encoder test : {Encoding.UTF8.GetString(connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span)}");
+            Logger.Instance.DebugDebug($"encoder test : {connection.Crypto.Decode(connection.ReceiveRequestWrap.Payload).Span.GetString()}");
             connection.Write(Helper.TrueArray);
         }
 

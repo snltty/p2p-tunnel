@@ -7,29 +7,14 @@ using System.Linq;
 
 namespace common.tcpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public struct ListeningChangeInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public ushort Port { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public bool State { get; set; }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class TcpForwardInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public TcpForwardInfo() { }
         /// <summary>
         /// 监听的端口
@@ -72,20 +57,10 @@ namespace common.tcpforward
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Buffer { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public Memory<byte> Cache { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
 
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes(out int length)
         {
             /*
@@ -125,10 +100,6 @@ namespace common.tcpforward
             index += Buffer.Length;
             return bytes;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="memory"></param>
         public void DeBytes(in Memory<byte> memory)
         {
             var span = memory.Span;
@@ -177,9 +148,6 @@ namespace common.tcpforward
         Forward = 1
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [Flags]
     public enum TcpForwardStateTypes : byte
     {
@@ -197,38 +165,20 @@ namespace common.tcpforward
         Close = 2
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [Flags]
     public enum TcpForwardTypes : byte
     {
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("转发")]
         Forward = 0,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("代理")]
         Proxy = 1
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [Flags]
     public enum TcpForwardAliveTypes : byte
     {
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("长连接")]
         Tunnel = 0,
-        /// <summary>
-        /// 
-        /// </summary>
         [Description("短连接")]
         Web = 1
     }
@@ -239,9 +189,6 @@ namespace common.tcpforward
     [Flags, MessengerIdEnum]
     public enum TcpForwardMessengerIds : ushort
     {
-        /// <summary>
-        /// 
-        /// </summary>
         Min = 600,
         /// <summary>
         /// 请求
@@ -271,9 +218,6 @@ namespace common.tcpforward
         /// 配置
         /// </summary>
         Setting = 608,
-        /// <summary>
-        /// 
-        /// </summary>
         Max = 699,
     }
 }

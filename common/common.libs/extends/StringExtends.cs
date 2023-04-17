@@ -118,7 +118,7 @@ namespace common.libs.extends
         /// </summary>
         /// <param name="str"></param>
         /// <param name="bytes"></param>
-        /// <returns>utf8Length</returns>
+        /// <returns></returns>
         public static int ToUTF8Bytes(this ReadOnlySpan<char> str, Memory<byte> bytes)
         {
             if (str.Length == 0) return 0;
@@ -277,7 +277,8 @@ namespace common.libs.extends
         }
 
         /// <summary>
-        /// 
+        /// utf16非常快，但是，ASCII 字符的大小将是原来的两倍，中文字符则比UTF8略小，Allocated 0.05
+        /// write  0.065  read 0.038   readwrite 0.039
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>

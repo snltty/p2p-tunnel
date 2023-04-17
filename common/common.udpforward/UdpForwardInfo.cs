@@ -12,14 +12,7 @@ namespace common.udpforward
     /// </summary>
     public sealed class UdpForwardInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public UdpForwardInfo() { }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public ushort SourcePort { get; set; }
 
         /// <summary>
@@ -35,15 +28,8 @@ namespace common.udpforward
         /// </summary>
         public Memory<byte> Buffer { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public IConnection Connection { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes(out int length)
         {
             int ipLength = SourceEndpoint.Address.Length();
@@ -74,10 +60,7 @@ namespace common.udpforward
             index += Buffer.Length;
             return bytes;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="memory"></param>
+
         public void DeBytes(in Memory<byte> memory)
         {
             var span = memory.Span;

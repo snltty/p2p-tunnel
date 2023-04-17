@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
-namespace invokeSpeed
+namespace toarrayNumber
 {
     internal class Program
     {

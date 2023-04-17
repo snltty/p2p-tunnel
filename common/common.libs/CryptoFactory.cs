@@ -1,4 +1,5 @@
-﻿using System;
+﻿using common.libs.extends;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -336,7 +337,7 @@ namespace common.libs
             byte[] iv = new byte[16];
 
             using SHA384 sha = SHA384.Create();
-            byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
+            byte[] hash = sha.ComputeHash(password.ToBytes());
 
             Array.Copy(hash, 0, key, 0, 32);
             Array.Copy(hash, 32, iv, 0, 16);

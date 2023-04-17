@@ -3,7 +3,7 @@ using BenchmarkDotNet.Running;
 using System;
 using System.Reflection;
 
-namespace invokeSpeed
+namespace invoke
 {
     internal class Program
     {
