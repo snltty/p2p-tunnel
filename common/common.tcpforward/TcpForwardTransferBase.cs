@@ -1,11 +1,12 @@
 ﻿using common.libs;
 using common.libs.extends;
+using System;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace common.tcpforward
 {
-    public  class TcpForwardTransferBase
+    public class TcpForwardTransferBase
     {
         private readonly ITcpForwardServer tcpForwardServer;
         private readonly TcpForwardMessengerSender tcpForwardMessengerSender;
@@ -49,6 +50,7 @@ namespace common.tcpforward
             request.Cache = request.Buffer;
             request.Buffer = Helper.EmptyArray;
 
+            Console.WriteLine(Encoding.UTF8.GetString(request.Cache.Span));
             //短链接
             if (request.AliveType == TcpForwardAliveTypes.Web)
             {
@@ -65,6 +67,10 @@ namespace common.tcpforward
                 {
                     string domain = HttpParseHelper.GetHost(request.Cache.Span).GetString();
                     tcpForwardTargetProvider?.Get(domain, request);
+                    if (request.Connection == null || request.Connection.Connected == false)
+                    {
+                        tcpForwardTargetProvider?.Get(request.SourcePort, request);
+                    }
                 }
             }
             //长连接

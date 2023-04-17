@@ -27,7 +27,7 @@ namespace common.libs.extends
     public static class StringExtends
     {
         /// <summary>
-        /// 
+        /// 截取
         /// </summary>
         /// <param name="str"></param>
         /// <param name="start"></param>
@@ -42,7 +42,7 @@ namespace common.libs.extends
             return str.Substring(start, maxLength);
         }
         /// <summary>
-        /// 
+        /// md5
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>

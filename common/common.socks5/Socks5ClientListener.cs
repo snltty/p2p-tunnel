@@ -152,13 +152,16 @@ namespace common.socks5
                     //有些客户端，会把一个包拆开发送，很奇怪，不得不验证一下数据完整性
                     if (token.DataWrap.Socks5Step < Socks5EnumStep.Forward)
                     {
-                        bool gt = false;
-                        while (ValidateData(token.DataWrap, out gt) == false && gt == false)
+                        Socks5Parser.Socks5ValidateResult validate = ValidateData(token.DataWrap);
+                        //太短
+                        while ((validate & Socks5Parser.Socks5ValidateResult.TooShort) == Socks5Parser.Socks5ValidateResult.TooShort)
                         {
                             totalLength += await token.Socket.ReceiveAsync(e.Buffer.AsMemory(e.Offset + totalLength), SocketFlags.None);
                             token.DataWrap.Data = e.Buffer.AsMemory(e.Offset, totalLength);
+                            validate = ValidateData(token.DataWrap);
                         }
-                        if (gt)
+                        //不短，又不相等，直接关闭连接
+                        if ((validate & Socks5Parser.Socks5ValidateResult.Equal) != Socks5Parser.Socks5ValidateResult.Equal)
                         {
                             CloseClientSocket(e);
                             return;
@@ -203,17 +206,16 @@ namespace common.socks5
                 Logger.Instance.DebugError(ex);
             }
         }
-        private bool ValidateData(Socks5Info info, out bool gt)
+        private Socks5Parser.Socks5ValidateResult ValidateData(Socks5Info info)
         {
-            gt = false;
             return info.Socks5Step switch
             {
-                Socks5EnumStep.Request => Socks5Parser.ValidateRequestData(info.Data, out gt),
-                Socks5EnumStep.Command => Socks5Parser.ValidateCommandData(info.Data, out gt),
-                Socks5EnumStep.Auth => Socks5Parser.ValidateAuthData(info.Data, info.AuthType, out gt),
-                Socks5EnumStep.Forward => true,
-                Socks5EnumStep.ForwardUdp => true,
-                _ => true
+                Socks5EnumStep.Request => Socks5Parser.ValidateRequestData(info.Data),
+                Socks5EnumStep.Command => Socks5Parser.ValidateCommandData(info.Data),
+                Socks5EnumStep.Auth => Socks5Parser.ValidateAuthData(info.Data, info.AuthType),
+                Socks5EnumStep.Forward => Socks5Parser.Socks5ValidateResult.Equal,
+                Socks5EnumStep.ForwardUdp => Socks5Parser.Socks5ValidateResult.Equal,
+                _ => Socks5Parser.Socks5ValidateResult.Equal
             };
         }
 

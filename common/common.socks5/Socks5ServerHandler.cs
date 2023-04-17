@@ -203,8 +203,6 @@ namespace common.socks5
                     return;
                 }
 
-                await Task.CompletedTask;
-
                 Socks5EnumRequestCommand command = (Socks5EnumRequestCommand)data.Data.Span[1];
                 IPEndPoint remoteEndPoint = Socks5Parser.GetRemoteEndPoint(data.Data);
                 if (remoteEndPoint.Port == 0)
@@ -236,7 +234,7 @@ namespace common.socks5
                 _ = ConnectReponse(data, Socks5EnumResponseCommand.ConnectFail);
                 return;
             }
-
+            await Task.CompletedTask;
 
         }
         private void Connect(Socks5Info data, IPEndPoint remoteEndPoint)

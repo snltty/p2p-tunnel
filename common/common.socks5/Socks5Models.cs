@@ -5,9 +5,6 @@ using System.Net;
 
 namespace common.socks5
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class Socks5Info
     {
         #region 数据字段

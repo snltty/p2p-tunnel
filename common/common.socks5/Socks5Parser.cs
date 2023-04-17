@@ -4,8 +4,6 @@ using System;
 using System.Buffers.Binary;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace common.socks5
@@ -141,7 +139,6 @@ namespace common.socks5
             }
             return IPAddress.Any;
         }
-
         /// <summary>
         /// 是否是 任意地址
         /// </summary>
@@ -175,7 +172,6 @@ namespace common.socks5
                 _ => false,
             };
         }
-
         /// <summary>
         /// 是否是广播地址
         /// </summary>
@@ -194,7 +190,7 @@ namespace common.socks5
         }
 
         /// <summary>
-        /// 是否是广播地址
+        /// 是否ipv4
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -217,7 +213,7 @@ namespace common.socks5
 
 
         /// <summary>
-        /// 
+        /// 获取udp中继中的数据
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
@@ -236,7 +232,7 @@ namespace common.socks5
             };
         }
         /// <summary>
-        /// 
+        /// 生成connect返回包
         /// </summary>
         /// <param name="remoteEndPoint"></param>
         /// <param name="responseCommand"></param>
@@ -268,7 +264,7 @@ namespace common.socks5
             return res;
         }
         /// <summary>
-        /// 
+        /// 生成udp中中继数据包
         /// </summary>
         /// <param name="remoteEndPoint"></param>
         /// <param name="data"></param>
@@ -313,30 +309,39 @@ namespace common.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static bool ValidateRequestData(Memory<byte> data, out bool gt)
+        public static Socks5ValidateResult ValidateRequestData(Memory<byte> data)
         {
-            gt = false;
-            if (data.Length > 2)
+            /*
+             * VERSION	METHODS_COUNT	METHODS
+                1字节	1字节	        1到255字节，长度由METHODS_COUNT值决定
+                0x05	0x03	        0x00 0x01 0x02
+             */
+
+
+            if (data.Length < 2 || data.Length < 2 + data.Span[1])
             {
-                gt = data.Length > 2 + data.Span[1];
-                return data.Length == 2 + data.Span[1];
+                return Socks5ValidateResult.TooShort;
             }
-            return false;
+            if (data.Length > 2 + data.Span[1])
+            {
+                return Socks5ValidateResult.TooLong;
+            }
+
+            return Socks5ValidateResult.Equal;
         }
         /// <summary>
         /// 验证command数据完整性
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static bool ValidateCommandData(Memory<byte> data, out bool gt)
+        public static Socks5ValidateResult ValidateCommandData(Memory<byte> data)
         {
-            gt = false;
             /*
              * VERSION  COMMAND RSV ADDRESS_TYPE    DST.ADDR    DST.PORT
              * 1        1       1   1               1-255       2
              * 域名模式下 DST.ADDR第一个字节是域名长度，那么整个数据至少5个字节
              */
-            if (data.Length < 5) return false;
+            if (data.Length < 5) return Socks5ValidateResult.TooShort;
 
             var span = data.Span;
             int addrLength = (Socks5EnumAddressType)span[3] switch
@@ -346,9 +351,15 @@ namespace common.socks5
                 Socks5EnumAddressType.IPV6 => 16 + 2,
                 _ => throw new NotImplementedException(),
             };
-            gt = data.Length > 4 + addrLength;
-            //首部4字节+地址长度
-            return data.Length == 4 + addrLength;
+            if (data.Length < 4 + addrLength)
+            {
+                return Socks5ValidateResult.TooShort;
+            }
+            if (data.Length > 4 + addrLength)
+            {
+                return Socks5ValidateResult.TooLong;
+            }
+            return Socks5ValidateResult.Equal;
         }
 
         /// <summary>
@@ -356,49 +367,61 @@ namespace common.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <param name="authType"></param>
-        /// <param name="gt"></param>
         /// <returns></returns>
-        public static bool ValidateAuthData(Memory<byte> data, Socks5EnumAuthType authType, out bool gt)
+        public static Socks5ValidateResult ValidateAuthData(Memory<byte> data, Socks5EnumAuthType authType)
         {
-            gt = false;
             return authType switch
             {
-                Socks5EnumAuthType.NoAuth => true,
-                Socks5EnumAuthType.Password => ValidateAuthPasswordData(data, out gt),
-                Socks5EnumAuthType.GSSAPI => true,
-                Socks5EnumAuthType.IANA => true,
-                Socks5EnumAuthType.UnKnow => false,
-                Socks5EnumAuthType.NotSupported => false,
-                _ => false,
+                Socks5EnumAuthType.NoAuth => Socks5ValidateResult.Equal,
+                Socks5EnumAuthType.Password => ValidateAuthPasswordData(data),
+                Socks5EnumAuthType.GSSAPI => Socks5ValidateResult.Equal,
+                Socks5EnumAuthType.IANA => Socks5ValidateResult.Equal,
+                Socks5EnumAuthType.UnKnow => Socks5ValidateResult.Bad,
+                Socks5EnumAuthType.NotSupported => Socks5ValidateResult.Bad,
+                _ => Socks5ValidateResult.Bad,
             };
         }
-        private static bool ValidateAuthPasswordData(Memory<byte> data, out bool gt)
+        private static Socks5ValidateResult ValidateAuthPasswordData(Memory<byte> data)
         {
             /*
              VERSION	USERNAME_LENGTH	USERNAME	PASSWORD_LENGTH	PASSWORD
                 1字节	1字节	        1到255字节	1字节	        1到255字节
                 0x01	0x01	        0x0a	    0x01	        0x0a
              */
-            gt = false;
 
             var span = data.Slice(1).Span;
             //至少有 USERNAME_LENGTH  PASSWORD_LENGTH 字节以上
             if (span.Length <= 2)
             {
-                return false;
+                return Socks5ValidateResult.TooShort;
             }
 
             byte nameLength = span[0];
             //至少有 USERNAME_LENGTH USERNAME  PASSWORD_LENGTH
             if (span.Length < nameLength + 1 + 1)
             {
-                return false;
+                return Socks5ValidateResult.TooShort;
             }
 
             byte passwordLength = span[1 + nameLength];
+            if (span.Length < 1 + 1 + nameLength + passwordLength)
+            {
+                return Socks5ValidateResult.TooShort;
+            }
+            if (span.Length > 1 + 1 + nameLength + passwordLength)
+            {
+                return Socks5ValidateResult.TooLong;
+            }
+            return Socks5ValidateResult.Equal;
+        }
 
-            gt = span.Length > 1 + 1 + nameLength + passwordLength;
-            return span.Length == 1 + 1 + nameLength + passwordLength;
+        [Flags]
+        public enum Socks5ValidateResult : byte
+        {
+            Equal = 1,
+            TooShort = 2,
+            TooLong = 4,
+            Bad = 8,
         }
     }
 }

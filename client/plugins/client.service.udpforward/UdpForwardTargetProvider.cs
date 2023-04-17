@@ -43,7 +43,7 @@ namespace client.service.udpforward
             {
                 return;
             }
-            if (cacheInfo.Connection == null || !cacheInfo.Connection.Connected)
+            if (cacheInfo.Connection == null || cacheInfo.Connection.Connected == false)
             {
                 cacheInfo.Connection = SelectConnection(cacheInfo);
             }

@@ -24,7 +24,7 @@ namespace common.libs.extends
         }
 
         /// <summary>
-        /// 
+        /// 判断是不是本地地址
         /// </summary>
         /// <param name="adress"></param>
         /// <returns></returns>
