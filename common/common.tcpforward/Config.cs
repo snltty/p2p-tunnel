@@ -57,6 +57,10 @@ namespace common.tcpforward
         /// </summary>
         public ushort[] WebListens { get; set; } = Array.Empty<ushort>();
         /// <summary>
+        /// 域名列表
+        /// </summary>
+        public string[] Domains { get; set; } = Array.Empty<string>();
+        /// <summary>
         /// 长链接端口范围
         /// </summary>
         public TunnelListenRangeInfo TunnelListenRange { get; set; } = new TunnelListenRangeInfo();

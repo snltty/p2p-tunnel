@@ -1,6 +1,11 @@
 ﻿using common.server.model;
 using server.messengers.singnin;
 using server.messengers;
+using Microsoft.Extensions.DependencyInjection;
+using common.libs;
+using System.Reflection;
+using System.Linq;
+using System;
 
 namespace server.service.validators
 {
@@ -11,23 +16,42 @@ namespace server.service.validators
 
         private readonly Config config;
         private readonly IClientSignInCaching clientSignInCache;
-        public SignInValidatorHandler(Config config, IClientSignInCaching clientSignInCache)
+        private readonly ServiceProvider serviceProvider;
+
+        public SignInValidatorHandler(Config config, IClientSignInCaching clientSignInCache, ServiceProvider serviceProvider)
         {
             this.config = config;
             this.clientSignInCache = clientSignInCache;
+            this.serviceProvider = serviceProvider;
         }
 
-        public void LoadValidator(ISignInValidator validator)
+        public void LoadValidator(Assembly[] assemblys)
         {
-            if (first == null)
+            foreach (ISignInValidator validator in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct().Select(c => (ISignInValidator)serviceProvider.GetService(c)).OrderBy(c => c.Order))
             {
-                first = new Wrap<ISignInValidator> { Value = validator };
-                last = first;
+                if (first == null)
+                {
+                    first = new Wrap<ISignInValidator> { Value = validator };
+                    last = first;
+                }
+                else
+                {
+                    last.Next = new Wrap<ISignInValidator> { Value = validator };
+                    last = last.Next;
+                }
             }
-            else
+
+            var validators = ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct()
+                .Select(c => (ISignInValidator)serviceProvider.GetService(c));
+
+            Logger.Instance.Debug("权限值,uint 每个权限占一位，最多32个权限");
+            if (validators.Select(c => c.Access).Distinct().Count() != validators.Count())
             {
-                last.Next = new Wrap<ISignInValidator> { Value = validator };
-                last = last.Next;
+                Logger.Instance.Error("有冲突");
+            }
+            foreach (var item in validators.OrderBy(c => c.Access))
+            {
+                Logger.Instance.Info($"{Convert.ToString(item.Access, 2).PadLeft(32, '0')}  {item.Name}");
             }
         }
 

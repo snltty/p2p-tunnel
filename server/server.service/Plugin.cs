@@ -16,6 +16,7 @@ using server.service.messengers;
 using common.libs.extends;
 using server.messengers.singnin;
 using server.service.messengers.singnin;
+using System.ComponentModel.DataAnnotations;
 
 namespace server.service
 {
@@ -65,22 +66,15 @@ namespace server.service
             udpServer.Start(config.Udp, timeout: config.TimeoutDelay);
             Logger.Instance.Info("UDP服务已开启");
 
-            MessengerResolver messenger = services.GetService<MessengerResolver>();
-            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)).Distinct())
-            {
-                messenger.LoadMessenger(item, services.GetService(item));
-            }
+            MessengerResolver messengerResolver = services.GetService<MessengerResolver>();
+            messengerResolver.LoadMessenger(assemblys);
 
             ISignInValidatorHandler signInMiddlewareHandler = services.GetService<ISignInValidatorHandler>();
-            foreach (ISignInValidator validator in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct().Select(c => (ISignInValidator)services.GetService(c)).OrderBy(c => c.Order))
-            {
-                signInMiddlewareHandler.LoadValidator(validator);
-            }
+            signInMiddlewareHandler.LoadValidator(assemblys);
+            
 
             Loop(services);
-            Udp((UdpServer)udpServer, messenger);
-
-            AccessCheck(services, assemblys);
+            Udp((UdpServer)udpServer, messengerResolver);
         }
 
         private void Loop(ServiceProvider services)
@@ -144,19 +138,5 @@ namespace server.service
             };
         }
 
-        private void AccessCheck(ServiceProvider services, Assembly[] assemblys)
-        {
-            var validators = ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct().Select(c => (ISignInValidator)services.GetService(c));
-
-            Logger.Instance.Debug("权限值,uint 每个权限占一位，最多32个权限");
-            if (validators.Select(c => c.Access).Distinct().Count() != validators.Count())
-            {
-                Logger.Instance.Error("有冲突");
-            }
-            foreach (var item in validators.OrderBy(c => c.Access))
-            {
-                Logger.Instance.Info($"{Convert.ToString(item.Access, 2).PadLeft(32, '0')}  {item.Name}");
-            }
-        }
     }
 }

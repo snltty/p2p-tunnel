@@ -5,46 +5,21 @@ using System.Net;
 
 namespace common.udpforward
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class UdpForwardRegisterParamsInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public UdpForwardRegisterParamsInfo() { }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public ushort SourcePort { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public string TargetName { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public string TargetIp { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public ushort TargetPort { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var tipBytes = TargetIp.GetUTF16Bytes();
-            var tnameBytes = TargetName.GetUTF16Bytes();
 
             byte[] bytes = new byte[
                 2 + 2
                 + 1 + 1 + tipBytes.Length
-                + 1 + 1 + tnameBytes.Length
             ];
             var memory = bytes.AsMemory();
             var span = bytes.AsSpan();
@@ -65,20 +40,10 @@ namespace common.udpforward
             tipBytes.CopyTo(span.Slice(index));
             index += tipBytes.Length;
 
-            bytes[index] = (byte)tnameBytes.Length;
-            index += 1;
-            bytes[index] = (byte)TargetName.Length;
-            index += 1;
-            tnameBytes.CopyTo(span.Slice(index));
-            index += tnameBytes.Length;
-
             return bytes;
 
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
+
         public void DeBytes(Memory<byte> data)
         {
             var span = data.Span;
@@ -93,8 +58,6 @@ namespace common.udpforward
             TargetIp = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
             index += 1 + 1 + span[index];
 
-            TargetName = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
-            index += 1 + 1 + span[index];
         }
 
     }

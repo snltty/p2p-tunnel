@@ -9,44 +9,18 @@ namespace common.tcpforward
     /// </summary>
     public sealed class TcpForwardRegisterParamsInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public TcpForwardRegisterParamsInfo() { }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public string SourceIp { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public ushort SourcePort { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public string TargetName { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public string TargetIp { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public ushort TargetPort { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+
         public byte[] ToBytes()
         {
             var sipBytes = SourceIp.GetUTF16Bytes();
             var tipBytes = TargetIp.GetUTF16Bytes();
-            var tnameBytes = TargetName.GetUTF16Bytes();
 
             byte[] bytes = new byte[
                 1  //AliveType
@@ -54,7 +28,6 @@ namespace common.tcpforward
                 + 2  //TargetPort
                 + 1 + 1 + sipBytes.Length  //SourceIp
                 + 1 + 1 + tipBytes.Length  //TargetIp
-                + 1 + 1 + tnameBytes.Length //TargetName
              ];
             var memory = bytes.AsMemory();
             var span = bytes.AsSpan();
@@ -84,19 +57,10 @@ namespace common.tcpforward
             tipBytes.CopyTo(span.Slice(index));
             index += tipBytes.Length;
 
-            bytes[index] = (byte)tnameBytes.Length;
-            index += 1;
-            bytes[index] = (byte)TargetName.Length;
-            index += 1;
-            tnameBytes.CopyTo(span.Slice(index));
-            index += tnameBytes.Length;
             return bytes;
 
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
+
         public void DeBytes(Memory<byte> data)
         {
             var span = data.Span;
@@ -117,8 +81,6 @@ namespace common.tcpforward
             TargetIp = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
             index += 1 + 1 + span[index];
 
-            TargetName = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
-            index += 1 + 1 + span[index];
         }
 
     }

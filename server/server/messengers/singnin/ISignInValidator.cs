@@ -1,12 +1,13 @@
 ﻿using common.server.model;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace server.messengers.singnin
 {
 
     public interface ISignInValidatorHandler
     {
-        public void LoadValidator(ISignInValidator validator);
+        public void LoadValidator(Assembly[] assemblys);
         /// <summary>
         /// 登入前验证
         /// </summary>

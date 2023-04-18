@@ -1,8 +1,10 @@
 ﻿using common.libs;
 using common.libs.extends;
 using common.server.model;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -23,10 +25,11 @@ namespace common.server
         private readonly MessengerSender messengerSender;
         private readonly IRelaySourceConnectionSelector sourceConnectionSelector;
         private readonly IRelayValidator relayValidator;
+        private readonly ServiceProvider serviceProvider;
 
 
         public MessengerResolver(IUdpServer udpserver, ITcpServer tcpserver, MessengerSender messengerSender,
-            IRelaySourceConnectionSelector sourceConnectionSelector, IRelayValidator relayValidator)
+            IRelaySourceConnectionSelector sourceConnectionSelector, IRelayValidator relayValidator, ServiceProvider serviceProvider)
         {
             this.tcpserver = tcpserver;
             this.udpserver = udpserver;
@@ -36,41 +39,48 @@ namespace common.server
             this.udpserver.OnPacket = InputData;
             this.sourceConnectionSelector = sourceConnectionSelector;
             this.relayValidator = relayValidator;
+            this.serviceProvider = serviceProvider;
         }
 
-        public void LoadMessenger(Type type, object obj)
+        public void LoadMessenger(Assembly[] assemblys)
         {
             Type voidType = typeof(void);
             Type midType = typeof(MessengerIdAttribute);
-            foreach (var method in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
-            {
-                MessengerIdAttribute mid = method.GetCustomAttribute(midType) as MessengerIdAttribute;
-                if (mid != null)
-                {
-                    if (messengers.ContainsKey(mid.Id) == false)
-                    {
-                        MessengerCacheInfo cache = new MessengerCacheInfo
-                        {
-                            Target = obj,
-                            //IsTaskResult = method.ReturnType.GetProperty("Result") != null
-                        };
-                        if (method.ReturnType == voidType)
-                        {
-                            cache.VoidMethod = (VoidDelegate)Delegate.CreateDelegate(typeof(VoidDelegate), obj, method);
-                        }
-                        else if (method.ReturnType.GetProperty("IsCompleted") != null && method.ReturnType.GetMethod("GetAwaiter") != null)
-                        {
-                            cache.TaskMethod = (TaskDelegate)Delegate.CreateDelegate(typeof(TaskDelegate), obj, method);
-                        }
 
-                        messengers.TryAdd(mid.Id, cache);
-                    }
-                    else
+            foreach (Type type in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)).Distinct())
+            {
+                object obj = serviceProvider.GetService(type);
+
+                foreach (var method in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
+                {
+                    MessengerIdAttribute mid = method.GetCustomAttribute(midType) as MessengerIdAttribute;
+                    if (mid != null)
                     {
-                        Logger.Instance.Error($"{type.Name}->{method.Name}->{mid.Id} 消息id已存在");
+                        if (messengers.ContainsKey(mid.Id) == false)
+                        {
+                            MessengerCacheInfo cache = new MessengerCacheInfo
+                            {
+                                Target = obj
+                            };
+                            if (method.ReturnType == voidType)
+                            {
+                                cache.VoidMethod = (VoidDelegate)Delegate.CreateDelegate(typeof(VoidDelegate), obj, method);
+                            }
+                            else if (method.ReturnType.GetProperty("IsCompleted") != null && method.ReturnType.GetMethod("GetAwaiter") != null)
+                            {
+                                cache.TaskMethod = (TaskDelegate)Delegate.CreateDelegate(typeof(TaskDelegate), obj, method);
+                            }
+
+                            messengers.TryAdd(mid.Id, cache);
+                        }
+                        else
+                        {
+                            Logger.Instance.Error($"{type.Name}->{method.Name}->{mid.Id} 消息id已存在");
+                        }
                     }
                 }
             }
+
         }
 
         public bool GetMessenger(ushort id, out object obj)
@@ -220,6 +230,7 @@ namespace common.server
             }
 
         }
+
 
         /// <summary>
         /// 消息插件缓存

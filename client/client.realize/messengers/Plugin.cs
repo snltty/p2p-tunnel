@@ -30,13 +30,10 @@ namespace client.realize.messengers
         {
             services.GetService<IClientsTransfer>();
             services.GetService<MessengerSender>();
-            MessengerResolver serverPluginHelper = services.GetService<MessengerResolver>();
+            MessengerResolver messengerResolver = services.GetService<MessengerResolver>();
 
             //加载所有的消息处理器
-            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)).Distinct())
-            {
-                serverPluginHelper.LoadMessenger(item, services.GetService(item));
-            }
+            messengerResolver.LoadMessenger(assemblys);
             //加载所有的打洞消息处理器
             services.GetService<PunchHoleMessengerSender>().LoadPlugins(assemblys);
         }

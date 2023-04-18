@@ -38,9 +38,13 @@ namespace server.service
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();
+            ServiceProvider serviceProvider = null;
+            //注入 依赖注入服务供应 使得可以在别的地方通过注入的方式获得 ServiceProvider 以用来获取其它服务
+            serviceCollection.AddSingleton((e) => serviceProvider);
+
             IPlugin[] plugins = PluginLoader.LoadBefore(serviceCollection, assemblys);
 
-            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+            serviceProvider = serviceCollection.BuildServiceProvider();
             PluginLoader.LoadAfter(plugins, serviceProvider, assemblys);
 
             var config = serviceProvider.GetService<Config>();

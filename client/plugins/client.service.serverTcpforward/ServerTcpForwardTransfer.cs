@@ -81,9 +81,7 @@ namespace client.service.tcpforward.server
                 SourceIp = forward.Domain,
                 SourcePort = forward.ServerPort,
                 TargetIp = forward.LocalIp,
-                TargetPort = forward.LocalPort,
-                TargetName = clientConfig.Client.Name,
-
+                TargetPort = forward.LocalPort
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
@@ -128,7 +126,6 @@ namespace client.service.tcpforward.server
                 SourceIp = forward.Domain,
                 SourcePort = forward.ServerPort,
                 TargetIp = forward.LocalIp,
-                TargetName = clientConfig.Client.Name,
                 TargetPort = forward.LocalPort,
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
@@ -164,6 +161,7 @@ namespace client.service.tcpforward.server
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
                 SourcePort = forward.ServerPort,
+                
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
@@ -250,8 +248,7 @@ namespace client.service.tcpforward.server
                 SourceIp = item.Domain,
                 SourcePort = item.ServerPort,
                 TargetIp = item.LocalIp,
-                TargetPort = item.LocalPort,
-                TargetName = clientConfig.Client.Name,
+                TargetPort = item.LocalPort
             }).ContinueWith((result) =>
             {
                 PrintResult(item, result.Result, type);

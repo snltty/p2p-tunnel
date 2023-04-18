@@ -128,10 +128,6 @@ namespace common.server.model
         /// </summary>
         public ulong ToId { get; set; } = 0;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             var bytes = new byte[24];
@@ -146,11 +142,6 @@ namespace common.server.model
             index += 8;
             return bytes;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;
@@ -239,10 +230,7 @@ namespace common.server.model
             return bytes;
 
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
+
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;

@@ -21,5 +21,12 @@ namespace common.libs
             return assemblys.SelectMany(c => c.GetTypes())
                .Where(c => !c.IsAbstract).Where(c => c.IsSubclassOf(type));
         }
+
+
+        public static IEnumerable<Type> GetEnums(Assembly[] assemblys)
+        {
+            return assemblys.SelectMany(c => c.GetTypes())
+               .Where(c => c.IsEnum);
+        }
     }
 }

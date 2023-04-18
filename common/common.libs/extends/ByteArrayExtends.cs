@@ -4,17 +4,9 @@ using System.IO.Compression;
 
 namespace common.libs.extends
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public static class ByteArrayExtends
     {
        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bytes"></param>
-        /// <returns></returns>
         public static byte[] GZip(this byte[] bytes)
         {
             using MemoryStream compressStream = new MemoryStream();
@@ -24,11 +16,6 @@ namespace common.libs.extends
             return compressStream.ToArray();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bytes"></param>
-        /// <returns></returns>
         public static byte[] UnGZip(this byte[] bytes)
         {
             using var compressStream = new MemoryStream(bytes);

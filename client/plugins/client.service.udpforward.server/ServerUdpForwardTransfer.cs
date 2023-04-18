@@ -21,18 +21,16 @@ namespace client.service.udpforward.server
     {
         public readonly ServerConfigInfo serverConfigInfo;
         private readonly IConfigDataProvider<ServerConfigInfo> serverConfigDataProvider;
-        private readonly Config clientConfig;
         private readonly SignInStateInfo signInStateInfo;
 
         private readonly UdpForwardMessengerSender udpForwardMessengerSender;
 
-        public ServerUdpForwardTransfer(UdpForwardMessengerSender udpForwardMessengerSender,IConfigDataProvider<ServerConfigInfo> serverConfigDataProvider,Config clientConfig,SignInStateInfo signInStateInfo)
+        public ServerUdpForwardTransfer(UdpForwardMessengerSender udpForwardMessengerSender,IConfigDataProvider<ServerConfigInfo> serverConfigDataProvider,SignInStateInfo signInStateInfo)
         {
             this.udpForwardMessengerSender = udpForwardMessengerSender;
             this.serverConfigDataProvider = serverConfigDataProvider;
             serverConfigInfo = ReadServerConfig();
 
-            this.clientConfig = clientConfig;
             this.signInStateInfo = signInStateInfo;
 
             signInStateInfo.OnChange+=(state) =>
@@ -71,8 +69,7 @@ namespace client.service.udpforward.server
             {
                 SourcePort = forward.ServerPort,
                 TargetIp = forward.LocalIp,
-                TargetPort = forward.LocalPort,
-                TargetName = clientConfig.Client.Name,
+                TargetPort = forward.LocalPort
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
@@ -107,7 +104,6 @@ namespace client.service.udpforward.server
                 SourcePort = forwardInfo.ServerPort,
                 TargetIp = forwardInfo.LocalIp,
                 TargetPort = forwardInfo.LocalPort,
-                TargetName = clientConfig.Client.Name,
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
@@ -184,8 +180,7 @@ namespace client.service.udpforward.server
             {
                 SourcePort = item.ServerPort,
                 TargetIp = item.LocalIp,
-                TargetPort = item.LocalPort,
-                TargetName = clientConfig.Client.Name,
+                TargetPort = item.LocalPort
             }).ContinueWith((result) =>
             {
                 PrintResult(item, result.Result);
@@ -228,13 +223,7 @@ namespace client.service.udpforward.server
     [Table("server-udp-forwards")]
     public sealed class ServerConfigInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public ServerConfigInfo() { }
-        /// <summary>
-        /// 
-        /// </summary>
         public List<ServerForwardItemInfo> Tunnels { get; set; } = new List<ServerForwardItemInfo>();
     }
     /// <summary>
