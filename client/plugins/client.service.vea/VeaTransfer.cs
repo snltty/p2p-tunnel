@@ -3,6 +3,7 @@ using client.messengers.singnin;
 using client.service.vea.socks5;
 using common.libs;
 using common.libs.extends;
+using common.proxy;
 using common.server;
 using System;
 using System.Collections.Concurrent;
@@ -34,18 +35,18 @@ namespace client.service.vea
         public ConcurrentDictionary<int, IPAddressCacheInfo> LanIPList => lanips;
 
         private readonly Config config;
-        private readonly IVeaSocks5ClientListener socks5ClientListener;
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly VeaMessengerSender veaMessengerSender;
         private readonly SignInStateInfo signInStateInfo;
+        private readonly IProxyServer proxyServer;
 
-        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, IVeaSocks5ClientListener socks5ClientListener, SignInStateInfo signInStateInfo)
+        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender,  SignInStateInfo signInStateInfo, IProxyServer proxyServer)
         {
             this.config = config;
-            this.socks5ClientListener = socks5ClientListener;
             this.clientInfoCaching = clientInfoCaching;
             this.veaMessengerSender = veaMessengerSender;
             this.signInStateInfo = signInStateInfo;
+            this.proxyServer = proxyServer;
 
             clientInfoCaching.OnOnline += (client) =>
             {
@@ -132,7 +133,7 @@ namespace client.service.vea
             if (config.Enable)
             {
                 RunTun2Socks();
-                socks5ClientListener.Start(config.SocksPort, config.BufferSize);
+                proxyServer.Start((ushort)config.SocksPort, config.Plugin);
             }
             UpdateIp();
         }
@@ -141,7 +142,7 @@ namespace client.service.vea
         /// </summary>
         public void Stop()
         {
-            socks5ClientListener.Stop();
+            proxyServer.Stop(config.Plugin);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 KillWindows();

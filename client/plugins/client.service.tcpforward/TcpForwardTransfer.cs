@@ -42,7 +42,7 @@ namespace client.service.tcpforward
             p2PConfigInfo = ReadP2PConfig();
 
             this.tcpForwardServer = tcpForwardServer;
-            tcpForwardServer.Init(config.NumConnections, config.BufferSize);
+            tcpForwardServer.Init(0, config.BufferSize);
             tcpForwardServer.OnListeningChange += (model) =>
             {
                 if (model.Port == 0)

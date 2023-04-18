@@ -9,7 +9,7 @@
   */
   "LanIPs": [ /*"192.168.66.0"*/ ],
   "SocksPort": 5415, //代理端口，无所谓，填写一个未被占用的端口即可
-  "BufferSize": 8192,
+  "BufferSize": 3,//0-1KB 1-2KB 2-4KB 3-8KB 4-16KB 5-32KB 6-64KB 7-128KB 8-256KB 9-512KB 10-1024KB
   "NumConnections": 1000, //支持连接数
   "ConnectEnable": false //是否允许被连接
 }

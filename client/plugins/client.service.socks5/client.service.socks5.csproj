@@ -18,6 +18,14 @@
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Content Include="socks-custom.pac">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="socks.pac">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\common\common.server\common.server.csproj" />

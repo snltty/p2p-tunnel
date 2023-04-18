@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\common\common.proxy\common.proxy.csproj" />
     <ProjectReference Include="..\client\client.csproj" />
   </ItemGroup>
 

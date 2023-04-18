@@ -1,8 +1,10 @@
 ﻿using common.libs.database;
 using common.libs.extends;
+using common.proxy;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace client.service.vea
@@ -13,15 +15,9 @@ namespace client.service.vea
     [Table("vea-appsettings")]
     public sealed class Config
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="configDataProvider"></param>
+
         public Config(IConfigDataProvider<Config> configDataProvider)
         {
             this.configDataProvider = configDataProvider;
@@ -36,6 +32,9 @@ namespace client.service.vea
             NumConnections = config.NumConnections;
             ConnectEnable = config.ConnectEnable;
         }
+
+        [JsonIgnore]
+        public byte Plugin => 2;
 
         /// <summary>
         /// 启用
@@ -62,7 +61,7 @@ namespace client.service.vea
         /// <summary>
         /// buffersize
         /// </summary>
-        public int BufferSize { get; set; } = 8 * 1024;
+        public EnumProxyBufferSize BufferSize { get; set; } =  EnumProxyBufferSize.KB_8;
         /// <summary>
         /// 连接数
         /// </summary>
@@ -104,7 +103,6 @@ namespace client.service.vea
             SocksPort = _config.SocksPort;
             BufferSize = _config.BufferSize;
             ConnectEnable = _config.ConnectEnable;
-
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }

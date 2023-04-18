@@ -23,7 +23,6 @@ namespace common.tcpforward
 
             Config config = ReadConfig().Result;
             ConnectEnable = config.ConnectEnable;
-            NumConnections = config.NumConnections;
             BufferSize = config.BufferSize;
             WebListens = config.WebListens;
             TunnelListenRange = config.TunnelListenRange;
@@ -44,13 +43,6 @@ namespace common.tcpforward
         /// 允许连接
         /// </summary>
         public bool ConnectEnable { get; set; } = false;
-        /// <summary>
-        /// 连接数
-        /// </summary>
-        public int NumConnections { get; set; } = 1000;
-        /// <summary>
-        /// 
-        /// </summary>
         public int BufferSize { get; set; } = 8 * 1024;
         /// <summary>
         /// 短连接端口
@@ -90,7 +82,6 @@ namespace common.tcpforward
             var _config = jsonStr.DeJson<Config>();
 
             ConnectEnable = _config.ConnectEnable;
-            NumConnections = _config.NumConnections;
             BufferSize = _config.BufferSize;
             WebListens = _config.WebListens;
             TunnelListenRange = _config.TunnelListenRange;

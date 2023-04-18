@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.proxy;
 using common.server;
 using common.socks5;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,12 +13,13 @@ namespace client.service.socks5
         {
             common.socks5.Config config = services.GetService<common.socks5.Config>();
             Socks5Transfer socks5Transfer = services.GetService<Socks5Transfer>();
+            ProxyPluginLoader.LoadPlugin(services.GetService<ISocks5ProxyPlugin>());
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Debug($"socks5已加载");
             if (config.ListenEnable)
             {
-                services.GetService<ISocks5ClientListener>().Start(config.ListenPort, config.BufferSize);
+                services.GetService<IProxyServer>().Start((ushort)config.ListenPort, config.Plugin);
                 if (config.IsPac)
                 {
                     socks5Transfer.UpdatePac();
@@ -43,16 +45,8 @@ namespace client.service.socks5
         {
             services.AddSingleton<Socks5Transfer>();
             services.AddSingleton<common.socks5.Config>();
-            services.AddSingleton<ISocks5ClientListener, Socks5ClientListener>();
-            services.AddSingleton<ISocks5MessengerSender, Socks5MessengerSender>();
-
-            services.AddSingleton<ISocks5ServerHandler, Socks5ServerHandler>();
-            services.AddSingleton<ISocks5ClientHandler, Socks5ClientHandler>();
-            services.AddSingleton<ISocks5DstEndpointProvider, Socks5DstEndpointProvider>();
-            
-
-            services.AddSingleton<ISocks5Validator, DefaultSocks5Validator>();
-            services.AddSingleton<ISocks5AuthValidator, Socks5AuthValidator>();
+            services.AddSingleton<ISocks5ConnectionProvider, Socks5ConnectionProvider>();
+            services.AddSingleton<ISocks5ProxyPlugin, Socks5ProxyPlugin>();
         }
     }
 

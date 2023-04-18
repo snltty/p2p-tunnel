@@ -10,18 +10,10 @@ namespace client.service.vea.client
     public sealed class VeaClientConfigure : IClientConfigure
     {
         private readonly Config config;
-        private readonly IVeaSocks5ServerHandler veaSocks5ServerHandler;
-        private readonly IVeaSocks5ClientListener veaSocks5ClientListener;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="veaSocks5ServerHandler"></param>
-        public VeaClientConfigure(Config config, IVeaSocks5ServerHandler veaSocks5ServerHandler, IVeaSocks5ClientListener veaSocks5ClientListener)
+
+        public VeaClientConfigure(Config config)
         {
             this.config = config;
-            this.veaSocks5ServerHandler = veaSocks5ServerHandler;
-            this.veaSocks5ClientListener = veaSocks5ClientListener;
         }
 
         /// <summary>
@@ -60,9 +52,6 @@ namespace client.service.vea.client
         public async Task<string> Save(string jsonStr)
         {
             await config.SaveConfig(jsonStr).ConfigureAwait(false);
-
-            veaSocks5ServerHandler.UpdateConfig();
-            veaSocks5ClientListener.SetBufferSize(config.BufferSize);
 
             return string.Empty;
         }

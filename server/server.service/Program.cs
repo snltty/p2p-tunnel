@@ -11,6 +11,7 @@ using common.server;
 using System.IO;
 using server.service.users;
 using common.libs.database;
+using common.proxy;
 
 namespace server.service
 {
@@ -33,8 +34,9 @@ namespace server.service
             Assembly[] assemblys = new Assembly[] {
                 typeof(TcpForwardMessenger).Assembly,
                 typeof(UdpForwardMessenger).Assembly,
-                typeof(Socks5Messenger).Assembly,
+                typeof(Socks5SettingMessenger).Assembly,
                 typeof(UsersMessenger).Assembly,
+                typeof(ProxyMessenger).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();

@@ -1,5 +1,5 @@
 ﻿using client.service.ui.api.clientServer;
-using common.socks5;
+using common.proxy;
 using System;
 using System.Threading.Tasks;
 
@@ -11,13 +11,13 @@ namespace client.service.socks5
     public sealed class Socks5ClientService : IClientService
     {
         private readonly common.socks5.Config config;
-        private readonly ISocks5ClientListener socks5ClientListener;
+        private readonly IProxyServer proxyServer;
         private readonly Socks5Transfer socks5Transfer;
 
-        public Socks5ClientService(common.socks5.Config config, ISocks5ClientListener socks5ClientListener, Socks5Transfer socks5Transfer)
+        public Socks5ClientService(common.socks5.Config config, IProxyServer proxyServer, Socks5Transfer socks5Transfer)
         {
             this.config = config;
-            this.socks5ClientListener = socks5ClientListener;
+            this.proxyServer = proxyServer;
             this.socks5Transfer = socks5Transfer;
         }
 
@@ -50,12 +50,12 @@ namespace client.service.socks5
         }
         public void Run(ClientServiceParamsInfo arg)
         {
-            socks5ClientListener.Stop();
+            proxyServer.Stop(config.Plugin);
             if (config.ListenEnable)
             {
                 try
                 {
-                    socks5ClientListener.Start(config.ListenPort, config.BufferSize);
+                    proxyServer.Start((ushort)config.ListenPort, config.Plugin);
                 }
                 catch (Exception ex)
                 {

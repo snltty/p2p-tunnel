@@ -1,7 +1,6 @@
 ﻿using common.libs;
 using common.libs.extends;
 using common.server;
-using common.server.model;
 using common.socks5;
 using server.messengers;
 using server.messengers.singnin;

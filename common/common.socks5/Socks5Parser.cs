@@ -1,5 +1,6 @@
 ﻿using common.libs;
 using common.libs.extends;
+using common.proxy;
 using System;
 using System.Buffers.Binary;
 using System.Linq;
@@ -139,6 +140,8 @@ namespace common.socks5
             }
             return IPAddress.Any;
         }
+
+
         /// <summary>
         /// 是否是 任意地址
         /// </summary>
@@ -309,7 +312,7 @@ namespace common.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static Socks5ValidateResult ValidateRequestData(Memory<byte> data)
+        public static EnumProxyValidateDataResult ValidateRequestData(Memory<byte> data)
         {
             /*
              * VERSION	METHODS_COUNT	METHODS
@@ -320,28 +323,28 @@ namespace common.socks5
 
             if (data.Length < 2 || data.Length < 2 + data.Span[1])
             {
-                return Socks5ValidateResult.TooShort;
+                return EnumProxyValidateDataResult.TooShort;
             }
             if (data.Length > 2 + data.Span[1])
             {
-                return Socks5ValidateResult.TooLong;
+                return EnumProxyValidateDataResult.TooLong;
             }
 
-            return Socks5ValidateResult.Equal;
+            return EnumProxyValidateDataResult.Equal;
         }
         /// <summary>
         /// 验证command数据完整性
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static Socks5ValidateResult ValidateCommandData(Memory<byte> data)
+        public static EnumProxyValidateDataResult ValidateCommandData(Memory<byte> data)
         {
             /*
              * VERSION  COMMAND RSV ADDRESS_TYPE    DST.ADDR    DST.PORT
              * 1        1       1   1               1-255       2
              * 域名模式下 DST.ADDR第一个字节是域名长度，那么整个数据至少5个字节
              */
-            if (data.Length < 5) return Socks5ValidateResult.TooShort;
+            if (data.Length < 5) return EnumProxyValidateDataResult.TooShort;
 
             var span = data.Span;
             int addrLength = (Socks5EnumAddressType)span[3] switch
@@ -353,13 +356,13 @@ namespace common.socks5
             };
             if (data.Length < 4 + addrLength)
             {
-                return Socks5ValidateResult.TooShort;
+                return EnumProxyValidateDataResult.TooShort;
             }
             if (data.Length > 4 + addrLength)
             {
-                return Socks5ValidateResult.TooLong;
+                return EnumProxyValidateDataResult.TooLong;
             }
-            return Socks5ValidateResult.Equal;
+            return EnumProxyValidateDataResult.Equal;
         }
 
         /// <summary>
@@ -368,20 +371,20 @@ namespace common.socks5
         /// <param name="data"></param>
         /// <param name="authType"></param>
         /// <returns></returns>
-        public static Socks5ValidateResult ValidateAuthData(Memory<byte> data, Socks5EnumAuthType authType)
+        public static EnumProxyValidateDataResult ValidateAuthData(Memory<byte> data, Socks5EnumAuthType authType)
         {
             return authType switch
             {
-                Socks5EnumAuthType.NoAuth => Socks5ValidateResult.Equal,
+                Socks5EnumAuthType.NoAuth => EnumProxyValidateDataResult.Equal,
                 Socks5EnumAuthType.Password => ValidateAuthPasswordData(data),
-                Socks5EnumAuthType.GSSAPI => Socks5ValidateResult.Equal,
-                Socks5EnumAuthType.IANA => Socks5ValidateResult.Equal,
-                Socks5EnumAuthType.UnKnow => Socks5ValidateResult.Bad,
-                Socks5EnumAuthType.NotSupported => Socks5ValidateResult.Bad,
-                _ => Socks5ValidateResult.Bad,
+                Socks5EnumAuthType.GSSAPI => EnumProxyValidateDataResult.Equal,
+                Socks5EnumAuthType.IANA => EnumProxyValidateDataResult.Equal,
+                Socks5EnumAuthType.UnKnow => EnumProxyValidateDataResult.Bad,
+                Socks5EnumAuthType.NotSupported => EnumProxyValidateDataResult.Bad,
+                _ => EnumProxyValidateDataResult.Bad,
             };
         }
-        private static Socks5ValidateResult ValidateAuthPasswordData(Memory<byte> data)
+        private static EnumProxyValidateDataResult ValidateAuthPasswordData(Memory<byte> data)
         {
             /*
              VERSION	USERNAME_LENGTH	USERNAME	PASSWORD_LENGTH	PASSWORD
@@ -393,26 +396,26 @@ namespace common.socks5
             //至少有 USERNAME_LENGTH  PASSWORD_LENGTH 字节以上
             if (span.Length <= 2)
             {
-                return Socks5ValidateResult.TooShort;
+                return EnumProxyValidateDataResult.TooShort;
             }
 
             byte nameLength = span[0];
             //至少有 USERNAME_LENGTH USERNAME  PASSWORD_LENGTH
             if (span.Length < nameLength + 1 + 1)
             {
-                return Socks5ValidateResult.TooShort;
+                return EnumProxyValidateDataResult.TooShort;
             }
 
             byte passwordLength = span[1 + nameLength];
             if (span.Length < 1 + 1 + nameLength + passwordLength)
             {
-                return Socks5ValidateResult.TooShort;
+                return EnumProxyValidateDataResult.TooShort;
             }
             if (span.Length > 1 + 1 + nameLength + passwordLength)
             {
-                return Socks5ValidateResult.TooLong;
+                return EnumProxyValidateDataResult.TooLong;
             }
-            return Socks5ValidateResult.Equal;
+            return EnumProxyValidateDataResult.Equal;
         }
 
         [Flags]

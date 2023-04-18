@@ -7,19 +7,21 @@ namespace common.proxy
     public interface IProxyPlugin
     {
         public byte Id { get; }
+        public EnumProxyBufferSize BufferSize { get; }
+
 
         /// <summary>
         /// 验证数据完整性
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public EnumProxyValidateDataResult ValidateData(Memory<byte> data);
+        public EnumProxyValidateDataResult ValidateData(ProxyInfo info);
 
         /// <summary>
         /// 请求数据预处理
         /// </summary>
         /// <param name="info"></param>
-        public void HandleRequestData(ProxyInfo info);
+        public bool HandleRequestData(ProxyInfo info);
 
         /// <summary>
         /// 验证权限，可以在这里阻止访问

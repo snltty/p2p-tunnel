@@ -19,26 +19,24 @@ namespace common.proxy
     /// <summary>
     /// socks5消息发送
     /// </summary>
-    public sealed class Socks5MessengerSender : IProxyMessengerSender
+    public sealed class ProxyMessengerSender : IProxyMessengerSender
     {
         private readonly MessengerSender messengerSender;
 
-        private IConnection connection;
-        private string targetName;
-        public Socks5MessengerSender(MessengerSender messengerSender)
+        public ProxyMessengerSender(MessengerSender messengerSender)
         {
             this.messengerSender = messengerSender;
         }
 
         public async Task<bool> Request(ProxyInfo info)
         {
-            if (connection == null || connection.Connected == false) return false;
+            if (info.Connection == null || info.Connection.Connected == false) return false;
 
             byte[] bytes = info.ToBytes(out int length);
             bool res = await messengerSender.SendOnly(new MessageRequestWrap
             {
-                MessengerId = (ushort)Socks5MessengerIds.Request,
-                Connection = connection,
+                MessengerId = (ushort)ProxyMessengerIds.Request,
+                Connection = info.Connection,
                 Payload = bytes.AsMemory(0, length)
             });
             info.Return(bytes);
@@ -46,10 +44,12 @@ namespace common.proxy
         }
         public async Task<bool> Response(ProxyInfo info)
         {
+            if (info.Connection == null || info.Connection.Connected == false) return false;
+
             byte[] bytes = info.ToBytes(out int length);
             bool res = await messengerSender.SendOnly(new MessageRequestWrap
             {
-                MessengerId = (ushort)Socks5MessengerIds.Response,
+                MessengerId = (ushort)ProxyMessengerIds.Response,
                 Connection = info.Connection,
                 Payload = bytes.AsMemory(0, length)
             });

@@ -26,13 +26,9 @@ namespace client.service.socks5.server
 
         public string Name => "Socks5服务端";
         public string Author => "snltty";
-        public string Desc => "";
+        public string Desc => string.Empty;
         public bool Enable => true;
 
-        /// <summary>
-        /// 加载
-        /// </summary>
-        /// <returns></returns>
         public async Task<string> Load()
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
@@ -47,11 +43,6 @@ namespace client.service.socks5.server
             return string.Empty;
         }
 
-        /// <summary>
-        /// 保存
-        /// </summary>
-        /// <param name="jsonStr"></param>
-        /// <returns></returns>
         public async Task<string> Save(string jsonStr)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
@@ -70,7 +61,7 @@ namespace client.service.socks5.server
 
     public sealed class ServerSocks5ClientService : IClientService
     {
-        
+
         public void Default(ClientServiceParamsInfo arg)
         {
         }

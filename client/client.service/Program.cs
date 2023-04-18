@@ -9,8 +9,9 @@ using client.service.udpforward;
 using client.service.udpforward.server;
 using client.service.ui.api.service.clientServer;
 using client.service.users.server;
-using client.service.vea.socks5;
+using client.service.vea.client;
 using common.libs;
+using common.proxy;
 using common.server;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -57,8 +58,9 @@ namespace client.service
                 typeof(Socks5ClientService).Assembly,
                 typeof(ServerSocks5Configure).Assembly,
                 typeof(PunchHoleMessenger).Assembly,
-                typeof(VeaSocks5Messenger).Assembly,
+                typeof(VeaClientService).Assembly,
                 typeof(ServerUsersClientService).Assembly,
+                typeof(ProxyMessenger).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();

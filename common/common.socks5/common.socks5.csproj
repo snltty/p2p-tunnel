@@ -20,12 +20,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include="socks-custom.pac">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="socks.pac">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
 	  <Content Include="socks5-appsettings.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -33,6 +27,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\common.libs\common.libs.csproj" />
+	  <ProjectReference Include="..\common.proxy\common.proxy.csproj" />
 	</ItemGroup>
 
 </Project>

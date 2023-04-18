@@ -200,17 +200,17 @@ namespace common.proxy
 
     public enum EnumProxyBufferSize : byte
     {
-        KB_1 = 1,
-        KB_2 = 2,
-        KB_4 = 3,
-        KB_8 = 4,
-        KB_16 = 5,
-        KB_32 = 6,
-        KB_64 = 7,
-        KB_128 = 8,
-        KB_256 = 9,
-        KB_512 = 10,
-        KB_1024 = 11,
+        KB_1 = 0,
+        KB_2 = 1,
+        KB_4 = 2,
+        KB_8 = 3,
+        KB_16 = 4,
+        KB_32 = 5,
+        KB_64 = 6,
+        KB_128 = 7,
+        KB_256 = 8,
+        KB_512 = 9,
+        KB_1024 = 10,
     }
 
     /// <summary>

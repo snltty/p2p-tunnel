@@ -17,6 +17,7 @@ using common.libs.extends;
 using server.messengers.singnin;
 using server.service.messengers.singnin;
 using System.ComponentModel.DataAnnotations;
+using common.proxy;
 
 namespace server.service
 {
@@ -44,6 +45,10 @@ namespace server.service
             services.AddSingleton<IAsymmetricCrypto, RsaCrypto>();
             services.AddSingleton<WheelTimer<object>>();
 
+            services.AddSingleton<IProxyMessengerSender, ProxyMessengerSender>();
+            services.AddSingleton<IProxyClient, ProxyClient>();
+            services.AddSingleton<IProxyServer, ProxyServer>();
+
             foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)))
             {
                 services.AddSingleton(item);
@@ -53,6 +58,7 @@ namespace server.service
                 services.AddSingleton(item);
             }
         }
+
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             var config = services.GetService<Config>();
@@ -71,7 +77,7 @@ namespace server.service
 
             ISignInValidatorHandler signInMiddlewareHandler = services.GetService<ISignInValidatorHandler>();
             signInMiddlewareHandler.LoadValidator(assemblys);
-            
+
 
             Loop(services);
             Udp((UdpServer)udpServer, messengerResolver);

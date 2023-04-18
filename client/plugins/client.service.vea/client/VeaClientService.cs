@@ -15,15 +15,13 @@ namespace client.service.vea.client
     {
         private readonly Config config;
         private readonly VeaTransfer VeaTransfer;
-        private readonly IVeaSocks5ServerHandler veaSocks5ServerHandler;
         private readonly VeaMessengerSender veaMessengerSender;
         private readonly IClientInfoCaching clientInfoCaching;
 
-        public VeaClientService(Config config, VeaTransfer VeaTransfer, IVeaSocks5ServerHandler veaSocks5ServerHandler, VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
+        public VeaClientService(Config config, VeaTransfer VeaTransfer,  VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
         {
             this.config = config;
             this.VeaTransfer = VeaTransfer;
-            this.veaSocks5ServerHandler = veaSocks5ServerHandler;
             this.veaMessengerSender = veaMessengerSender;
             this.clientInfoCaching = clientInfoCaching;
         }
@@ -45,7 +43,6 @@ namespace client.service.vea.client
         public void Set(ClientServiceParamsInfo arg)
         {
             config.SaveConfig(arg.Content).Wait();
-            veaSocks5ServerHandler.UpdateConfig();
         }
         public void Run(ClientServiceParamsInfo arg)
         {

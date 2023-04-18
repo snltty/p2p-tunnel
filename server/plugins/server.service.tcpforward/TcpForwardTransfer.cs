@@ -20,7 +20,7 @@ namespace server.service.tcpforward
         {
             if (config.ConnectEnable)
             {
-                tcpForwardServer.Init(config.NumConnections, config.BufferSize);
+                tcpForwardServer.Init(0, config.BufferSize);
 
                 //离线删除其监听
                 clientSignInCaching.OnOffline += (client) =>
