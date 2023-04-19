@@ -14,9 +14,9 @@ const accesss = files.keys().map(c => files(c).default).filter(c => c.access > 0
 export const shareData = {
     aliveTypes: { 0: '长连接', 1: '短链接' },
     aliveTypesName: { "tunnel": 0, 'web': 1 },
-    forwardTypes: { 'forward': 0, 'proxy': 1 },
     clientConnectTypes: { 0: '未连接', 1: '打洞', 2: '节点中继', 4: '服务器中继' },
     serverTypes: { 1: 'TCP', 2: 'UDP', 3: '/' },
+    bufferSizes: ['KB_1', 'KB_2', 'KB_4', 'KB_8', 'KB_16', 'KB_32', 'KB_64', 'KB_128', 'KB_256', 'KB_512', 'KB_1024'],
     serverAccess: accesss,
     serverImgs: {
         'zg': { img: require('../assets/zg.png'), name: '中国' },
@@ -41,7 +41,6 @@ export const shareData = {
 };
 
 const shareDataKey = Symbol();
-
 export const provideShareData = () => {
     const state = reactive(shareData);
     provide(shareDataKey, state);

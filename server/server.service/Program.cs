@@ -5,12 +5,10 @@ using System.Reflection;
 using server.service.tcpforward;
 using System.Linq;
 using server.service.socks5;
-using server.service.udpforward;
 using System.Threading;
 using common.server;
 using System.IO;
 using server.service.users;
-using common.libs.database;
 using common.proxy;
 
 namespace server.service
@@ -32,8 +30,7 @@ namespace server.service
             //加载插件程序集，当单文件发布或者动态加载dll外部插件时需要，否则如果本程序集没有显式的使用它的相关内容的话，会加载不出来
             //可以改为从dll文件加载
             Assembly[] assemblys = new Assembly[] {
-                typeof(TcpForwardMessenger).Assembly,
-                typeof(UdpForwardMessenger).Assembly,
+                typeof(ServerForwardMessenger).Assembly,
                 typeof(Socks5SettingMessenger).Assembly,
                 typeof(UsersMessenger).Assembly,
                 typeof(ProxyMessenger).Assembly,

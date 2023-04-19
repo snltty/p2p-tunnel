@@ -12,17 +12,6 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="所在分组" prop="GroupId">
                                 <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top-start">
-                                    <!-- <el-dropdown class="w-100">
-                                        <el-input v-model="model.GroupId" :suffix-icon="ArrowDown" readonly></el-input>
-                                        <template #dropdown>
-                                            <el-dropdown-menu>
-                                                <template v-for="(item,index) in model.GroupIds" :key="index">
-                                                    <el-dropdown-item>{{item}}</el-dropdown-item>
-                                                </template>
-                                                <el-dropdown-item divided>添加</el-dropdown-item>
-                                            </el-dropdown-menu>
-                                        </template>
-                                    </el-dropdown> -->
                                     <el-select size="default" v-model="model.GroupId" @change="handleGroupIdChange" allow-create clearable filterable default-first-option placeholder="选择或输入分组编号">
                                         <el-option v-for="(item,index) in model.GroupIds" :key="index" :label="item" :value="item">
                                             <div class="flex">
@@ -67,6 +56,13 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动登入" prop="AutoReg">
                                 <el-checkbox size="default" v-model="model.AutoReg">开启</el-checkbox>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <el-form-item label="bufsize" prop="TcpBufferSize">
+                                <el-select size="default" v-model="model.TcpBufferSize" placeholder="选择合适的buff">
+                                    <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -134,11 +130,11 @@
 import { ref, toRefs, reactive } from '@vue/reactivity';
 import { getSignInInfo, updateConfig } from '../../../apis/signin'
 import { injectServices, accessService } from '../../../states/services';
+import { shareData } from '../../../states/shareData';
 import { getCurrentInstance, onMounted } from '@vue/runtime-core';
 import plugin from './plugin'
 export default {
-    plugin: plugin,
-    components: {},
+    plugin: Object.assign(JSON.parse(JSON.stringify(plugin)), { text: '节点配置' }),
     setup() {
 
         const instance = getCurrentInstance();
@@ -161,7 +157,8 @@ export default {
                 UseRelay: true,
                 AutoRelay: true,
                 UseReConnect: false,
-                UdpUploadSpeedLimit: 0
+                UdpUploadSpeedLimit: 0,
+                TcpBufferSize: 0,
             },
             rules: {
                 Name: [{ required: true, message: '必填', trigger: 'blur' }],
@@ -186,6 +183,7 @@ export default {
 
         const loadConfig = () => {
             getSignInInfo().then((json) => {
+                state.model.TcpBufferSize = json.ClientConfig.TcpBufferSize;
                 state.model.Name = json.ClientConfig.Name;
                 state.model.Args = json.ClientConfig.Args;
                 state.model.GroupId = json.ClientConfig.GroupId;
@@ -209,9 +207,11 @@ export default {
         const getJson = () => {
             return new Promise((resolve, reject) => {
                 getSignInInfo().then((json) => {
+                    json.ClientConfig.TcpBufferSize = +state.model.TcpBufferSize;
                     json.ClientConfig.Name = state.model.Name;
                     json.ClientConfig.Args = getArgs();
                     json.ClientConfig.GroupId = state.model.GroupId;
+                    json.ClientConfig.GroupIds = state.model.GroupIds;
                     json.ClientConfig.AutoReg = state.model.AutoReg;
                     json.ClientConfig.UsePunchHole = state.model.UsePunchHole;
                     json.ClientConfig.TimeoutDelay = +state.model.TimeoutDelay;
@@ -270,7 +270,7 @@ export default {
         });
 
         return {
-            components, ...toRefs(state), formDom, submit, handleGroupIdChange, handleRemoveGroupId
+            shareData, components, ...toRefs(state), formDom, submit, handleGroupIdChange, handleRemoveGroupId
         }
     }
 }

@@ -1,14 +1,11 @@
 ﻿using client.messengers.singnin;
 using client.realize.messengers.punchHole;
 using client.service.forward;
+using client.service.forward.server;
 using client.service.httpProxy;
 using client.service.logger;
 using client.service.socks5;
 using client.service.socks5.server;
-using client.service.tcpforward;
-using client.service.tcpforward.server;
-using client.service.udpforward;
-using client.service.udpforward.server;
 using client.service.ui.api.service.clientServer;
 using client.service.users.server;
 using client.service.vea.client;
@@ -56,7 +53,7 @@ namespace client.service
 
                 typeof(ProxyMessenger).Assembly,
                 typeof(ForwardTransfer).Assembly,
-                typeof(ServerTcpForwardClientService).Assembly,
+                typeof(ServerForwardClientService).Assembly,
 
                 typeof(HttpProxyClientService).Assembly,
 

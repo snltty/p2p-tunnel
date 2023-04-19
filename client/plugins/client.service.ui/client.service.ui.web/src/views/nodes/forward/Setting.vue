@@ -11,6 +11,13 @@
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <el-form-item label="bufsize" prop="BufferSize">
+                                <el-tooltip class="box-item" effect="dark" content="tcp连接的buffer size" placement="top-start">
+                                    <el-input size="default" v-model="model.BufferSize"></el-input>
+                                </el-tooltip>
+                            </el-form-item>
+                        </el-col>
                     </el-row>
                 </el-form-item>
             </el-form>
@@ -19,9 +26,9 @@
 </template>
 
 <script>
-import { ref, toRefs, reactive } from '@vue/reactivity';
-import { getConfig, updateConfig } from '../../../apis/udp-forward'
-import { onMounted } from '@vue/runtime-core';
+import { ref, toRefs, reactive } from "@vue/reactivity";
+import { getConfig, updateConfig } from "../../../apis/forward";
+import { onMounted } from "@vue/runtime-core";
 import plugin from './plugin'
 export default {
     plugin: plugin,
@@ -30,24 +37,42 @@ export default {
         const state = reactive({
             configInfo: {},
             model: {
-                ConnectEnable: false
+                ConnectEnable: false,
+                BufferSize: 0,
             },
             rules: {
-            }
+                BufferSize: [
+                    { required: true, message: "必填", trigger: "blur" },
+                    {
+                        type: "number",
+                        min: 1024,
+                        max: 2147483647,
+                        message: "数字 1024-2147483647",
+                        trigger: "blur",
+                        transform(value) {
+                            return Number(value);
+                        },
+                    },
+                ],
+            },
         });
+
         const loadConfig = () => {
-            getConfig().then((json) => {
-                json = new Function('return' + json)();
-                state.configInfo = json;
-                state.model.ConnectEnable = json.ConnectEnable;
-            }).catch((msg) => {
-            });
-        }
+            getConfig()
+                .then((json) => {
+                    json = new Function("return" + json)();
+                    state.configInfo = json;
+                    state.model.ConnectEnable = json.ConnectEnable;
+                    state.model.BufferSize = json.BufferSize;
+                })
+                .catch((msg) => { });
+        };
         const getJson = () => {
             let _json = JSON.parse(JSON.stringify(state.configInfo));
             _json.ConnectEnable = state.model.ConnectEnable;
+            _json.BufferSize = +state.model.BufferSize;
             return _json;
-        }
+        };
         const submit = () => {
             return new Promise((resolve, reject) => {
                 formDom.value.validate((valid) => {
@@ -56,20 +81,24 @@ export default {
                         return false;
                     }
                     const _json = getJson();
-                    updateConfig(JSON.stringify(_json)).then(resolve).catch(reject);
+                    updateConfig(JSON.stringify(_json))
+                        .then(resolve)
+                        .catch(reject);
                 });
             });
-        }
+        };
 
         onMounted(() => {
             loadConfig();
         });
 
         return {
-            ...toRefs(state), formDom, submit
-        }
-    }
-}
+            ...toRefs(state),
+            formDom,
+            submit,
+        };
+    },
+};
 </script>
 
 <style lang="stylus" scoped>

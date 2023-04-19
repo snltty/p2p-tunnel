@@ -1,7 +1,9 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 const files = require.context('../views/server/', true, /Index\.vue/);
-const servers = files.keys().map(c => files(c).default).filter(c => c.plugin);
+const servers = files.keys().map(c => files(c).default).filter(c => c.plugin).sort((a, b) => {
+    return (a.plugin.order || 0) - (b.plugin.order || 0);
+});
 
 const files1 = require.context('../views/nodes/', true, /Index\.vue/);
 const nodes = files1.keys().map(c => files1(c).default).filter(c => c.plugin).sort((a, b) => {

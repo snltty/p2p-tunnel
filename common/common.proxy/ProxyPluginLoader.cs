@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.server.model;
 using System;
 using System.Collections.Concurrent;
 
@@ -7,7 +8,7 @@ namespace common.proxy
     public interface IProxyPlugin
     {
         public byte Id { get; }
-        public EnumProxyBufferSize BufferSize { get; }
+        public EnumBufferSize BufferSize { get; }
 
 
         /// <summary>

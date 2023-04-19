@@ -4,6 +4,7 @@ using System;
 using System.Buffers.Binary;
 using common.libs.extends;
 using System.Net;
+using common.server.model;
 
 namespace common.socks5
 {
@@ -15,7 +16,7 @@ namespace common.socks5
     public class Socks5ProxyPlugin : ISocks5ProxyPlugin
     {
         public virtual byte Id => config.Plugin;
-        public virtual EnumProxyBufferSize BufferSize => config.BufferSize;
+        public virtual EnumBufferSize BufferSize => config.BufferSize;
         public virtual ushort Port => (ushort)config.ListenPort;
         public virtual bool Enable => config.ListenEnable;
 
@@ -177,7 +178,7 @@ namespace common.socks5
                     break;
             }
 
-            info.TargetPort = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(index, 2));
+            info.TargetPort = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(index, 2));
         }
     }
 }

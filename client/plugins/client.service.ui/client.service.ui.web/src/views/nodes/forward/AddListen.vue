@@ -23,7 +23,7 @@
 
 <script>
 import { reactive, ref, toRefs } from '@vue/reactivity';
-import { addListen } from '../../../apis/tcp-forward'
+import { addListen } from '../../../apis/forward'
 import { injectShareData } from '../../../states/shareData'
 import { inject, watch } from '@vue/runtime-core';
 export default {

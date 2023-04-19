@@ -345,7 +345,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             Logger.Instance.Warning($"tcp {ip} connect success");
                             cache.Success = true;
 
-                            IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: config.Client.TcpBufferSize);
+                            IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: (byte)config.Client.TcpBufferSize*1024);
                             await CryptoSwap(connection);
                             await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel);
                             success = true;

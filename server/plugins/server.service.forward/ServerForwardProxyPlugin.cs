@@ -1,37 +1,59 @@
-﻿using common.libs;
+﻿using common.forward;
+using common.libs;
 using common.libs.extends;
 using common.proxy;
 using common.server.model;
-using System;
+using server.messengers;
+using server.messengers.singnin;
 using System.Linq;
 using System.Text;
 
-namespace common.forward
+namespace server.service.forward
 {
-    public interface IForwardProxyPlugin : IProxyPlugin
+    public interface IServerForwardProxyPlugin : IProxyPlugin
     {
-        public Action<ushort> OnStarted { get; set; }
-        public Action<ushort> OnStoped { get; set; }
     }
 
-    public sealed class ForwardProxyPlugin : IForwardProxyPlugin
+    public sealed class ServerForwardProxyPlugin : IServerForwardProxyPlugin
     {
+        public static uint Access => 0b00000000_00000000_00000000_00010000;
         public byte Id => config.Plugin;
         public EnumBufferSize BufferSize => config.BufferSize;
-        public Action<ushort> OnStarted { get; set; } = (port) => { };
-        public Action<ushort> OnStoped { get; set; } = (port) => { };
 
 
-        private readonly Config config;
+        private readonly common.forward.Config config;
         private readonly IProxyServer proxyServer;
         private readonly IForwardTargetProvider forwardTargetProvider;
         private readonly IForwardUdpTargetProvider forwardUdpTargetProvider;
-        public ForwardProxyPlugin(Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IForwardUdpTargetProvider forwardUdpTargetProvider)
+        private readonly IServiceAccessValidator serviceAccessProvider;
+
+        public ServerForwardProxyPlugin(common.forward.Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IForwardUdpTargetProvider forwardUdpTargetProvider, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching)
         {
             this.config = config;
             this.proxyServer = proxyServer;
             this.forwardTargetProvider = forwardTargetProvider;
             this.forwardUdpTargetProvider = forwardUdpTargetProvider;
+            this.serviceAccessProvider = serviceAccessProvider;
+
+
+            clientSignInCaching.OnOffline += (client) =>
+            {
+                var keys = forwardTargetCaching.Remove(client.Name);
+                if (keys.Any())
+                {
+                    foreach (var item in keys)
+                    {
+                        proxyServer.Stop(item);
+                    }
+                }
+            };
+
+            Logger.Instance.Info("代理转发服务已启动...");
+            foreach (ushort port in config.WebListens)
+            {
+                proxyServer.Start(port, config.Plugin);
+                Logger.Instance.Warning($"转发监听:{port}");
+            }
         }
 
         public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
@@ -54,32 +76,14 @@ namespace common.forward
                 return true;
             }
 
-            info.AddressType =  EnumProxyAddressType.IPV4;
+            info.AddressType = EnumProxyAddressType.IPV4;
 
             return true;
         }
         public void HandleAnswerData(ProxyInfo info) { }
         public bool ValidateAccess(ProxyInfo info)
         {
-            if (config.PortWhiteList.Length > 0 && config.PortWhiteList.Contains(info.TargetPort) == false)
-            {
-                return false;
-            }
-            if (config.PortBlackList.Length > 0 && config.PortBlackList.Contains(info.TargetPort))
-            {
-                return false;
-            }
-            return config.ConnectEnable;
-        }
-
-
-        public void Started(ushort port)
-        {
-            OnStarted(port);
-        }
-        public void Stoped(ushort port)
-        {
-            OnStoped(port);
+            return config.ConnectEnable || serviceAccessProvider.Validate(info.Connection, Access);
         }
 
         private void GetConnection(ProxyInfo info)

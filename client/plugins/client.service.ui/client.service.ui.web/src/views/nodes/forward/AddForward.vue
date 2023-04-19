@@ -47,7 +47,7 @@
 <script>
 import { computed, reactive, ref, toRefs } from '@vue/reactivity';
 import { inject, watch } from '@vue/runtime-core';
-import { addForward } from '../../../apis/tcp-forward'
+import { addForward } from '../../../apis/forward'
 import { injectClients } from '../../../states/clients'
 import { injectShareData } from '../../../states/shareData'
 export default {

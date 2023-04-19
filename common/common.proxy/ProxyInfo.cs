@@ -1,5 +1,6 @@
 ﻿using common.libs.extends;
 using common.server;
+using common.server.model;
 using System;
 using System.Buffers;
 using System.Net;
@@ -26,7 +27,7 @@ namespace common.proxy
         /// <summary>
         /// buffer size
         /// </summary>
-        public EnumProxyBufferSize BufferSize { get; set; } = EnumProxyBufferSize.KB_8;
+        public EnumBufferSize BufferSize { get; set; } = EnumBufferSize.KB_8;
         /// <summary>
         /// 插件id
         /// </summary>
@@ -153,7 +154,7 @@ namespace common.proxy
             AddressType = (EnumProxyAddressType)(span[index] & 0b0000_1111);
             index += 1;
 
-            BufferSize = (EnumProxyBufferSize)span[index];
+            BufferSize = (EnumBufferSize)span[index];
             index += 1;
             PluginId = span[index];
             index += 1;
@@ -196,21 +197,6 @@ namespace common.proxy
             ArrayPool<byte>.Shared.Return(data);
         }
 
-    }
-
-    public enum EnumProxyBufferSize : byte
-    {
-        KB_1 = 0,
-        KB_2 = 1,
-        KB_4 = 2,
-        KB_8 = 3,
-        KB_16 = 4,
-        KB_32 = 5,
-        KB_64 = 6,
-        KB_128 = 7,
-        KB_256 = 8,
-        KB_512 = 9,
-        KB_1024 = 10,
     }
 
     /// <summary>

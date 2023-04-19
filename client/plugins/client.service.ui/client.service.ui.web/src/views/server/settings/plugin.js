@@ -5,4 +5,5 @@ export default {
     checked: true,
     path: '/server-settings.html',
     name: 'ServerSettings',
+    order: -98
 }

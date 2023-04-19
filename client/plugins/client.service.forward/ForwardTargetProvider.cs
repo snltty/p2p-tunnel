@@ -34,7 +34,7 @@ namespace client.service.forward
 
         public bool Contains(ushort port)
         {
-            return forwardTargetCaching.Get(port) != null;
+            return forwardTargetCaching.Contains(port);
         }
 
         /// <summary>

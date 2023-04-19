@@ -17,14 +17,6 @@
 </template> 
 
 <script>
-import Client from '../../nodes/list/Setting.vue'
-import Encode from '../../nodes/list/EncodeSetting.vue'
-import TcpForward from '../../nodes/tcpforward/Setting.vue'
-import UdpForward from '../../nodes/udpforward/Setting.vue'
-import HttpProxy from '../../nodes/httpproxy/Setting.vue'
-import Socks5 from '../../nodes/socks5/Setting.vue'
-import Vea from '../../nodes/vea/Setting.vue'
-import Logger from '../../nodes/logger/Setting.vue'
 import { getCurrentInstance, computed, watch, reactive, ref, shallowRef } from '@vue/runtime-core'
 import { useRouter } from 'vue-router'
 import { injectServices, accessService } from '../../../states/services'
@@ -36,16 +28,17 @@ export default {
 
         const instance = getCurrentInstance();
 
-        const _menus = [
-            { text: '节点配置', component: shallowRef(Client) },
-            { text: '通信加密', component: shallowRef(Encode) },
-            { text: 'tcp转发', component: shallowRef(TcpForward) },
-            { text: 'udp转发', component: shallowRef(UdpForward) },
-            { text: 'http代理', component: shallowRef(HttpProxy) },
-            { text: 'socks5代理', component: shallowRef(Socks5) },
-            { text: '虚拟网卡组网', component: shallowRef(Vea) },
-            { text: '日志信息', component: shallowRef(Logger) }
-        ];
+        const files = require.context('../', true, /Setting\.vue/);
+        const settings = files.keys().map(c => files(c).default);
+        const _menus = settings.sort((a, b) => {
+            return (a.plugin.order || 0) - (b.plugin.order || 0);
+        }).map(c => {
+            return {
+                text: c.text || c.plugin.text,
+                component: shallowRef(c)
+            }
+        });
+
         const router = useRouter();
         const servicesState = injectServices();
         const getMenuIndex = (menus) => {

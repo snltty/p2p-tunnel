@@ -1,5 +1,6 @@
 ﻿using common.libs;
 using common.libs.database;
+using common.server.model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -98,7 +99,7 @@ namespace client
         /// <summary>
         /// TcpBufferSize
         /// </summary>
-        public int TcpBufferSize { get; set; } = 128 * 1024;
+        public EnumBufferSize TcpBufferSize { get; set; } = EnumBufferSize.KB_128;
         /// <summary>
         /// 加密
         /// </summary>

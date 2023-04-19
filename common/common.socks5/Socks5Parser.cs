@@ -100,7 +100,7 @@ namespace common.socks5
                         break;
                 }
 
-                int port = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(index, 2));
+                int port = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(index, 2));
 
                 return new IPEndPoint(ip, port);
             }
@@ -186,7 +186,7 @@ namespace common.socks5
             if ((Socks5EnumAddressType)span[0] == Socks5EnumAddressType.IPV4)
             {
                 span = span.Slice(1, 4);
-                uint ip = BinaryPrimitives.ReadUInt32LittleEndian(span);
+                uint ip = BinaryPrimitives.ReadUInt32BigEndian(span);
                 return ip >= 0xE0000000 && ip <= 0xEFFFFFFF;
             }
             return false;

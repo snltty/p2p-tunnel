@@ -13,17 +13,15 @@ namespace client.service.forward
             services.GetService<ForwardTransfer>();
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Debug("转发已加载");
-            Logger.Instance.Debug("转发已启动");
+            Logger.Instance.Debug("端口转发已加载");
             var config = services.GetService<common.forward.Config>();
-
             if (config.ConnectEnable)
             {
-                Logger.Instance.Debug($"转发已允许连接");
+                Logger.Instance.Debug($"端口转发已允许连接");
             }
             else
             {
-                Logger.Instance.Info($"转发未允许连接");
+                Logger.Instance.Info($"端口转发未允许连接");
             }
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }

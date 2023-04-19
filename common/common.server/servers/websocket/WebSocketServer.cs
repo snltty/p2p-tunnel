@@ -69,9 +69,6 @@ namespace common.server.servers.websocket
                 return connections.Values.Select(c => c.Connectrion);
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public WebSocketServer()
         {
             handles = new Dictionary<WebSocketFrameInfo.EnumOpcode, Action<AsyncUserToken>> {
@@ -87,11 +84,6 @@ namespace common.server.servers.websocket
                 { WebSocketFrameInfo.EnumOpcode.Pong,HandlePong},
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bindip"></param>
-        /// <param name="port"></param>
         public void Start(IPAddress bindip, int port)
         {
             IPEndPoint localEndPoint = new IPEndPoint(bindip, port);
@@ -238,9 +230,6 @@ namespace common.server.servers.websocket
             }
 
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public void Stop()
         {
             socket?.SafeClose();
@@ -386,68 +375,31 @@ namespace common.server.servers.websocket
 
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public class WebsocketConnection
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public uint Id { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public Socket Socket { get; init; }
-        /// <summary>
-        /// 
-        /// </summary>
         public bool Connected { get; set; } = false;
 
         private bool Closed = false;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="header"></param>
-        /// <returns></returns>
         public int ConnectResponse(WebsocketHeaderInfo header)
         {
             var data = WebSocketParser.BuildConnectResponseData(header);
             return SendRaw(data);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public int SendRaw(byte[] buffer)
         {
             return Socket.Send(buffer, SocketFlags.None);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="remark"></param>
-        /// <returns></returns>
         public int SendFrame(WebSocketFrameRemarkInfo remark)
         {
             var frame = WebSocketParser.BuildFrameData(remark);
             return SendRaw(frame);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="txt"></param>
-        /// <returns></returns>
         public int SendFrameText(string txt)
         {
             return SendFrameText(txt.ToBytes());
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public int SendFrameText(byte[] buffer)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -456,11 +408,6 @@ namespace common.server.servers.websocket
                 Data = buffer
             });
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public int SendFrameBinary(byte[] buffer)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -469,19 +416,10 @@ namespace common.server.servers.websocket
                 Data = buffer
             });
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public int SendFramePong()
         {
             return SendRaw(WebSocketParser.BuildPongData());
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
         public int SendFrameClose(WebSocketFrameInfo.EnumCloseStatus status)
         {
             return SendFrame(new WebSocketFrameRemarkInfo
@@ -490,9 +428,6 @@ namespace common.server.servers.websocket
                 Data = ((ushort)status).ToBytes()
             });
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public void Close()
         {
             if (!Closed)

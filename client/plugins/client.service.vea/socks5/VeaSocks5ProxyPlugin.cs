@@ -1,6 +1,7 @@
 ﻿using common.libs.extends;
 using common.proxy;
 using common.server;
+using common.server.model;
 using common.socks5;
 using System;
 using System.Net;
@@ -22,7 +23,7 @@ namespace client.service.vea.socks5
     public class VeaSocks5ProxyPlugin : Socks5ProxyPlugin, IVeaSocks5ProxyPlugin
     {
         public override byte Id => config.Plugin;
-        public override EnumProxyBufferSize BufferSize => config.BufferSize;
+        public override EnumBufferSize BufferSize => config.BufferSize;
         public override ushort Port => (ushort)config.SocksPort;
         public override bool Enable => config.Enable;
 

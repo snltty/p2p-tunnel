@@ -1,4 +1,5 @@
 ﻿using common.proxy;
+using common.server.model;
 
 namespace common.httpProxy
 {
@@ -10,7 +11,7 @@ namespace common.httpProxy
     public class HttpProxyPlugin : IHttpProxyPlugin
     {
         public virtual byte Id => config.Plugin;
-        public virtual EnumProxyBufferSize BufferSize => config.BufferSize;
+        public virtual EnumBufferSize BufferSize => config.BufferSize;
         public virtual ushort Port => (ushort)config.ListenPort;
         public virtual bool Enable => config.ListenEnable;
 

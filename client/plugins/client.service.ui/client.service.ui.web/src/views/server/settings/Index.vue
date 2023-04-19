@@ -33,7 +33,9 @@ export default {
 
         const files = require.context('../', true, /Setting\.vue/);
         const settings = files.keys().map(c => files(c).default);
-        const _menus = settings.map(c => {
+        const _menus = settings.sort((a, b) => {
+            return (a.plugin.order || 0) - (b.plugin.order || 0);
+        }).map(c => {
             return {
                 text: c.plugin.text,
                 component: shallowRef(c)

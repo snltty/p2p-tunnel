@@ -132,10 +132,10 @@ namespace client.realize.messengers.clients
         private async Task<ushort> NewBindTcp(ushort localport, IPAddress serverAddress, ulong selfId, ulong targetId)
         {
             TcpServer tempTcpServer = new TcpServer();
-            tempTcpServer.SetBufferSize(config.Client.TcpBufferSize);
+            tempTcpServer.SetBufferSize((byte)config.Client.TcpBufferSize * 1024);
             tempTcpServer.OnConnected1 = (socket) =>
             {
-                tcpServer.BindReceive(socket, config.Client.TcpBufferSize);
+                tcpServer.BindReceive(socket, (byte)config.Client.TcpBufferSize * 1024);
                 tempTcpServer.Disponse();
             };
             tempTcpServer.Start1(localport);
@@ -150,7 +150,7 @@ namespace client.realize.messengers.clients
 
             IPAddress localAddress = (tcpSocket.LocalEndPoint as IPEndPoint).Address;
 
-            IConnection connection = tcpServer.BindReceive(tcpSocket, config.Client.TcpBufferSize);
+            IConnection connection = tcpServer.BindReceive(tcpSocket, (byte)config.Client.TcpBufferSize*1024);
 
             ushort port = await clientsMessengerSender.AddTunnel(connection, selfId, targetId, localport);
 

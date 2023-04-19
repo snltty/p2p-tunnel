@@ -1,6 +1,7 @@
 ﻿using common.libs.database;
 using common.libs.extends;
 using common.proxy;
+using common.server.model;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
@@ -45,7 +46,7 @@ namespace common.forward
         /// 允许连接
         /// </summary>
         public bool ConnectEnable { get; set; } = false;
-        public EnumProxyBufferSize BufferSize { get; set; } = EnumProxyBufferSize.KB_8;
+        public EnumBufferSize BufferSize { get; set; } = EnumBufferSize.KB_8;
         /// <summary>
         /// 短连接端口
         /// </summary>

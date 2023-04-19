@@ -11,6 +11,8 @@ using common.libs.database;
 using common.server;
 using System.Reflection;
 using client.service.users.server;
+using client.service.forward;
+using client.service.httpProxy;
 
 namespace client.service.app
 {
@@ -54,10 +56,9 @@ namespace client.service.app
             //可以改为从dll文件加载
             Assembly[] assemblys = new Assembly[] {
                 typeof(LoggerClientService).Assembly,
-                typeof(TcpForwardMessenger).Assembly,
-                typeof(UdpForwardMessenger).Assembly,
+                typeof(ForwardClientService).Assembly,
+                typeof(HttpProxyClientService).Assembly,
                 typeof(ClientServer).Assembly,
-                typeof(Socks5ClientService).Assembly,
                 typeof(Socks5ClientService).Assembly,
                 typeof(PunchHoleMessenger).Assembly,
                 typeof(ServerUsersClientService).Assembly,

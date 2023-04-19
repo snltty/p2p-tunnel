@@ -30,7 +30,8 @@
 
 <script>
 import { computed, reactive } from '@vue/reactivity'
-import { getListProxy, addListen } from '../../../apis/tcp-forward'
+import { getConfigure, saveConfigure } from '../../../apis/configure'
+import { update } from '../../../apis/httpproxy'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 import ConnectButton from '../../../components/ConnectButton.vue'
@@ -56,10 +57,10 @@ export default {
             localtion: window.location.origin,
         });
         const loadConfig = () => {
-            getListProxy().then((res) => {
-                state.port = res.Port;
-                state.name = res.Name;
-                state.listening = res.Listening;
+            getConfigure(plugin.service).then((res) => {
+                state.port = res.ListenPort;
+                state.name = res.TargetName;
+                state.listening = res.ListenEnable;
             });
         }
         onMounted(() => {
@@ -68,12 +69,16 @@ export default {
 
         const submit = () => {
             state.loading = true;
-            getListProxy().then((res) => {
-                res.Name = state.name;
-                res.Listening = state.listening;
-                addListen(res).then(() => {
-                    state.loading = false;
-                    loadConfig();
+            getConfigure().then((res) => {
+                res.TargetName = state.name;
+                res.ListenEnable = state.listening;
+                saveConfigure(JSON.stringify(res)).then(() => {
+                    update().then(() => {
+                        loadConfig();
+                        state.loading = false;
+                    }).catch(() => {
+                        state.loading = false;
+                    });
                 }).catch(() => {
                     state.loading = false;
                 });

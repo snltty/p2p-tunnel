@@ -64,7 +64,7 @@ namespace server.service
             var config = services.GetService<Config>();
 
             var server = services.GetService<ITcpServer>();
-            server.SetBufferSize(config.TcpBufferSize);
+            server.SetBufferSize((byte)config.TcpBufferSize * 1024);
             server.Start(config.Tcp);
             Logger.Instance.Info("TCP服务已开启");
 

@@ -11,9 +11,27 @@
                                 </el-form-item>
                             </el-col>
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="bufsize" prop="BufferSize">
+                                    <el-input size="default" v-model="state.form.BufferSize"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <div class="w-100">
+                        <el-row :gutter="10">
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="允许访问" prop="ConnectEnable">
+                                    <el-tooltip class="box-item" effect="dark" content="作为目标端时，是否允许被访问" placement="top-start">
+                                        <el-checkbox v-model="state.form.ConnectEnable" label="开启" />
+                                    </el-tooltip>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="目标端" prop="Name">
                                     <el-select size="default" v-model="state.form.Name" placeholder="选择目标">
-                                        <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.Name">
+                                        <el-option v-for="(item, index) in targets" :key="index" :label="item.label" :value="item.Name">
                                         </el-option>
                                     </el-select>
                                 </el-form-item>
@@ -60,11 +78,13 @@
 
 <script>
 import { computed, reactive, ref } from '@vue/reactivity'
-import { getListProxy, getPac, addListen } from '../../../apis/tcp-forward'
+import { getPac, setPac } from '../../../apis/httpproxy'
+import { getConfigure, saveConfigure } from '../../../apis/configure'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 import { injectShareData } from '../../../states/shareData'
 import plugin from './plugin'
+import { updatePac } from '../../../apis/socks5'
 export default {
     plugin: plugin,
     components: {},
@@ -84,6 +104,8 @@ export default {
                 Port: 5413,
                 IsPac: false,
                 IsCustomPac: false,
+                BufferSize: 3,
+                ConnectEnable: false,
                 Name: '',
                 Pac: '',
             },
@@ -99,12 +121,14 @@ export default {
             }
         });
         const loadConfig = () => {
-            getListProxy().then((res) => {
+            getConfigure().then((res) => {
                 const json = res;
-                state.form.Port = json.Port;
-                state.form.Name = json.Name;
+                state.form.Port = json.ListenPort;
+                state.form.Name = json.TargetName;
                 state.form.IsPac = json.IsPac;
                 state.form.IsCustomPac = json.IsCustomPac;
+                state.form.BufferSize = json.BufferSize;
+                state.form.ConnectEnable = json.ConnectEnable;
                 loadPac();
             });
         }
@@ -133,13 +157,15 @@ export default {
                         reject();
                         return false;
                     }
-                    getListProxy().then((res) => {
-                        res.Name = state.form.Name;
-                        res.Port = +state.form.Port;
-                        res.Pac = state.form.Pac;
+                    getConfigure().then((res) => {
+                        res.TargetName = state.form.Name;
+                        res.ListenPort = +state.form.Port;
                         res.IsPac = state.form.IsPac;
                         res.IsCustomPac = state.form.IsCustomPac;
-                        addListen(res).then(resolve).catch(reject);
+                        res.BufferSize = +state.form.BufferSize;
+                        res.ConnectEnable = state.form.ConnectEnable;
+                        saveConfigure(JSON.stringify(res)).then(resolve).catch(reject);
+                        setPac(state.form.Pac);
                     });
 
                 });

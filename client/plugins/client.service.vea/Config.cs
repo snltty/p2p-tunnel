@@ -1,6 +1,7 @@
 ﻿using common.libs.database;
 using common.libs.extends;
 using common.proxy;
+using common.server.model;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
@@ -61,7 +62,7 @@ namespace client.service.vea
         /// <summary>
         /// buffersize
         /// </summary>
-        public EnumProxyBufferSize BufferSize { get; set; } =  EnumProxyBufferSize.KB_8;
+        public EnumBufferSize BufferSize { get; set; } =  EnumBufferSize.KB_8;
         /// <summary>
         /// 连接数
         /// </summary>

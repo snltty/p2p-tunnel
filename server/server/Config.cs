@@ -1,5 +1,6 @@
 ﻿using common.libs.database;
 using common.libs.extends;
+using common.server.model;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
@@ -42,10 +43,7 @@ namespace server
         /// 连接频率每秒
         /// </summary>
         public int ConnectLimit { get; set; } = 0;
-        /// <summary>
-        /// 
-        /// </summary>
-        public int TcpBufferSize { get; set; } = 8 * 1024;
+        public EnumBufferSize TcpBufferSize { get; set; } = EnumBufferSize.KB_8;
         /// <summary>
         /// 掉线超时
         /// </summary>

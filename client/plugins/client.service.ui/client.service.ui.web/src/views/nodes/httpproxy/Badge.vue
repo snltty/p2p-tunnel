@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { getListProxy, addListen } from '../../../apis/tcp-forward'
+import { getListProxy, addListen } from '../../../apis/forward'
 import { reactive } from '@vue/reactivity'
 import { computed, onMounted } from '@vue/runtime-core';
 import plugin from './plugin'

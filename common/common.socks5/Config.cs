@@ -1,6 +1,7 @@
 ﻿using common.libs.database;
 using common.libs.extends;
 using common.proxy;
+using common.server.model;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace common.socks5
 
         public bool ListenEnable { get; set; } = false;
         public int ListenPort { get; set; } = 5412;
-        public EnumProxyBufferSize BufferSize { get; set; } = EnumProxyBufferSize.KB_8;
+        public EnumBufferSize BufferSize { get; set; } = EnumBufferSize.KB_8;
         public bool ConnectEnable { get; set; } = false;
         public bool IsCustomPac { get; set; } = false;
         public bool IsPac { get; set; } = false;

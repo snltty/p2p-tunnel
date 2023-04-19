@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
@@ -18,11 +18,10 @@
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
-	
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\common\common.forward\common.forward.csproj" />
-	  <ProjectReference Include="..\..\server\server.csproj" />
-	  <ProjectReference Include="..\server.service.forward.model\server.service.forward.model.csproj" />
+	  <ProjectReference Include="..\..\..\common\common.libs\common.libs.csproj" />
+	  <ProjectReference Include="..\..\..\common\common.server\common.server.csproj" />
 	</ItemGroup>
 
 </Project>

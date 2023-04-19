@@ -15,7 +15,7 @@
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                    <el-form-item label="buffersize" prop="BufferSize">
+                                    <el-form-item label="bufsize" prop="BufferSize">
                                         <el-input size="default" v-model="state.form.BufferSize"></el-input>
                                     </el-form-item>
                                 </el-col>
@@ -25,7 +25,6 @@
                     <el-form-item label="" label-width="0">
                         <div class="w-100">
                             <el-row :gutter="10">
-
                                 <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
                                     <el-form-item label="允许访问" prop="ConnectEnable">
                                         <el-tooltip class="box-item" effect="dark" content="作为被访问端时，是否允许访问" placement="top-start">
@@ -33,16 +32,6 @@
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
-                                <!-- <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                    <el-form-item label="目标端" prop="TargetName">
-                                        <el-tooltip class="box-item" effect="dark" content="当遇到不存在的ip时，目标端应该选择谁，为某个客户端" placement="top-start">
-                                            <el-select size="default" v-model="state.form.TargetName" placeholder="选择目标">
-                                                <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.Name">
-                                                </el-option>
-                                            </el-select>
-                                        </el-tooltip>
-                                    </el-form-item>
-                                </el-col> -->
                             </el-row>
                         </div>
                     </el-form-item>

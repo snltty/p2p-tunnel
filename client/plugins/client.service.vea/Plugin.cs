@@ -1,4 +1,5 @@
-﻿using client.service.vea.socks5;
+﻿using client.service.socks5;
+using client.service.vea.socks5;
 using common.libs;
 using common.proxy;
 using common.server;
@@ -14,15 +15,28 @@ namespace client.service.vea
         {
             var transfer = services.GetService<VeaTransfer>();
             ProxyPluginLoader.LoadPlugin(services.GetService<IVeaSocks5ProxyPlugin>());
+            Config config = services.GetService<Config>();
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Debug("vea 虚拟网卡插件已加载");
-            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-
-            if (services.GetService<Config>().Enable)
+            Logger.Instance.Debug($"虚拟网卡插件已加载");
+            if (config.Enable)
             {
                 transfer.Run();
+                Logger.Instance.Debug($"虚拟网卡插件已开启");
             }
+            else
+            {
+                Logger.Instance.Info($"虚拟网卡插件未开启");
+            }
+            if (config.ConnectEnable)
+            {
+                Logger.Instance.Debug($"虚拟网卡插件已允许连接");
+            }
+            else
+            {
+                Logger.Instance.Info($"虚拟网卡插件未允许连接");
+            }
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)

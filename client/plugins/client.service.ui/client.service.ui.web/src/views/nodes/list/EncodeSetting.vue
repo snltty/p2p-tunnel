@@ -49,7 +49,7 @@ import { getSignInInfo, updateConfig } from '../../../apis/signin'
 import { onMounted } from '@vue/runtime-core';
 import plugin from './plugin'
 export default {
-    plugin: plugin,
+    plugin: Object.assign(JSON.parse(JSON.stringify(plugin)), { text: '加密配置', order: -97 }),
     setup() {
         const formDom = ref(null);
         const state = reactive({

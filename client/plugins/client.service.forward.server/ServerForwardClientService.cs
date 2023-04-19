@@ -3,15 +3,15 @@ using common.libs.extends;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace client.service.tcpforward.server
+namespace client.service.forward.server
 {
     /// <summary>
-    /// 服务器tcp转发
+    /// 服务器转发
     /// </summary>
-    public sealed class ServerTcpForwardClientService : IClientService
+    public sealed class ServerForwardClientService : IClientService
     {
-        private readonly ServerTcpForwardTransfer tcpForwardTransfer;
-        public ServerTcpForwardClientService(ServerTcpForwardTransfer tcpForwardTransfer)
+        private readonly ServerForwardTransfer tcpForwardTransfer;
+        public ServerForwardClientService(ServerForwardTransfer tcpForwardTransfer)
         {
             this.tcpForwardTransfer = tcpForwardTransfer;
         }
@@ -25,6 +25,17 @@ namespace client.service.tcpforward.server
         {
             return tcpForwardTransfer.serverForwards;
         }
+
+        /// <summary>
+        /// 获取域名列表
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public async Task<string[]> Domains(ClientServiceParamsInfo arg)
+        {
+            return await tcpForwardTransfer.GetServerDomains();
+        }
+
         /// <summary>
         /// 服务器端口
         /// </summary>

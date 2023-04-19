@@ -1,23 +1,24 @@
 ﻿using client.messengers.singnin;
 using client.service.ui.api.clientServer;
+using common.forward;
 using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using common.tcpforward;
+using server.service.forward.model;
 using System;
 using System.Threading.Tasks;
 
-namespace client.service.tcpforward.server
+namespace client.service.forward.server
 {
     /// <summary>
     /// tcp转发服务端配置文件
     /// </summary>
-    public sealed class ServerTcpForwardConfigure : IClientConfigure
+    public sealed class ServerForwardConfigure : IClientConfigure
     {
         private readonly MessengerSender messengerSender;
         private readonly SignInStateInfo signInStateInfo;
-        public ServerTcpForwardConfigure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
+        public ServerForwardConfigure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
         {
             this.messengerSender = messengerSender;
             this.signInStateInfo = signInStateInfo;
@@ -36,7 +37,7 @@ namespace client.service.tcpforward.server
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)TcpForwardMessengerIds.GetSetting,
+                MessengerId = (ushort)ServerForwardMessengerIds.GetSetting,
                 Connection = signInStateInfo.Connection,
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
@@ -54,7 +55,7 @@ namespace client.service.tcpforward.server
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)TcpForwardMessengerIds.Setting,
+                MessengerId = (ushort)ServerForwardMessengerIds.Setting,
                 Connection = signInStateInfo.Connection,
                 Payload = jsonStr.ToUTF8Bytes()
             }).ConfigureAwait(false);

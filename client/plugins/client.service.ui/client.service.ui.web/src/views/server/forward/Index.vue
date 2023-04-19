@@ -2,7 +2,7 @@
     <div class="forward-wrap">
         <div class="inner">
             <div class="head flex">
-                <el-button type="primary" size="small" @click="handleAddListen">增加tcp长连接端口</el-button>
+                <el-button type="primary" size="small" @click="handleAddListen">增加长连接端口</el-button>
                 <el-button size="small" @click="loadPorts">刷新列表</el-button>
                 <span class="flex-1"></span>
             </div>
@@ -63,7 +63,7 @@
 
 <script>
 import { onMounted, provide, reactive, ref } from '@vue/runtime-core';
-import { getServerPorts, getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../apis/tcp-forward-server'
+import { getServerPorts, getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../apis/forward-server'
 import { injectShareData } from '../../../states/shareData'
 import { injectSignIn } from '../../../states/signin'
 import AddForward from './AddForward.vue'

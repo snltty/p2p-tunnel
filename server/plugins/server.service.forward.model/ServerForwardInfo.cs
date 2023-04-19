@@ -1,33 +1,63 @@
-﻿using common.libs.extends;
+﻿using common.forward;
+using common.libs.extends;
+using common.server;
 using System;
 using System.ComponentModel;
+using System.Net;
 
-namespace common.tcpforward
+namespace server.service.forward.model
 {
     /// <summary>
-    /// Tcp转发
+    /// 转发相关的消息id
     /// </summary>
-    public sealed class TcpForwardRegisterParamsInfo
+    [Flags, MessengerIdEnum]
+    public enum ServerForwardMessengerIds : ushort
     {
-        public TcpForwardRegisterParamsInfo() { }
+        Min = 600,
+        /// <summary>
+        /// 获取端口
+        /// </summary>
+        Ports = 604,
+        /// <summary>
+        /// 注册
+        /// </summary>
+        SignIn = 605,
+        /// <summary>
+        /// 退出
+        /// </summary>
+        SignOut = 606,
+        /// <summary>
+        /// 获取配置
+        /// </summary>
+        GetSetting = 607,
+        /// <summary>
+        /// 配置
+        /// </summary>
+        Setting = 608,
+        Domains = 604,
+        Max = 699,
+    }
+
+    public sealed class ServerForwardSignInInfo
+    {
+        public ServerForwardSignInInfo() { }
 
         public string SourceIp { get; set; }
         public ushort SourcePort { get; set; }
-        public string TargetIp { get; set; }
+        public IPAddress TargetIp { get; set; } = IPAddress.Any;
         public ushort TargetPort { get; set; }
-        public TcpForwardAliveTypes AliveType { get; set; } = TcpForwardAliveTypes.Web;
+        public ForwardAliveTypes AliveType { get; set; } = ForwardAliveTypes.Web;
 
         public byte[] ToBytes()
         {
             var sipBytes = SourceIp.GetUTF16Bytes();
-            var tipBytes = TargetIp.GetUTF16Bytes();
 
             byte[] bytes = new byte[
                 1  //AliveType
                 + 2  //SourcePort
                 + 2  //TargetPort
                 + 1 + 1 + sipBytes.Length  //SourceIp
-                + 1 + 1 + tipBytes.Length  //TargetIp
+                + 4  //TargetIp
              ];
             var memory = bytes.AsMemory();
             var span = bytes.AsSpan();
@@ -50,13 +80,8 @@ namespace common.tcpforward
             sipBytes.CopyTo(span.Slice(index));
             index += sipBytes.Length;
 
-            bytes[index] = (byte)tipBytes.Length;
-            index += 1;
-            bytes[index] = (byte)TargetIp.Length;
-            index += 1;
-            tipBytes.CopyTo(span.Slice(index));
-            index += tipBytes.Length;
 
+            TargetIp.TryWriteBytes (span.Slice(index), out int length);
             return bytes;
 
         }
@@ -66,7 +91,7 @@ namespace common.tcpforward
             var span = data.Span;
             int index = 0;
 
-            AliveType = (TcpForwardAliveTypes)span[index];
+            AliveType = (ForwardAliveTypes)span[index];
             index += 1;
 
             SourcePort = span.Slice(index, 2).ToUInt16();
@@ -78,22 +103,22 @@ namespace common.tcpforward
             SourceIp = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
             index += 1 + 1 + span[index];
 
-            TargetIp = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            TargetIp = new IPAddress(span.Slice(index));
             index += 1 + 1 + span[index];
 
         }
 
     }
-    public sealed class TcpForwardUnRegisterParamsInfo
+    public sealed class ServerForwardSignOutInfo
     {
-        public TcpForwardUnRegisterParamsInfo() { }
+        public ServerForwardSignOutInfo() { }
         public string SourceIp { get; set; }
         public ushort SourcePort { get; set; }
-        public TcpForwardAliveTypes AliveType { get; set; }
+        public ForwardAliveTypes AliveType { get; set; }
         public byte[] ToBytes()
         {
             var ipBytes = SourceIp.GetUTF16Bytes();
-            byte[] bytes = new byte[1 +2+ 1 + ipBytes.Length];
+            byte[] bytes = new byte[1 + 2 + 1 + ipBytes.Length];
 
             int index = 0;
 
@@ -115,7 +140,7 @@ namespace common.tcpforward
             var span = data.Span;
             int index = 0;
 
-            AliveType = (TcpForwardAliveTypes)span[index];
+            AliveType = (ForwardAliveTypes)span[index];
             index += 1;
 
             SourcePort = span.Slice(index, 2).ToUInt16();
@@ -124,9 +149,9 @@ namespace common.tcpforward
             SourceIp = span.Slice(index + 1).GetUTF16String(span[index]);
         }
     }
-    public sealed class TcpForwardRegisterResult
+    public sealed class ServerForwardSignInResultInfo
     {
-        public TcpForwardRegisterResultCodes Code { get; set; }
+        public ServerForwardSignInResultCodes Code { get; set; }
         public ulong ID { get; set; }
         public string Msg { get; set; } = string.Empty;
         public byte[] ToBytes()
@@ -158,7 +183,7 @@ namespace common.tcpforward
             var span = data.Span;
             int index = 0;
 
-            Code = (TcpForwardRegisterResultCodes)span[index];
+            Code = (ServerForwardSignInResultCodes)span[index];
             index += 1;
 
             ID = span.Slice(index, 8).ToUInt64();
@@ -169,7 +194,7 @@ namespace common.tcpforward
     }
 
     [Flags]
-    public enum TcpForwardRegisterResultCodes : byte
+    public enum ServerForwardSignInResultCodes : byte
     {
         [Description("成功")]
         OK = 0,
