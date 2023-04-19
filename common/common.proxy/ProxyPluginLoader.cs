@@ -36,6 +36,16 @@ namespace common.proxy
         /// <param name="info"></param>
         /// <returns></returns>
         public void HandleAnswerData(ProxyInfo info);
+
+
+        public void Started(ushort port)
+        {
+
+        }
+        public void Stoped(ushort port)
+        {
+
+        }
     }
 
     public static class ProxyPluginLoader

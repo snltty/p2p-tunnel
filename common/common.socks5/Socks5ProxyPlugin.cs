@@ -177,8 +177,7 @@ namespace common.socks5
                     break;
             }
 
-            ushort int16Port = span.Slice(index, 2).ToUInt16();
-            info.TargetPort = BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(int16Port) : int16Port;
+            info.TargetPort = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(index, 2));
         }
     }
 }

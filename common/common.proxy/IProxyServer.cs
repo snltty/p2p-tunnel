@@ -85,6 +85,8 @@ namespace common.proxy
             acceptEventArg.Completed += IO_Completed;
             StartAccept(acceptEventArg);
 
+            plugin.Started(port);
+
             IAsyncResult result = server.UdpClient.BeginReceive(ProcessReceiveUdp, server);
         }
         private void StartAccept(SocketAsyncEventArgs acceptEventArg)
@@ -425,26 +427,27 @@ namespace common.proxy
 
     sealed class ServersManager
     {
-        public ConcurrentDictionary<int, ServerInfo> services = new();
+        public ConcurrentDictionary<ushort, ServerInfo> services = new();
         public bool TryAdd(ServerInfo model)
         {
             return services.TryAdd(model.SourcePort, model);
         }
-        public bool Contains(int port)
+        public bool Contains(ushort port)
         {
             return services.ContainsKey(port);
         }
-        public bool TryGetValue(int port, out ServerInfo c)
+        public bool TryGetValue(ushort port, out ServerInfo c)
         {
             return services.TryGetValue(port, out c);
         }
-        public bool TryRemove(int port, out ServerInfo c)
+        public bool TryRemove(ushort port, out ServerInfo c)
         {
             bool res = services.TryRemove(port, out c);
             if (res)
             {
                 try
                 {
+                    c.UdpInfo?.ProxyPlugin?.Stoped(port);
                     c.Socket.SafeClose();
                     GC.Collect();
                     //  GC.SuppressFinalize(c);
@@ -471,6 +474,7 @@ namespace common.proxy
             {
                 try
                 {
+                    item.UdpInfo?.ProxyPlugin?.Stoped(item.SourcePort);
                     item.Socket.SafeClose();
                     GC.Collect();
                     // GC.SuppressFinalize(item);

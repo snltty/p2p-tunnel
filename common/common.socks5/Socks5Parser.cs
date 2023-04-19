@@ -99,8 +99,8 @@ namespace common.socks5
                     default:
                         break;
                 }
-                ushort int16Port = span.Slice(index, 2).ToUInt16();
-                int port = BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(int16Port) : int16Port;
+
+                int port = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(index, 2));
 
                 return new IPEndPoint(ip, port);
             }
@@ -186,7 +186,7 @@ namespace common.socks5
             if ((Socks5EnumAddressType)span[0] == Socks5EnumAddressType.IPV4)
             {
                 span = span.Slice(1, 4);
-                uint ip = BinaryPrimitives.ReverseEndianness(span.ToUInt32());
+                uint ip = BinaryPrimitives.ReadUInt32LittleEndian(span);
                 return ip >= 0xE0000000 && ip <= 0xEFFFFFFF;
             }
             return false;

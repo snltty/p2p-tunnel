@@ -1,0 +1,15 @@
+﻿{
+  "PortWhiteList": [], //白名单，只允许此列表内的端口被访问
+  "PortBlackList": [], //黑名单，此列表内的端口不可被访问
+  "BufferSize": 3, //0-1KB 1-2KB 2-4KB 3-8KB 4-16KB 5-32KB 6-64KB 7-128KB 8-256KB 9-512KB 10-1024KB
+  "ConnectEnable": false, //是否开启tcp转发转发和http1.1代理
+
+  //以下为服务端配置
+  "WebListens": [ /*8000*/ ], //监听哪些端口，短连接端口，客户端注册转发时需要指定注册到哪个端口下
+  "Domains": [ /*"p2p.snltty.com"*/ ], //已解析的域名列表，当客户端使用服务器代理穿透的时候，可以填写一个域名，比如 aaa, 那么就可以使用 aaa.p2p.snltty.com 经过访问
+  //提供给客户端动态注册长连接监听，允许注册的端口范围
+  "TunnelListenRange": {
+    "Min": 10000,
+    "Max": 60000
+  }
+}

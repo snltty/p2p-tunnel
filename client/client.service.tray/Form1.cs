@@ -140,7 +140,11 @@ namespace client.service.tray
                 }
                 try
                 {
-                    value = Rkey.GetValue(keyName).ToString();
+                    object val = Rkey.GetValue(keyName);
+                    if(val != null)
+                    {
+                        value = val.ToString(); 
+                    }
                 }
                 catch (Exception)
                 {

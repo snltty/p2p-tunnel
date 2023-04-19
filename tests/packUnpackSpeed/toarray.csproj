@@ -15,7 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\common\common.libs\common.libs.csproj" />
     <ProjectReference Include="..\..\common\common.server\common.server.csproj" />
-    <ProjectReference Include="..\..\common\common.tcpforward\common.tcpforward.csproj" />
+    <ProjectReference Include="..\..\common\common.tcpforward\common.forward.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,7 @@
 ﻿using client.messengers.singnin;
 using client.realize.messengers.punchHole;
+using client.service.forward;
+using client.service.httpProxy;
 using client.service.logger;
 using client.service.socks5;
 using client.service.socks5.server;
@@ -49,18 +51,23 @@ namespace client.service
             //加载插件程序集，当单文件发布或者动态加载dll外部插件时需要，否则如果本程序集没有显式的使用它的相关内容的话，会加载不出来
             //可以改为从dll文件加载
             Assembly[] assemblys = new Assembly[] {
-                typeof(LoggerClientService).Assembly,
-                typeof(TcpForwardMessenger).Assembly,
-                typeof(ServerTcpForwardClientService).Assembly,
-                typeof(UdpForwardMessenger).Assembly,
-                typeof(ServerUdpForwardClientService).Assembly,
                 typeof(ClientServer).Assembly,
+                typeof(LoggerClientService).Assembly,
+
+                typeof(ProxyMessenger).Assembly,
+                typeof(ForwardTransfer).Assembly,
+                typeof(ServerTcpForwardClientService).Assembly,
+
+                typeof(HttpProxyClientService).Assembly,
+
                 typeof(Socks5ClientService).Assembly,
                 typeof(ServerSocks5Configure).Assembly,
-                typeof(PunchHoleMessenger).Assembly,
                 typeof(VeaClientService).Assembly,
+
+                typeof(PunchHoleMessenger).Assembly,
+              
                 typeof(ServerUsersClientService).Assembly,
-                typeof(ProxyMessenger).Assembly,
+              
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();

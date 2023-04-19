@@ -207,12 +207,12 @@ namespace common.server.servers.websocket
 
             if (dataLength > ushort.MaxValue)
             {
-                BinaryPrimitives.ReverseEndianness(((ulong)dataLength)).ToBytes(memory.Slice(index));
+                BinaryPrimitives.WriteUInt64BigEndian(memory.Slice(index).Span, (ulong)dataLength);
                 index += 8;
             }
             else if (dataLength > 125)
             {
-                BinaryPrimitives.ReverseEndianness(((ushort)dataLength)).ToBytes(memory.Slice(index));
+                BinaryPrimitives.WriteUInt16BigEndian(memory.Slice(index).Span, (ushort)dataLength);
                 index += 2;
             }
 
@@ -366,14 +366,12 @@ namespace common.server.servers.websocket
             int payloadLength = (span[1] & 0b01111111);
             if (payloadLength == 126)
             {
-                ushort pl = span.Slice(2, 2).ToUInt16();
-                payloadLength = BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(pl) : pl;
+                payloadLength = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(2, 2));
                 index += 2;
             }
             else if (payloadLength == 127)
             {
-                ulong pl = span.Slice(2, 8).ToUInt64();
-                payloadLength = (int)(BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(pl) : pl);
+                payloadLength = (int)BinaryPrimitives.ReadUInt64LittleEndian(span.Slice(2, 8));
                 index += 8;
             }
             //数据长+头长 大于 整个数据长，则不是一个完整的包
