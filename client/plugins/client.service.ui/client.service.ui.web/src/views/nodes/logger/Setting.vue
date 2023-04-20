@@ -1,20 +1,20 @@
 <template>
     <div class="form">
         <div class="inner">
-            <el-form label-width="8rem" ref="formDom" :model="model" :rules="rules">
+            <el-form label-width="8rem" ref="formDom" :model="state.form" :rules="state.rules">
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="开启" prop="Enable">
                                 <el-tooltip class="box-item" effect="dark" content="开启" placement="top-start">
-                                    <el-checkbox v-model="model.enable">开启</el-checkbox>
+                                    <el-checkbox v-model="state.form.Enable">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="显示数量" prop="MaxLength">
                                 <el-tooltip class="box-item" effect="dark" content="日志显示数量" placement="top-start">
-                                    <el-input size="default" v-model="model.maxLength"></el-input>
+                                    <el-input size="default" v-model="state.form.MaxLength"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -36,12 +36,12 @@ export default {
         const formDom = ref(null);
         const state = reactive({
             configInfo: {},
-            model: {
-                enable: false,
-                maxLength: 0,
+            form: {
+                Enable: false,
+                MaxLength: 0,
             },
             rules: {
-                maxLength: [
+                MaxLength: [
                     { required: true, message: "必填", trigger: "blur" },
                     {
                         type: "number",
@@ -62,15 +62,15 @@ export default {
                 .then((json) => {
                     json = new Function("return" + json)();
                     state.configInfo = json;
-                    state.model.enable = json.Enable;
-                    state.model.maxLength = json.MaxLength;
+                    state.form.Enable = json.Enable;
+                    state.form.MaxLength = json.MaxLength;
                 })
                 .catch((msg) => { });
         };
         const getJson = () => {
             let _json = JSON.parse(JSON.stringify(state.configInfo));
-            _json.Enable = state.model.enable;
-            _json.MaxLength = +state.model.maxLength;
+            _json.Enable = state.form.Enable;
+            _json.MaxLength = +state.form.MaxLength;
             return _json;
         };
         const submit = () => {
@@ -93,7 +93,7 @@ export default {
         });
 
         return {
-            ...toRefs(state),
+            state,
             formDom,
             submit,
         };

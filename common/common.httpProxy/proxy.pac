@@ -7539,7 +7539,7 @@ var domains = {
 }
 
 var iplist = {}  
-var proxy = "PROXY {socks5-address}; DIRECT;";
+var proxy = "PROXY {proxy-address}; DIRECT;";
 var direct = 'DIRECT;';
 
 function FindProxyForURL(url, host) {

@@ -1,20 +1,31 @@
 <template>
     <div class="register-form">
         <div class="inner">
-            <el-form label-width="8rem" ref="formDom" :model="model" :rules="rules">
+            <el-form label-width="8rem" ref="formDom" :model="state.form" :rules="state.rules">
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="开启" prop="ConnectEnable">
-                                <el-tooltip class="box-item" effect="dark" content="允许所有账号使用tcp穿透，包括匿名" placement="top-start">
-                                    <el-checkbox size="default" v-model="model.ConnectEnable">开启</el-checkbox>
+                                <el-tooltip class="box-item" effect="dark" content="允许所有账号使用端口转发穿透，包括匿名" placement="top-start">
+                                    <el-checkbox size="default" v-model="state.form.ConnectEnable">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <el-form-item label="bufsize" prop="BufferSize">
+                                <el-tooltip class="box-item" effect="dark" content="tcp连接的buffer size" placement="top-start">
+                                    <el-input size="default" v-model="state.form.BufferSize"></el-input>
+                                </el-tooltip>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <el-row>
+                        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
                             <el-form-item label="短链接端口" prop="WebListens">
                                 <el-tooltip class="box-item" effect="dark" content="短链接端口列表，多个英文逗号间隔" placement="top-start">
-                                    <el-input size="default" v-model="model.WebListens" placeholder="短链接端口"></el-input>
+                                    <el-input size="default" v-model="state.form.WebListens" placeholder="短链接端口"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -25,14 +36,14 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="端口开始" prop="min">
                                 <el-tooltip class="box-item" effect="dark" content="长连接端口开始" placement="top-start">
-                                    <el-input size="default" v-model="model.min" placeholder="长连接端口开始"></el-input>
+                                    <el-input size="default" v-model="state.form.min" placeholder="长连接端口开始"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="端口结束" prop="max">
                                 <el-tooltip class="box-item" effect="dark" content="长连接端口结束" placement="top-start">
-                                    <el-input size="default" v-model="model.max" placeholder="长连接端口结束"></el-input>
+                                    <el-input size="default" v-model="state.form.max" placeholder="长连接端口结束"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -53,9 +64,10 @@ export default {
     setup() {
         const formDom = ref(null);
         const state = reactive({
-            model: {
+            form: {
                 ConnectEnable: true,
                 WebListens: "",
+                BufferSize: 3,
                 min: 1025,
                 max: 65535
             },
@@ -81,7 +93,7 @@ export default {
 
         const loadConfig = () => {
             return new Promise((resolve, reject) => {
-                getConfigure('ServerTcpForwardConfigure').then((json) => {
+                getConfigure(plugin.config).then((json) => {
                     resolve(new Function(`return ${json}`)());
                 }).catch(reject);
             });
@@ -94,11 +106,12 @@ export default {
                         return false;
                     }
                     loadConfig().then((json) => {
-                        json.ConnectEnable = state.model.ConnectEnable;
-                        json.WebListens = state.model.WebListens.split(',').filter(c => c.length > 0).map(c => +c);
-                        json.TunnelListenRange.Min = +state.model.min;
-                        json.TunnelListenRange.Max = +state.model.max;
-                        saveConfigure('ServerTcpForwardConfigure', JSON.stringify(json)).then(resolve).catch(reject);
+                        json.ConnectEnable = state.form.ConnectEnable;
+                        json.BufferSize = +state.form.BufferSize;
+                        json.WebListens = state.form.WebListens.split(',').filter(c => c.length > 0).map(c => +c);
+                        json.TunnelListenRange.Min = +state.form.min;
+                        json.TunnelListenRange.Max = +state.form.max;
+                        saveConfigure(plugin.config, JSON.stringify(json)).then(resolve).catch(reject);
                     }).catch(reject);
                 });
             })
@@ -106,15 +119,16 @@ export default {
 
         onMounted(() => {
             loadConfig().then((json) => {
-                state.model.ConnectEnable = json.ConnectEnable;
-                state.model.WebListens = json.WebListens.join(',');
-                state.model.min = json.TunnelListenRange.Min;
-                state.model.max = json.TunnelListenRange.Max;
+                state.form.ConnectEnable = json.ConnectEnable;
+                state.form.BufferSize = json.BufferSize;
+                state.form.WebListens = json.WebListens.join(',');
+                state.form.min = json.TunnelListenRange.Min;
+                state.form.max = json.TunnelListenRange.Max;
             });
         });
 
         return {
-            ...toRefs(state), formDom, submit
+            state, formDom, submit
         }
     }
 }

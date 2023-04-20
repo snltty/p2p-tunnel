@@ -1,4 +1,5 @@
 ﻿using client.messengers.singnin;
+using common.libs;
 using common.server;
 using common.server.model;
 using System;
@@ -25,21 +26,24 @@ namespace client.realize.messengers.singnin
             IPAddress[] localIps = new IPAddress[] { config.Client.LoopbackIp, signInState.LocalInfo.LocalIp };
             localIps = localIps.Concat(signInState.LocalInfo.Ipv6s).ToArray();
 
+            SignInParamsInfo param = new SignInParamsInfo
+            {
+                ShortId = config.Client.ShortId,
+                Id = 0,
+                Name = config.Client.Name,
+                Args = config.Client.Args,
+                GroupId = config.Client.GroupId,
+                LocalIps = localIps,
+                LocalTcpPort = signInState.LocalInfo.Port,
+                ClientAccess = (uint)config.Client.GetAccess()
+            };
+            param.Args.TryAdd("version",Helper.Version);
+
             MessageResponeInfo tcpResult = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = signInState.Connection,
                 MessengerId = (ushort)SignInMessengerIds.SignIn,
-                Payload = new SignInParamsInfo
-                {
-                    ShortId = config.Client.ShortId,
-                    Id = 0,
-                    Name = config.Client.Name,
-                    Args = config.Client.Args,
-                    GroupId = config.Client.GroupId,
-                    LocalIps = localIps,
-                    LocalTcpPort = signInState.LocalInfo.Port,
-                    ClientAccess = (uint)config.Client.GetAccess()
-                }.ToBytes(),
+                Payload = param.ToBytes(),
                 Timeout = 15 * 1000,
             }).ConfigureAwait(false);
 

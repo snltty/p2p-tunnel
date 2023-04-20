@@ -1,13 +1,13 @@
 <template>
     <div class="register-form">
         <div class="inner">
-            <el-form label-width="8rem" ref="formDom" :model="model" :rules="rules">
+            <el-form label-width="8rem" ref="formDom" :model="state.form" :rules="state.rules">
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="开启" prop="ConnectEnable">
                                 <el-tooltip class="box-item" effect="dark" content="允许所有账号使用socks5代理，包括匿名" placement="top-start">
-                                    <el-checkbox size="default" v-model="model.ConnectEnable">开启</el-checkbox>
+                                    <el-checkbox size="default" v-model="state.form.ConnectEnable">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -28,7 +28,7 @@ export default {
     setup() {
         const formDom = ref(null);
         const state = reactive({
-            model: {
+            form: {
                 ConnectEnable: true
             },
             rules: {}
@@ -36,7 +36,7 @@ export default {
 
         const loadConfig = () => {
             return new Promise((resolve, reject) => {
-                getConfigure('ServerSocks5Configure').then((json) => {
+                getConfigure(plugin.config).then((json) => {
                     resolve(new Function(`return ${json}`)());
                 }).catch(reject);
             });
@@ -49,8 +49,8 @@ export default {
                         return false;
                     }
                     loadConfig().then((json) => {
-                        json.ConnectEnable = state.model.ConnectEnable;
-                        saveConfigure('ServerSocks5Configure', JSON.stringify(json)).then(resolve).catch(reject);
+                        json.ConnectEnable = state.form.ConnectEnable;
+                        saveConfigure(plugin.config, JSON.stringify(json)).then(resolve).catch(reject);
                     }).catch(reject);
                 });
             })
@@ -58,12 +58,12 @@ export default {
 
         onMounted(() => {
             loadConfig().then((json) => {
-                state.model.ConnectEnable = json.ConnectEnable;
+                state.form.ConnectEnable = json.ConnectEnable;
             });
         });
 
         return {
-            ...toRefs(state), formDom, submit
+            state, formDom, submit
         }
     }
 }

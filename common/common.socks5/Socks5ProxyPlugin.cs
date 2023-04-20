@@ -1,14 +1,13 @@
 ﻿using common.libs;
 using common.proxy;
-using System;
 using System.Buffers.Binary;
-using common.libs.extends;
 using System.Net;
 using common.server.model;
+using System;
 
 namespace common.socks5
 {
-    public interface ISocks5ProxyPlugin: IProxyPlugin
+    public interface ISocks5ProxyPlugin : IProxyPlugin
     {
 
     }
@@ -45,33 +44,24 @@ namespace common.socks5
 
         public virtual bool HandleRequestData(ProxyInfo info)
         {
-            Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
+            if (info.Rsv == 0)
+            {
+                info.Rsv = (byte)Socks5EnumStep.Request;
+            }
 
+            Console.WriteLine($"{info.RequestId}  step:{(Socks5EnumStep)info.Rsv}, command:{info.Command},{string.Join(",",info.Data.ToArray())}");
+
+            Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
             //request  auth 的 直接通过,跳过验证部分
             if (socks5EnumStep < Socks5EnumStep.Command)
             {
-                switch (socks5EnumStep)
-                {
-                    case Socks5EnumStep.Request:
-                        {
-                            info.Response[0] = (byte)Socks5EnumAuthType.NoAuth;
-                            info.Data = info.Response;
-                        }
-                        break;
-                    case Socks5EnumStep.Auth:
-                        {
-                            info.Response[0] = (byte)Socks5EnumAuthState.Success;
-                            info.Data = info.Response;
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                //Socks5EnumAuthType.NoAut  Socks5EnumAuthState.Success 都是 0x00
+                info.Response[0] = (byte)Socks5EnumAuthType.NoAuth;
+                info.Data = info.Response;
+                info.Rsv++;
                 proxyServer.InputData(info);
                 return false;
             }
-
-            socks5ConnectionProvider.Get(info);
 
             //command 的
             if (info.Step == EnumProxyStep.Command)
@@ -84,14 +74,17 @@ namespace common.socks5
                     proxyServer.InputData(info);
                     return false;
                 }
+
+                info.Command = (EnumProxyCommand)info.Data.Span[1];
                 GetRemoteEndPoint(info);
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
-                info.Data = Socks5Parser.GetUdpData(info.Data);
                 GetRemoteEndPoint(info);
+                info.Data = Socks5Parser.GetUdpData(info.Data);
             }
 
+            socks5ConnectionProvider.Get(info);
             return true;
         }
 
@@ -103,42 +96,41 @@ namespace common.socks5
         public void HandleAnswerData(ProxyInfo info)
         {
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
+
+            if (socks5EnumStep < Socks5EnumStep.Command)
+            {
+                info.Data = new byte[] { 5, info.Data.Span[0] };
+                info.Rsv = (byte)Socks5EnumStep.Command;
+                return;
+            }
+
             switch (socks5EnumStep)
             {
-                case Socks5EnumStep.Request:
-                    {
-                        info.Data = new byte[] { 5, info.Data.Span[0] };
-                        info.Rsv = (byte)Socks5EnumStep.Command;
-                    }
-                    break;
-                case Socks5EnumStep.Auth:
-                    {
-                        info.Data = new byte[] { 5, info.Data.Span[0] };
-                        info.Rsv = (byte)Socks5EnumStep.Command;
-                    }
-                    break;
                 case Socks5EnumStep.Command:
                     {
                         Socks5EnumResponseCommand type = (Socks5EnumResponseCommand)info.Data.Span[0];
                         if (type == Socks5EnumResponseCommand.ConnecSuccess)
                         {
                             info.Data = Socks5Parser.MakeConnectResponse(new IPEndPoint(IPAddress.Any, Port), (byte)type);
-                            info.Rsv = (byte)Socks5EnumStep.Forward;
                         }
                         else
                         {
                             info.Data = Helper.EmptyArray;
                         }
+                        info.Rsv = (byte)Socks5EnumStep.Forward;
+                        info.Step = EnumProxyStep.ForwardTcp;
                     }
                     break;
                 case Socks5EnumStep.Forward:
                     {
                         info.Rsv = (byte)Socks5EnumStep.Forward;
+                        info.Step = EnumProxyStep.ForwardTcp;
                     }
                     break;
                 case Socks5EnumStep.ForwardUdp:
                     {
                         info.Data = Socks5Parser.MakeUdpResponse(new IPEndPoint(new IPAddress(info.TargetAddress.Span), info.TargetPort), info.Data);
+                        info.Step = EnumProxyStep.ForwardUdp;
                     }
                     break;
             }

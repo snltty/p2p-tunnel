@@ -10,11 +10,11 @@ using System.Text;
 
 namespace server.service.forward
 {
-    public interface IServerForwardProxyPlugin : IProxyPlugin
+    public interface IForwardProxyPlugin : IProxyPlugin
     {
     }
 
-    public sealed class ServerForwardProxyPlugin : IServerForwardProxyPlugin
+    public sealed class ForwardProxyPlugin : IForwardProxyPlugin
     {
         public static uint Access => 0b00000000_00000000_00000000_00010000;
         public byte Id => config.Plugin;
@@ -27,7 +27,7 @@ namespace server.service.forward
         private readonly IForwardUdpTargetProvider forwardUdpTargetProvider;
         private readonly IServiceAccessValidator serviceAccessProvider;
 
-        public ServerForwardProxyPlugin(common.forward.Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IForwardUdpTargetProvider forwardUdpTargetProvider, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching)
+        public ForwardProxyPlugin(common.forward.Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IForwardUdpTargetProvider forwardUdpTargetProvider, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching)
         {
             this.config = config;
             this.proxyServer = proxyServer;
@@ -48,11 +48,11 @@ namespace server.service.forward
                 }
             };
 
-            Logger.Instance.Info("代理转发服务已启动...");
+            Logger.Instance.Info("端口转发穿透服务已启动...");
             foreach (ushort port in config.WebListens)
             {
                 proxyServer.Start(port, config.Plugin);
-                Logger.Instance.Warning($"转发监听:{port}");
+                Logger.Instance.Warning($"端口转发穿透监听:{port}");
             }
         }
 
@@ -94,8 +94,9 @@ namespace server.service.forward
             }
             else
             {
-                string domain = HttpParser.GetHost(info.Data).GetString();
-                forwardTargetProvider?.Get(domain, info);
+                int portStart = 0;
+                string host = HttpParser.GetHost(info.Data,ref portStart).GetString();
+                forwardTargetProvider?.Get(host, info);
             }
         }
     }

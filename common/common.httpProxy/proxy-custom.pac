@@ -1,5 +1,5 @@
 
-var proxy = "PROXY {socks5-address}";
+var proxy = "PROXY {proxy-address}";
 
 function FindProxyForURL(url, host) 
 {

@@ -88,16 +88,19 @@ namespace common.proxy
 
         }
 
-        private async Task ForwardTcp(ProxyInfo data)
+        private async Task ForwardTcp(ProxyInfo info)
         {
-            ConnectionKey key = new ConnectionKey(data.Connection.ConnectId, data.RequestId);
+            ConnectionKey key = new ConnectionKey(info.Connection.ConnectId, info.RequestId);
             if (connections.TryGetValue(key, out AsyncServerUserToken token))
             {
-                if (data.Data.Length > 0 && token.TargetSocket.Connected)
+                token.Data.Step = info.Step;
+                token.Data.Command = info.Command;
+                token.Data.Rsv = info.Rsv;
+                if (info.Data.Length > 0 && token.TargetSocket.Connected)
                 {
                     try
                     {
-                        await token.TargetSocket.SendAsync(data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                        await token.TargetSocket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                     }
                     catch (Exception)
                     {
@@ -147,6 +150,9 @@ namespace common.proxy
                 }
                 else
                 {
+                    token.Data.Step = info.Step;
+                    token.Data.Command = info.Command;
+                    token.Data.Rsv = info.Rsv;
                     token.Update();
                     await token.TargetSocket.SendToAsync(info.Data, SocketFlags.None, remoteEndpoint);
                     token.Data.Data = Helper.EmptyArray;

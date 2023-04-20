@@ -81,6 +81,20 @@ namespace common.server
                 }
             }
 
+
+            List<Tuple<string, ushort, ushort>> ushorts = ReflectionHelper.GetEnums(assemblys).Where(c => c.Name.EndsWith("MessengerIds")).Distinct().Select(item =>
+            {
+                var fields = item.GetFields(BindingFlags.Static | BindingFlags.Public).Select(c => (ushort)c.GetValue(null));
+                return new Tuple<string, ushort, ushort>(item.Name, fields.Min(), fields.Max());
+            }).OrderBy(c => c.Item2).ToList();
+
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
+            Logger.Instance.Debug($"枚举类型ushort，已存在消息列表如下:");
+            foreach (var item in ushorts)
+            {
+                Logger.Instance.Info($"{item.Item1.PadLeft(32,'-')}  {item.Item2}-{item.Item3}");
+            }
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 
         public bool GetMessenger(ushort id, out object obj)

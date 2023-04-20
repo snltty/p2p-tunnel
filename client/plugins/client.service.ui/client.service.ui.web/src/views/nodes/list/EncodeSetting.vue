@@ -1,20 +1,20 @@
 <template>
     <div class="register-form">
         <div class="inner">
-            <el-form label-width="8rem" ref="formDom" :model="model" :rules="rules">
+            <el-form label-width="8rem" ref="formDom" :model="state.form" :rules="state.rules">
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="P2P加密" prop="ClientEncode">
                                 <el-tooltip class="box-item" effect="dark" content="客户端之间通信使用加密" placement="top-start">
-                                    <el-checkbox v-model="model.ClientEncode">开启</el-checkbox>
+                                    <el-checkbox v-model="state.form.ClientEncode">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="密钥" prop="ClientEncodePassword">
                                 <el-tooltip class="box-item" effect="dark" content="加密密钥32位，为空则每次加密随机密钥，如果填写，则各客户端都填写" placement="top-start">
-                                    <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="model.ClientEncodePassword"></el-input>
+                                    <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="state.form.ClientEncodePassword"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -25,14 +25,14 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="登入加密" prop="ServerEncode">
                                 <el-tooltip class="box-item" effect="dark" content="客户端与服务端之间通信使用加密" placement="top-start">
-                                    <el-checkbox v-model="model.ServerEncode">开启</el-checkbox>
+                                    <el-checkbox v-model="state.form.ServerEncode">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="密钥" prop="ServerEncodePassword">
                                 <el-tooltip class="box-item" effect="dark" content="加密密钥 32位，为空则每次加密随机密钥，使用p2p.snltty.com服务器则必须留空" placement="top-start">
-                                    <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="model.ServerEncodePassword"></el-input>
+                                    <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="state.form.ServerEncodePassword"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -53,7 +53,7 @@ export default {
     setup() {
         const formDom = ref(null);
         const state = reactive({
-            model: {
+            form: {
                 ClientEncode: false,
                 ClientEncodePassword: "",
                 ServerEncode: false,
@@ -65,21 +65,21 @@ export default {
 
         const loadConfig = () => {
             getSignInInfo().then((json) => {
-                state.model.ClientEncode = json.ClientConfig.Encode;
-                state.model.ClientEncodePassword = json.ClientConfig.EncodePassword;
+                state.form.ClientEncode = json.ClientConfig.Encode;
+                state.form.ClientEncodePassword = json.ClientConfig.EncodePassword;
 
-                state.model.ServerEncode = json.ServerConfig.Encode;
-                state.model.ServerEncodePassword = json.ServerConfig.EncodePassword;
+                state.form.ServerEncode = json.ServerConfig.Encode;
+                state.form.ServerEncodePassword = json.ServerConfig.EncodePassword;
             }).catch((msg) => {
             });
         }
         const getJson = () => {
             return new Promise((resolve, reject) => {
                 getSignInInfo().then((json) => {
-                    json.ClientConfig.Encode = state.model.ClientEncode;
-                    json.ClientConfig.EncodePassword = state.model.ClientEncodePassword;
-                    json.ServerConfig.Encode = state.model.ServerEncode;
-                    json.ServerConfig.EncodePassword = state.model.ServerEncodePassword;
+                    json.ClientConfig.Encode = state.form.ClientEncode;
+                    json.ClientConfig.EncodePassword = state.form.ClientEncodePassword;
+                    json.ServerConfig.Encode = state.form.ServerEncode;
+                    json.ServerConfig.EncodePassword = state.form.ServerEncodePassword;
                     resolve(json);
                 }).catch(reject);
             });
@@ -103,7 +103,7 @@ export default {
         });
 
         return {
-            ...toRefs(state), formDom, submit
+            state, formDom, submit
         }
     }
 }

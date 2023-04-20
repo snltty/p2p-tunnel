@@ -7,16 +7,18 @@
                         <div class="w-100">
                             <el-row :gutter="10">
                                 <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                    <el-form-item label="监听端口" prop="SocksPort">
+                                    <el-form-item label="监听端口" prop="ListenPort">
                                         <el-tooltip class="box-item" effect="dark" content="监听端口，无所谓，填写一个未被占用的端口即可" placement="top-start">
-                                            <el-input size="default" v-model="state.form.SocksPort"></el-input>
+                                            <el-input size="default" v-model="state.form.ListenPort"></el-input>
                                         </el-tooltip>
 
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                     <el-form-item label="bufsize" prop="BufferSize">
-                                        <el-input size="default" v-model="state.form.BufferSize"></el-input>
+                                        <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
+                                            <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                        </el-select>
                                     </el-form-item>
                                 </el-col>
                             </el-row>
@@ -66,6 +68,7 @@ import { computed, reactive, ref } from '@vue/reactivity'
 import { getConfig, setConfig } from '../../../apis/vea'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
+import { shareData } from '../../../states/shareData'
 import plugin from './plugin'
 export default {
     plugin: plugin,
@@ -84,20 +87,12 @@ export default {
                 TargetName: '',
                 IP: '',
                 LanIPs: '',
-                SocksPort: 5415,
+                ListenPort: 5415,
                 BufferSize: 8 * 1024,
                 ConnectEnable: false
             },
             rules: {
-                BufferSize: [
-                    { required: true, message: '必填', trigger: 'blur' },
-                    {
-                        type: 'number', min: 1024, max: 65536, message: '数字 1k-64k', trigger: 'blur', transform(value) {
-                            return Number(value)
-                        }
-                    }
-                ],
-                SocksPort: [
+                ListenPort: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
                         type: 'number', min: 1, max: 65535, message: '数字 1-65535', trigger: 'blur', transform(value) {
@@ -117,7 +112,7 @@ export default {
                 state.form.TargetName = res.TargetName;
                 state.form.IP = res.IP;
                 state.form.LanIPs = res.LanIPs.join(',');
-                state.form.SocksPort = res.SocksPort;
+                state.form.ListenPort = res.ListenPort;
                 state.form.BufferSize = res.BufferSize;
                 state.form.ConnectEnable = res.ConnectEnable;
             });
@@ -137,7 +132,7 @@ export default {
                     state.configInfo.TargetName = state.form.TargetName;
                     state.configInfo.IP = state.form.IP;
                     state.configInfo.LanIPs = state.form.LanIPs.split(',').filter(c => c.length > 0);
-                    state.configInfo.SocksPort = +state.form.SocksPort;
+                    state.configInfo.ListenPort = +state.form.ListenPort;
                     state.configInfo.BufferSize = +state.form.BufferSize;
                     state.configInfo.ConnectEnable = state.form.ConnectEnable;
                     setConfig(state.configInfo).then(resolve).catch(reject);
@@ -146,7 +141,7 @@ export default {
         }
 
         return {
-            targets, state, formDom, submit
+            shareData, targets, state, formDom, submit
         }
     }
 }

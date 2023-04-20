@@ -51,10 +51,12 @@ namespace client.service.socks5
         public void Run(ClientServiceParamsInfo arg)
         {
             proxyServer.Stop(config.Plugin);
+            Console.WriteLine("socks5 stop");
             if (config.ListenEnable)
             {
                 try
                 {
+                    Console.WriteLine("socks5 start");
                     proxyServer.Start((ushort)config.ListenPort, config.Plugin);
                 }
                 catch (Exception ex)

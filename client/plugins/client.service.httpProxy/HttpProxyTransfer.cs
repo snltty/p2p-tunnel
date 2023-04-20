@@ -44,7 +44,7 @@ namespace client.service.httpProxy
                 pacContent = File.ReadAllText("./proxy.pac");
             }
 
-            pacContent = pacContent.Replace("{socks5-address}", $"127.0.0.1:{config.ListenPort}");
+            pacContent = pacContent.Replace("{proxy-address}", $"127.0.0.1:{config.ListenPort}");
             File.WriteAllText(file, pacContent);
 
             if (config.ListenEnable && config.IsPac)
@@ -90,7 +90,6 @@ namespace client.service.httpProxy
         {
             try
             {
-                string file = Path.Join(uiconfig.Web.Root, "proxy-custom.pac");
                 File.WriteAllText("./proxy-custom.pac", pac);
 
                 return string.Empty;

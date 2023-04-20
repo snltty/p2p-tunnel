@@ -16,7 +16,7 @@ namespace common.libs
 
         public static string SeparatorString = ",";
         public static char SeparatorChar = ',';
-        public static byte[] Version = new byte[4] { 2, 0, 0, 0 };
+        public static string Version = "2.0.0.1";
 
         public static string GetStackTraceModelName()
         {

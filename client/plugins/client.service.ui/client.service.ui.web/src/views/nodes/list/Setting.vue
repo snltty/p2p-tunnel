@@ -1,19 +1,19 @@
 <template>
     <div class="register-form">
         <div class="inner">
-            <el-form label-width="8rem" ref="formDom" :model="model" :rules="rules">
+            <el-form label-width="8rem" ref="formDom" :model="state.form" :rules="state.rules">
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="节点名称" prop="Name">
-                                <el-input size="default" v-model="model.Name" maxlength="32" show-word-limit placeholder="设置你的注册名称"></el-input>
+                                <el-input size="default" v-model="state.form.Name" maxlength="32" show-word-limit placeholder="设置你的注册名称"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="所在分组" prop="GroupId">
                                 <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top-start">
-                                    <el-select size="default" v-model="model.GroupId" @change="handleGroupIdChange" allow-create clearable filterable default-first-option placeholder="选择或输入分组编号">
-                                        <el-option v-for="(item,index) in model.GroupIds" :key="index" :label="item" :value="item">
+                                    <el-select size="default" v-model="state.form.GroupId" @change="handleGroupIdChange" allow-create clearable filterable default-first-option placeholder="选择或输入分组编号">
+                                        <el-option v-for="(item,index) in state.form.GroupIds" :key="index" :label="item" :value="item">
                                             <div class="flex">
                                                 <span>{{item}}</span>
                                                 <span class="flex-1"></span>
@@ -31,21 +31,21 @@
                     </el-row>
                 </el-form-item>
                 <template v-for="(item1,index) in components" :key="index">
-                    <component :is="item1" :args="model.Args" :ref="`setting_item_${index}`"></component>
+                    <component :is="item1" :args="state.form.Args" :ref="`setting_item_${index}`"></component>
                 </template>
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="掉线超时" prop="TimeoutDelay">
                                 <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top-start">
-                                    <el-input size="default" v-model="model.TimeoutDelay" placeholder="掉线超时"></el-input>
+                                    <el-input size="default" v-model="state.form.TimeoutDelay" placeholder="掉线超时"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="udp限速" prop="UdpUploadSpeedLimit">
                                 <el-tooltip class="box-item" effect="dark" content="udp发送速度限制（字节数,0不限制）" placement="top-start">
-                                    <el-input size="default" v-model="model.UdpUploadSpeedLimit"></el-input>
+                                    <el-input size="default" v-model="state.form.UdpUploadSpeedLimit"></el-input>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -55,12 +55,12 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动登入" prop="AutoReg">
-                                <el-checkbox size="default" v-model="model.AutoReg">开启</el-checkbox>
+                                <el-checkbox size="default" v-model="state.form.AutoReg">开启</el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="bufsize" prop="TcpBufferSize">
-                                <el-select size="default" v-model="model.TcpBufferSize" placeholder="选择合适的buff">
+                                <el-select size="default" v-model="state.form.TcpBufferSize" placeholder="选择合适的buff">
                                     <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -72,14 +72,14 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="tcp打洞" prop="UseTcp">
                                 <el-tooltip class="box-item" effect="dark" content="是否使用tcp打洞" placement="top-start">
-                                    <el-checkbox v-model="model.UseTcp">开启</el-checkbox>
+                                    <el-checkbox v-model="state.form.UseTcp">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="udp打洞" prop="UseUdp">
                                 <el-tooltip class="box-item" effect="dark" content="是否使用udp打洞" placement="top-start">
-                                    <el-checkbox v-model="model.UseUdp">开启</el-checkbox>
+                                    <el-checkbox v-model="state.form.UseUdp">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -90,14 +90,14 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动打洞" prop="UsePunchHole">
                                 <el-tooltip class="box-item" effect="dark" content="发现新客户端后是否自动打洞" placement="top-start">
-                                    <el-checkbox v-model="model.UsePunchHole">开启</el-checkbox>
+                                    <el-checkbox v-model="state.form.UsePunchHole">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="断线重连" prop="UseReConnect">
                                 <el-tooltip class="box-item" effect="dark" content="客户端之间掉线后，是否尝试重新连接" placement="top-start">
-                                    <el-checkbox v-model="model.UseReConnect">开启</el-checkbox>>
+                                    <el-checkbox v-model="state.form.UseReConnect">开启</el-checkbox>>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -108,14 +108,14 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动中继" prop="AutoRelay">
                                 <el-tooltip class="box-item" effect="dark" content="不开启自动打洞的话，是否自动中继" placement="top-start">
-                                    <el-checkbox v-model="model.AutoRelay">开启</el-checkbox>
+                                    <el-checkbox v-model="state.form.AutoRelay">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="中继节点" prop="UseRelay">
                                 <el-tooltip class="box-item" effect="dark" content="是否允许本客户端作为中继节点" placement="top-start">
-                                    <el-checkbox v-model="model.UseRelay">开启</el-checkbox>>
+                                    <el-checkbox v-model="state.form.UseRelay">开启</el-checkbox>>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -144,7 +144,7 @@ export default {
 
         const formDom = ref(null);
         const state = reactive({
-            model: {
+            form: {
                 Name: '',
                 GroupId: '',
                 Args: {},
@@ -183,23 +183,23 @@ export default {
 
         const loadConfig = () => {
             getSignInInfo().then((json) => {
-                state.model.TcpBufferSize = json.ClientConfig.TcpBufferSize;
-                state.model.Name = json.ClientConfig.Name;
-                state.model.Args = json.ClientConfig.Args;
-                state.model.GroupId = json.ClientConfig.GroupId;
-                state.model.GroupIds = json.ClientConfig.GroupIds;
+                state.form.TcpBufferSize = json.ClientConfig.TcpBufferSize;
+                state.form.Name = json.ClientConfig.Name;
+                state.form.Args = json.ClientConfig.Args;
+                state.form.GroupId = json.ClientConfig.GroupId;
+                state.form.GroupIds = json.ClientConfig.GroupIds;
 
-                state.model.AutoReg = json.ClientConfig.AutoReg;
-                state.model.UsePunchHole = json.ClientConfig.UsePunchHole;
-                state.model.UseReConnect = json.ClientConfig.UseReConnect;
+                state.form.AutoReg = json.ClientConfig.AutoReg;
+                state.form.UsePunchHole = json.ClientConfig.UsePunchHole;
+                state.form.UseReConnect = json.ClientConfig.UseReConnect;
 
-                state.model.TimeoutDelay = json.ClientConfig.TimeoutDelay;
+                state.form.TimeoutDelay = json.ClientConfig.TimeoutDelay;
 
-                state.model.UseUdp = json.ClientConfig.UseUdp;
-                state.model.UseTcp = json.ClientConfig.UseTcp;
-                state.model.UseRelay = json.ClientConfig.UseRelay;
-                state.model.AutoRelay = json.ClientConfig.AutoRelay;
-                state.model.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
+                state.form.UseUdp = json.ClientConfig.UseUdp;
+                state.form.UseTcp = json.ClientConfig.UseTcp;
+                state.form.UseRelay = json.ClientConfig.UseRelay;
+                state.form.AutoRelay = json.ClientConfig.AutoRelay;
+                state.form.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
             }).catch((msg) => {
             });
         }
@@ -207,20 +207,20 @@ export default {
         const getJson = () => {
             return new Promise((resolve, reject) => {
                 getSignInInfo().then((json) => {
-                    json.ClientConfig.TcpBufferSize = +state.model.TcpBufferSize;
-                    json.ClientConfig.Name = state.model.Name;
+                    json.ClientConfig.TcpBufferSize = +state.form.TcpBufferSize;
+                    json.ClientConfig.Name = state.form.Name;
                     json.ClientConfig.Args = getArgs();
-                    json.ClientConfig.GroupId = state.model.GroupId;
-                    json.ClientConfig.GroupIds = state.model.GroupIds;
-                    json.ClientConfig.AutoReg = state.model.AutoReg;
-                    json.ClientConfig.UsePunchHole = state.model.UsePunchHole;
-                    json.ClientConfig.TimeoutDelay = +state.model.TimeoutDelay;
-                    json.ClientConfig.UseUdp = state.model.UseUdp;
-                    json.ClientConfig.UseTcp = state.model.UseTcp;
-                    json.ClientConfig.UseRelay = state.model.UseRelay;
-                    json.ClientConfig.AutoRelay = state.model.AutoRelay;
-                    json.ClientConfig.UseReConnect = state.model.UseReConnect;
-                    json.ClientConfig.UdpUploadSpeedLimit = +state.model.UdpUploadSpeedLimit;
+                    json.ClientConfig.GroupId = state.form.GroupId;
+                    json.ClientConfig.GroupIds = state.form.GroupIds;
+                    json.ClientConfig.AutoReg = state.form.AutoReg;
+                    json.ClientConfig.UsePunchHole = state.form.UsePunchHole;
+                    json.ClientConfig.TimeoutDelay = +state.form.TimeoutDelay;
+                    json.ClientConfig.UseUdp = state.form.UseUdp;
+                    json.ClientConfig.UseTcp = state.form.UseTcp;
+                    json.ClientConfig.UseRelay = state.form.UseRelay;
+                    json.ClientConfig.AutoRelay = state.form.AutoRelay;
+                    json.ClientConfig.UseReConnect = state.form.UseReConnect;
+                    json.ClientConfig.UdpUploadSpeedLimit = +state.form.UdpUploadSpeedLimit;
                     resolve(json);
                 }).catch(reject);
             })
@@ -251,15 +251,15 @@ export default {
 
         const handleGroupIdChange = async (val) => {
             val = val.replace(/^\s|\s$/g, '');
-            if (state.model.GroupIds.indexOf(val) == -1 && val) {
-                state.model.GroupIds.push(val);
+            if (state.form.GroupIds.indexOf(val) == -1 && val) {
+                state.form.GroupIds.push(val);
             }
             getJson().then((json) => {
                 updateConfig(json);
             });
         }
         const handleRemoveGroupId = (index) => {
-            state.model.GroupIds.splice(index, 1);
+            state.form.GroupIds.splice(index, 1);
             getJson().then((json) => {
                 updateConfig(json);
             });
@@ -270,7 +270,7 @@ export default {
         });
 
         return {
-            shareData, components, ...toRefs(state), formDom, submit, handleGroupIdChange, handleRemoveGroupId
+            shareData, components, state, formDom, submit, handleGroupIdChange, handleRemoveGroupId
         }
     }
 }

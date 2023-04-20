@@ -4,25 +4,27 @@ using common.server;
 using System.Reflection;
 using common.forward;
 using server.service.forward;
+using common.proxy;
 
-namespace server.service.tcpforward
+namespace server.service.forward
 {
     public sealed class Plugin : IPlugin
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
-            services.GetService<ServerForwardProxyPlugin>();
+            services.GetService<IForwardProxyPlugin>();
+            ProxyPluginLoader.LoadPlugin(services.GetService<IForwardProxyPlugin>());
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Info($"tcp转发和http1.1代理已加载");
+            Logger.Instance.Info($"端口转发穿透已加载");
             var config = services.GetService<common.forward.Config>();
             if (config.ConnectEnable)
             {
-                Logger.Instance.Debug($"tcp转发和http1.1代理已允许注册");
+                Logger.Instance.Debug($"端口转发穿透已允许注册");
             }
             else
             {
-                Logger.Instance.Info($"tcp转发和http1.1代理未允许注册");
+                Logger.Instance.Info($"端口转发穿透未允许注册");
             }
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
@@ -35,7 +37,7 @@ namespace server.service.tcpforward
             services.AddSingleton<IForwardUdpTargetCaching<ForwardTargetCacheInfo>, ForwardUdpTargetCaching>();
 
 
-            services.AddSingleton<IForwardTargetProvider, ServerForwardTargetProvider>();
+            services.AddSingleton<IForwardTargetProvider, ForwardTargetProvider>();
             services.AddSingleton<IForwardUdpTargetProvider, ServerForwardUdpTargetProvider>();
             services.AddSingleton<IForwardProxyPlugin, ForwardProxyPlugin>();
 

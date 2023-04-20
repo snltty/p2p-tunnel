@@ -130,10 +130,10 @@ namespace client.service.vea
         public void Run()
         {
             Stop();
-            if (config.Enable)
+            if (config.ListenEnable)
             {
                 RunTun2Socks();
-                proxyServer.Start((ushort)config.SocksPort, config.Plugin);
+                proxyServer.Start((ushort)config.ListenPort, config.Plugin); ;
             }
             UpdateIp();
         }
@@ -230,7 +230,7 @@ namespace client.service.vea
             //return;
             for (int i = 0; i < 10; i++)
             {
-                Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -loglevel silent");
+                Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -loglevel silent");
                 for (int k = 0; k < 4; k++)
                 {
                     System.Threading.Thread.Sleep(1000);
@@ -286,7 +286,7 @@ namespace client.service.vea
                 $"ip link set dev {veaName} up"
             });
             interfaceLinux = GetLinuxInterfaceNum();
-            Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceLinux} -loglevel silent");
+            Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -interface {interfaceLinux} -loglevel silent");
 
             AddRoute();
         }
@@ -312,7 +312,7 @@ namespace client.service.vea
         private void RunOsx()
         {
             interfaceOsx = GetOsxInterfaceNum();
-            Tun2SocksProcess = Command.Execute("./tun2socks-osx", $" -device {veaNameOsx} -proxy socks5://127.0.0.1:{config.SocksPort} -interface {interfaceOsx} -loglevel silent");
+            Tun2SocksProcess = Command.Execute("./tun2socks-osx", $" -device {veaNameOsx} -proxy socks5://127.0.0.1:{config.ListenPort} -interface {interfaceOsx} -loglevel silent");
 
             for (int i = 0; i < 60; i++)
             {

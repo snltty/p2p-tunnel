@@ -2,14 +2,14 @@
 using common.proxy;
 using server.messengers.singnin;
 
-namespace server.service.tcpforward
+namespace server.service.forward
 {
-    internal class ServerForwardTargetProvider : IForwardTargetProvider
+    internal class ForwardTargetProvider : IForwardTargetProvider
     {
         private readonly IClientSignInCaching clientSignInCaching;
         private readonly IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching;
 
-        public ServerForwardTargetProvider(IClientSignInCaching clientSignInCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching)
+        public ForwardTargetProvider(IClientSignInCaching clientSignInCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching)
         {
             this.clientSignInCaching = clientSignInCaching;
             this.forwardTargetCaching = forwardTargetCaching;
@@ -53,7 +53,7 @@ namespace server.service.tcpforward
         }
     }
 
-    internal class ServerForwardUdpTargetProvider : ServerForwardTargetProvider, IForwardUdpTargetProvider
+    internal class ServerForwardUdpTargetProvider : ForwardTargetProvider, IForwardUdpTargetProvider
     {
         public ServerForwardUdpTargetProvider(IClientSignInCaching clientSignInCaching, IForwardUdpTargetCaching<ForwardTargetCacheInfo> forwardUdpTargetCaching)
             : base(clientSignInCaching, forwardUdpTargetCaching)

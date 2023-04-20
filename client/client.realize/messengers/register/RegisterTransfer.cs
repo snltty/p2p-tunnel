@@ -1,5 +1,4 @@
-﻿using client.messengers.clients;
-using client.messengers.singnin;
+﻿using client.messengers.singnin;
 using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;
@@ -88,7 +87,7 @@ namespace client.realize.messengers.singnin
             CommonTaskResponseInfo<bool> success = new CommonTaskResponseInfo<bool> { Data = false, ErrorMsg = string.Empty };
             if (signInState.LocalInfo.IsConnecting)
             {
-                success.ErrorMsg = "注册操作中...";
+                success.ErrorMsg = "登入操作中...";
                 return success;
             }
 
@@ -102,7 +101,7 @@ namespace client.realize.messengers.singnin
                     {
                         if (signInState.LocalInfo.IsConnecting)
                         {
-                            success.ErrorMsg = "注册操作中...";
+                            success.ErrorMsg = "登入操作中...";
                             Logger.Instance.Error(success.ErrorMsg);
                             break;
                         }
@@ -110,7 +109,7 @@ namespace client.realize.messengers.singnin
                         //先退出
                         Exit1();
 
-                        Logger.Instance.Info($"开始注册");
+                        Logger.Instance.Info($"开始登入");
                         signInState.LocalInfo.IsConnecting = true;
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
@@ -124,11 +123,11 @@ namespace client.realize.messengers.singnin
                         await SwapCryptoTcp();
 
 
-                        //注册
+                        //登入
                         SignInResult result = await signinMessengerSender.SignIn().ConfigureAwait(false);
                         if (result.NetState.Code != MessageResponeCodes.OK)
                         {
-                            Logger.Instance.Error($"注册失败，网络问题:{result.NetState.Code.GetDesc((byte)result.NetState.Code)}");
+                            Logger.Instance.Error($"登入失败，网络问题:{result.NetState.Code.GetDesc((byte)result.NetState.Code)}");
                             Logger.Instance.Error(success.ErrorMsg);
                             signInState.LocalInfo.IsConnecting = false;
                             await Task.Delay((int)interval, cancellationToken.Token);
@@ -136,7 +135,7 @@ namespace client.realize.messengers.singnin
                         }
                         if (result.Data.Code != SignInResultInfo.SignInResultInfoCodes.OK)
                         {
-                            success.ErrorMsg = $"注册失败:{result.Data.Code.GetDesc((byte)result.Data.Code)}";
+                            success.ErrorMsg = $"登入失败:{result.Data.Code.GetDesc((byte)result.Data.Code)}";
                             Logger.Instance.Error(success.ErrorMsg);
                             signInState.LocalInfo.IsConnecting = false;
                             break;
@@ -149,7 +148,7 @@ namespace client.realize.messengers.singnin
                         signInState.Online(result.Data.ConnectionId, result.Data.Ip);
                         await signinMessengerSender.Notify().ConfigureAwait(false);
 
-                        success.ErrorMsg = "注册成功~";
+                        success.ErrorMsg = "登入成功~";
                         success.Data = true;
                         Logger.Instance.Debug(success.ErrorMsg);
                         break;
@@ -191,7 +190,7 @@ namespace client.realize.messengers.singnin
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             signInState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;
-            signInState.Connection = tcpServer.BindReceive(tcpSocket, (byte)config.Client.TcpBufferSize*1024);
+            signInState.Connection = tcpServer.BindReceive(tcpSocket, (byte)config.Client.TcpBufferSize * 1024);
         }
         private async Task SwapCryptoTcp()
         {
@@ -202,7 +201,7 @@ namespace client.realize.messengers.singnin
             ICrypto crypto = await cryptoSwap.Swap(signInState.Connection, config.Server.EncodePassword);
             if (crypto == null)
             {
-                throw new Exception("注册交换密钥失败，如果客户端设置了密钥，则服务器必须设置相同的密钥，如果服务器未设置密钥，则客户端必须留空");
+                throw new Exception("登入交换密钥失败，如果客户端设置了密钥，则服务器必须设置相同的密钥，如果服务器未设置密钥，则客户端必须留空");
             }
 
             signInState.Connection?.EncodeEnable(crypto);

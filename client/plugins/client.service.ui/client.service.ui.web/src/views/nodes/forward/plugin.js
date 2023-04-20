@@ -1,7 +1,7 @@
 export default {
-    service: 'TcpForwardClientService',
+    service: 'ForwardClientService',
     text: '端口转发',
     checked: false,
-    path: '/nodes/tcp-forward.html',
-    name: 'NodesTcpForward',
+    path: '/nodes/forward.html',
+    name: 'NodesForward',
 }

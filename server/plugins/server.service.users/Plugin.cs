@@ -11,6 +11,7 @@ namespace server.service.users
         {
             var config = services.GetService<Config>();
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
+            Logger.Instance.Info("账号模块已加载");
             if (config.Enable)
             {
                 Logger.Instance.Debug($"已启用账号验证");

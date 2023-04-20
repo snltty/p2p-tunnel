@@ -114,37 +114,37 @@ namespace server.service.users.model
     [Flags, MessengerIdEnum]
     public enum UsersMessengerIds : ushort
     {
-        Min = 1200,
+        Min = 1000,
         /// <summary>
         /// 分页
         /// </summary>
-        Page = 1201,
+        Page = 1001,
         /// <summary>
         /// 添加修改
         /// </summary>
-        Add = 1202,
+        Add = 1002,
         /// <summary>
         /// 更新密码
         /// </summary>
-        Password = 1203,
+        Password = 1003,
         /// <summary>
         /// 删除
         /// </summary>
-        Remove = 1204,
+        Remove = 1004,
         /// <summary>
         /// 信息
         /// </summary>
-        Info = 1205,
+        Info = 1005,
 
         /// <summary>
         /// 获取配置
         /// </summary>
-        GetSetting = 1206,
+        GetSetting = 1006,
         /// <summary>
         /// 设置配置
         /// </summary>
-        Setting = 1207,
+        Setting = 1007,
 
-        Max = 1299,
+        Max = 1099,
     }
 }

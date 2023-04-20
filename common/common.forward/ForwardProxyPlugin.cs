@@ -90,8 +90,9 @@ namespace common.forward
             }
             else
             {
-                string domain = HttpParser.GetHost(info.Data).GetString();
-                forwardTargetProvider?.Get(domain, info);
+                int portStart = 0;
+                string host = HttpParser.GetHost(info.Data,ref portStart).GetString();
+                forwardTargetProvider?.Get(host, info);
             }
         }
     }

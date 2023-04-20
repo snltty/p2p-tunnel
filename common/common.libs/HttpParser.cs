@@ -3,7 +3,7 @@ using common.libs.extends;
 using System;
 using System.Text;
 
-namespace common.forward
+namespace common.libs
 {
     public static class HttpParser
     {
@@ -13,9 +13,10 @@ namespace common.forward
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
-        public static Span<byte> GetHost(in Span<byte> span)
+        public static Memory<byte> GetHost(in Memory<byte> memory, ref int portStart)
         {
             int keyIndex = -1;
+            var span = memory.Span;
             for (int i = 0, len = span.Length; i < len; i++)
             {
                 //找到key之前
@@ -28,7 +29,7 @@ namespace common.forward
                         {
                             break;
                         }
-                        //因为 headers 是从第二行开始，所以，可以在碰到每个\n时，向前获取与目标key相同长度的内容与之匹配，成功则已找到key，标识位置
+                        //因为 headers 是从第二行开始，所以，可以在碰到每个\n时，向后获取与目标key相同长度的内容与之匹配，成功则已找到key，标识位置
                         Span<byte> keySpan = span.Slice(i + 1, hostBytes.Length);
                         keySpan[0] |= 32;
                         if (keySpan[0] == hostBytes[0] && keySpan.SequenceEqual(hostBytes))
@@ -37,15 +38,19 @@ namespace common.forward
                             i += hostBytes.Length - 1;
                         }
                     }
+
                 }
                 //找到key之后，如果碰到了\n，就说明value内容已结束，截取key的位置到当前\n位置，就是值内容
                 else if (span[i] == 10)
                 {
-                    Span<byte> valueSpan = span.Slice(keyIndex, i - 1 - keyIndex);
-                    return valueSpan;
+                    return memory.Slice(keyIndex, i - 1 - keyIndex);
+                }
+                else if (span[i] == 58)
+                {
+                    portStart = i - keyIndex;
                 }
             }
-            return Helper.EmptyArray;
+            return Array.Empty<byte>();
         }
         /// <summary>
         /// 构造一条简单的http消息
@@ -101,51 +106,6 @@ namespace common.forward
         public static bool IsConnectMethod(in Span<byte> span)
         {
             return span.Length > connectMethodValue.Length && span.Slice(0, connectMethodValue.Length).SequenceEqual(connectMethodValue.Span);
-        }
-        /// <summary>
-        /// 获取 http connect方法中的host
-        /// </summary>
-        /// <param name="memory"></param>
-        /// <returns></returns>
-        public static Memory<byte> GetHost(in Memory<byte> memory)
-        {
-            var span = memory.Span;
-            int start = connectMethodValue.Length + 1;
-            int hostEndindex = -1, portEndIndex = -1;
-            for (int i = start, len = span.Length; i < len; i++)
-            {
-                if (span[i] == 58)
-                {
-                    hostEndindex = i + 1;
-                }
-                if (span[i] == 32)
-                {
-                    portEndIndex = i + 1;
-                    break;
-                }
-                if (span[i] == 10)
-                {
-                    break;
-                }
-            }
-            if (hostEndindex >= 0 && portEndIndex >= 0)
-            {
-                var host = memory.Slice(start, hostEndindex - start - 1);
-                var port = Array2Port(memory.Slice(hostEndindex, portEndIndex - hostEndindex - 1));
-
-                return NetworkHelper.EndpointToArray(host, port);
-            }
-            return Array.Empty<byte>();
-        }
-        private static Memory<byte> Array2Port(in Memory<byte> memory)
-        {
-            var span = memory.Span;
-            ushort result = 0;
-            for (int i = 0, len = span.Length; i < len; i++)
-            {
-                result += (ushort)((span[i] - 48) * (int)Math.Pow(10, len - i - 1));
-            }
-            return result.ToBytes();
         }
     }
 }

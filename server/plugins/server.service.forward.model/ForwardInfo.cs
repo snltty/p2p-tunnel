@@ -7,40 +7,9 @@ using System.Net;
 
 namespace server.service.forward.model
 {
-    /// <summary>
-    /// 转发相关的消息id
-    /// </summary>
-    [Flags, MessengerIdEnum]
-    public enum ServerForwardMessengerIds : ushort
+    public sealed class ForwardSignInInfo
     {
-        Min = 600,
-        /// <summary>
-        /// 获取端口
-        /// </summary>
-        Ports = 604,
-        /// <summary>
-        /// 注册
-        /// </summary>
-        SignIn = 605,
-        /// <summary>
-        /// 退出
-        /// </summary>
-        SignOut = 606,
-        /// <summary>
-        /// 获取配置
-        /// </summary>
-        GetSetting = 607,
-        /// <summary>
-        /// 配置
-        /// </summary>
-        Setting = 608,
-        Domains = 604,
-        Max = 699,
-    }
-
-    public sealed class ServerForwardSignInInfo
-    {
-        public ServerForwardSignInInfo() { }
+        public ForwardSignInInfo() { }
 
         public string SourceIp { get; set; }
         public ushort SourcePort { get; set; }
@@ -81,7 +50,7 @@ namespace server.service.forward.model
             index += sipBytes.Length;
 
 
-            TargetIp.TryWriteBytes (span.Slice(index), out int length);
+            TargetIp.TryWriteBytes(span.Slice(index), out int length);
             return bytes;
 
         }
@@ -109,9 +78,9 @@ namespace server.service.forward.model
         }
 
     }
-    public sealed class ServerForwardSignOutInfo
+    public sealed class ForwardSignOutInfo
     {
-        public ServerForwardSignOutInfo() { }
+        public ForwardSignOutInfo() { }
         public string SourceIp { get; set; }
         public ushort SourcePort { get; set; }
         public ForwardAliveTypes AliveType { get; set; }
@@ -149,9 +118,9 @@ namespace server.service.forward.model
             SourceIp = span.Slice(index + 1).GetUTF16String(span[index]);
         }
     }
-    public sealed class ServerForwardSignInResultInfo
+    public sealed class ForwardSignInResultInfo
     {
-        public ServerForwardSignInResultCodes Code { get; set; }
+        public ForwardSignInResultCodes Code { get; set; }
         public ulong ID { get; set; }
         public string Msg { get; set; } = string.Empty;
         public byte[] ToBytes()
@@ -183,7 +152,7 @@ namespace server.service.forward.model
             var span = data.Span;
             int index = 0;
 
-            Code = (ServerForwardSignInResultCodes)span[index];
+            Code = (ForwardSignInResultCodes)span[index];
             index += 1;
 
             ID = span.Slice(index, 8).ToUInt64();
@@ -194,7 +163,7 @@ namespace server.service.forward.model
     }
 
     [Flags]
-    public enum ServerForwardSignInResultCodes : byte
+    public enum ForwardSignInResultCodes : byte
     {
         [Description("成功")]
         OK = 0,

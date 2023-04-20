@@ -74,7 +74,7 @@ namespace client.service.forward.server
         }
         public async Task<string> AddServerForward(ServerForwardItemInfo forward)
         {
-            var resp = await tcpForwardMessengerSender.SignIn(signInStateInfo.Connection, new ServerForwardSignInInfo
+            var resp = await tcpForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -87,9 +87,9 @@ namespace client.service.forward.server
                 return resp.Code.GetDesc((byte)resp.Code);
             }
 
-            ServerForwardSignInResultInfo result = new ServerForwardSignInResultInfo();
+            ForwardSignInResultInfo result = new ForwardSignInResultInfo();
             result.DeBytes(resp.Data);
-            if (result.Code != ServerForwardSignInResultCodes.OK)
+            if (result.Code != ForwardSignInResultCodes.OK)
             {
                 return $"{result.Code.GetDesc((byte)result.Code)},{result.Msg}";
             }
@@ -114,7 +114,7 @@ namespace client.service.forward.server
             {
                 return "未找到操作对象";
             }
-            var resp = await tcpForwardMessengerSender.SignIn(signInStateInfo.Connection, new ServerForwardSignInInfo
+            var resp = await tcpForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -146,7 +146,7 @@ namespace client.service.forward.server
             {
                 return "未找到操作对象";
             }
-            var resp = await tcpForwardMessengerSender.SignOut(signInStateInfo.Connection, new ServerForwardSignOutInfo
+            var resp = await tcpForwardMessengerSender.SignOut(signInStateInfo.Connection, new ForwardSignOutInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -176,7 +176,7 @@ namespace client.service.forward.server
             {
                 return "未找到删除对象";
             }
-            var resp = await tcpForwardMessengerSender.SignOut(signInStateInfo.Connection, new ServerForwardSignOutInfo
+            var resp = await tcpForwardMessengerSender.SignOut(signInStateInfo.Connection, new ForwardSignOutInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -225,7 +225,7 @@ namespace client.service.forward.server
         }
         private void SendRegister(ServerForwardItemInfo item, ForwardAliveTypes type)
         {
-            tcpForwardMessengerSender.SignIn(signInStateInfo.Connection, new ServerForwardSignInInfo
+            tcpForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
             {
                 AliveType = type,
                 SourceIp = item.Domain,
@@ -242,17 +242,17 @@ namespace client.service.forward.server
             bool success = false;
             StringBuilder sb = new StringBuilder();
 
-            sb.Append($"注册服务器代理Tcp转发【{type.GetDesc((byte)type)}】代理 {item.Domain}:{item.ServerPort} -> {item.LocalIp}:{item.LocalPort}");
+            sb.Append($"注册服务器代理转发【{type.GetDesc((byte)type)}】代理 {item.Domain}:{item.ServerPort} -> {item.LocalIp}:{item.LocalPort}");
             if (resp.Code != MessageResponeCodes.OK)
             {
                 sb.Append($" 【{resp.Code.GetDesc((byte)resp.Code)}】");
             }
             else
             {
-                ServerForwardSignInResultInfo result = new ServerForwardSignInResultInfo();
+                ForwardSignInResultInfo result = new ForwardSignInResultInfo();
                 result.DeBytes(resp.Data);
                 sb.Append($" 【{result.Code.GetDesc((byte)result.Code)},{result.Msg}】{result.Msg}");
-                success = result.Code == ServerForwardSignInResultCodes.OK;
+                success = result.Code == ForwardSignInResultCodes.OK;
             }
             if (success)
             {

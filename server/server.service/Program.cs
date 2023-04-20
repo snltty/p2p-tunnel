@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
-using server.service.tcpforward;
 using System.Linq;
 using server.service.socks5;
 using System.Threading;
@@ -10,6 +9,8 @@ using common.server;
 using System.IO;
 using server.service.users;
 using common.proxy;
+using server.service.httpProxy;
+using server.service.forward;
 
 namespace server.service
 {
@@ -30,10 +31,21 @@ namespace server.service
             //加载插件程序集，当单文件发布或者动态加载dll外部插件时需要，否则如果本程序集没有显式的使用它的相关内容的话，会加载不出来
             //可以改为从dll文件加载
             Assembly[] assemblys = new Assembly[] {
-                typeof(ServerForwardMessenger).Assembly,
+                typeof(ForwardMessenger).Assembly,
                 typeof(Socks5SettingMessenger).Assembly,
+                typeof(HttpProxySettingMessenger).Assembly,
                 typeof(UsersMessenger).Assembly,
                 typeof(ProxyMessenger).Assembly,
+
+                 //以下是为了获取信息
+                typeof(common.server.model.SignInMessengerIds).Assembly,
+                typeof(common.proxy.ProxyMessengerIds).Assembly,
+                typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
+                typeof(common.socks5.Socks5MessengerIds).Assembly,
+                typeof(common.forward.ForwardMessengerIds).Assembly,
+
+                typeof(server.service.users.model.UsersMessengerIds).Assembly,
+
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();

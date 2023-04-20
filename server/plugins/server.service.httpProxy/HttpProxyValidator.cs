@@ -1,26 +1,25 @@
-﻿using common.server;
+﻿using common.httpProxy;
 using common.server.model;
 using server.messengers;
 using server.messengers.singnin;
-using server.service.forward;
 using System.Collections.Generic;
 
-namespace server.service.tcpforward
+namespace server.service.httpProxy
 {
 
-    public sealed class ServerForwardValidator : ISignInValidator
+    public sealed class HttpProxyValidator : ISignInValidator
     {
-        private readonly common.forward.Config config;
+        private readonly common.httpProxy.Config config;
 
-        public ServerForwardValidator(common.forward.Config config)
+        public HttpProxyValidator(common.httpProxy.Config config)
         {
             this.config = config;
         }
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
-        public uint Access => ServerForwardProxyPlugin.Access;
+        public uint Access => ServerHttpProxyPlugin.Access;
 
-        public string Name => "代理穿透";
+        public string Name => "http代理";
 
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)

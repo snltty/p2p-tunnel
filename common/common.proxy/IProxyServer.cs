@@ -62,6 +62,7 @@ namespace common.proxy
                 SourcePort = port,
                 Socket = socket,
                 UdpClient = new UdpClient(endpoint),
+                Plugin = plugin.Id,
                 UdpInfo = new ProxyInfo
                 {
                     ProxyPlugin = plugin,
@@ -269,7 +270,7 @@ namespace common.proxy
         private async Task Receive(ProxyInfo info, Memory<byte> data)
         {
             info.Data = data;
-            await Receive(info, data);
+            await Receive(info);
         }
         private async Task Receive(ProxyInfo info)
         {
@@ -293,7 +294,10 @@ namespace common.proxy
         private void CloseClientSocket(ProxyUserToken token)
         {
             clientsManager.TryRemove(token.Request.RequestId, out _);
-            _ = Receive(token, Helper.EmptyArray);
+            if (token.Request.Step > EnumProxyStep.Command)
+            {
+                _ = Receive(token, Helper.EmptyArray);
+            }
         }
 
         public void Stop(byte plugin)
@@ -329,6 +333,9 @@ namespace common.proxy
                     }
 
                     token.Request.ProxyPlugin.HandleAnswerData(info);
+                    token.Request.Step = info.Step;
+                    token.Request.Command = info.Command;
+                    token.Request.Rsv = info.Rsv;
                     if (token.Request.Step == EnumProxyStep.Command)
                     {
                         token.Request.Step = EnumProxyStep.ForwardTcp;
@@ -352,6 +359,9 @@ namespace common.proxy
                     {
                         plugin.HandleAnswerData(info);
                     }
+                    token.Request.Step = info.Step;
+                    token.Request.Command = info.Command;
+                    token.Request.Rsv = info.Rsv;
                     await token.UdpClient.SendAsync(info.Data, info.SourceEP);
                 }
                 catch (Exception)

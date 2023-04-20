@@ -3,6 +3,7 @@ using client.realize.messengers.punchHole;
 using client.service.forward;
 using client.service.forward.server;
 using client.service.httpProxy;
+using client.service.httpProxy.server;
 using client.service.logger;
 using client.service.socks5;
 using client.service.socks5.server;
@@ -50,21 +51,30 @@ namespace client.service
             Assembly[] assemblys = new Assembly[] {
                 typeof(ClientServer).Assembly,
                 typeof(LoggerClientService).Assembly,
+                typeof(PunchHoleMessenger).Assembly,
 
-                typeof(ProxyMessenger).Assembly,
-                typeof(ForwardTransfer).Assembly,
+                typeof(ForwardClientService).Assembly,
                 typeof(ServerForwardClientService).Assembly,
 
                 typeof(HttpProxyClientService).Assembly,
+                typeof(ServerHttpProxyClientService).Assembly,
 
                 typeof(Socks5ClientService).Assembly,
-                typeof(ServerSocks5Configure).Assembly,
+                typeof(ServerSocks5ClientService).Assembly,
+
                 typeof(VeaClientService).Assembly,
 
-                typeof(PunchHoleMessenger).Assembly,
-              
                 typeof(ServerUsersClientService).Assembly,
-              
+
+                //以下是为了获取信息
+                typeof(common.server.model.SignInMessengerIds).Assembly,
+                typeof(common.proxy.ProxyMessengerIds).Assembly,
+                typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
+                typeof(common.socks5.Socks5MessengerIds).Assembly,
+                typeof(common.forward.ForwardMessengerIds).Assembly,
+
+                typeof(server.service.users.model.UsersMessengerIds).Assembly,
+
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();

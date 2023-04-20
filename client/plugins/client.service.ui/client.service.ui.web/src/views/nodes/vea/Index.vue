@@ -4,7 +4,7 @@
             <el-form ref="formDom" label-width="0">
                 <el-form-item>
                     <div class="w-100 t-c">
-                        <ConnectButton :loading="state.loading" v-model="state.enable" @handle="handle"></ConnectButton>
+                        <ConnectButton :loading="state.loading" v-model="state.ListenEnable" @handle="handle"></ConnectButton>
                     </div>
                 </el-form-item>
                 <el-form-item>
@@ -38,12 +38,12 @@ export default {
 
         const state = reactive({
             loading: false,
-            enable: false
+            ListenEnable: false
         });
 
         const loadConfig = () => {
             getConfig().then((res) => {
-                state.enable = res.Enable;
+                state.ListenEnable = res.ListenEnable;
             });
         }
 
@@ -54,7 +54,7 @@ export default {
         const submit = () => {
             state.loading = true;
             getConfig().then((res) => {
-                res.Enable = state.enable;
+                res.ListenEnable = state.ListenEnable;
                 setConfig(res).then(() => {
                     loadConfig();
                     runVea().then(() => {
@@ -71,7 +71,7 @@ export default {
         }
         const handle = () => {
             if (state.loading) return;
-            state.enable = !state.enable;
+            state.ListenEnable = !state.ListenEnable;
             submit();
         };
         return {

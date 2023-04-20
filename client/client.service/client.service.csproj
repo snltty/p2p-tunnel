@@ -29,6 +29,7 @@
 		<Content Include="logo.ico" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\..\client.service.httpProxy.server\client.service.httpProxy.server.csproj" />
 		<ProjectReference Include="..\client.realize\client.realize.csproj" />
 		<ProjectReference Include="..\plugins\client.service.forward.server\client.service.forward.server.csproj" />
 		<ProjectReference Include="..\plugins\client.service.forward\client.service.forward.csproj" />
@@ -55,9 +56,7 @@
 		</None>
 	</ItemGroup>
 	<ProjectExtensions>
-		<VisualStudio>
-			<UserProperties appsettings_1json__JsonSchema="" />
-		</VisualStudio>
+		<VisualStudio><UserProperties /></VisualStudio>
 	</ProjectExtensions>
 
 </Project>

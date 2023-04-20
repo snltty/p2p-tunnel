@@ -57,7 +57,7 @@ export default {
             localtion: window.location.origin,
         });
         const loadConfig = () => {
-            getConfigure(plugin.service).then((res) => {
+            getConfigure(plugin.config).then((res) => {
                 state.port = res.ListenPort;
                 state.name = res.TargetName;
                 state.listening = res.ListenEnable;
@@ -72,7 +72,7 @@ export default {
             getConfigure().then((res) => {
                 res.TargetName = state.name;
                 res.ListenEnable = state.listening;
-                saveConfigure(JSON.stringify(res)).then(() => {
+                saveConfigure(plugin.config, JSON.stringify(res)).then(() => {
                     update().then(() => {
                         loadConfig();
                         state.loading = false;

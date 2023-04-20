@@ -19,7 +19,7 @@ namespace client.service.vea
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Debug($"虚拟网卡插件已加载");
-            if (config.Enable)
+            if (config.ListenEnable)
             {
                 transfer.Run();
                 Logger.Instance.Debug($"虚拟网卡插件已开启");

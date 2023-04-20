@@ -24,13 +24,12 @@ namespace client.service.vea
             this.configDataProvider = configDataProvider;
 
             Config config = ReadConfig().Result;
-            Enable = config.Enable;
+            ListenEnable = config.ListenEnable;
             ProxyAll = config.ProxyAll;
             IP = config.IP;
             LanIPs = config.LanIPs;
-            SocksPort = config.SocksPort;
+            ListenPort = config.ListenPort;
             BufferSize = config.BufferSize;
-            NumConnections = config.NumConnections;
             ConnectEnable = config.ConnectEnable;
         }
 
@@ -40,7 +39,7 @@ namespace client.service.vea
         /// <summary>
         /// 启用
         /// </summary>
-        public bool Enable { get; set; } = false;
+        public bool ListenEnable { get; set; } = false;
         /// <summary>
         /// 代理所有
         /// </summary>
@@ -58,15 +57,11 @@ namespace client.service.vea
         /// <summary>
         /// 监听端口
         /// </summary>
-        public int SocksPort { get; set; } = 5415;
+        public int ListenPort { get; set; } = 5415;
         /// <summary>
         /// buffersize
         /// </summary>
         public EnumBufferSize BufferSize { get; set; } =  EnumBufferSize.KB_8;
-        /// <summary>
-        /// 连接数
-        /// </summary>
-        public int NumConnections { get; set; } = 1000;
         /// <summary>
         /// 允许被连接
         /// </summary>
@@ -97,11 +92,11 @@ namespace client.service.vea
         {
             var _config = jsonStr.DeJson<Config>();
 
-            Enable = _config.Enable;
+            ListenEnable = _config.ListenEnable;
             ProxyAll = _config.ProxyAll;
             IP = _config.IP;
             LanIPs = _config.LanIPs;
-            SocksPort = _config.SocksPort;
+            ListenPort = _config.ListenPort;
             BufferSize = _config.BufferSize;
             ConnectEnable = _config.ConnectEnable;
 

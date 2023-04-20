@@ -20,7 +20,7 @@ namespace client.service.forward.server
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)ServerForwardMessengerIds.Domains,
+                MessengerId = (ushort)ForwardMessengerIds.Domains,
                 Connection = Connection
             }).ConfigureAwait(false);
         }
@@ -28,24 +28,24 @@ namespace client.service.forward.server
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)ServerForwardMessengerIds.Ports,
+                MessengerId = (ushort)ForwardMessengerIds.Ports,
                 Connection = Connection
             }).ConfigureAwait(false);
         }
-        public async Task<MessageResponeInfo> SignOut(IConnection Connection, ServerForwardSignOutInfo data)
+        public async Task<MessageResponeInfo> SignOut(IConnection Connection, ForwardSignOutInfo data)
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)ServerForwardMessengerIds.SignOut,
+                MessengerId = (ushort)ForwardMessengerIds.SignOut,
                 Connection = Connection,
                 Payload = data.ToBytes()
             }).ConfigureAwait(false);
         }
-        public async Task<MessageResponeInfo> SignIn(IConnection Connection, ServerForwardSignInInfo data)
+        public async Task<MessageResponeInfo> SignIn(IConnection Connection, ForwardSignInInfo data)
         {
             return await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)ServerForwardMessengerIds.SignIn,
+                MessengerId = (ushort)ForwardMessengerIds.SignIn,
                 Connection = Connection,
                 Payload = data.ToBytes(),
             }).ConfigureAwait(false);

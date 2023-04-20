@@ -15,7 +15,6 @@ namespace client.service.vea.socks5
     {
         public void Get(ProxyInfo info)
         {
-            throw new NotImplementedException();
         }
     }
 
@@ -24,8 +23,8 @@ namespace client.service.vea.socks5
     {
         public override byte Id => config.Plugin;
         public override EnumBufferSize BufferSize => config.BufferSize;
-        public override ushort Port => (ushort)config.SocksPort;
-        public override bool Enable => config.Enable;
+        public override ushort Port => (ushort)config.ListenPort;
+        public override bool Enable => config.ConnectEnable;
 
         private readonly Config config;
         private readonly IProxyServer proxyServer;
@@ -45,7 +44,13 @@ namespace client.service.vea.socks5
 
         public override bool HandleRequestData(ProxyInfo info)
         {
+            if (info.Rsv == 0)
+            {
+                info.Rsv = (byte)Socks5EnumStep.Request;
+            }
+
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
+
             if (socks5EnumStep == Socks5EnumStep.Command)
             {
                 if (Socks5Parser.GetIsIPV4(info.Data) == false)
@@ -125,18 +130,18 @@ namespace client.service.vea.socks5
         /// <summary>
         /// 最小
         /// </summary>
-        Min = 900,
+        Min = 1100,
         /// <summary>
         /// 更新ip
         /// </summary>
-        Ip = 901,
+        Ip = 1101,
         /// <summary>
         /// 重装网卡
         /// </summary>
-        Reset = 902,
+        Reset = 1102,
         /// <summary>
         /// 最大
         /// </summary>
-        Max = 999,
+        Max = 1199,
     }
 }

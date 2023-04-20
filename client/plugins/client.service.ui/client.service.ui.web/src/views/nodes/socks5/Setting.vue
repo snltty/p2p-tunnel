@@ -12,7 +12,9 @@
                             </el-col>
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="bufsize" prop="BufferSize">
-                                    <el-input size="default" v-model="state.form.BufferSize"></el-input>
+                                    <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
+                                        <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                    </el-select>
                                 </el-form-item>
                             </el-col>
                         </el-row>
@@ -82,6 +84,7 @@ import { get, set, getPac, updatePac } from "../../../apis/socks5";
 import { onMounted } from "@vue/runtime-core";
 import { injectClients } from "../../../states/clients";
 import { injectShareData } from "../../../states/shareData";
+import { ElMessage } from 'element-plus/lib/components'
 import plugin from './plugin'
 export default {
     plugin: plugin,
@@ -121,20 +124,7 @@ export default {
                             return Number(value);
                         },
                     },
-                ],
-                BufferSize: [
-                    { required: true, message: "必填", trigger: "blur" },
-                    {
-                        type: "number",
-                        min: 1024,
-                        max: 1048576,
-                        message: "数字 1024-1048576",
-                        trigger: "blur",
-                        transform(value) {
-                            return Number(value);
-                        },
-                    },
-                ],
+                ]
             },
         });
 
@@ -154,6 +144,8 @@ export default {
         };
         const handlePac = () => {
             state.showPac = false;
+            updatePac(state.pac);
+            ElMessage.success('已更新');
         };
 
         const loadPac = () => {
@@ -180,12 +172,8 @@ export default {
                     state.configInfo.TargetName = state.form.TargetName;
                     state.configInfo.IsPac = state.form.IsPac;
                     state.configInfo.IsCustomPac = state.form.IsCustomPac;
+                    set(state.configInfo).then(resolve).catch(reject);
 
-                    updatePac(state.pac)
-                        .then(() => {
-                            set(state.configInfo).then(resolve).catch(reject);
-                        })
-                        .catch(reject);
                 });
             });
         };

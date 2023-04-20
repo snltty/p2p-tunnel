@@ -310,9 +310,9 @@ namespace common.proxy
     [Flags]
     public enum ProxyMessengerIds : ushort
     {
-        Min = 1000,
-        Request = 1001,
-        Response = 1002,
-        Max = 1099,
+        Min = 900,
+        Request = 901,
+        Response = 902,
+        Max = 999,
     }
 }

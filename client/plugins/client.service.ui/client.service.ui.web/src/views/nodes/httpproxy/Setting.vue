@@ -7,12 +7,14 @@
                         <el-row :gutter="10">
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="监听端口" prop="Port">
-                                    <el-input size="default" v-model="state.form.Port"></el-input>
+                                    <el-input size="default" v-model="state.form.ListenPort"></el-input>
                                 </el-form-item>
                             </el-col>
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="bufsize" prop="BufferSize">
-                                    <el-input size="default" v-model="state.form.BufferSize"></el-input>
+                                    <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
+                                        <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                    </el-select>
                                 </el-form-item>
                             </el-col>
                         </el-row>
@@ -30,7 +32,7 @@
                             </el-col>
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="目标端" prop="Name">
-                                    <el-select size="default" v-model="state.form.Name" placeholder="选择目标">
+                                    <el-select size="default" v-model="state.form.TargetName" placeholder="选择目标">
                                         <el-option v-for="(item, index) in targets" :key="index" :label="item.label" :value="item.Name">
                                         </el-option>
                                     </el-select>
@@ -84,7 +86,7 @@ import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../states/clients'
 import { injectShareData } from '../../../states/shareData'
 import plugin from './plugin'
-import { updatePac } from '../../../apis/socks5'
+import { ElMessage } from 'element-plus/lib/components'
 export default {
     plugin: plugin,
     components: {},
@@ -101,16 +103,16 @@ export default {
             showPac: false,
             pac: '',
             form: {
-                Port: 5413,
+                ListenPort: 5413,
                 IsPac: false,
                 IsCustomPac: false,
                 BufferSize: 3,
                 ConnectEnable: false,
-                Name: '',
+                TargetName: '',
                 Pac: '',
             },
             rules: {
-                Port: [
+                ListenPort: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
                         type: 'number', min: 1024, max: 65535, message: '数字 1024-65535', trigger: 'blur', transform(value) {
@@ -121,10 +123,10 @@ export default {
             }
         });
         const loadConfig = () => {
-            getConfigure().then((res) => {
-                const json = res;
-                state.form.Port = json.ListenPort;
-                state.form.Name = json.TargetName;
+            getConfigure(plugin.config).then((res) => {
+                const json = new Function(`return ${res}`)();
+                state.form.ListenPort = json.ListenPort;
+                state.form.TargetName = json.TargetName;
                 state.form.IsPac = json.IsPac;
                 state.form.IsCustomPac = json.IsCustomPac;
                 state.form.BufferSize = json.BufferSize;
@@ -148,6 +150,8 @@ export default {
         const handlePac = () => {
             state.form.Pac = state.pac;
             state.showPac = false;
+            setPac(state.form.Pac);
+            ElMessage.success('已更新');
         }
         const formDom = ref(null);
         const submit = () => {
@@ -157,15 +161,15 @@ export default {
                         reject();
                         return false;
                     }
-                    getConfigure().then((res) => {
-                        res.TargetName = state.form.Name;
-                        res.ListenPort = +state.form.Port;
-                        res.IsPac = state.form.IsPac;
-                        res.IsCustomPac = state.form.IsCustomPac;
-                        res.BufferSize = +state.form.BufferSize;
-                        res.ConnectEnable = state.form.ConnectEnable;
-                        saveConfigure(JSON.stringify(res)).then(resolve).catch(reject);
-                        setPac(state.form.Pac);
+                    getConfigure(plugin.config).then((res) => {
+                        const json = new Function(`return ${res}`)();
+                        json.TargetName = state.form.TargetName;
+                        json.ListenPort = +state.form.ListenPort;
+                        json.IsPac = state.form.IsPac;
+                        json.IsCustomPac = state.form.IsCustomPac;
+                        json.BufferSize = +state.form.BufferSize;
+                        json.ConnectEnable = state.form.ConnectEnable;
+                        saveConfigure(plugin.config, JSON.stringify(json)).then(resolve).catch(reject);
                     });
 
                 });

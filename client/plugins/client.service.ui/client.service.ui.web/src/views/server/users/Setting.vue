@@ -1,20 +1,20 @@
 <template>
     <div class="register-form">
         <div class="inner">
-            <el-form label-width="8rem" ref="formDom" :model="model" :rules="rules">
+            <el-form label-width="8rem" ref="formDom" :model="state.form" :rules="state.rules">
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="账号验证" prop="Enable">
                                 <el-tooltip class="box-item" effect="dark" content="开启账号验证" placement="top-start">
-                                    <el-checkbox size="default" v-model="model.Enable">开启</el-checkbox>
+                                    <el-checkbox size="default" v-model="state.form.Enable">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="强制离线" prop="ForceOffline">
                                 <el-tooltip class="box-item" effect="dark" content="超出登入数量时，是否强制其它连接断开" placement="top-start">
-                                    <el-checkbox size="default" v-model="model.ForceOffline">开启</el-checkbox>
+                                    <el-checkbox size="default" v-model="state.form.ForceOffline">开启</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-col>
@@ -35,7 +35,7 @@ export default {
     setup() {
         const formDom = ref(null);
         const state = reactive({
-            model: {
+            form: {
                 Enable: false,
                 ForceOffline: false,
             },
@@ -45,7 +45,7 @@ export default {
 
         const loadConfig = () => {
             return new Promise((resolve, reject) => {
-                getConfigure('ServerUsersConfigure').then((json) => {
+                getConfigure(plugin.config).then((json) => {
                     resolve(new Function(`return ${json}`)());
                 }).catch(reject);
             });
@@ -58,9 +58,9 @@ export default {
                         return false;
                     }
                     loadConfig().then((json) => {
-                        json.Enable = state.model.Enable;
-                        json.ForceOffline = state.model.ForceOffline;
-                        saveConfigure('ServerUsersConfigure', JSON.stringify(json)).then(resolve).catch(reject);
+                        json.Enable = state.form.Enable;
+                        json.ForceOffline = state.form.ForceOffline;
+                        saveConfigure(plugin.config, JSON.stringify(json)).then(resolve).catch(reject);
                     }).catch(reject);
                 });
             })
@@ -68,13 +68,13 @@ export default {
 
         onMounted(() => {
             loadConfig().then((json) => {
-                state.model.Enable = json.Enable;
-                state.model.ForceOffline = json.ForceOffline;
+                state.form.Enable = json.Enable;
+                state.form.ForceOffline = json.ForceOffline;
             });
         });
 
         return {
-            ...toRefs(state), formDom, submit
+            state, formDom, submit
         }
     }
 }

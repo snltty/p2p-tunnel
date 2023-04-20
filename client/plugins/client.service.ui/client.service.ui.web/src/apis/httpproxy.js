@@ -6,6 +6,6 @@ export const update = () => {
 export const getPac = () => {
     return sendWebsocketMsg(`httpproxy/GetPac`);
 }
-export const setPac = () => {
-    return sendWebsocketMsg(`httpproxy/SetPac`);
+export const setPac = (content) => {
+    return sendWebsocketMsg(`httpproxy/SetPac`, content);
 }
