@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { getListProxy, addListen } from '../../../apis/forward'
+import { getConfigure, saveConfigure } from '../../../apis/configure'
 import { reactive } from '@vue/reactivity'
 import { computed, onMounted } from '@vue/runtime-core';
 import plugin from './plugin'
@@ -29,14 +29,15 @@ export default {
     props: ['params'],
     setup(props) {
         const name = props.params.Name;
-        const isTarget = computed(() => name == state.targetName);
+        const isTarget = computed(() => name == state.TargetName);
         const state = reactive({
             loading: false,
-            targetName: ''
+            TargetName: ''
         });
         const loadData = () => {
-            getListProxy().then((res) => {
-                state.targetName = res.Name;
+            getConfigure(plugin.config).then((res) => {
+                let json = new Function(`return ${res}`)();
+                state.TargetName = json.TargetName;
             }).catch(() => {
 
             });
@@ -47,9 +48,10 @@ export default {
 
         const handleSubmit = () => {
             state.loading = true;
-            getListProxy().then((res) => {
-                res.Name = state.targetName;
-                addListen(res).then((res) => {
+            getConfigure(plugin.config).then((res) => {
+                let json = new Function(`return ${res}`)();
+                json.TargetName = state.TargetName;
+                saveConfigure(plugin.config, JSON.stringify(json)).then((res) => {
                     state.loading = false;
                     loadData();
                 }).catch(() => {
@@ -60,12 +62,12 @@ export default {
             });
         }
 
-        const handleSet = () => {
-            state.targetName = name;
+        const handleSet = (name) => {
+            state.TargetName = name;
             handleSubmit();
         }
         const handleClear = () => {
-            state.targetName = '';
+            state.TargetName = '';
             handleSubmit();
         }
 

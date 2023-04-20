@@ -44,6 +44,7 @@ namespace common.proxy
         /// <summary>
         /// 目标地址
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> TargetAddress { get; set; }
         public ushort TargetPort { get; set; }
 
@@ -68,7 +69,7 @@ namespace common.proxy
         public IConnection Connection { get; set; }
         [System.Text.Json.Serialization.JsonIgnore]
         public byte[] Response { get; set; } = new byte[1];
-
+        [System.Text.Json.Serialization.JsonIgnore]
         public IProxyPlugin ProxyPlugin { get; set; }
 
         #endregion
@@ -101,7 +102,7 @@ namespace common.proxy
             int index = 0;
 
 
-            bytes[index] = (byte)((Rsv << 4) | ((byte)Step << 4));
+            bytes[index] = (byte)((Rsv << 4) | ((byte)Step));
             index += 1;
             bytes[index] = (byte)(((byte)Command << 4) | (byte)AddressType);
             index += 1;
@@ -149,8 +150,9 @@ namespace common.proxy
 
             Rsv = (byte)(span[index] >> 4);
             Step = (EnumProxyStep)(span[index] & 0b0000_1111);
+            index++;
 
-            Command = (EnumProxyCommand)((span[index] >> 4));
+            Command = (EnumProxyCommand)(span[index] >> 4);
             AddressType = (EnumProxyAddressType)(span[index] & 0b0000_1111);
             index += 1;
 

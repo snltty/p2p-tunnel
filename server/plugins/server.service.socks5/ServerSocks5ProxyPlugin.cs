@@ -13,6 +13,7 @@ namespace server.service.socks5
 
     public class ServerSocks5ProxyPlugin : Socks5ProxyPlugin, IServerSocks5ProxyPlugin
     {
+        public static uint Access => 0b00000000_00000000_00000000_00010000;
         private readonly IServiceAccessValidator serviceAccessProvider;
         private readonly IClientSignInCaching clientSignInCaching;
         public ServerSocks5ProxyPlugin(common.socks5.Config config, IProxyServer proxyServer, ISocks5ConnectionProvider socks5ConnectionProvider
@@ -32,7 +33,7 @@ namespace server.service.socks5
 
             if (clientSignInCaching.Get(info.Connection.ConnectId, out SignInCacheInfo client))
             {
-                return Enable || serviceAccessProvider.Validate(client.UserAccess, 0b00000000_00000000_00000000_00001000);
+                return Enable || serviceAccessProvider.Validate(client.UserAccess, Access);
             }
 
             return Enable;

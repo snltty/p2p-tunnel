@@ -3,7 +3,6 @@ using common.proxy;
 using System.Buffers.Binary;
 using System.Net;
 using common.server.model;
-using System;
 
 namespace common.socks5
 {
@@ -49,14 +48,12 @@ namespace common.socks5
                 info.Rsv = (byte)Socks5EnumStep.Request;
             }
 
-            Console.WriteLine($"{info.RequestId}  step:{(Socks5EnumStep)info.Rsv}, command:{info.Command},{string.Join(",",info.Data.ToArray())}");
-
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
             //request  auth 的 直接通过,跳过验证部分
             if (socks5EnumStep < Socks5EnumStep.Command)
             {
-                //Socks5EnumAuthType.NoAut  Socks5EnumAuthState.Success 都是 0x00
-                info.Response[0] = (byte)Socks5EnumAuthType.NoAuth;
+                //Socks5EnumAuthType.NoAuth不验证  Socks5EnumAuthState.Success验证成功 都是 0x00
+                info.Response[0] = 0x00;
                 info.Data = info.Response;
                 info.Rsv++;
                 proxyServer.InputData(info);
@@ -75,15 +72,18 @@ namespace common.socks5
                     return false;
                 }
 
+                //将socks5的command转化未通用command
                 info.Command = (EnumProxyCommand)info.Data.Span[1];
                 GetRemoteEndPoint(info);
+                //此时的负载是socks5的command包，直接去掉
+                info.Data = Helper.EmptyArray;
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
+                //重组udp转发包
                 GetRemoteEndPoint(info);
                 info.Data = Socks5Parser.GetUdpData(info.Data);
             }
-
             socks5ConnectionProvider.Get(info);
             return true;
         }
@@ -97,6 +97,7 @@ namespace common.socks5
         {
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
 
+            //request auth 步骤的，只需回复一个字节的状态码
             if (socks5EnumStep < Socks5EnumStep.Command)
             {
                 info.Data = new byte[] { 5, info.Data.Span[0] };
@@ -108,6 +109,7 @@ namespace common.socks5
             {
                 case Socks5EnumStep.Command:
                     {
+                        //command的，需要区分成功和失败，成功则回复指定数据，失败则关闭连接
                         Socks5EnumResponseCommand type = (Socks5EnumResponseCommand)info.Data.Span[0];
                         if (type == Socks5EnumResponseCommand.ConnecSuccess)
                         {
@@ -117,6 +119,7 @@ namespace common.socks5
                         {
                             info.Data = Helper.EmptyArray;
                         }
+                        //走到转发步骤
                         info.Rsv = (byte)Socks5EnumStep.Forward;
                         info.Step = EnumProxyStep.ForwardTcp;
                     }
@@ -129,7 +132,9 @@ namespace common.socks5
                     break;
                 case Socks5EnumStep.ForwardUdp:
                     {
+                        //组装udp包
                         info.Data = Socks5Parser.MakeUdpResponse(new IPEndPoint(new IPAddress(info.TargetAddress.Span), info.TargetPort), info.Data);
+                        info.Rsv = (byte)Socks5EnumStep.ForwardUdp;
                         info.Step = EnumProxyStep.ForwardUdp;
                     }
                     break;
@@ -142,7 +147,7 @@ namespace common.socks5
             //VERSION COMMAND RSV ATYPE  DST.ADDR  DST.PORT
             //去掉 VERSION COMMAND RSV
             var memory = info.Data.Slice(3);
-            var span = memory.Span.Slice(3);
+            var span = memory.Span;
             info.AddressType = (EnumProxyAddressType)span[0];
             int index = 0;
 

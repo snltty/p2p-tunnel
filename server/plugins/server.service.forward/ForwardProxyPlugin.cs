@@ -16,7 +16,7 @@ namespace server.service.forward
 
     public sealed class ForwardProxyPlugin : IForwardProxyPlugin
     {
-        public static uint Access => 0b00000000_00000000_00000000_00010000;
+        public static uint Access => 0b00000000_00000000_00000000_00001000;
         public byte Id => config.Plugin;
         public EnumBufferSize BufferSize => config.BufferSize;
 
