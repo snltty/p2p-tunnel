@@ -22,7 +22,6 @@ namespace client.service.forward
         public List<P2PListenInfo> p2pListens = new List<P2PListenInfo>();
         private readonly IConfigDataProvider<P2PConfigInfo> p2pConfigDataProvider;
         private readonly IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching;
-        private readonly IForwardUdpTargetCaching<ForwardTargetCacheInfo> forwardUdpTargetCaching;
         private readonly IProxyServer proxyServer;
 
         NumberSpaceUInt32 listenNS = new NumberSpaceUInt32();
@@ -33,12 +32,10 @@ namespace client.service.forward
         public ForwardTransfer(
             IConfigDataProvider<P2PConfigInfo> p2pConfigDataProvider,
             IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching,
-            IForwardUdpTargetCaching<ForwardTargetCacheInfo> forwardUdpTargetCaching,
             common.forward.Config config, IForwardProxyPlugin forwardProxyPlugin, IProxyServer proxyServer)
         {
             this.p2pConfigDataProvider = p2pConfigDataProvider;
             this.forwardTargetCaching = forwardTargetCaching;
-            this.forwardUdpTargetCaching = forwardUdpTargetCaching;
             this.config = config;
             this.proxyServer = proxyServer;
 
@@ -133,7 +130,6 @@ namespace client.service.forward
                     forwardTargetCaching.Remove(item.SourceIp, item.TargetPort);
                 }
                 forwardTargetCaching.Remove(listen.Port);
-                forwardUdpTargetCaching.Remove(listen.Port);
                 SaveP2PConfig();
             }
         }
@@ -192,7 +188,6 @@ namespace client.service.forward
                 {
                     forwardTargetCaching.Remove(listen.Port);
                 }
-                forwardUdpTargetCaching.Remove(listen.Port);
                 saveInfo.Desc = forward.Forward.Desc;
                 saveInfo.SourceIp = forward.Forward.SourceIp;
                 saveInfo.TargetIp = forward.Forward.TargetIp;
@@ -232,12 +227,6 @@ namespace client.service.forward
             else
             {
                 forwardTargetCaching.Add(listen.Port, new ForwardTargetCacheInfo
-                {
-                    IPAddress = forward.Forward.TargetIp.GetAddressBytes(),
-                    Port = forward.Forward.TargetPort,
-                    Name = forward.Forward.Name,
-                });
-                forwardUdpTargetCaching.Add(listen.Port, new ForwardTargetCacheInfo
                 {
                     IPAddress = forward.Forward.TargetIp.GetAddressBytes(),
                     Port = forward.Forward.TargetPort,
@@ -285,7 +274,7 @@ namespace client.service.forward
         {
             try
             {
-                proxyServer.Start(listen.Port, config.Plugin);
+                proxyServer.Start(listen.Port, config.Plugin, (byte)listen.AliveType);
                 SaveP2PConfig();
             }
             catch (Exception ex)
@@ -352,12 +341,6 @@ namespace client.service.forward
                     try
                     {
                         forwardTargetCaching.Add(listen.Port, new ForwardTargetCacheInfo
-                        {
-                            IPAddress = forward.TargetIp.GetAddressBytes(),
-                            Port = forward.TargetPort,
-                            Name = forward.Name
-                        });
-                        forwardUdpTargetCaching.Add(listen.Port, new ForwardTargetCacheInfo
                         {
                             IPAddress = forward.TargetIp.GetAddressBytes(),
                             Port = forward.TargetPort,

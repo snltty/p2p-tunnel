@@ -3,7 +3,6 @@ using common.libs;
 using common.server;
 using System.Reflection;
 using common.forward;
-using server.service.forward;
 using common.proxy;
 
 namespace server.service.forward
@@ -12,7 +11,6 @@ namespace server.service.forward
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
-            services.GetService<IForwardProxyPlugin>();
             ProxyPluginLoader.LoadPlugin(services.GetService<IForwardProxyPlugin>());
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
@@ -34,11 +32,9 @@ namespace server.service.forward
             services.AddSingleton<common.forward.Config>();//启动器
 
             services.AddSingleton<IForwardTargetCaching<ForwardTargetCacheInfo>, ForwardTargetCaching>();
-            services.AddSingleton<IForwardUdpTargetCaching<ForwardTargetCacheInfo>, ForwardUdpTargetCaching>();
 
 
             services.AddSingleton<IForwardTargetProvider, ForwardTargetProvider>();
-            services.AddSingleton<IForwardUdpTargetProvider, ServerForwardUdpTargetProvider>();
             services.AddSingleton<IForwardProxyPlugin, ForwardProxyPlugin>();
 
         }

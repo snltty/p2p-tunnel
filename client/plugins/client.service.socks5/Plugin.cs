@@ -12,9 +12,10 @@ namespace client.service.socks5
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
+            ProxyPluginLoader.LoadPlugin(services.GetService<IClientSocks5ProxyPlugin>());
             common.socks5.Config config = services.GetService<common.socks5.Config>();
             Socks5Transfer socks5Transfer = services.GetService<Socks5Transfer>();
-            ProxyPluginLoader.LoadPlugin(services.GetService<IClientSocks5ProxyPlugin>());
+           
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Debug($"socks5已加载");

@@ -5,6 +5,7 @@ using common.proxy;
 using common.server.model;
 using server.messengers;
 using server.messengers.singnin;
+using System;
 using System.Linq;
 using System.Text;
 
@@ -14,28 +15,14 @@ namespace server.service.forward
     {
     }
 
-    public sealed class ForwardProxyPlugin : IForwardProxyPlugin
+    public sealed class ForwardProxyPlugin : common.forward.ForwardProxyPlugin, IForwardProxyPlugin
     {
         public static uint Access => 0b00000000_00000000_00000000_00001000;
-        public byte Id => config.Plugin;
-        public EnumBufferSize BufferSize => config.BufferSize;
-
-
-        private readonly common.forward.Config config;
-        private readonly IProxyServer proxyServer;
-        private readonly IForwardTargetProvider forwardTargetProvider;
-        private readonly IForwardUdpTargetProvider forwardUdpTargetProvider;
         private readonly IServiceAccessValidator serviceAccessProvider;
 
-        public ForwardProxyPlugin(common.forward.Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IForwardUdpTargetProvider forwardUdpTargetProvider, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching)
+        public ForwardProxyPlugin(common.forward.Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching) : base(config, proxyServer, forwardTargetProvider)
         {
-            this.config = config;
-            this.proxyServer = proxyServer;
-            this.forwardTargetProvider = forwardTargetProvider;
-            this.forwardUdpTargetProvider = forwardUdpTargetProvider;
             this.serviceAccessProvider = serviceAccessProvider;
-
-
             clientSignInCaching.OnOffline += (client) =>
             {
                 var keys = forwardTargetCaching.Remove(client.Name);
@@ -56,48 +43,10 @@ namespace server.service.forward
             }
         }
 
-        public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
+        public override bool ValidateAccess(ProxyInfo info)
         {
-            return EnumProxyValidateDataResult.Equal;
+            return true;//serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
         }
 
-        public bool HandleRequestData(ProxyInfo info)
-        {
-            if (info.Connection == null || info.Connection.Connected == false)
-            {
-                info.Connection = null;
-                GetConnection(info);
-            }
-
-            if (info.Connection == null || info.Connection.Connected == false)
-            {
-                info.Data = Helper.EmptyArray;
-                proxyServer.InputData(info);
-                return true;
-            }
-
-            info.AddressType = EnumProxyAddressType.IPV4;
-
-            return true;
-        }
-        public void HandleAnswerData(ProxyInfo info) { }
-        public bool ValidateAccess(ProxyInfo info)
-        {
-            return config.ConnectEnable || serviceAccessProvider.Validate(info.Connection, Access);
-        }
-
-        private void GetConnection(ProxyInfo info)
-        {
-            if (info.Command == EnumProxyCommand.UdpAssociate || forwardUdpTargetProvider.Contains(info.ListenPort))
-            {
-                forwardUdpTargetProvider?.Get(info.ListenPort, info);
-            }
-            else
-            {
-                int portStart = 0;
-                string host = HttpParser.GetHost(info.Data,ref portStart).GetString();
-                forwardTargetProvider?.Get(host, info);
-            }
-        }
     }
 }

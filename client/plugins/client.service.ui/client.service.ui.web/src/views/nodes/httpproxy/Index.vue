@@ -58,9 +58,10 @@ export default {
         });
         const loadConfig = () => {
             getConfigure(plugin.config).then((res) => {
-                state.ListenPort = res.ListenPort;
-                state.TargetName = res.TargetName;
-                state.ListenEnable = res.ListenEnable;
+                const json = new Function(`return ${res}`)();
+                state.ListenPort = json.ListenPort;
+                state.TargetName = json.TargetName;
+                state.ListenEnable = json.ListenEnable;
             });
         }
         onMounted(() => {
@@ -69,10 +70,12 @@ export default {
 
         const submit = () => {
             state.loading = true;
-            getConfigure().then((res) => {
-                res.TargetName = state.TargetName;
-                res.ListenEnable = state.ListenEnable;
-                saveConfigure(plugin.config, JSON.stringify(res)).then(() => {
+            getConfigure(plugin.config).then((res) => {
+                const json = new Function(`return ${res}`)();
+                json.TargetName = state.TargetName;
+                json.ListenEnable = state.ListenEnable;
+                console.log(json);
+                saveConfigure(plugin.config, JSON.stringify(json)).then(() => {
                     update().then(() => {
                         loadConfig();
                         state.loading = false;

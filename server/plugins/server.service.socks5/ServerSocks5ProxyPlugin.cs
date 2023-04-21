@@ -15,13 +15,11 @@ namespace server.service.socks5
     {
         public static uint Access => 0b00000000_00000000_00000000_00010000;
         private readonly IServiceAccessValidator serviceAccessProvider;
-        private readonly IClientSignInCaching clientSignInCaching;
         public ServerSocks5ProxyPlugin(common.socks5.Config config, IProxyServer proxyServer, ISocks5ConnectionProvider socks5ConnectionProvider
-            , IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCaching)
+            , IServiceAccessValidator serviceAccessProvider)
             : base(config, proxyServer, socks5ConnectionProvider)
         {
             this.serviceAccessProvider = serviceAccessProvider;
-            this.clientSignInCaching = clientSignInCaching;
         }
 
         public override bool ValidateAccess(ProxyInfo info)
@@ -31,12 +29,7 @@ namespace server.service.socks5
                 return false;
             }
 
-            if (clientSignInCaching.Get(info.Connection.ConnectId, out SignInCacheInfo client))
-            {
-                return Enable || serviceAccessProvider.Validate(client.UserAccess, Access);
-            }
-
-            return Enable;
+            return base.ValidateAccess(info) || serviceAccessProvider.Validate(info.Connection, Access);
         }
     }
 }

@@ -50,10 +50,9 @@ namespace common.libs.extends
                || (address[0] == 172 && address[1] >= 16 && address[1] <= 31)
                || (address[0] == 192 && address[1] == 168);
             }
-
-            return address.SequenceEqual(ipv6Loopback.Span)
+            return address.Length == ipv6Loopback.Length && (address.SequenceEqual(ipv6Loopback.Span)
                 || address.SequenceEqual(ipv6Multicast.Span)
-                || (address[0] == ipv6Local.Span[0] && address[1] == ipv6Local.Span[1]);
+                || (address[0] == ipv6Local.Span[0] && address[1] == ipv6Local.Span[1]));
         }
 
         public static int Length(this IPAddress address)

@@ -76,9 +76,8 @@ namespace common.proxy
 
         public byte[] ToBytes(out int length)
         {
-            length = 1 //0000 0000  rsv + step
-                + 1 // 0000 0000 command + address type
-                + 1 //buffer size
+            length = 1 //0000 00 00  rsv + step + command
+                + 1 // 0000 0000 address type + buffer size
                 + 1 //PluginId
                 + 4  // RequestId
                 + 1  //source length
@@ -102,11 +101,9 @@ namespace common.proxy
             int index = 0;
 
 
-            bytes[index] = (byte)((Rsv << 4) | ((byte)Step));
+            bytes[index] = (byte)((Rsv << 4) | ((byte)Step) << 2 | (byte)Command);
             index += 1;
-            bytes[index] = (byte)(((byte)Command << 4) | (byte)AddressType);
-            index += 1;
-            bytes[index] = (byte)BufferSize;
+            bytes[index] = (byte)(((byte)AddressType << 4) | (byte)BufferSize);
             index += 1;
             bytes[index] = PluginId;
             index += 1;
@@ -149,15 +146,14 @@ namespace common.proxy
             int index = 0;
 
             Rsv = (byte)(span[index] >> 4);
-            Step = (EnumProxyStep)(span[index] & 0b0000_1111);
+            Step = (EnumProxyStep)((span[index] & 0b0000_1100) >> 2);
+            Command = (EnumProxyCommand)(span[index] & 0b0000_0011);
             index++;
 
-            Command = (EnumProxyCommand)(span[index] >> 4);
-            AddressType = (EnumProxyAddressType)(span[index] & 0b0000_1111);
+            AddressType = (EnumProxyAddressType)(span[index] >> 4);
+            BufferSize = (EnumBufferSize)(span[index] & 0b0000_1111);
             index += 1;
 
-            BufferSize = (EnumBufferSize)span[index];
-            index += 1;
             PluginId = span[index];
             index += 1;
 

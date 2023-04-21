@@ -11,8 +11,9 @@ namespace server.service.httpProxy
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
-            common.httpProxy.Config config = services.GetService<common.httpProxy.Config>();
             ProxyPluginLoader.LoadPlugin(services.GetService<IServerHttpProxyPlugin>());
+            common.httpProxy.Config config = services.GetService<common.httpProxy.Config>();
+           
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Debug($"http代理已加载");

@@ -9,10 +9,10 @@ namespace client.service.forward
     /// </summary>
     public sealed class ForwardClientService : IClientService
     {
-        private readonly ForwardTransfer tcpForwardTransfer;
-        public ForwardClientService(ForwardTransfer tcpForwardTransfer)
+        private readonly ForwardTransfer  forwardTransfer;
+        public ForwardClientService(ForwardTransfer forwardTransfer)
         {
-            this.tcpForwardTransfer = tcpForwardTransfer;
+            this.forwardTransfer = forwardTransfer;
         }
         /// <summary>
         /// 添加监听
@@ -22,7 +22,7 @@ namespace client.service.forward
         {
             P2PListenAddParams fmodel = arg.Content.DeJson<P2PListenAddParams>();
 
-            string errmsg = tcpForwardTransfer.AddP2PListen(fmodel);
+            string errmsg = forwardTransfer.AddP2PListen(fmodel);
             if (string.IsNullOrWhiteSpace(errmsg) == false)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, errmsg);
@@ -35,7 +35,7 @@ namespace client.service.forward
         /// <param name="arg"></param>
         public bool RemoveListen(ClientServiceParamsInfo arg)
         {
-            tcpForwardTransfer.RemoveP2PListen(uint.Parse(arg.Content));
+            forwardTransfer.RemoveP2PListen(uint.Parse(arg.Content));
             return true;
         }
         /// <summary>
@@ -45,7 +45,7 @@ namespace client.service.forward
         public void AddForward(ClientServiceParamsInfo arg)
         {
             P2PForwardAddParams fmodel = arg.Content.DeJson<P2PForwardAddParams>();
-            string errmsg = tcpForwardTransfer.AddP2PForward(fmodel);
+            string errmsg = forwardTransfer.AddP2PForward(fmodel);
             if (string.IsNullOrWhiteSpace(errmsg) == false)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, errmsg);
@@ -58,7 +58,7 @@ namespace client.service.forward
         public void RemoveForward(ClientServiceParamsInfo arg)
         {
             P2PForwardRemoveParams fmodel = arg.Content.DeJson<P2PForwardRemoveParams>();
-            tcpForwardTransfer.RemoveP2PForward(fmodel);
+            forwardTransfer.RemoveP2PForward(fmodel);
         }
         /// <summary>
         /// 监听列表
@@ -67,7 +67,7 @@ namespace client.service.forward
         /// <returns></returns>
         public IEnumerable<P2PListenInfo> List(ClientServiceParamsInfo arg)
         {
-            return tcpForwardTransfer.p2pListens;
+            return forwardTransfer.p2pListens;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace client.service.forward
         /// <returns></returns>
         public P2PListenInfo Get(ClientServiceParamsInfo arg)
         {
-            return tcpForwardTransfer.GetP2PByID(uint.Parse(arg.Content));
+            return forwardTransfer.GetP2PByID(uint.Parse(arg.Content));
         }
         /// <summary>
         /// 开启监听
@@ -85,7 +85,7 @@ namespace client.service.forward
         /// <param name="arg"></param>
         public bool Start(ClientServiceParamsInfo arg)
         {
-            string errmsg = tcpForwardTransfer.StartP2P(uint.Parse(arg.Content));
+            string errmsg = forwardTransfer.StartP2P(uint.Parse(arg.Content));
             if (string.IsNullOrWhiteSpace(errmsg) == false)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, errmsg);
@@ -98,7 +98,7 @@ namespace client.service.forward
         /// <param name="arg"></param>
         public bool Stop(ClientServiceParamsInfo arg)
         {
-            string errmsg = tcpForwardTransfer.StopP2P(uint.Parse(arg.Content));
+            string errmsg = forwardTransfer.StopP2P(uint.Parse(arg.Content));
             if (string.IsNullOrWhiteSpace(errmsg) == false)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, errmsg);

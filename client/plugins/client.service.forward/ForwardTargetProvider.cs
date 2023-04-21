@@ -14,9 +14,8 @@ namespace client.service.forward
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching;
         private readonly SignInStateInfo signInStateInfo;
-        private readonly IClientsTransfer clientsTransfer;
 
-        public ForwardTargetProvider(IClientInfoCaching clientInfoCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching, SignInStateInfo signInStateInfo, IClientsTransfer clientsTransfer)
+        public ForwardTargetProvider(IClientInfoCaching clientInfoCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching, SignInStateInfo signInStateInfo)
         {
             this.clientInfoCaching = clientInfoCaching;
             this.forwardTargetCaching = forwardTargetCaching;
@@ -29,7 +28,6 @@ namespace client.service.forward
             {
                 forwardTargetCaching.ClearConnection(client.Name);
             };
-            this.clientsTransfer = clientsTransfer;
         }
 
         public bool Contains(ushort port)
@@ -72,29 +70,14 @@ namespace client.service.forward
 
         private IConnection SelectConnection(ForwardTargetCacheInfo cacheInfo)
         {
-            if (cacheInfo.Name == "/")
-            {
-                return signInStateInfo.Connection;
-            }
+            //return signInStateInfo.Connection;
 
             if (clientInfoCaching.GetByName(cacheInfo.Name, out ClientInfo client))
             {
-                if (client.Connection == null || client.Connection.Connected == false)
-                {
-                    clientsTransfer.ConnectClient(client);
-                }
                 return client.Connection;
             }
             return null;
         }
     }
 
-    internal class ForwardUdpTargetProvider : ForwardTargetProvider, IForwardUdpTargetProvider
-    {
-        public ForwardUdpTargetProvider(IClientInfoCaching clientInfoCaching, IForwardUdpTargetCaching<ForwardTargetCacheInfo> forwardUdpTargetCaching, SignInStateInfo signInStateInfo, IClientsTransfer clientsTransfe)
-            : base(clientInfoCaching, forwardUdpTargetCaching, signInStateInfo, clientsTransfe)
-        {
-
-        }
-    }
 }

@@ -11,12 +11,13 @@ namespace client.service.httpProxy
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
+            ProxyPluginLoader.LoadPlugin(services.GetService<IClientHttpProxyPlugin>());
             services.GetService<HttpProxyTransfer>();
 
 
             common.httpProxy.Config config = services.GetService<common.httpProxy.Config>();
             HttpProxyTransfer httpProxyTransfer = services.GetService<HttpProxyTransfer>();
-            ProxyPluginLoader.LoadPlugin(services.GetService<IClientHttpProxyPlugin>());
+           
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Debug($"http代理已加载");

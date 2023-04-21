@@ -1,4 +1,5 @@
 ﻿using common.httpProxy;
+using common.libs.extends;
 using common.proxy;
 using server.messengers;
 
@@ -21,7 +22,12 @@ namespace server.service.httpProxy
 
         public override bool ValidateAccess(ProxyInfo info)
         {
-            return serviceAccessProvider.Validate(info.Connection, Access) || base.ValidateAccess(info);
+            if (info.TargetAddress.IsLan())
+            {
+                return false;
+            }
+
+            return base.ValidateAccess(info) || serviceAccessProvider.Validate(info.Connection, Access);
         }
     }
 }

@@ -24,6 +24,11 @@ namespace common.httpProxy
             Config config = ReadConfig().Result;
             ConnectEnable = config.ConnectEnable;
             BufferSize = config.BufferSize;
+            ListenEnable = config.ListenEnable;
+            ListenPort = config.ListenPort;
+            IsPac = config.IsPac;
+            IsCustomPac = config.IsCustomPac;
+            TargetName = config.TargetName;
         }
 
         [System.Text.Json.Serialization.JsonIgnore]
@@ -33,7 +38,7 @@ namespace common.httpProxy
         public bool IsPac { get; set; } = false;
         public bool IsCustomPac { get; set; } = false;
         public string TargetName { get; set; } = string.Empty;
-        
+
 
         /// <summary>
         /// 开启监听
@@ -75,6 +80,11 @@ namespace common.httpProxy
 
             ConnectEnable = _config.ConnectEnable;
             BufferSize = _config.BufferSize;
+            ListenEnable = _config.ListenEnable;
+            ListenPort = _config.ListenPort;
+            IsPac = _config.IsPac;
+            IsCustomPac = _config.IsCustomPac;
+            TargetName = _config.TargetName;
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }

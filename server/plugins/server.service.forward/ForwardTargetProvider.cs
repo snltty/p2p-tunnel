@@ -53,12 +53,4 @@ namespace server.service.forward
         }
     }
 
-    internal class ServerForwardUdpTargetProvider : ForwardTargetProvider, IForwardUdpTargetProvider
-    {
-        public ServerForwardUdpTargetProvider(IClientSignInCaching clientSignInCaching, IForwardUdpTargetCaching<ForwardTargetCacheInfo> forwardUdpTargetCaching)
-            : base(clientSignInCaching, forwardUdpTargetCaching)
-        {
-
-        }
-    }
 }

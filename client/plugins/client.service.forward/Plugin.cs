@@ -1,5 +1,6 @@
 ﻿using common.forward;
 using common.libs;
+using common.proxy;
 using common.server;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -10,7 +11,9 @@ namespace client.service.forward
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
+            ProxyPluginLoader.LoadPlugin(services.GetService<IForwardProxyPlugin>());
             services.GetService<ForwardTransfer>();
+           
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Debug("端口转发已加载");
@@ -31,12 +34,10 @@ namespace client.service.forward
             services.AddSingleton<common.forward.Config>();
 
             services.AddSingleton<IForwardTargetCaching<ForwardTargetCacheInfo>, ForwardTargetCaching>();
-            services.AddSingleton<IForwardUdpTargetCaching<ForwardTargetCacheInfo>, ForwardUdpTargetCaching>();
             services.AddSingleton<ForwardTransfer>();
 
 
             services.AddSingleton<IForwardTargetProvider, ForwardTargetProvider>();
-            services.AddSingleton<IForwardUdpTargetProvider, ForwardUdpTargetProvider>();
             services.AddSingleton<IForwardProxyPlugin, ForwardProxyPlugin>();
 
 

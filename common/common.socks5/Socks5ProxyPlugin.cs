@@ -3,6 +3,7 @@ using common.proxy;
 using System.Buffers.Binary;
 using System.Net;
 using common.server.model;
+using System;
 
 namespace common.socks5
 {
@@ -59,7 +60,6 @@ namespace common.socks5
                 proxyServer.InputData(info);
                 return false;
             }
-
             //command 的
             if (info.Step == EnumProxyStep.Command)
             {
@@ -93,7 +93,7 @@ namespace common.socks5
             return Enable;
         }
 
-        public void HandleAnswerData(ProxyInfo info)
+        public bool HandleAnswerData(ProxyInfo info)
         {
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
 
@@ -102,7 +102,7 @@ namespace common.socks5
             {
                 info.Data = new byte[] { 5, info.Data.Span[0] };
                 info.Rsv = (byte)Socks5EnumStep.Command;
-                return;
+                return true;
             }
 
             switch (socks5EnumStep)
@@ -111,14 +111,7 @@ namespace common.socks5
                     {
                         //command的，需要区分成功和失败，成功则回复指定数据，失败则关闭连接
                         Socks5EnumResponseCommand type = (Socks5EnumResponseCommand)info.Data.Span[0];
-                        if (type == Socks5EnumResponseCommand.ConnecSuccess)
-                        {
-                            info.Data = Socks5Parser.MakeConnectResponse(new IPEndPoint(IPAddress.Any, Port), (byte)type);
-                        }
-                        else
-                        {
-                            info.Data = Helper.EmptyArray;
-                        }
+                        info.Data = Socks5Parser.MakeConnectResponse(new IPEndPoint(IPAddress.Any, Port), (byte)type);
                         //走到转发步骤
                         info.Rsv = (byte)Socks5EnumStep.Forward;
                         info.Step = EnumProxyStep.ForwardTcp;
@@ -139,6 +132,7 @@ namespace common.socks5
                     }
                     break;
             }
+            return true;
         }
 
 

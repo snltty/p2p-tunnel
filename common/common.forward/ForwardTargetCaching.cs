@@ -129,11 +129,6 @@ namespace common.forward
         }
     }
 
-    public sealed class ForwardUdpTargetCaching : ForwardTargetCaching, IForwardUdpTargetCaching<ForwardTargetCacheInfo>
-    {
-
-    }
-
     public sealed class ForwardTargetCacheInfo
     {
         public ulong Id { get; set; }

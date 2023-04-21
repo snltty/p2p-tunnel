@@ -31,10 +31,9 @@ namespace client.service.httpProxy
         {
             if (info.Step == EnumProxyStep.Command)
             {
-                info.Step = EnumProxyStep.ForwardTcp;
                 GetTargetEndPoint(info);
+                info.Data = Helper.EmptyArray;
             }
-
             if (info.Connection == null || info.Connection.Connected == false)
             {
                 if (config.TargetName == "/")
@@ -49,14 +48,12 @@ namespace client.service.httpProxy
                     }
                 }
             }
+
             if (info.Connection == null || info.Connection.Connected == false)
             {
-                info.Data = Helper.EmptyArray;
                 proxyServer.InputData(info);
                 return false;
             }
-
-
             return true;
         }
 

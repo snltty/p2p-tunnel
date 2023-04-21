@@ -39,8 +39,7 @@ export default {
                 ID: addListenData.value.ID || 0,
                 Port: addListenData.value.Port || 0,
                 AliveType: (addListenData.value.AliveType || shareData.aliveTypesName.tunnel) + '',
-                Desc: addListenData.value.Desc || '',
-                ForwardType: shareData.forwardTypes.forward,
+                Desc: addListenData.value.Desc || ''
             },
             rules: {
                 Port: [
@@ -72,7 +71,6 @@ export default {
                 const json = JSON.parse(JSON.stringify(state.form));
                 json.Port = Number(json.Port);
                 json.AliveType = Number(json.AliveType);
-                json.ForwardType = Number(json.ForwardType);
                 addListen(json).then(() => {
                     state.loading = false;
                     state.show = false;

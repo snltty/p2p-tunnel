@@ -37,14 +37,13 @@ namespace common.proxy
 
         public async Task InputData(ProxyInfo info)
         {
-            if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false || plugin.ValidateAccess(info) == false)
-            {
-                _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow);
-                return;
-            }
-
             if (info.Step == EnumProxyStep.Command)
             {
+                if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false || plugin.ValidateAccess(info) == false)
+                {
+                    _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow);
+                    return;
+                }
                 _ = Command(info);
             }
             else if (info.Step == EnumProxyStep.ForwardTcp)
@@ -216,7 +215,6 @@ namespace common.proxy
         private void Connect(ProxyInfo info)
         {
             IPEndPoint remoteEndpoint = ReadRemoteEndPoint(info);
-
             Socket socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
@@ -262,9 +260,19 @@ namespace common.proxy
             {
                 if (e.SocketError == SocketError.Success)
                 {
-                    BindTargetReceive(token);
-                    await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess);
+                    int length = token.Data.Data.Length;
+                    if (length > 0)
+                    {
+                        await token.TargetSocket.SendAsync(token.Data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                        token.Data.Data = Helper.EmptyArray;
+                    }
+                    else
+                    {
+                        await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess);
+                    }
                     token.Data.Step = EnumProxyStep.ForwardTcp;
+
+                    BindTargetReceive(token);
                     return;
                 }
                 else

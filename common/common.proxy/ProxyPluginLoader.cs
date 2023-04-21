@@ -22,31 +22,26 @@ namespace common.proxy
         /// 请求数据预处理
         /// </summary>
         /// <param name="info"></param>
+        /// <returns>是否发送给目标端</returns>
         public bool HandleRequestData(ProxyInfo info);
 
         /// <summary>
         /// 验证权限，可以在这里阻止访问
         /// </summary>
         /// <param name="info"></param>
-        /// <returns></returns>
+        /// <returns>是否通过验证</returns>
         public bool ValidateAccess(ProxyInfo info);
 
         /// <summary>
         /// 回复数据预处理
         /// </summary>
         /// <param name="info"></param>
-        /// <returns></returns>
-        public void HandleAnswerData(ProxyInfo info);
+        /// <returns>是否发送给来源端</returns>
+        public bool HandleAnswerData(ProxyInfo info);
 
 
-        public void Started(ushort port)
-        {
-
-        }
-        public void Stoped(ushort port)
-        {
-
-        }
+        public void Started(ushort port){}
+        public void Stoped(ushort port){}
     }
 
     public static class ProxyPluginLoader

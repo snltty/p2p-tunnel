@@ -10,8 +10,6 @@ namespace common.forward
         void Get(ushort port, ProxyInfo info);
     }
 
-    public interface IForwardUdpTargetProvider : IForwardTargetProvider { }
-
     /// <summary>
     /// 目标缓存器，缓存注册的监听和转发信息，以提供后续查询
     /// </summary>
@@ -119,5 +117,4 @@ namespace common.forward
         /// <param name="id"></param>
         void ClearConnection(ulong id);
     }
-    public interface IForwardUdpTargetCaching<T> : IForwardTargetCaching<T> { }
 }

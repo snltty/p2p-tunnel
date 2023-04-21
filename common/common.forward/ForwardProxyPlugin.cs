@@ -14,7 +14,7 @@ namespace common.forward
         public Action<ushort> OnStoped { get; set; }
     }
 
-    public sealed class ForwardProxyPlugin : IForwardProxyPlugin
+    public class ForwardProxyPlugin : IForwardProxyPlugin
     {
         public byte Id => config.Plugin;
         public EnumBufferSize BufferSize => config.BufferSize;
@@ -25,13 +25,11 @@ namespace common.forward
         private readonly Config config;
         private readonly IProxyServer proxyServer;
         private readonly IForwardTargetProvider forwardTargetProvider;
-        private readonly IForwardUdpTargetProvider forwardUdpTargetProvider;
-        public ForwardProxyPlugin(Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IForwardUdpTargetProvider forwardUdpTargetProvider)
+        public ForwardProxyPlugin(Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider)
         {
             this.config = config;
             this.proxyServer = proxyServer;
             this.forwardTargetProvider = forwardTargetProvider;
-            this.forwardUdpTargetProvider = forwardUdpTargetProvider;
         }
 
         public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
@@ -54,12 +52,14 @@ namespace common.forward
                 return true;
             }
 
-            info.AddressType =  EnumProxyAddressType.IPV4;
-
+            info.AddressType = EnumProxyAddressType.IPV4;
             return true;
         }
-        public void HandleAnswerData(ProxyInfo info) { }
-        public bool ValidateAccess(ProxyInfo info)
+        public bool HandleAnswerData(ProxyInfo info)
+        {
+            return true;
+        }
+        public virtual bool ValidateAccess(ProxyInfo info)
         {
             if (config.PortWhiteList.Length > 0 && config.PortWhiteList.Contains(info.TargetPort) == false)
             {
@@ -84,15 +84,16 @@ namespace common.forward
 
         private void GetConnection(ProxyInfo info)
         {
-            if (info.Command == EnumProxyCommand.UdpAssociate || forwardUdpTargetProvider.Contains(info.ListenPort))
+            ForwardAliveTypes aliveTypes = (ForwardAliveTypes)info.Rsv;
+            if (aliveTypes == ForwardAliveTypes.Tunnel)
             {
-                forwardUdpTargetProvider?.Get(info.ListenPort, info);
+                forwardTargetProvider.Get(info.ListenPort, info);
             }
             else
             {
                 int portStart = 0;
-                string host = HttpParser.GetHost(info.Data,ref portStart).GetString();
-                forwardTargetProvider?.Get(host, info);
+                string host = HttpParser.GetHost(info.Data, ref portStart).GetString();
+                forwardTargetProvider.Get(host, info);
             }
         }
     }

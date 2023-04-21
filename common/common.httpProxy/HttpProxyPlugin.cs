@@ -37,11 +37,12 @@ namespace common.httpProxy
             return Enable;
         }
 
-        public virtual void HandleAnswerData(ProxyInfo info)
+        public virtual bool HandleAnswerData(ProxyInfo info)
         {
             if (info.Step == EnumProxyStep.Command)
             {
                 EnumProxyCommandStatus enumProxyCommandStatus = (EnumProxyCommandStatus)info.Data.Span[0];
+
                 if (enumProxyCommandStatus == EnumProxyCommandStatus.ConnecSuccess)
                 {
                     info.Data = HttpParser.ConnectSuccessMessage();
@@ -52,6 +53,7 @@ namespace common.httpProxy
                 }
                 info.Step = EnumProxyStep.ForwardTcp;
             }
+            return true;
         }
 
     }

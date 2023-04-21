@@ -13,8 +13,9 @@ namespace client.service.vea
     {
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
-            var transfer = services.GetService<VeaTransfer>();
             ProxyPluginLoader.LoadPlugin(services.GetService<IVeaSocks5ProxyPlugin>());
+            var transfer = services.GetService<VeaTransfer>();
+           
             Config config = services.GetService<Config>();
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
