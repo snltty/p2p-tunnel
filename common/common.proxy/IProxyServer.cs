@@ -214,7 +214,7 @@ namespace common.proxy
                     await Receive(token.Request);
                     if (token.Receive)
                     {
-                        if (token.SourceSocket.Available > 0)
+                        if (token.SourceSocket.Available > 0 && token.Request.Step > EnumProxyStep.Command)
                         {
                             while (token.SourceSocket.Available > 0)
                             {
@@ -254,7 +254,7 @@ namespace common.proxy
             catch (Exception ex)
             {
                 CloseClientSocket(e);
-               // Logger.Instance.DebugError(ex);
+                Logger.Instance.DebugError(ex);
             }
         }
 
@@ -382,6 +382,7 @@ namespace common.proxy
             catch (Exception ex)
             {
                 clientsManager.TryRemove(info.RequestId, out _);
+                Logger.Instance.DebugError(ex);
             }
         }
     }

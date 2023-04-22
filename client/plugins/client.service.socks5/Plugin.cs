@@ -47,7 +47,6 @@ namespace client.service.socks5
         {
             services.AddSingleton<Socks5Transfer>();
             services.AddSingleton<common.socks5.Config>();
-            services.AddSingleton<ISocks5ConnectionProvider, Socks5ConnectionProvider>();
             services.AddSingleton<IClientSocks5ProxyPlugin, ClientSocks5ProxyPlugin>();
         }
     }

@@ -21,12 +21,10 @@ namespace common.socks5
 
         private readonly Config config;
         private readonly IProxyServer proxyServer;
-        private readonly ISocks5ConnectionProvider socks5ConnectionProvider;
-        public Socks5ProxyPlugin(Config config, IProxyServer proxyServer, ISocks5ConnectionProvider socks5ConnectionProvider)
+        public Socks5ProxyPlugin(Config config, IProxyServer proxyServer)
         {
             this.config = config;
             this.proxyServer = proxyServer;
-            this.socks5ConnectionProvider = socks5ConnectionProvider;
         }
 
         public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
@@ -84,7 +82,6 @@ namespace common.socks5
                 GetRemoteEndPoint(info);
                 info.Data = Socks5Parser.GetUdpData(info.Data);
             }
-            socks5ConnectionProvider.Get(info);
             return true;
         }
 
@@ -136,7 +133,7 @@ namespace common.socks5
         }
 
 
-        private void GetRemoteEndPoint(ProxyInfo info)
+        protected void GetRemoteEndPoint(ProxyInfo info)
         {
             //VERSION COMMAND RSV ATYPE  DST.ADDR  DST.PORT
             //去掉 VERSION COMMAND RSV

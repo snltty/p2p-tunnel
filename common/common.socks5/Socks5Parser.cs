@@ -186,10 +186,20 @@ namespace common.socks5
             if ((Socks5EnumAddressType)span[0] == Socks5EnumAddressType.IPV4)
             {
                 span = span.Slice(1, 4);
-                uint ip = BinaryPrimitives.ReadUInt32BigEndian(span);
-                return ip >= 0xE0000000 && ip <= 0xEFFFFFFF;
+                return GetIsBroadcastAddress(span);
+               
             }
             return false;
+        }
+        /// <summary>
+        /// 是否是广播地址
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
+        public static bool GetIsBroadcastAddress(Span<byte> span)
+        {
+            uint ip = BinaryPrimitives.ReadUInt32BigEndian(span);
+            return ip >= 0xE0000000 && ip <= 0xEFFFFFFF;
         }
 
         /// <summary>

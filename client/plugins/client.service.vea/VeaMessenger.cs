@@ -1,6 +1,7 @@
 ﻿using client.service.vea.socks5;
 using common.libs;
 using common.server;
+using System;
 
 namespace client.service.vea
 {
@@ -43,5 +44,30 @@ namespace client.service.vea
 
             connection.Write(Helper.TrueArray);
         }
+    }
+
+
+    /// <summary>
+    /// 组网消息
+    /// </summary>
+    [Flags, MessengerIdEnum]
+    public enum VeaSocks5MessengerIds : ushort
+    {
+        /// <summary>
+        /// 最小
+        /// </summary>
+        Min = 1100,
+        /// <summary>
+        /// 更新ip
+        /// </summary>
+        Ip = 1101,
+        /// <summary>
+        /// 重装网卡
+        /// </summary>
+        Reset = 1102,
+        /// <summary>
+        /// 最大
+        /// </summary>
+        Max = 1199,
     }
 }

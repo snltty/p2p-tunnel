@@ -1,4 +1,5 @@
-﻿using common.libs.extends;
+﻿using common.libs;
+using common.libs.extends;
 using common.proxy;
 using common.server;
 using common.server.model;
@@ -8,15 +9,7 @@ using System.Net;
 
 namespace client.service.vea.socks5
 {
-    public interface IVeaSocks5ConnectionProvider : ISocks5ConnectionProvider { }
     public interface IVeaSocks5ProxyPlugin : IProxyPlugin { }
-
-    public class VeaSocks5ConnectionProvider : IVeaSocks5ConnectionProvider
-    {
-        public void Get(ProxyInfo info)
-        {
-        }
-    }
 
 
     public class VeaSocks5ProxyPlugin : Socks5ProxyPlugin, IVeaSocks5ProxyPlugin
@@ -32,9 +25,8 @@ namespace client.service.vea.socks5
         private readonly IProxyMessengerSender proxyMessengerSender;
 
         public VeaSocks5ProxyPlugin(Config config, IProxyServer proxyServer
-            , IVeaSocks5ConnectionProvider veaSocks5ConnectionProvider
             , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender) :
-            base(new common.socks5.Config(), proxyServer, veaSocks5ConnectionProvider)
+            base(new common.socks5.Config(), proxyServer)
         {
             this.config = config;
             this.proxyServer = proxyServer;
@@ -44,36 +36,26 @@ namespace client.service.vea.socks5
 
         public override bool HandleRequestData(ProxyInfo info)
         {
-            if (info.Rsv == 0)
-            {
-                info.Rsv = (byte)Socks5EnumStep.Request;
-            }
+            bool res = base.HandleRequestData(info);
+            if (res == false) return res;
 
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
-
             if (socks5EnumStep == Socks5EnumStep.Command)
             {
-                if (Socks5Parser.GetIsIPV4(info.Data) == false)
+                if (info.AddressType != EnumProxyAddressType.IPV4)
                 {
                     info.Response[0] = (byte)Socks5EnumResponseCommand.AddressNotAllow;
                     info.Data = info.Response;
                     proxyServer.InputData(info);
                     return false;
                 }
-                if (Socks5Parser.GetIsIPV4AnyAddress(info.Data) == false)
-                {
-                    var targetEp = Socks5Parser.GetRemoteAddress(info.Data);
-                    info.Connection = GetConnection(targetEp);
-                }
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
-                if (Socks5Parser.GetIsIPV4(info.Data) == false) return false;
-                if (Socks5Parser.GetIsIPV4AnyAddress(info.Data)) return false;
+                if (info.AddressType != EnumProxyAddressType.IPV4) return false;
                 //广播数据包
-                if (Socks5Parser.GetIsBroadcastAddress(info.Data))
+                if (Socks5Parser.GetIsBroadcastAddress(info.TargetAddress))
                 {
-                    base.HandleRequestData(info);
                     foreach (var item in veaTransfer.IPList.Values)
                     {
                         info.Connection = item.Client.Connection;
@@ -81,11 +63,10 @@ namespace client.service.vea.socks5
                     }
                     return false;
                 }
-
-                IPAddress address = Socks5Parser.GetRemoteAddress(info.Data);
-                info.Connection = GetConnection(address);
             }
-            return base.HandleRequestData(info);
+
+            info.Connection = GetConnection(new IPAddress(info.TargetAddress.Span));
+            return true;
         }
 
         byte[] ipBytes = new byte[4];
@@ -119,29 +100,5 @@ namespace client.service.vea.socks5
 
             return connection;
         }
-    }
-
-    /// <summary>
-    /// 组网消息
-    /// </summary>
-    [Flags, MessengerIdEnum]
-    public enum VeaSocks5MessengerIds : ushort
-    {
-        /// <summary>
-        /// 最小
-        /// </summary>
-        Min = 1100,
-        /// <summary>
-        /// 更新ip
-        /// </summary>
-        Ip = 1101,
-        /// <summary>
-        /// 重装网卡
-        /// </summary>
-        Reset = 1102,
-        /// <summary>
-        /// 最大
-        /// </summary>
-        Max = 1199,
     }
 }
