@@ -19,10 +19,10 @@
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\client\client\client.csproj" />
-	  <ProjectReference Include="..\client\plugins\client.service.ui\client.service.ui.api\client.service.ui.api.csproj" />
-	  <ProjectReference Include="..\common\common.httpProxy\common.httpProxy.csproj" />
-	  <ProjectReference Include="..\common\common.server\common.server.csproj" />
+	  <ProjectReference Include="..\..\..\common\common.httpProxy\common.httpProxy.csproj" />
+	  <ProjectReference Include="..\..\..\common\common.server\common.server.csproj" />
+	  <ProjectReference Include="..\..\client\client.csproj" />
+	  <ProjectReference Include="..\client.service.ui\client.service.ui.api\client.service.ui.api.csproj" />
 	</ItemGroup>
 
 </Project>

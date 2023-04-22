@@ -29,10 +29,10 @@
 		<Content Include="logo.ico" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\client.service.httpProxy.server\client.service.httpProxy.server.csproj" />
 		<ProjectReference Include="..\client.realize\client.realize.csproj" />
 		<ProjectReference Include="..\plugins\client.service.forward.server\client.service.forward.server.csproj" />
 		<ProjectReference Include="..\plugins\client.service.forward\client.service.forward.csproj" />
+		<ProjectReference Include="..\plugins\client.service.httpProxy.server\client.service.httpProxy.server.csproj" />
 		<ProjectReference Include="..\plugins\client.service.httpProxy\client.service.httpProxy.csproj" />
 		<ProjectReference Include="..\plugins\client.service.logger\client.service.logger.csproj" />
 		<ProjectReference Include="..\plugins\client.service.socks5.server\client.service.socks5.server.csproj" />

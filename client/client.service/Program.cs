@@ -11,7 +11,6 @@ using client.service.ui.api.service.clientServer;
 using client.service.users.server;
 using client.service.vea.client;
 using common.libs;
-using common.proxy;
 using common.server;
 using Microsoft.Extensions.DependencyInjection;
 using System;

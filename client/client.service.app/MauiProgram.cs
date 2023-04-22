@@ -2,8 +2,6 @@
 using client.realize.messengers.punchHole;
 using client.service.logger;
 using client.service.socks5;
-using client.service.tcpforward;
-using client.service.udpforward;
 using client.service.ui.api.service.clientServer;
 using client.service.ui.api.service.webServer;
 using common.libs;
@@ -55,13 +53,26 @@ namespace client.service.app
             //加载插件程序集，当单文件发布或者动态加载dll外部插件时需要，否则如果本程序集没有显式的使用它的相关内容的话，会加载不出来
             //可以改为从dll文件加载
             Assembly[] assemblys = new Assembly[] {
-                typeof(LoggerClientService).Assembly,
-                typeof(ForwardClientService).Assembly,
-                typeof(HttpProxyClientService).Assembly,
                 typeof(ClientServer).Assembly,
-                typeof(Socks5ClientService).Assembly,
+                typeof(LoggerClientService).Assembly,
                 typeof(PunchHoleMessenger).Assembly,
+
+                typeof(ForwardClientService).Assembly,
+
+                typeof(HttpProxyClientService).Assembly,
+
+                typeof(Socks5ClientService).Assembly,
+
                 typeof(ServerUsersClientService).Assembly,
+
+                //以下是为了获取信息
+                typeof(common.server.model.SignInMessengerIds).Assembly,
+                typeof(common.proxy.ProxyMessengerIds).Assembly,
+                typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
+                typeof(common.socks5.Socks5MessengerIds).Assembly,
+                typeof(common.forward.ForwardMessengerIds).Assembly,
+
+                typeof(server.service.users.model.UsersMessengerIds).Assembly,
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 
 

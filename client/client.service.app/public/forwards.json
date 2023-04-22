@@ -1,0 +1,42 @@
+﻿{
+  "Webs": [
+    /*
+    {
+      "ID": 1,
+      "Port": 8000,
+      "AliveType": 2, //1长连接 2短链接
+      "Listening":false,
+      "Forwards": [
+        {
+          "ID": 11,
+          "Name": "B客户端",
+          "SourceIp": "127.0.0.1",
+          "TargetIp": "127.0.0.1",
+          "TargetPort": 80,
+          "Desc": "默认的p2p转发web配置示例"
+        }
+      ],
+      //以下两项仅代理模式配置，代理模式不配置 Forwards项
+      "Name": "", //目标客户端名
+    }*/
+  ],
+  "Tunnels": [
+    /*
+    {
+      "ID": 2,
+      "Port": 8001,
+      "AliveType": 1, //1长连接 2短链接
+      "Listening":false,
+      "Forwards": [
+        {
+          "ID": 22,
+          "Name": "B客户端",
+          "TargetIp": "127.0.0.1",
+          "TargetPort": 3389,
+          "Desc": "默认的p2p转发tunnel配置示例"
+        }
+      ]
+    }
+  */
+  ]
+}

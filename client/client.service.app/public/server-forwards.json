@@ -1,0 +1,23 @@
+﻿{
+  "Webs": [
+    /*
+    {
+      "Domain": "127.0.0.1",
+      "ServerPort": 8000,
+      "LocalIp": "127.0.0.1",
+      "LocalPort": 80,
+      "Listening":false,
+    }
+  */
+  ],
+  "Tunnels": [
+    /*
+    {
+      "ServerPort": 1935,
+      "LocalIp": "127.0.0.1",
+      "LocalPort": 3389,
+    "Listening":false,
+    }
+  */
+  ]
+}
