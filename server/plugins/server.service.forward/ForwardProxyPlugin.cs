@@ -34,18 +34,16 @@ namespace server.service.forward
                     }
                 }
             };
-
-            Logger.Instance.Info("端口转发穿透服务已启动...");
-            foreach (ushort port in config.WebListens)
-            {
-                proxyServer.Start(port, config.Plugin);
-                Logger.Instance.Warning($"端口转发穿透监听:{port}");
-            }
         }
 
         public override bool ValidateAccess(ProxyInfo info)
         {
-            return true;//serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
+#if DEBUG
+            return true;
+#else
+            return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
+#endif
+
         }
 
     }

@@ -115,6 +115,7 @@ namespace common.proxy
         private async Task ForwardUdp(ProxyInfo info)
         {
             IPEndPoint remoteEndpoint = ReadRemoteEndPoint(info);
+
             if (remoteEndpoint.Port == 0) return;
 
             bool isBroadcast = GetIsBroadcastAddress(info);
@@ -192,6 +193,7 @@ namespace common.proxy
             try
             {
                 int length = token.TargetSocket.EndReceiveFrom(result, ref token.TempRemoteEP);
+
                 if (length > 0)
                 {
                     token.Data.Data = token.PoolBuffer.AsMemory(0, length);
@@ -270,6 +272,7 @@ namespace common.proxy
                     {
                         await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess);
                     }
+                    token.Data.TargetAddress = Helper.EmptyArray;
                     token.Data.Step = EnumProxyStep.ForwardTcp;
 
                     BindTargetReceive(token);

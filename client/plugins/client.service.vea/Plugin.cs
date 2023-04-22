@@ -1,9 +1,7 @@
-﻿using client.service.socks5;
-using client.service.vea.socks5;
+﻿using client.service.vea.socks5;
 using common.libs;
 using common.proxy;
 using common.server;
-using common.socks5;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -46,7 +44,6 @@ namespace client.service.vea
             services.AddSingleton<VeaTransfer>();
             services.AddSingleton<VeaMessengerSender>();
 
-            services.AddSingleton<IVeaSocks5ConnectionProvider, VeaSocks5ConnectionProvider>();
             services.AddSingleton<IVeaSocks5ProxyPlugin, VeaSocks5ProxyPlugin>();
 
         }

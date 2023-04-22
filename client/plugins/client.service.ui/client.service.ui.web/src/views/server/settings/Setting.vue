@@ -124,14 +124,6 @@ export default {
                             return Number(value)
                         }
                     }
-                ],
-                TcpBufferSize: [
-                    { required: true, message: '必填', trigger: 'blur' },
-                    {
-                        type: 'number', min: 1024, max: 65536, message: '数字 1024-65536', trigger: 'blur', transform(value) {
-                            return Number(value)
-                        }
-                    }
                 ]
             }
         });
@@ -167,7 +159,7 @@ export default {
         }
 
         onMounted(() => {
-            loadConfig().then(() => {
+            loadConfig().then((json) => {
                 if (json) {
                     state.form.ConnectLimit = json.ConnectLimit;
                     state.form.TcpBufferSize = json.TcpBufferSize;

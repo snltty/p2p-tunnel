@@ -13,9 +13,9 @@
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="bufsize" prop="BufferSize">
-                                <el-tooltip class="box-item" effect="dark" content="tcp连接的buffer size" placement="top-start">
-                                    <el-input size="default" v-model="state.form.BufferSize"></el-input>
-                                </el-tooltip>
+                                <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
+                                    <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -55,8 +55,9 @@
 </template>
 
 <script>
-import { ref, toRefs, reactive } from '@vue/reactivity';
+import { ref, reactive } from '@vue/reactivity';
 import { getConfigure, saveConfigure } from '../../../apis/configure'
+import { shareData } from '../../../states/shareData'
 import { onMounted } from '@vue/runtime-core';
 import plugin from './plugin'
 export default {
@@ -128,7 +129,7 @@ export default {
         });
 
         return {
-            state, formDom, submit
+            shareData, state, formDom, submit
         }
     }
 }

@@ -11,6 +11,9 @@ namespace common.proxy
     {
         #region 数据字段
 
+        /// <summary>
+        /// 保留字段，各协议可以根据自己的实际需求拿去玩儿
+        /// </summary>
         public byte Rsv { get; set; }
         /// <summary>
         /// 执行到哪一步了

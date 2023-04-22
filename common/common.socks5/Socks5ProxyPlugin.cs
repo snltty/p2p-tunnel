@@ -1,15 +1,13 @@
 ﻿using common.libs;
 using common.proxy;
-using System.Buffers.Binary;
 using System.Net;
 using common.server.model;
-using System;
+using common.libs.extends;
 
 namespace common.socks5
 {
     public interface ISocks5ProxyPlugin : IProxyPlugin
     {
-
     }
 
     public class Socks5ProxyPlugin : ISocks5ProxyPlugin
@@ -29,6 +27,10 @@ namespace common.socks5
 
         public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
         {
+            if (info.Rsv == 0)
+            {
+                info.Rsv = (byte)Socks5EnumStep.Request;
+            }
             return (Socks5EnumStep)info.Rsv switch
             {
                 Socks5EnumStep.Request => Socks5Parser.ValidateRequestData(info.Data),
@@ -61,8 +63,10 @@ namespace common.socks5
             //command 的
             if (info.Step == EnumProxyStep.Command)
             {
+                //解析出目标地址
+                GetRemoteEndPoint(info);
                 //udp中继的时候，有可能是 0.0.0.0:0 直接通过
-                if (Socks5Parser.GetIsAnyAddress(info.Data))
+                if (info.TargetAddress.GetIsAnyAddress())
                 {
                     info.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
                     info.Data = info.Response;
@@ -72,14 +76,14 @@ namespace common.socks5
 
                 //将socks5的command转化未通用command
                 info.Command = (EnumProxyCommand)info.Data.Span[1];
-                GetRemoteEndPoint(info);
                 //此时的负载是socks5的command包，直接去掉
                 info.Data = Helper.EmptyArray;
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
-                //重组udp转发包
+                //解析出目标地址
                 GetRemoteEndPoint(info);
+                //解析出udp包的数据部分
                 info.Data = Socks5Parser.GetUdpData(info.Data);
             }
             return true;
@@ -87,9 +91,12 @@ namespace common.socks5
 
         public virtual bool ValidateAccess(ProxyInfo info)
         {
+#if DEBUG
+            return true;
+#else
             return Enable;
+#endif
         }
-
         public bool HandleAnswerData(ProxyInfo info)
         {
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
@@ -102,9 +109,9 @@ namespace common.socks5
                 return true;
             }
 
-            switch (socks5EnumStep)
+            switch (info.Step)
             {
-                case Socks5EnumStep.Command:
+                case EnumProxyStep.Command:
                     {
                         //command的，需要区分成功和失败，成功则回复指定数据，失败则关闭连接
                         Socks5EnumResponseCommand type = (Socks5EnumResponseCommand)info.Data.Span[0];
@@ -114,13 +121,13 @@ namespace common.socks5
                         info.Step = EnumProxyStep.ForwardTcp;
                     }
                     break;
-                case Socks5EnumStep.Forward:
+                case EnumProxyStep.ForwardTcp:
                     {
                         info.Rsv = (byte)Socks5EnumStep.Forward;
                         info.Step = EnumProxyStep.ForwardTcp;
                     }
                     break;
-                case Socks5EnumStep.ForwardUdp:
+                case EnumProxyStep.ForwardUdp:
                     {
                         //组装udp包
                         info.Data = Socks5Parser.MakeUdpResponse(new IPEndPoint(new IPAddress(info.TargetAddress.Span), info.TargetPort), info.Data);
@@ -132,41 +139,11 @@ namespace common.socks5
             return true;
         }
 
-
         protected void GetRemoteEndPoint(ProxyInfo info)
         {
-            //VERSION COMMAND RSV ATYPE  DST.ADDR  DST.PORT
-            //去掉 VERSION COMMAND RSV
-            var memory = info.Data.Slice(3);
-            var span = memory.Span;
-            info.AddressType = (EnumProxyAddressType)span[0];
-            int index = 0;
-
-            switch (info.AddressType)
-            {
-                case EnumProxyAddressType.IPV4:
-                    {
-                        info.TargetAddress = memory.Slice(1, 4);
-                        index = 1 + 4;
-                    }
-                    break;
-                case EnumProxyAddressType.Domain:
-                    {
-                        info.TargetAddress = memory.Slice(2, span[1]);
-                        index = 2 + span[1];
-                    }
-                    break;
-                case EnumProxyAddressType.IPV6:
-                    {
-                        info.TargetAddress = memory.Slice(1, 16);
-                        index = 1 + 16;
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            info.TargetPort = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(index, 2));
+            info.TargetAddress = Socks5Parser.GetRemoteEndPoint(info.Data, out Socks5EnumAddressType addressType, out ushort port);
+            info.AddressType = (EnumProxyAddressType)addressType;
+            info.TargetPort = port;
         }
     }
 }

@@ -30,7 +30,6 @@ namespace server.service.socks5
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
             services.AddSingleton<common.socks5.Config>();
-            services.AddSingleton<ISocks5ConnectionProvider, Socks5ConnectionProvider>();
             services.AddSingleton<IServerSocks5ProxyPlugin, ServerSocks5ProxyPlugin>();
         }
     }

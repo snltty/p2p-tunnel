@@ -1,14 +1,24 @@
 <template>
-    <el-dialog title="添加长连接" top="1vh" destroy-on-close v-model="show" center :close-on-click-modal="false" width="350px">
+    <el-dialog title="添加长连接(tcp,udp)" top="1vh" destroy-on-close v-model="show" center :close-on-click-modal="false" width="350px">
         <el-form ref="formDom" :model="form" :rules="rules" label-width="100px">
             <el-form-item label="服务器端口" prop="ServerPort">
                 <el-input v-model="form.ServerPort"></el-input>
             </el-form-item>
-            <el-form-item label="本机ip" prop="LocalIp">
-                <el-input v-model="form.LocalIp"></el-input>
-            </el-form-item>
-            <el-form-item label="本机端口" prop="LocalPort">
-                <el-input v-model="form.LocalPort"></el-input>
+            <el-form-item label="本机服务" prop="LocalIp">
+                <el-row>
+                    <el-col :xs="16" :sm="16" :md="16" :lg="16" :xl="16">
+                        <el-form-item label="" prop="LocalIp">
+                            <el-input v-model="form.LocalIp"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
+                        <el-form-item label="" prop="LocalPort">
+                            <el-tooltip class="box-item" effect="dark" content="端口" placement="top-start">
+                                <el-input v-model="form.LocalPort"></el-input>
+                            </el-tooltip>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
             </el-form-item>
             <el-form-item label="简单说明" prop="Desc">
                 <el-input v-model="form.Desc"></el-input>

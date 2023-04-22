@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Linq;
 using System.Net;
 
@@ -53,6 +54,36 @@ namespace common.libs.extends
             return address.Length == ipv6Loopback.Length && (address.SequenceEqual(ipv6Loopback.Span)
                 || address.SequenceEqual(ipv6Multicast.Span)
                 || (address[0] == ipv6Local.Span[0] && address[1] == ipv6Local.Span[1]));
+        }
+
+
+        public static bool GetIsBroadcastAddress(this IPAddress address)
+        {
+            return address.GetAddressBytes().AsSpan().GetIsBroadcastAddress();
+        }
+        public static bool GetIsBroadcastAddress(this Memory<byte> address)
+        {
+            return address.Span.GetIsBroadcastAddress();
+        }
+        public static bool GetIsBroadcastAddress(this Span<byte> address)
+        {
+            uint ip = BinaryPrimitives.ReadUInt32BigEndian(address);
+            return ip >= 0xE0000000 && ip <= 0xEFFFFFFF;
+        }
+
+
+        public static bool GetIsAnyAddress(this IPAddress address)
+        {
+            return address.GetAddressBytes().AsSpan().GetIsAnyAddress();
+        }
+        public static bool GetIsAnyAddress(this Memory<byte> address)
+        {
+            return address.Span.GetIsAnyAddress();
+        }
+        public static bool GetIsAnyAddress(this Span<byte> address)
+        {
+            return (address.Length == 4 && address.SequenceEqual(Helper.AnyIpArray))
+                || (address.Length == 6 && address.SequenceEqual(Helper.AnyIpv6Array));
         }
 
         public static int Length(this IPAddress address)

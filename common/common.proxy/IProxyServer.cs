@@ -48,10 +48,10 @@ namespace common.proxy
                 return;
             }
 
-            BindAccept(port, plugin);
+            BindAccept(port, plugin, rsv);
         }
 
-        private void BindAccept(ushort port, IProxyPlugin plugin, byte rsv = 0)
+        private void BindAccept(ushort port, IProxyPlugin plugin, byte rsv)
         {
             var endpoint = new IPEndPoint(IPAddress.Any, port);
             var socket = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -68,7 +68,11 @@ namespace common.proxy
                 {
                     ProxyPlugin = plugin,
                     Step = EnumProxyStep.ForwardUdp,
-                    Command = EnumProxyCommand.UdpAssociate
+                    Command = EnumProxyCommand.UdpAssociate,
+                    PluginId = plugin.Id,
+                    ListenPort = port,
+                    Rsv = rsv,
+                    BufferSize = plugin.BufferSize
                 }
             };
             server.UdpClient.EnableBroadcast = true;

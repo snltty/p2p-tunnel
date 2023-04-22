@@ -43,8 +43,13 @@ namespace client.service.forward
 
             forwardProxyPlugin.OnStarted += (port) => StateChanged(port, true);
             forwardProxyPlugin.OnStoped += (port) => StateChanged(port, false);
-            StartP2PAllWithListening();
+            
 
+        }
+
+        public void Start()
+        {
+            StartP2PAllWithListening();
         }
 
         private void StateChanged(ushort port, bool state)

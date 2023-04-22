@@ -22,12 +22,16 @@ namespace server.service.httpProxy
 
         public override bool ValidateAccess(ProxyInfo info)
         {
+#if DEBUG
+            return true;
+#else
             if (info.TargetAddress.IsLan())
             {
                 return false;
             }
 
             return base.ValidateAccess(info) || serviceAccessProvider.Validate(info.Connection, Access);
+#endif
         }
     }
 }

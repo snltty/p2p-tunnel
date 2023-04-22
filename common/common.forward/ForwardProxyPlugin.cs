@@ -3,7 +3,6 @@ using common.libs.extends;
 using common.proxy;
 using common.server.model;
 using System;
-using System.Linq;
 using System.Text;
 
 namespace common.forward
@@ -20,7 +19,6 @@ namespace common.forward
         public EnumBufferSize BufferSize => config.BufferSize;
         public Action<ushort> OnStarted { get; set; } = (port) => { };
         public Action<ushort> OnStoped { get; set; } = (port) => { };
-
 
         private readonly Config config;
         private readonly IProxyServer proxyServer;
@@ -61,6 +59,10 @@ namespace common.forward
         }
         public virtual bool ValidateAccess(ProxyInfo info)
         {
+
+#if DEBUG
+            return true;
+#else
             if (config.PortWhiteList.Length > 0 && config.PortWhiteList.Contains(info.TargetPort) == false)
             {
                 return false;
@@ -70,8 +72,9 @@ namespace common.forward
                 return false;
             }
             return config.ConnectEnable;
-        }
+#endif
 
+        }
 
         public void Started(ushort port)
         {

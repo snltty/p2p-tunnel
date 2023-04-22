@@ -1,7 +1,7 @@
 export default {
     service: 'ServerForwardClientService',
     config: 'ServerForwardConfigure',
-    text: '端口转发穿透',
+    text: '端口转发',
     access: 8,
     checked: false,
     path: '/server-forward.html',

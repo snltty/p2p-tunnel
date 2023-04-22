@@ -12,8 +12,7 @@ namespace client.service.forward
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             ProxyPluginLoader.LoadPlugin(services.GetService<IForwardProxyPlugin>());
-            services.GetService<ForwardTransfer>();
-           
+            ForwardTransfer forwardTransfer = services.GetService<ForwardTransfer>();
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Debug("端口转发已加载");
@@ -26,6 +25,7 @@ namespace client.service.forward
             {
                 Logger.Instance.Info($"端口转发未允许连接");
             }
+            forwardTransfer.Start();
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 

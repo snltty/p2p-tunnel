@@ -12,6 +12,7 @@ namespace server.service.forward
         public void LoadAfter(ServiceProvider services, Assembly[] assemblys)
         {
             ProxyPluginLoader.LoadPlugin(services.GetService<IForwardProxyPlugin>());
+            IProxyServer proxyServer = services.GetService<IProxyServer>();
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Info($"端口转发穿透已加载");
@@ -24,6 +25,14 @@ namespace server.service.forward
             {
                 Logger.Instance.Info($"端口转发穿透未允许注册");
             }
+
+            Logger.Instance.Info("端口转发穿透服务已启动...");
+            foreach (ushort port in config.WebListens)
+            {
+                proxyServer.Start(port, config.Plugin, (byte)ForwardAliveTypes.Web);
+                Logger.Instance.Warning($"端口转发穿透监听:{port}");
+            }
+
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 

@@ -26,7 +26,6 @@ namespace common.httpProxy
         {
             return EnumProxyValidateDataResult.Equal;
         }
-
         public virtual bool HandleRequestData(ProxyInfo info)
         {
             return true;
@@ -34,7 +33,11 @@ namespace common.httpProxy
 
         public virtual bool ValidateAccess(ProxyInfo info)
         {
+#if DEBUG
+            return true;
+#else
             return Enable;
+#endif
         }
 
         public virtual bool HandleAnswerData(ProxyInfo info)

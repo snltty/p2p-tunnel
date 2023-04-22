@@ -26,7 +26,7 @@ namespace client.service.vea.socks5
 
         public VeaSocks5ProxyPlugin(Config config, IProxyServer proxyServer
             , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender) :
-            base(new common.socks5.Config(), proxyServer)
+            base(null, proxyServer)
         {
             this.config = config;
             this.proxyServer = proxyServer;
@@ -42,6 +42,7 @@ namespace client.service.vea.socks5
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
             if (socks5EnumStep == Socks5EnumStep.Command)
             {
+                //组网支持IPV4
                 if (info.AddressType != EnumProxyAddressType.IPV4)
                 {
                     info.Response[0] = (byte)Socks5EnumResponseCommand.AddressNotAllow;
@@ -52,9 +53,11 @@ namespace client.service.vea.socks5
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
+                //组网支持IPV4
                 if (info.AddressType != EnumProxyAddressType.IPV4) return false;
-                //广播数据包
-                if (Socks5Parser.GetIsBroadcastAddress(info.TargetAddress))
+
+                //组播数据包，直接分发
+                if (info.TargetAddress.GetIsBroadcastAddress())
                 {
                     foreach (var item in veaTransfer.IPList.Values)
                     {
@@ -67,6 +70,15 @@ namespace client.service.vea.socks5
 
             info.Connection = GetConnection(new IPAddress(info.TargetAddress.Span));
             return true;
+        }
+
+        public override bool ValidateAccess(ProxyInfo info)
+        {
+#if DEBUG
+            return true;
+#else
+            return Enable;
+#endif
         }
 
         byte[] ipBytes = new byte[4];

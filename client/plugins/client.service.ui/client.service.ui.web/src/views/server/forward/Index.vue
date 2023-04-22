@@ -9,7 +9,7 @@
             <div class="content">
                 <el-row>
                     <template v-for="(item,index) in state.list" :key="index">
-                        <el-col :xs="12" :sm="8" :md="8" :lg="8" :xl="8">
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <div class="item">
                                 <dl>
                                     <dt class="flex">

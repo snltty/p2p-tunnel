@@ -68,14 +68,6 @@ export default {
             return [num, txts[index - 1]];
         }
 
-        const accessLength = (access) => {
-            let length = 0;
-            for (length = 0; length < 32 && access > 0; length++) {
-                access = (((access >>> 0) & (~(1 << length) >>> 0)) >>> 0);
-            }
-            return length;
-        }
-
         onMounted(() => {
             info().then((res) => {
                 let json = JSON.parse(res);
@@ -96,9 +88,6 @@ export default {
                 state.user._endTime = format[1];
             });
         });
-
-
-
 
         return {
             state

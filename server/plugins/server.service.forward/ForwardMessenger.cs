@@ -147,7 +147,7 @@ namespace server.service.forward
                         });
                         try
                         {
-                            proxyServer.Start(model.SourcePort, config.Plugin);
+                            proxyServer.Start(model.SourcePort, config.Plugin,(byte)ForwardAliveTypes.Tunnel);
                         }
                         catch (Exception)
                         {
@@ -196,7 +196,7 @@ namespace server.service.forward
 
             for (int i = 0; i < config.WebListens.Length; i++)
             {
-                proxyServer.Start(config.WebListens[i], config.Plugin);
+                proxyServer.Start(config.WebListens[i], config.Plugin, (byte)ForwardAliveTypes.Web);
             }
 
             connection.Write(Helper.TrueArray);
