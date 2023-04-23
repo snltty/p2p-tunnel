@@ -1,6 +1,7 @@
 ﻿using common.proxy;
 using common.socks5;
 using server.messengers;
+using common.libs.extends;
 
 namespace server.service.socks5
 {
@@ -21,12 +22,13 @@ namespace server.service.socks5
 
         public override bool ValidateAccess(ProxyInfo info)
         {
+           
 #if DEBUG
             return true;
 #else
             if (info.TargetAddress.IsLan())
             {
-               return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
+                return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
             }
 
             return base.ValidateAccess(info) || serviceAccessProvider.Validate(info.Connection, Access);
