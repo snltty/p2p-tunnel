@@ -5,7 +5,7 @@
   "BufferSize": 3, //0-1KB 1-2KB 2-4KB 3-8KB 4-16KB 5-32KB 6-64KB 7-128KB 8-256KB 9-512KB 10-1024KB
 
   //客户端服务端共有配置
-  "ConnectEnable": false, //是否开启tcp转发转发和http1.1代理
+  "ConnectEnable": false, //允许连接
 
   //服务端配置
   "WebListens": [ /*8000*/ ], //监听哪些端口，短连接端口，客户端注册转发时需要指定注册到哪个端口下

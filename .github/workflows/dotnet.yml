@@ -49,7 +49,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         tag_name: v2.1.0.0-beta
-        release_name: Release ${{ steps.date.outputs.today }}
+        release_name: v2.1.0.0-beta.${{ steps.date.outputs.today }}
         draft: false
         prerelease: false
         

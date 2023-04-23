@@ -1,7 +1,7 @@
 ﻿{
   //客户端配置
   "ListenEnable": false, //是否开启
-  "ListenPort": 5413, //监听端口
+  "ListenPort": 5414, //监听端口
   "BufferSize": 3, //0-1KB 1-2KB 2-4KB 3-8KB 4-16KB 5-32KB 6-64KB 7-128KB 8-256KB 9-512KB 10-1024KB
   "TargetName": "B客户端", //连接目标客户端名，为/表示代理到服务器
   "IsCustomPac": false, //是否自定义pac
