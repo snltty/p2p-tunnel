@@ -35,7 +35,7 @@ export default {
             if (route.query.port) {
                 localStorage.setItem('wsurl', `ws://127.0.0.1:${route.query.port}`);
             }
-            wsUrl.value = (localStorage.getItem('wsurl') || `ws://127.0.0.1:${route.query.port || 59411}`);
+            wsUrl.value = (localStorage.getItem('wsurl') || `ws://127.0.0.1:${route.query.port || 5412}`);
             initWebsocket(wsUrl.value);
         });
 

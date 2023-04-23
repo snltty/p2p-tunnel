@@ -179,7 +179,7 @@ namespace client.realize.messengers.singnin
         private void TcpBind(IPAddress serverAddress)
         {
             //TCP 本地开始监听
-            tcpServer.SetBufferSize((byte)config.Client.TcpBufferSize * 1024);
+            tcpServer.SetBufferSize((1 << (byte)config.Client.TcpBufferSize) * 1024);
             tcpServer.Start(signInState.LocalInfo.Port);
 
             //TCP 连接服务器
@@ -190,7 +190,7 @@ namespace client.realize.messengers.singnin
             tcpSocket.ReuseBind(bindEndpoint);
             tcpSocket.Connect(new IPEndPoint(serverAddress, config.Server.TcpPort));
             signInState.LocalInfo.LocalIp = (tcpSocket.LocalEndPoint as IPEndPoint).Address;
-            signInState.Connection = tcpServer.BindReceive(tcpSocket, (byte)config.Client.TcpBufferSize * 1024);
+            signInState.Connection = tcpServer.BindReceive(tcpSocket, (1 << (byte)config.Client.TcpBufferSize) * 1024);
         }
         private async Task SwapCryptoTcp()
         {

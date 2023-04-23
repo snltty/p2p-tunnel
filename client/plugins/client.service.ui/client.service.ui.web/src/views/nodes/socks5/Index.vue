@@ -50,7 +50,7 @@ export default {
             loading: false,
             localtion: window.location.origin,
             listenEnable: false,
-            listenPort: 5412,
+            listenPort: 5413,
             targetName: ''
         });
         const loadConfig = () => {

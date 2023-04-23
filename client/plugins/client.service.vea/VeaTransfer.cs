@@ -1,11 +1,11 @@
 ﻿using client.messengers.clients;
 using client.messengers.singnin;
-using client.service.vea.socks5;
 using common.libs;
 using common.libs.extends;
 using common.proxy;
 using common.server;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +13,6 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Threading.Tasks;
 
 namespace client.service.vea
 {
@@ -30,9 +29,9 @@ namespace client.service.vea
         const string veaNameOsx = "utun12138";
 
         private readonly ConcurrentDictionary<IPAddress, IPAddressCacheInfo> ips = new ConcurrentDictionary<IPAddress, IPAddressCacheInfo>();
-        private readonly ConcurrentDictionary<int, IPAddressCacheInfo> lanips = new ConcurrentDictionary<int, IPAddressCacheInfo>();
+        private readonly ConcurrentDictionary<uint, IPAddressCacheInfo> lanips = new ConcurrentDictionary<uint, IPAddressCacheInfo>();
         public ConcurrentDictionary<IPAddress, IPAddressCacheInfo> IPList => ips;
-        public ConcurrentDictionary<int, IPAddressCacheInfo> LanIPList => lanips;
+        public ConcurrentDictionary<uint, IPAddressCacheInfo> LanIPList => lanips;
 
         private readonly Config config;
         private readonly IClientInfoCaching clientInfoCaching;
@@ -468,7 +467,7 @@ namespace client.service.vea
         {
             foreach (var item in _lanips)
             {
-                lanips.TryRemove(item.GetAddressBytes().ToInt32(), out _);
+                lanips.TryRemove(BinaryPrimitives.ReadUInt32BigEndian(item.GetAddressBytes()), out _);
             }
             DelRoute(_lanips);
         }
@@ -478,7 +477,7 @@ namespace client.service.vea
             _lanips = ExcludeLanIP(_lanips, client);
             foreach (var item in _lanips)
             {
-                lanips.AddOrUpdate(item.GetAddressBytes().ToInt32(), cache, (a, b) => cache);
+                lanips.AddOrUpdate(BinaryPrimitives.ReadUInt32BigEndian(item.GetAddressBytes()), cache, (a, b) => cache);
             }
         }
 

@@ -1,10 +1,9 @@
-﻿using common.libs;
-using common.libs.extends;
+﻿using common.libs.extends;
 using common.proxy;
 using common.server;
 using common.server.model;
 using common.socks5;
-using System;
+using System.Buffers.Binary;
 using System.Net;
 
 namespace client.service.vea.socks5
@@ -40,6 +39,7 @@ namespace client.service.vea.socks5
             if (res == false) return res;
 
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
+
             if (socks5EnumStep == Socks5EnumStep.Command)
             {
                 //组网支持IPV4
@@ -50,12 +50,12 @@ namespace client.service.vea.socks5
                     proxyServer.InputData(info);
                     return false;
                 }
+                info.Connection = GetConnection(info);
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
                 //组网支持IPV4
                 if (info.AddressType != EnumProxyAddressType.IPV4) return false;
-
                 //组播数据包，直接分发
                 if (info.TargetAddress.GetIsBroadcastAddress())
                 {
@@ -66,9 +66,14 @@ namespace client.service.vea.socks5
                     }
                     return false;
                 }
+                info.Connection = GetConnection(info);
+            }
+            //组网支持IPV4
+            if (info.AddressType != EnumProxyAddressType.IPV4)
+            {
+                return false;
             }
 
-            info.Connection = GetConnection(new IPAddress(info.TargetAddress.Span));
             return true;
         }
 
@@ -81,9 +86,9 @@ namespace client.service.vea.socks5
 #endif
         }
 
-        byte[] ipBytes = new byte[4];
-        private IConnection GetConnection(IPAddress target)
+        private IConnection GetConnection(ProxyInfo info)
         {
+            IPAddress target = new IPAddress(info.TargetAddress.Span);
             IConnection connection = null;
             if (veaTransfer.IPList.TryGetValue(target, out IPAddressCacheInfo cache))
             {
@@ -91,22 +96,18 @@ namespace client.service.vea.socks5
             }
             else
             {
-                if (target.IsLan())
+                uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
+                if (veaTransfer.LanIPList.TryGetValue(ip & 0xffffff00, out cache))
                 {
-                    target.TryWriteBytes(ipBytes, out int len);
-                    int ip = ipBytes.AsSpan().ToInt32();
-                    if (veaTransfer.LanIPList.TryGetValue(ip & 0xffffff, out cache))
-                    {
-                        connection = cache.Client.Connection;
-                    }
-                    if (veaTransfer.LanIPList.TryGetValue(ip & 0xffff, out cache))
-                    {
-                        connection = cache.Client.Connection;
-                    }
-                    if (veaTransfer.LanIPList.TryGetValue(ip & 0xff, out cache))
-                    {
-                        connection = cache.Client.Connection;
-                    }
+                    connection = cache.Client.Connection;
+                }
+                if (veaTransfer.LanIPList.TryGetValue(ip & 0xffff0000, out cache))
+                {
+                    connection = cache.Client.Connection;
+                }
+                if (veaTransfer.LanIPList.TryGetValue(ip & 0xff000000, out cache))
+                {
+                    connection = cache.Client.Connection;
                 }
             }
 

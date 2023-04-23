@@ -3,6 +3,7 @@ using common.proxy;
 using System.Net;
 using common.server.model;
 using common.libs.extends;
+using System;
 
 namespace common.socks5
 {
@@ -86,6 +87,8 @@ namespace common.socks5
                 //解析出udp包的数据部分
                 info.Data = Socks5Parser.GetUdpData(info.Data);
             }
+            if (info.TargetAddress.GetIsAnyAddress()) return false;
+
             return true;
         }
 

@@ -59,7 +59,7 @@ namespace server.service.messengers.singnin
             string str = connection.ReceiveRequestWrap.Payload.GetUTF8String();
             await config.SaveConfig(str);
 
-            tcpServer.SetBufferSize((byte)config.TcpBufferSize * 1024);
+            tcpServer.SetBufferSize((1 << (byte)config.TcpBufferSize) * 1024);
 
             connection.Write(Helper.TrueArray);
         }

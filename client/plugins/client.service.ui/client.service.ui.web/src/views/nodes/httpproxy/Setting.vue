@@ -103,7 +103,7 @@ export default {
             showPac: false,
             pac: '',
             form: {
-                ListenPort: 5413,
+                ListenPort: 5414,
                 IsPac: false,
                 IsCustomPac: false,
                 BufferSize: 3,

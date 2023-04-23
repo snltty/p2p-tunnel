@@ -90,6 +90,7 @@ namespace common.proxy
         private async Task ForwardTcp(ProxyInfo info)
         {
             ConnectionKey key = new ConnectionKey(info.Connection.ConnectId, info.RequestId);
+
             if (connections.TryGetValue(key, out AsyncServerUserToken token))
             {
                 token.Data.Step = info.Step;
@@ -115,10 +116,9 @@ namespace common.proxy
         private async Task ForwardUdp(ProxyInfo info)
         {
             IPEndPoint remoteEndpoint = ReadRemoteEndPoint(info);
-
             if (remoteEndpoint.Port == 0) return;
 
-            bool isBroadcast = GetIsBroadcastAddress(info);
+            bool isBroadcast = info.TargetAddress.GetIsBroadcastAddress();
             if (isBroadcast)
             {
                 remoteEndpoint.Address = IPAddress.Loopback;
@@ -268,10 +268,7 @@ namespace common.proxy
                         await token.TargetSocket.SendAsync(token.Data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                         token.Data.Data = Helper.EmptyArray;
                     }
-                    else
-                    {
-                        await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess);
-                    }
+                    await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess);
                     token.Data.TargetAddress = Helper.EmptyArray;
                     token.Data.Step = EnumProxyStep.ForwardTcp;
 
@@ -327,8 +324,8 @@ namespace common.proxy
                 UserToken = token,
                 SocketFlags = SocketFlags.None,
             };
-            token.PoolBuffer = new byte[(byte)token.Data.BufferSize * 1024];
-            readEventArgs.SetBuffer(token.PoolBuffer, 0, (byte)token.Data.BufferSize * 1024);
+            token.PoolBuffer = new byte[(1 << (byte)token.Data.BufferSize) * 1024];
+            readEventArgs.SetBuffer(token.PoolBuffer, 0, (1 << (byte)token.Data.BufferSize) * 1024);
             readEventArgs.Completed += Target_IO_Completed;
 
             if (token.TargetSocket.ReceiveAsync(readEventArgs) == false)
@@ -456,16 +453,6 @@ namespace common.proxy
             }
             return new IPEndPoint(ip, info.TargetPort);
         }
-        private bool GetIsBroadcastAddress(ProxyInfo info)
-        {
-            if (info.AddressType == EnumProxyAddressType.IPV4)
-            {
-                uint ip = info.TargetAddress.ToUInt32();
-                return ip >= 0xE0000000 && ip <= 0xEFFFFFFF;
-            }
-            return false;
-        }
-
     }
 
     public sealed class AsyncServerUserToken

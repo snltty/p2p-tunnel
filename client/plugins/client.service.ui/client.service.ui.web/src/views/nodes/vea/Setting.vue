@@ -88,7 +88,7 @@ export default {
                 IP: '',
                 LanIPs: '',
                 ListenPort: 5415,
-                BufferSize: 8 * 1024,
+                BufferSize: 3,
                 ConnectEnable: false
             },
             rules: {

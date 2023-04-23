@@ -58,7 +58,7 @@ namespace client.service.forward
         {
             if (cacheInfo != null)
             {
-                if (cacheInfo.Connection == null || !cacheInfo.Connection.Connected)
+                if (cacheInfo.Connection == null || cacheInfo.Connection.Connected == false)
                 {
                     cacheInfo.Connection = SelectConnection(cacheInfo);
                 }

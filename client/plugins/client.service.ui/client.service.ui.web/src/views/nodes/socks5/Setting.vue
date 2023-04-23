@@ -104,9 +104,9 @@ export default {
             showPac: false,
             pac: "",
             form: {
-                ListenPort: 5412,
+                ListenPort: 5413,
                 ConnectEnable: false,
-                BufferSize: 8 * 1024,
+                BufferSize: 3,
                 TargetName: "",
                 IsPac: false,
                 IsCustomPac: false,

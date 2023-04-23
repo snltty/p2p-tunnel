@@ -1,7 +1,5 @@
 ﻿using common.proxy;
-using common.libs.extends;
 using common.socks5;
-using server.messengers.singnin;
 using server.messengers;
 
 namespace server.service.socks5
@@ -28,7 +26,7 @@ namespace server.service.socks5
 #else
             if (info.TargetAddress.IsLan())
             {
-                return false;
+               return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
             }
 
             return base.ValidateAccess(info) || serviceAccessProvider.Validate(info.Connection, Access);

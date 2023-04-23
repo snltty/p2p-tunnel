@@ -50,7 +50,7 @@ export default {
         const state = reactive({
             loading: false,
 
-            ListenPort: 5412,
+            ListenPort: 5414,
             TargetName: '',
             ListenEnable: false,
 

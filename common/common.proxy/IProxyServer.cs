@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -168,8 +169,8 @@ namespace common.proxy
 
                 token.SourceSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
                 token.SourceSocket.SendTimeout = 5000;
-                token.PoolBuffer = new byte[(byte)acceptToken.ProxyPlugin.BufferSize * 1024];
-                readEventArgs.SetBuffer(token.PoolBuffer, 0, (byte)acceptToken.ProxyPlugin.BufferSize * 1024);
+                token.PoolBuffer = new byte[(1 << (byte)acceptToken.ProxyPlugin.BufferSize) * 1024];
+                readEventArgs.SetBuffer(token.PoolBuffer, 0, (1 << (byte)acceptToken.ProxyPlugin.BufferSize) * 1024);
                 readEventArgs.Completed += IO_Completed;
 
                 if (token.SourceSocket.ReceiveAsync(readEventArgs) == false)
@@ -184,9 +185,10 @@ namespace common.proxy
         }
         private async void ProcessReceive(SocketAsyncEventArgs e)
         {
+            ProxyUserToken token = (ProxyUserToken)e.UserToken;
             try
             {
-                ProxyUserToken token = (ProxyUserToken)e.UserToken;
+
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
                     int totalLength = e.BytesTransferred;
@@ -214,9 +216,9 @@ namespace common.proxy
                         }
 
                     }
-
+                    bool receive = token.Receive;
                     await Receive(token.Request);
-                    if (token.Receive)
+                    if (receive)
                     {
                         if (token.SourceSocket.Available > 0 && token.Request.Step > EnumProxyStep.Command)
                         {
@@ -234,6 +236,7 @@ namespace common.proxy
                         {
                             if (token.SourceSocket.ReceiveAsync(e) == false)
                             {
+
                                 ProcessReceive(e);
                             }
                         }
@@ -258,7 +261,7 @@ namespace common.proxy
             catch (Exception ex)
             {
                 CloseClientSocket(e);
-                Logger.Instance.DebugError(ex);
+                Logger.Instance.DebugError($"{token.Request.RequestId} {ex + ""}");
             }
         }
 
@@ -343,6 +346,7 @@ namespace common.proxy
         {
             if (info.Data.Length == 0)
             {
+
                 clientsManager.TryRemove(info.RequestId, out _);
                 return;
             }
@@ -400,7 +404,7 @@ namespace common.proxy
         public SocketAsyncEventArgs Saea { get; set; }
         public IProxyPlugin ProxyPlugin { get; set; }
         public byte[] PoolBuffer { get; set; }
-        public bool Receive { get; set; } = true;
+        public bool Receive { get; set; }
 
         public ProxyInfo Request { get; set; } = new ProxyInfo { };
     }

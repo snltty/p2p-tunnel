@@ -56,6 +56,11 @@ namespace common.forward
         }
         public bool HandleAnswerData(ProxyInfo info)
         {
+            if (info.Step == EnumProxyStep.Command)
+            {
+                info.Step = EnumProxyStep.ForwardTcp;
+                return false;
+            }
             return true;
         }
         public virtual bool ValidateAccess(ProxyInfo info)

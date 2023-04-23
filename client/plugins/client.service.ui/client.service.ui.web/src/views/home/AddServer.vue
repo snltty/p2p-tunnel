@@ -1,7 +1,7 @@
 <template>
     <el-dialog title="添加服务器节点" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px" @click.stop>
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="75px" @click.stop>
-            <el-form-item label="地址" prop="Ip">
+            <el-form-item label="域名/ip" prop="Ip">
                 <el-input v-model="state.form.Ip"></el-input>
             </el-form-item>
             <el-form-item label="tcp端口" prop="TcpPort">
@@ -11,7 +11,7 @@
                 <el-input v-model="state.form.UdpPort"></el-input>
             </el-form-item>
 
-            <el-form-item label="地区" prop="Img">
+            <el-form-item label="地区标识" prop="Img">
                 <el-select v-model="state.form.Img" placeholder="Select">
                     <template #prefix>
                         <img v-if="state.form.Img" :src="shareData.serverImgs[state.form.Img].img" alt="" height="20">
@@ -22,7 +22,7 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="名称" prop="Name">
+            <el-form-item label="备注名称" prop="Name">
                 <el-input v-model="state.form.Name"></el-input>
             </el-form-item>
         </el-form>

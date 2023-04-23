@@ -27,7 +27,7 @@ namespace server.service.httpProxy
 #else
             if (info.TargetAddress.IsLan())
             {
-                return false;
+                return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
             }
 
             return base.ValidateAccess(info) || serviceAccessProvider.Validate(info.Connection, Access);

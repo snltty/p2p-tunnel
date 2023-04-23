@@ -87,6 +87,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "client.service.httpProxy.se
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "invoke", "tests\invoke\invoke.csproj", "{87818F70-D3F0-4787-AD7F-6C673CA00E54}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "udp", "tests\udp\udp.csproj", "{77366D9A-CF13-48F5-9DBD-6A02F57A03BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -379,6 +381,14 @@ Global
 		{87818F70-D3F0-4787-AD7F-6C673CA00E54}.Release|Any CPU.Build.0 = Release|Any CPU
 		{87818F70-D3F0-4787-AD7F-6C673CA00E54}.Release|x64.ActiveCfg = Release|Any CPU
 		{87818F70-D3F0-4787-AD7F-6C673CA00E54}.Release|x64.Build.0 = Release|Any CPU
+		{77366D9A-CF13-48F5-9DBD-6A02F57A03BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77366D9A-CF13-48F5-9DBD-6A02F57A03BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77366D9A-CF13-48F5-9DBD-6A02F57A03BF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{77366D9A-CF13-48F5-9DBD-6A02F57A03BF}.Debug|x64.Build.0 = Debug|Any CPU
+		{77366D9A-CF13-48F5-9DBD-6A02F57A03BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77366D9A-CF13-48F5-9DBD-6A02F57A03BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77366D9A-CF13-48F5-9DBD-6A02F57A03BF}.Release|x64.ActiveCfg = Release|Any CPU
+		{77366D9A-CF13-48F5-9DBD-6A02F57A03BF}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -422,6 +432,7 @@ Global
 		{225866B2-8113-48E3-A2F8-BC9D4C8C8ADD} = {B678CEEF-2268-4906-9610-9B12CB9C4D7B}
 		{6A0562F9-F640-40E2-BA3C-1B2E864B7FA2} = {689218D7-FC93-47D5-A95B-66780B9D4870}
 		{87818F70-D3F0-4787-AD7F-6C673CA00E54} = {0732D9F3-310A-44BE-AD37-E2346C5ACEB6}
+		{77366D9A-CF13-48F5-9DBD-6A02F57A03BF} = {0732D9F3-310A-44BE-AD37-E2346C5ACEB6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE8935B2-54F1-4FBD-98BB-8119E42B52A6}

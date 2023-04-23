@@ -1,13 +1,8 @@
 ﻿using common.forward;
-using common.libs;
-using common.libs.extends;
 using common.proxy;
-using common.server.model;
 using server.messengers;
 using server.messengers.singnin;
-using System;
 using System.Linq;
-using System.Text;
 
 namespace server.service.forward
 {
@@ -38,10 +33,11 @@ namespace server.service.forward
 
         public override bool ValidateAccess(ProxyInfo info)
         {
+           
 #if DEBUG
             return true;
 #else
-            return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
+             return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
 #endif
 
         }
