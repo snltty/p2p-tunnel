@@ -51,7 +51,7 @@ export default {
             loading: false,
             form: {
                 TcpPort: stateEdit.value.data.TcpPort || 59410,
-                UdpPort: stateEdit.value.data.TcpPort || 5410,
+                UdpPort: stateEdit.value.data.UdpPort || 5410,
                 Ip: stateEdit.value.data.Ip || '',
                 Name: stateEdit.value.data.Name || '',
                 Img: stateEdit.value.data.Img || Object.keys(shareData.serverImgs)[0],
