@@ -511,7 +511,7 @@ namespace client.service.vea
         }
 
         /// <summary>
-        /// 重新计算其掩码，不显示写掩码的时候，给它计算出一个来
+        /// 重新计算其掩码，不显式定义掩码时，给它计算出一个来
         /// </summary>
         /// <param name="_ips"></param>
         private void ResetMask(IPAddressInfo _ips)
@@ -540,8 +540,7 @@ namespace client.service.vea
         /// <returns>网络号 小端</returns>
         public uint GetNetWork(uint ip, byte maskBitLength)
         {
-            if (maskBitLength >= 32) return ip;
-            if (maskBitLength == 0) return ip & 0xffffffff;
+            if (maskBitLength >= 32 || maskBitLength == 0) return ip;
 
             return ip & (uint)(1 << (32 - maskBitLength));
         }
