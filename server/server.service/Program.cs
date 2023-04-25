@@ -63,6 +63,7 @@ namespace server.service
             Logger.Instance.Info("没什么报红的，就说明运行成功了");
             Logger.Instance.Info($"UDP端口:{config.Udp}");
             Logger.Instance.Info($"TCP端口:{config.Tcp}");
+            Logger.Instance.Warning($"当前版本：{Helper.Version}，如果客户端版本与此不一致，则可能无法连接");
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
             Console.ReadLine();
