@@ -3,7 +3,9 @@ using common.libs.extends;
 using common.proxy;
 using common.server.model;
 using System;
+using System.Buffers.Binary;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Net;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -18,6 +20,7 @@ namespace client.service.vea
     {
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
+       
 
         public Config(IConfigDataProvider<Config> configDataProvider)
         {
@@ -31,6 +34,8 @@ namespace client.service.vea
             ListenPort = config.ListenPort;
             BufferSize = config.BufferSize;
             ConnectEnable = config.ConnectEnable;
+            UdpBind = config.UdpBind;
+            ParseLanIPs();
         }
 
         [JsonIgnore]
@@ -39,11 +44,11 @@ namespace client.service.vea
         /// <summary>
         /// 启用
         /// </summary>
-        public bool ListenEnable { get; set; } = false;
+        public bool ListenEnable { get; set; }
         /// <summary>
         /// 代理所有
         /// </summary>
-        public bool ProxyAll { get; set; } = false;
+        public bool ProxyAll { get; set; }
 
         /// <summary>
         /// 组网ip
@@ -52,7 +57,10 @@ namespace client.service.vea
         /// <summary>
         /// 局域网网段ip列表
         /// </summary>
-        public IPAddress[] LanIPs { get; set; } = Array.Empty<IPAddress>();
+        public string[] LanIPs { get; set; } = Array.Empty<string>();
+
+        [JsonIgnore]
+        public VeaLanIPAddress[] VeaLanIPs { get; set; } = Array.Empty<VeaLanIPAddress>();
 
         /// <summary>
         /// 监听端口
@@ -61,11 +69,13 @@ namespace client.service.vea
         /// <summary>
         /// buffersize
         /// </summary>
-        public EnumBufferSize BufferSize { get; set; } =  EnumBufferSize.KB_8;
+        public EnumBufferSize BufferSize { get; set; } = EnumBufferSize.KB_8;
         /// <summary>
         /// 允许被连接
         /// </summary>
-        public bool ConnectEnable { get; set; } = false;
+        public bool ConnectEnable { get; set; }
+
+        public IPAddress UdpBind { get; set; } = IPAddress.Any;
 
         /// <summary>
         /// 读取配置文件
@@ -99,8 +109,39 @@ namespace client.service.vea
             ListenPort = _config.ListenPort;
             BufferSize = _config.BufferSize;
             ConnectEnable = _config.ConnectEnable;
+            UdpBind = _config.UdpBind;
+            ParseLanIPs();
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+
         }
+
+        private void ParseLanIPs()
+        {
+            VeaLanIPs = LanIPs.Select(c =>
+            {
+                string[] arr = c.Split('/');
+                byte mask = 0;
+                IPAddress ip = IPAddress.Parse(arr[0]);
+                if (arr.Length > 1)
+                {
+                    mask = byte.Parse(arr[1]);
+                }
+                return new VeaLanIPAddress
+                {
+                    IPAddress = BinaryPrimitives.ReadUInt32BigEndian(ip.GetAddressBytes()),
+                    Mask = mask
+                };
+            }).ToArray();
+        }
+    }
+
+    public sealed class VeaLanIPAddress
+    {
+        /// <summary>
+        /// ip，存小端
+        /// </summary>
+        public uint IPAddress { get; set; }
+        public byte Mask { get; set; } = 32;
     }
 }

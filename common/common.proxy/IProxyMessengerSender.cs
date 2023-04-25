@@ -8,8 +8,8 @@ namespace common.proxy
 {
     public interface IProxyMessengerSender
     {
-        public Task<bool> Request(ProxyInfo data);
-        public Task<bool> Response(ProxyInfo data);
+        public Task<bool> Request(ProxyInfo data, bool unconnectedMessage = false);
+        public Task<bool> Response(ProxyInfo data, bool unconnectedMessage = false);
 
         public Task<bool> ResponseClose(ProxyInfo data);
         public Task<bool> RequestClose(ProxyInfo data);
@@ -28,7 +28,7 @@ namespace common.proxy
             this.messengerSender = messengerSender;
         }
 
-        public async Task<bool> Request(ProxyInfo info)
+        public async Task<bool> Request(ProxyInfo info, bool unconnectedMessage = false)
         {
             if (info.Connection == null || info.Connection.Connected == false) return false;
 
@@ -38,11 +38,11 @@ namespace common.proxy
                 MessengerId = (ushort)ProxyMessengerIds.Request,
                 Connection = info.Connection,
                 Payload = bytes.AsMemory(0, length)
-            });
+            }, unconnectedMessage: unconnectedMessage);
             info.Return(bytes);
             return res;
         }
-        public async Task<bool> Response(ProxyInfo info)
+        public async Task<bool> Response(ProxyInfo info, bool unconnectedMessage = false)
         {
             if (info.Connection == null || info.Connection.Connected == false) return false;
 
@@ -52,7 +52,7 @@ namespace common.proxy
                 MessengerId = (ushort)ProxyMessengerIds.Response,
                 Connection = info.Connection,
                 Payload = bytes.AsMemory(0, length)
-            });
+            }, unconnectedMessage: unconnectedMessage);
             info.Return(bytes);
             return res;
         }

@@ -86,7 +86,7 @@ namespace client
         /// <summary>
         /// 参数
         /// </summary>
-        public Dictionary<string,string> Args { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Args { get; set; } = new Dictionary<string, string>();
         /// <summary>
         /// 自动注册
         /// </summary>
@@ -139,6 +139,11 @@ namespace client
         public int UdpUploadSpeedLimit { get; set; }
 
         public string[] Services { get; set; } = Array.Empty<string>();
+
+        /// <summary>
+        /// TCP禁用delay
+        /// </summary>
+        public bool NoDelay { get; set; } = false;
 
         /// <summary>
         /// 绑定ip

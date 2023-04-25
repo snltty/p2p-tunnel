@@ -1,9 +1,9 @@
-﻿using client.service.vea.socks5;
-using common.libs;
+﻿using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
 using System;
+using System.Buffers.Binary;
 using System.Threading.Tasks;
 
 namespace client.service.vea
@@ -37,7 +37,7 @@ namespace client.service.vea
             {
                 Connection = connection,
                 MessengerId = (ushort)VeaSocks5MessengerIds.Ip,
-                Payload = new IPAddressInfo { IP = config.IP, LanIPs = config.LanIPs }.ToBytes(),
+                Payload = new IPAddressInfo { IP = BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()), LanIPs = config.VeaLanIPs }.ToBytes(),
                 Timeout = 1000
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)

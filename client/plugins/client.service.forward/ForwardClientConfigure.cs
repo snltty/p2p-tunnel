@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace client.service.forward
 {
     /// <summary>
-    /// tcp转发配置文件
+    /// 端口转发配置文件
     /// </summary>
     public sealed class ForwardClientConfigure : IClientConfigure
     {

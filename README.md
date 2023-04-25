@@ -40,7 +40,7 @@
 
 ## 一些说明
 1. [x] **【内网穿透】**
-    - TCP、UDP打洞，(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
+    - TCP、UDP打洞，(IPV4、IPV6)(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
         - A客户端<-->B客户端
     - 服务器中继
         - A客户端<-->服务器<-->B客户端
@@ -75,7 +75,7 @@
 - [x] **【代理模块】【http代理】**  以节点或者服务端作为跳点访问外网
 - [x] **【代理模块】【socks5代理】** 以节点或者服务端作为跳点访问外网
 - [x] **【代理模块】【虚拟网卡组网】** 分配虚拟ip，通过ip访问目标端内网服务
-    - 支持tcp、udp(支持组播)，方便联机游戏
+    - 支持tcp、udp(支持组播，如果客户端之间是udp连接的，那将会以纯udp方式广播，不考虑是否到达，降低延迟)，方便联机游戏
     - 支持windows、linux、osx
     - 如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
 

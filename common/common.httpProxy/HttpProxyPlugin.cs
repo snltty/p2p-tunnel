@@ -2,6 +2,7 @@
 using common.proxy;
 using common.server.model;
 using System;
+using System.Net;
 
 namespace common.httpProxy
 {
@@ -13,6 +14,7 @@ namespace common.httpProxy
     {
         public virtual byte Id => config.Plugin;
         public virtual EnumBufferSize BufferSize => config.BufferSize;
+        public IPAddress UdpBind => IPAddress.Any;
         public virtual ushort Port => config.ListenPort;
         public virtual bool Enable => config.ListenEnable;
 

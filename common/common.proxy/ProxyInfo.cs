@@ -57,6 +57,7 @@ namespace common.proxy
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Data { get; set; }
 
+
         #endregion
 
         #region 辅助字段

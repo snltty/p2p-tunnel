@@ -28,9 +28,9 @@ namespace client.service.vea
         const string veaName = "p2p-tunnel";
         const string veaNameOsx = "utun12138";
 
-        private readonly ConcurrentDictionary<IPAddress, IPAddressCacheInfo> ips = new ConcurrentDictionary<IPAddress, IPAddressCacheInfo>();
+        private readonly ConcurrentDictionary<uint, IPAddressCacheInfo> ips = new ConcurrentDictionary<uint, IPAddressCacheInfo>();
         private readonly ConcurrentDictionary<uint, IPAddressCacheInfo> lanips = new ConcurrentDictionary<uint, IPAddressCacheInfo>();
-        public ConcurrentDictionary<IPAddress, IPAddressCacheInfo> IPList => ips;
+        public ConcurrentDictionary<uint, IPAddressCacheInfo> IPList => ips;
         public ConcurrentDictionary<uint, IPAddressCacheInfo> LanIPList => lanips;
 
         private readonly Config config;
@@ -39,7 +39,7 @@ namespace client.service.vea
         private readonly SignInStateInfo signInStateInfo;
         private readonly IProxyServer proxyServer;
 
-        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender,  SignInStateInfo signInStateInfo, IProxyServer proxyServer)
+        public VeaTransfer(Config config, IClientInfoCaching clientInfoCaching, VeaMessengerSender veaMessengerSender, SignInStateInfo signInStateInfo, IProxyServer proxyServer)
         {
             this.config = config;
             this.clientInfoCaching = clientInfoCaching;
@@ -54,7 +54,7 @@ namespace client.service.vea
             clientInfoCaching.OnOffline += (client) =>
             {
                 var value = ips.FirstOrDefault(c => c.Value.Client.Id == client.Id);
-                if (value.Key != null)
+                if (value.Key != 0)
                 {
                     if (ips.TryRemove(value.Key, out IPAddressCacheInfo cache))
                     {
@@ -90,6 +90,7 @@ namespace client.service.vea
 
             lock (this)
             {
+                ResetMask(_ips);
                 var cache = ips.Values.FirstOrDefault(c => c.Client.Id == client.Id);
                 if (cache != null)
                 {
@@ -97,9 +98,9 @@ namespace client.service.vea
                     RemoveLanMasks(cache.LanIPs);
                 }
 
-                cache = new IPAddressCacheInfo { Client = client, IP = _ips.IP, LanIPs = _ips.LanIPs };
+                cache = new IPAddressCacheInfo { Client = client, IP = _ips.IP, LanIPs = _ips.LanIPs, Mask = 32 };
                 ips.AddOrUpdate(_ips.IP, cache, (a, b) => cache);
-                AddLanMasks(_ips.LanIPs, cache, client);
+                AddLanMasks(_ips, client);
 
                 AddRoute();
             }
@@ -359,13 +360,13 @@ namespace client.service.vea
 
         private void AddRoute()
         {
-            foreach (var item in lanips)
+            foreach (var item in ips)
             {
-                IPAddress[] _lanips = ExcludeLanIP(item.Value.LanIPs, item.Value.Client);
+                VeaLanIPAddress[] _lanips = ExcludeLanIP(item.Value.LanIPs, item.Value.Client);
                 AddRoute(_lanips);
             }
         }
-        private void AddRoute(IPAddress[] ip)
+        private void AddRoute(VeaLanIPAddress[] ip)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -380,37 +381,35 @@ namespace client.service.vea
                 AddRouteOsx(ip);
             }
         }
-        private void AddRouteWindows(IPAddress[] ip)
+        private void AddRouteWindows(VeaLanIPAddress[] ip)
         {
             if (interfaceNumber > 0)
             {
                 List<string> commands = new List<string>(ip.Length);
                 foreach (var item in ip)
                 {
-                    if (item.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    {
-                        byte[] mask = GetIPMask(item);
-                        commands.Add($"route add {item} mask {string.Join(".", mask)} {config.IP} metric 5 if {interfaceNumber}");
-                    }
+                    GetMinNetWork(item, out byte mask);
+                    byte[] maskArr = BitConverter.GetBytes(BinaryPrimitives.ReverseEndianness(0xffffffff << (32 - mask)));
+                    commands.Add($"route add {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())} mask {string.Join(".", maskArr)} {config.IP} metric 5 if {interfaceNumber}");
                 }
                 Command.Windows(string.Empty, commands.ToArray());
             }
         }
-        private void AddRouteLinux(IPAddress[] ip)
+        private void AddRouteLinux(VeaLanIPAddress[] ip)
         {
-            string[] commands = ip.Select(c =>
+            string[] commands = ip.Select(item =>
             {
-                int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
-                return $"ip route add {c}/{mask} via {config.IP} dev {veaName} metric 1 ";
+                GetMinNetWork(item, out byte mask);
+                return $"ip route add {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())}/{mask} via {config.IP} dev {veaName} metric 1 ";
             }).ToArray();
             Command.Linux(string.Empty, commands);
         }
-        private void AddRouteOsx(IPAddress[] ip)
+        private void AddRouteOsx(VeaLanIPAddress[] ip)
         {
-            string[] commands = ip.Select(c =>
+            string[] commands = ip.Select(item =>
             {
-                int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
-                return $"route add -net {c}/{mask} {config.IP}";
+                GetMinNetWork(item, out byte mask);
+                return $"route add -net {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())}/{mask} {config.IP}";
             }).ToArray();
             if (commands.Length > 0)
             {
@@ -418,7 +417,7 @@ namespace client.service.vea
             }
         }
 
-        private void DelRoute(IPAddress[] ip)
+        private void DelRoute(VeaLanIPAddress[] ip)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -433,29 +432,29 @@ namespace client.service.vea
                 DelRouteOsx(ip);
             }
         }
-        private void DelRouteWindows(IPAddress[] ip)
+        private void DelRouteWindows(VeaLanIPAddress[] ip)
         {
             if (interfaceNumber > 0)
             {
-                string[] commands = ip.Select(c => $"route delete {c}").ToArray();
+                string[] commands = ip.Select(item => $"route delete {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())}").ToArray();
                 Command.Windows(string.Empty, commands.ToArray());
             }
         }
-        private void DelRouteLinux(IPAddress[] ip)
+        private void DelRouteLinux(VeaLanIPAddress[] ip)
         {
-            string[] commands = ip.Select(c =>
+            string[] commands = ip.Select(item =>
             {
-                int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
-                return $"ip route del {c}/{mask}";
+                GetMinNetWork(item, out byte mask);
+                return $"ip route del {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())}/{mask}";
             }).ToArray();
             Command.Linux(string.Empty, commands);
         }
-        private void DelRouteOsx(IPAddress[] ip)
+        private void DelRouteOsx(VeaLanIPAddress[] ip)
         {
-            string[] commands = ip.Select(c =>
+            string[] commands = ip.Select(item =>
             {
-                int mask = c.GetAddressBytes().Count(c => c > 0) * 8;
-                return $"route delete -net {c}/{mask}";
+                GetMinNetWork(item, out byte mask);
+                return $"route delete -net {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())}/{mask}";
             }).ToArray();
             if (commands.Length > 0)
             {
@@ -463,53 +462,110 @@ namespace client.service.vea
             }
         }
 
-        private void RemoveLanMasks(IPAddress[] _lanips)
+        private void RemoveLanMasks(VeaLanIPAddress[] _lanips)
         {
             foreach (var item in _lanips)
             {
-                lanips.TryRemove(BinaryPrimitives.ReadUInt32BigEndian(item.GetAddressBytes()), out _);
+                lanips.TryRemove(GetMinNetWork(item, out _), out _);
             }
             DelRoute(_lanips);
         }
 
-        private void AddLanMasks(IPAddress[] _lanips, IPAddressCacheInfo cache, ClientInfo client)
+        private void AddLanMasks(IPAddressInfo ips, ClientInfo client)
         {
-            _lanips = ExcludeLanIP(_lanips, client);
+            var _lanips = ExcludeLanIP(ips.LanIPs, client);
             foreach (var item in _lanips)
             {
-                lanips.AddOrUpdate(BinaryPrimitives.ReadUInt32BigEndian(item.GetAddressBytes()), cache, (a, b) => cache);
+                IPAddressCacheInfo cache = new IPAddressCacheInfo
+                {
+                    Client = client,
+                    IP = item.IPAddress,
+                    LanIPs = ips.LanIPs,
+                    NetWork = GetNetWork(item.IPAddress, item.Mask),
+                    Mask = item.Mask
+                };
+                lanips.AddOrUpdate(GetMinNetWork(item, out _), cache, (a, b) => cache);
             }
         }
 
-        private IPAddress[] ExcludeLanIP(IPAddress[] _lanips, ClientInfo client)
+        /// <summary>
+        /// 排除与目标客户端连接的ip
+        /// </summary>
+        /// <param name="lanips"></param>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        private VeaLanIPAddress[] ExcludeLanIP(VeaLanIPAddress[] lanips, ClientInfo client)
         {
             IPAddress ip = client.IPAddress.Address;
 
-            //跟目标客户端是局域网连接，则排除连接的ip网段
+            //跟目标客户端是局域网连接，则排除连接的ip网段, 连接的ip，与目标传来的局域网ip，进行ip匹配，是否是同网段
             if (client.ConnectType == ClientConnectTypes.P2P && ip.IsLan())
             {
-                _lanips = _lanips.Where(c =>
+                lanips = lanips.Where(c =>
                 {
-                    int mask = GetIPMask(c).ToInt32();
-                    int _lanip = c.GetAddressBytes().ToInt32() & mask;
-                    int _ip = ip.GetAddressBytes().ToInt32() & mask;
-                    return _lanip != _ip;
+                    //取网络号不一样的
+                    return GetNetWork(BinaryPrimitives.ReadUInt32BigEndian(ip.GetAddressBytes()), c.Mask) != GetNetWork(c.IPAddress, c.Mask);
                 }).ToArray();
             }
-            return _lanips;
+            return lanips;
         }
 
-        private byte[] GetIPMask(IPAddress ip)
+        /// <summary>
+        /// 重新计算其掩码，不显示写掩码的时候，给它计算出一个来
+        /// </summary>
+        /// <param name="_ips"></param>
+        private void ResetMask(IPAddressInfo _ips)
         {
-            byte[] mask = new byte[] { 255, 255, 255, 255 };
-            byte[] ipBytes = ip.GetAddressBytes();
-            for (int i = 0; i < ipBytes.Length; i++)
+            foreach (var item in _ips.LanIPs)
             {
-                if (ipBytes[i] == 0) mask[i] = 0;
+                if (item.Mask == 0)
+                {
+                    item.Mask = 32;
+                    for (int i = 0; i < sizeof(uint); i++)
+                    {
+                        if (((item.IPAddress >> (i * 8)) & 0x000000ff) != 0)
+                        {
+                            break;
+                        }
+                        item.Mask -= 8;
+                    }
+                }
             }
-            return mask;
         }
 
+        /// <summary>
+        /// 获取网络号
+        /// </summary>
+        /// <param name="ip">小端</param>
+        /// <returns>网络号 小端</returns>
+        public uint GetNetWork(uint ip, byte maskBitLength)
+        {
+            if (maskBitLength >= 32) return ip;
+            if (maskBitLength == 0) return ip & 0xffffffff;
+
+            return ip & (uint)(1 << (32 - maskBitLength));
+        }
+
+        /// <summary>
+        /// 最小网络号，整段的 32 24 16 8，用作一段判断，二段判断其具体掩码
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns>网络号 小端</returns>
+        public uint GetMinNetWork(VeaLanIPAddress ip, out byte maskBitLength)
+        {
+            uint mask = 0xffffff00;
+            maskBitLength = 24;
+            for (int i = 1; i < sizeof(uint); i++)
+            {
+                if (((ip.IPAddress >> (i * 8)) & 0x000000ff) == 0 || maskBitLength > ip.Mask)
+                {
+                    mask <<= 8;
+                    maskBitLength -= 8;
+                }
+                else break;
+            }
+            return ip.IPAddress & mask;
+        }
     }
 
     /// <summary>
@@ -518,19 +574,25 @@ namespace client.service.vea
     public sealed class IPAddressCacheInfo
     {
         /// <summary>
-        /// ip
+        /// ip 小端
         /// </summary>
-        public IPAddress IP { get; set; }
+        public uint IP { get; set; }
         /// <summary>
         /// 局域网网段
         /// </summary>
-        public IPAddress[] LanIPs { get; set; }
+        public VeaLanIPAddress[] LanIPs { get; set; }
         /// <summary>
         /// 客户端
         /// </summary>
 
         [System.Text.Json.Serialization.JsonIgnore]
         public ClientInfo Client { get; set; }
+
+        /// <summary>
+        /// 网络号，小端
+        /// </summary>
+        public uint NetWork { get; set; }
+        public byte Mask { get; set; }
     }
 
     /// <summary>
@@ -539,13 +601,13 @@ namespace client.service.vea
     public sealed class IPAddressInfo
     {
         /// <summary>
-        /// ip
+        /// ip 小端
         /// </summary>
-        public IPAddress IP { get; set; }
+        public uint IP { get; set; }
         /// <summary>
         /// 局域网网段
         /// </summary>
-        public IPAddress[] LanIPs { get; set; }
+        public VeaLanIPAddress[] LanIPs { get; set; }
 
         /// <summary>
         /// 序列化
@@ -553,21 +615,23 @@ namespace client.service.vea
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var bytes = new byte[1 + 4 + 1 + LanIPs.Length * 4];
+            var bytes = new byte[1 + 4 + 1 + LanIPs.Length * 5];
             var span = bytes.AsSpan();
 
             int index = 0;
             bytes[index] = 4;
             index += 1;
-            IP.TryWriteBytes(span.Slice(index), out _);
+            IP.ToBytes(bytes.AsMemory(index));
             index += 4;
 
             bytes[index] = (byte)LanIPs.Length;
             index += 1;
             for (int i = 0; i < LanIPs.Length; i++)
             {
-                LanIPs[i].TryWriteBytes(span.Slice(index), out _);
+                LanIPs[i].IPAddress.ToBytes(bytes.AsMemory(index));
                 index += 4;
+                bytes[index] = LanIPs[i].Mask;
+                index += 1;
             }
 
             return bytes;
@@ -586,17 +650,25 @@ namespace client.service.vea
             byte ipLength = span[index];
             index += 1;
 
-            IP = new IPAddress(span.Slice(index, ipLength));
+            IP = span.Slice(index, ipLength).ToUInt32();
             index += ipLength;
 
             byte lanipLength = span[index];
             index += 1;
 
-            LanIPs = new IPAddress[lanipLength];
+            LanIPs = new VeaLanIPAddress[lanipLength];
             for (int i = 0; i < lanipLength; i++)
             {
-                LanIPs[i] = new IPAddress(span.Slice(index, 4));
+                ReadOnlyMemory<byte> ip = memory.Slice(index, 4);
                 index += 4;
+                byte mask = span[index];
+                index += 1;
+
+                LanIPs[i] = new VeaLanIPAddress
+                {
+                    IPAddress = ip.ToUInt32(),
+                    Mask = mask
+                };
             }
         }
     }

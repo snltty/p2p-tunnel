@@ -10,10 +10,12 @@ namespace client.service.vea.client
     public sealed class VeaClientConfigure : IClientConfigure
     {
         private readonly Config config;
+        private readonly VeaTransfer VeaTransfer;
 
-        public VeaClientConfigure(Config config)
+        public VeaClientConfigure(Config config, VeaTransfer VeaTransfer)
         {
             this.config = config;
+            this.VeaTransfer = VeaTransfer;
         }
 
         /// <summary>
@@ -52,7 +54,7 @@ namespace client.service.vea.client
         public async Task<string> Save(string jsonStr)
         {
             await config.SaveConfig(jsonStr).ConfigureAwait(false);
-
+            VeaTransfer.UpdateIp();
             return string.Empty;
         }
     }

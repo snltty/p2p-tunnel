@@ -1,9 +1,12 @@
 ﻿using client.messengers.clients;
 using client.service.ui.api.clientServer;
 using client.service.vea.socks5;
+using common.libs.extends;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace client.service.vea.client
@@ -18,7 +21,7 @@ namespace client.service.vea.client
         private readonly VeaMessengerSender veaMessengerSender;
         private readonly IClientInfoCaching clientInfoCaching;
 
-        public VeaClientService(Config config, VeaTransfer VeaTransfer,  VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
+        public VeaClientService(Config config, VeaTransfer VeaTransfer, VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
         {
             this.config = config;
             this.VeaTransfer = VeaTransfer;
@@ -43,6 +46,7 @@ namespace client.service.vea.client
         public void Set(ClientServiceParamsInfo arg)
         {
             config.SaveConfig(arg.Content).Wait();
+            VeaTransfer.UpdateIp();
         }
         public void Run(ClientServiceParamsInfo arg)
         {
@@ -62,9 +66,15 @@ namespace client.service.vea.client
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public Dictionary<ulong, IPAddressCacheInfo> List(ClientServiceParamsInfo arg)
+        public object List(ClientServiceParamsInfo arg)
         {
-            return VeaTransfer.IPList.ToDictionary(c => c.Value.Client.Id, d => d.Value);
+            return VeaTransfer.IPList.ToDictionary(c => c.Value.Client.Id, d => new
+            {
+                IP = string.Join(".", BinaryPrimitives.ReverseEndianness(d.Value.IP).ToBytes()),
+                LanIPs = d.Value.LanIPs.Select(c => new { IPAddress = string.Join(".", BinaryPrimitives.ReverseEndianness(c.IPAddress).ToBytes()), Mask = c.Mask }),
+                NetWork = d.Value.NetWork,
+                Mask = d.Value.Mask
+            });
         }
 
         /// <summary>

@@ -166,7 +166,7 @@ namespace LiteNetLib
         private readonly INtpEventListener _ntpEventListener;
         private readonly IPeerAddressChangedListener _peerAddressChangedListener;
 
-        private readonly Dictionary<IPEndPoint, NetPeer> _peersDict = new Dictionary<IPEndPoint, NetPeer>(new IPEndPointComparer());
+        public readonly Dictionary<IPEndPoint, NetPeer> _peersDict = new Dictionary<IPEndPoint, NetPeer>(new IPEndPointComparer());
         private readonly Dictionary<IPEndPoint, ConnectionRequest> _requestsDict = new Dictionary<IPEndPoint, ConnectionRequest>(new IPEndPointComparer());
         private readonly Dictionary<IPEndPoint, NtpRequest> _ntpRequests = new Dictionary<IPEndPoint, NtpRequest>(new IPEndPointComparer());
         private readonly ReaderWriterLockSlim _peersLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
@@ -1434,7 +1434,7 @@ namespace LiteNetLib
         /// <param name="message">Raw data</param>
         /// <param name="remoteEndPoint">Packet destination</param>
         /// <returns>Operation result</returns>
-        public bool SendUnconnectedMessage(byte[] message, IPEndPoint remoteEndPoint)
+        public bool SendUnconnectedMessage(ReadOnlyMemory<byte> message, IPEndPoint remoteEndPoint)
         {
             return SendUnconnectedMessage(message, 0, message.Length, remoteEndPoint);
         }
@@ -1474,7 +1474,7 @@ namespace LiteNetLib
         /// <param name="length">data length</param>
         /// <param name="remoteEndPoint">Packet destination</param>
         /// <returns>Operation result</returns>
-        public bool SendUnconnectedMessage(byte[] message, int start, int length, IPEndPoint remoteEndPoint)
+        public bool SendUnconnectedMessage(ReadOnlyMemory<byte> message, int start, int length, IPEndPoint remoteEndPoint)
         {
             //No need for CRC here, SendRaw does that
             NetPacket packet = PoolGetWithData(PacketProperty.UnconnectedMessage, message, start, length);

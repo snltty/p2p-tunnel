@@ -34,12 +34,6 @@
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
-                            </el-row>
-                        </div>
-                    </el-form-item>
-                    <el-form-item label-width="0">
-                        <div class="w-100">
-                            <el-row :gutter="10">
                                 <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                     <el-form-item label="本机IP" prop="IP">
                                         <el-tooltip class="box-item" effect="dark" content="当前客户端的虚拟网卡ip，各个客户端之间设置不一样的ip，相同网段即可" placement="top-start">
@@ -47,14 +41,33 @@
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
+                            </el-row>
+                        </div>
+                    </el-form-item>
+                    <el-form-item label-width="0">
+                        <div class="w-100">
+                            <el-row :gutter="10">
                                 <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                     <el-form-item label="局域网段" prop="LanIPs">
-                                        <el-tooltip class="box-item" effect="dark" content="当前客户端的局域网段，各个客户端之间设置不一样的网段即可，192.168.x.0酱紫，为空不启用，多个网段用英文逗号间隔" placement="top-start">
-                                            <el-input size="default" v-model="state.form.LanIPs"></el-input>
+                                        <el-tooltip class="box-item" effect="dark" content="当前客户端的局域网段，多条使用英文逗号间隔或者换行" placement="top-start">
+                                            <el-input type="textarea" size="default" v-model="state.form.LanIPs" resize="none" :autosize="{minRows:4,maxRows:6}"></el-input>
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                    <el-form-item label="组播绑定" prop="UdpBind">
+                                        <el-tooltip class="box-item" effect="dark" content="udp组播绑定端点发送，当为0.0.0.0时，组播消息将发送到127.0.0.1" placement="top-start">
+                                            <el-input size="default" v-model="state.form.UdpBind"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
                             </el-row>
+                        </div>
+                    </el-form-item>
+                    <el-form-item label-width="0">
+                        <div class="w-100">
+                            <p>关于局域网段：各客户端之间，网段不可重复，其它客户端可访问本客户端所在局域网的其它设备</p>
+                            <p>支持配置掩码，如 192.168.1.100/29，则 192.168.1.97 - 192.168.1.102可用</p>
                         </div>
                     </el-form-item>
                 </el-form>
@@ -87,6 +100,7 @@ export default {
                 TargetName: '',
                 IP: '',
                 LanIPs: '',
+                UdpBind: '0.0.0.0',
                 ListenPort: 5415,
                 BufferSize: 3,
                 ConnectEnable: false
@@ -111,10 +125,11 @@ export default {
                 state.configInfo = res;
                 state.form.TargetName = res.TargetName;
                 state.form.IP = res.IP;
-                state.form.LanIPs = res.LanIPs.join(',');
+                state.form.LanIPs = res.LanIPs.join('\n');
                 state.form.ListenPort = res.ListenPort;
                 state.form.BufferSize = res.BufferSize;
                 state.form.ConnectEnable = res.ConnectEnable;
+                state.form.UdpBind = res.UdpBind;
             });
         }
 
@@ -131,10 +146,11 @@ export default {
                     }
                     state.configInfo.TargetName = state.form.TargetName;
                     state.configInfo.IP = state.form.IP;
-                    state.configInfo.LanIPs = state.form.LanIPs.split(',').filter(c => c.length > 0);
+                    state.configInfo.LanIPs = state.form.LanIPs.split(/,|\n/).filter(c => c.length > 0).map(c => c.replace(/\s/g, ''));
                     state.configInfo.ListenPort = +state.form.ListenPort;
                     state.configInfo.BufferSize = +state.form.BufferSize;
                     state.configInfo.ConnectEnable = state.form.ConnectEnable;
+                    state.configInfo.UdpBind = state.form.UdpBind;
                     setConfig(state.configInfo).then(resolve).catch(reject);
                 });
             });

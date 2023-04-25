@@ -97,14 +97,14 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false);
+        public Task<bool> Send(ReadOnlyMemory<byte> data, bool unconnectedMessage = false);
         /// <summary>
         /// 发送
         /// </summary>
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public Task<bool> Send(byte[] data, int length, bool logger = false);
+        public Task<bool> Send(byte[] data, int length, bool unconnectedMessage = false);
 
         /// <summary>
         /// 销毁
@@ -471,45 +471,53 @@ namespace common.server
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public override async Task<bool> Send(byte[] data, int length, bool logger = false)
+        public override async Task<bool> Send(byte[] data, int length, bool unconnectedMessage = false)
         {
-            return await Send(data.AsMemory(0, length), logger);
+            return await Send(data.AsMemory(0, length), unconnectedMessage);
         }
         /// <summary>
         /// 发送
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
+        public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool unconnectedMessage = false)
         {
             if (Connected)
             {
                 try
                 {
-                    int index = 0;
-                    while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
+                    if (unconnectedMessage == false)
                     {
-                        if (index >= 10000 / 30 || Connected == false)
+                        int index = 0;
+                        while (NetPeer.GetPacketsCountInReliableQueue(0, true) > 75)
                         {
-                            return false;
-                        }
-                        NetPeer.Update();
-                        await Task.Delay(30);
-                        index++;
-                    }
-                    int len = 0;
-                    do
-                    {
-                        len = tokenBucketRatelimit.Try(data.Length);
-                        if (len < data.Length)
-                        {
+                            if (index >= 10000 / 30 || Connected == false)
+                            {
+                                return false;
+                            }
+                            NetPeer.Update();
                             await Task.Delay(30);
+                            index++;
                         }
-                        if (Connected == false) return false;
-                    } while (len < data.Length);
+                        int len = 0;
+                        do
+                        {
+                            len = tokenBucketRatelimit.Try(data.Length);
+                            if (len < data.Length)
+                            {
+                                await Task.Delay(30);
+                            }
+                            if (Connected == false) return false;
+                        } while (len < data.Length);
 
-                    NetPeer.Send(data, 0, data.Length, DeliveryMethod.ReliableOrdered);
-                    NetPeer.Update();
+                        NetPeer.Send(data, 0, data.Length, DeliveryMethod.ReliableOrdered);
+                        NetPeer.Update();
+                    }
+                    else
+                    {
+                        NetPeer.NetManager.SendUnconnectedMessage(data, 0, data.Length, Address);
+                    }
+
 
                     return true;
                 }
@@ -561,7 +569,7 @@ namespace common.server
         {
             TcpSocket = tcpSocket;
 
-            IPEndPoint address = (TcpSocket.RemoteEndPoint as IPEndPoint) ?? new IPEndPoint(IPAddress.Any,0);
+            IPEndPoint address = (TcpSocket.RemoteEndPoint as IPEndPoint) ?? new IPEndPoint(IPAddress.Any, 0);
             if (address.Address.AddressFamily == AddressFamily.InterNetworkV6 && address.Address.IsIPv4MappedToIPv6)
             {
                 address = new IPEndPoint(new IPAddress(address.Address.GetAddressBytes()[^4..]), address.Port);
@@ -592,7 +600,7 @@ namespace common.server
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool logger = false)
+        public override async Task<bool> Send(ReadOnlyMemory<byte> data, bool unconnectedMessage = false)
         {
             if (Connected)
             {
@@ -615,9 +623,9 @@ namespace common.server
         /// <param name="data"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public override async Task<bool> Send(byte[] data, int length, bool logger = false)
+        public override async Task<bool> Send(byte[] data, int length, bool unconnectedMessage = false)
         {
-            return await Send(data.AsMemory(0, length), logger);
+            return await Send(data.AsMemory(0, length), unconnectedMessage);
         }
         /// <summary>
         /// 销毁

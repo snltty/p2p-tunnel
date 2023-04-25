@@ -11,10 +11,10 @@
                 <el-dropdown-item>网卡IP : {{state.data.IP}}</el-dropdown-item>
                 <template v-for="(item,index) in state.data.LanIPs" :key="index">
                     <template v-if="index == 0">
-                        <el-dropdown-item divided>网段{{index+1}} : {{item}}</el-dropdown-item>
+                        <el-dropdown-item divided>网段{{index+1}} : {{item.IPAddress}}/{{item.Mask}}</el-dropdown-item>
                     </template>
                     <template v-else>
-                        <el-dropdown-item>网段{{index+1}} : {{item}}</el-dropdown-item>
+                        <el-dropdown-item>网段{{index+1}} : {{item.IPAddress}}/{{item.Mask}}</el-dropdown-item>
                     </template>
                 </template>
                 <el-dropdown-item divided>

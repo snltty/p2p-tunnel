@@ -70,7 +70,8 @@ namespace server
         /// </summary>
         public string AdminGroup { get; set; } = string.Empty;
 
-        
+        public bool NoDelay { get; set; } = false;
+
 
         private async Task<Config> ReadConfig()
         {

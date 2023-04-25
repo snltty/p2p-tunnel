@@ -2,6 +2,7 @@
 using common.server.model;
 using System;
 using System.Collections.Concurrent;
+using System.Net;
 
 namespace common.proxy
 {
@@ -9,6 +10,7 @@ namespace common.proxy
     {
         public byte Id { get; }
         public EnumBufferSize BufferSize { get; }
+        public IPAddress UdpBind { get; }
 
 
         /// <summary>

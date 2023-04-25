@@ -25,14 +25,16 @@ namespace common.server
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public async Task<MessageResponeInfo> SendReply(MessageRequestWrap msg, bool logger = false)
+        public async Task<MessageResponeInfo> SendReply(MessageRequestWrap msg, bool unconnectedMessage = false)
         {
             if (msg.Connection == null || msg.Connection.Connected == false)
             {
                 return new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT };
             }
+            unconnectedMessage = unconnectedMessage && msg.Connection.ServerType == ServerType.UDP;
 
-            await msg.Connection.WaitOne();
+            if (unconnectedMessage == false)
+                await msg.Connection.WaitOne();
             if (msg.RequestId == 0)
             {
                 uint id = msg.RequestId;
@@ -41,14 +43,16 @@ namespace common.server
             }
             WheelTimerTimeout<TimeoutState> timeout = NewReply(msg);
 
-            bool res = await SendOnly(msg, true, logger).ConfigureAwait(false);
+            bool res = await SendOnly(msg, true, unconnectedMessage).ConfigureAwait(false);
             if (res == false)
             {
                 sends.TryRemove(msg.RequestId, out _);
                 timeout.Cancel();
                 timeout.Task.State.Tcs.SetResult(new MessageResponeInfo { Code = MessageResponeCodes.NOT_CONNECT });
             }
-            msg.Connection.Release();
+
+            if (unconnectedMessage == false)
+                msg.Connection.Release();
 
             return await timeout.Task.State.Tcs.Task.ConfigureAwait(false);
         }
@@ -58,13 +62,15 @@ namespace common.server
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public async Task<bool> SendOnly(MessageRequestWrap msg, bool locked = false, bool logger = false)
+        public async Task<bool> SendOnly(MessageRequestWrap msg, bool locked = false, bool unconnectedMessage = false)
         {
             if (msg.Connection == null || msg.Connection.Connected == false)
             {
                 return false;
             }
-            if (locked == false)
+            unconnectedMessage = unconnectedMessage && msg.Connection.ServerType == ServerType.UDP;
+
+            if (locked == false && unconnectedMessage == false)
                 await msg.Connection.WaitOne();
             try
             {
@@ -87,7 +93,7 @@ namespace common.server
                     msg.Payload = msg.Connection.Crypto.Encode(msg.Payload);
                 }
                 byte[] bytes = msg.ToArray(out int length);
-                bool res = await msg.Connection.Send(bytes.AsMemory(0, length), logger).ConfigureAwait(false);
+                bool res = await msg.Connection.Send(bytes.AsMemory(0, length), unconnectedMessage).ConfigureAwait(false);
                 msg.Return(bytes);
                 return res;
             }
@@ -97,7 +103,7 @@ namespace common.server
             }
             finally
             {
-                if (locked == false)
+                if (locked == false && unconnectedMessage == false)
                     msg.Connection.Release();
             }
             return false;

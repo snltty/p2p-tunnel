@@ -30,9 +30,12 @@ namespace udp
 
         static void Client()
         {
+            Console.Write("绑定ip+端口:");
+            IPEndPoint ep0 = IPEndPoint.Parse(Console.ReadLine());
             Console.Write("目标ip+端口:");
             IPEndPoint ep = IPEndPoint.Parse(Console.ReadLine());
-            var udp = new UdpClient(new Random().Next(1024, 60000));
+
+            var udp = new UdpClient(ep0);
             udp.Client.EnableBroadcast = true;
             Console.WriteLine("====================================================\n");
             while (true)
@@ -45,22 +48,22 @@ namespace udp
 
         static void Server()
         {
-            Console.Write("监听端口:");
-            int port = int.Parse(Console.ReadLine());
+            Console.Write("监听ip+端口:");
+            IPEndPoint ep = IPEndPoint.Parse(Console.ReadLine());
             Console.Write("加入组播(空不加入):");
             string group = Console.ReadLine();
 
-            var udp = new UdpClient(port);
-            if(string.IsNullOrWhiteSpace(group) == false)
+            var udp = new UdpClient(ep);
+            if (string.IsNullOrWhiteSpace(group) == false)
             {
                 udp.JoinMulticastGroup(IPAddress.Parse(group));
             }
-            Console.WriteLine($"已监听端口:{port}、开始接收消息:\n====================================================\n");
+            Console.WriteLine($"已监听:{ep}、开始接收消息:\n====================================================\n");
 
-            IPEndPoint ep = new IPEndPoint(IPAddress.Any, 0);
+            IPEndPoint ep1 = new IPEndPoint(IPAddress.Any, 0);
             while (true)
             {
-                var bytes = udp.Receive(ref ep);
+                var bytes = udp.Receive(ref ep1);
                 Console.WriteLine($"收到消息:{Encoding.UTF8.GetString(bytes)}");
             }
         }

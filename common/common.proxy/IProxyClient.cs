@@ -37,9 +37,10 @@ namespace common.proxy
 
         public async Task InputData(ProxyInfo info)
         {
+            bool pluginExists = ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin);
             if (info.Step == EnumProxyStep.Command)
             {
-                if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false || plugin.ValidateAccess(info) == false)
+                if (pluginExists == false || plugin.ValidateAccess(info) == false)
                 {
                     _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow);
                     return;
@@ -52,7 +53,7 @@ namespace common.proxy
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
-                await ForwardUdp(info);
+                await ForwardUdp(info, plugin);
             }
         }
 
@@ -113,13 +114,13 @@ namespace common.proxy
                 }
             }
         }
-        private async Task ForwardUdp(ProxyInfo info)
+        private async Task ForwardUdp(ProxyInfo info, IProxyPlugin plugin)
         {
             IPEndPoint remoteEndpoint = ReadRemoteEndPoint(info);
             if (remoteEndpoint.Port == 0) return;
 
             bool isBroadcast = info.TargetAddress.GetIsBroadcastAddress();
-            if (isBroadcast)
+            if (isBroadcast && plugin.UdpBind.Equals(IPAddress.Any))
             {
                 remoteEndpoint.Address = IPAddress.Loopback;
             }
@@ -131,9 +132,10 @@ namespace common.proxy
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
                     Socket socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-
                     if (isBroadcast)
                     {
+                        //Console.WriteLine($"绑定：{new IPEndPoint(plugin.UdpBind, 0)} <---> {remoteEndpoint}");
+                        socket.Bind(new IPEndPoint(plugin.UdpBind, 0));
                         socket.EnableBroadcast = true;
                     }
                     socket.WindowsUdpBug();
@@ -150,6 +152,7 @@ namespace common.proxy
                 }
                 else
                 {
+                    //Console.WriteLine($"发送：{token.TargetSocket.LocalEndPoint} <---> {remoteEndpoint}");
                     token.Data.Step = info.Step;
                     token.Data.Command = info.Command;
                     token.Data.Rsv = info.Rsv;

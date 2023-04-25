@@ -1,7 +1,7 @@
-﻿using client.service.vea.socks5;
-using common.libs;
+﻿using common.libs;
 using common.server;
 using System;
+using System.Buffers.Binary;
 
 namespace client.service.vea
 {
@@ -29,7 +29,7 @@ namespace client.service.vea
         {
             veaTransfer.OnNotify(connection);
 
-            connection.Write(new IPAddressInfo { IP = config.IP, LanIPs = config.LanIPs }.ToBytes());
+            connection.Write(new IPAddressInfo { IP = BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()), LanIPs = config.VeaLanIPs }.ToBytes());
         }
 
         /// <summary>

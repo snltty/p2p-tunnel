@@ -1,6 +1,5 @@
 ﻿using common.libs.extends;
 using common.proxy;
-using common.server;
 using common.server.model;
 using common.socks5;
 using System.Buffers.Binary;
@@ -15,6 +14,7 @@ namespace client.service.vea.socks5
     {
         public override byte Id => config.Plugin;
         public override EnumBufferSize BufferSize => config.BufferSize;
+        public override IPAddress UdpBind => config.UdpBind;
         public override ushort Port => (ushort)config.ListenPort;
         public override bool Enable => config.ConnectEnable;
 
@@ -50,7 +50,14 @@ namespace client.service.vea.socks5
                     proxyServer.InputData(info);
                     return false;
                 }
-                info.Connection = GetConnection(info);
+                GetConnection(info);
+                if (info.Connection == null || info.Connection.Connected == false)
+                {
+                    info.Response[0] = (byte)Socks5EnumResponseCommand.AddressNotAllow;
+                    info.Data = info.Response;
+                    proxyServer.InputData(info);
+                    return false;
+                }
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
@@ -59,14 +66,15 @@ namespace client.service.vea.socks5
                 //组播数据包，直接分发
                 if (info.TargetAddress.GetIsBroadcastAddress())
                 {
+                    // Console.WriteLine($"{info.SourceEP} <--> {string.Join(",",info.TargetAddress.ToArray())}:{info.TargetPort}");
                     foreach (var item in veaTransfer.IPList.Values)
                     {
                         info.Connection = item.Client.Connection;
-                        proxyMessengerSender.Request(info);
+                        proxyMessengerSender.Request(info, unconnectedMessage: false);
                     }
                     return false;
                 }
-                info.Connection = GetConnection(info);
+                GetConnection(info);
             }
             //组网支持IPV4
             if (info.AddressType != EnumProxyAddressType.IPV4)
@@ -86,32 +94,26 @@ namespace client.service.vea.socks5
 #endif
         }
 
-        private IConnection GetConnection(ProxyInfo info)
+        uint[] masks = new uint[] { 0xffffff00, 0xffff0000, 0xff000000 };
+        private void GetConnection(ProxyInfo info)
         {
-            IPAddress target = new IPAddress(info.TargetAddress.Span);
-            IConnection connection = null;
-            if (veaTransfer.IPList.TryGetValue(target, out IPAddressCacheInfo cache))
+            if (veaTransfer.IPList.TryGetValue(BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span), out IPAddressCacheInfo cache))
             {
-                connection = cache.Client.Connection;
+                info.Connection = cache.Client.Connection;
             }
             else
             {
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
-                if (veaTransfer.LanIPList.TryGetValue(ip & 0xffffff00, out cache))
+                for (int i = 0; i < masks.Length; i++)
                 {
-                    connection = cache.Client.Connection;
-                }
-                if (veaTransfer.LanIPList.TryGetValue(ip & 0xffff0000, out cache))
-                {
-                    connection = cache.Client.Connection;
-                }
-                if (veaTransfer.LanIPList.TryGetValue(ip & 0xff000000, out cache))
-                {
-                    connection = cache.Client.Connection;
+                    if (veaTransfer.LanIPList.TryGetValue(ip & masks[i], out cache))
+                    {
+                        if ((ip & cache.Mask) == cache.NetWork)
+                            info.Connection = cache.Client.Connection;
+                        break;
+                    }
                 }
             }
-
-            return connection;
         }
     }
 }

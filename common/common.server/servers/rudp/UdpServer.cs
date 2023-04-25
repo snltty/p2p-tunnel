@@ -1,10 +1,13 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server.model;
 using LiteNetLib;
 using System;
+using System.Buffers;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace common.server.servers.rudp
 {
@@ -80,7 +83,29 @@ namespace common.server.servers.rudp
             };
             listener.NetworkReceiveUnconnectedEvent += (IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) =>
             {
-                OnMessage?.Invoke(remoteEndPoint, reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize));
+                var data = reader.RawData.AsMemory(reader.UserDataOffset, reader.UserDataSize);
+                if (data.Length < 0) return;
+
+                if (data.ToInt32() > 0)
+                {
+                    if (server._peersDict.TryGetValue(remoteEndPoint, out NetPeer netPeer))
+                    {
+                        try
+                        {
+                            if (netPeer.Tag is IConnection connection)
+                            {
+                                connection.ReceiveData = data;
+                                OnPacket(connection).Wait();
+                                return;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                }
+
+                OnMessage?.Invoke(remoteEndPoint, data.Slice(4));
             };
         }
 
@@ -152,9 +177,18 @@ namespace common.server.servers.rudp
             }
         }
 
-        public bool SendUnconnectedMessage(byte[] message, IPEndPoint address)
+        public bool SendUnconnectedMessage(Memory<byte> message, IPEndPoint address)
         {
-            return server.SendUnconnectedMessage(message, address);
+            int length = 4 + message.Length;
+            var bytes = ArrayPool<byte>.Shared.Rent(length);
+            (0).ToBytes(bytes);
+            message.CopyTo(bytes.AsMemory(4));
+
+            bool res = server.SendUnconnectedMessage(bytes.AsMemory(0, length), address);
+
+            ArrayPool<byte>.Shared.Return(bytes);
+
+            return res;
         }
 
         public void SetSpeedLimit(int limit)

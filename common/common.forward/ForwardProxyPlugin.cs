@@ -4,6 +4,7 @@ using common.proxy;
 using common.server.model;
 using System;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace common.forward
@@ -18,8 +19,11 @@ namespace common.forward
     {
         public byte Id => config.Plugin;
         public EnumBufferSize BufferSize => config.BufferSize;
+        public IPAddress UdpBind => IPAddress.Any;
         public Action<ushort> OnStarted { get; set; } = (port) => { };
         public Action<ushort> OnStoped { get; set; } = (port) => { };
+
+        
 
         private readonly Config config;
         private readonly IProxyServer proxyServer;
