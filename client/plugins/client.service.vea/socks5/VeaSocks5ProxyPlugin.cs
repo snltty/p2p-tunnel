@@ -66,7 +66,6 @@ namespace client.service.vea.socks5
                 //组播数据包，直接分发
                 if (info.TargetAddress.GetIsBroadcastAddress())
                 {
-                    // Console.WriteLine($"{info.SourceEP} <--> {string.Join(",",info.TargetAddress.ToArray())}:{info.TargetPort}");
                     foreach (var item in veaTransfer.IPList.Values)
                     {
                         info.Connection = item.Client.Connection;
