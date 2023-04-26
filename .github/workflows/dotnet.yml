@@ -24,16 +24,16 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
         dotnet-version: 6.0.x
-
-    - name: install dotnet maui
-      run: 
-        dotnet workload install maui
+    
+    #- name: install dotnet maui
+    #  run: 
+    #    dotnet workload install maui
 
     - name: restore
       run: 
         dotnet restore ./client/client.service &&
-        dotnet restore ./client/client.service.app &&
         dotnet restore ./server/server.service
+        #dotnet restore ./client/client.service.app
         
     - name: publish projects
       run: ./publish.bat "C:\\Android\\android-sdk"
@@ -141,14 +141,14 @@ jobs:
         asset_name: osx-arm64-single.zip
         asset_content_type: application/zip
 
-    - name: upload apk
-      id: upload-apk
-      uses: actions/upload-release-asset@master
-      env:
-          GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./public/publish-zip/p2p-tunnel.apk
-        asset_name: p2p-tunnel.apk
-        asset_content_type: application/vnd.android.package-archive
+    #- name: upload apk
+    #  id: upload-apk
+    #  uses: actions/upload-release-asset@master
+    #  env:
+    #      GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
+    #  with:
+    #    upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #    asset_path: ./public/publish-zip/p2p-tunnel.apk
+    #    asset_name: p2p-tunnel.apk
+    #    asset_content_type: application/vnd.android.package-archive
         
