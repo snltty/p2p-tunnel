@@ -78,7 +78,7 @@ namespace common.server.model
         /// <summary>
         /// 加密，自动设置，无需填写
         /// </summary>
-        public bool Encode { get; set; } = true;
+        public bool Encode { get; set; }
 
 
         /// <summary>

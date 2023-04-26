@@ -71,9 +71,9 @@ namespace client.service.vea.client
             return VeaTransfer.IPList.ToDictionary(c => c.Value.Client.Id, d => new
             {
                 IP = string.Join(".", BinaryPrimitives.ReverseEndianness(d.Value.IP).ToBytes()),
-                LanIPs = d.Value.LanIPs.Select(c => new { IPAddress = string.Join(".", BinaryPrimitives.ReverseEndianness(c.IPAddress).ToBytes()), Mask = c.Mask }),
+                LanIPs = d.Value.LanIPs.Select(c => new { IPAddress = string.Join(".", BinaryPrimitives.ReverseEndianness(c.IPAddress).ToBytes()), Mask = c.MaskLength }),
                 NetWork = d.Value.NetWork,
-                Mask = d.Value.Mask
+                Mask = d.Value.MaskLength
             });
         }
 

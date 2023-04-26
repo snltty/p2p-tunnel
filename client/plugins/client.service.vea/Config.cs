@@ -20,7 +20,7 @@ namespace client.service.vea
     {
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
-       
+
 
         public Config(IConfigDataProvider<Config> configDataProvider)
         {
@@ -130,7 +130,7 @@ namespace client.service.vea
                 return new VeaLanIPAddress
                 {
                     IPAddress = BinaryPrimitives.ReadUInt32BigEndian(ip.GetAddressBytes()),
-                    Mask = mask
+                    MaskLength = mask
                 };
             }).ToArray();
         }
@@ -142,6 +142,8 @@ namespace client.service.vea
         /// ip，存小端
         /// </summary>
         public uint IPAddress { get; set; }
-        public byte Mask { get; set; } = 32;
+        public byte MaskLength { get; set; }
+        public uint MaskValue { get; set; }
+        public uint NetWork { get; set; }
     }
 }

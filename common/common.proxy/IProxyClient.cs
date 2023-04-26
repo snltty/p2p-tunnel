@@ -134,7 +134,7 @@ namespace common.proxy
                     Socket socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     if (isBroadcast)
                     {
-                        //Console.WriteLine($"绑定：{new IPEndPoint(plugin.UdpBind, 0)} <---> {remoteEndpoint}");
+                        //Console.WriteLine($"{info.RequestId} 绑定：{new IPEndPoint(plugin.UdpBind, 0)} <---> {remoteEndpoint}");
                         socket.Bind(new IPEndPoint(plugin.UdpBind, 0));
                         socket.EnableBroadcast = true;
                     }
@@ -152,7 +152,7 @@ namespace common.proxy
                 }
                 else
                 {
-                    //Console.WriteLine($"发送：{token.TargetSocket.LocalEndPoint} <---> {remoteEndpoint}");
+                    //Console.WriteLine($"{info.RequestId} 发送：{token.TargetSocket.LocalEndPoint} <---> {remoteEndpoint}");
                     token.Data.Step = info.Step;
                     token.Data.Command = info.Command;
                     token.Data.Rsv = info.Rsv;
@@ -167,7 +167,7 @@ namespace common.proxy
                 {
                     _token.Clear();
                 }
-                Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndpoint} : {info.Data.Length}  " + ex);
+                //Logger.Instance.DebugError($"socks5 forward udp -> sendto {remoteEndpoint} : {info.Data.Length}  " + ex);
             }
         }
         private void TimeoutUdp()
@@ -213,7 +213,7 @@ namespace common.proxy
                 {
                     token.Clear();
                 }
-                Logger.Instance.DebugError($"socks5 forward udp -> receive" + ex);
+                //Logger.Instance.DebugError($"socks5 forward udp -> receive" + ex);
             }
         }
 

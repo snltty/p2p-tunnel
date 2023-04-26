@@ -4,7 +4,7 @@
             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                 <el-form-item label="账号" prop="Account">
                     <el-tooltip class="box-item" effect="dark" content="账号" placement="top-start">
-                        <el-input size="default" v-model="state.account" placeholder="账号"></el-input>
+                        <el-input type="password" size="default" v-model="state.account" placeholder="账号" show-password></el-input>
                     </el-tooltip>
                 </el-form-item>
             </el-col>

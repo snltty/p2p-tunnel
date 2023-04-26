@@ -87,13 +87,13 @@ namespace client.service.vea.socks5
         public override bool ValidateAccess(ProxyInfo info)
         {
 #if DEBUG
+
             return true;
 #else
             return Enable;
 #endif
         }
 
-        uint[] masks = new uint[] { 0xffffff00, 0xffff0000, 0xff000000 };
         private void GetConnection(ProxyInfo info)
         {
             if (veaTransfer.IPList.TryGetValue(BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span), out IPAddressCacheInfo cache))
@@ -103,12 +103,11 @@ namespace client.service.vea.socks5
             else
             {
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
-                for (int i = 0; i < masks.Length; i++)
+                for (int i = 32; i >= 8; i--)
                 {
-                    if (veaTransfer.LanIPList.TryGetValue(ip & masks[i], out cache))
+                    if (veaTransfer.LanIPList.TryGetValue(ip & (uint)(0xffffffff << (32 - i)), out cache))
                     {
-                        if ((ip & cache.Mask) == cache.NetWork)
-                            info.Connection = cache.Client.Connection;
+                        info.Connection = cache.Client.Connection;
                         break;
                     }
                 }
