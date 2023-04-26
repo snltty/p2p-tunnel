@@ -28,7 +28,6 @@ namespace client.service.vea
         public void IP(IConnection connection)
         {
             veaTransfer.OnNotify(connection);
-
             veaTransfer.ResetMask(config.VeaLanIPs);
             connection.Write(new IPAddressInfo { IP = BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()), LanIPs = config.VeaLanIPs }.ToBytes());
         }

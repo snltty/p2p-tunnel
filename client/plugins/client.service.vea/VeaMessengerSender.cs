@@ -15,13 +15,11 @@ namespace client.service.vea
     {
         private readonly MessengerSender messengerSender;
         private readonly Config config;
-        private readonly VeaTransfer veaTransfer;
 
-        public VeaMessengerSender(MessengerSender messengerSender, Config config, VeaTransfer veaTransfer)
+        public VeaMessengerSender(MessengerSender messengerSender, Config config)
         {
             this.messengerSender = messengerSender;
             this.config = config;
-            this.veaTransfer = veaTransfer;
         }
         /// <summary>
         /// 获取ip
@@ -30,8 +28,6 @@ namespace client.service.vea
         /// <returns></returns>
         public async Task<IPAddressInfo> IP(IConnection connection)
         {
-
-            veaTransfer.ResetMask(config.VeaLanIPs);
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,

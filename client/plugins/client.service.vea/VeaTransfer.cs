@@ -110,6 +110,7 @@ namespace client.service.vea
         /// </summary>
         public void UpdateIp()
         {
+            ResetMask(config.VeaLanIPs);
             foreach (var item in clientInfoCaching.All().Where(c => c.Id != signInStateInfo.ConnectId))
             {
                 var connection = item.Connection;
