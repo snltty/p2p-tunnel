@@ -322,7 +322,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         }
                         catch (Exception)
                         {
-
                         }
                         return null;
                     }).ToList();
