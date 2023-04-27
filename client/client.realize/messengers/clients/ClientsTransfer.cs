@@ -88,8 +88,6 @@ namespace client.realize.messengers.clients
             //收到来自服务器的 在线客户端 数据
             clientsMessengerSender.OnServerClientsData += OnServerSendClients;
 
-            Logger.Instance.Info("获取外网距离ing...");
-            signInState.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel();
         }
 
         private void OnPunchHoleStep(object sender, PunchHoleStepModel arg)
@@ -363,7 +361,7 @@ namespace client.realize.messengers.clients
 
             client.SetConnecting(true);
 
-            byte[] tunnelNames = new byte[] { 0, 1 };
+            byte[] tunnelNames = new byte[] { 1, 1 };
             for (int i = 0; i < tunnelNames.Length; i++)
             {
                 clientInfoCaching.AddTunnelPort(client.Id, signInState.LocalInfo.Port);

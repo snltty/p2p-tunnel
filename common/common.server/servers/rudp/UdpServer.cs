@@ -7,7 +7,6 @@ using System.Buffers;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace common.server.servers.rudp
 {
@@ -104,8 +103,10 @@ namespace common.server.servers.rudp
                         }
                     }
                 }
-
-                OnMessage?.Invoke(remoteEndPoint, data.Slice(4));
+                if(data.Length > 4)
+                {
+                    OnMessage?.Invoke(remoteEndPoint, data.Slice(4));
+                }
             };
         }
 
@@ -174,6 +175,19 @@ namespace common.server.servers.rudp
             finally
             {
                 Release();
+            }
+        }
+
+        public NetPeer Connect(IPEndPoint address)
+        {
+            try
+            {
+                return server.Connect(address, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.DebugError(ex);
+                return null;
             }
         }
 

@@ -24,6 +24,7 @@ namespace client.realize.messengers.singnin
         public async Task<SignInResult> SignIn()
         {
             IPAddress[] localIps = new IPAddress[] { config.Client.LoopbackIp, signInState.LocalInfo.LocalIp };
+            localIps = localIps.Concat(signInState.LocalInfo.RouteIps).ToArray();
             localIps = localIps.Concat(signInState.LocalInfo.Ipv6s).ToArray();
 
             SignInParamsInfo param = new SignInParamsInfo

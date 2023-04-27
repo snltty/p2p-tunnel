@@ -144,6 +144,8 @@ namespace client.messengers.singnin
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public IPAddress[] Ipv6s { get; set; } = Array.Empty<IPAddress>();
+        [System.Text.Json.Serialization.JsonIgnore]
+        public IPAddress[] RouteIps { get; set; } = Array.Empty<IPAddress>();
 
         /// <summary>
         /// 是否正在连接服务器

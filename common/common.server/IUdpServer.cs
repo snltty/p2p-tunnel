@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using LiteNetLib;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace common.server
@@ -7,6 +8,7 @@ namespace common.server
     {
         public void Start(int port, int timeout = 20000);
         public Task<IConnection> CreateConnection(IPEndPoint address);
+        public NetPeer Connect(IPEndPoint address);
 
     }
 }

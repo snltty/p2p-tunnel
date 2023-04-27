@@ -14,8 +14,10 @@ using common.libs;
 using common.server;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 
@@ -85,6 +87,15 @@ namespace client.service
 
             serviceProvider = serviceCollection.BuildServiceProvider();
             PluginLoader.LoadAfter(plugins, serviceProvider, assemblys);
+
+
+            SignInStateInfo signInStateInfo = serviceProvider.GetService<SignInStateInfo>();
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
+            Logger.Instance.Info("获取外网距离ing...");
+            signInStateInfo.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel(out List<IPAddress> ips);
+            signInStateInfo.LocalInfo.RouteIps = ips.ToArray();
+            Logger.Instance.Info($"外网距离:{signInStateInfo.LocalInfo.RouteLevel}");
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Warning("没什么报红的，就说明运行成功了");

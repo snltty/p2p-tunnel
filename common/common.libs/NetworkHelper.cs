@@ -51,18 +51,20 @@ namespace common.libs
         /// 获取路由层数，自己与外网距离几个网关，用于发送一个对方网络收不到没有回应的数据包
         /// </summary>
         /// <returns></returns>
-        public static ushort GetRouteLevel()
+        public static ushort GetRouteLevel(out List<IPAddress> ips)
         {
+            ips = new List<IPAddress>();
             try
             {
                 List<string> starts = new() { "10.", "100.", "192.168.", "172." };
-                IEnumerable<IPAddress> list = GetTraceRoute("www.baidu.com");
+                var list = GetTraceRoute("www.baidu.com").ToList();
                 for (ushort i = 0; i < list.Count(); i++)
                 {
                     string ip = list.ElementAt(i).ToString();
-                    if (ip.StartsWith(starts[0], StringComparison.Ordinal) || ip.StartsWith(starts[1], StringComparison.Ordinal) || ip.StartsWith(starts[2], StringComparison.Ordinal))
+                    if (ip.StartsWith(starts[0], StringComparison.Ordinal) || ip.StartsWith(starts[1], StringComparison.Ordinal) || ip.StartsWith(starts[2], StringComparison.Ordinal) || ip.StartsWith(starts[3], StringComparison.Ordinal))
                     {
-
+                        if (ip.StartsWith(starts[2], StringComparison.Ordinal) == false)
+                            ips.Add(list.ElementAt(i));
                     }
                     else
                     {
@@ -75,11 +77,6 @@ namespace common.libs
             }
             return 0;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="hostNameOrAddress"></param>
-        /// <returns></returns>
         public static IEnumerable<IPAddress> GetTraceRoute(string hostNameOrAddress)
         {
             return GetTraceRoute(hostNameOrAddress, 1);
@@ -122,12 +119,7 @@ namespace common.libs
             }
             return result;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="timeout"></param>
-        /// <returns></returns>
+     
         public static bool Ping(IPAddress address, int timeout = 100)
         {
             try

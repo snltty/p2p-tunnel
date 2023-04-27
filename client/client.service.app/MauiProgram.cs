@@ -11,6 +11,7 @@ using System.Reflection;
 using client.service.users.server;
 using client.service.forward;
 using client.service.httpProxy;
+using System.Net;
 
 namespace client.service.app
 {
@@ -85,6 +86,14 @@ namespace client.service.app
 
             serviceProvider = serviceCollection.BuildServiceProvider();
             PluginLoader.LoadAfter(plugins, serviceProvider, assemblys);
+
+            SignInStateInfo signInStateInfo = serviceProvider.GetService<SignInStateInfo>();
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
+            Logger.Instance.Info("获取外网距离ing...");
+            signInStateInfo.LocalInfo.RouteLevel = NetworkHelper.GetRouteLevel(out List<IPAddress> ips);
+            signInStateInfo.LocalInfo.RouteIps = ips.ToArray();
+            Logger.Instance.Info($"外网距离:{signInStateInfo.LocalInfo.RouteLevel}");
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Warning("没什么报红的，就说明运行成功了");
