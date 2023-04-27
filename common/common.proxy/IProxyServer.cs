@@ -369,6 +369,15 @@ namespace common.proxy
                 {
                     if (clientsManager.TryGetValue(info.RequestId, out ProxyUserToken token))
                     {
+                        if(info.Step == EnumProxyStep.Command)
+                        {
+                            if ((EnumProxyCommandStatus)info.Data.Span[0] != EnumProxyCommandStatus.ConnecSuccess)
+                            {
+                                clientsManager.TryRemove(info.RequestId, out _);
+                                return;
+                            }
+                        }
+
                         bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
                         token.Request.Step = info.Step;
                         token.Request.Command = info.Command;

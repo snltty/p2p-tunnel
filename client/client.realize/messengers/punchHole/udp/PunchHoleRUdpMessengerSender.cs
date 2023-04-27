@@ -184,23 +184,27 @@ namespace client.realize.messengers.punchHole.udp
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.LocalPort));
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.Port));
 
-                    for (int i = data.Port + 1; i <= data.Port + 128; i++)
+                    for (int i = 0; i <= 1; i++)
                     {
-                        if (i > 1024 && i < 65535)
+                        if (data.Port + i < ushort.MaxValue)
                         {
-                            udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, i));
+                            udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.Port + i));
                         }
                     }
 
                 }
-                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port));
-                for (int i = data.Port + 1; i <= data.Port + 128; i++)
+
+                if (NotIPv6Support(data.Ip) == false)
                 {
-                    if (i > 1024 && i < 65535)
+                    for (int i = 0; i <= 1; i++)
                     {
-                        udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, i));
+                        if (data.Port + i < ushort.MaxValue)
+                        {
+                            udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + i));
+                        }
                     }
                 }
+
 
                 AddSendTimeout(model.RawData.FromId);
                 await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2Info>
@@ -249,7 +253,7 @@ namespace client.realize.messengers.punchHole.udp
 
                  try
                  {
-                     List<NetPeer> peers = ips.Where(c => NotIPv6Support(c.Address)).Select(ip => udpServer.Connect(ip)).ToList();
+                     List<NetPeer> peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
                      await Task.Delay(1000);
                      NetPeer peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
                      foreach (NetPeer item in peers.Where(c => c != null && ReferenceEquals(c, peer) == false && c.ConnectionState != ConnectionState.Connected))
@@ -257,14 +261,17 @@ namespace client.realize.messengers.punchHole.udp
                          item.Disconnect();
                      }
 
-                     if (peer == null)
+                     if (peer == null && NotIPv6Support(data.Ip) == false)
                      {
                          ips = new List<IPEndPoint>();
-                         for (int i = 0; i <= 128; i++)
+                         for (int i = 0; i <= 1; i++)
                          {
-                             ips.Add(new IPEndPoint(data.Ip, data.Port + i));
+                             if (data.Port + i < ushort.MaxValue)
+                             {
+                                 ips.Add(new IPEndPoint(data.Ip, data.Port + i));
+                             }
                          }
-                         peers = ips.Where(c => NotIPv6Support(c.Address)).Select(ip => udpServer.Connect(ip)).ToList();
+                         peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
                          await Task.Delay(2000);
                          peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
                          foreach (NetPeer item in peers.Where(c => c != null && ReferenceEquals(c, peer) == false && c.ConnectionState != ConnectionState.Connected))
@@ -282,12 +289,12 @@ namespace client.realize.messengers.punchHole.udp
                      else
                      {
                          await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
-                         Logger.Instance.DebugError($"udp {data.Ip} connect fail");
+                         Logger.Instance.DebugError($"udp {data.Ip}:{data.Port} connect fail");
                      }
                  }
                  catch (Exception ex)
                  {
-                     Logger.Instance.DebugError($"udp {data.Ip} connect fail");
+                     Logger.Instance.DebugError($"udp {data.Ip}:{data.Port} connect fail");
                      Logger.Instance.DebugError(ex);
                  }
              });

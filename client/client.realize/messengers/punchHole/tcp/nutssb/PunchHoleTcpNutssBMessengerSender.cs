@@ -46,7 +46,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         private IConnection Connection => signInState.Connection;
 
-        private int RouteLevel => signInState.LocalInfo.RouteLevel + 2;
+        private int RouteLevel => signInState.LocalInfo.RouteLevel;
 #if DEBUG
         private bool UseLocalPort = true;
 #else
@@ -201,6 +201,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 Data = new PunchHoleStep1Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_1, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
         }
+
         private async Task OnStep1(PunchHoleStepModel model)
         {
             if (model.RawData.NewTunnel == 1)
@@ -217,10 +218,12 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             if (clientInfoCaching.GetTunnelPort(model.RawData.FromId, out int localPort))
             {
                 List<IPEndPoint> ips = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
-                ips.Add(new IPEndPoint(data.Ip, data.Port));
-                for (int i = 1; i <= 128; i++)
+                for (int i = 0; i <= 1; i++)
                 {
-                    ips.Add(new IPEndPoint(data.Ip, data.Port + i));
+                    if (data.Port + i < ushort.MaxValue)
+                    {
+                        ips.Add(new IPEndPoint(data.Ip, data.Port + i));
+                    }
                 }
 
                 foreach (IPEndPoint ip in ips)
@@ -283,6 +286,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 Data = new PunchHoleStep2Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
         }
+
         public async Task OnStep2(PunchHoleStepModel model)
         {
             await Task.Run(async () =>
@@ -333,13 +337,16 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         (item.AsyncState as Socket).SafeClose();
                     }
 
-                    if (result == null)
+                    if (result == null && NotIPv6Support(data.Ip) == false)
                     {
                         sockets = new List<IAsyncResult>();
                         ips = new List<IPEndPoint>();
-                        for (int i = 0; i <= 128; i++)
+                        for (int i = 0; i <= 1; i++)
                         {
-                            ips.Add(new IPEndPoint(data.Ip, data.Port + i));
+                            if (data.Port + i <= ushort.MaxValue)
+                            {
+                                ips.Add(new IPEndPoint(data.Ip, data.Port + i));
+                            }
                         }
                         sockets = ips.Select(ip =>
                         {
