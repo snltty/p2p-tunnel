@@ -3,7 +3,7 @@
 ```
 // 拉取运行
 docker pull snltty/p2p-tunnel-server
-docker run -it -d --name="p2p-tunnel-server" -p 5410:5410/udp -p 59410:59410/tcp snltty/p2p-tunnel-server
+docker run -it -d --name="p2p-tunnel-server" -p 5410:5410/udp -p 5410:5410/tcp snltty/p2p-tunnel-server
 
 // 创建本地目录用来保存临时配置文件，用于修改配置信息
 cd /usr/local

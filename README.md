@@ -91,7 +91,6 @@
 - <a href="./readme/server-linux.md">服务端 linux docker托管</a>
 - <a href="./readme/client-linux.md">客户端 linux supervisor托管</a>
 - 服务端docker镜像  **snltty/p2p-tunnel-server**
-- 客户端端docker镜像  **snltty/p2p-tunnel-client**
 
 
 ## 支持作者
