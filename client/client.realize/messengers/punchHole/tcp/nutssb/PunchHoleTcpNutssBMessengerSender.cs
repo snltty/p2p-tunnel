@@ -249,7 +249,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     catch (Exception)
                     {
                     }
-                    //targetSocket.SafeClose();
+                    targetSocket.SafeClose();
                 }
                 await SendStep2(model);
 
