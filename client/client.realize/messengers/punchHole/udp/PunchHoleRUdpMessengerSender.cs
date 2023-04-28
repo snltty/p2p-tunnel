@@ -184,7 +184,7 @@ namespace client.realize.messengers.punchHole.udp
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.LocalPort));
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.Port));
 
-                    for (int i = 0; i <= 128; i++)
+                    for (int i = 0; i <= 1; i++)
                     {
                         if (data.Port + i < ushort.MaxValue)
                         {
@@ -199,7 +199,7 @@ namespace client.realize.messengers.punchHole.udp
 
                 if (NotIPv6Support(data.Ip) == false)
                 {
-                    for (int i = 0; i <= 128; i++)
+                    for (int i = 0; i <= 1; i++)
                     {
                         if (data.Port + i < ushort.MaxValue)
                         {
@@ -285,7 +285,7 @@ namespace client.realize.messengers.punchHole.udp
                          {
                              item.Disconnect();
                          }
-                         if(peer == null || peer.ConnectionState != ConnectionState.Connected)
+                         if (peer == null || peer.ConnectionState != ConnectionState.Connected)
                          {
                              peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
                              await Task.Delay(2000);
