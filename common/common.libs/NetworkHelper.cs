@@ -153,7 +153,7 @@ namespace common.libs
             Random rd = new();
             while (true)
             {
-                ushort port = (ushort)rd.Next(10000, 56000);
+                ushort port = (ushort)rd.Next(20000, 30000);
                 if (!allPorts.Contains(port))
                 {
                     return port;

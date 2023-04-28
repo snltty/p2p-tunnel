@@ -361,7 +361,7 @@ namespace client.realize.messengers.clients
 
             client.SetConnecting(true);
 
-            byte[] tunnelNames = new byte[] { 1, 1 };
+            byte[] tunnelNames = new byte[] { 0, 1 };
             for (int i = 0; i < tunnelNames.Length; i++)
             {
                 clientInfoCaching.AddTunnelPort(client.Id, signInState.LocalInfo.Port);

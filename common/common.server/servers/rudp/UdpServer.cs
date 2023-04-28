@@ -23,12 +23,16 @@ namespace common.server.servers.rudp
         private NetManager server;
         private EventBasedNetListener listener;
 
+        public int port { get; private set; }
+
         public void Start(int port)
         {
+            this.port = port;
             Start(port, 20000);
         }
         public void Start(int port, int timeout = 20000)
         {
+            this.port = port;
             listener = new EventBasedNetListener();
             server = new NetManager(listener);
             server.UnconnectedMessagesEnabled = true;

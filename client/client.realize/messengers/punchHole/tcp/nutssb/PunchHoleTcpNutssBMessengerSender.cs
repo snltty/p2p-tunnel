@@ -46,7 +46,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         private IConnection Connection => signInState.Connection;
 
-        private int RouteLevel => signInState.LocalInfo.RouteLevel;
+        private int RouteLevel => signInState.LocalInfo.RouteLevel + 2;
 #if DEBUG
         private bool UseLocalPort = true;
 #else
@@ -226,6 +226,8 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                 }
 
+                
+
                 foreach (IPEndPoint ip in ips)
                 {
                     if (ip.Address.Equals(IPAddress.Any) || ip.Address.Equals(IPAddress.IPv6Any))
@@ -247,9 +249,10 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     catch (Exception)
                     {
                     }
-                    targetSocket.SafeClose();
+                    //targetSocket.SafeClose();
                 }
                 await SendStep2(model);
+
             }
             else
             {
@@ -331,7 +334,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }).ToList();
 
                     sockets.LastOrDefault()?.AsyncWaitHandle.WaitOne(1000, false);
-                    IAsyncResult result = sockets.FirstOrDefault(c => c.IsCompleted);
+                    IAsyncResult result = sockets.FirstOrDefault(c => c.IsCompleted && (c.AsyncState as Socket).Connected);
                     foreach (var item in sockets.Where(c => c != null && ReferenceEquals(c, result) == false))
                     {
                         (item.AsyncState as Socket).SafeClose();
@@ -365,7 +368,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             return null;
                         }).ToList();
                         sockets.LastOrDefault().AsyncWaitHandle.WaitOne(2000, false);
-                        result = sockets.FirstOrDefault(c => c.IsCompleted);
+                        result = sockets.FirstOrDefault(c => c.IsCompleted && (c.AsyncState as Socket).Connected);
                         foreach (var item in sockets.Where(c => c != null && ReferenceEquals(c, result) == false))
                         {
                             (item.AsyncState as Socket).SafeClose();
@@ -376,6 +379,8 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     {
                         Socket targetSocket = result.AsyncState as Socket;
                         targetSocket.EndConnect(result);
+
+                       
                         cache.Success = true;
 
                         IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: (byte)config.Client.TcpBufferSize * 1024);
