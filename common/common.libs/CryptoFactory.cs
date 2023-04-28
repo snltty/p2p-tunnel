@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace common.libs
 {
@@ -21,9 +20,7 @@ namespace common.libs
         /// <returns></returns>
         public IAsymmetricCrypto CreateAsymmetric(RsaKey key);
     }
-    /// <summary>
-    /// 
-    /// </summary>
+
     public sealed class CryptoFactory : ICryptoFactory
     {
         /// <summary>
@@ -46,34 +43,11 @@ namespace common.libs
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public interface ICrypto : IDisposable
     {
-       /// <summary>
-       /// 
-       /// </summary>
-       /// <param name="buffer"></param>
-       /// <returns></returns>
         public byte[] Encode(byte[] buffer);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public byte[] Encode(in ReadOnlyMemory<byte> buffer);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public Memory<byte> Decode(byte[] buffer);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public Memory<byte> Decode(in ReadOnlyMemory<byte> buffer);
     }
 
@@ -82,34 +56,17 @@ namespace common.libs
     /// </summary>
     public interface IAsymmetricCrypto : ICrypto
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public RsaKey Key { get; }
     }
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class RsaCrypto : IAsymmetricCrypto
     {
         RsaKey key = new RsaKey();
 
-        /// <summary>
-        /// 
-        /// </summary>
         public RsaKey Key => key;
-
-        /// <summary>
-        /// 
-        /// </summary>
         public RsaCrypto()
         {
             CreateKey();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="key"></param>
         public RsaCrypto(RsaKey key)
         {
             if (key != null)
@@ -121,11 +78,6 @@ namespace common.libs
                 CreateKey();
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public Memory<byte> Decode(byte[] buffer)
         {
             using RSACryptoServiceProvider coder = new RSACryptoServiceProvider();
@@ -163,20 +115,10 @@ namespace common.libs
             }
             return enStream.ToArray();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public Memory<byte> Decode(in ReadOnlyMemory<byte> buffer)
         {
             return Decode(buffer.ToArray());
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public byte[] Encode(byte[] buffer)
         {
             using RSACryptoServiceProvider coder = new RSACryptoServiceProvider();
@@ -215,18 +157,12 @@ namespace common.libs
 
             return enStream.ToArray();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
+     
         public byte[] Encode(in ReadOnlyMemory<byte> buffer)
         {
             return Encode(buffer.ToArray());
         }
-        /// <summary>
-        /// 
-        /// </summary>
+     
         public void Dispose()
         {
             key = null;
@@ -240,31 +176,17 @@ namespace common.libs
         }
 
     }
-    /// <summary>
-    /// 
-    /// </summary>
+
     public sealed class RsaKey
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public string PrivateKey { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public string PublicKey { get; set; }
     }
 
-    /// <summary>
-    /// 对称加密
-    /// </summary>
     public interface ISymmetricCrypto : ICrypto
     {
         public string Password { get; set; }
     }
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class AesCrypto : ISymmetricCrypto
     {
         private ICryptoTransform encryptoTransform;
@@ -272,10 +194,6 @@ namespace common.libs
 
         public string Password { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="password"></param>
         public AesCrypto(in string password)
         {
             Password = password;
@@ -286,45 +204,22 @@ namespace common.libs
             encryptoTransform = aes.CreateEncryptor(aes.Key, aes.IV);
             decryptoTransform = aes.CreateDecryptor(aes.Key, aes.IV);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public byte[] Encode(byte[] buffer)
         {
             return encryptoTransform.TransformFinalBlock(buffer, 0, buffer.Length);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public byte[] Encode(in ReadOnlyMemory<byte> buffer)
         {
             return Encode(buffer.ToArray());
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public Memory<byte> Decode(byte[] buffer)
         {
             return decryptoTransform.TransformFinalBlock(buffer, 0, buffer.Length);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <returns></returns>
         public Memory<byte> Decode(in ReadOnlyMemory<byte> buffer)
         {
             return Decode(buffer.ToArray());
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public void Dispose()
         {
             encryptoTransform.Dispose();
