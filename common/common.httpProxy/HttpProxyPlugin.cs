@@ -14,7 +14,7 @@ namespace common.httpProxy
     {
         public virtual byte Id => config.Plugin;
         public virtual EnumBufferSize BufferSize => config.BufferSize;
-        public IPAddress UdpBind => IPAddress.Any;
+        public IPAddress BroadcastBind => IPAddress.Any;
         public virtual ushort Port => config.ListenPort;
         public virtual bool Enable => config.ListenEnable;
 

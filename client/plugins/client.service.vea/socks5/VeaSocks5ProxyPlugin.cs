@@ -3,6 +3,7 @@ using common.proxy;
 using common.server.model;
 using common.socks5;
 using System.Buffers.Binary;
+using System.Linq;
 using System.Net;
 
 namespace client.service.vea.socks5
@@ -14,7 +15,7 @@ namespace client.service.vea.socks5
     {
         public override byte Id => config.Plugin;
         public override EnumBufferSize BufferSize => config.BufferSize;
-        public override IPAddress UdpBind => config.UdpBind;
+        public override IPAddress BroadcastBind => config.BroadcastBind;
         public override ushort Port => (ushort)config.ListenPort;
         public override bool Enable => config.ConnectEnable;
 
@@ -66,6 +67,14 @@ namespace client.service.vea.socks5
                 //组播数据包，直接分发
                 if (info.TargetAddress.GetIsBroadcastAddress())
                 {
+                    //没开启组播
+                    if (config.BroadcastEnable == false) return false;
+                    //组播ip不包含在允许列表里
+                    if(config.VeaBroadcastList.Length > 0 && config.VeaBroadcastList.Contains(BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span)) == false)
+                    {
+                        return false;
+                    }
+
                     foreach (var item in veaTransfer.IPList.Values)
                     {
                         info.Connection = item.Client.Connection;
@@ -103,7 +112,7 @@ namespace client.service.vea.socks5
             else
             {
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
-                for (int i = 32; i >= 8; i--)
+                for (int i = 32; i >= 16; i--)
                 {
                     if (veaTransfer.LanIPList.TryGetValue(ip & (uint)(0xffffffff << (32 - i)), out cache))
                     {

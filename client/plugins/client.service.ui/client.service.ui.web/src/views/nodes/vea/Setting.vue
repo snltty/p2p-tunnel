@@ -47,17 +47,43 @@
                     <el-form-item label-width="0">
                         <div class="w-100">
                             <el-row :gutter="10">
-                                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                    <el-form-item label="局域网段" prop="LanIPs">
-                                        <el-tooltip class="box-item" effect="dark" content="当前客户端的局域网段，多条使用英文逗号间隔或者换行" placement="top-start">
-                                            <el-input type="textarea" size="default" v-model="state.form.LanIPs" resize="none" :autosize="{minRows:4,maxRows:6}"></el-input>
+                                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+                                    <el-form-item label="开启组播" prop="BroadcastEnable">
+                                        <el-tooltip class="box-item" effect="dark" content="是否将组播消息发送到对端" placement="top-start">
+                                            <el-checkbox v-model="state.form.BroadcastEnable" label="开启" />
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                    <el-form-item label="组播绑定" prop="UdpBind">
+                                    <el-form-item label="组播绑定" prop="BroadcastBind">
                                         <el-tooltip class="box-item" effect="dark" content="udp组播绑定端点发送，当为0.0.0.0时，组播消息将发送到127.0.0.1" placement="top-start">
-                                            <el-input size="default" v-model="state.form.UdpBind"></el-input>
+                                            <el-input size="default" v-model="state.form.BroadcastBind"></el-input>
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </el-form-item>
+                    <el-form-item label-width="0">
+                        <div class="w-100">
+                            <el-row :gutter="10">
+                                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                                    <el-form-item label="组播列表" prop="BroadcastList">
+                                        <el-tooltip class="box-item" effect="dark" content="允许哪些组播ip，为空则允许所有，多条使用英文逗号间隔或者换行" placement="top-start">
+                                            <el-input type="textarea" size="default" v-model="state.form.BroadcastList" resize="none" :autosize="{minRows:4,maxRows:6}"></el-input>
+                                        </el-tooltip>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </el-form-item>
+                    <el-form-item label-width="0">
+                        <div class="w-100">
+                            <el-row :gutter="10">
+                                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                                    <el-form-item label="局域网段" prop="LanIPs">
+                                        <el-tooltip class="box-item" effect="dark" content="当前客户端的局域网段，多条使用英文逗号间隔或者换行" placement="top-start">
+                                            <el-input type="textarea" size="default" v-model="state.form.LanIPs" resize="none" :autosize="{minRows:4,maxRows:6}"></el-input>
                                         </el-tooltip>
                                     </el-form-item>
                                 </el-col>
@@ -68,6 +94,7 @@
                         <div class="w-100">
                             <p>关于局域网段：各客户端之间，网段不可重复，其它客户端可访问本客户端所在局域网的其它设备</p>
                             <p>支持配置掩码，如 192.168.1.100/29，则 192.168.1.97 - 192.168.1.102可用</p>
+                            <p>掩码16+，也就是至多两段(192.168.0.0)，而不能(192.0.0.0)，并且必须局域网网段</p>
                         </div>
                     </el-form-item>
                 </el-form>
@@ -100,10 +127,13 @@ export default {
                 TargetName: '',
                 IP: '',
                 LanIPs: '',
-                UdpBind: '0.0.0.0',
+
                 ListenPort: 5415,
                 BufferSize: 3,
-                ConnectEnable: false
+                ConnectEnable: false,
+                BroadcastEnable: false,
+                BroadcastBind: '0.0.0.0',
+                BroadcastList: '',
             },
             rules: {
                 ListenPort: [
@@ -129,7 +159,9 @@ export default {
                 state.form.ListenPort = res.ListenPort;
                 state.form.BufferSize = res.BufferSize;
                 state.form.ConnectEnable = res.ConnectEnable;
-                state.form.UdpBind = res.UdpBind;
+                state.form.BroadcastBind = res.BroadcastBind;
+                state.form.BroadcastEnable = res.BroadcastEnable;
+                state.form.BroadcastList = res.BroadcastList.join('\n');
             });
         }
 
@@ -146,11 +178,13 @@ export default {
                     }
                     state.configInfo.TargetName = state.form.TargetName;
                     state.configInfo.IP = state.form.IP;
-                    state.configInfo.LanIPs = state.form.LanIPs.split(/,|\n/).filter(c => c.length > 0).map(c => c.replace(/\s/g, ''));
+                    state.configInfo.LanIPs = state.form.LanIPs.replace(/\s/g, '').split(/,|\n/).filter(c => c.length > 0).map(c => c.replace(/\s/g, ''));
                     state.configInfo.ListenPort = +state.form.ListenPort;
                     state.configInfo.BufferSize = +state.form.BufferSize;
                     state.configInfo.ConnectEnable = state.form.ConnectEnable;
-                    state.configInfo.UdpBind = state.form.UdpBind;
+                    state.configInfo.BroadcastBind = state.form.BroadcastBind;
+                    state.configInfo.BroadcastEnable = state.form.BroadcastEnable;
+                    state.configInfo.BroadcastList = state.form.BroadcastList.replace(/\s/g, '').split(/,|\n/).filter(c => c.length > 0).map(c => c.replace(/\s/g, ''));
                     setConfig(state.configInfo).then(resolve).catch(reject);
                 });
             });

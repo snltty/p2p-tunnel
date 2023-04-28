@@ -10,7 +10,7 @@ namespace common.proxy
     {
         public byte Id { get; }
         public EnumBufferSize BufferSize { get; }
-        public IPAddress UdpBind { get; }
+        public IPAddress BroadcastBind { get; }
 
 
         /// <summary>

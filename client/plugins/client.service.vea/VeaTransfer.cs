@@ -386,26 +386,31 @@ namespace client.service.vea
         {
             if (interfaceNumber > 0)
             {
-                List<string> commands = new List<string>(ip.Length);
-                foreach (var item in ip)
+                string[] commands = ip.Where(c => c.IPAddress > 0).Select(item =>
                 {
                     byte[] maskArr = BitConverter.GetBytes(BinaryPrimitives.ReverseEndianness(item.MaskValue));
-                    commands.Add($"route add {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())} mask {string.Join(".", maskArr)} {config.IP} metric 5 if {interfaceNumber}");
+                    return $"route add {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())} mask {string.Join(".", maskArr)} {config.IP} metric 5 if {interfaceNumber}";
+                }).ToArray();
+                if(commands.Length > 0)
+                {
+                    Command.Windows(string.Empty, commands);
                 }
-                Command.Windows(string.Empty, commands.ToArray());
             }
         }
         private void AddRouteLinux(VeaLanIPAddress[] ip)
         {
-            string[] commands = ip.Select(item =>
+            string[] commands = ip.Where(c => c.IPAddress > 0).Select(item =>
             {
                 return $"ip route add {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())}/{item.MaskLength} via {config.IP} dev {veaName} metric 1 ";
             }).ToArray();
-            Command.Linux(string.Empty, commands);
+            if (commands.Length > 0)
+            {
+                Command.Linux(string.Empty, commands);
+            }
         }
         private void AddRouteOsx(VeaLanIPAddress[] ip)
         {
-            string[] commands = ip.Select(item =>
+            string[] commands = ip.Where(c => c.IPAddress > 0).Select(item =>
             {
                 return $"route add -net {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())}/{item.MaskLength} {config.IP}";
             }).ToArray();

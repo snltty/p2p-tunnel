@@ -15,7 +15,7 @@ namespace common.socks5
     {
         public virtual byte Id => config.Plugin;
         public virtual EnumBufferSize BufferSize => config.BufferSize;
-        public virtual IPAddress UdpBind => IPAddress.Any;
+        public virtual IPAddress BroadcastBind => IPAddress.Any;
         public virtual ushort Port => (ushort)config.ListenPort;
         public virtual bool Enable => config.ListenEnable;
 

@@ -19,7 +19,7 @@ namespace common.forward
     {
         public byte Id => config.Plugin;
         public EnumBufferSize BufferSize => config.BufferSize;
-        public IPAddress UdpBind => IPAddress.Any;
+        public IPAddress BroadcastBind => IPAddress.Any;
         public Action<ushort> OnStarted { get; set; } = (port) => { };
         public Action<ushort> OnStoped { get; set; } = (port) => { };
 

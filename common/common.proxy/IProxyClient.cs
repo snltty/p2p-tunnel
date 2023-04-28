@@ -120,7 +120,7 @@ namespace common.proxy
             if (remoteEndpoint.Port == 0) return;
 
             bool isBroadcast = info.TargetAddress.GetIsBroadcastAddress();
-            if (isBroadcast && plugin.UdpBind.Equals(IPAddress.Any))
+            if (isBroadcast && plugin.BroadcastBind.Equals(IPAddress.Any))
             {
                 remoteEndpoint.Address = IPAddress.Loopback;
             }
@@ -135,7 +135,7 @@ namespace common.proxy
                     if (isBroadcast)
                     {
                         //Console.WriteLine($"{info.RequestId} 绑定：{new IPEndPoint(plugin.UdpBind, 0)} <---> {remoteEndpoint}");
-                        socket.Bind(new IPEndPoint(plugin.UdpBind, 0));
+                        socket.Bind(new IPEndPoint(plugin.BroadcastBind, 0));
                         socket.EnableBroadcast = true;
                     }
                     socket.WindowsUdpBug();

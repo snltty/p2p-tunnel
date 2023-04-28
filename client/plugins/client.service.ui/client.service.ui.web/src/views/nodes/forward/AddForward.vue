@@ -1,17 +1,17 @@
 <template>
-    <el-dialog title="转发" top="1vh" destroy-on-close v-model="show" center :close-on-click-modal="false" width="500px">
-        <el-form ref="formDom" :model="form" :rules="rules" label-width="80px">
+    <el-dialog title="转发" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="500px">
+        <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="80px">
             <el-form-item label="" label-width="0">
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="源host" prop="SourceIp">
-                            <el-input :disabled="addForwardData.currentLsiten.AliveType == shareData.aliveTypesName.tunnel" v-model="form.SourceIp"></el-input>
+                            <el-input :disabled="addForwardData.currentLsiten.AliveType == shareData.aliveTypesName.tunnel" v-model="state.form.SourceIp"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="目标端" prop="Name">
-                            <el-select v-model="form.Name" placeholder="选择目标">
-                                <el-option v-for="(item,index) in clients" :key="index" :label="item.Name" :value="item.Name">
+                            <el-select v-model="state.form.Name" placeholder="选择目标">
+                                <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.Name">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -22,30 +22,30 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="目标ip" prop="TargetIp">
-                            <el-input v-model="form.TargetIp"></el-input>
+                            <el-input v-model="state.form.TargetIp"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="目标端口" prop="TargetPort">
-                            <el-input v-model="form.TargetPort"></el-input>
+                            <el-input v-model="state.form.TargetPort"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
             </el-form-item>
             <el-form-item label="简单说明" prop="Desc">
-                <el-input v-model="form.Desc"></el-input>
+                <el-input v-model="state.form.Desc"></el-input>
             </el-form-item>
         </el-form>
         <div class="remark t-c" v-html="remark"></div>
         <template #footer>
             <el-button @click="handleCancel">取 消</el-button>
-            <el-button type="primary" :loading="loading" @click="handleSubmit">确 定</el-button>
+            <el-button type="primary" :loading="state.loading" @click="handleSubmit">确 定</el-button>
         </template>
     </el-dialog>
 </template>
 
 <script>
-import { computed, reactive, ref, toRefs } from '@vue/reactivity';
+import { computed, reactive, ref } from '@vue/reactivity';
 import { inject, watch } from '@vue/runtime-core';
 import { addForward } from '../../../apis/forward'
 import { injectClients } from '../../../states/clients'
@@ -65,6 +65,11 @@ export default {
             Desc: ''
         };
         const clientsState = injectClients();
+        const targets = computed(() => {
+            return [{ Name: '/', label: '服务器' }].concat(clientsState.clients.map(c => {
+                return { Name: c.Name, label: c.Name }
+            }));
+        });
         const addForwardData = inject('add-forward-data');
 
         const state = reactive({
@@ -138,7 +143,7 @@ export default {
         }
 
         return {
-            shareData, ...toRefs(state), ...toRefs(clientsState), addForwardData, formDom, remark, handleSubmit, handleCancel
+            shareData, state, targets, addForwardData, formDom, remark, handleSubmit, handleCancel
         }
     }
 }

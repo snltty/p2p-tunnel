@@ -34,8 +34,11 @@ namespace client.service.vea
             ListenPort = config.ListenPort;
             BufferSize = config.BufferSize;
             ConnectEnable = config.ConnectEnable;
-            UdpBind = config.UdpBind;
+            BroadcastBind = config.BroadcastBind;
+            BroadcastEnable = config.BroadcastEnable;
+            BroadcastList = config.BroadcastList;
             ParseLanIPs();
+            ParseBroadcastList();
         }
 
         [JsonIgnore]
@@ -75,7 +78,11 @@ namespace client.service.vea
         /// </summary>
         public bool ConnectEnable { get; set; }
 
-        public IPAddress UdpBind { get; set; } = IPAddress.Any;
+        public IPAddress BroadcastBind { get; set; } = IPAddress.Any;
+        public bool BroadcastEnable { get; set; }
+        public IPAddress[] BroadcastList { get; set; } = Array.Empty<IPAddress>();
+        [JsonIgnore]
+        public uint[] VeaBroadcastList { get; set; } = Array.Empty<uint>();
 
         /// <summary>
         /// 读取配置文件
@@ -109,8 +116,11 @@ namespace client.service.vea
             ListenPort = _config.ListenPort;
             BufferSize = _config.BufferSize;
             ConnectEnable = _config.ConnectEnable;
-            UdpBind = _config.UdpBind;
+            BroadcastBind = _config.BroadcastBind;
+            BroadcastEnable = _config.BroadcastEnable;
+            BroadcastList = _config.BroadcastList;
             ParseLanIPs();
+            ParseBroadcastList();
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
 
@@ -121,18 +131,28 @@ namespace client.service.vea
             VeaLanIPs = LanIPs.Select(c =>
             {
                 string[] arr = c.Split('/');
-                byte mask = 0;
                 IPAddress ip = IPAddress.Parse(arr[0]);
-                if (arr.Length > 1)
+                if (ip.IsLan())
                 {
-                    mask = byte.Parse(arr[1]);
+                    byte mask = 0;
+                    if (arr.Length > 1)
+                    {
+                        mask = byte.Parse(arr[1]);
+                    }
+                    return new VeaLanIPAddress
+                    {
+                        IPAddress = BinaryPrimitives.ReadUInt32BigEndian(ip.GetAddressBytes()),
+                        MaskLength = mask
+                    };
                 }
-                return new VeaLanIPAddress
-                {
-                    IPAddress = BinaryPrimitives.ReadUInt32BigEndian(ip.GetAddressBytes()),
-                    MaskLength = mask
-                };
-            }).ToArray();
+                return null;
+
+            }).Where(c => c != null).ToArray();
+        }
+
+        private void ParseBroadcastList()
+        {
+            VeaBroadcastList = BroadcastList.Where(c=>c.GetIsBroadcastAddress()).Select(c => BinaryPrimitives.ReadUInt32BigEndian(c.GetAddressBytes())).ToArray();
         }
     }
 

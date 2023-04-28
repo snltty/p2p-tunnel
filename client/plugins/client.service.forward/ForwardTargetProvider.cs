@@ -71,8 +71,13 @@ namespace client.service.forward
         private IConnection SelectConnection(ForwardTargetCacheInfo cacheInfo)
         {
 #if DEBUG
+            
             return signInStateInfo.Connection;
 #else
+            if(cacheInfo.Name == "/")
+            {
+                return signInStateInfo.Connection;
+            }
             if (clientInfoCaching.GetByName(cacheInfo.Name, out ClientInfo client))
             {
                 return client.Connection;
