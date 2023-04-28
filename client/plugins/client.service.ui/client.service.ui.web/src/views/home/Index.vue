@@ -35,6 +35,7 @@ import ConnectButton from '../../components/ConnectButton.vue'
 import ServerLine from './ServerLine.vue'
 import Servers from './Servers.vue'
 import { ElMessageBox } from 'element-plus/lib/components'
+import { ElMessage } from 'element-plus'
 export default {
     name: 'Home',
     components: { ConnectButton, ServerLine, Servers },

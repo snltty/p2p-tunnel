@@ -122,8 +122,12 @@ export default {
                 account: state.account,
                 sort: state.sort
             }).then((res) => {
-                let json = new Function(`return ${res}`)();
-                state.data = json;
+                if (res) {
+                    let json = new Function(`return ${res}`)();
+                    if (json.Data) {
+                        state.data = json;
+                    }
+                }
                 state.loading = false;
             }).catch(() => {
                 state.loading = false;

@@ -50,7 +50,7 @@ export default {
             show: props.modelValue,
             loading: false,
             form: {
-                TcpPort: stateEdit.value.data.TcpPort || 59410,
+                TcpPort: stateEdit.value.data.TcpPort || 5410,
                 UdpPort: stateEdit.value.data.UdpPort || 5410,
                 Ip: stateEdit.value.data.Ip || '',
                 Name: stateEdit.value.data.Name || '',

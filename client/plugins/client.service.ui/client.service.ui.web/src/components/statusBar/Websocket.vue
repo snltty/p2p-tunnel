@@ -7,7 +7,7 @@
 <script>
 import { injectWebsocket } from '../../states/websocket'
 import { initWebsocket } from '../../apis/request'
-import { computed, nextTick, onMounted, ref, watch } from '@vue/runtime-core'
+import { computed, ref } from '@vue/runtime-core'
 import { ElMessageBox } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 export default {
