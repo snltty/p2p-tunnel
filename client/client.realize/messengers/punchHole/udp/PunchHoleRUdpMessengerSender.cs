@@ -184,13 +184,11 @@ namespace client.realize.messengers.punchHole.udp
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.LocalPort));
                     udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.Port));
 
-                    for (int i = 0; i <= 1; i++)
+                    for (int i = 0; i <= 128; i++)
                     {
                         if (data.Port + i < ushort.MaxValue)
                         {
                             udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.LocalPort + i));
-                            udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.LocalPort + i));
-                            udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.Port + i));
                             udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(ip, data.Port + i));
                         }
                     }
@@ -199,13 +197,11 @@ namespace client.realize.messengers.punchHole.udp
 
                 if (NotIPv6Support(data.Ip) == false)
                 {
-                    for (int i = 0; i <= 1; i++)
+                    for (int i = 0; i <= 128; i++)
                     {
                         if (data.Port + i < ushort.MaxValue)
                         {
                             udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.LocalPort + i));
-                            udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.LocalPort + i));
-                            udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + i));
                             udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + i));
                         }
                     }
@@ -270,7 +266,7 @@ namespace client.realize.messengers.punchHole.udp
                      if (peer == null && NotIPv6Support(data.Ip) == false)
                      {
                          ips = new List<IPEndPoint>();
-                         for (int i = 0; i <= 1; i++)
+                         for (int i = 0; i <= 128; i++)
                          {
                              if (data.Port + i < ushort.MaxValue)
                              {

@@ -10,6 +10,7 @@ using System.Net;
 using System.Threading.Tasks;
 using client.messengers.singnin;
 using common.libs.extends;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace client.realize.messengers.clients
 {
