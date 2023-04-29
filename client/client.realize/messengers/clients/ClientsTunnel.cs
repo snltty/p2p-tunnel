@@ -98,7 +98,6 @@ namespace client.realize.messengers.clients
                     }
                 });
             };
-            Console.WriteLine($"udp localport:{localport}");
             tempUdpServer.Start(localport, config.Client.TimeoutDelay);
             tempUdpServer.SetSpeedLimit(config.Client.UdpUploadSpeedLimit);
 
@@ -156,7 +155,8 @@ namespace client.realize.messengers.clients
 
             ushort port = await clientsMessengerSender.AddTunnel(connection, selfId, targetId, localport);
 
-            clientInfoCaching.AddTunnelPort(targetId, port);
+            clientInfoCaching.AddTunnelPort(targetId, localport);
+            //clientInfoCaching.AddUdpserver(targetId, tempTcpServer);
 
             return port;
         }

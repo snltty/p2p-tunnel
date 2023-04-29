@@ -227,90 +227,90 @@ namespace client.realize.messengers.punchHole.udp
         private async Task OnStep2(PunchHoleStepModel model)
         {
             await Task.Run(async () =>
-             {
-                 PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
-                 if (connectCache.TryGetValue(model.RawData.FromId, out ConnectCacheModel cache) == false)
-                 {
-                     Logger.Instance.Error($"udp 找不到缓存");
-                     await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
-                     return;
-                 }
-                 if (clientInfoCaching.GetUdpserver(model.RawData.FromId, out UdpServer udpServer) == false)
-                 {
-                     Logger.Instance.Error($"udp 找不到通道服务器：{model.RawData.FromId}");
-                     await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
-                     return;
-                 }
+            {
+                PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
+                if (connectCache.TryGetValue(model.RawData.FromId, out ConnectCacheModel cache) == false)
+                {
+                    Logger.Instance.Error($"udp 找不到缓存");
+                    await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
+                    return;
+                }
+                if (clientInfoCaching.GetUdpserver(model.RawData.FromId, out UdpServer udpServer) == false)
+                {
+                    Logger.Instance.Error($"udp 找不到通道服务器：{model.RawData.FromId}");
+                    await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
+                    return;
+                }
 
-                 List<IPEndPoint> ips = new List<IPEndPoint>();
-                 if (UseLocalPort)
-                 {
-                     ips.AddRange(data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, data.LocalPort)));
-                 }
-                 if (IPv6Support() && data.Ip.IsLan() == false)
-                 {
-                     ips.AddRange(data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, data.Port)));
-                 }
+                List<IPEndPoint> ips = new List<IPEndPoint>();
+                if (UseLocalPort)
+                {
+                    ips.AddRange(data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && (c.AddressFamily == AddressFamily.InterNetwork ||c.IsIPv4MappedToIPv6)).Select(c => new IPEndPoint(c, data.LocalPort)));
+                }
+                if (IPv6Support() && data.Ip.IsLan() == false)
+                {
+                    ips.AddRange(data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6 && c.IsIPv4MappedToIPv6 == false).Select(c => new IPEndPoint(c, data.Port)));
+                }
 
 
-                 try
-                 {
-                     List<NetPeer> peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
-                     await Task.Delay(1000);
-                     NetPeer peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
-                     foreach (NetPeer item in peers.Where(c => c != null && ReferenceEquals(c, peer) == false && c.ConnectionState != ConnectionState.Connected))
-                     {
-                         item.Disconnect();
-                     }
+                try
+                {
+                    List<NetPeer> peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
+                    await Task.Delay(1000);
+                    NetPeer peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
+                    foreach (NetPeer item in peers.Where(c => c != null && ReferenceEquals(c, peer) == false && c.ConnectionState != ConnectionState.Connected))
+                    {
+                        item.Disconnect();
+                    }
 
-                     if (peer == null && NotIPv6Support(data.Ip) == false)
-                     {
-                         ips = new List<IPEndPoint>();
-                         for (int i = 0; i <= 128; i++)
-                         {
-                             if (data.Port + i < ushort.MaxValue)
-                             {
-                                 ips.Add(new IPEndPoint(data.Ip, data.Port + i));
-                                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + i));
-                             }
-                         }
-                         peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
-                         await Task.Delay(1000);
-                         peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
-                         foreach (NetPeer item in peers.Where(c => c != null && ReferenceEquals(c, peer) == false && c.ConnectionState != ConnectionState.Connected))
-                         {
-                             item.Disconnect();
-                         }
-                         if (peer == null || peer.ConnectionState != ConnectionState.Connected)
-                         {
-                             peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
-                             await Task.Delay(2000);
-                             peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
-                             foreach (NetPeer item in peers.Where(c => c != null && ReferenceEquals(c, peer) == false && c.ConnectionState != ConnectionState.Connected))
-                             {
-                                 item.Disconnect();
-                             }
-                         }
-                     }
-                     if (peer != null && peer.ConnectionState == ConnectionState.Connected)
-                     {
-                         IConnection connection = peer.Tag as IConnection;
-                         Logger.Instance.DebugDebug($"udp {connection.Address} connect");
-                         await CryptoSwap(connection).ConfigureAwait(false);
-                         await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
-                     }
-                     else
-                     {
-                         await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
-                         Logger.Instance.DebugError($"udp {data.Ip}:{data.Port} connect fail");
-                     }
-                 }
-                 catch (Exception ex)
-                 {
-                     Logger.Instance.DebugError($"udp {data.Ip}:{data.Port} connect fail");
-                     Logger.Instance.DebugError(ex);
-                 }
-             });
+                    if (peer == null && NotIPv6Support(data.Ip) == false)
+                    {
+                        ips = new List<IPEndPoint>();
+                        for (int i = 0; i <= 128; i++)
+                        {
+                            if (data.Port + i < ushort.MaxValue)
+                            {
+                                ips.Add(new IPEndPoint(data.Ip, data.Port + i));
+                                udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + i));
+                            }
+                        }
+                        peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
+                        await Task.Delay(1000);
+                        peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
+                        foreach (NetPeer item in peers.Where(c => c != null && ReferenceEquals(c, peer) == false && c.ConnectionState != ConnectionState.Connected))
+                        {
+                            item.Disconnect();
+                        }
+                        if (peer == null || peer.ConnectionState != ConnectionState.Connected)
+                        {
+                            peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
+                            await Task.Delay(2000);
+                            peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
+                            foreach (NetPeer item in peers.Where(c => c != null && ReferenceEquals(c, peer) == false && c.ConnectionState != ConnectionState.Connected))
+                            {
+                                item.Disconnect();
+                            }
+                        }
+                    }
+                    if (peer != null && peer.ConnectionState == ConnectionState.Connected)
+                    {
+                        IConnection connection = peer.Tag as IConnection;
+                        Logger.Instance.DebugDebug($"udp {connection.Address} connect");
+                        await CryptoSwap(connection).ConfigureAwait(false);
+                        await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
+                        Logger.Instance.DebugError($"udp {data.Ip}:{data.Port} connect fail");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.DebugError($"udp {data.Ip}:{data.Port} connect fail");
+                    Logger.Instance.DebugError(ex);
+                }
+            });
         }
         private async Task CryptoSwap(IConnection connection)
         {

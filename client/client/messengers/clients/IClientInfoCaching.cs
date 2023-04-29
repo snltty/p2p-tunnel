@@ -67,13 +67,13 @@ namespace client.messengers.clients
         /// </summary>
         /// <param name="id"></param>
         /// <param name="val"></param>
-        public void SetConnecting(ulong id,bool val);
+        public void SetConnecting(ulong id, bool val);
         /// <summary>
         /// 掉线
         /// </summary>
         /// <param name="id"></param>
         /// <param name="offlineType"></param>
-        public void Offline(ulong id,ClientOfflineTypes offlineType = ClientOfflineTypes.Manual);
+        public void Offline(ulong id, ClientOfflineTypes offlineType = ClientOfflineTypes.Manual);
         /// <summary>
         /// 上线
         /// </summary>
@@ -107,7 +107,7 @@ namespace client.messengers.clients
         /// </summary>
         /// <param name="id"></param>
         /// <param name="server"></param>
-        public void AddUdpserver(ulong id, UdpServer server);
+        public void AddUdpserver(ulong id, IServer server);
         /// <summary>
         /// 通道服务端
         /// </summary>

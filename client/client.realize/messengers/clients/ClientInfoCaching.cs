@@ -1,6 +1,4 @@
 ﻿using client.messengers.clients;
-using common.libs;
-using common.libs.extends;
 using common.server;
 using common.server.servers.rudp;
 using System;
@@ -194,7 +192,7 @@ namespace client.realize.messengers.clients
         /// </summary>
         /// <param name="id"></param>
         /// <param name="server"></param>
-        public void AddUdpserver(ulong id, UdpServer server)
+        public void AddUdpserver(ulong id, IServer server)
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {

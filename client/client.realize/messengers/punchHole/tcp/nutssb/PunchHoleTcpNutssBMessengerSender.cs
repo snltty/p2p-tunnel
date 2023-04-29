@@ -48,7 +48,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         private int RouteLevel => signInState.LocalInfo.RouteLevel + 5;
 #if DEBUG
-        private bool UseLocalPort = false;
+        private bool UseLocalPort = true;
 #else
         private bool UseLocalPort = true;
 #endif
@@ -226,23 +226,31 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                 }
 
-                var sockets = ips.Where(c => NotIPv6Support(c.Address)).Select(ip =>
+                foreach (IPEndPoint ip in ips)
                 {
-                    using Socket targetSocket = new(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    if (ip.AddressFamily == AddressFamily.InterNetworkV6)
+                    if (ip.Address.Equals(IPAddress.Any) || ip.Address.Equals(IPAddress.IPv6Any))
                     {
-                        targetSocket.IPv6Only(ip.AddressFamily, false);
+                        continue;
                     }
-                    targetSocket.Ttl = (short)(RouteLevel);
-                    targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
-                    _ = targetSocket.ConnectAsync(ip);
-                    return targetSocket;
-                });
-                foreach (var item in sockets)
-                {
-                    item.SafeClose();
-                }
+                    if (NotIPv6Support(ip.Address))
+                    {
+                        continue;
+                    }
 
+                    using Socket targetSocket = new(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    try
+                    {
+                        targetSocket.IPv6Only(ip.Address.AddressFamily, false);
+                        targetSocket.Ttl = (short)(RouteLevel);
+                        targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork  ? IPAddress.Any : IPAddress.IPv6Any, localPort));
+                        _ = targetSocket.ConnectAsync(ip);
+                        await Task.Delay(30);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    targetSocket.SafeClose();
+                }
                 await SendStep2(model);
 
             }
@@ -293,106 +301,91 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     return;
                 }
 
+                bool success = false;
                 List<IPEndPoint> ips = new List<IPEndPoint>();
                 PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
-                if (UseLocalPort)
+                if (UseLocalPort && signInState.Connection.Address.Equals(data.Ip))
                 {
-                    var locals = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.AddressFamily == AddressFamily.InterNetwork).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
+                    var locals = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6)).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
                     ips.AddRange(locals);
                 }
-                if (IPv6Support() && data.Ip.IsLan() == false)
+                if (IPv6Support())
                 {
-                    var locals = data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6).Select(c => new IPEndPoint(c, data.Port)).ToList();
+                    var locals = data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6 && c.IsIPv4MappedToIPv6 == false).Select(c => new IPEndPoint(c, data.Port)).ToList();
                     ips.AddRange(locals);
                 }
+                ips.Add(new IPEndPoint(data.Ip, data.Port));
+                ips.Add(new IPEndPoint(data.Ip, data.Port + 1));
 
-                try
+                for (byte i = 0; i < ips.Count; i++)
                 {
-                    List<IAsyncResult> sockets = ips.Select(ip =>
+                    if (cache.Canceled)
                     {
-                        try
-                        {
-                            Socket targetSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                            if (ip.AddressFamily == AddressFamily.InterNetworkV6)
-                            {
-                                targetSocket.IPv6Only(ip.AddressFamily, false);
-                            }
-                            targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
-                            targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
-                            IAsyncResult result = targetSocket.BeginConnect(ip, null, targetSocket);
-                            return result;
-                        }
-                        catch (Exception)
-                        {
-                        }
-                        return null;
-                    }).ToList();
-
-                    sockets.LastOrDefault()?.AsyncWaitHandle.WaitOne(1000, false);
-                    IAsyncResult result = sockets.FirstOrDefault(c => c.IsCompleted && (c.AsyncState as Socket).Connected);
-                    foreach (var item in sockets.Where(c => c != null && ReferenceEquals(c, result) == false))
-                    {
-                        (item.AsyncState as Socket).SafeClose();
+                        break;
                     }
 
-                    if (result == null && NotIPv6Support(data.Ip) == false)
+                    IPEndPoint ip = i >= ips.Count ? ips[^1] : ips[i];
+                    if (NotIPv6Support(ip.Address))
                     {
-                        sockets = new List<IAsyncResult>();
-                        ips = new List<IPEndPoint>();
-                        for (int i = 0; i <= 1; i++)
-                        {
-                            if (data.Port + i <= ushort.MaxValue)
-                            {
-                                ips.Add(new IPEndPoint(data.Ip, data.Port + i));
-                            }
-                        }
-                        sockets = ips.Select(ip =>
-                        {
-                            try
-                            {
-                                Socket targetSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                                if (ip.AddressFamily == AddressFamily.InterNetworkV6)
-                                {
-                                    targetSocket.IPv6Only(ip.AddressFamily, false);
-                                }
-                                targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
-                                targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
-                                IAsyncResult result = targetSocket.BeginConnect(ip, null, targetSocket);
-                                return result;
-                            }
-                            catch (Exception)
-                            {
-                            }
-                            return null;
-                        }).ToList();
-                        sockets.LastOrDefault().AsyncWaitHandle.WaitOne(2000, false);
-                        result = sockets.FirstOrDefault(c => c.IsCompleted && (c.AsyncState as Socket).Connected);
-                        foreach (var item in sockets.Where(c => c != null && ReferenceEquals(c, result) == false))
-                        {
-                            (item.AsyncState as Socket).SafeClose();
-                        }
+                        continue;
                     }
 
-                    if (result != null)
+                    Socket targetSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    try
                     {
-                        Socket targetSocket = result.AsyncState as Socket;
-                        targetSocket.EndConnect(result);
-                        cache.Success = true;
-                        IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: (byte)config.Client.TcpBufferSize * 1024);
-                        await CryptoSwap(connection);
-                        await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel);
+                        targetSocket.IPv6Only(ip.AddressFamily, false);
+                        targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
+                        targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
+                        Logger.Instance.DebugDebug($"tcp {ip} connect");
+                        IAsyncResult result = targetSocket.BeginConnect(ip, null, null);
+                        result.AsyncWaitHandle.WaitOne(ip.IsLan() ? 50 : 300, false);
 
-                        Logger.Instance.Warning($"tcp {targetSocket.RemoteEndPoint} connect success");
+                        if (result.IsCompleted)
+                        {
+                            if (cache.Canceled)
+                            {
+                                targetSocket.SafeClose();
+                                break;
+                            }
+
+                            targetSocket.EndConnect(result);
+                            Logger.Instance.Warning($"tcp {ip} connect success");
+                            cache.Success = true;
+
+                            IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: (byte)config.Client.TcpBufferSize * 1024);
+                            await CryptoSwap(connection);
+                            await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel);
+                            success = true;
+                            break;
+                        }
+                        else
+                        {
+                            Logger.Instance.DebugError($"tcp {ip} connect fail");
+                            targetSocket.SafeClose();
+                            targetSocket = null;
+                            await Task.Delay(500);
+                        }
                     }
-                    else
+                    catch (SocketException ex)
                     {
-                        await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
+                        Logger.Instance.DebugError($"tcp {ip} connect fail:{ex}");
+                        targetSocket.SafeClose();
+                        targetSocket = null;
+                        if (ex.SocketErrorCode == SocketError.AddressNotAvailable)
+                        {
+                            Logger.Instance.DebugError($"{ex.SocketErrorCode}:{ip}");
+                        }
+                        await Task.Delay(500);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Instance.DebugError($"tcp {ip} connect fail:{ex}");
                     }
                 }
-                catch (Exception ex)
+
+                if (success == false)
                 {
                     await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
-                    Logger.Instance.DebugError($"tcp {data.Ip}:{data.Port} connect fail:{ex}");
                 }
 
             }).ConfigureAwait(false);
