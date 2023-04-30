@@ -304,6 +304,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     ips.AddRange(data.LocalIps
                         .Where(c => c.Equals(IPAddress.Any) == false && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6))
                         .Select(c => new IPEndPoint(c, data.LocalPort)).ToList());
+                    ips.AddRange(data.LocalIps
+                        .Where(c => c.Equals(IPAddress.Any) == false && c.Equals(IPAddress.Loopback) == false && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6))
+                        .Select(c => new IPEndPoint(c, data.Port)).ToList());
                 }
                 if (IPv6Support())
                 {

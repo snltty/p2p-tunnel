@@ -248,6 +248,9 @@ namespace client.realize.messengers.punchHole.udp
                     ips.AddRange(data.LocalIps
                         .Where(c => c.Equals(IPAddress.Any) == false && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6))
                         .Select(c => new IPEndPoint(c, data.LocalPort)));
+                    ips.AddRange(data.LocalIps
+                        .Where(c => c.Equals(IPAddress.Any) == false && c.Equals(IPAddress.Loopback) && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6))
+                        .Select(c => new IPEndPoint(c, data.Port)));
                 }
                 if (IPv6Support() && data.Ip.IsLan() == false)
                 {

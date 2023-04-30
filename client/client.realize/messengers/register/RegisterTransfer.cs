@@ -115,7 +115,7 @@ namespace client.realize.messengers.singnin
 
                         IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
                         signInState.LocalInfo.Port = NetworkHelper.GetRandomPort();
-                        config.Client.UseIpv6 = false;// NetworkHelper.IPv6Support;
+                        config.Client.UseIpv6 = NetworkHelper.IPv6Support;
                         signInState.LocalInfo.Ipv6s = iPv6AddressRequest.GetIPV6();
                         signInState.OnBind?.Invoke(true);
 

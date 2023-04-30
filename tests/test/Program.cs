@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Running;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Net;
 
 namespace invokeSpeed
 {
@@ -9,8 +10,7 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-
-            var summary = BenchmarkRunner.Run<Test>();
+            //var summary = BenchmarkRunner.Run<Test>();
             Console.ReadLine();
         }
 
