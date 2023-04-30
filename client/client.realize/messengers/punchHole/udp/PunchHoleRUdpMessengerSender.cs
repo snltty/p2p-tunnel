@@ -245,16 +245,21 @@ namespace client.realize.messengers.punchHole.udp
                 List<IPEndPoint> ips = new List<IPEndPoint>();
                 if (UseLocalPort)
                 {
-                    ips.AddRange(data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && (c.AddressFamily == AddressFamily.InterNetwork ||c.IsIPv4MappedToIPv6)).Select(c => new IPEndPoint(c, data.LocalPort)));
+                    ips.AddRange(data.LocalIps
+                        .Where(c => c.Equals(IPAddress.Any) == false && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6))
+                        .Select(c => new IPEndPoint(c, data.LocalPort)));
                 }
                 if (IPv6Support() && data.Ip.IsLan() == false)
                 {
-                    ips.AddRange(data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6 && c.IsIPv4MappedToIPv6 == false).Select(c => new IPEndPoint(c, data.Port)));
+                    ips.AddRange(data.LocalIps
+                        .Where(c => NotIPv6Support(c) == false && c.AddressFamily == AddressFamily.InterNetworkV6 && c.IsIPv4MappedToIPv6 == false)
+                        .Select(c => new IPEndPoint(c, data.Port)));
                 }
 
 
                 try
                 {
+                    //链接局域网
                     List<NetPeer> peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
                     await Task.Delay(1000);
                     NetPeer peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
@@ -265,6 +270,7 @@ namespace client.realize.messengers.punchHole.udp
 
                     if (peer == null && NotIPv6Support(data.Ip) == false)
                     {
+                        //链接广域网
                         ips = new List<IPEndPoint>();
                         for (int i = 0; i <= 128; i++)
                         {
@@ -281,6 +287,8 @@ namespace client.realize.messengers.punchHole.udp
                         {
                             item.Disconnect();
                         }
+
+                        //再次链接广域网
                         if (peer == null || peer.ConnectionState != ConnectionState.Connected)
                         {
                             peers = ips.Select(ip => udpServer.Connect(ip)).ToList();

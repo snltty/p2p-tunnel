@@ -46,7 +46,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         private IConnection Connection => signInState.Connection;
 
-        private int RouteLevel => signInState.LocalInfo.RouteLevel + 5;
+        private int RouteLevel => signInState.LocalInfo.RouteLevel + 1;
 #if DEBUG
         private bool UseLocalPort = true;
 #else
@@ -214,10 +214,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
 
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
-
             if (clientInfoCaching.GetTunnelPort(model.RawData.FromId, out int localPort))
             {
-                List<IPEndPoint> ips = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
+                List<IPEndPoint> ips = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.Equals(IPAddress.IPv6Any) == false).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
                 for (int i = 0; i <= 1; i++)
                 {
                     if (data.Port + i < ushort.MaxValue)
@@ -226,33 +225,28 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                 }
 
-                foreach (IPEndPoint ip in ips)
+                var sockets = ips.Where(c => NotIPv6Support(c.Address) == false).Select(ip =>
                 {
-                    if (ip.Address.Equals(IPAddress.Any) || ip.Address.Equals(IPAddress.IPv6Any))
-                    {
-                        continue;
-                    }
-                    if (NotIPv6Support(ip.Address))
-                    {
-                        continue;
-                    }
-
                     using Socket targetSocket = new(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
                         targetSocket.IPv6Only(ip.Address.AddressFamily, false);
                         targetSocket.Ttl = (short)(RouteLevel);
-                        targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork  ? IPAddress.Any : IPAddress.IPv6Any, localPort));
+                        targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
                         _ = targetSocket.ConnectAsync(ip);
-                        await Task.Delay(30);
+                        return targetSocket;
                     }
                     catch (Exception)
                     {
                     }
-                    targetSocket.SafeClose();
+                    return null;
+                });
+
+                foreach (Socket item in sockets.Where(c => c != null))
+                {
+                    item.SafeClose();
                 }
                 await SendStep2(model);
-
             }
             else
             {
@@ -260,6 +254,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
             }
         }
+
 
         private async Task CryptoSwap(IConnection connection)
         {
@@ -301,18 +296,20 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     return;
                 }
 
-                bool success = false;
-                List<IPEndPoint> ips = new List<IPEndPoint>();
                 PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
-                if (UseLocalPort && signInState.Connection.Address.Equals(data.Ip))
+
+                List<IPEndPoint> ips = new List<IPEndPoint>();
+                if (UseLocalPort)
                 {
-                    var locals = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6)).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
-                    ips.AddRange(locals);
+                    ips.AddRange(data.LocalIps
+                        .Where(c => c.Equals(IPAddress.Any) == false && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6))
+                        .Select(c => new IPEndPoint(c, data.LocalPort)).ToList());
                 }
                 if (IPv6Support())
                 {
-                    var locals = data.LocalIps.Where(c => c.AddressFamily == AddressFamily.InterNetworkV6 && c.IsIPv4MappedToIPv6 == false).Select(c => new IPEndPoint(c, data.Port)).ToList();
-                    ips.AddRange(locals);
+                    ips.AddRange(data.LocalIps
+                        .Where(c => NotIPv6Support(c) == false && c.AddressFamily == AddressFamily.InterNetworkV6 && c.IsIPv4MappedToIPv6 == false)
+                        .Select(c => new IPEndPoint(c, data.Port)).ToList());
                 }
                 ips.Add(new IPEndPoint(data.Ip, data.Port));
                 ips.Add(new IPEndPoint(data.Ip, data.Port + 1));
@@ -325,57 +322,58 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
 
                     IPEndPoint ip = i >= ips.Count ? ips[^1] : ips[i];
-                    if (NotIPv6Support(ip.Address))
+                    AddressFamily family = ip.AddressFamily;
+                    IPAddress bindIp = family == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any;
+                    if (cache.LocalPort == signInState.LocalInfo.Port)
                     {
-                        continue;
+                        family = config.Client.BindIp.AddressFamily;
+                        bindIp = config.Client.BindIp;
                     }
+                    Socket targetSocket = new Socket(family, SocketType.Stream, ProtocolType.Tcp);
 
-                    Socket targetSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     try
                     {
-                        targetSocket.IPv6Only(ip.AddressFamily, false);
+                        targetSocket.IPv6Only(family, false);
                         targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
-                        targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, cache.LocalPort));
+                        targetSocket.ReuseBind(new IPEndPoint(bindIp, cache.LocalPort));
                         Logger.Instance.DebugDebug($"tcp {ip} connect");
                         IAsyncResult result = targetSocket.BeginConnect(ip, null, null);
-                        result.AsyncWaitHandle.WaitOne(ip.IsLan() ? 50 : 300, false);
+                        result.AsyncWaitHandle.WaitOne(ip.IsLan() ? 50 : 1000, false);
 
-                        if (result.IsCompleted)
-                        {
-                            if (cache.Canceled)
-                            {
-                                targetSocket.SafeClose();
-                                break;
-                            }
-
-                            targetSocket.EndConnect(result);
-                            Logger.Instance.Warning($"tcp {ip} connect success");
-                            cache.Success = true;
-
-                            IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: (byte)config.Client.TcpBufferSize * 1024);
-                            await CryptoSwap(connection);
-                            await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel);
-                            success = true;
-                            break;
-                        }
-                        else
+                        if (result.IsCompleted == false)
                         {
                             Logger.Instance.DebugError($"tcp {ip} connect fail");
                             targetSocket.SafeClose();
                             targetSocket = null;
-                            await Task.Delay(500);
+                            continue;
                         }
+
+                        try
+                        {
+                            targetSocket.EndConnect(result);
+                        }
+                        catch (Exception)
+                        {
+                            continue;
+                        }
+
+                        Logger.Instance.Warning($"tcp {ip} connect success");
+                        IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: (byte)config.Client.TcpBufferSize * 1024);
+                        await CryptoSwap(connection);
+                        await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel);
+                        cache.Success = true;
+                        break;
                     }
                     catch (SocketException ex)
                     {
-                        Logger.Instance.DebugError($"tcp {ip} connect fail:{ex}");
                         targetSocket.SafeClose();
                         targetSocket = null;
+
+                        Logger.Instance.DebugError($"tcp {ip} connect fail:{ex}");
                         if (ex.SocketErrorCode == SocketError.AddressNotAvailable)
                         {
                             Logger.Instance.DebugError($"{ex.SocketErrorCode}:{ip}");
                         }
-                        await Task.Delay(500);
                     }
                     catch (Exception ex)
                     {
@@ -383,7 +381,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     }
                 }
 
-                if (success == false)
+                if (cache.Success == false)
                 {
                     await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
                 }
@@ -391,8 +389,23 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }).ConfigureAwait(false);
         }
 
+        public async Task SendStep2Retry(ulong toid, byte newTunnel)
+        {
+            if (connectTcpCache.TryGetValue(toid, out ConnectCacheModel cache))
+            {
+                await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep2TryInfo>
+                {
+                    NewTunnel = newTunnel,
+                    Connection = Connection,
+                    ToId = toid,
+                    Data = new PunchHoleStep2TryInfo { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2_TRY, PunchType = PunchHoleTypes.TCP_NUTSSB }
+                }).ConfigureAwait(false);
+                //Cancel(toid);
+            }
+        }
         public void OnStep2Retry(PunchHoleStepModel model)
         {
+            Console.WriteLine($"OnStep2Retry {model.RawData.FromId}");
             if (connectTcpCache.TryGetValue(model.RawData.FromId, out ConnectCacheModel cache) == false || cache.Success)
             {
                 return;
@@ -401,36 +414,36 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
             if (clientInfoCaching.GetTunnelPort(model.RawData.FromId, out int localPort))
             {
-                if (NotIPv6Support(data.Ip))
+                List<IPEndPoint> ips = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.Equals(IPAddress.IPv6Any) == false).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
+                for (int i = 0; i <= 1; i++)
                 {
-                    return;
-                }
-                Socket targetSocket = null;
-                try
-                {
-                    if (data.Ip.Equals(IPAddress.Any) == false || data.Ip.Equals(IPAddress.IPv6Any))
+                    if (data.Port + i < ushort.MaxValue)
                     {
-                        IPEndPoint target = new IPEndPoint(data.Ip, data.Port);
-                        targetSocket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                        targetSocket.IPv6Only(target.AddressFamily, false);
+                        ips.Add(new IPEndPoint(data.Ip, data.Port + i));
+                    }
+                }
+
+                var sockets = ips.Where(c => NotIPv6Support(c.Address) == false).Select(ip =>
+                {
+                    using Socket targetSocket = new(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    try
+                    {
+                        targetSocket.IPv6Only(ip.Address.AddressFamily, false);
                         targetSocket.Ttl = (short)(RouteLevel);
-                        targetSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                        targetSocket.Bind(new IPEndPoint(data.Ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
-                        _ = targetSocket.ConnectAsync(target);
+                        targetSocket.ReuseBind(new IPEndPoint(ip.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, localPort));
+                        _ = targetSocket.ConnectAsync(ip);
+                        return targetSocket;
                     }
-
-                }
-                catch (Exception)
-                {
-                }
-                finally
-                {
-                    if (targetSocket != null)
+                    catch (Exception)
                     {
-                        targetSocket.SafeClose();
                     }
-                }
+                    return null;
+                });
 
+                foreach (Socket item in sockets.Where(c => c != null))
+                {
+                    item.SafeClose();
+                }
             }
         }
 
