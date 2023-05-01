@@ -1,4 +1,5 @@
-﻿using common.libs.database;
+﻿using common.libs;
+using common.libs.database;
 using common.libs.extends;
 using common.proxy;
 using common.server.model;
@@ -128,31 +129,23 @@ namespace client.service.vea
 
         private void ParseLanIPs()
         {
-            VeaLanIPs = LanIPs.Select(c =>
+            try
             {
-                string[] arr = c.Split('/');
-                IPAddress ip = IPAddress.Parse(arr[0]);
-                if (ip.IsLan())
+                VeaLanIPs = LanIPs.Select(c => c.Split('/')).Where(c => c[0] != IPAddress.Any.ToString()).Select(c => new VeaLanIPAddress
                 {
-                    byte mask = 0;
-                    if (arr.Length > 1)
-                    {
-                        mask = byte.Parse(arr[1]);
-                    }
-                    return new VeaLanIPAddress
-                    {
-                        IPAddress = BinaryPrimitives.ReadUInt32BigEndian(ip.GetAddressBytes()),
-                        MaskLength = mask
-                    };
-                }
-                return null;
-
-            }).Where(c => c != null).ToArray();
+                    IPAddress = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse(c[0]).GetAddressBytes()),
+                    MaskLength = c.Length > 1 ? byte.Parse(c[1]) : (byte)0
+                }).ToArray();
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
         }
 
         private void ParseBroadcastList()
         {
-            VeaBroadcastList = BroadcastList.Where(c=>c.GetIsBroadcastAddress()).Select(c => BinaryPrimitives.ReadUInt32BigEndian(c.GetAddressBytes())).ToArray();
+            VeaBroadcastList = BroadcastList.Where(c => c.GetIsBroadcastAddress()).Select(c => BinaryPrimitives.ReadUInt32BigEndian(c.GetAddressBytes())).ToArray();
         }
     }
 
