@@ -13,7 +13,7 @@
 
 # p2p-tunnel
 #### Visual Studio 2022 LTSC 17.4.1
-<a href="https://jq.qq.com/?_wv=1027&k=ucoIVfz4" target="_blank">QQ 群：1121552990</a> | <a href="https://www.bilibili.com/video/BV14M4y117MB">介绍视频</a>
+<a href="https://jq.qq.com/?_wv=1027&k=ucoIVfz4" target="_blank">QQ 群：1121552990</a> | <a href="https://www.bilibili.com/video/BV14M4y117MB">介绍视频</a> | <a href="https://github.com/snltty/p2p-tunnel/wiki">wiki文档</a>
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/snltty/p2p-tunnel?style=social)
 ![GitHub Repo forks](https://img.shields.io/github/forks/snltty/p2p-tunnel?style=social)
@@ -41,15 +41,13 @@
 ## 一些说明
 1. [x] **【内网穿透】**
     - TCP、UDP打洞，(IPV4、IPV6)(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib rudp</a>)
-        - A客户端<-->B客户端
+        - A客户端<-->B客户端 <u>(p2p直连，不消耗服务器资源)</u>
     - 服务器中继
-        - A客户端<-->服务器<-->B客户端
-        - 中继不参与打包解包，仅网络消耗
+        - A客户端<-->服务器<-->B客户端 <u>(中继不参与打包解包，仅网络消耗)</u>
     - 节点中继
-        - A客户端<-->某客户端(中间任意数量)<-->B客户端
-        - 中继不参与打包解包，仅网络消耗
+        - A客户端<-->某客户端(中间任意数量)<-->B客户端 <u>(中继不参与打包解包，仅网络消耗)</u>
     - 服务器代理
-        - 服务器<-->A客户端
+        - 服务器<-->A客户端 <u>(也就是通过服务器ip，或者域名，访问到内网服务)</u>
 2. [x] **【.NET7】** 跨平台，高性能，小尺寸，小内存
 <p><img src="./readme/size.jpg"></p>
 
@@ -81,17 +79,6 @@
 
 #### 代理模块大致原理、流程
 <p><img src="./readme/proxy.jpg"></p> 
-
-## 部署运行
-#### windows 可使用托盘程序
-- client.service.tray.exe    //客户端
-- server.service.tray.exe    //服务端
-
-#### linux 按你喜欢的方式进行托管
-- <a href="./readme/server-linux.md">服务端 linux docker托管</a>
-- <a href="./readme/client-linux.md">客户端 linux supervisor托管</a>
-- 服务端docker镜像  **snltty/p2p-tunnel-server**
-
 
 ## 支持作者
 请作者喝一杯咖啡，使其更有精力更新代码

@@ -8,5 +8,5 @@
   "TargetName": "B客户端", //连接目标客户端名，为/表示代理到服务器
 
   //以下为客户端与服务端共有配置
-  "ConnectEnable": false //是否允许被连接，作为服务端时，表示是否开启socks5代理
+  "ConnectEnable": false //是否允许被连接，作为服务端时，表示是否允许所有人使用socks5
 }

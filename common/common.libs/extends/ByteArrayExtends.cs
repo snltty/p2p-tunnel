@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
-using System.IO.Compression;
-
-namespace common.libs.extends
+﻿namespace common.libs.extends
 {
     public static class ByteArrayExtends
     {
        
+        /*
         public static byte[] GZip(this byte[] bytes)
         {
             using MemoryStream compressStream = new MemoryStream();
@@ -24,5 +21,6 @@ namespace common.libs.extends
             zipStream.CopyTo(resultStream);
             return resultStream.ToArray();
         }
+        */
     }
 }
