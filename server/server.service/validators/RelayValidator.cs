@@ -31,9 +31,7 @@ namespace server.service.validators
             {
                 return config.RelayEnable || serviceAccessProvider.Validate(source, Access);
             }
-
             return false;
-
         }
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
@@ -58,7 +56,6 @@ namespace server.service.validators
 
         public SettingValidator()
         {
-
         }
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
@@ -68,7 +65,6 @@ namespace server.service.validators
 
         public void Validated(SignInCacheInfo cache)
         {
-
         }
     }
 }

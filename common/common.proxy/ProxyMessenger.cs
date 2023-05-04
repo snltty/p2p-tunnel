@@ -19,7 +19,7 @@ namespace common.proxy
         public async Task Request(IConnection connection)
         {
             ProxyInfo data = ProxyInfo.Debytes(connection.ReceiveRequestWrap.Payload);
-            data.Connection = connection;
+            data.Connection = connection.FromConnection;
             await proxyClient.InputData(data);
         }
 
