@@ -20,9 +20,7 @@
 [![star](https://gitee.com/snltty/p2p-tunnel/badge/star.svg?theme=dark)](https://gitee.com/snltty/p2p-tunnel/stargazers)
 [![fork](https://gitee.com/snltty/p2p-tunnel/badge/fork.svg?theme=dark)](https://gitee.com/snltty/p2p-tunnel/members)
 
-使用前请确保你已知其中风险
-
-本软件仅供学习交流，请勿用于违法犯罪
+使用前请确保你已知其中风险,仅供学习交流，请勿用于违法犯罪
 
 </div>
 
