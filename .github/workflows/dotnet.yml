@@ -41,8 +41,8 @@ jobs:
       env:
           GITHUB_TOKEN: '${{ secrets.ACTIONS_TOKEN }}'
       with:
-        tag_name: v2.1.0.0
-        release_name: v2.1.0.0.${{ steps.date.outputs.today }}
+        tag_name: v2.1.0.0-beta
+        release_name: v2.1.0.0-beta.${{ steps.date.outputs.today }}
         draft: false
         prerelease: false
         
