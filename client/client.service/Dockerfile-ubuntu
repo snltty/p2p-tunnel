@@ -1,0 +1,9 @@
+
+FROM ubuntu:latest
+
+EXPOSE 5411/tcp
+EXPOSE 5412/tcp
+
+WORKDIR /app
+COPY . .
+ENTRYPOINT ["./client.service"]

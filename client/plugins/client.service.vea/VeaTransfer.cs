@@ -21,6 +21,7 @@ namespace client.service.vea
     /// </summary>
     public sealed class VeaTransfer
     {
+
         Process Tun2SocksProcess;
         int interfaceNumber = 0;
         string interfaceLinux = string.Empty;
