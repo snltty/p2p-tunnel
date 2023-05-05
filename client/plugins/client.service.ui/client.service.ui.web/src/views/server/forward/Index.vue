@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import { onMounted, provide, reactive, ref } from '@vue/runtime-core';
+import { onMounted, provide, reactive, ref, watch } from '@vue/runtime-core';
 import { getServerPorts, getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../apis/forward-server'
 import { injectShareData } from '../../../states/shareData'
 import { injectSignIn } from '../../../states/signin'
@@ -81,6 +81,9 @@ export default {
             list: [],
             showAddForward: false,
             showAddListen: false
+        });
+        watch(() => signinState.ServerConfig.Ip, () => {
+            loadPorts();
         });
 
         const expandKeys = ref([]);

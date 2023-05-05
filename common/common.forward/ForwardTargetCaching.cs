@@ -1,4 +1,5 @@
-﻿using common.server;
+﻿using common.libs.extends;
+using common.server;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -51,11 +52,12 @@ namespace common.forward
         }
         public bool Remove(ushort port)
         {
+
             return cache.TryRemove(port, out _);
         }
         public IEnumerable<ushort> Remove(string targetName)
         {
-            var keys = cache.Where(c => c.Value.Name == targetName).Select(c => c.Key);
+            var keys = cache.Where(c => c.Value.Name == targetName).Select(c => c.Key).ToList();
             foreach (var key in keys)
             {
                 cache.TryRemove(key, out _);
@@ -69,12 +71,12 @@ namespace common.forward
         }
         public IEnumerable<ushort> Remove(ulong id)
         {
-            var keys = cache.Where(c => c.Value.Id == id).Select(c => c.Key);
+            var keys = cache.Where(c => c.Value.Id == id).Select(c => c.Key).ToList();
             foreach (var key in keys)
             {
                 cache.TryRemove(key, out _);
             }
-            var keys1 = cacheHost.Where(c => c.Value.Id == id).Select(c => c.Key);
+            var keys1 = cacheHost.Where(c => c.Value.Id == id).Select(c => c.Key).ToList();
             foreach (var key in keys1)
             {
                 cacheHost.TryRemove(key, out _);
@@ -116,6 +118,7 @@ namespace common.forward
                 item.Connection = null;
             }
         }
+
         public void ClearConnection(ulong id)
         {
             foreach (var item in cacheHost.Values.Where(c => c.Id == id))
@@ -132,14 +135,13 @@ namespace common.forward
     public sealed class ForwardTargetCacheInfo
     {
         public ulong Id { get; set; }
+        public string Key { get; set; }
         public string Name { get; set; }
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> IPAddress { get; set; }
-
-        [System.Text.Json.Serialization.JsonIgnore]
         public ushort Port { get; set; }
     }
 }

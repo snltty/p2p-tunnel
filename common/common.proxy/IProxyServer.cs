@@ -281,7 +281,7 @@ namespace common.proxy
             }
             catch (Exception ex)
             {
-                Logger.Instance.Error($"socks5 listen udp -> error " + ex);
+                //Logger.Instance.Error($"socks5 listen udp -> error " + ex);
             }
         }
 

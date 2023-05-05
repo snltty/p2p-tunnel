@@ -28,24 +28,26 @@ namespace client.service.forward.server
         public List<ServerForwardItemInfo> serverForwards = new List<ServerForwardItemInfo>();
         private readonly IConfigDataProvider<ServerForwardConfigInfo> serverConfigDataProvider;
 
-        private readonly Config clientConfig;
         private readonly SignInStateInfo signInStateInfo;
 
-        private readonly ServerForwardMessengerSender tcpForwardMessengerSender;
-        public ServerForwardTransfer(IConfigDataProvider<ServerForwardConfigInfo> serverConfigDataProvider, Config clientConfig, SignInStateInfo signInStateInfo, ServerForwardMessengerSender tcpForwardMessengerSender)
+        private readonly ServerForwardMessengerSender  serverForwardMessengerSender;
+
+        private string IP => (signInStateInfo.Connection?.Address.Address ?? IPAddress.Any).ToString();
+
+        public ServerForwardTransfer(IConfigDataProvider<ServerForwardConfigInfo> serverConfigDataProvider, SignInStateInfo signInStateInfo, ServerForwardMessengerSender serverForwardMessengerSender)
         {
             this.serverConfigDataProvider = serverConfigDataProvider;
 
-            this.clientConfig = clientConfig;
             this.signInStateInfo = signInStateInfo;
 
-            this.tcpForwardMessengerSender = tcpForwardMessengerSender;
+            this.serverForwardMessengerSender = serverForwardMessengerSender;
 
             serverForwardConfigInfo = ReadServerConfig();
             signInStateInfo.OnChange += (state) =>
             {
                 if (state)
                 {
+                    ParseConfig();
                     RegisterServerForward();
                 }
             };
@@ -54,7 +56,7 @@ namespace client.service.forward.server
 
         public async Task<string[]> GetServerDomains()
         {
-            var resp = await tcpForwardMessengerSender.GetDomains(signInStateInfo.Connection);
+            var resp = await serverForwardMessengerSender.GetDomains(signInStateInfo.Connection);
             if (resp.Code == MessageResponeCodes.OK)
             {
                 return resp.Data.GetUTF8String().DeJson<string[]>();
@@ -64,7 +66,7 @@ namespace client.service.forward.server
         }
         public async Task<ushort[]> GetServerPorts()
         {
-            var resp = await tcpForwardMessengerSender.GetPorts(signInStateInfo.Connection);
+            var resp = await serverForwardMessengerSender.GetPorts(signInStateInfo.Connection);
             if (resp.Code == MessageResponeCodes.OK)
             {
                 return resp.Data.ToUInt16Array();
@@ -74,24 +76,27 @@ namespace client.service.forward.server
         }
         public async Task<string> AddServerForward(ServerForwardItemInfo forward)
         {
-            var resp = await tcpForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
+            if (forward.Listening)
             {
-                AliveType = forward.AliveType,
-                SourceIp = forward.Domain,
-                SourcePort = forward.ServerPort,
-                TargetIp = forward.LocalIp,
-                TargetPort = forward.LocalPort
-            }).ConfigureAwait(false);
-            if (resp.Code != MessageResponeCodes.OK)
-            {
-                return resp.Code.GetDesc((byte)resp.Code);
-            }
+                var resp = await serverForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
+                {
+                    AliveType = forward.AliveType,
+                    SourceIp = forward.Domain,
+                    SourcePort = forward.ServerPort,
+                    TargetIp = forward.LocalIp,
+                    TargetPort = forward.LocalPort
+                }).ConfigureAwait(false);
+                if (resp.Code != MessageResponeCodes.OK)
+                {
+                    return resp.Code.GetDesc((byte)resp.Code);
+                }
 
-            ForwardSignInResultInfo result = new ForwardSignInResultInfo();
-            result.DeBytes(resp.Data);
-            if (result.Code != ForwardSignInResultCodes.OK)
-            {
-                return $"{result.Code.GetDesc((byte)result.Code)},{result.Msg}";
+                ForwardSignInResultInfo result = new ForwardSignInResultInfo();
+                result.DeBytes(resp.Data);
+                if (result.Code != ForwardSignInResultCodes.OK)
+                {
+                    return $"{result.Code.GetDesc((byte)result.Code)},{result.Msg}";
+                }
             }
 
             serverForwards.Remove(serverForwards.FirstOrDefault(c => c.Domain == forward.Domain && c.ServerPort == forward.ServerPort));
@@ -114,7 +119,7 @@ namespace client.service.forward.server
             {
                 return "未找到操作对象";
             }
-            var resp = await tcpForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
+            var resp = await serverForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -126,11 +131,18 @@ namespace client.service.forward.server
             {
                 return resp.Code.GetDesc((byte)resp.Code);
             }
+
+            ForwardSignInResultInfo result = new ForwardSignInResultInfo();
+            result.DeBytes(resp.Data);
+            if (result.Code !=  ForwardSignInResultCodes.OK)
+            {
+                return result.Code.GetDesc((byte)result.Code);
+            }
             forwardInfo.Listening = true;
             SaveServerConfig();
             return string.Empty;
         }
-       
+
         public async Task<string> StopServerForward(ServerForwardItemInfo forward)
         {
             ServerForwardItemInfo forwardInfo;
@@ -146,7 +158,7 @@ namespace client.service.forward.server
             {
                 return "未找到操作对象";
             }
-            var resp = await tcpForwardMessengerSender.SignOut(signInStateInfo.Connection, new ForwardSignOutInfo
+            var resp = await serverForwardMessengerSender.SignOut(signInStateInfo.Connection, new ForwardSignOutInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -160,7 +172,7 @@ namespace client.service.forward.server
             forwardInfo.Listening = false;
             SaveServerConfig();
             return string.Empty;
-        }  
+        }
         public async Task<string> RemoveServerForward(ServerForwardItemInfo forward)
         {
             ServerForwardItemInfo forwardInfo;
@@ -176,7 +188,7 @@ namespace client.service.forward.server
             {
                 return "未找到删除对象";
             }
-            var resp = await tcpForwardMessengerSender.SignOut(signInStateInfo.Connection, new ForwardSignOutInfo
+            var resp = await serverForwardMessengerSender.SignOut(signInStateInfo.Connection, new ForwardSignOutInfo
             {
                 AliveType = forward.AliveType,
                 SourceIp = forward.Domain,
@@ -194,38 +206,54 @@ namespace client.service.forward.server
 
         private ServerForwardConfigInfo ReadServerConfig()
         {
-            var config = serverConfigDataProvider.Load().Result;
-            foreach (var item in config.Webs)
-            {
-                item.AliveType = ForwardAliveTypes.Web;
-            }
-            foreach (var item in config.Tunnels)
-            {
-                item.AliveType = ForwardAliveTypes.Tunnel;
-            }
-            serverForwards = config.Webs.Concat(config.Tunnels).ToList();
-            return config;
+            return serverConfigDataProvider.Load().Result ?? new ServerForwardConfigInfo();
+
+
         }
+        private void ParseConfig()
+        {
+            if (serverForwardConfigInfo.List.TryGetValue(IP, out ServerForwardWrapInfo wrap))
+            {
+                foreach (var item in wrap.Webs)
+                {
+                    item.AliveType = ForwardAliveTypes.Web;
+                }
+                foreach (var item in wrap.Tunnels)
+                {
+                    item.AliveType = ForwardAliveTypes.Tunnel;
+                }
+                serverForwards = wrap.Webs.Concat(wrap.Tunnels).ToList();
+            }
+        }
+
         private void SaveServerConfig()
         {
-            serverForwardConfigInfo.Webs = serverForwards.Where(c => c.AliveType == ForwardAliveTypes.Web).ToArray();
-            serverForwardConfigInfo.Tunnels = serverForwards.Where(c => c.AliveType == ForwardAliveTypes.Tunnel).ToArray();
+            if (serverForwardConfigInfo.List.TryGetValue(IP, out ServerForwardWrapInfo wrap) == false)
+            {
+                wrap = new ServerForwardWrapInfo();
+                serverForwardConfigInfo.List.Add(IP, wrap);
+            }
+            wrap.Webs = serverForwards.Where(c => c.AliveType == ForwardAliveTypes.Web).ToArray();
+            wrap.Tunnels = serverForwards.Where(c => c.AliveType == ForwardAliveTypes.Tunnel).ToArray();
             serverConfigDataProvider.Save(serverForwardConfigInfo);
         }
         private void RegisterServerForward()
         {
-            foreach (var item in serverForwardConfigInfo.Webs)
+            if (serverForwardConfigInfo.List.TryGetValue(IP, out ServerForwardWrapInfo wrap))
             {
-                SendRegister(item, ForwardAliveTypes.Web);
-            }
-            foreach (var item in serverForwardConfigInfo.Tunnels.Where(c => c.Listening == true))
-            {
-                SendRegister(item, ForwardAliveTypes.Tunnel);
+                foreach (var item in wrap.Webs)
+                {
+                    SendRegister(item, ForwardAliveTypes.Web);
+                }
+                foreach (var item in wrap.Tunnels.Where(c => c.Listening == true))
+                {
+                    SendRegister(item, ForwardAliveTypes.Tunnel);
+                }
             }
         }
         private void SendRegister(ServerForwardItemInfo item, ForwardAliveTypes type)
         {
-            tcpForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
+            serverForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
             {
                 AliveType = type,
                 SourceIp = item.Domain,
@@ -268,6 +296,11 @@ namespace client.service.forward.server
 
     [Table("server-forwards")]
     public sealed class ServerForwardConfigInfo
+    {
+        public Dictionary<string, ServerForwardWrapInfo> List { get; set; } = new Dictionary<string, ServerForwardWrapInfo>();
+    }
+
+    public sealed class ServerForwardWrapInfo
     {
         public ServerForwardItemInfo[] Webs { get; set; } = Array.Empty<ServerForwardItemInfo>();
         public ServerForwardItemInfo[] Tunnels { get; set; } = Array.Empty<ServerForwardItemInfo>();

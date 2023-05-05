@@ -2,6 +2,9 @@
 using common.proxy;
 using server.messengers;
 using server.messengers.singnin;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace server.service.forward
@@ -20,10 +23,10 @@ namespace server.service.forward
             this.serviceAccessProvider = serviceAccessProvider;
             clientSignInCaching.OnOffline += (client) =>
             {
-                var keys = forwardTargetCaching.Remove(client.Name);
+                IEnumerable<ushort> keys = forwardTargetCaching.Remove(client.Name);
                 if (keys.Any())
                 {
-                    foreach (var item in keys)
+                    foreach (ushort item in keys)
                     {
                         proxyServer.Stop(item);
                     }
@@ -33,7 +36,7 @@ namespace server.service.forward
 
         public override bool ValidateAccess(ProxyInfo info)
         {
-           
+
 #if DEBUG
             return true;
 #else

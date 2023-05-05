@@ -32,6 +32,7 @@ namespace server.service.forward
             this.proxyServer = proxyServer;
         }
 
+
         [MessengerId((ushort)ForwardMessengerIds.Domains)]
         public void Domains(IConnection connection)
         {
@@ -149,8 +150,9 @@ namespace server.service.forward
                         {
                             proxyServer.Start(model.SourcePort, config.Plugin,(byte)ForwardAliveTypes.Tunnel);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
+                            Logger.Instance.DebugError(ex);
                             forwardTargetCaching.Remove(model.SourcePort);
                         }
                     }

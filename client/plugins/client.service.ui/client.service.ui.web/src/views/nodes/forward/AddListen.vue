@@ -10,6 +10,9 @@
                     </el-option>
                 </el-select>
             </el-form-item>
+            <el-form-item label="" prop="">
+                http的选啥类型都可以，其它的选长连接
+            </el-form-item>
             <el-form-item label="简单说明" prop="Desc">
                 <el-input v-model="form.Desc"></el-input>
             </el-form-item>

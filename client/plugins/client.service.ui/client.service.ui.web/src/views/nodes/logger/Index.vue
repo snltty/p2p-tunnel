@@ -5,7 +5,7 @@
                 <el-option :value="-1" label="全部"></el-option>
                 <el-option :value="0" label="debug"></el-option>
                 <el-option :value="1" label="info"></el-option>
-                <el-option :value="2" label="debug"></el-option>
+                <el-option :value="2" label="warning"></el-option>
                 <el-option :value="3" label="error"></el-option>
             </el-select>
             <span class="split"></span>
