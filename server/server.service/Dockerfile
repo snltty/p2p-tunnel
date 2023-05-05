@@ -40,7 +40,7 @@ RUN echo "https://mirrors.tuna.tsinghua.edu.cn/alpine/latest-stable/main/" > /et
     && echo $TZ > /etc/timezone
 
 EXPOSE 5410/udp
-EXPOSE 59410/tcp
+EXPOSE 5410/tcp
 
 WORKDIR /app
 COPY . .
