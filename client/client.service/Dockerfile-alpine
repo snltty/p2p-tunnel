@@ -10,4 +10,4 @@ EXPOSE 5412/tcp
 
 WORKDIR /app
 COPY . .
-ENTRYPOINT ["./client.service"]
+ENTRYPOINT ["./service.run"]

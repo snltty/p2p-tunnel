@@ -12,6 +12,19 @@ namespace client.service.tray
     {
         private NotifyIcon notifyIcon = null;
         private Process proc;
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                const int WS_EX_APPWINDOW = 0x40000;
+                const int WS_EX_TOOLWINDOW = 0x80;
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle &= (~WS_EX_APPWINDOW);
+                cp.ExStyle |= WS_EX_TOOLWINDOW;
+                return cp;
+            }
+        }
+
         public Form1()
         {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
@@ -20,6 +33,8 @@ namespace client.service.tray
             InitializeComponent();
             InitialTray();
         }
+
+
 
         Image unright = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right1.png"));
         Image right = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right.png"));
@@ -141,9 +156,9 @@ namespace client.service.tray
                 try
                 {
                     object val = Rkey.GetValue(keyName);
-                    if(val != null)
+                    if (val != null)
                     {
-                        value = val.ToString(); 
+                        value = val.ToString();
                     }
                 }
                 catch (Exception)

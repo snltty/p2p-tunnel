@@ -42,14 +42,6 @@ for %%r in (x64,arm64,arm) do (
 		del  "public\\publish\\%%p-%%r-single\\server\\*.pac"
 	)
 
-	for %%p in (client,server) do (
-		echo F|xcopy "%%p-install-windows service.bat" "public\\publish\\win-%%r-single\\%%p\\"  /f /h /y
-		echo F|xcopy "%%p-uninstall-windows service.bat" "public\\publish\\win-%%r-single\\%%p\\"  /f /h /y
-	)
-	echo F|xcopy "client-install-windows service.bat" "public\\publish\\any\client\\"  /f /h /y
-	echo F|xcopy "server-install-windows service.bat" "public\\publish\\any\server\\"  /f /h /y
-	echo F|xcopy "client-uninstall-windows service.bat" "public\\publish\\any\client\\"  /f /h /y
-	echo F|xcopy "server-uninstall-windows service.bat" "public\\publish\\any\server\\"  /f /h /y
 	echo F|xcopy "client\\plugins\\client.service.ui\\client.service.ui.api.service\\public\\client.service.tray.exe" "public\\publish\\win-%%r-single\\client\\client.service.tray.exe"  /s /f /h /y
 	echo F|xcopy "server\\server.service\\public\\server.service.tray.exe" "public\\publish\\win-%%r-single\\server\\server.service.tray.exe"  /s /f /h /y
 	

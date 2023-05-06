@@ -11,6 +11,18 @@ namespace server.service.tray
     {
         private NotifyIcon notifyIcon = null;
         private Process proc;
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                const int WS_EX_APPWINDOW = 0x40000;
+                const int WS_EX_TOOLWINDOW = 0x80;
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle &= (~WS_EX_APPWINDOW);
+                cp.ExStyle |= WS_EX_TOOLWINDOW;
+                return cp;
+            }
+        }
         public Form1()
         {
             ShowInTaskbar = false;
