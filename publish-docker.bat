@@ -17,7 +17,7 @@ for %%f in (client,server) do (
 			del  "public\\publish\\linux-%%p-%%r\\%%f\\wintun.dll"
 
 			cd public/publish/linux-%%p-%%r/%%f
-			docker build -f "%target%\\public\\publish\\linux-%%p-%%r\\%%f\\Dockerfile-%%p" --force-rm -t %image%-%%f-%%p-%%r .
+			docker buildx build -f "%target%\\public\\publish\\linux-%%p-%%r\\%%f\\Dockerfile-%%p" --platform=linux/%%r --force-rm -t %image%-%%f-%%p-%%r .
 			docker push %image%-%%f-%%p-%%r
 			cd ../../../../
 		)
