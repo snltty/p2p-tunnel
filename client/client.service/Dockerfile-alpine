@@ -1,4 +1,5 @@
 FROM alpine:latest
+
 ENV TZ=Asia/Shanghai DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 RUN echo "https://mirrors.tuna.tsinghua.edu.cn/alpine/latest-stable/main/" > /etc/apk/repositories \
     && apk add --no-cache libstdc++ libintl tzdata zeromq bash \
@@ -10,4 +11,7 @@ EXPOSE 5412/tcp
 
 WORKDIR /app
 COPY . .
+
+
+
 ENTRYPOINT ["./service.run"]

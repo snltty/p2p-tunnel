@@ -24,6 +24,7 @@
 	  <DockerfileContext>..\..</DockerfileContext>
 	  <ApplicationIcon>logo.ico</ApplicationIcon>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
 	</PropertyGroup>
 	
 	<ItemGroup>

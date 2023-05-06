@@ -24,6 +24,7 @@
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<DockerfileContext>..\..</DockerfileContext>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
 	</PropertyGroup>
 	<ItemGroup>
 		<Content Include="logo.ico" />
