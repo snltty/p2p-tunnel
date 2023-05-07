@@ -6,6 +6,8 @@ using common.libs;
 using System.Reflection;
 using System.Linq;
 using System;
+using common.server;
+using System.Threading.Tasks;
 
 namespace server.service.validators
 {
@@ -17,12 +19,14 @@ namespace server.service.validators
         private readonly Config config;
         private readonly IClientSignInCaching clientSignInCache;
         private readonly ServiceProvider serviceProvider;
+        private readonly MessengerSender messengerSender;
 
-        public SignInValidatorHandler(Config config, IClientSignInCaching clientSignInCache, ServiceProvider serviceProvider)
+        public SignInValidatorHandler(Config config, IClientSignInCaching clientSignInCache, ServiceProvider serviceProvider, MessengerSender messengerSender)
         {
             this.config = config;
             this.clientSignInCache = clientSignInCache;
             this.serviceProvider = serviceProvider;
+            this.messengerSender = messengerSender;
         }
 
         public void LoadValidator(Assembly[] assemblys)
@@ -66,8 +70,13 @@ namespace server.service.validators
             //重名
             if (clientSignInCache.Get(model.GroupId, model.Name, out SignInCacheInfo client))
             {
-                return SignInResultInfo.SignInResultInfoCodes.SAME_NAMES;
+                if (Alive(client.Connection))
+                {
+                    return SignInResultInfo.SignInResultInfoCodes.SAME_NAMES;
+                }
+                clientSignInCache.Remove(client.ConnectionId);
             }
+
 
             //是管理员分组的
             if (string.IsNullOrWhiteSpace(config.AdminGroup) == false && model.GroupId == config.AdminGroup)
@@ -101,6 +110,21 @@ namespace server.service.validators
                 current.Value.Validated(cache);
                 current = current.Next;
             }
+        }
+
+        private bool Alive(IConnection connection)
+        {
+            MessageResponeInfo resp = messengerSender.SendReply(new MessageRequestWrap
+            {
+                Connection = connection,
+                MessengerId = (ushort)HeartMessengerIds.Alive,
+                Timeout = 1000,
+            }).Result;
+            if (resp.Code == MessageResponeCodes.OK)
+            {
+                return resp.Data.Span.SequenceEqual(Helper.TrueArray);
+            }
+            return false;
         }
 
         class Wrap<T>

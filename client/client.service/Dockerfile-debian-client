@@ -1,0 +1,25 @@
+
+FROM debian:latest
+
+RUN rm -rf  /etc/apt/sources.list
+RUN echo 'deb http://mirrors.ustc.edu.cn/debian/ bullseye main non-free contrib \
+deb-src http://mirrors.ustc.edu.cn/debian/ bullseye main non-free contrib \
+deb http://mirrors.ustc.edu.cn/debian-security/ bullseye-security main \
+deb-src http://mirrors.ustc.edu.cn/debian-security/ bullseye-security main \
+deb http://mirrors.ustc.edu.cn/debian/ bullseye-updates main non-free contrib \
+deb-src http://mirrors.ustc.edu.cn/debian/ bullseye-updates main non-free contrib \
+deb http://mirrors.ustc.edu.cn/debian/ bullseye-backports main non-free contrib \
+deb-src http://mirrors.ustc.edu.cn/debian/ bullseye-backports main non-free contrib' > /etc/apt/sources.list
+
+RUN apt clean
+RUN apt update
+RUN apt upgrade
+RUN apt -y install iproute2 
+RUN apt -y install net-tools 
+
+EXPOSE 5411/tcp
+EXPOSE 5412/tcp
+
+WORKDIR /app
+COPY . .
+ENTRYPOINT ["./service.run"]
