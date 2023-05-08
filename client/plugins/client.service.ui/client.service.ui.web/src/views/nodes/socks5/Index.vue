@@ -9,8 +9,8 @@
                 </el-form-item>
                 <el-form-item>
                     <div class="w-100 t-c">
-                        <span>目标</span>：<el-select v-model="state.targetName" placeholder="选择目标" @change="handleChange">
-                            <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.Name">
+                        <span>目标</span>：<el-select v-model="state.targetConnectionId" placeholder="选择目标" @change="handleChange">
+                            <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.id">
                             </el-option>
                         </el-select>
                     </div>
@@ -42,8 +42,8 @@ export default {
 
         const clientsState = injectClients();
         const targets = computed(() => {
-            return [{ Name: '/', label: '服务器' }].concat(clientsState.clients.map(c => {
-                return { Name: c.Name, label: c.Name }
+            return [{ id: 0, label: '服务器' }].concat(clientsState.clients.map(c => {
+                return { id: c.ConnectionId, label: c.Name }
             }));
         });
         const state = reactive({
@@ -51,13 +51,13 @@ export default {
             localtion: window.location.origin,
             listenEnable: false,
             listenPort: 5413,
-            targetName: ''
+            targetConnectionId: ''
         });
         const loadConfig = () => {
             get().then((res) => {
                 state.listenEnable = res.ListenEnable;
                 state.listenPort = res.ListenPort;
-                state.targetName = res.TargetName;
+                state.targetConnectionId = res.TargetConnectionId;
             });
         }
         onMounted(() => {
@@ -67,7 +67,7 @@ export default {
         const submit = () => {
             state.loading = true;
             get().then((res) => {
-                res.TargetName = state.targetName;
+                res.TargetConnectionId = state.targetConnectionId;
                 res.ListenEnable = state.listenEnable;
                 set(res).then(() => {
                     loadConfig();
@@ -88,9 +88,9 @@ export default {
             state.listenEnable = !state.listenEnable;
             submit();
         };
-        const handleChange = (name) => {
+        const handleChange = (id) => {
             if (state.loading) return;
-            state.targetName = name;
+            state.targetConnectionId = id;
             submit();
         }
         return {

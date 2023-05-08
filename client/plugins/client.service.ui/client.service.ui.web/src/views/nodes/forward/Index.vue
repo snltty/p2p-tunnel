@@ -26,7 +26,7 @@
                                                     <template v-for="(fitem,findex) in item.Forwards" :key="findex">
                                                         <li>
                                                             <p class="flex"><span class="flex-1">访问</span><span>{{fitem.SourceIp}}:{{item.Port}}</span></p>
-                                                            <p class="flex"><span class="flex-1">目标</span><span>【{{fitem.Name}}】{{fitem.TargetIp}}:{{fitem.TargetPort}}</span></p>
+                                                            <p class="flex"><span class="flex-1">目标</span><span>【{{ fitem.name}}】{{fitem.TargetIp}}:{{fitem.TargetPort}}</span></p>
                                                             <p class="t-r">
                                                                 <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveForward(item,fitem)">
                                                                     <template #reference>
@@ -64,10 +64,11 @@
 <script>
 import { reactive, ref, toRefs } from '@vue/reactivity'
 import { getList, removeListen, startListen, stopListen, removeForward } from '../../../apis/forward'
-import { onMounted, provide } from '@vue/runtime-core'
+import { computed, onMounted, provide } from '@vue/runtime-core'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../states/shareData'
+import { injectClients } from '../../../states/clients'
 import plugin from './plugin'
 export default {
     plugin: plugin,
@@ -82,10 +83,27 @@ export default {
             showAddListen: false,
             showAddForward: false,
         });
+        const clientsState = injectClients();
+        const targets = computed(() => {
+            return [{ id: 0, label: '服务器' }].concat(clientsState.clients.map(c => {
+                return { id: c.ConnectionId, label: c.Name }
+            }));
+        });
+        const targetJson = computed(() => {
+            return targets.value.reduce((value, item) => {
+                value[item.id] = item.label;
+                return value;
+            }, {})
+        });
 
         const expandKeys = ref([]);
         const getData = () => {
             getList().then((res) => {
+                res.forEach(c => {
+                    c.Forwards.forEach(d => {
+                        d.name = targetJson.value[d.ConnectionId];
+                    });
+                });
                 state.list = res;
             });
         };

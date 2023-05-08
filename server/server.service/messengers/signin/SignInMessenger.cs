@@ -51,6 +51,7 @@ namespace server.service.messengers.singnin
                 ShortId = model.ShortId,
                 LocalPort = model.LocalTcpPort,
                 Connection = connection,
+                ConnectionId = model.ConnectionId,
                 UserAccess = access,
                 Args = model.Args
             });

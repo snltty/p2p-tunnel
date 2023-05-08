@@ -62,8 +62,8 @@ namespace client.realize.messengers.punchHole.udp
                 Tcs = tcs,
                 LocalPort = param.LocalPort,
             });
-            AddSendTimeout(param.Id);
 
+            AddSendTimeout(param.Id);
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep1Info>
             {
                 Connection = Connection,
@@ -76,8 +76,7 @@ namespace client.realize.messengers.punchHole.udp
         public async Task InputData(PunchHoleStepModel model)
         {
             PunchHoleUdpSteps step = (PunchHoleUdpSteps)model.RawData.PunchStep;
-
-            RemoveSendTimeout(model.RawData.FromId);
+            if (step ==  PunchHoleUdpSteps.STEP_4) return;
             OnStepHandler?.Invoke(this, model);
             switch (step)
             {
@@ -166,7 +165,6 @@ namespace client.realize.messengers.punchHole.udp
             }
         }
 
-
         private async Task OnStep1(PunchHoleStepModel model)
         {
             await clientsTunnel.NewBind(ServerType.UDP, Connection.ConnectId, model.RawData.FromId);
@@ -228,6 +226,7 @@ namespace client.realize.messengers.punchHole.udp
         {
             await Task.Run(async () =>
             {
+                RemoveSendTimeout(model.RawData.FromId);
                 PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
                 if (connectCache.TryGetValue(model.RawData.FromId, out ConnectCacheModel cache) == false)
                 {
@@ -414,6 +413,7 @@ namespace client.realize.messengers.punchHole.udp
         }
         public async Task OnStep3(PunchHoleStepModel model)
         {
+            RemoveSendTimeout(model.RawData.FromId);
             await punchHoleMessengerSender.Request(new SendPunchHoleArg<PunchHoleStep4Info>
             {
                 Connection = model.Connection,
@@ -427,6 +427,7 @@ namespace client.realize.messengers.punchHole.udp
 
         public void OnStep4(PunchHoleStepModel model)
         {
+            RemoveSendTimeout(model.RawData.FromId);
             if (connectCache.TryRemove(model.RawData.FromId, out ConnectCacheModel cache))
             {
                 cache.Tcs.SetResult(new ConnectResultModel { State = true });

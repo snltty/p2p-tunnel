@@ -27,28 +27,28 @@ namespace client.messengers.clients
         /// <summary>
         /// 名字
         /// </summary>
-        public string Name { get; init; }
+        public string Name { get; set; }
         /// <summary>
         /// 连接id
         /// </summary>
-        public ulong Id { get; init; }
+        public ulong ConnectionId { get; set; }
         /// <summary>
         /// 自动打洞
         /// </summary>
-        public bool UsePunchHole { get; init; }
+        public bool UsePunchHole { get; set; }
         /// <summary>
         /// 用udp
         /// </summary>
-        public bool UseUdp { get; init; }
+        public bool UseUdp { get; set; }
         /// <summary>
         /// 用tco
         /// </summary>
-        public bool UseTcp { get; init; }
+        public bool UseTcp { get; set; }
         /// <summary>
         /// 中继节点
         /// </summary>
-        public bool UseRelay { get; init; }
-        public bool UseAutoRelay { get; init; }
+        public bool UseRelay { get; set; }
+        public bool UseAutoRelay { get; set; }
 
         /// <summary>
         /// ping值

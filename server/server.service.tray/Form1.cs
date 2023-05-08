@@ -23,12 +23,15 @@ namespace server.service.tray
                 return cp;
             }
         }
+
         public Form1()
         {
+            this.FormBorderStyle = FormBorderStyle.None;
             ShowInTaskbar = false;
-            Visible = false;
+            this.WindowState = FormWindowState.Minimized;
+            this.Hide();
+            this.Opacity = 0;
             InitializeComponent();
-            Hide();
             InitialTray();
         }
 
@@ -85,20 +88,17 @@ namespace server.service.tray
                 string dir = Directory.GetCurrentDirectory();
                 string file = Path.Combine(dir, "./server.service.exe");
 
-                proc = new Process();
-                proc.StartInfo.WorkingDirectory = dir;
-                proc.StartInfo.UseShellExecute = false;
-                proc.StartInfo.CreateNoWindow = true;
-                proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                proc.StartInfo.FileName = file;
-                proc.StartInfo.RedirectStandardInput = true;
-                proc.StartInfo.RedirectStandardOutput = true;
-                proc.StartInfo.RedirectStandardError = true;
-                proc.StartInfo.UseShellExecute = false;
-                proc.StartInfo.CreateNoWindow = true;
-
-                proc.Start();
-
+                ProcessStartInfo processStartInfo = new ProcessStartInfo()
+                {
+                    WorkingDirectory = dir,
+                    FileName = file,
+                    CreateNoWindow = false,
+                    ErrorDialog = false,
+                    UseShellExecute = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    Verb = "runas",
+                };
+                proc = Process.Start(processStartInfo);
                 return true;
             }
             catch (Exception)
@@ -139,8 +139,8 @@ namespace server.service.tray
             string exeName = AppDomain.CurrentDomain.FriendlyName;
             string value = string.Empty;
             Microsoft.Win32.RegistryKey Rkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-
             string keyName = exeName.Replace(".exe", "");
+
             try
             {
                 if (Rkey == null)
@@ -178,7 +178,7 @@ namespace server.service.tray
             {
                 if (string.IsNullOrEmpty(model.Value))
                 {
-                    model.RegKey.SetValue(model.Key, model.Path);
+                    model.RegKey.SetValue(model.Key, "\"" + model.Path + "\"");
                     notifyIcon.BalloonTipText = "已设置自启动";
                     notifyIcon.ShowBalloonTip(1000);
                 }
@@ -216,12 +216,12 @@ namespace server.service.tray
 
         private void Close(object sender, EventArgs e)
         {
+            KillExe();
             this.Close();
         }
         private new void Closing(object sender, FormClosingEventArgs e)
         {
-            proc?.Close();
-            proc?.Dispose();
+            KillExe();
         }
 
 

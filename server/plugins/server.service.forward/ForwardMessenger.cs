@@ -61,7 +61,7 @@ namespace server.service.forward
                 {
                     ForwardTargetCacheInfo cache = model.AliveType == ForwardAliveTypes.Web ? forwardTargetCaching.Get(model.SourceIp, model.SourcePort) : forwardTargetCaching.Get(model.SourcePort);
 
-                    if (cache != null && cache.Id == source.ConnectionId)
+                    if (cache != null && cache.ConnectionId == source.ConnectionId)
                     {
                         if (model.AliveType == ForwardAliveTypes.Web)
                         {
@@ -107,15 +107,14 @@ namespace server.service.forward
                     {
                         ForwardTargetCacheInfo target = forwardTargetCaching.Get(model.SourceIp, model.SourcePort);
                         //已存在相同的注册
-                        if (target != null && target.Id != source.ConnectionId)
+                        if (target != null && target.ConnectionId != source.ConnectionId)
                         {
                             connection.Write(new ForwardSignInResultInfo { Code = ForwardSignInResultCodes.EXISTS }.ToBytes());
                             return;
                         }
                         forwardTargetCaching.AddOrUpdate(model.SourceIp, model.SourcePort, new ForwardTargetCacheInfo
                         {
-                            Id = source.ConnectionId,
-                            Name = source.Name,
+                            ConnectionId = source.ConnectionId,
                             Connection = connection,
                             IPAddress = model.TargetIp.GetAddressBytes(),
                             Port = model.TargetPort,
@@ -133,15 +132,14 @@ namespace server.service.forward
 
                         ForwardTargetCacheInfo target = forwardTargetCaching.Get(model.SourcePort);
                         //已存在相同的注册
-                        if (target != null && target.Id != source.ConnectionId)
+                        if (target != null && target.ConnectionId != source.ConnectionId)
                         {
                             connection.Write(new ForwardSignInResultInfo { Code = ForwardSignInResultCodes.EXISTS }.ToBytes());
                             return;
                         }
                         forwardTargetCaching.AddOrUpdate(model.SourcePort, new ForwardTargetCacheInfo
                         {
-                            Id = source.ConnectionId,
-                            Name = source.Name,
+                            ConnectionId = source.ConnectionId,
                             Connection = connection,
                             IPAddress = model.TargetIp.GetAddressBytes(),
                             Port = model.TargetPort,

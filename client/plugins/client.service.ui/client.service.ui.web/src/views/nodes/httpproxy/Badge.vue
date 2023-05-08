@@ -28,16 +28,16 @@ export default {
     plugin: plugin,
     props: ['params'],
     setup(props) {
-        const name = props.params.Name;
-        const isTarget = computed(() => name == state.TargetName);
+        const id = props.params.ConnectionId;
+        const isTarget = computed(() => id == state.TargetConnectionId);
         const state = reactive({
             loading: false,
-            TargetName: ''
+            TargetConnectionId: 0
         });
         const loadData = () => {
             getConfigure(plugin.config).then((res) => {
                 let json = new Function(`return ${res}`)();
-                state.TargetName = json.TargetName;
+                state.TargetConnectionId = json.TargetConnectionId;
             }).catch(() => {
 
             });
@@ -50,7 +50,8 @@ export default {
             state.loading = true;
             getConfigure(plugin.config).then((res) => {
                 let json = new Function(`return ${res}`)();
-                json.TargetName = state.TargetName;
+                json.TargetConnectionId = state.TargetConnectionId;
+                console.log(JSON.stringify(json));
                 saveConfigure(plugin.config, JSON.stringify(json)).then((res) => {
                     state.loading = false;
                     loadData();
@@ -62,12 +63,12 @@ export default {
             });
         }
 
-        const handleSet = (name) => {
-            state.TargetName = name;
+        const handleSet = () => {
+            state.TargetConnectionId = id;
             handleSubmit();
         }
         const handleClear = () => {
-            state.TargetName = '';
+            state.TargetConnectionId = 0;
             handleSubmit();
         }
 

@@ -1,8 +1,10 @@
 ﻿using client.messengers.clients;
 using client.messengers.singnin;
 using common.forward;
+using common.libs.extends;
 using common.proxy;
 using common.server;
+using System;
 
 namespace client.service.forward
 {
@@ -26,7 +28,7 @@ namespace client.service.forward
             };
             clientInfoCaching.OnOffline += (client) =>
             {
-                forwardTargetCaching.ClearConnection(client.Name);
+                forwardTargetCaching.ClearConnection(client.ConnectionId);
             };
         }
 
@@ -70,12 +72,11 @@ namespace client.service.forward
 
         private IConnection SelectConnection(ForwardTargetCacheInfo cacheInfo)
         {
-
-            if (cacheInfo.Name == "/")
+            if (cacheInfo.ConnectionId == 0)
             {
                 return signInStateInfo.Connection;
             }
-            if (clientInfoCaching.GetByName(cacheInfo.Name, out ClientInfo client))
+            if (clientInfoCaching.Get(cacheInfo.ConnectionId, out ClientInfo client))
             {
                 return client.Connection;
             }

@@ -144,6 +144,9 @@ namespace client
         /// TCP禁用delay
         /// </summary>
         public bool NoDelay { get; set; } = false;
+        public ulong ConnectId { get; set; }
+
+        public ushort TTL { get; set; } = 1;
 
         /// <summary>
         /// 绑定ip

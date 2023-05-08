@@ -64,11 +64,11 @@ export default {
             return clientsState.clients.concat([{
                 Name: '服务器',
                 Id: 0
-            }]).filter(c => state.delays[c.Id]).map(c => {
+            }]).filter(c => state.delays[c.ConnectionId]).map(c => {
                 return {
                     name: c.Name,
-                    id: c.Id,
-                    delay: state.delays[c.Id] || -1
+                    id: c.ConnectionId,
+                    delay: state.delays[c.ConnectionId] || -1
                 }
             });
         });
@@ -98,12 +98,12 @@ export default {
                     getDelay(paths).then((delays) => {
 
                         let clients = clientsState.clients.reduce((json, current, index) => {
-                            json[current.Id] = current;
+                            json[current.ConnectionId] = current;
                             return json;
                         }, {});
 
                         let clients1 = clientsState.clients.reduce((json, current, index) => {
-                            json[current.Id] = current.Name;
+                            json[current.ConnectionId] = current.Name;
                             return json;
                         }, {});
 
@@ -132,8 +132,8 @@ export default {
         const fun = (starts, exclude = [], path = [], result = []) => {
             for (let i = 0; i < starts.length; i++) {
                 let _path = path.slice(0);
-                if (starts[i].Id == state.end) {
-                    _path.push(starts[i].Id);
+                if (starts[i].ConnectionId == state.end) {
+                    _path.push(starts[i].ConnectionId);
                     if (_path[0] == state.start) {
                         result.push(_path);
                     }
@@ -141,11 +141,11 @@ export default {
                 }
 
                 let _exclude = exclude.slice(0);
-                _exclude.push(starts[i].Id);
-                _path.push(starts[i].Id);
+                _exclude.push(starts[i].ConnectionId);
+                _path.push(starts[i].ConnectionId);
 
                 let lastIds = starts[i].Connects.filter(c => _exclude.indexOf(c) == -1);
-                let last = state.connects.filter(c => lastIds.indexOf(c.Id) >= 0);
+                let last = state.connects.filter(c => lastIds.indexOf(c.ConnectionId) >= 0);
                 if (last.length > 0) {
                     fun(last, _exclude, _path, result);
                 } else {

@@ -185,7 +185,7 @@ namespace common.server.servers.iocp
                         }
                     }
 
-                    if (token.Socket.Connected == false || token.Port != port)
+                    if (token.Socket.Connected == false)
                     {
                         token.Connection.SocketError = SocketError.SocketError;
                         CloseClientSocket(e);
@@ -211,8 +211,6 @@ namespace common.server.servers.iocp
         }
         private async Task ReadPacket(AsyncUserToken token, byte[] data, int offset, int length)
         {
-            if (token.Port != port) return;
-
             //是一个完整的包
             if (token.DataBuffer.Size == 0 && length > 4)
             {

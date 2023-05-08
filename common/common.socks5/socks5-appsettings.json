@@ -5,7 +5,7 @@
   "BufferSize": 3, //0-1KB 1-2KB 2-4KB 3-8KB 4-16KB 5-32KB 6-64KB 7-128KB 8-256KB 9-512KB 10-1024KB
   "IsCustomPac": false, //是否自定义pac
   "IsPac": false, //是否设置pac
-  "TargetName": "B客户端", //连接目标客户端名，为/表示代理到服务器
+  "TargetConnectionId": 0, //连接目标客户端，0表示代理到服务器
 
   //以下为客户端与服务端共有配置
   "ConnectEnable": false //是否允许被连接，作为服务端时，表示是否允许所有人使用socks5

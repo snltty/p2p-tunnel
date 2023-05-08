@@ -94,7 +94,7 @@ namespace server.service
                 List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.Connection != null && c.Connection.Connected).OrderBy(c => c.ConnectionId).Select(c => new ClientsClientInfo
                 {
                     Connection = c.Connection,
-                    Id = c.ConnectionId,
+                    ConnectionId = c.ConnectionId,
                     Name = c.Name,
                     Access = c.ClientAccess,
                 }).ToList();

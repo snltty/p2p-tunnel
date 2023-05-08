@@ -68,7 +68,7 @@ namespace client.service.vea.client
         /// <returns></returns>
         public object List(ClientServiceParamsInfo arg)
         {
-            return VeaTransfer.IPList.ToDictionary(c => c.Value.Client.Id, d => new
+            return VeaTransfer.IPList.ToDictionary(c => c.Value.Client.ConnectionId, d => new
             {
                 IP = string.Join(".", BinaryPrimitives.ReverseEndianness(d.Value.IP).ToBytes()),
                 LanIPs = d.Value.LanIPs.Select(c => new { IPAddress = string.Join(".", BinaryPrimitives.ReverseEndianness(c.IPAddress).ToBytes()), Mask = c.MaskLength }),

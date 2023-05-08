@@ -9,10 +9,8 @@ using client.realize.messengers.heart;
 using client.realize.messengers.punchHole;
 using client.realize.messengers.relay;
 using common.libs;
-using common.libs.extends;
 using common.server;
 using common.server.model;
-using common.server.servers.rudp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -140,11 +138,11 @@ namespace client.realize.messengers.clients
 
         private void OnOffline(ClientInfo client)
         {
-            if (clientInfoCaching.Get(client.Id, out _))
+            if (clientInfoCaching.Get(client.ConnectionId, out _))
             {
                 signInState.LocalInfo.IsConnecting = true;
                 client.SetConnecting(true);
-                punchHoleMessengerSender.SendOffline(client.Id).Wait();
+                punchHoleMessengerSender.SendOffline(client.ConnectionId).Wait();
                 client.SetConnecting(false);
                 signInState.LocalInfo.IsConnecting = false;
             }
@@ -152,7 +150,12 @@ namespace client.realize.messengers.clients
         }
         private void OnOfflineAfter(ClientInfo client)
         {
-            if (clientInfoCaching.Get(client.Id, out _))
+            if (signInState.Connected == false)
+            {
+                clientInfoCaching.Remove(client.ConnectionId);
+                return;
+            }
+            if (clientInfoCaching.Get(client.ConnectionId, out _))
             {
                 //主动连接的，未知掉线信息的，去尝试重连一下
                 if (config.Client.UseReConnect && client.OnlineType == ClientOnlineTypes.Active && client.OfflineType == ClientOfflineTypes.Disconnect)
@@ -168,6 +171,7 @@ namespace client.realize.messengers.clients
             {
                 return;
             }
+
 
             Logger.Instance.Error($"{connection.ServerType} client 断开~~~~${connection.Address}");
             if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
@@ -201,7 +205,7 @@ namespace client.realize.messengers.clients
         /// <param name="client"></param>
         public void ConnectClient(ClientInfo client)
         {
-            if (client.Id == signInState.ConnectId)
+            if (client.ConnectionId == signInState.ConnectId)
             {
                 Logger.Instance.Error($"canot connect you self");
                 return;
@@ -295,9 +299,9 @@ namespace client.realize.messengers.clients
         /// 连我
         /// </summary>
         /// <param name="info"></param>
-        public void ConnectReverse(ClientInfo info)
+        public void ConnectReverse(ClientInfo client)
         {
-            punchHoleMessengerSender.SendReverse(info).ConfigureAwait(false);
+            punchHoleMessengerSender.SendReverse(client).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -334,7 +338,7 @@ namespace client.realize.messengers.clients
             {
                 ConnectResultModel result = await punchHoleUdp.Send(new ConnectParams
                 {
-                    Id = client.Id,
+                    Id = client.ConnectionId,
                     NewTunnel = 1,
                     LocalPort = 0
                 }).ConfigureAwait(false);
@@ -364,10 +368,10 @@ namespace client.realize.messengers.clients
             byte[] tunnelNames = new byte[] { 1, 1 };
             for (int i = 0; i < tunnelNames.Length; i++)
             {
-                clientInfoCaching.AddTunnelPort(client.Id, signInState.LocalInfo.Port);
+                clientInfoCaching.AddTunnelPort(client.ConnectionId, signInState.LocalInfo.Port);
                 ConnectResultModel result = await punchHoleTcp.Send(new ConnectParams
                 {
-                    Id = client.Id,
+                    Id = client.ConnectionId,
                     NewTunnel = tunnelNames[i],
                     LocalPort = signInState.LocalInfo.Port
                 }).ConfigureAwait(false);
@@ -434,32 +438,34 @@ namespace client.realize.messengers.clients
                 }
                 lock (lockObject)
                 {
-                    IEnumerable<ulong> remoteIds = clients.Clients.Select(c => c.Id);
+                    IEnumerable<ulong> remoteIds = clients.Clients.Select(c => c.ConnectionId);
                     //下线了的
-                    IEnumerable<ulong> offlines = clientInfoCaching.AllIds().Except(remoteIds).Where(c => c != signInState.ConnectId);
+                    IEnumerable<ulong> offlines = clientInfoCaching.All().Where(c => c.Connected == false).Select(c => c.ConnectionId).Except(remoteIds).Where(c => c != signInState.ConnectId);
                     foreach (ulong offid in offlines)
                     {
                         clientInfoCaching.Remove(offid);
                     }
-                    //新上线的
-                    IEnumerable<ulong> upLines = remoteIds.Except(clientInfoCaching.AllIds());
-                    IEnumerable<ClientsClientInfo> upLineClients = clients.Clients.Where(c => upLines.Contains(c.Id) && c.Id != signInState.ConnectId && c.Name != config.Client.Name);
 
-                    foreach (ClientsClientInfo item in upLineClients)
+                    //新上线的或者更新的
+                    foreach (ClientsClientInfo item in clients.Clients.Where(c => c.ConnectionId != signInState.ConnectId))
                     {
                         EnumClientAccess enumClientAccess = (EnumClientAccess)item.Access;
-                        ClientInfo client = new ClientInfo
+                        bool has = clientInfoCaching.Get(item.ConnectionId, out ClientInfo client);
+                        if (has == false)
                         {
-                            Id = item.Id,
-                            Name = item.Name,
-                            UseTcp = (enumClientAccess & EnumClientAccess.UseTcp) == EnumClientAccess.UseTcp,
-                            UseUdp = (enumClientAccess & EnumClientAccess.UseUdp) == EnumClientAccess.UseUdp,
-                            UsePunchHole = (enumClientAccess & EnumClientAccess.UsePunchHole) == EnumClientAccess.UsePunchHole,
-                            UseRelay = (enumClientAccess & EnumClientAccess.UseRelay) == EnumClientAccess.UseRelay,
-                            UseAutoRelay = (enumClientAccess & EnumClientAccess.UseAutoRelay) == EnumClientAccess.UseAutoRelay
-                        };
+                            client = new ClientInfo();
+                            client.ConnectionId = item.ConnectionId;
+                        }
+
+                        client.Name = item.Name;
+                        client.UseTcp = (enumClientAccess & EnumClientAccess.UseTcp) == EnumClientAccess.UseTcp;
+                        client.UseUdp = (enumClientAccess & EnumClientAccess.UseUdp) == EnumClientAccess.UseUdp;
+                        client.UsePunchHole = (enumClientAccess & EnumClientAccess.UsePunchHole) == EnumClientAccess.UsePunchHole;
+                        client.UseRelay = (enumClientAccess & EnumClientAccess.UseRelay) == EnumClientAccess.UseRelay;
+                        client.UseAutoRelay = (enumClientAccess & EnumClientAccess.UseAutoRelay) == EnumClientAccess.UseAutoRelay;
                         clientInfoCaching.Add(client);
-                        if (firstClients.IsDefault)
+
+                        if (has == false && firstClients.IsDefault && client.Connected == false)
                         {
                             if (config.Client.UsePunchHole && client.UsePunchHole)
                             {
@@ -555,7 +561,7 @@ namespace client.realize.messengers.clients
             {
                 return;
             }
-            await Relay(connection, new ulong[] { signInState.ConnectId, 0, client.Id }, notify);
+            await Relay(connection, new ulong[] { signInState.ConnectId, 0, client.ConnectionId }, notify);
         }
 
         /// <summary>

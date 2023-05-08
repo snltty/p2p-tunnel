@@ -9,9 +9,6 @@ namespace common.server.model
     /// </summary>
     public sealed class ClientsInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public ClientsInfo() { }
 
         /// <summary>
@@ -81,7 +78,7 @@ namespace common.server.model
         /// <summary>
         /// id
         /// </summary>
-        public ulong Id { get; set; }
+        public ulong ConnectionId { get; set; }
         /// <summary>
         /// 名字
         /// </summary>
@@ -113,7 +110,7 @@ namespace common.server.model
             Access.ToBytes(memory.Slice(index));
             index += 4;
 
-            Id.ToBytes(memory.Slice(index));
+            ConnectionId.ToBytes(memory.Slice(index));
             index += 8;
 
             bytes[index] = (byte)nameBytes.Length;
@@ -134,7 +131,7 @@ namespace common.server.model
             Access = span.Slice(index, 4).ToUInt32();
             index += 4;
 
-            Id = span.Slice(index, 8).ToUInt64();
+            ConnectionId = span.Slice(index, 8).ToUInt64();
             index += 8;
 
             Name = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);

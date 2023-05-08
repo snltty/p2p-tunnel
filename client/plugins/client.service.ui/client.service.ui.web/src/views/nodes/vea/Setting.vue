@@ -124,7 +124,6 @@ export default {
         const state = reactive({
             configInfo: {},
             form: {
-                TargetName: '',
                 IP: '',
                 LanIPs: '',
 
@@ -153,7 +152,6 @@ export default {
         const loadConfig = () => {
             getConfig().then((res) => {
                 state.configInfo = res;
-                state.form.TargetName = res.TargetName;
                 state.form.IP = res.IP;
                 state.form.LanIPs = res.LanIPs.join('\n');
                 state.form.ListenPort = res.ListenPort;
@@ -176,7 +174,6 @@ export default {
                         reject();
                         return false;
                     }
-                    state.configInfo.TargetName = state.form.TargetName;
                     state.configInfo.IP = state.form.IP;
                     state.configInfo.LanIPs = state.form.LanIPs.replace(/\s/g, '').split(/,|\n/).filter(c => c.length > 0).map(c => c.replace(/\s/g, ''));
                     state.configInfo.ListenPort = +state.form.ListenPort;

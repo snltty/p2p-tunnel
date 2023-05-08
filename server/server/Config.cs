@@ -34,15 +34,15 @@ namespace server
         /// <summary>
         /// udp端口
         /// </summary>
-        public int Udp { get; set; } = 0;
+        public int Udp { get; set; }
         /// <summary>
         /// tcp端口
         /// </summary>
-        public int Tcp { get; set; } = 0;
+        public int Tcp { get; set; }
         /// <summary>
         /// 连接频率每秒
         /// </summary>
-        public int ConnectLimit { get; set; } = 0;
+        public int ConnectLimit { get; set; }
         public EnumBufferSize TcpBufferSize { get; set; } = EnumBufferSize.KB_8;
         /// <summary>
         /// 掉线超时
@@ -60,7 +60,7 @@ namespace server
         /// <summary>
         /// 允许中继
         /// </summary>
-        public bool RelayEnable { get; set; } = false;
+        public bool RelayEnable { get; set; }
         /// <summary>
         /// 加密密码
         /// </summary>
@@ -70,7 +70,8 @@ namespace server
         /// </summary>
         public string AdminGroup { get; set; } = string.Empty;
 
-        public bool NoDelay { get; set; } = false;
+        public bool NoDelay { get; set; }
+
 
 
         private async Task<Config> ReadConfig()
@@ -108,6 +109,11 @@ namespace server
             config.AdminGroup = AdminGroup;
 
             await configDataProvider.Save(config).ConfigureAwait(false);
+        }
+
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this).ConfigureAwait(false);
         }
     }
 

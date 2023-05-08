@@ -45,13 +45,7 @@ namespace client.messengers.clients
         /// <param name="client"></param>
         /// <returns></returns>
         public bool Get(ulong id, out ClientInfo client);
-        /// <summary>
-        /// 按名获取
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="client"></param>
-        /// <returns></returns>
-        public bool GetByName(string name, out ClientInfo client);
+
         /// <summary>
         /// 所有
         /// </summary>

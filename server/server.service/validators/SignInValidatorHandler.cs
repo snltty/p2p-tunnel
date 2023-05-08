@@ -68,12 +68,8 @@ namespace server.service.validators
             }
 
             //重名
-            if (clientSignInCache.Get(model.GroupId, model.Name, out SignInCacheInfo client))
+            if (clientSignInCache.Get(model.ConnectionId, out SignInCacheInfo client))
             {
-                if (Alive(client.Connection))
-                {
-                    return SignInResultInfo.SignInResultInfoCodes.SAME_NAMES;
-                }
                 clientSignInCache.Remove(client.ConnectionId);
             }
 

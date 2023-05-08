@@ -1,6 +1,8 @@
-﻿using common.server;
+﻿using common.libs.extends;
+using common.server;
 using common.server.model;
 using server.messengers.singnin;
+using System;
 using System.Threading.Tasks;
 
 namespace server.service.messengers
@@ -51,7 +53,6 @@ namespace server.service.messengers
             PunchHoleRequestInfo model = new PunchHoleRequestInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
             model.FromId = connection.ConnectId;
-
             //A已注册
             if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
             {

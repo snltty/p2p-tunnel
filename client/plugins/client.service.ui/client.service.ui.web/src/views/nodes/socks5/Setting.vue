@@ -31,9 +31,9 @@
                                 </el-form-item>
                             </el-col>
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                <el-form-item label="目标端" prop="TargetName">
-                                    <el-select size="default" v-model="state.form.TargetName" placeholder="选择目标">
-                                        <el-option v-for="(item, index) in targets" :key="index" :label="item.label" :value="item.Name">
+                                <el-form-item label="目标端" prop="TargetConnectionId">
+                                    <el-select size="default" v-model="state.form.TargetConnectionId" placeholder="选择目标">
+                                        <el-option v-for="(item, index) in targets" :key="index" :label="item.label" :value="item.id">
                                         </el-option>
                                     </el-select>
                                 </el-form-item>
@@ -93,9 +93,9 @@ export default {
         const clientsState = injectClients();
         const shareData = injectShareData();
         const targets = computed(() => {
-            return [{ Name: "/", label: "服务器" }].concat(
+            return [{ id: 0, label: "服务器" }].concat(
                 clientsState.clients.map((c) => {
-                    return { Name: c.Name, label: c.Name };
+                    return { id: c.ConnectionId, label: c.Name };
                 })
             );
         });
@@ -107,7 +107,7 @@ export default {
                 ListenPort: 5413,
                 ConnectEnable: false,
                 BufferSize: 3,
-                TargetName: "",
+                TargetConnectionId: 0,
                 IsPac: false,
                 IsCustomPac: false,
             },
@@ -134,7 +134,7 @@ export default {
                 state.form.ListenPort = res.ListenPort;
                 state.form.BufferSize = res.BufferSize;
                 state.form.ConnectEnable = res.ConnectEnable;
-                state.form.TargetName = res.TargetName;
+                state.form.TargetConnectionId = res.TargetConnectionId;
                 state.form.IsPac = res.IsPac;
                 state.form.IsCustomPac = res.IsCustomPac;
             });
@@ -169,7 +169,7 @@ export default {
                     state.configInfo.ListenPort = +state.form.ListenPort;
                     state.configInfo.BufferSize = +state.form.BufferSize;
                     state.configInfo.ConnectEnable = state.form.ConnectEnable;
-                    state.configInfo.TargetName = state.form.TargetName;
+                    state.configInfo.TargetConnectionId = state.form.TargetConnectionId;
                     state.configInfo.IsPac = state.form.IsPac;
                     state.configInfo.IsCustomPac = state.form.IsCustomPac;
                     set(state.configInfo).then(resolve).catch(reject);

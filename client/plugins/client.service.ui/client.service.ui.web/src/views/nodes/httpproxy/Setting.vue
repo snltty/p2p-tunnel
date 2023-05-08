@@ -32,8 +32,8 @@
                             </el-col>
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="目标端" prop="Name">
-                                    <el-select size="default" v-model="state.form.TargetName" placeholder="选择目标">
-                                        <el-option v-for="(item, index) in targets" :key="index" :label="item.label" :value="item.Name">
+                                    <el-select size="default" v-model="state.form.TargetConnectionId" placeholder="选择目标">
+                                        <el-option v-for="(item, index) in targets" :key="index" :label="item.label" :value="item.id">
                                         </el-option>
                                     </el-select>
                                 </el-form-item>
@@ -95,8 +95,8 @@ export default {
         const clientsState = injectClients();
         const shareData = injectShareData();
         const targets = computed(() => {
-            return [{ Name: '/', label: '服务器' }].concat(clientsState.clients.map(c => {
-                return { Name: c.Name, label: c.Name }
+            return [{ id: 0, label: '服务器' }].concat(clientsState.clients.map(c => {
+                return { id: c.ConnectionId, label: c.Name }
             }));
         })
         const state = reactive({
@@ -108,7 +108,7 @@ export default {
                 IsCustomPac: false,
                 BufferSize: 3,
                 ConnectEnable: false,
-                TargetName: '',
+                TargetConnectionId: 0,
                 Pac: '',
             },
             rules: {
@@ -126,7 +126,7 @@ export default {
             getConfigure(plugin.config).then((res) => {
                 const json = new Function(`return ${res}`)();
                 state.form.ListenPort = json.ListenPort;
-                state.form.TargetName = json.TargetName;
+                state.form.TargetConnectionId = json.TargetConnectionId;
                 state.form.IsPac = json.IsPac;
                 state.form.IsCustomPac = json.IsCustomPac;
                 state.form.BufferSize = json.BufferSize;
@@ -163,7 +163,7 @@ export default {
                     }
                     getConfigure(plugin.config).then((res) => {
                         const json = new Function(`return ${res}`)();
-                        json.TargetName = state.form.TargetName;
+                        json.TargetConnectionId = state.form.TargetConnectionId;
                         json.ListenPort = +state.form.ListenPort;
                         json.IsPac = state.form.IsPac;
                         json.IsCustomPac = state.form.IsCustomPac;

@@ -7,7 +7,6 @@ using common.server.model;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -145,8 +144,11 @@ namespace client.realize.messengers.singnin
 
                         config.Client.ShortId = result.Data.ShortId;
                         config.Client.GroupId = result.Data.GroupId;
+                        config.Client.ConnectId = result.Data.ConnectionId;
                         signInState.RemoteInfo.Access = result.Data.UserAccess;
                         signInState.Online(result.Data.ConnectionId, result.Data.Ip);
+                       
+                        await config.SaveConfig(config);
                         await signinMessengerSender.Notify().ConfigureAwait(false);
 
                         success.ErrorMsg = "登入成功~";
@@ -167,7 +169,6 @@ namespace client.realize.messengers.singnin
                         success.ErrorMsg = ex.Message;
                         signInState.LocalInfo.IsConnecting = false;
                         await Task.Delay((int)interval, cancellationToken.Token);
-                        continue;
                     }
                 }
                 if (success.Data == false)

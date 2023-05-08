@@ -9,9 +9,9 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="目标端" prop="Name">
-                            <el-select v-model="state.form.Name" placeholder="选择目标">
-                                <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.Name">
+                        <el-form-item label="目标端" prop="ConnectionId">
+                            <el-select v-model="state.form.ConnectionId" placeholder="选择目标">
+                                <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.id">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -60,16 +60,24 @@ export default {
             ListenID: 0,
             ID: 0,
             SourceIp: '0.0.0.0',
-            Name: 'B客户端', TargetIp: '127.0.0.1', TargetPort: 80,
+            id: 0, TargetIp: '127.0.0.1', TargetPort: 80,
             AliveType: shareData.aliveTypesName.tunnel + '',
-            Desc: ''
+            Desc: '',
+            ConnectionId: 0
         };
         const clientsState = injectClients();
         const targets = computed(() => {
-            return [{ Name: '/', label: '服务器' }].concat(clientsState.clients.map(c => {
-                return { Name: c.Name, label: c.Name }
+            return [{ id: 0, label: '服务器' }].concat(clientsState.clients.map(c => {
+                return { id: c.ConnectionId, label: `${c.Name}` }
             }));
         });
+        const targetJson = computed(() => {
+            return targets.value.reduce((value, item) => {
+                value[item.id] = item.label;
+                return value;
+            }, {})
+        });
+
         const addForwardData = inject('add-forward-data');
 
         const state = reactive({
@@ -78,7 +86,7 @@ export default {
             form: {
                 ID: addForwardData.value.forward.ID || defaultForm.ID,
                 SourceIp: addForwardData.value.forward.SourceIp || defaultForm.SourceIp,
-                Name: addForwardData.value.forward.Name || defaultForm.Name,
+                ConnectionId: addForwardData.value.forward.ConnectionId || defaultForm.ConnectionId,
                 TargetIp: addForwardData.value.forward.TargetIp || defaultForm.TargetIp,
                 TargetPort: addForwardData.value.forward.TargetPort || defaultForm.TargetPort,
                 Desc: addForwardData.value.forward.Desc || defaultForm.Desc
@@ -112,7 +120,7 @@ export default {
                 `【${shareData.aliveTypes[addForwardData.value.currentLsiten.AliveType]}】`,
                 ` -> `,
                 `<br/>`,
-                `${state.form.Name}(${state.form.TargetIp}:${state.form.TargetPort})`
+                `${targetJson.value[state.form.ConnectionId]}(${state.form.TargetIp}:${state.form.TargetPort})`
             ].join('');
         });
 

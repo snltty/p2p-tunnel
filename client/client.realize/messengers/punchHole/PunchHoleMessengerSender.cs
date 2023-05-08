@@ -150,7 +150,7 @@ namespace client.realize.messengers.punchHole
             await Request(new SendPunchHoleArg<PunchHoleReverseInfo>
             {
                 Connection = signInState.Connection,
-                ToId = info.Id,
+                ToId = info.ConnectionId,
                 Data = new PunchHoleReverseInfo { Value = times }
             }).ConfigureAwait(false);
         }

@@ -42,7 +42,7 @@ namespace server.service.forward
             {
                 if (cacheInfo.Connection == null || cacheInfo.Connection.Connected == false)
                 {
-                    if (clientSignInCaching.Get(cacheInfo.Id, out SignInCacheInfo client))
+                    if (clientSignInCaching.Get(cacheInfo.ConnectionId, out SignInCacheInfo client))
                     {
                         cacheInfo.Connection = client.Connection;
                     }

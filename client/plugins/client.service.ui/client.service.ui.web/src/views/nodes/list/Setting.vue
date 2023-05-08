@@ -70,6 +70,26 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <el-form-item label="自动打洞" prop="UsePunchHole">
+                                <el-tooltip class="box-item" effect="dark" content="发现新客户端后是否自动打洞" placement="top-start">
+                                    <el-checkbox v-model="state.form.UsePunchHole">开启</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                            <el-form-item label="附加TTL" prop="TTL">
+                                <el-popover placement="top-start" title="TCP打洞可以调整TTL" :width="300" trigger="hover" content="TCP打洞，有一方将会以一个低TTL值向对方发起连接，达到在网关中留下对方信息，而不会被对方拒绝的效果，默认值1，表示你当前设备与外网的距离+1">
+                                    <template #reference>
+                                        <el-input size="default" v-model="state.form.TTL"></el-input>
+                                    </template>
+                                </el-popover>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <el-row>
+                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="tcp打洞" prop="UseTcp">
                                 <el-tooltip class="box-item" effect="dark" content="是否使用tcp打洞" placement="top-start">
                                     <el-checkbox v-model="state.form.UseTcp">开启</el-checkbox>
@@ -85,24 +105,7 @@
                         </el-col>
                     </el-row>
                 </el-form-item>
-                <el-form-item label="" label-width="0">
-                    <el-row>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="自动打洞" prop="UsePunchHole">
-                                <el-tooltip class="box-item" effect="dark" content="发现新客户端后是否自动打洞" placement="top-start">
-                                    <el-checkbox v-model="state.form.UsePunchHole">开启</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="断线重连" prop="UseReConnect">
-                                <el-tooltip class="box-item" effect="dark" content="客户端之间掉线后，是否尝试重新连接" placement="top-start">
-                                    <el-checkbox v-model="state.form.UseReConnect">开启</el-checkbox>>
-                                </el-tooltip>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form-item>
+
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -156,7 +159,7 @@ export default {
                 UseTcp: false,
                 UseRelay: true,
                 AutoRelay: true,
-                UseReConnect: false,
+                TTL: 1,
                 UdpUploadSpeedLimit: 0,
                 TcpBufferSize: 0,
             },
@@ -177,6 +180,14 @@ export default {
                             return Number(value)
                         }
                     }
+                ],
+                TTL: [
+                    { required: true, message: '必填', trigger: 'blur' },
+                    {
+                        type: 'number', min: -255, max: 255, message: '数字 -255-255', trigger: 'blur', transform(value) {
+                            return Number(value)
+                        }
+                    }
                 ]
             }
         });
@@ -191,7 +202,7 @@ export default {
 
                 state.form.AutoReg = json.ClientConfig.AutoReg;
                 state.form.UsePunchHole = json.ClientConfig.UsePunchHole;
-                state.form.UseReConnect = json.ClientConfig.UseReConnect;
+                state.form.TTL = json.ClientConfig.TTL;
 
                 state.form.TimeoutDelay = json.ClientConfig.TimeoutDelay;
 
@@ -219,7 +230,7 @@ export default {
                     json.ClientConfig.UseTcp = state.form.UseTcp;
                     json.ClientConfig.UseRelay = state.form.UseRelay;
                     json.ClientConfig.AutoRelay = state.form.AutoRelay;
-                    json.ClientConfig.UseReConnect = state.form.UseReConnect;
+                    json.ClientConfig.TTL = +state.form.TTL;
                     json.ClientConfig.UdpUploadSpeedLimit = +state.form.UdpUploadSpeedLimit;
                     resolve(json);
                 }).catch(reject);

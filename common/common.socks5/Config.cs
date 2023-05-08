@@ -27,7 +27,7 @@ namespace common.socks5
             ConnectEnable = config.ConnectEnable;
             IsCustomPac = config.IsCustomPac;
             IsPac = config.IsPac;
-            TargetName = config.TargetName;
+            TargetConnectionId = config.TargetConnectionId;
 
         }
 
@@ -40,7 +40,7 @@ namespace common.socks5
         public bool ConnectEnable { get; set; } = false;
         public bool IsCustomPac { get; set; } = false;
         public bool IsPac { get; set; } = false;
-        public string TargetName { get; set; } = string.Empty;
+        public ulong TargetConnectionId { get; set; }
 
         public async Task<Config> ReadConfig()
         {
@@ -62,7 +62,7 @@ namespace common.socks5
             ConnectEnable = config.ConnectEnable;
             IsCustomPac = config.IsCustomPac;
             IsPac = config.IsPac;
-            TargetName = config.TargetName;
+            TargetConnectionId = config.TargetConnectionId;
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
     }

@@ -51,7 +51,6 @@ namespace client.messengers.singnin
             {
                 connectid = value;
                 RemoteInfo.ConnectId = connectid;
-
                 if (connectid > 0)
                 {
                     if (Connection != null)
@@ -71,7 +70,6 @@ namespace client.messengers.singnin
 
             RemoteInfo.Ip = IPAddress.Any;
 
-            ConnectId = 0;
             Connection?.Disponse();
             Connection = null;
 

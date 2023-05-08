@@ -9,8 +9,8 @@
                 </el-form-item>
                 <el-form-item>
                     <div class="w-100 t-c">
-                        <span>目标</span>：<el-select v-model="state.TargetName" placeholder="选择目标" @change="handleChange">
-                            <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.Name">
+                        <span>目标</span>：<el-select v-model="state.TargetConnectionId" placeholder="选择目标" @change="handleChange">
+                            <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.id">
                             </el-option>
                         </el-select>
                     </div>
@@ -43,15 +43,15 @@ export default {
 
         const clientsState = injectClients();
         const targets = computed(() => {
-            return [{ Name: '/', label: '服务器' }].concat(clientsState.clients.map(c => {
-                return { Name: c.Name, label: c.Name }
+            return [{ id: 0, label: '服务器' }].concat(clientsState.clients.map(c => {
+                return { id: c.ConnectionId, label: c.Name }
             }));
         });
         const state = reactive({
             loading: false,
 
             ListenPort: 5414,
-            TargetName: '',
+            TargetConnectionId: 0,
             ListenEnable: false,
 
             localtion: window.location.origin,
@@ -60,7 +60,7 @@ export default {
             getConfigure(plugin.config).then((res) => {
                 const json = new Function(`return ${res}`)();
                 state.ListenPort = json.ListenPort;
-                state.TargetName = json.TargetName;
+                state.TargetConnectionId = json.TargetConnectionId;
                 state.ListenEnable = json.ListenEnable;
             });
         }
@@ -72,7 +72,7 @@ export default {
             state.loading = true;
             getConfigure(plugin.config).then((res) => {
                 const json = new Function(`return ${res}`)();
-                json.TargetName = state.TargetName;
+                json.TargetConnectionId = state.TargetConnectionId;
                 json.ListenEnable = state.ListenEnable;
                 console.log(json);
                 saveConfigure(plugin.config, JSON.stringify(json)).then(() => {
@@ -94,9 +94,9 @@ export default {
             state.ListenEnable = !state.ListenEnable;
             submit();
         };
-        const handleChange = (name) => {
+        const handleChange = (id) => {
             if (state.loading) return;
-            state.TargetName = name;
+            state.TargetConnectionId = id;
             submit();
         }
 

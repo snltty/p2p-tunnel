@@ -12,6 +12,7 @@ namespace client.service.tray
     {
         private NotifyIcon notifyIcon = null;
         private Process proc;
+
         protected override CreateParams CreateParams
         {
             get
@@ -27,13 +28,17 @@ namespace client.service.tray
 
         public Form1()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            this.FormBorderStyle = FormBorderStyle.None;
             ShowInTaskbar = false;
+            this.WindowState = FormWindowState.Minimized;
             this.Hide();
+            this.Opacity = 0;
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+
             InitializeComponent();
             InitialTray();
-        }
 
+        }
 
 
         Image unright = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right1.png"));
@@ -91,19 +96,18 @@ namespace client.service.tray
                 string dir = Directory.GetCurrentDirectory();
                 string file = Path.Combine(dir, "./client.service.exe");
 
-                proc = new Process();
-                proc.StartInfo.WorkingDirectory = dir;
-                proc.StartInfo.UseShellExecute = false;
-                proc.StartInfo.CreateNoWindow = true;
-                proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                proc.StartInfo.FileName = file;
-                proc.StartInfo.RedirectStandardInput = true;
-                proc.StartInfo.RedirectStandardOutput = true;
-                proc.StartInfo.RedirectStandardError = true;
-                proc.StartInfo.UseShellExecute = false;
-                proc.StartInfo.CreateNoWindow = true;
 
-                proc.Start();
+                ProcessStartInfo processStartInfo = new ProcessStartInfo()
+                {
+                    WorkingDirectory = dir,
+                    FileName = file,
+                    CreateNoWindow = false,
+                    ErrorDialog = false,
+                    UseShellExecute = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    Verb = "runas",
+                };
+                proc = Process.Start(processStartInfo);
 
                 return true;
             }
@@ -145,8 +149,8 @@ namespace client.service.tray
             string exeName = AppDomain.CurrentDomain.FriendlyName;
             string value = string.Empty;
             Microsoft.Win32.RegistryKey Rkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-
             string keyName = exeName.Replace(".exe", "");
+
             try
             {
                 if (Rkey == null)
@@ -184,7 +188,7 @@ namespace client.service.tray
             {
                 if (string.IsNullOrEmpty(model.Value))
                 {
-                    model.RegKey.SetValue(model.Key, model.Path);
+                    model.RegKey.SetValue(model.Key, "\"" + model.Path + "\"");
                     notifyIcon.BalloonTipText = "已设置自启动";
                     notifyIcon.ShowBalloonTip(1000);
                 }
@@ -222,9 +226,9 @@ namespace client.service.tray
 
         private void OpenWeb(object sender, EventArgs e)
         {
-            if (File.Exists("./ui-appsettings.json"))
+            if (System.IO.File.Exists("./ui-appsettings.json"))
             {
-                string texts = File.ReadAllText("./ui-appsettings.json");
+                string texts = System.IO.File.ReadAllText("./ui-appsettings.json");
                 JObject jsObj = JObject.Parse(texts);
                 Process.Start($"http://127.0.0.1:{jsObj["web"]["Port"]}/#/?port={jsObj["websocket"]["Port"]}");
             }
@@ -241,12 +245,12 @@ namespace client.service.tray
 
         private void Close(object sender, EventArgs e)
         {
+            KillExe();
             this.Close();
         }
         private new void Closing(object sender, FormClosingEventArgs e)
         {
-            proc?.Close();
-            proc?.Dispose();
+            KillExe();
         }
 
 

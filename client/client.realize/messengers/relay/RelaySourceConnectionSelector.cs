@@ -12,7 +12,7 @@ namespace client.realize.messengers.relay
             this.clientInfoCaching = clientInfoCaching;
             clientInfoCaching.OnOffline += (client) =>
             {
-                connecRouteCaching.Remove(client.Id);
+                connecRouteCaching.Remove(client.ConnectionId);
             };
         }
         public IConnection Select(IConnection connection, ulong relayid)

@@ -54,7 +54,7 @@ namespace client.service.vea
             };
             clientInfoCaching.OnOffline += (client) =>
             {
-                var value = ips.FirstOrDefault(c => c.Value.Client.Id == client.Id);
+                var value = ips.FirstOrDefault(c => c.Value.Client.ConnectionId == client.ConnectionId);
                 if (value.Key != 0)
                 {
                     if (ips.TryRemove(value.Key, out IPAddressCacheInfo cache))
@@ -92,7 +92,7 @@ namespace client.service.vea
             lock (this)
             {
                 ResetMask(_ips.LanIPs);
-                var cache = ips.Values.FirstOrDefault(c => c.Client.Id == client.Id);
+                var cache = ips.Values.FirstOrDefault(c => c.Client.ConnectionId == client.ConnectionId);
                 if (cache != null)
                 {
                     ips.TryRemove(cache.IP, out _);
@@ -112,7 +112,7 @@ namespace client.service.vea
         public void UpdateIp()
         {
             ResetMask(config.VeaLanIPs);
-            foreach (var item in clientInfoCaching.All().Where(c => c.Id != signInStateInfo.ConnectId))
+            foreach (var item in clientInfoCaching.All().Where(c => c.ConnectionId != signInStateInfo.ConnectId))
             {
                 var connection = item.Connection;
                 var client = item;

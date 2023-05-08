@@ -6,7 +6,7 @@
                     <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                         <div class="item">
                             <dl v-loading="item.Connecting">
-                                <dt>{{item.Name}}</dt>
+                                <dt>{{item.name}}</dt>
                                 <dd :style="item.connectTypeStyle" :title="item.IPAddress" class="flex line" @click="handleShowDelay(item)">
                                     <span class="label">{{item.serverType}}</span>
                                     <span>{{item.connectTypeStr}}</span>
@@ -72,6 +72,7 @@ export default {
                 c.connectTypeStr = shareDataState.clientConnectTypes[c.ConnectType];
                 c.connectTypeStyle = connectTypeColors[c.ConnectType];
                 c.serverType = shareDataState.serverTypes[c.ServerType];
+                c.name = `${c.Name}`
             });
             return clientsState.clients;
         });
@@ -83,12 +84,12 @@ export default {
                     cancelButtonText: '取消',
                     type: 'warning',
                 }).then(() => {
-                    sendClientConnect(row.Id);
+                    sendClientConnect(row.ConnectionId);
                 }).catch(() => {
 
                 });
             } else {
-                sendClientConnect(row.Id);
+                sendClientConnect(row.ConnectionId);
             }
         }
         const handleConnectReverse = (row) => {
@@ -98,12 +99,12 @@ export default {
                     cancelButtonText: '取消',
                     type: 'warning',
                 }).then(() => {
-                    sendClientConnectReverse(row.Id);
+                    sendClientConnectReverse(row.ConnectionId);
                 }).catch(() => {
 
                 });
             } else {
-                sendClientConnectReverse(row.Id);
+                sendClientConnectReverse(row.ConnectionId);
             }
         }
         const handleConnectReset = (row) => {
@@ -112,7 +113,7 @@ export default {
                 cancelButtonText: '取消',
                 type: 'warning',
             }).then(() => {
-                sendClientReset(row.Id);
+                sendClientReset(row.ConnectionId);
             }).catch(() => {
 
             });
@@ -123,7 +124,7 @@ export default {
                 cancelButtonText: '取消',
                 type: 'warning',
             }).then(() => {
-                sendClientOffline(row.Id);
+                sendClientOffline(row.ConnectionId);
             }).catch(() => {
             });
         }
@@ -150,7 +151,7 @@ export default {
         });
         provide('share-data', state);
         const handleShowDelay = (item) => {
-            state.toId = item.Id;
+            state.toId = item.ConnectionId;
             state.showDelay = true;
         }
         const handleOnRelay = (relayPath) => {

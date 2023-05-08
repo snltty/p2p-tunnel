@@ -30,7 +30,7 @@ namespace client.realize.messengers.singnin
             SignInParamsInfo param = new SignInParamsInfo
             {
                 ShortId = config.Client.ShortId,
-                Id = 0,
+                ConnectionId = config.Client.ConnectId,
                 Name = config.Client.Name,
                 Args = config.Client.Args,
                 GroupId = config.Client.GroupId,
@@ -38,7 +38,7 @@ namespace client.realize.messengers.singnin
                 LocalTcpPort = signInState.LocalInfo.Port,
                 ClientAccess = (uint)config.Client.GetAccess()
             };
-            param.Args.TryAdd("version",Helper.Version);
+            param.Args.TryAdd("version", Helper.Version);
 
             MessageResponeInfo tcpResult = await messengerSender.SendReply(new MessageRequestWrap
             {

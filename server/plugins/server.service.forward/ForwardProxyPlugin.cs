@@ -23,7 +23,7 @@ namespace server.service.forward
             this.serviceAccessProvider = serviceAccessProvider;
             clientSignInCaching.OnOffline += (client) =>
             {
-                IEnumerable<ushort> keys = forwardTargetCaching.Remove(client.Name);
+                IEnumerable<ushort> keys = forwardTargetCaching.Remove(client.ConnectionId);
                 if (keys.Any())
                 {
                     foreach (ushort item in keys)

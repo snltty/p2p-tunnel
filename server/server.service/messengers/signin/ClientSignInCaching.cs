@@ -15,7 +15,6 @@ namespace server.service.messengers.singnin
     {
         private readonly ConcurrentDictionary<ulong, SignInCacheInfo> cache = new();
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, SignInCacheInfo>> cacheGroups = new();
-        private NumberSpace idNs = new NumberSpace(0);
         private readonly Config config;
 
         public Action<SignInCacheInfo> OnChanged { get; set; } = (param) => { };
@@ -30,7 +29,6 @@ namespace server.service.messengers.singnin
         public ClientSignInCaching(Config config, IUdpServer udpServer, ITcpServer tcpServer)
         {
             this.config = config;
-
             if (config.ConnectLimit > 0)
             {
                 rateLimit = new TokenBucketRatelimit<IPAddress>(config.ConnectLimit);
@@ -72,29 +70,34 @@ namespace server.service.messengers.singnin
         }
         public SignInCacheInfo Add(SignInCacheInfo model)
         {
-            lock (idNs)
+            if (model.ConnectionId == 0)
             {
-                if (model.ConnectionId == 0)
+                do
                 {
-                    model.ConnectionId = idNs.Increment();
-                }
-                if (string.IsNullOrWhiteSpace(model.GroupId))
-                {
-                    model.GroupId = Guid.NewGuid().ToString().Md5();
-                }
-                if (cacheGroups.TryGetValue(model.GroupId, out ConcurrentDictionary<string, SignInCacheInfo> value) == false)
-                {
-                    value = new ConcurrentDictionary<string, SignInCacheInfo>();
-                    cacheGroups.TryAdd(model.GroupId, value);
-                }
-                if (model.Connection != null)
-                {
-                    model.Connection.ConnectId = model.ConnectionId;
-                }
-                value.TryAdd(model.Name, model);
-                cache.TryAdd(model.ConnectionId, model);
-            }
+                    string str = BitConverter.ToUInt64(Guid.NewGuid().ToByteArray()).ToString();
+                    if (str.Length > 15)
+                    {
+                        str = str.Substring(str.Length - 15, 15);
+                    }
+                    model.ConnectionId = ulong.Parse(str);
 
+                } while (cache.ContainsKey(model.ConnectionId));
+            }
+            if (string.IsNullOrWhiteSpace(model.GroupId))
+            {
+                model.GroupId = Guid.NewGuid().ToString().Md5();
+            }
+            if (cacheGroups.TryGetValue(model.GroupId, out ConcurrentDictionary<string, SignInCacheInfo> value) == false)
+            {
+                value = new ConcurrentDictionary<string, SignInCacheInfo>();
+                cacheGroups.TryAdd(model.GroupId, value);
+            }
+            if (model.Connection != null)
+            {
+                model.Connection.ConnectId = model.ConnectionId;
+            }
+            value.TryAdd(model.Name, model);
+            cache.TryAdd(model.ConnectionId, model);
             OnLine?.Invoke(model);
             return model;
         }

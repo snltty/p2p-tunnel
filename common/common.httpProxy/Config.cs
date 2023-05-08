@@ -28,7 +28,7 @@ namespace common.httpProxy
             ListenPort = config.ListenPort;
             IsPac = config.IsPac;
             IsCustomPac = config.IsCustomPac;
-            TargetName = config.TargetName;
+            TargetConnectionId = config.TargetConnectionId;
         }
 
         [System.Text.Json.Serialization.JsonIgnore]
@@ -37,7 +37,7 @@ namespace common.httpProxy
 
         public bool IsPac { get; set; } = false;
         public bool IsCustomPac { get; set; } = false;
-        public string TargetName { get; set; } = string.Empty;
+        public ulong TargetConnectionId { get; set; }
 
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace common.httpProxy
             ListenPort = _config.ListenPort;
             IsPac = _config.IsPac;
             IsCustomPac = _config.IsCustomPac;
-            TargetName = _config.TargetName;
+            TargetConnectionId = _config.TargetConnectionId;
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }

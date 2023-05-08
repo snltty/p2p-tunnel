@@ -37,7 +37,7 @@ export default {
     props: ['params'],
     setup(props) {
 
-        const id = props.params.Id;
+        const id = props.params.ConnectionId;
         const state = reactive({
             loading: false,
             data: { IP: '', LanIPs: [] }

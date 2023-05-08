@@ -36,19 +36,19 @@ namespace server.service.socks5
         }
 
 
-        string targetName = string.Empty;
+        ulong target = 0;
         private void GetConnection(ProxyInfo info)
         {
-            if (info.Connection == null || info.Connection.Connected == false || targetName != config.TargetName)
+            if (info.Connection == null || info.Connection.Connected == false || target != config.TargetConnectionId)
             {
-                targetName = config.TargetName;
-                if (config.TargetName == "/")
+                target = config.TargetConnectionId;
+                if (config.TargetConnectionId == 0)
                 {
                     info.Connection = signInStateInfo.Connection;
                 }
                 else
                 {
-                    if (clientInfoCaching.GetByName(config.TargetName, out ClientInfo client))
+                    if (clientInfoCaching.Get(config.TargetConnectionId, out ClientInfo client))
                     {
                         info.Connection = client.Connection;
                     }

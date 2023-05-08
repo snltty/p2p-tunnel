@@ -43,7 +43,7 @@ namespace client.service.forward
 
             forwardProxyPlugin.OnStarted += (port) => StateChanged(port, true);
             forwardProxyPlugin.OnStoped += (port) => StateChanged(port, false);
-            
+
 
         }
 
@@ -197,7 +197,7 @@ namespace client.service.forward
                 saveInfo.SourceIp = forward.Forward.SourceIp;
                 saveInfo.TargetIp = forward.Forward.TargetIp;
                 saveInfo.TargetPort = forward.Forward.TargetPort;
-                saveInfo.Name = forward.Forward.Name;
+                saveInfo.ConnectionId = forward.Forward.ConnectionId;
             }
             else
             {
@@ -226,7 +226,7 @@ namespace client.service.forward
                 {
                     IPAddress = forward.Forward.TargetIp.GetAddressBytes(),
                     Port = forward.Forward.TargetPort,
-                    Name = forward.Forward.Name,
+                    ConnectionId = forward.Forward.ConnectionId,
                 });
             }
             else
@@ -235,7 +235,7 @@ namespace client.service.forward
                 {
                     IPAddress = forward.Forward.TargetIp.GetAddressBytes(),
                     Port = forward.Forward.TargetPort,
-                    Name = forward.Forward.Name,
+                    ConnectionId = forward.Forward.ConnectionId,
                 });
             }
 
@@ -330,7 +330,7 @@ namespace client.service.forward
                         {
                             IPAddress = forward.TargetIp.GetAddressBytes(),
                             Port = forward.TargetPort,
-                            Name = forward.Name
+                            ConnectionId = forward.ConnectionId,
                         });
                     }
                     catch (Exception)
@@ -349,7 +349,7 @@ namespace client.service.forward
                         {
                             IPAddress = forward.TargetIp.GetAddressBytes(),
                             Port = forward.TargetPort,
-                            Name = forward.Name
+                            ConnectionId = forward.ConnectionId,
                         });
                     }
                     catch (Exception)
@@ -418,7 +418,7 @@ namespace client.service.forward
     public sealed class P2PForwardInfo
     {
         public uint ID { get; set; }
-        public string Name { get; set; } = string.Empty;
+        public ulong ConnectionId { get; set; }
         public string SourceIp { get; set; } = string.Empty;
         public IPAddress TargetIp { get; set; } = IPAddress.Any;
         public ushort TargetPort { get; set; }

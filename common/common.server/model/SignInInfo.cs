@@ -20,7 +20,7 @@ namespace common.server.model
         /// <summary>
         /// 连接id，因为分两次注册，第二次带上第一次的注册后获得的id
         /// </summary>
-        public ulong Id { get; set; }
+        public ulong ConnectionId { get; set; }
         public byte ShortId { get; set; }
         /// <summary>
         /// 分组
@@ -85,7 +85,7 @@ namespace common.server.model
                 index += 1 + ll;
             }
 
-            Id.ToBytes(memory.Slice(index));
+            ConnectionId.ToBytes(memory.Slice(index));
             index += 8;
             bytes[index] = ShortId;
             index += 1;
@@ -152,7 +152,7 @@ namespace common.server.model
                 index += 1 + span[index];
             }
 
-            Id = span.Slice(index, 8).ToUInt64();
+            ConnectionId = span.Slice(index, 8).ToUInt64();
             index += 8;
             ShortId = span[index];
             index += 1;

@@ -88,11 +88,11 @@ namespace client.service.ui.api.service.clientServer.services
             {
                 if (client.OnlineType == ClientOnlineTypes.Active)
                 {
-                    clientInfoCaching.Offline(client.Id);
+                    clientInfoCaching.Offline(client.ConnectionId);
                 }
                 else
                 {
-                    await clientsTransfer.SendOffline(client.Id);
+                    await clientsTransfer.SendOffline(client.ConnectionId);
                 }
             }
 

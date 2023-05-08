@@ -55,28 +55,14 @@ namespace common.forward
 
             return cache.TryRemove(port, out _);
         }
-        public IEnumerable<ushort> Remove(string targetName)
-        {
-            var keys = cache.Where(c => c.Value.Name == targetName).Select(c => c.Key).ToList();
-            foreach (var key in keys)
-            {
-                cache.TryRemove(key, out _);
-            }
-            var keys1 = cacheHost.Where(c => c.Value.Name == targetName).Select(c => c.Key);
-            foreach (var key in keys1)
-            {
-                cacheHost.TryRemove(key, out _);
-            }
-            return keys;
-        }
         public IEnumerable<ushort> Remove(ulong id)
         {
-            var keys = cache.Where(c => c.Value.Id == id).Select(c => c.Key).ToList();
+            var keys = cache.Where(c => c.Value.ConnectionId == id).Select(c => c.Key).ToList();
             foreach (var key in keys)
             {
                 cache.TryRemove(key, out _);
             }
-            var keys1 = cacheHost.Where(c => c.Value.Id == id).Select(c => c.Key).ToList();
+            var keys1 = cacheHost.Where(c => c.Value.ConnectionId == id).Select(c => c.Key).ToList();
             foreach (var key in keys1)
             {
                 cacheHost.TryRemove(key, out _);
@@ -107,25 +93,14 @@ namespace common.forward
                 item.Connection = null;
             }
         }
-        public void ClearConnection(string name)
-        {
-            foreach (var item in cacheHost.Values.Where(c => c.Name == name))
-            {
-                item.Connection = null;
-            }
-            foreach (var item in cache.Values.Where(c => c.Name == name))
-            {
-                item.Connection = null;
-            }
-        }
 
         public void ClearConnection(ulong id)
         {
-            foreach (var item in cacheHost.Values.Where(c => c.Id == id))
+            foreach (var item in cacheHost.Values.Where(c => c.ConnectionId == id))
             {
                 item.Connection = null;
             }
-            foreach (var item in cache.Values.Where(c => c.Id == id))
+            foreach (var item in cache.Values.Where(c => c.ConnectionId == id))
             {
                 item.Connection = null;
             }
@@ -134,9 +109,9 @@ namespace common.forward
 
     public sealed class ForwardTargetCacheInfo
     {
-        public ulong Id { get; set; }
+        public ulong ConnectionId { get; set; }
         public string Key { get; set; }
-        public string Name { get; set; }
+
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; }
 

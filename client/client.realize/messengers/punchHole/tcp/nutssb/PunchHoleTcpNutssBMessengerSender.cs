@@ -46,7 +46,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
 
         private IConnection Connection => signInState.Connection;
 
-        private int RouteLevel => signInState.LocalInfo.RouteLevel + 1;
+        private int RouteLevel => signInState.LocalInfo.RouteLevel + config.Client.TTL;
 #if DEBUG
         private bool UseLocalPort = true;
 #else
@@ -55,7 +55,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         private readonly ConcurrentDictionary<ulong, ConnectCacheModel> connectTcpCache = new();
 
         public event IPunchHoleTcp.StepEvent OnStepHandler;
-
 
         public async Task<ConnectResultModel> Send(ConnectParams param)
         {
@@ -82,8 +81,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         public async Task InputData(PunchHoleStepModel model)
         {
             PunchHoleTcpNutssBSteps step = (PunchHoleTcpNutssBSteps)model.RawData.PunchStep;
-
-            RemoveSendTimeout(model.RawData.FromId);
             OnStepHandler?.Invoke(this, model);
             switch (step)
             {
@@ -97,6 +94,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_2:
                     {
+                       
                         PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
@@ -119,6 +117,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_3:
                     {
+                       
                         PunchHoleStep3Info data = new PunchHoleStep3Info();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
@@ -189,7 +188,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
         }
 
-
         private async Task SendStep1(ConnectParams param)
         {
             AddSendTimeout(param.Id);
@@ -201,9 +199,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 Data = new PunchHoleStep1Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_1, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
         }
-
         private async Task OnStep1(PunchHoleStepModel model)
         {
+            
             if (model.RawData.NewTunnel == 1)
             {
                 await clientsTunnel.NewBind(ServerType.TCP, Connection.ConnectId, model.RawData.FromId);
@@ -214,6 +212,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
 
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
+           
             if (clientInfoCaching.GetTunnelPort(model.RawData.FromId, out int localPort))
             {
                 List<IPEndPoint> ips = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.Equals(IPAddress.IPv6Any) == false).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
@@ -255,7 +254,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
         }
 
-
         private async Task CryptoSwap(IConnection connection)
         {
             if (config.Client.Encode)
@@ -272,7 +270,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
         }
 
-
         private async Task SendStep2(PunchHoleStepModel model)
         {
             AddSendTimeout(model.RawData.FromId);
@@ -284,11 +281,11 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 Data = new PunchHoleStep2Info { Step = (byte)PunchHoleTcpNutssBSteps.STEP_2, PunchType = PunchHoleTypes.TCP_NUTSSB }
             }).ConfigureAwait(false);
         }
-
         public async Task OnStep2(PunchHoleStepModel model)
         {
             await Task.Run(async () =>
             {
+                RemoveSendTimeout(model.RawData.FromId);
                 if (connectTcpCache.TryGetValue(model.RawData.FromId, out ConnectCacheModel cache) == false)
                 {
                     Logger.Instance.Warning($"OnStep2 未找到缓存：{model.RawData.FromId}");
@@ -489,6 +486,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         }
         public void OnStep2Fail(PunchHoleStepModel model)
         {
+            RemoveSendTimeout(model.RawData.FromId);
         }
         public async Task SendStep2Stop(ulong toid, byte newTunnel)
         {
@@ -525,6 +523,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         }
         public async Task OnStep3(PunchHoleStepModel model)
         {
+            RemoveSendTimeout(model.RawData.FromId);
             await SendStep4(model);
         }
 
@@ -543,6 +542,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         }
         public void OnStep4(PunchHoleStepModel model)
         {
+            RemoveSendTimeout(model.RawData.FromId);
             if (connectTcpCache.TryRemove(model.RawData.FromId, out ConnectCacheModel cache))
             {
                 cache.Tcs.SetResult(new ConnectResultModel { State = true });
