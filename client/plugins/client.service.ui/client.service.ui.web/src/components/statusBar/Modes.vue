@@ -5,23 +5,13 @@
             <h3>节点功能</h3>
             <el-checkbox-group v-model="state.checkListNodes">
                 <template v-for="(item,index) in nodesPlugins" :key="index">
-                    <template v-if="item.checked">
-                        <el-checkbox :label="item.service" checked disabled>{{item.text}}</el-checkbox>
-                    </template>
-                    <template v-else>
-                        <el-checkbox :label="item.service" :checked="access(item.service)">{{item.text}}</el-checkbox>
-                    </template>
+                    <el-checkbox :label="item.service" :checked="access(item.service)">{{item.text}}</el-checkbox>
                 </template>
             </el-checkbox-group>
             <h3>服务器功能</h3>
             <el-checkbox-group v-model="state.checkListServer">
                 <template v-for="(item,index) in serverPlugins" :key="index">
-                    <template v-if="item.checked">
-                        <el-checkbox :label="item.service" checked disabled>{{item.text}}</el-checkbox>
-                    </template>
-                    <template v-else>
-                        <el-checkbox :label="item.service" :checked="access(item.service)">{{item.text}}</el-checkbox>
-                    </template>
+                    <el-checkbox :label="item.service" :checked="access(item.service)">{{item.text}}</el-checkbox>
                 </template>
             </el-checkbox-group>
         </div>

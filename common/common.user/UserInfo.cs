@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace server.service.users.model
+namespace common.user
 {
     public sealed class UserInfo
     {

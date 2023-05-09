@@ -1,5 +1,4 @@
-﻿using server.messengers;
-using common.server;
+﻿using common.server;
 using server.messengers.singnin;
 using common.server.model;
 using System.Collections.Generic;
@@ -11,32 +10,26 @@ namespace server.service.validators
 
         private readonly Config config;
         private readonly IServiceAccessValidator serviceAccessProvider;
-        private readonly IClientSignInCaching clientSignInCache;
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
 
-        public uint Access => (uint)EnumServiceAccess.Relay;
+        public uint Access => (uint)server.messengers.EnumServiceAccess.Relay;
 
         public string Name => "中继";
 
-        public RelayValidator(Config config, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCache)
+        public RelayValidator(Config config, IServiceAccessValidator serviceAccessProvider)
         {
             this.config = config;
             this.serviceAccessProvider = serviceAccessProvider;
-            this.clientSignInCache = clientSignInCache;
         }
         public bool Validate(IConnection connection)
         {
-            if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
-            {
-                return config.RelayEnable || serviceAccessProvider.Validate(source, Access);
-            }
-            return false;
+            return config.RelayEnable || serviceAccessProvider.Validate(connection, Access);
         }
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
-            access |= (config.RelayEnable ? Access : (uint)EnumServiceAccess.None);
+            access |= (config.RelayEnable ? Access : (uint)common.server.EnumServiceAccess.None);
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
 
@@ -50,7 +43,7 @@ namespace server.service.validators
     public sealed class SettingValidator : ISignInValidator
     {
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
-        public uint Access => (uint)EnumServiceAccess.Setting;
+        public uint Access => (uint)common.server.EnumServiceAccess.Setting;
 
         public string Name => "服务器配置";
 

@@ -268,9 +268,15 @@ span.split-pad10 {
     margin-bottom: 0;
 }
 
-
-.el-divider__text {
+.el-input-group__append,
+.el-input-group__prepend {
+    padding: 0 4px !important;
     background-color: transparent !important;
+}
+
+.el-checkbox__label .el-icon {
+    vertical-align: middle;
+    margin-top: -2px;
 }
 
 /* .el-input__inner:read-only {

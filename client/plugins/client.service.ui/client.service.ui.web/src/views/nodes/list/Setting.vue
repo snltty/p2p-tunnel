@@ -6,26 +6,39 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="节点名称" prop="Name">
-                                <el-input size="default" v-model="state.form.Name" maxlength="32" show-word-limit placeholder="设置你的注册名称"></el-input>
+                                <el-input size="default" v-model="state.form.Name" maxlength="32" show-word-limit placeholder="设置你的注册名称">
+                                    <template #append>
+                                        <el-tooltip class="box-item" effect="dark" content="设置你的注册名称" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </template>
+                                </el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="所在分组" prop="GroupId">
-                                <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top-start">
-                                    <el-select size="default" v-model="state.form.GroupId" @change="handleGroupIdChange" allow-create clearable filterable default-first-option placeholder="选择或输入分组编号">
-                                        <el-option v-for="(item,index) in state.form.GroupIds" :key="index" :label="item" :value="item">
-                                            <div class="flex">
-                                                <span>{{item}}</span>
-                                                <span class="flex-1"></span>
-                                                <span style="padding:1px 0 0 1rem" @click.stop="handleRemoveGroupId(index)">
-                                                    <el-icon>
-                                                        <CircleClose />
-                                                    </el-icon>
-                                                </span>
-                                            </div>
-                                        </el-option>
-                                    </el-select>
-                                </el-tooltip>
+                                <el-select size="default" v-model="state.form.GroupId" @change="handleGroupIdChange" allow-create clearable filterable default-first-option placeholder="选择或输入分组编号">
+                                    <template #prefix>
+                                        <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </template>
+                                    <el-option v-for="(item,index) in state.form.GroupIds" :key="index" :label="item" :value="item">
+                                        <div class="flex">
+                                            <span>{{item}}</span>
+                                            <span class="flex-1"></span>
+                                            <span style="padding:1px 0 0 1rem" @click.stop="handleRemoveGroupId(index)">
+                                                <el-icon>
+                                                    <CircleClose />
+                                                </el-icon>
+                                            </span>
+                                        </div>
+                                    </el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -37,16 +50,28 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="掉线超时" prop="TimeoutDelay">
-                                <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top-start">
-                                    <el-input size="default" v-model="state.form.TimeoutDelay" placeholder="掉线超时"></el-input>
-                                </el-tooltip>
+                                <el-input size="default" v-model="state.form.TimeoutDelay" placeholder="掉线超时">
+                                    <template #append>
+                                        <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </template>
+                                </el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="udp限速" prop="UdpUploadSpeedLimit">
-                                <el-tooltip class="box-item" effect="dark" content="udp发送速度限制（字节数,0不限制）" placement="top-start">
-                                    <el-input size="default" v-model="state.form.UdpUploadSpeedLimit"></el-input>
-                                </el-tooltip>
+                                <el-input size="default" v-model="state.form.UdpUploadSpeedLimit">
+                                    <template #append>
+                                        <el-tooltip class="box-item" effect="dark" content="udp发送速度限制（字节数,0不限制）" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </template>
+                                </el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -55,7 +80,12 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动登入" prop="AutoReg">
-                                <el-checkbox size="default" v-model="state.form.AutoReg">开启</el-checkbox>
+                                <el-checkbox size="default" v-model="state.form.AutoReg">开启
+                                    <el-tooltip class="box-item" effect="dark" content="开启自动登入，客户端启动后，立即连接服务端" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip></el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -71,18 +101,28 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动打洞" prop="UsePunchHole">
-                                <el-tooltip class="box-item" effect="dark" content="发现新客户端后是否自动打洞" placement="top-start">
-                                    <el-checkbox v-model="state.form.UsePunchHole">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox v-model="state.form.UsePunchHole">开启
+                                    <el-tooltip class="box-item" effect="dark" content="发现新客户端后是否自动打洞" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="附加TTL" prop="TTL">
-                                <el-popover placement="top-start" title="TCP打洞可以调整TTL" :width="300" trigger="hover" content="TCP打洞，有一方将会以一个低TTL值向对方发起连接，达到在网关中留下对方信息，而不会被对方拒绝的效果，默认值1，表示你当前设备与外网的距离+1">
-                                    <template #reference>
-                                        <el-input size="default" v-model="state.form.TTL"></el-input>
+                                <el-input size="default" v-model="state.form.TTL">
+                                    <template #append>
+                                        <el-popover placement="top-start" title="TCP打洞可以调整TTL" :width="300" trigger="hover" content="TCP打洞，有一方将会以一个低TTL值向对方发起连接，达到在网关中留下对方信息，而不会被对方拒绝的效果，默认值1，表示你当前设备与外网的距离+1">
+                                            <template #reference>
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </template>
+                                        </el-popover>
                                     </template>
-                                </el-popover>
+                                </el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -91,16 +131,24 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="tcp打洞" prop="UseTcp">
-                                <el-tooltip class="box-item" effect="dark" content="是否使用tcp打洞" placement="top-start">
-                                    <el-checkbox v-model="state.form.UseTcp">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox v-model="state.form.UseTcp">开启
+                                    <el-tooltip class="box-item" effect="dark" content="是否使用tcp打洞" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="udp打洞" prop="UseUdp">
-                                <el-tooltip class="box-item" effect="dark" content="是否使用udp打洞" placement="top-start">
-                                    <el-checkbox v-model="state.form.UseUdp">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox v-model="state.form.UseUdp">开启
+                                    <el-tooltip class="box-item" effect="dark" content="是否使用udp打洞" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -110,16 +158,24 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动中继" prop="AutoRelay">
-                                <el-tooltip class="box-item" effect="dark" content="不开启自动打洞的话，是否自动中继" placement="top-start">
-                                    <el-checkbox v-model="state.form.AutoRelay">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox v-model="state.form.AutoRelay">开启
+                                    <el-tooltip class="box-item" effect="dark" content="不开启自动打洞的话，是否自动中继" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="中继节点" prop="UseRelay">
-                                <el-tooltip class="box-item" effect="dark" content="是否允许本客户端作为中继节点" placement="top-start">
-                                    <el-checkbox v-model="state.form.UseRelay">开启</el-checkbox>>
-                                </el-tooltip>
+                                <el-checkbox v-model="state.form.UseRelay">开启
+                                    <el-tooltip class="box-item" effect="dark" content="是否允许本客户端作为中继节点" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                     </el-row>

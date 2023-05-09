@@ -3,7 +3,7 @@ using common.libs.extends;
 using common.proxy;
 using common.server.model;
 using System;
-using System.Linq;
+using System.Buffers.Binary;
 using System.Net;
 using System.Text;
 
@@ -22,8 +22,6 @@ namespace common.forward
         public IPAddress BroadcastBind => IPAddress.Any;
         public Action<ushort> OnStarted { get; set; } = (port) => { };
         public Action<ushort> OnStoped { get; set; } = (port) => { };
-
-        
 
         private readonly Config config;
         private readonly IProxyServer proxyServer;
@@ -80,6 +78,19 @@ namespace common.forward
             if (config.PortBlackList.Length > 0 && config.PortBlackList.Contains(info.TargetPort))
             {
                 return false;
+            }
+            if(config.ForwardIPList.Length > 0)
+            {
+                uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
+                bool res = false;
+                for (int i = 0; i < config.ForwardIPList.Length; i++)
+                {
+                    if((ip & config.ForwardIPList[i].MaskValue) == config.ForwardIPList[i].NetWork)
+                    {
+                        res = true; break;
+                    }
+                }
+                if (res == false) return res;
             }
             return config.ConnectEnable;
 #endif

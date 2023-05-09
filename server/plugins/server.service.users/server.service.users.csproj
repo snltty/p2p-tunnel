@@ -19,19 +19,8 @@
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="users.json" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Content Include="users-appsettings.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="users.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-	<ItemGroup>
+	  <ProjectReference Include="..\..\..\common\common.user\common.user.csproj" />
 	  <ProjectReference Include="..\..\server\server.csproj" />
-	  <ProjectReference Include="..\server.service.users.model\server.service.users.model.csproj" />
 	</ItemGroup>
 
 </Project>

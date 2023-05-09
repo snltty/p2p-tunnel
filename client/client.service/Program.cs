@@ -11,7 +11,9 @@ using client.service.ui.api.service.clientServer;
 using client.service.users.server;
 using client.service.vea.client;
 using common.libs;
+using common.proxy;
 using common.server;
+using common.user;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -54,6 +56,8 @@ namespace client.service
                 typeof(LoggerClientService).Assembly,
                 typeof(PunchHoleMessenger).Assembly,
 
+                typeof(ProxyMessenger).Assembly,
+
                 typeof(ForwardClientService).Assembly,
                 typeof(ServerForwardClientService).Assembly,
 
@@ -69,12 +73,12 @@ namespace client.service
 
                 //以下是为了获取信息
                 typeof(common.server.model.SignInMessengerIds).Assembly,
-                typeof(common.proxy.ProxyMessengerIds).Assembly,
+                typeof(ProxyMessengerIds).Assembly,
                 typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
                 typeof(common.socks5.Socks5MessengerIds).Assembly,
                 typeof(common.forward.ForwardMessengerIds).Assembly,
 
-                typeof(server.service.users.model.UsersMessengerIds).Assembly,
+                typeof(UsersMessengerIds).Assembly,
 
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 

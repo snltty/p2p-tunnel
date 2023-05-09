@@ -85,6 +85,7 @@ export default {
     padding: 0.6rem;
     border-radius: 0.4rem;
     transition: 0.3s;
+    background-color: #fff;
 
     &:hover {
         box-shadow: 0 0 0 0.4rem #36836112;

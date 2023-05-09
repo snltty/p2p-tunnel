@@ -24,7 +24,7 @@ namespace server.service.httpProxy
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
-            access |= (config.ConnectEnable ? Access : (uint)EnumServiceAccess.None);
+            access |= (config.ConnectEnable ? Access : (uint)common.server.EnumServiceAccess.None);
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
         public void Validated(SignInCacheInfo cache)

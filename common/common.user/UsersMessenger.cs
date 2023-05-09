@@ -1,15 +1,11 @@
 ﻿using common.libs;
 using common.libs.extends;
 using common.server;
-using common.server.model;
-using server.messengers;
-using server.messengers.singnin;
-using server.service.users.model;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace server.service.users
+namespace common.user
 {
     /// <summary>
     /// 服务端权限配置
@@ -17,25 +13,22 @@ namespace server.service.users
     [MessengerIdRange((ushort)UsersMessengerIds.Min, (ushort)UsersMessengerIds.Max)]
     public sealed class UsersMessenger : IMessenger
     {
-        private readonly IClientSignInCaching clientSignInCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IUserStore userStore;
         private readonly Config config;
-        public UsersMessenger(IClientSignInCaching clientSignInCaching, IServiceAccessValidator serviceAccessValidator, IUserStore userStore, Config config)
+        private readonly IUserInfoCaching userInfoCaching;
+
+        public UsersMessenger(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, Config config, IUserInfoCaching userInfoCaching)
         {
-            this.clientSignInCaching = clientSignInCaching;
             this.serviceAccessValidator = serviceAccessValidator;
             this.userStore = userStore;
             this.config = config;
+            this.userInfoCaching = userInfoCaching;
         }
 
         [MessengerId((ushort)UsersMessengerIds.Page)]
         public void Page(IConnection connection)
         {
-            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
-            {
-                return;
-            }
             if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 return;
@@ -56,11 +49,6 @@ namespace server.service.users
         [MessengerId((ushort)UsersMessengerIds.Add)]
         public void Add(IConnection connection)
         {
-            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
-            {
-                connection.Write(Helper.FalseArray);
-                return;
-            }
             if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
@@ -75,28 +63,19 @@ namespace server.service.users
         [MessengerId((ushort)UsersMessengerIds.Password)]
         public void Password(IConnection connection)
         {
-            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
-            {
-                connection.Write(Helper.FalseArray);
-                return;
-            }
-            if (SignInAccessValidator.GetAccountPassword(client.Args, out string account, out string password) && userStore.Get(account, password, out UserInfo user))
+            if (userInfoCaching.GetUser(connection, out UserInfo user))
             {
                 bool res = userStore.UpdatePassword(user.ID, connection.ReceiveRequestWrap.Payload.GetUTF8String());
                 connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
                 return;
             }
+
             connection.Write(Helper.FalseArray);
         }
 
         [MessengerId((ushort)UsersMessengerIds.Remove)]
         public void Remove(IConnection connection)
         {
-            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
-            {
-                connection.Write(Helper.FalseArray);
-                return;
-            }
             if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
@@ -118,16 +97,10 @@ namespace server.service.users
         [MessengerId((ushort)UsersMessengerIds.Info)]
         public void Info(IConnection connection)
         {
-            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) )
+            if (userInfoCaching.GetUser(connection, out UserInfo user))
             {
-                if (SignInAccessValidator.GetAccountPassword(client.Args, out string account, out string password))
-                {
-                    if (userStore.Get(account, password, out UserInfo user))
-                    {
-                        connection.Write(user.ToJson().ToUTF8Bytes());
-                        return;
-                    }
-                }
+                connection.Write(user.ToJson().ToUTF8Bytes());
+                return;
             }
             connection.Write(Helper.FalseArray);
         }
@@ -142,11 +115,6 @@ namespace server.service.users
         [MessengerId((ushort)UsersMessengerIds.Setting)]
         public async Task Setting(IConnection connection)
         {
-            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo client) == false)
-            {
-                connection.Write(Helper.FalseArray);
-                return;
-            }
             if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);

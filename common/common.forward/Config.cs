@@ -1,9 +1,14 @@
-﻿using common.libs.database;
+﻿using common.libs;
+using common.libs.database;
 using common.libs.extends;
 using common.proxy;
 using common.server.model;
 using System;
+using System.Buffers.Binary;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Net;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace common.forward
@@ -28,7 +33,8 @@ namespace common.forward
             TunnelListenRange = config.TunnelListenRange;
             PortWhiteList = config.PortWhiteList;
             PortBlackList = config.PortBlackList;
-
+            IPList = config.IPList;
+            ParseIPList();
         }
 
         [System.Text.Json.Serialization.JsonIgnore]
@@ -42,6 +48,10 @@ namespace common.forward
         /// 端口黑名单
         /// </summary>
         public ushort[] PortBlackList { get; set; } = Array.Empty<ushort>();
+        public string[] IPList { get; set; } = Array.Empty<string>();
+        [JsonIgnore]
+        public LanIPAddress[] ForwardIPList { get; set; } = Array.Empty<LanIPAddress>();
+
         /// <summary>
         /// 允许连接
         /// </summary>
@@ -90,8 +100,47 @@ namespace common.forward
             TunnelListenRange = _config.TunnelListenRange;
             PortWhiteList = _config.PortWhiteList;
             PortBlackList = _config.PortBlackList;
+            IPList = _config.IPList;
+            ParseIPList();
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+        }
+
+        private void ParseIPList()
+        {
+            try
+            {
+                ForwardIPList = IPList.Select(c => c.Split('/')).Where(c => c[0] != IPAddress.Any.ToString()).Select(c =>
+                {
+                    byte maskLength = c.Length > 1 ? byte.Parse(c[1]) : (byte)0;
+                    uint ip = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse(c[0]).GetAddressBytes());
+
+                    if (maskLength == 0)
+                    {
+                        maskLength = 32;
+                        for (int i = 0; i < sizeof(uint); i++)
+                        {
+                            if (((ip >> (i * 8)) & 0x000000ff) != 0)
+                            {
+                                break;
+                            }
+                            maskLength -= 8;
+                        }
+                    }
+                    uint maskValue = 0xffffffff << (32 - maskLength);
+                    return new LanIPAddress
+                    {
+                        IPAddress = ip,
+                        MaskLength = maskLength,
+                        MaskValue = maskValue,
+                        NetWork = ip & maskValue
+                    };
+                }).ToArray();
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
         }
     }
     /// <summary>
@@ -107,6 +156,17 @@ namespace common.forward
         /// 最大
         /// </summary>
         public ushort Max { get; set; } = 60000;
+    }
+
+    public sealed class LanIPAddress
+    {
+        /// <summary>
+        /// ip，存小端
+        /// </summary>
+        public uint IPAddress { get; set; }
+        public byte MaskLength { get; set; }
+        public uint MaskValue { get; set; }
+        public uint NetWork { get; set; }
     }
 
 }

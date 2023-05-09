@@ -69,6 +69,7 @@ export default {
 
 .content {
     overflow: hidden;
+    background-color: #ecf1ef;
 }
 
 @media screen and (max-width: 800px) {

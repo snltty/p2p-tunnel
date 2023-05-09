@@ -98,6 +98,7 @@ namespace common.socks5
 #if DEBUG
             return true;
 #else
+            if (info.TargetAddress.IsLan()) return false;
             return Enable;
 #endif
         }

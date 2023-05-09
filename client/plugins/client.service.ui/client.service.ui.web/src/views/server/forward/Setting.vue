@@ -6,9 +6,13 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="开启" prop="ConnectEnable">
-                                <el-tooltip class="box-item" effect="dark" content="允许所有账号使用端口转发穿透，包括匿名" placement="top-start">
-                                    <el-checkbox size="default" v-model="state.form.ConnectEnable">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox size="default" v-model="state.form.ConnectEnable">开启
+                                    <el-tooltip class="box-item" effect="dark" content="允许所有账号使用端口转发穿透，包括匿名" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -24,9 +28,15 @@
                     <el-row>
                         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
                             <el-form-item label="短链接端口" prop="WebListens">
-                                <el-tooltip class="box-item" effect="dark" content="短链接端口列表，多个英文逗号间隔" placement="top-start">
-                                    <el-input size="default" v-model="state.form.WebListens" placeholder="短链接端口"></el-input>
-                                </el-tooltip>
+                                <el-input size="default" v-model="state.form.WebListens" placeholder="短链接端口">
+                                    <template #append>
+                                        <el-tooltip class="box-item" effect="dark" content="短链接端口列表，多个英文逗号间隔" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </template>
+                                </el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -35,20 +45,20 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="端口开始" prop="min">
-                                <el-tooltip class="box-item" effect="dark" content="长连接端口开始" placement="top-start">
-                                    <el-input size="default" v-model="state.form.min" placeholder="长连接端口开始"></el-input>
-                                </el-tooltip>
+                                <el-input size="default" v-model="state.form.min" placeholder="长连接端口开始"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="端口结束" prop="max">
-                                <el-tooltip class="box-item" effect="dark" content="长连接端口结束" placement="top-start">
-                                    <el-input size="default" v-model="state.form.max" placeholder="长连接端口结束"></el-input>
-                                </el-tooltip>
+                                <el-input size="default" v-model="state.form.max" placeholder="长连接端口结束"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
                 </el-form-item>
+                <el-form-item label="" label-width="0">
+                    你可以设置一个端口范围，客户端只能添加此范围内的长连接端口监听
+                </el-form-item>
+
             </el-form>
         </div>
     </div>

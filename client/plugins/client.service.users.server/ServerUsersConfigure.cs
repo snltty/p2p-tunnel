@@ -4,7 +4,7 @@ using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using server.service.users.model;
+using common.user;
 using System;
 using System.Threading.Tasks;
 

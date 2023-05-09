@@ -1,7 +1,6 @@
-﻿using server.service.users.model;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace server.service.users
+namespace common.user
 {
     public interface IUserStore
     {

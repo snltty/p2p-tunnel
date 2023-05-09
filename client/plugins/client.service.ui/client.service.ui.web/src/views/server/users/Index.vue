@@ -239,6 +239,7 @@ export default {
     .inner {
         border: 1px solid var(--main-border-color);
         border-radius: 0.4rem;
+        background-color: #fff;
     }
 
     .head {

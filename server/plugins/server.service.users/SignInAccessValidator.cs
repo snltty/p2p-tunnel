@@ -1,9 +1,7 @@
-﻿using common.libs;
-using common.server;
+﻿using common.server;
 using common.server.model;
-using server.messengers;
+using common.user;
 using server.messengers.singnin;
-using server.service.users.model;
 using System;
 using System.Collections.Generic;
 
@@ -12,19 +10,21 @@ namespace server.service.users
     /// <summary>
     /// 登入权限验证
     /// </summary>
-    public sealed class SignInAccessValidator : ISignInValidator
+    public sealed class SignInAccessValidator : ISignInValidator, IUserInfoCaching
     {
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IUserStore userStore;
-        private readonly Config config;
+        private readonly common.user.Config config;
         private readonly MessengerSender messengerSender;
+        private readonly IClientSignInCaching clientSignInCaching;
 
-        public SignInAccessValidator(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, IClientSignInCaching clientSignInCaching, Config config, MessengerSender messengerSender)
+        public SignInAccessValidator(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, IClientSignInCaching clientSignInCaching, common.user.Config config, MessengerSender messengerSender)
         {
             this.serviceAccessValidator = serviceAccessValidator;
             this.userStore = userStore;
             this.config = config;
             this.messengerSender = messengerSender;
+            this.clientSignInCaching = clientSignInCaching;
             clientSignInCaching.OnOffline += (SignInCacheInfo cache) =>
             {
                 if (GetUser(cache.Args, out UserInfo user))
@@ -35,13 +35,13 @@ namespace server.service.users
         }
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.None;
-        public uint Access => (uint)EnumServiceAccess.SignIn;
+        public uint Access => (uint)messengers.EnumServiceAccess.SignIn;
 
         public string Name => "登入";
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
-            if(GetUser(args, out UserInfo user))
+            if (GetUser(args, out UserInfo user))
             {
                 access |= user.Access;
             }
@@ -88,6 +88,7 @@ namespace server.service.users
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
 
+
         public void Validated(SignInCacheInfo cache)
         {
             if (GetUser(cache.Args, out UserInfo user))
@@ -96,6 +97,15 @@ namespace server.service.users
             }
         }
 
+        public bool GetUser(IConnection connection, out UserInfo user)
+        {
+            user = default;
+            if (clientSignInCaching.Get(connection.ConnectId, out SignInCacheInfo sign))
+            {
+                return GetUser(sign.Args, out user);
+            }
+            return false;
+        }
         private bool GetUser(Dictionary<string, string> args, out UserInfo user)
         {
             user = default;
@@ -105,7 +115,7 @@ namespace server.service.users
             }
             return false;
         }
-        public static bool GetAccountPassword(Dictionary<string, string> args, out string account, out string password)
+        private bool GetAccountPassword(Dictionary<string, string> args, out string account, out string password)
         {
             bool res = args.TryGetValue("account", out account);
             bool res1 = args.TryGetValue("password", out password);

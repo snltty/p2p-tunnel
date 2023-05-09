@@ -6,9 +6,13 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="开启" prop="ConnectEnable">
-                                <el-tooltip class="box-item" effect="dark" content="允许所有账号使用http代理，包括匿名" placement="top-start">
-                                    <el-checkbox size="default" v-model="state.form.ConnectEnable">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox size="default" v-model="state.form.ConnectEnable">开启
+                                    <el-tooltip class="box-item" effect="dark" content="允许所有账号使用http代理，包括匿名" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                     </el-row>

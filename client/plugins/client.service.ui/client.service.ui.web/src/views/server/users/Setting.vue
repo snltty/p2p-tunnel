@@ -6,16 +6,24 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="账号验证" prop="Enable">
-                                <el-tooltip class="box-item" effect="dark" content="开启账号验证" placement="top-start">
-                                    <el-checkbox size="default" v-model="state.form.Enable">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox size="default" v-model="state.form.Enable">开启
+                                    <el-tooltip class="box-item" effect="dark" content="开启账号验证" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="强制离线" prop="ForceOffline">
-                                <el-tooltip class="box-item" effect="dark" content="超出登入数量时，是否强制其它连接断开" placement="top-start">
-                                    <el-checkbox size="default" v-model="state.form.ForceOffline">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox size="default" v-model="state.form.ForceOffline">开启
+                                    <el-tooltip class="box-item" effect="dark" content="超出登入数量时，是否强制其它连接断开" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                     </el-row>

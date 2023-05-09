@@ -3,7 +3,7 @@ using common.libs.extends;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
-namespace server.service.users
+namespace common.user
 {
     [Table("users-appsettings")]
     public sealed class Config

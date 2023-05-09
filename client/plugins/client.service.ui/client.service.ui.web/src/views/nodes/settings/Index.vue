@@ -3,8 +3,8 @@
         <div class="content h-100 flex-1 flex flex-column">
             <div class="inner flex-1 scrollbar" ref="contentDom">
                 <template v-for="(item,index) in leftMenus" :key="index">
-                    <el-divider content-position="left" border-style="dotted">{{item.text}}</el-divider>
                     <div class="setting-item">
+                        <el-divider content-position="left" border-style="dotted">{{item.text}}</el-divider>
                         <component :is="item.component.value" :ref="`setting_item_${item.text}`" />
                     </div>
                 </template>
@@ -113,7 +113,7 @@ export default {
 <style lang="stylus" scoped>
 .content {
     .inner {
-        padding-bottom: 2rem;
+        padding: 4rem 2rem 2rem 2rem;
         box-sizing: border-box;
     }
 
@@ -122,14 +122,20 @@ export default {
         padding: 1rem;
         text-align: center;
         box-shadow: -1px 1px 0.6rem rgba(0, 0, 0, 0.05);
+        background-color: #fff;
     }
 }
 
 .setting-item {
-    margin: 0 2rem 0rem 2rem;
-    border: 1px solid #ececec;
+    margin: 0 2rem 2rem 2rem;
+    border: 1px solid #ddd;
     background-color: #fff;
     padding: 2rem;
     border-radius: 4px;
+    box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
+
+    .el-divider {
+        margin-top: 0;
+    }
 }
 </style>

@@ -114,7 +114,7 @@ namespace client.service.vea.socks5
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
                 for (int i = 32; i >= 16; i--)
                 {
-                    if (veaTransfer.LanIPList.TryGetValue(ip & (uint)(0xffffffff << (32 - i)), out cache))
+                    if (veaTransfer.LanIPList.TryGetValue(ip & 0xffffffff << (32 - i), out cache))
                     {
                         info.Connection = cache.Client.Connection;
                         break;

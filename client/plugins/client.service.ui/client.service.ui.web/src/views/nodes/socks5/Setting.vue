@@ -7,7 +7,15 @@
                         <el-row :gutter="10">
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="监听端口" prop="ListenPort">
-                                    <el-input size="default" v-model="state.form.ListenPort"></el-input>
+                                    <el-input size="default" v-model="state.form.ListenPort" placeholder="监听端口，随便一个空闲的端口即可">
+                                        <template #append>
+                                            <el-tooltip class="box-item" effect="dark" content="监听端口，随便一个空闲的端口即可" placement="top">
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-input>
                                 </el-form-item>
                             </el-col>
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -25,9 +33,13 @@
                         <el-row :gutter="10">
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="允许访问" prop="ConnectEnable">
-                                    <el-tooltip class="box-item" effect="dark" content="作为目标端时，是否允许被访问" placement="top-start">
-                                        <el-checkbox v-model="state.form.ConnectEnable" label="开启" />
-                                    </el-tooltip>
+                                    <el-checkbox v-model="state.form.ConnectEnable">开启
+                                        <el-tooltip class="box-item" effect="dark" content="作为目标端时，是否允许被访问" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </el-checkbox>
                                 </el-form-item>
                             </el-col>
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -46,16 +58,24 @@
                         <el-row :gutter="10">
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="系统代理" prop="IsPac">
-                                    <el-tooltip class="box-item" effect="dark" content="勾选则设置系统代理，不勾选则需要自己设置" placement="top-start">
-                                        <el-checkbox v-model="state.form.IsPac" label="开启" />
-                                    </el-tooltip>
+                                    <el-checkbox v-model="state.form.IsPac">开启
+                                        <el-tooltip class="box-item" effect="dark" content="勾选则设置系统代理，不勾选则需要自己设置" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </el-checkbox>
                                 </el-form-item>
                             </el-col>
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="自定义pac" prop="IsCustomPac">
-                                    <el-tooltip class="box-item" effect="dark" content="自定义pac还是使用预制的pac规则" placement="top-start">
-                                        <el-checkbox v-model="state.form.IsCustomPac" label="开启" />
-                                    </el-tooltip>
+                                    <el-checkbox v-model="state.form.IsCustomPac">开启
+                                        <el-tooltip class="box-item" effect="dark" content="自定义pac还是使用预制的pac规则" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </el-checkbox>
                                 </el-form-item>
                             </el-col>
                         </el-row>

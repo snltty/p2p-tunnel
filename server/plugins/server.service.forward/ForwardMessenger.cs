@@ -180,7 +180,7 @@ namespace server.service.forward
                 connection.Write(Helper.FalseArray);
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, (uint)common.server.EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;

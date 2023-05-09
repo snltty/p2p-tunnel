@@ -31,7 +31,7 @@
                     </el-col>
                 </template>
             </el-row>
-            <el-empty v-else description="空的，请确保各节点使用了同一分组编号，同一服务器" />
+            <el-empty v-else description="暂无数据，请确保各节点使用了同一分组编号，同一服务器" />
         </div>
         <RelayView v-if="state.showDelay" v-model="state.showDelay" @success="handleOnRelay"></RelayView>
     </div>
@@ -168,8 +168,16 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
+.wrap {
+    padding: 4rem;
+}
+
 .content {
     padding: 1rem;
+    background-color: #fff;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
 
     .item {
         padding: 1rem 0.6rem;

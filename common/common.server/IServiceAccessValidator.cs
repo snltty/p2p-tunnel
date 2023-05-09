@@ -1,7 +1,7 @@
-﻿using common.server;
-using server.messengers.singnin;
+﻿using System;
+using System.Collections.Generic;
 
-namespace server.messengers
+namespace common.server
 {
     public interface IServiceAccessValidator
     {
@@ -22,17 +22,25 @@ namespace server.messengers
         /// <summary>
         /// 验证权限
         /// </summary>
-        /// <param name="cache">缓存对象</param>
-        /// <param name="service">验证哪个权限</param>
-        /// <returns></returns>
-        public bool Validate(SignInCacheInfo cache, uint service);
-        /// <summary>
-        /// 验证权限
-        /// </summary>
         /// <param name="access">你有的权限</param>
         /// <param name="service">验证哪个权限</param>
         /// <returns></returns>
         public bool Validate(uint access, uint service);
+
     }
 
+
+    [Flags]
+    public enum EnumServiceAccess : uint
+    {
+        None = 0b00000000_00000000_00000000_00000000,
+        /// <summary>
+        /// 配置
+        /// </summary>
+        Setting = 0b00000000_00000000_00000000_00000010,
+        /// <summary>
+        /// 全部权限
+        /// </summary>
+        All = uint.MaxValue
+    }
 }

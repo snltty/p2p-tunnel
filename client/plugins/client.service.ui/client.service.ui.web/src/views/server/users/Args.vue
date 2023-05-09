@@ -3,16 +3,28 @@
         <el-row style="width:100%">
             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                 <el-form-item label="账号" prop="Account">
-                    <el-tooltip class="box-item" effect="dark" content="账号" placement="top-start">
-                        <el-input type="password" size="default" v-model="state.account" placeholder="账号" show-password></el-input>
-                    </el-tooltip>
+                    <el-input type="password" size="default" v-model="state.account" placeholder="账号" show-password>
+                        <template #append>
+                            <el-tooltip class="box-item" effect="dark" content="你的账号" placement="top">
+                                <el-icon>
+                                    <Warning />
+                                </el-icon>
+                            </el-tooltip>
+                        </template>
+                    </el-input>
                 </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                 <el-form-item label="密码" prop="Password">
-                    <el-tooltip class="box-item" effect="dark" content="密码" placement="top-start">
-                        <el-input type="password" size="default" placeholder="密码" v-model="state.password" show-password></el-input>
-                    </el-tooltip>
+                    <el-input type="password" size="default" placeholder="密码" v-model="state.password" show-password>
+                        <template #append>
+                            <el-tooltip class="box-item" effect="dark" content="你的密码" placement="top">
+                                <el-icon>
+                                    <Warning />
+                                </el-icon>
+                            </el-tooltip>
+                        </template>
+                    </el-input>
                 </el-form-item>
             </el-col>
         </el-row>

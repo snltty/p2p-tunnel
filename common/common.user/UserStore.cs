@@ -1,12 +1,10 @@
-﻿using common.libs;
-using common.libs.database;
-using server.service.users.model;
+﻿using common.libs.database;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
-namespace server.service.users
+namespace common.user
 {
     internal class UserStore : IUserStore
     {

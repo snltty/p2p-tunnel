@@ -2,7 +2,6 @@
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using server.messengers;
 using server.messengers.singnin;
 using System.Threading.Tasks;
 
@@ -34,7 +33,7 @@ namespace server.service.messengers.singnin
             {
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, (uint)common.server.EnumServiceAccess.Setting) == false)
             {
                 return;
             }
@@ -50,7 +49,7 @@ namespace server.service.messengers.singnin
                 connection.Write(Helper.FalseArray);
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection, (uint)common.server.EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;

@@ -109,6 +109,14 @@ export default {
 
 <style lang="stylus" scoped>
 .proxy-wrap {
-    padding-top: 5rem;
+    padding: 4rem;
+
+    .form {
+        padding-top: 3rem;
+        background-color: #fff;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
+    }
 }
 </style>

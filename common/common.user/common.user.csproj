@@ -18,9 +18,17 @@
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\common\common.user\common.user.csproj" />
-    <ProjectReference Include="..\client.service.ui\client.service.ui.api\client.service.ui.api.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <Content Include="users-appsettings.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="users.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\common.libs\common.libs.csproj" />
+	  <ProjectReference Include="..\common.server\common.server.csproj" />
+	</ItemGroup>
 
 </Project>

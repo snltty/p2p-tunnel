@@ -6,16 +6,12 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="开启" prop="Enable">
-                                <el-tooltip class="box-item" effect="dark" content="开启" placement="top-start">
-                                    <el-checkbox v-model="state.form.Enable">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox v-model="state.form.Enable">开启</el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="显示数量" prop="MaxLength">
-                                <el-tooltip class="box-item" effect="dark" content="日志显示数量" placement="top-start">
-                                    <el-input size="default" v-model="state.form.MaxLength"></el-input>
-                                </el-tooltip>
+                                <el-input size="default" v-model="state.form.MaxLength"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>

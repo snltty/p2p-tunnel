@@ -7,7 +7,7 @@
                 <span class="flex-1"></span>
             </div>
             <div class="content">
-                <el-row>
+                <el-row v-if="state.list.length > 0">
                     <template v-for="(item,index) in state.list" :key="index">
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <div class="item">
@@ -54,6 +54,7 @@
                         </el-col>
                     </template>
                 </el-row>
+                <el-empty v-else></el-empty>
             </div>
         </div>
         <AddForward v-if="state.showAddForward" v-model="state.showAddForward" @success="loadPorts"></AddForward>
@@ -226,6 +227,7 @@ export default {
         border: 1px solid var(--main-border-color);
         // padding: 1rem;
         border-radius: 0.4rem;
+        background-color: #Fff;
     }
 
     .head {

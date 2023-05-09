@@ -6,16 +6,26 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="P2P加密" prop="ClientEncode">
-                                <el-tooltip class="box-item" effect="dark" content="客户端之间通信使用加密" placement="top-start">
-                                    <el-checkbox v-model="state.form.ClientEncode">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox v-model="state.form.ClientEncode">开启
+                                    <el-tooltip class="box-item" effect="dark" content="客户端之间通信使用加密" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="密钥" prop="ClientEncodePassword">
-                                <el-tooltip class="box-item" effect="dark" content="加密密钥32位，为空则每次加密随机密钥，如果填写，则各客户端都填写" placement="top-start">
-                                    <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="state.form.ClientEncodePassword"></el-input>
-                                </el-tooltip>
+                                <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="state.form.ClientEncodePassword" placeholder="加密密钥32位">
+                                    <template #append>
+                                        <el-tooltip class="box-item" effect="dark" content="加密密钥32位，为空则每次加密随机密钥，如果填写，则各客户端都填写" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </template>
+                                </el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -24,16 +34,26 @@
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="登入加密" prop="ServerEncode">
-                                <el-tooltip class="box-item" effect="dark" content="客户端与服务端之间通信使用加密" placement="top-start">
-                                    <el-checkbox v-model="state.form.ServerEncode">开启</el-checkbox>
-                                </el-tooltip>
+                                <el-checkbox v-model="state.form.ServerEncode">开启
+                                    <el-tooltip class="box-item" effect="dark" content="客户端与服务端之间通信使用加密" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip>
+                                </el-checkbox>
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="密钥" prop="ServerEncodePassword">
-                                <el-tooltip class="box-item" effect="dark" content="加密密钥 32位，为空则每次加密随机密钥，使用p2p.snltty.com服务器则必须留空" placement="top-start">
-                                    <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="state.form.ServerEncodePassword"></el-input>
-                                </el-tooltip>
+                                <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="state.form.ServerEncodePassword" placeholder="加密密钥32位">
+                                    <template #append>
+                                        <el-tooltip class="box-item" effect="dark" content="加密密钥32位，为空则每次加密随机密钥，使用默认服务器则必须留空" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </template>
+                                </el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>

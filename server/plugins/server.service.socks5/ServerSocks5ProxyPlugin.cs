@@ -2,6 +2,7 @@
 using common.socks5;
 using server.messengers;
 using common.libs.extends;
+using common.server;
 
 namespace server.service.socks5
 {
@@ -26,11 +27,6 @@ namespace server.service.socks5
 #if DEBUG
             return true;
 #else
-            if (info.TargetAddress.IsLan())
-            {
-                return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
-            }
-
             return base.ValidateAccess(info) || serviceAccessProvider.Validate(info.Connection, Access);
 #endif
         }

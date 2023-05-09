@@ -6,7 +6,7 @@
                 <el-button size="small" @click="getData">刷新列表</el-button>
             </div>
             <div class="content">
-                <el-row>
+                <el-row v-if="list.length > 0">
                     <template v-for="(item,index) in list" :key="index">
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <div class="item">
@@ -55,6 +55,7 @@
                         </el-col>
                     </template>
                 </el-row>
+                <el-empty v-else />
             </div>
             <AddForward v-if="showAddForward" v-model="showAddForward" @success="getData"></AddForward>
             <AddListen v-if="showAddListen" v-model="showAddListen" @success="getData"></AddListen>
@@ -190,9 +191,10 @@ export default {
     padding: 2rem;
 
     .inner {
-        border: 1px solid #eee;
-        // padding: 1rem;
-        border-radius: 0.4rem;
+        background-color: #fff;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
     }
 
     .head {

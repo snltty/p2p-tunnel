@@ -1,35 +1,38 @@
 <template>
     <div class="logger-setting-wrap flex flex-column h-100">
-        <div class="head flex">
-            <el-select v-model="Type" size="small" @change="loadData" style="width:6rem;">
-                <el-option :value="-1" label="全部"></el-option>
-                <el-option :value="0" label="debug"></el-option>
-                <el-option :value="1" label="info"></el-option>
-                <el-option :value="2" label="warning"></el-option>
-                <el-option :value="3" label="error"></el-option>
-            </el-select>
-            <span class="split"></span>
-            <el-button size="small" :loading="loading" @click="loadData">刷新列表</el-button>
-            <el-button type="warning" size="small" :loading="loading" @click="clearData">清空</el-button>
-            <span class="flex-1"></span>
-        </div>
-        <div class="body flex-1 relative">
-            <div class="absolute">
-                <el-table border :data="page.Data" size="small" height="100%" @row-click="handleRowClick" :row-class-name="tableRowClassName">
-                    <el-table-column type="index" width="50" />
-                    <el-table-column prop="Type" label="类别" width="80">
-                        <template #default="scope">
-                            <span>{{types[scope.row.Type]}} </span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="Time" label="时间" width="160"></el-table-column>
-                    <el-table-column prop="content" label="内容"></el-table-column>
-                </el-table>
+        <div class="inner">
+            <div class="head flex">
+                <el-select v-model="Type" size="small" @change="loadData" style="width:6rem;">
+                    <el-option :value="-1" label="全部"></el-option>
+                    <el-option :value="0" label="debug"></el-option>
+                    <el-option :value="1" label="info"></el-option>
+                    <el-option :value="2" label="warning"></el-option>
+                    <el-option :value="3" label="error"></el-option>
+                </el-select>
+                <span class="split"></span>
+                <el-button size="small" :loading="loading" @click="loadData">刷新列表</el-button>
+                <el-button type="warning" size="small" :loading="loading" @click="clearData">清空</el-button>
+                <span class="flex-1"></span>
             </div>
-        </div>
-        <div class="pages t-c">
-            <el-pagination small :total="page.Count" v-model:currentPage="page.PageIndex" :page-size="page.PageSize" @current-change="loadData" background layout="total,prev, pager, next">
-            </el-pagination>
+            <div class="body flex-1 relative">
+                <div class="absolute" v-if="page.Data.length > 0">
+                    <el-table border :data="page.Data" size="small" height="100%" @row-click="handleRowClick" :row-class-name="tableRowClassName">
+                        <el-table-column type="index" width="50" />
+                        <el-table-column prop="Type" label="类别" width="80">
+                            <template #default="scope">
+                                <span>{{types[scope.row.Type]}} </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="Time" label="时间" width="160"></el-table-column>
+                        <el-table-column prop="content" label="内容"></el-table-column>
+                    </el-table>
+                </div>
+                <el-empty v-else />
+            </div>
+            <div class="pages t-c">
+                <el-pagination small :total="page.Count" v-model:currentPage="page.PageIndex" :page-size="page.PageSize" @current-change="loadData" background layout="total,prev, pager, next">
+                </el-pagination>
+            </div>
         </div>
     </div>
 </template>
@@ -47,7 +50,7 @@ export default {
 
         const state = reactive({
             loading: true,
-            page: { PageIndex: 1, PageSize: 20, Count: 0 },
+            page: { PageIndex: 1, PageSize: 20, Count: 0, Data: [] },
             types: ['debug', 'info', 'warning', 'error'],
             Type: -1
         })
@@ -103,6 +106,14 @@ export default {
 .logger-setting-wrap {
     padding: 2rem;
     box-sizing: border-box;
+
+    .inner {
+        padding: 1rem;
+        background-color: #fff;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
+    }
 
     .head {
         margin-bottom: 1rem;

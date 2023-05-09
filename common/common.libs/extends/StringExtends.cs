@@ -436,5 +436,6 @@ namespace common.libs.extends
             ReadOnlySpan<char> src = MemoryMarshal.Cast<byte, char>(span).Slice(0, strLength);
             return new string(src);
         }
+
     }
 }

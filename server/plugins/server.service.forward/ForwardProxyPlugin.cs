@@ -1,5 +1,6 @@
 ﻿using common.forward;
 using common.proxy;
+using common.server;
 using server.messengers;
 using server.messengers.singnin;
 using System;
@@ -17,9 +18,11 @@ namespace server.service.forward
     {
         public static uint Access => 0b00000000_00000000_00000000_00001000;
         private readonly IServiceAccessValidator serviceAccessProvider;
+        private readonly common.forward.Config config;
 
         public ForwardProxyPlugin(common.forward.Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching) : base(config, proxyServer, forwardTargetProvider)
         {
+            this.config = config;
             this.serviceAccessProvider = serviceAccessProvider;
             clientSignInCaching.OnOffline += (client) =>
             {
@@ -40,7 +43,7 @@ namespace server.service.forward
 #if DEBUG
             return true;
 #else
-             return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
+            return serviceAccessProvider.Validate(info.Connection, (uint)EnumServiceAccess.Setting);
 #endif
 
         }

@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.proxy;
 using common.server.model;
 using System;
@@ -37,7 +38,9 @@ namespace common.httpProxy
         {
 #if DEBUG
             return true;
+
 #else
+            if (info.TargetAddress.IsLan()) return false;
             return Enable;
 #endif
         }

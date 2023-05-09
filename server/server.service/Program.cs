@@ -11,6 +11,7 @@ using server.service.users;
 using common.proxy;
 using server.service.httpProxy;
 using server.service.forward;
+using common.user;
 
 namespace server.service
 {
@@ -39,12 +40,12 @@ namespace server.service
 
                  //以下是为了获取信息
                 typeof(common.server.model.SignInMessengerIds).Assembly,
-                typeof(common.proxy.ProxyMessengerIds).Assembly,
+                typeof(ProxyMessengerIds).Assembly,
                 typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
                 typeof(common.socks5.Socks5MessengerIds).Assembly,
                 typeof(common.forward.ForwardMessengerIds).Assembly,
 
-                typeof(server.service.users.model.UsersMessengerIds).Assembly,
+                typeof(SignInAccessValidator).Assembly,
 
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 

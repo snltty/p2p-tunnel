@@ -33,7 +33,7 @@ namespace server.service.messengers.singnin
             SignInParamsInfo model = new SignInParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
 
-            uint access = (uint)EnumServiceAccess.None;
+            uint access = (uint)common.server.EnumServiceAccess.None;
             //登入验证
             SignInResultInfo.SignInResultInfoCodes code = signInValidatorHandler.Validate(model, ref access);
             if (code != SignInResultInfo.SignInResultInfoCodes.OK)

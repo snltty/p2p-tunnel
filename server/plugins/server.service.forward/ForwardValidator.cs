@@ -1,8 +1,5 @@
-﻿using common.server;
-using common.server.model;
-using server.messengers;
+﻿using common.server.model;
 using server.messengers.singnin;
-using server.service.forward;
 using System.Collections.Generic;
 
 namespace server.service.forward
@@ -25,7 +22,7 @@ namespace server.service.forward
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
-            access |= (config.ConnectEnable ? Access : (uint)EnumServiceAccess.None);
+            access |= (config.ConnectEnable ? Access : (uint)common.server.EnumServiceAccess.None);
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
         public void Validated(SignInCacheInfo cache)

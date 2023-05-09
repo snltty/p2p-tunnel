@@ -20,3 +20,6 @@ Number.prototype.timeFormat = function () {
         add0(Math.floor(num % 60)),
     ];
 }
+Number.prototype.splitStr = function () {
+    return this.replace(/\s/g, '').split(/,|\n/).filter(c => c.length > 0).map(c => c.replace(/\s/g, ''));
+}
