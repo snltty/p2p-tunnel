@@ -21,15 +21,17 @@ namespace server.service.forward
         private readonly IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching;
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IProxyServer proxyServer;
+        private readonly IForwardProxyPlugin forwardProxyPlugin;
 
         public ForwardMessenger(IClientSignInCaching clientSignInCache, common.forward.Config config,
-            IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching, IServiceAccessValidator serviceAccessValidator, IProxyServer proxyServer)
+            IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching, IServiceAccessValidator serviceAccessValidator, IProxyServer proxyServer, IForwardProxyPlugin forwardProxyPlugin)
         {
             this.clientSignInCache = clientSignInCache;
             this.config = config;
             this.forwardTargetCaching = forwardTargetCaching;
             this.serviceAccessValidator = serviceAccessValidator;
             this.proxyServer = proxyServer;
+            this.forwardProxyPlugin = forwardProxyPlugin;
         }
 
 
@@ -96,7 +98,7 @@ namespace server.service.forward
                 //取出注册缓存，没取出来就说明没注册
                 if (clientSignInCache.Get(connection.ConnectId, out SignInCacheInfo source))
                 {
-                    if (config.ConnectEnable == false && serviceAccessValidator.Validate(connection, forward.ForwardProxyPlugin.Access) == false)
+                    if (config.ConnectEnable == false && serviceAccessValidator.Validate(connection.ConnectId, forwardProxyPlugin.Access) == false)
                     {
                         connection.Write(new ForwardSignInResultInfo { Code = ForwardSignInResultCodes.DISABLED }.ToBytes());
                         return;
@@ -180,7 +182,7 @@ namespace server.service.forward
                 connection.Write(Helper.FalseArray);
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, (uint)common.server.EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)common.server.EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;

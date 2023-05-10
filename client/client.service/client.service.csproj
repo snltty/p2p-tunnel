@@ -40,6 +40,7 @@
 		<ProjectReference Include="..\plugins\client.service.socks5\client.service.socks5.csproj" />
 		<ProjectReference Include="..\plugins\client.service.ui\client.service.ui.api.service\client.service.ui.api.service.csproj" />
 		<ProjectReference Include="..\plugins\client.service.users.server\client.service.users.server.csproj" />
+		<ProjectReference Include="..\plugins\client.service.users\client.service.users.csproj" />
 		<ProjectReference Include="..\plugins\client.service.vea\client.service.vea.csproj" />
 	</ItemGroup>
 	<ItemGroup>

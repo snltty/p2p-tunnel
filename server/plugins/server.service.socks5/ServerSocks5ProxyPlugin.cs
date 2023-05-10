@@ -13,12 +13,11 @@ namespace server.service.socks5
 
     public class ServerSocks5ProxyPlugin : Socks5ProxyPlugin, IServerSocks5ProxyPlugin
     {
-        public static uint Access => 0b00000000_00000000_00000000_00010000;
-        private readonly IServiceAccessValidator serviceAccessProvider;
-        public ServerSocks5ProxyPlugin(common.socks5.Config config, IProxyServer proxyServer, IServiceAccessValidator serviceAccessProvider)
-            : base(config, proxyServer)
+        private readonly IServiceAccessValidator  serviceAccessValidator;
+        public ServerSocks5ProxyPlugin(common.socks5.Config config, IProxyServer proxyServer, IServiceAccessValidator serviceAccessValidator)
+            : base(config, proxyServer, serviceAccessValidator)
         {
-            this.serviceAccessProvider = serviceAccessProvider;
+            this.serviceAccessValidator = serviceAccessValidator;
         }
 
         public override bool ValidateAccess(ProxyInfo info)
@@ -27,7 +26,7 @@ namespace server.service.socks5
 #if DEBUG
             return true;
 #else
-            return base.ValidateAccess(info) || serviceAccessProvider.Validate(info.Connection, Access);
+            return base.ValidateAccess(info) || serviceAccessValidator.Validate(info.Connection, Access);
 #endif
         }
     }

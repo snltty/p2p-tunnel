@@ -7,11 +7,6 @@ namespace common.server
     /// </summary>
     public interface IRelayValidator
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         public bool Validate(IConnection connection);
     }
 
@@ -20,17 +15,9 @@ namespace common.server
     /// </summary>
     public sealed class DefaultRelayValidator : IRelayValidator
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public DefaultRelayValidator()
         {
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
         public bool Validate(IConnection connection)
         {
             return true;

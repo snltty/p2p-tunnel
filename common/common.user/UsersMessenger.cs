@@ -29,7 +29,7 @@ namespace common.user
         [MessengerId((ushort)UsersMessengerIds.Page)]
         public void Page(IConnection connection)
         {
-            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)EnumServiceAccess.Setting) == false)
             {
                 return;
             }
@@ -49,7 +49,7 @@ namespace common.user
         [MessengerId((ushort)UsersMessengerIds.Add)]
         public void Add(IConnection connection)
         {
-            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;
@@ -76,7 +76,7 @@ namespace common.user
         [MessengerId((ushort)UsersMessengerIds.Remove)]
         public void Remove(IConnection connection)
         {
-            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;
@@ -115,7 +115,7 @@ namespace common.user
         [MessengerId((ushort)UsersMessengerIds.Setting)]
         public async Task Setting(IConnection connection)
         {
-            if (serviceAccessValidator.Validate(connection, (uint)EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;

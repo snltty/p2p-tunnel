@@ -9,7 +9,7 @@ using client.service.socks5;
 using client.service.socks5.server;
 using client.service.ui.api.service.clientServer;
 using client.service.users.server;
-using client.service.vea.client;
+using client.service.vea;
 using common.libs;
 using common.proxy;
 using common.server;
@@ -69,6 +69,7 @@ namespace client.service
 
                 typeof(VeaClientService).Assembly,
 
+                typeof(UsersClientService).Assembly,
                 typeof(ServerUsersClientService).Assembly,
 
                 //以下是为了获取信息

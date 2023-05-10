@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.server;
 using common.server.model;
 using System;
 using System.Collections.Concurrent;
@@ -6,7 +7,7 @@ using System.Net;
 
 namespace common.proxy
 {
-    public interface IProxyPlugin
+    public interface IProxyPlugin : IAccess
     {
         public byte Id { get; }
         public EnumBufferSize BufferSize { get; }
@@ -42,8 +43,8 @@ namespace common.proxy
         public bool HandleAnswerData(ProxyInfo info);
 
 
-        public void Started(ushort port){}
-        public void Stoped(ushort port){}
+        public void Started(ushort port) { }
+        public void Stoped(ushort port) { }
     }
 
     public static class ProxyPluginLoader
@@ -52,7 +53,7 @@ namespace common.proxy
         delegate void DelegateValidateAccess(ProxyInfo info);
         delegate void DelegateCommandAnswer(ProxyInfo info);
 
-        static ConcurrentDictionary<byte, IProxyPlugin> plugins = new ConcurrentDictionary<byte, IProxyPlugin>();
+        public static ConcurrentDictionary<byte, IProxyPlugin> plugins = new ConcurrentDictionary<byte, IProxyPlugin>();
         public static void LoadPlugin(IProxyPlugin plugin)
         {
             if (plugins.ContainsKey(plugin.Id))

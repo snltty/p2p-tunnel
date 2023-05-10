@@ -12,6 +12,7 @@ namespace client.service.tray
     {
         private NotifyIcon notifyIcon = null;
         private Process proc;
+        static string lnk = "";
 
         protected override CreateParams CreateParams
         {
@@ -35,9 +36,9 @@ namespace client.service.tray
             this.Opacity = 0;
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
+            lnk = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Startup), AppDomain.CurrentDomain.FriendlyName) + ".lnk";
             InitializeComponent();
             InitialTray();
-
         }
 
 
@@ -142,7 +143,45 @@ namespace client.service.tray
             }
         }
 
+        /*
+        private void StartUp(object sender, EventArgs e)
+        {
+            try
+            {
+                if (File.Exists(lnk) == false)
+                {
+                    CreateShortcut();
+                    notifyIcon.BalloonTipText = "已设置自启动";
+                    notifyIcon.ShowBalloonTip(1000);
+                }
+                else
+                {
+                    File.Delete(lnk);
+                    notifyIcon.BalloonTipText = "已取消自启动";
+                    notifyIcon.ShowBalloonTip(1000);
+                }
+            }
+            catch (Exception ex)
+            {
+                notifyIcon.BalloonTipText = ex.Message;
+                notifyIcon.ShowBalloonTip(1000);
+            }
+            StartUp();
+        }
+        private void StartUp()
+        {
+            if (File.Exists(lnk) == false)
+            {
+                notifyIcon.ContextMenuStrip.Items[1].Image = unright;
+            }
+            else
+            {
+                notifyIcon.ContextMenuStrip.Items[1].Image = right;
+            }
+        }
+        */
 
+        
         private Model GetReg()
         {
             string currentPath = Application.StartupPath;
@@ -223,7 +262,6 @@ namespace client.service.tray
             model.RegKey.Close();
         }
 
-
         private void OpenWeb(object sender, EventArgs e)
         {
             if (System.IO.File.Exists("./ui-appsettings.json"))
@@ -253,8 +291,6 @@ namespace client.service.tray
             KillExe();
         }
 
-
-
         private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
             string resourceName = "client.service.tray." + new AssemblyName(args.Name).Name + ".dll";
@@ -269,6 +305,21 @@ namespace client.service.tray
 
                 return null;
             }
+        }
+
+
+        private static void CreateShortcut(string args = "")
+        {
+            var shellType = Type.GetTypeFromProgID("WScript.Shell");
+            var shell = Activator.CreateInstance(shellType);
+            var shortcut = shellType.InvokeMember("CreateShortcut", BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod, null, shell, new object[] { lnk });
+
+            var shortcutType = shortcut.GetType();
+            shortcutType.InvokeMember("WindowStyle", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { 1 });
+            shortcutType.InvokeMember("TargetPath", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { Assembly.GetEntryAssembly().Location });
+            shortcutType.InvokeMember("Arguments", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { args });
+            shortcutType.InvokeMember("WorkingDirectory", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { AppDomain.CurrentDomain.SetupInformation.ApplicationBase });
+            shortcutType.InvokeMember("Save", BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod, null, shortcut, null);
         }
 
         class Model

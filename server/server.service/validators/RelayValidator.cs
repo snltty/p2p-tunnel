@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace server.service.validators
 {
-    public sealed class RelayValidator : IRelayValidator, ISignInValidator
+    public sealed class RelayValidator : IRelayValidator, ISignInValidator, IAccess
     {
 
         private readonly Config config;
@@ -24,12 +24,12 @@ namespace server.service.validators
         }
         public bool Validate(IConnection connection)
         {
-            return config.RelayEnable || serviceAccessProvider.Validate(connection, Access);
+            return config.RelayEnable || serviceAccessProvider.Validate(connection.ConnectId, Access);
         }
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
-            access |= (config.RelayEnable ? Access : (uint)common.server.EnumServiceAccess.None);
+            access |= (config.RelayEnable ? Access : (uint)EnumServiceAccess.None);
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
 
@@ -40,16 +40,12 @@ namespace server.service.validators
     }
 
 
-    public sealed class SettingValidator : ISignInValidator
+    public sealed class SettingValidator : ISignInValidator, IAccess
     {
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
-        public uint Access => (uint)common.server.EnumServiceAccess.Setting;
+        public uint Access => (uint)EnumServiceAccess.Setting;
 
         public string Name => "服务器配置";
-
-        public SettingValidator()
-        {
-        }
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {

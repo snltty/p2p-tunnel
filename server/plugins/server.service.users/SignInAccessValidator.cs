@@ -10,7 +10,7 @@ namespace server.service.users
     /// <summary>
     /// 登入权限验证
     /// </summary>
-    public sealed class SignInAccessValidator : ISignInValidator, IUserInfoCaching
+    public sealed class SignInAccessValidator : ISignInValidator, IUserInfoCaching, IAccess
     {
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IUserStore userStore;

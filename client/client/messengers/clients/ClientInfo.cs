@@ -3,6 +3,7 @@ using System;
 using System.Text.Json.Serialization;
 using common.server;
 using System.Net;
+using System.Collections.Generic;
 
 namespace client.messengers.clients
 {
@@ -49,6 +50,12 @@ namespace client.messengers.clients
         /// </summary>
         public bool UseRelay { get; set; }
         public bool UseAutoRelay { get; set; }
+
+        public uint UserAccess { get; set; }
+        /// <summary>
+        /// 额外参数
+        /// </summary>
+        public Dictionary<string, string> Args { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// ping值
@@ -143,7 +150,7 @@ namespace client.messengers.clients
             OnlineType = onlineType;
             Connecting = false;
 
-            if(onlineType == ClientOnlineTypes.Active)
+            if (onlineType == ClientOnlineTypes.Active)
             {
                 _connection?.Disponse();
             }
@@ -155,6 +162,14 @@ namespace client.messengers.clients
         public void SetConnecting(bool val)
         {
             Connecting = val;
+        }
+
+        public void UpdateArgs(Dictionary<string, string> source, string key)
+        {
+            if(source.TryGetValue(key,out string value))
+            {
+                Args[key] = value;
+            }
         }
     }
 

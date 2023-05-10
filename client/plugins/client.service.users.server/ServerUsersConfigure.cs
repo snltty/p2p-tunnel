@@ -25,7 +25,7 @@ namespace client.service.users.server
 
         public string Name => "服务端用户管理";
         public string Author => "snltty";
-        public string Desc => "";
+        public string Desc => string.Empty;
         public bool Enable => true;
 
         /// <summary>

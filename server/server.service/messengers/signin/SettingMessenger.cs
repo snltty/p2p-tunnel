@@ -33,7 +33,7 @@ namespace server.service.messengers.singnin
             {
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, (uint)common.server.EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)common.server.EnumServiceAccess.Setting) == false)
             {
                 return;
             }
@@ -49,7 +49,7 @@ namespace server.service.messengers.singnin
                 connection.Write(Helper.FalseArray);
                 return;
             }
-            if (serviceAccessValidator.Validate(connection, (uint)common.server.EnumServiceAccess.Setting) == false)
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)common.server.EnumServiceAccess.Setting) == false)
             {
                 connection.Write(Helper.FalseArray);
                 return;

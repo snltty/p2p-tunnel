@@ -5,6 +5,7 @@ using common.libs;
 using System.Reflection;
 using System.Linq;
 using System;
+using common.proxy;
 
 namespace server.service.validators
 {
@@ -37,19 +38,6 @@ namespace server.service.validators
                     last.Next = new Wrap<ISignInValidator> { Value = validator };
                     last = last.Next;
                 }
-            }
-
-            var validators = ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(ISignInValidator)).Distinct()
-                .Select(c => (ISignInValidator)serviceProvider.GetService(c));
-
-            Logger.Instance.Debug("权限值,uint 每个权限占一位，最多32个权限");
-            if (validators.Select(c => c.Access).Distinct().Count() != validators.Count())
-            {
-                Logger.Instance.Error("有冲突");
-            }
-            foreach (var item in validators.OrderBy(c => c.Access))
-            {
-                Logger.Instance.Info($"{Convert.ToString(item.Access, 2).PadLeft(32, '0')}  {item.Name}");
             }
         }
 

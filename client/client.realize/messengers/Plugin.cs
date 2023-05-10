@@ -22,6 +22,7 @@ using common.server.servers.iocp;
 using client.realize.messengers.relay;
 using client.messengers.relay;
 using common.proxy;
+using System.ComponentModel.DataAnnotations;
 
 namespace client.realize.messengers
 {
@@ -51,6 +52,7 @@ namespace client.realize.messengers
             
 
             services.AddSingleton<IIPv6AddressRequest, IPv6AddressRequest>();
+            services.AddSingleton<IServiceAccessValidator, clients.ServiceAccessValidator>();
 
             //监听服务
             services.AddSingleton<ITcpServer, TcpServer>();

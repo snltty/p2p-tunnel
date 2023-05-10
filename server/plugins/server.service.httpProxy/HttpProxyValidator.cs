@@ -10,21 +10,20 @@ namespace server.service.httpProxy
     public sealed class HttpProxyValidator : ISignInValidator
     {
         private readonly common.httpProxy.Config config;
+        private readonly IServerHttpProxyPlugin serverHttpProxyPlugin;
 
-        public HttpProxyValidator(common.httpProxy.Config config)
+        public HttpProxyValidator(common.httpProxy.Config config, IServerHttpProxyPlugin serverHttpProxyPlugin)
         {
             this.config = config;
+            this.serverHttpProxyPlugin = serverHttpProxyPlugin;
         }
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
-        public uint Access => ServerHttpProxyPlugin.Access;
-
-        public string Name => "http代理";
 
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
-            access |= (config.ConnectEnable ? Access : (uint)common.server.EnumServiceAccess.None);
+            access |= (config.ConnectEnable ? serverHttpProxyPlugin.Access : (uint)common.server.EnumServiceAccess.None);
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
         public void Validated(SignInCacheInfo cache)

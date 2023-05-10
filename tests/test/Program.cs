@@ -12,16 +12,10 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            List<ulong> list = new List<ulong>();
-            Random rd = new Random();
-            for (int i = 0; i < 10000000; i++)
-            {
-                string str = BitConverter.ToUInt64(Guid.NewGuid().ToByteArray()).ToString();
-                ulong val = ulong.Parse(str.Substring(str.Length-15, 15));
-                //if (list.Contains(val) == false) list.Add(val);
-            }
-            Console.WriteLine(list.Count);
-            
+
+            Dictionary<string, string> Args = new Dictionary<string, string>();
+            Args["aa"] = "aa";
+            Console.Write(Args["aa"]);
             //var summary = BenchmarkRunner.Run<Test>();
         }
 

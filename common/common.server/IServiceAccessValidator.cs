@@ -1,17 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace common.server
 {
-    public interface IServiceAccessValidator
+
+    public interface IAccess
     {
         /// <summary>
-        /// 验证权限
+        /// 权限
         /// </summary>
-        /// <param name="connection">连接对象</param>
-        /// <param name="service">验证哪个权限</param>
-        /// <returns></returns>
-        public bool Validate(IConnection connection, uint service);
+        public uint Access { get; }
+        /// <summary>
+        /// 名字
+        /// </summary>
+        public string Name { get; }
+    }
+
+    public interface IServiceAccessValidator
+    {
         /// <summary>
         /// 验证权限
         /// </summary>
@@ -27,6 +32,23 @@ namespace common.server
         /// <returns></returns>
         public bool Validate(uint access, uint service);
 
+    }
+
+    public class ServiceAccessValidator : IServiceAccessValidator
+    {
+
+        public ServiceAccessValidator()
+        {
+        }
+
+        public virtual bool Validate(ulong connectionid, uint service)
+        {
+            return false;
+        }
+        public bool Validate(uint access, uint service)
+        {
+            return (access & service) == service;
+        }
     }
 
 

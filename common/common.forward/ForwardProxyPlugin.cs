@@ -1,9 +1,9 @@
 ﻿using common.libs;
 using common.libs.extends;
 using common.proxy;
+using common.server;
 using common.server.model;
 using System;
-using System.Buffers.Binary;
 using System.Net;
 using System.Text;
 
@@ -18,6 +18,8 @@ namespace common.forward
     public class ForwardProxyPlugin : IForwardProxyPlugin
     {
         public byte Id => config.Plugin;
+        public virtual uint Access => 0b00000000_00000000_00000000_00001000;
+        public virtual string Name => "port forward";
         public EnumBufferSize BufferSize => config.BufferSize;
         public IPAddress BroadcastBind => IPAddress.Any;
         public Action<ushort> OnStarted { get; set; } = (port) => { };
@@ -26,11 +28,13 @@ namespace common.forward
         private readonly Config config;
         private readonly IProxyServer proxyServer;
         private readonly IForwardTargetProvider forwardTargetProvider;
-        public ForwardProxyPlugin(Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider)
+        private readonly IServiceAccessValidator serviceAccessValidator;
+        public ForwardProxyPlugin(Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IServiceAccessValidator serviceAccessValidator)
         {
             this.config = config;
             this.proxyServer = proxyServer;
             this.forwardTargetProvider = forwardTargetProvider;
+            this.serviceAccessValidator = serviceAccessValidator;
         }
 
         public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
@@ -67,7 +71,6 @@ namespace common.forward
         }
         public virtual bool ValidateAccess(ProxyInfo info)
         {
-
 #if DEBUG
             return true;
 #else
@@ -92,7 +95,7 @@ namespace common.forward
                 }
                 if (res == false) return res;
             }
-            return config.ConnectEnable;
+            return config.ConnectEnable ||  serviceAccessValidator.Validate(info.Connection.ConnectId,Access);
 #endif
 
         }

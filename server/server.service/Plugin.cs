@@ -9,14 +9,12 @@ using common.server.servers.iocp;
 using common.server.servers.rudp;
 using System.Reflection;
 using common.libs.database;
-using server.messengers;
 using server.service.validators;
 using System.Net;
 using server.service.messengers;
 using common.libs.extends;
 using server.messengers.singnin;
 using server.service.messengers.singnin;
-using System.ComponentModel.DataAnnotations;
 using common.proxy;
 
 namespace server.service
@@ -35,8 +33,8 @@ namespace server.service
 
 
             services.AddSingleton<ISignInValidatorHandler, SignInValidatorHandler>();
-            services.AddSingleton<IServiceAccessValidator, ServiceAccessValidator>();
             services.AddSingleton<IRelayValidator, RelayValidator>();
+            services.AddSingleton<IServiceAccessValidator, validators.ServiceAccessValidator>();
 
 
             services.AddSingleton<MessengerResolver>();
@@ -78,6 +76,8 @@ namespace server.service
             ISignInValidatorHandler signInMiddlewareHandler = services.GetService<ISignInValidatorHandler>();
             signInMiddlewareHandler.LoadValidator(assemblys);
 
+
+            PrintProxyPlugin(services,assemblys);
 
             Loop(services);
             Udp((UdpServer)udpServer, messengerResolver);
@@ -142,6 +142,21 @@ namespace server.service
                     Logger.Instance.DebugError(ex);
                 }
             };
+        }
+
+        private void PrintProxyPlugin(ServiceProvider services, Assembly[] assemblys)
+        {
+            var iAccesss = ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IAccess))
+                .Where(c => c.FullName.StartsWith(this.GetType().Namespace)).Distinct()
+                .Select(c=> services.GetService(c)).Concat(ProxyPluginLoader.plugins.Values).Where(c => c is IAccess).Select(c=>(IAccess)c);
+
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
+            Logger.Instance.Debug("权限值,uint 每个权限占一位，最多32个权限");
+            foreach (var item in iAccesss.OrderBy(c=>c.Access))
+            {
+                Logger.Instance.Info($"{Convert.ToString(item.Access, 2).PadLeft(Logger.Instance.PaddingWidth, '0')}  {item.Name}");
+            }
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 
     }

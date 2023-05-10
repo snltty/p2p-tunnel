@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using common.libs.extends;
 using common.proxy;
+using common.server;
 using common.server.model;
 using System;
 using System.Net;
@@ -14,15 +15,19 @@ namespace common.httpProxy
     public class HttpProxyPlugin : IHttpProxyPlugin
     {
         public virtual byte Id => config.Plugin;
+        public virtual uint Access => 0b00000000_00000000_00000000_00100000;
+        public virtual string Name => "http proxy";
         public virtual EnumBufferSize BufferSize => config.BufferSize;
         public IPAddress BroadcastBind => IPAddress.Any;
         public virtual ushort Port => config.ListenPort;
         public virtual bool Enable => config.ListenEnable;
 
         private readonly Config config;
-        public HttpProxyPlugin(Config config)
+        private readonly IServiceAccessValidator serviceAccessValidator;
+        public HttpProxyPlugin(Config config, IServiceAccessValidator serviceAccessValidator)
         {
             this.config = config;
+            this.serviceAccessValidator = serviceAccessValidator;
         }
 
         public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
@@ -41,7 +46,7 @@ namespace common.httpProxy
 
 #else
             if (info.TargetAddress.IsLan()) return false;
-            return Enable;
+            return Enable ||  serviceAccessValidator.Validate(info.Connection.ConnectId,Access);
 #endif
         }
 

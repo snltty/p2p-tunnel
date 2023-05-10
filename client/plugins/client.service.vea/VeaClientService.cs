@@ -1,15 +1,12 @@
 ﻿using client.messengers.clients;
 using client.service.ui.api.clientServer;
-using client.service.vea.socks5;
 using common.libs.extends;
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
-namespace client.service.vea.client
+namespace client.service.vea
 {
     /// <summary>
     /// 组网前端接口
@@ -72,7 +69,7 @@ namespace client.service.vea.client
             {
                 IP = string.Join(".", BinaryPrimitives.ReverseEndianness(d.Value.IP).ToBytes()),
                 LanIPs = d.Value.LanIPs.Select(c => new { IPAddress = string.Join(".", BinaryPrimitives.ReverseEndianness(c.IPAddress).ToBytes()), Mask = c.MaskLength }),
-                NetWork = d.Value.NetWork,
+                d.Value.NetWork,
                 Mask = d.Value.MaskLength
             });
         }

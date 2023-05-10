@@ -4,6 +4,7 @@ using common.httpProxy;
 using common.libs;
 using common.libs.extends;
 using common.proxy;
+using common.server;
 using System;
 using System.Net;
 
@@ -19,7 +20,7 @@ namespace client.service.httpProxy
         private readonly IClientInfoCaching clientInfoCaching;
         private readonly SignInStateInfo signInStateInfo;
         private readonly IProxyServer proxyServer;
-        public ClientHttpProxyPlugin(common.httpProxy.Config config, IClientInfoCaching clientInfoCaching, SignInStateInfo signInStateInfo, IProxyServer proxyServer) : base(config)
+        public ClientHttpProxyPlugin(common.httpProxy.Config config, IClientInfoCaching clientInfoCaching, SignInStateInfo signInStateInfo, IProxyServer proxyServer, IServiceAccessValidator serviceAccessValidator) : base(config, serviceAccessValidator)
         {
             this.config = config;
             this.clientInfoCaching = clientInfoCaching;

@@ -1,12 +1,13 @@
 ﻿using common.libs.extends;
 using common.proxy;
+using common.server;
 using common.server.model;
 using common.socks5;
 using System.Buffers.Binary;
 using System.Linq;
 using System.Net;
 
-namespace client.service.vea.socks5
+namespace client.service.vea
 {
     public interface IVeaSocks5ProxyPlugin : IProxyPlugin { }
 
@@ -14,6 +15,8 @@ namespace client.service.vea.socks5
     public class VeaSocks5ProxyPlugin : Socks5ProxyPlugin, IVeaSocks5ProxyPlugin
     {
         public override byte Id => config.Plugin;
+        public override uint Access => 0b00000000_00000000_00000000_01000000;
+        public override string Name => "vea";
         public override EnumBufferSize BufferSize => config.BufferSize;
         public override IPAddress BroadcastBind => config.BroadcastBind;
         public override ushort Port => (ushort)config.ListenPort;
@@ -23,10 +26,10 @@ namespace client.service.vea.socks5
         private readonly IProxyServer proxyServer;
         private readonly VeaTransfer veaTransfer;
         private readonly IProxyMessengerSender proxyMessengerSender;
-
+        private readonly IServiceAccessValidator serviceAccessValidator;
         public VeaSocks5ProxyPlugin(Config config, IProxyServer proxyServer
-            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender) :
-            base(null, proxyServer)
+            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender, IServiceAccessValidator serviceAccessValidator) :
+            base(null, proxyServer, serviceAccessValidator)
         {
             this.config = config;
             this.proxyServer = proxyServer;
@@ -70,7 +73,7 @@ namespace client.service.vea.socks5
                     //没开启组播
                     if (config.BroadcastEnable == false) return false;
                     //组播ip不包含在允许列表里
-                    if(config.VeaBroadcastList.Length > 0 && config.VeaBroadcastList.Contains(BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span)) == false)
+                    if (config.VeaBroadcastList.Length > 0 && config.VeaBroadcastList.Contains(BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span)) == false)
                     {
                         return false;
                     }
@@ -99,7 +102,7 @@ namespace client.service.vea.socks5
 
             return true;
 #else
-            return Enable;
+            return Enable || serviceAccessValidator.Validate(info.Connection.ConnectId,Access);
 #endif
         }
 

@@ -145,6 +145,11 @@ namespace common.user
         /// </summary>
         Setting = 1007,
 
+        /// <summary>
+        /// 用于单独登录，每个客户端可能有不通的账号配置，需要单独登录
+        /// </summary>
+        SignIn = 1008,
+
         Max = 1099,
     }
 }

@@ -4,6 +4,7 @@ using System.Net;
 using common.server.model;
 using common.libs.extends;
 using System;
+using common.server;
 
 namespace common.socks5
 {
@@ -14,6 +15,8 @@ namespace common.socks5
     public class Socks5ProxyPlugin : ISocks5ProxyPlugin
     {
         public virtual byte Id => config.Plugin;
+        public virtual uint Access => 0b00000000_00000000_00000000_00010000;
+        public virtual string Name => "socks5";
         public virtual EnumBufferSize BufferSize => config.BufferSize;
         public virtual IPAddress BroadcastBind => IPAddress.Any;
         public virtual ushort Port => (ushort)config.ListenPort;
@@ -21,10 +24,12 @@ namespace common.socks5
 
         private readonly Config config;
         private readonly IProxyServer proxyServer;
-        public Socks5ProxyPlugin(Config config, IProxyServer proxyServer)
+        private readonly IServiceAccessValidator serviceAccessValidator;
+        public Socks5ProxyPlugin(Config config, IProxyServer proxyServer, IServiceAccessValidator serviceAccessValidator)
         {
             this.config = config;
             this.proxyServer = proxyServer;
+            this.serviceAccessValidator = serviceAccessValidator;
         }
 
         public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
@@ -99,7 +104,7 @@ namespace common.socks5
             return true;
 #else
             if (info.TargetAddress.IsLan()) return false;
-            return Enable;
+            return Enable || serviceAccessValidator.Validate(info.Connection.ConnectId,Access);;
 #endif
         }
         public bool HandleAnswerData(ProxyInfo info)

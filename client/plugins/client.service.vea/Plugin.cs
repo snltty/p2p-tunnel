@@ -1,5 +1,4 @@
-﻿using client.service.vea.socks5;
-using common.libs;
+﻿using common.libs;
 using common.proxy;
 using common.server;
 using Microsoft.Extensions.DependencyInjection;

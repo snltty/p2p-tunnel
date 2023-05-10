@@ -8,21 +8,20 @@ namespace server.service.forward
     public sealed class ForwardValidator : ISignInValidator
     {
         private readonly common.forward.Config config;
+        private readonly IForwardProxyPlugin forwardProxyPlugin;
 
-        public ForwardValidator(common.forward.Config config)
+        public ForwardValidator(common.forward.Config config, IForwardProxyPlugin forwardProxyPlugin)
         {
             this.config = config;
+            this.forwardProxyPlugin = forwardProxyPlugin;
         }
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
-        public uint Access => ForwardProxyPlugin.Access;
-
-        public string Name => "代理穿透";
 
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
-            access |= (config.ConnectEnable ? Access : (uint)common.server.EnumServiceAccess.None);
+            access |= (config.ConnectEnable ? forwardProxyPlugin.Access : (uint)common.server.EnumServiceAccess.None);
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
         public void Validated(SignInCacheInfo cache)

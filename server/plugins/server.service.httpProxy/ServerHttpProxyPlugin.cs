@@ -12,11 +12,8 @@ namespace server.service.httpProxy
 
     public sealed class ServerHttpProxyPlugin : HttpProxyPlugin, IServerHttpProxyPlugin
     {
-        public static uint Access => 0b00000000_00000000_00000000_00100000;
-
-
         private readonly IServiceAccessValidator serviceAccessProvider;
-        public ServerHttpProxyPlugin(common.httpProxy.Config config, IServiceAccessValidator serviceAccessProvider) : base(config)
+        public ServerHttpProxyPlugin(common.httpProxy.Config config, IServiceAccessValidator serviceAccessProvider) : base(config, serviceAccessProvider)
         {
             this.serviceAccessProvider = serviceAccessProvider;
         }

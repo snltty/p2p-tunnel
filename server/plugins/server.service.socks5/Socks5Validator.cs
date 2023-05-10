@@ -1,6 +1,4 @@
-﻿using common.socks5;
-using server.messengers;
-using server.messengers.singnin;
+﻿using server.messengers.singnin;
 using common.server.model;
 using System.Collections.Generic;
 
@@ -10,20 +8,20 @@ namespace server.service.socks5
     {
 
         private readonly common.socks5.Config config;
+        private readonly IServerSocks5ProxyPlugin serverSocks5ProxyPlugin;
 
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
-        public uint Access => ServerSocks5ProxyPlugin.Access;
-        public string Name => "socks5";
 
-        public Socks5Validator(common.socks5.Config config)
+        public Socks5Validator(common.socks5.Config config, IServerSocks5ProxyPlugin serverSocks5ProxyPlugin)
         {
             this.config = config;
+            this.serverSocks5ProxyPlugin = serverSocks5ProxyPlugin;
         }
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {
-            access |= (config.ConnectEnable ? Access : (uint)common.server.EnumServiceAccess.None);
+            access |= (config.ConnectEnable ? serverSocks5ProxyPlugin.Access : (uint)common.server.EnumServiceAccess.None);
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
         public void Validated(SignInCacheInfo cache)

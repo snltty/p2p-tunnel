@@ -1,4 +1,5 @@
-﻿using common.server.model;
+﻿using common.server;
+using common.server.model;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -28,14 +29,6 @@ namespace server.messengers.singnin
         /// 执行顺序，升序
         /// </summary>
         public EnumSignInValidatorOrder Order { get; }
-        /// <summary>
-        /// 权限
-        /// </summary>
-        public uint Access { get; }
-        /// <summary>
-        /// 名字
-        /// </summary>
-        public string Name { get; }
         /// <summary>
         /// 登入前验证
         /// </summary>

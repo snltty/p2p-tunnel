@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace server.service.tray
@@ -13,6 +12,11 @@ namespace server.service.tray
         [STAThread]
         static void Main()
         {
+            Mutex mutex = new Mutex(true, System.Diagnostics.Process.GetCurrentProcess().ProcessName, out bool isAppRunning);
+            if (isAppRunning == false)
+            {
+                Environment.Exit(1);
+            }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
