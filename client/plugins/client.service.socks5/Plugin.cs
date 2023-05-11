@@ -1,9 +1,7 @@
 ﻿using common.libs;
 using common.proxy;
 using common.server;
-using common.socks5;
 using Microsoft.Extensions.DependencyInjection;
-using server.service.socks5;
 using System.Reflection;
 
 namespace client.service.socks5

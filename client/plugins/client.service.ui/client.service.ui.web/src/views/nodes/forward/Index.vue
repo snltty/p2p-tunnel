@@ -6,8 +6,8 @@
                 <el-button size="small" @click="getData">刷新列表</el-button>
             </div>
             <div class="content">
-                <el-row v-if="list.length > 0">
-                    <template v-for="(item,index) in list" :key="index">
+                <el-row v-if="state.list.length > 0">
+                    <template v-for="(item,index) in state.list" :key="index">
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <div class="item">
                                 <dl>
@@ -57,8 +57,8 @@
                 </el-row>
                 <el-empty v-else />
             </div>
-            <AddForward v-if="showAddForward" v-model="showAddForward" @success="getData"></AddForward>
-            <AddListen v-if="showAddListen" v-model="showAddListen" @success="getData"></AddListen>
+            <AddForward v-if="state.showAddForward" v-model="state.showAddForward" @success="getData"></AddForward>
+            <AddListen v-if="state.showAddListen" v-model="state.showAddListen" @success="getData"></AddListen>
         </div>
     </div>
 </template>
@@ -160,7 +160,7 @@ export default {
         });
 
         return {
-            ...toRefs(state), shareData, getData, expandKeys, onExpand,
+            state, shareData, getData, expandKeys, onExpand,
             handleRemoveListen, handleAddListen, handleEditListen, onListeningChange,
             handleAddForward, handleEditForward, handleRemoveForward,
         }

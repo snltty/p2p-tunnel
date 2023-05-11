@@ -59,6 +59,8 @@ namespace server.service
             serviceProvider = serviceCollection.BuildServiceProvider();
             PluginLoader.LoadAfter(plugins, serviceProvider, assemblys);
 
+            PrintProxyPlugin(serviceProvider, assemblys);
+
             var config = serviceProvider.GetService<Config>();
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Info("没什么报红的，就说明运行成功了");
@@ -71,7 +73,7 @@ namespace server.service
         }
 
 
-        static void LoggerConsole()
+        private static void LoggerConsole()
         {
             if (Directory.Exists("log") == false)
             {
@@ -110,5 +112,20 @@ namespace server.service
                 sw.Dispose();
             };
         }
+
+        private static void PrintProxyPlugin(ServiceProvider services, Assembly[] assemblys)
+        {
+            var iAccesss = ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IAccess)).Distinct()
+                .Select(c => services.GetService(c)).Concat(ProxyPluginLoader.plugins.Values).Where(c => c is IAccess).Select(c => (IAccess)c);
+
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
+            Logger.Instance.Debug("权限值,uint 每个权限占一位，最多32个权限");
+            foreach (var item in iAccesss.OrderBy(c => c.Access))
+            {
+                Logger.Instance.Info($"{Convert.ToString(item.Access, 2).PadLeft(Logger.Instance.PaddingWidth, '0')}  {item.Name}");
+            }
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
+        }
+
     }
 }

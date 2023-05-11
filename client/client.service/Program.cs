@@ -5,6 +5,7 @@ using client.service.forward.server;
 using client.service.httpProxy;
 using client.service.httpProxy.server;
 using client.service.logger;
+using client.service.proxy;
 using client.service.socks5;
 using client.service.socks5.server;
 using client.service.ui.api.service.clientServer;
@@ -72,6 +73,8 @@ namespace client.service
                 typeof(UsersClientService).Assembly,
                 typeof(ServerUsersClientService).Assembly,
 
+                typeof(ProxyClientService).Assembly,
+
                 //以下是为了获取信息
                 typeof(common.server.model.SignInMessengerIds).Assembly,
                 typeof(ProxyMessengerIds).Assembly,
@@ -93,6 +96,7 @@ namespace client.service
             serviceProvider = serviceCollection.BuildServiceProvider();
             PluginLoader.LoadAfter(plugins, serviceProvider, assemblys);
 
+            PrintProxyPlugin(serviceProvider, assemblys);
 
             SignInStateInfo signInStateInfo = serviceProvider.GetService<SignInStateInfo>();
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
@@ -115,7 +119,7 @@ namespace client.service
             }
         }
 
-        static void LoggerConsole()
+        private static void LoggerConsole()
         {
             if (Directory.Exists("log") == false)
             {
@@ -151,6 +155,20 @@ namespace client.service
                  sw.Close();
                  sw.Dispose();
              };
+        }
+
+        private static void PrintProxyPlugin(ServiceProvider services, Assembly[] assemblys)
+        {
+            var iAccesss = ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IAccess)).Distinct()
+                .Select(c => services.GetService(c)).Concat(ProxyPluginLoader.plugins.Values).Where(c => c is IAccess).Select(c => (IAccess)c);
+
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
+            Logger.Instance.Debug("权限值,uint 每个权限占一位，最多32个权限");
+            foreach (var item in iAccesss.OrderBy(c => c.Access))
+            {
+                Logger.Instance.Info($"{Convert.ToString(item.Access, 2).PadLeft(Logger.Instance.PaddingWidth, '0')}  {item.Name}");
+            }
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
     }
 

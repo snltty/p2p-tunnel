@@ -10,9 +10,9 @@ namespace common.libs.extends
     /// </summary>
     public static class EndPointExtends
     {
-        static Memory<byte> ipv6Loopback = IPAddress.IPv6Loopback.GetAddressBytes();
-        static Memory<byte> ipv6Multicast = IPAddress.Parse("ff00::").GetAddressBytes();
-        static Memory<byte> ipv6Local = IPAddress.Parse("fe80::").GetAddressBytes();
+        public static Memory<byte> ipv6Loopback = IPAddress.IPv6Loopback.GetAddressBytes();
+        public static Memory<byte> ipv6Multicast = IPAddress.Parse("ff00::").GetAddressBytes();
+        public static Memory<byte> ipv6Local = IPAddress.Parse("fe80::").GetAddressBytes();
         /// <summary>
         /// 判断是不是本地地址
         /// </summary>

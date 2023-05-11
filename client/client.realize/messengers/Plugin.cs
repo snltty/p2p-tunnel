@@ -49,7 +49,7 @@ namespace client.realize.messengers
             services.AddSingleton<IRelaySourceConnectionSelector, relay.RelaySourceConnectionSelector>();
             services.AddSingleton<IRelayValidator, RelayValidator>();
             services.AddSingleton<IClientConnectsCaching, ClientConnectsCaching>();
-            
+
 
             services.AddSingleton<IIPv6AddressRequest, IPv6AddressRequest>();
             services.AddSingleton<IServiceAccessValidator, clients.ServiceAccessValidator>();
@@ -76,7 +76,6 @@ namespace client.realize.messengers
 
             //打洞
             services.AddSingleton<PunchHoleMessengerSender>();
-            //services.AddSingleton<IPunchHoleUdp, PunchHoleUdpMessengerSender>();
             services.AddSingleton<IPunchHoleUdp, PunchHoleRUdpMessengerSender>();
             services.AddSingleton<IPunchHoleTcp, PunchHoleTcpNutssBMessengerSender>();
 
@@ -93,6 +92,7 @@ namespace client.realize.messengers
 
 
             //代理
+            services.AddSingleton<common.proxy.Config>();
             services.AddSingleton<IProxyMessengerSender, ProxyMessengerSender>();
             services.AddSingleton<IProxyClient, ProxyClient>();
             services.AddSingleton<IProxyServer, ProxyServer>();
@@ -110,5 +110,7 @@ namespace client.realize.messengers
                 services.AddSingleton(item);
             }
         }
+
+
     }
 }

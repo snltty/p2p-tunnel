@@ -37,7 +37,7 @@ namespace server.service.users
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.None;
         public uint Access => (uint)messengers.EnumServiceAccess.SignIn;
 
-        public string Name => "登入";
+        public string Name => "sign in";
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {

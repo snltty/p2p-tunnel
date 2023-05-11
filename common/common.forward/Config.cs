@@ -31,26 +31,10 @@ namespace common.forward
             BufferSize = config.BufferSize;
             WebListens = config.WebListens;
             TunnelListenRange = config.TunnelListenRange;
-            PortWhiteList = config.PortWhiteList;
-            PortBlackList = config.PortBlackList;
-            IPList = config.IPList;
-            ParseIPList();
         }
 
-        [System.Text.Json.Serialization.JsonIgnore]
-        public byte Plugin => 3;
-
-        /// <summary>
-        /// 端口白名单
-        /// </summary>
-        public ushort[] PortWhiteList { get; set; } = Array.Empty<ushort>();
-        /// <summary>
-        /// 端口黑名单
-        /// </summary>
-        public ushort[] PortBlackList { get; set; } = Array.Empty<ushort>();
-        public string[] IPList { get; set; } = Array.Empty<string>();
         [JsonIgnore]
-        public LanIPAddress[] ForwardIPList { get; set; } = Array.Empty<LanIPAddress>();
+        public byte Plugin => 3;
 
         /// <summary>
         /// 允许连接
@@ -98,50 +82,10 @@ namespace common.forward
             BufferSize = _config.BufferSize;
             WebListens = _config.WebListens;
             TunnelListenRange = _config.TunnelListenRange;
-            PortWhiteList = _config.PortWhiteList;
-            PortBlackList = _config.PortBlackList;
-            IPList = _config.IPList;
-            ParseIPList();
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
 
-        private void ParseIPList()
-        {
-            try
-            {
-                ForwardIPList = IPList.Select(c => c.Split('/')).Where(c => c[0] != IPAddress.Any.ToString()).Select(c =>
-                {
-                    byte maskLength = c.Length > 1 ? byte.Parse(c[1]) : (byte)0;
-                    uint ip = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse(c[0]).GetAddressBytes());
-
-                    if (maskLength == 0)
-                    {
-                        maskLength = 32;
-                        for (int i = 0; i < sizeof(uint); i++)
-                        {
-                            if (((ip >> (i * 8)) & 0x000000ff) != 0)
-                            {
-                                break;
-                            }
-                            maskLength -= 8;
-                        }
-                    }
-                    uint maskValue = 0xffffffff << (32 - maskLength);
-                    return new LanIPAddress
-                    {
-                        IPAddress = ip,
-                        MaskLength = maskLength,
-                        MaskValue = maskValue,
-                        NetWork = ip & maskValue
-                    };
-                }).ToArray();
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.Error(ex);
-            }
-        }
     }
     /// <summary>
     /// 长链接端口范围

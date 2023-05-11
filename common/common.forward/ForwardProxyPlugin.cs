@@ -74,30 +74,8 @@ namespace common.forward
 #if DEBUG
             return true;
 #else
-            if (config.PortWhiteList.Length > 0 && config.PortWhiteList.Contains(info.TargetPort) == false)
-            {
-                return false;
-            }
-            if (config.PortBlackList.Length > 0 && config.PortBlackList.Contains(info.TargetPort))
-            {
-                return false;
-            }
-            if(config.ForwardIPList.Length > 0)
-            {
-                uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
-                bool res = false;
-                for (int i = 0; i < config.ForwardIPList.Length; i++)
-                {
-                    if((ip & config.ForwardIPList[i].MaskValue) == config.ForwardIPList[i].NetWork)
-                    {
-                        res = true; break;
-                    }
-                }
-                if (res == false) return res;
-            }
             return config.ConnectEnable ||  serviceAccessValidator.Validate(info.Connection.ConnectId,Access);
 #endif
-
         }
 
         public void Started(ushort port)

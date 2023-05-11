@@ -4,7 +4,7 @@ using common.proxy;
 using common.server;
 using common.socks5;
 
-namespace server.service.socks5
+namespace client.service.socks5
 {
     public interface IClientSocks5ProxyPlugin : ISocks5ProxyPlugin
     {

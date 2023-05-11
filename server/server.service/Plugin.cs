@@ -76,9 +76,6 @@ namespace server.service
             ISignInValidatorHandler signInMiddlewareHandler = services.GetService<ISignInValidatorHandler>();
             signInMiddlewareHandler.LoadValidator(assemblys);
 
-
-            PrintProxyPlugin(services,assemblys);
-
             Loop(services);
             Udp((UdpServer)udpServer, messengerResolver);
         }
@@ -144,20 +141,6 @@ namespace server.service
             };
         }
 
-        private void PrintProxyPlugin(ServiceProvider services, Assembly[] assemblys)
-        {
-            var iAccesss = ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IAccess))
-                .Where(c => c.FullName.StartsWith(this.GetType().Namespace)).Distinct()
-                .Select(c=> services.GetService(c)).Concat(ProxyPluginLoader.plugins.Values).Where(c => c is IAccess).Select(c=>(IAccess)c);
-
-            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Debug("权限值,uint 每个权限占一位，最多32个权限");
-            foreach (var item in iAccesss.OrderBy(c=>c.Access))
-            {
-                Logger.Instance.Info($"{Convert.ToString(item.Access, 2).PadLeft(Logger.Instance.PaddingWidth, '0')}  {item.Name}");
-            }
-            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-        }
-
+     
     }
 }

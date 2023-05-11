@@ -1,6 +1,7 @@
 ﻿using common.libs;
 using common.libs.extends;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,15 +25,16 @@ namespace common.proxy
         private ConcurrentDictionary<ConnectionKeyUdp, UdpToken> udpConnections = new(new ConnectionKeyUdpComparer());
         private readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         private readonly IProxyMessengerSender proxyMessengerSender;
+        private readonly Config config;
 
         private readonly WheelTimer<object> wheelTimer;
 
-        public ProxyClient(WheelTimer<object> wheelTimer, IProxyMessengerSender proxyMessengerSender)
+        public ProxyClient(WheelTimer<object> wheelTimer, IProxyMessengerSender proxyMessengerSender, Config config)
         {
             this.wheelTimer = wheelTimer;
             this.proxyMessengerSender = proxyMessengerSender;
+            this.config = config;
             TimeoutUdp();
-
         }
 
         public async Task InputData(ProxyInfo info)
@@ -455,6 +457,43 @@ namespace common.proxy
                     break;
             }
             return new IPEndPoint(ip, info.TargetPort);
+        }
+
+        private bool FirewallDenied(ProxyInfo info, FirewallProtocolType protocolType)
+        {
+
+            if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
+            {
+                Span<byte> span = info.TargetAddress.Span;
+                //阻止IPV6的内网ip
+                return span.SequenceEqual(EndPointExtends.ipv6Loopback.Span)
+                     || span.SequenceEqual(EndPointExtends.ipv6Multicast.Span)
+                     || (span[0] == EndPointExtends.ipv6Local.Span[0] && span[1] == EndPointExtends.ipv6Local.Span[1]);
+            }
+            //IPV4的，防火墙验证
+            else if (info.TargetAddress.Length == 4)
+            {
+                uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
+                //白名单
+                if (config.AllowFirewalls.Count > 0)
+                {
+                    FirewallKey key = new FirewallKey(info.TargetPort, protocolType);
+                    if (config.AllowFirewalls.TryGetValue(key, out FirewallCache cache))
+                    {
+                        for (int i = 0; i < cache.IPs.Length; i++)
+                        {
+                            if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+                //黑名单
+            }
+            //其它的直接通过
+            return false;
         }
     }
 

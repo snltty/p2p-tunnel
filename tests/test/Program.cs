@@ -12,10 +12,10 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-
-            Dictionary<string, string> Args = new Dictionary<string, string>();
-            Args["aa"] = "aa";
-            Console.Write(Args["aa"]);
+            foreach (var item in Dns.GetHostAddresses(Dns.GetHostName()))
+            {
+                Console.WriteLine(item.ToString());
+            }
             //var summary = BenchmarkRunner.Run<Test>();
         }
 

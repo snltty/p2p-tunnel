@@ -15,7 +15,7 @@ namespace server.service.validators
 
         public uint Access => (uint)server.messengers.EnumServiceAccess.Relay;
 
-        public string Name => "中继";
+        public string Name => "relay";
 
         public RelayValidator(Config config, IServiceAccessValidator serviceAccessProvider)
         {
@@ -45,7 +45,7 @@ namespace server.service.validators
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
         public uint Access => (uint)EnumServiceAccess.Setting;
 
-        public string Name => "服务器配置";
+        public string Name => "setting";
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
         {

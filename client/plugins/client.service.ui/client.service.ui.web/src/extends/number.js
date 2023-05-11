@@ -21,5 +21,8 @@ Number.prototype.timeFormat = function () {
     ];
 }
 Number.prototype.splitStr = function () {
-    return this.replace(/\s/g, '').split(/,|\n/).filter(c => c.length > 0).map(c => c.replace(/\s/g, ''));
+    return this.toString().split(/,|\n/).map(c => c.replace(/\s/g, '')).filter(c => c.length > 0);
+}
+String.prototype.splitStr = function () {
+    return this.split(/,|\n/).map(c => c.replace(/\s/g, '')).filter(c => c.length > 0);
 }

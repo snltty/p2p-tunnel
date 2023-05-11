@@ -15,7 +15,7 @@
                 <span class="flex-1"></span>
             </div>
             <div class="body flex-1 relative">
-                <div class="absolute" v-if="page.Data.length > 0">
+                <div v-if="page.Data.length > 0">
                     <el-table border :data="page.Data" size="small" height="100%" @row-click="handleRowClick" :row-class-name="tableRowClassName">
                         <el-table-column type="index" width="50" />
                         <el-table-column prop="Type" label="类别" width="80">
@@ -50,7 +50,7 @@ export default {
 
         const state = reactive({
             loading: true,
-            page: { PageIndex: 1, PageSize: 20, Count: 0, Data: [] },
+            page: { PageIndex: 1, PageSize: 10, Count: 0, Data: [] },
             types: ['debug', 'info', 'warning', 'error'],
             Type: -1
         })

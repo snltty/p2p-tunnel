@@ -36,6 +36,7 @@
 		<ProjectReference Include="..\plugins\client.service.httpProxy.server\client.service.httpProxy.server.csproj" />
 		<ProjectReference Include="..\plugins\client.service.httpProxy\client.service.httpProxy.csproj" />
 		<ProjectReference Include="..\plugins\client.service.logger\client.service.logger.csproj" />
+		<ProjectReference Include="..\plugins\client.service.proxy\client.service.proxy.csproj" />
 		<ProjectReference Include="..\plugins\client.service.socks5.server\client.service.socks5.server.csproj" />
 		<ProjectReference Include="..\plugins\client.service.socks5\client.service.socks5.csproj" />
 		<ProjectReference Include="..\plugins\client.service.ui\client.service.ui.api.service\client.service.ui.api.service.csproj" />
