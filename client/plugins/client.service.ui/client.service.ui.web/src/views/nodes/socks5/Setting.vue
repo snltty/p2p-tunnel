@@ -32,6 +32,25 @@
                     <div class="w-100">
                         <el-row :gutter="10">
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="绑定ip" prop="ProxyIp">
+                                    <el-input size="default" v-model="state.form.ProxyIp" placeholder="作为代理目标ip">
+                                        <template #append>
+                                            <el-tooltip class="box-item" effect="dark" content="作为代理目标ip" placement="top">
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <div class="w-100">
+                        <el-row :gutter="10">
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                                 <el-form-item label="允许访问" prop="ConnectEnable">
                                     <el-checkbox v-model="state.form.ConnectEnable">开启
                                         <el-tooltip class="box-item" effect="dark" content="作为目标端时，是否允许被访问" placement="top">
@@ -130,6 +149,7 @@ export default {
                 TargetConnectionId: 0,
                 IsPac: false,
                 IsCustomPac: false,
+                ProxyIp: '127.0.0.1'
             },
             rules: {
                 ListenPort: [
@@ -157,6 +177,7 @@ export default {
                 state.form.TargetConnectionId = res.TargetConnectionId;
                 state.form.IsPac = res.IsPac;
                 state.form.IsCustomPac = res.IsCustomPac;
+                state.form.ProxyIp = res.ProxyIp;
             });
         };
         const handlePacCancel = () => {
@@ -192,6 +213,7 @@ export default {
                     state.configInfo.TargetConnectionId = state.form.TargetConnectionId;
                     state.configInfo.IsPac = state.form.IsPac;
                     state.configInfo.IsCustomPac = state.form.IsCustomPac;
+                    state.configInfo.ProxyIp = state.form.ProxyIp;
                     set(state.configInfo).then(resolve).catch(reject);
 
                 });

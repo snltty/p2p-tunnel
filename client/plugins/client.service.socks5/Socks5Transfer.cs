@@ -66,12 +66,12 @@ namespace client.service.socks5
                         pacContent = File.ReadAllText("./socks.pac");
                     }
 
-                    pacContent = pacContent.Replace("{socks5-address}", $"127.0.0.1:{config.ListenPort}");
+                    pacContent = pacContent.Replace("{socks5-address}", $"{config.ProxyIp}:{config.ListenPort}");
                     File.WriteAllText(file, pacContent);
 
                     if (config.ListenEnable && config.IsPac)
                     {
-                        SetPac($"http://{(uiconfig.Web.BindIp == "+" ? "127.0.0.1" : uiconfig.Web.BindIp)}:{uiconfig.Web.Port}/{Path.GetFileName(file)}");
+                        SetPac($"http://{(uiconfig.Web.BindIp == "+" ? config.ProxyIp.ToString() : uiconfig.Web.BindIp)}:{uiconfig.Web.Port}/{Path.GetFileName(file)}");
                     }
                     else
                     {

@@ -29,5 +29,15 @@ namespace common.libs
             }
             return result;
         }
+
+        public static ushort[] Range(ushort start, ushort end)
+        {
+            ushort[] result = new ushort[(end - start) + 1];
+            for (ushort p = start, i = 0; p <= end; p++, i++)
+            {
+                result[i] = p;
+            }
+            return result;
+        }
     }
 }

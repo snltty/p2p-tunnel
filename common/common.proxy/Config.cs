@@ -104,26 +104,24 @@ namespace common.proxy
         {
             if (string.IsNullOrWhiteSpace(port)) return Array.Empty<ushort>();
 
-            string[] arr = port.Split('/');
-            if (arr.Length == 1) return new ushort[1] { ushort.Parse(arr[0]) };
-
-            ushort start = ushort.Parse(arr[0]);
-            ushort end = ushort.Parse(arr[1]);
-            ushort[] result = new ushort[(end - start) + 1];
-
-            for (ushort p = start, i = 0; p <= end; p++, i++)
+            return port.Split((char)44).SelectMany(c =>
             {
-                result[i] = p;
-            }
-            return result;
+                string[] arr = c.Split((char)47);
+                if (arr.Length == 1)
+                {
+                    return new ushort[1] { ushort.Parse(arr[0]) };
+                }
+                return Helper.Range(ushort.Parse(arr[0]), ushort.Parse(arr[1]));
+
+            }).ToArray();
         }
         private FirewallCacheIp[] ParseIp(string[] ips)
         {
-            return ips.Select(c => c.Split('/')).Where(c => c[0] != IPAddress.Any.ToString()).Select(c =>
+            return ips.Select(c => c.Split((char)47)).Where(c => c[0] != IPAddress.Any.ToString()).Select(c =>
             {
                 byte maskLength = c.Length > 1 ? byte.Parse(c[1]) : (byte)0;
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse(c[0]).GetAddressBytes());
-
+                //每天写掩码，自动计算
                 if (c.Length == 1)
                 {
                     maskLength = 32;
@@ -136,10 +134,12 @@ namespace common.proxy
                         maskLength -= 8;
                     }
                 }
+                //掩码十进制
                 uint maskValue = 0xffffffff << (32 - maskLength);
                 return new FirewallCacheIp
                 {
                     MaskValue = maskValue,
+                    //网络号
                     NetWork = ip & maskValue
                 };
             }).ToArray();

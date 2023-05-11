@@ -19,8 +19,8 @@
                     <div class="w-100 t-c" style="line-height:1.8rem">
                         <p>代理地址: 127.0.0.1:{{state.listenPort}}</p>
                         <p>自动设置代理有可能失败，可以手动配置系统代理“使用设置脚本”</p>
-                        <p>预置pac规则文件地址 <strong>{{state.localtion}}/socks.pac</strong></p>
-                        <p>自定义pac规则文件地址 <strong>{{state.localtion}}/socks-custom.pac</strong></p>
+                        <p>预置pac规则文件地址 <strong>http://{{state.ProxyIp}}:{{state.port}}/socks.pac</strong></p>
+                        <p>自定义pac规则文件地址 <strong>http://{{state.ProxyIp}}:{{state.port}}/socks-custom.pac</strong></p>
                     </div>
                 </el-form-item>
             </el-form>
@@ -48,15 +48,17 @@ export default {
         });
         const state = reactive({
             loading: false,
-            localtion: window.location.origin,
             listenEnable: false,
             listenPort: 5413,
-            targetConnectionId: ''
+            targetConnectionId: '',
+            ProxyIp: '127.0.0.1',
+            port: window.location.port
         });
         const loadConfig = () => {
             get().then((res) => {
                 state.listenEnable = res.ListenEnable;
                 state.listenPort = res.ListenPort;
+                state.ProxyIp = res.ProxyIp;
                 state.targetConnectionId = res.TargetConnectionId;
             });
         }

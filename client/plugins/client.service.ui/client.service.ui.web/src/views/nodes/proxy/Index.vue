@@ -5,6 +5,13 @@
                 <el-button size="small" :loading="state.loading" @click="Add">添加新项</el-button>
                 <span class="split"></span>
                 <el-button size="small" :loading="state.loading" @click="loadData">刷新列表</el-button>
+                <el-popover placement="top-start" title="说明" :width="300" trigger="hover" content="【ipv6】局域网全部阻止，【ipv4】所有ip验证黑名单，局域网ip验证白名单，【域名】全部通过">
+                    <template #reference>
+                        <el-icon>
+                            <Warning />
+                        </el-icon>
+                    </template>
+                </el-popover>
                 <span class="flex-1"></span>
             </div>
             <div class="body flex-1 relative">

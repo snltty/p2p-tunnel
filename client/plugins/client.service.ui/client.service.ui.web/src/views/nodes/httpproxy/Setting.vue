@@ -6,7 +6,7 @@
                     <div class="w-100">
                         <el-row :gutter="10">
                             <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                <el-form-item label="监听端口" prop="Port">
+                                <el-form-item label="监听端口" prop="ListenPort">
                                     <el-input size="default" v-model="state.form.ListenPort" placeholder="监听端口，随便一个空闲的端口即可">
                                         <template #append>
                                             <el-tooltip class="box-item" effect="dark" content="监听端口，随便一个空闲的端口即可" placement="top">
@@ -23,6 +23,25 @@
                                     <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
                                         <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
                                     </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <div class="w-100">
+                        <el-row :gutter="10">
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="绑定ip" prop="ProxyIp">
+                                    <el-input size="default" v-model="state.form.ProxyIp" placeholder="作为代理目标ip">
+                                        <template #append>
+                                            <el-tooltip class="box-item" effect="dark" content="作为代理目标ip" placement="top">
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-input>
                                 </el-form-item>
                             </el-col>
                         </el-row>
@@ -130,6 +149,7 @@ export default {
                 ConnectEnable: false,
                 TargetConnectionId: 0,
                 Pac: '',
+                ProxyIp: '127.0.0.1'
             },
             rules: {
                 ListenPort: [
@@ -151,6 +171,7 @@ export default {
                 state.form.IsCustomPac = json.IsCustomPac;
                 state.form.BufferSize = json.BufferSize;
                 state.form.ConnectEnable = json.ConnectEnable;
+                state.form.ProxyIp = json.ProxyIp;
                 loadPac();
             });
         }
@@ -189,6 +210,7 @@ export default {
                         json.IsCustomPac = state.form.IsCustomPac;
                         json.BufferSize = +state.form.BufferSize;
                         json.ConnectEnable = state.form.ConnectEnable;
+                        json.ProxyIp = state.form.ProxyIp;
                         saveConfigure(plugin.config, JSON.stringify(json)).then(resolve).catch(reject);
                     });
 

@@ -22,18 +22,16 @@ rem echo F|xcopy "client\\client.service.app\\bin\\Release\\net7.0-android\\publ
  
 
 for %%r in (x64,arm64) do (
-	for %%f in (tun2socks-linux) do (
-		echo F|xcopy "client\\plugins\\client.service.vea\\%%f" "public\\publish\\linux-%%r-single\\client\\"  /f /h /y
+	for %%f in (tun2socks-linux,tun2socks-osx,tun2socks-windows.exe) do (
 		del  "public\\publish\\win-%%r-single\\client\\%%f"
 		del  "public\\publish\\osx-%%r-single\\client\\%%f"
-	)
-	for %%f in (tun2socks-osx) do (
-		echo F|xcopy "client\\plugins\\client.service.vea\\%%f" "public\\publish\\osx-%%r-single\\client\\"  /f /h /y
-		del  "public\\publish\\win-%%r-single\\client\\%%f"
 		del  "public\\publish\\linux-%%r-single\\client\\%%f"
 	)
-	for %%f in (tun2socks-windows.exe,wintun.dll) do (
-		echo F|xcopy "client\\plugins\\client.service.vea\\%%f" "public\\publish\\win-%%r-single\\client\\"  /f /h /y
+	echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-linux-%%r" "public\\publish\\linux-%%r-single\\client\\tun2socks-linux"  /f /h /y
+	echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-osx-%%r" "public\\publish\\osx-%%r-single\\client\\tun2socks-osx"  /f /h /y
+	echo F|xcopy "client\\plugins\\client.service.vea\\tun2socks-windows.exe-%%r" "public\\publish\\win-%%r-single\\client\\tun2socks-windows.exe"  /f /h /y
+
+	for %%f in (wintun.dll) do (
 		del  "public\\publish\\linux-%%r-single\\client\\%%f"
 		del  "public\\publish\\osx-%%r-single\\client\\%%f"
 	)

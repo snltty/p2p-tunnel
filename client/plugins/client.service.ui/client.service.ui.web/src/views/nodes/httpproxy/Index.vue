@@ -17,10 +17,10 @@
                 </el-form-item>
                 <el-form-item>
                     <div class="w-100 t-c" style="line-height:1.8rem">
-                        <p>代理地址: 127.0.0.1:{{state.ListenPort}}</p>
+                        <p>代理地址: {{state.ProxyIp}}:{{state.ListenPort}}</p>
                         <p>自动设置代理有可能失败，可以手动配置系统代理“使用设置脚本”</p>
-                        <p>预置pac规则文件地址 <strong>{{state.localtion}}/proxy.pac</strong></p>
-                        <p>自定义pac规则文件地址 <strong>{{state.localtion}}/proxy-custom.pac</strong></p>
+                        <p>预置pac规则文件地址 <strong>http://{{state.ProxyIp}}:{{state.port}}/proxy.pac</strong></p>
+                        <p>自定义pac规则文件地址 <strong>http://{{state.ProxyIp}}:{{state.port}}/proxy-custom.pac</strong></p>
                     </div>
                 </el-form-item>
             </el-form>
@@ -53,8 +53,9 @@ export default {
             ListenPort: 5414,
             TargetConnectionId: 0,
             ListenEnable: false,
+            ProxyIp: '127.0.0.1',
 
-            localtion: window.location.origin,
+            port: window.location.port,
         });
         const loadConfig = () => {
             getConfigure(plugin.config).then((res) => {
@@ -62,6 +63,8 @@ export default {
                 state.ListenPort = json.ListenPort;
                 state.TargetConnectionId = json.TargetConnectionId;
                 state.ListenEnable = json.ListenEnable;
+                state.ProxyIp = json.ProxyIp;
+
             });
         }
         onMounted(() => {
@@ -74,7 +77,6 @@ export default {
                 const json = new Function(`return ${res}`)();
                 json.TargetConnectionId = state.TargetConnectionId;
                 json.ListenEnable = state.ListenEnable;
-                console.log(json);
                 saveConfigure(plugin.config, JSON.stringify(json)).then(() => {
                     update().then(() => {
                         loadConfig();

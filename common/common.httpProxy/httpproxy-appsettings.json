@@ -6,6 +6,7 @@
   "TargetConnectionId": 0, //连接目标客户端，0表示代理到服务器
   "IsCustomPac": false, //是否自定义pac
   "IsPac": false, //是否设置pac
+  "ProxyIp": "127.0.0.1",
 
   //客户端服务端共有配置
   "ConnectEnable": false //允许连接

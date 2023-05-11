@@ -21,9 +21,16 @@
                     </el-col>
                 </el-row>
             </el-form-item>
-
             <el-form-item label="端口" prop="Port">
-                <el-input v-model="state.form.Port" placeholder="可用5410/5415表示范围"></el-input>
+                <el-input v-model="state.form.Port" placeholder="可用5410/5415表示范围">
+                    <template #append>
+                        <el-tooltip class="box-item" effect="dark" content="英文逗号,间隔表示多个，/间隔表示范围，0代表所有" placement="top">
+                            <el-icon>
+                                <Warning />
+                            </el-icon>
+                        </el-tooltip>
+                    </template>
+                </el-input>
             </el-form-item>
             <el-form-item label="IP" prop="IP">
                 <el-input type="textarea" v-model="state.form.IP" placeholder="可用掩码" resize="none" :autosize="{minRows:4,maxRows:6}"></el-input>
@@ -87,6 +94,7 @@ export default {
                 }
                 state.loading = true;
                 const json = JSON.parse(JSON.stringify(state.form));
+                json.Port = json.Port.replace(/\s/g, '');
                 json.Protocol = +json.Protocol;
                 json.Type = +json.Type;
                 json.IP = json.IP.splitStr();

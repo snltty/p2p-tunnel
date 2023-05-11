@@ -65,7 +65,14 @@ namespace common.proxy
             {
                 if (info.Command == EnumProxyCommand.Connect)
                 {
-                    Connect(info);
+                    if (FirewallDenied(info, FirewallProtocolType.TCP))
+                    {
+                        _ = ConnectReponse(info, EnumProxyCommandStatus.AddressNotAllow);
+                    }
+                    else
+                    {
+                        Connect(info);
+                    }
                 }
                 else if (info.Command == EnumProxyCommand.UdpAssociate)
                 {
@@ -133,10 +140,14 @@ namespace common.proxy
 
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
+                    if (FirewallDenied(info, FirewallProtocolType.UDP))
+                    {
+                        return;
+                    }
+
                     Socket socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     if (isBroadcast)
                     {
-                        //Console.WriteLine($"{info.RequestId} 绑定：{new IPEndPoint(plugin.UdpBind, 0)} <---> {remoteEndpoint}");
                         socket.Bind(new IPEndPoint(plugin.BroadcastBind, 0));
                         socket.EnableBroadcast = true;
                     }
@@ -154,7 +165,6 @@ namespace common.proxy
                 }
                 else
                 {
-                    //Console.WriteLine($"{info.RequestId} 发送：{token.TargetSocket.LocalEndPoint} <---> {remoteEndpoint}");
                     token.Data.Step = info.Step;
                     token.Data.Command = info.Command;
                     token.Data.Rsv = info.Rsv;
@@ -459,13 +469,18 @@ namespace common.proxy
             return new IPEndPoint(ip, info.TargetPort);
         }
 
+        /// <summary>
+        /// 防火墙阻止
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="protocolType"></param>
+        /// <returns></returns>
         private bool FirewallDenied(ProxyInfo info, FirewallProtocolType protocolType)
         {
-
+            //阻止IPV6的内网ip
             if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
             {
                 Span<byte> span = info.TargetAddress.Span;
-                //阻止IPV6的内网ip
                 return span.SequenceEqual(EndPointExtends.ipv6Loopback.Span)
                      || span.SequenceEqual(EndPointExtends.ipv6Multicast.Span)
                      || (span[0] == EndPointExtends.ipv6Local.Span[0] && span[1] == EndPointExtends.ipv6Local.Span[1]);
@@ -474,23 +489,42 @@ namespace common.proxy
             else if (info.TargetAddress.Length == 4)
             {
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
-                //白名单
-                if (config.AllowFirewalls.Count > 0)
+                FirewallKey key = new FirewallKey(info.TargetPort, protocolType);
+                FirewallKey key0 = new FirewallKey(0, protocolType);
+                //局域网或者组播，验证白名单
+                if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
                 {
-                    FirewallKey key = new FirewallKey(info.TargetPort, protocolType);
-                    if (config.AllowFirewalls.TryGetValue(key, out FirewallCache cache))
+                    if (config.AllowFirewalls.Count > 0)
+                    {
+                        if (config.AllowFirewalls.TryGetValue(key, out FirewallCache cache) || config.AllowFirewalls.TryGetValue(key0, out cache))
+                        {
+                            for (int i = 0; i < cache.IPs.Length; i++)
+                            {
+                                //有一项通过就通过
+                                if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                        return true;
+                    }
+                }
+                //黑名单
+                if (config.DeniedFirewalls.Count > 0)
+                {
+                    if (config.DeniedFirewalls.TryGetValue(key, out FirewallCache cache) || config.DeniedFirewalls.TryGetValue(key0, out cache))
                     {
                         for (int i = 0; i < cache.IPs.Length; i++)
                         {
+                            //有一项匹配就不通过
                             if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
                             {
-                                return false;
+                                return true;
                             }
                         }
                     }
-                    return true;
                 }
-                //黑名单
             }
             //其它的直接通过
             return false;

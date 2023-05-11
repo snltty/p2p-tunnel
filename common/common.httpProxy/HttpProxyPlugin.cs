@@ -45,7 +45,6 @@ namespace common.httpProxy
             return true;
 
 #else
-            if (info.TargetAddress.IsLan()) return false;
             return Enable ||  serviceAccessValidator.Validate(info.Connection.ConnectId,Access);
 #endif
         }

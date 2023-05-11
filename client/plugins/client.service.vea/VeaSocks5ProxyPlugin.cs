@@ -3,6 +3,7 @@ using common.proxy;
 using common.server;
 using common.server.model;
 using common.socks5;
+using System;
 using System.Buffers.Binary;
 using System.Linq;
 using System.Net;
