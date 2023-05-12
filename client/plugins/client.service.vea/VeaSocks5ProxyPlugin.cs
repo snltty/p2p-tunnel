@@ -36,6 +36,7 @@ namespace client.service.vea
             this.proxyServer = proxyServer;
             this.veaTransfer = veaTransfer;
             this.proxyMessengerSender = proxyMessengerSender;
+            this.serviceAccessValidator = serviceAccessValidator;
         }
 
         public override bool HandleRequestData(ProxyInfo info)

@@ -20,6 +20,24 @@ namespace common.user
         /// 限制登录数，-1无限制
         /// </summary>
         public int SignLimit { get; set; } = -1;
+
+        private uint signCount = 0;
+        public uint SignCount
+        {
+            get
+            {
+                if (signCount == 0)
+                {
+                    signCount = (uint)Connections.Count;
+                }
+                return signCount;
+            }
+            set
+            {
+                signCount = value;
+            }
+        }
+
         [JsonIgnore]
         public ConcurrentDictionary<ulong, IConnection> Connections { get; set; } = new ConcurrentDictionary<ulong, IConnection>();
 

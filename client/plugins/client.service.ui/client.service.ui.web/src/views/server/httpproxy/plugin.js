@@ -1,6 +1,6 @@
 export default {
     service: 'ServerHttpProxyClientService',
     config: 'ServerHttpProxyConfigure',
-    text: 'http代理',
+    text: '代理(http)',
     access: 32
 }

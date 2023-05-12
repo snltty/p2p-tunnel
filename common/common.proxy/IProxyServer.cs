@@ -279,7 +279,7 @@ namespace common.proxy
 
                 result = server.UdpClient.BeginReceive(ProcessReceiveUdp, server);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //Logger.Instance.Error($"socks5 listen udp -> error " + ex);
             }

@@ -10,7 +10,7 @@
         </div>
         <ul>
             <template v-for="(item,index) in menus" :key="index">
-                <li>
+                <li :style="`animation-delay:${(index+1)*.05}s;`">
                     <template v-if="item.url">
                         <router-link :to="{name:item.url}" :class="{current:currentMenu == index}">{{item.text}}</router-link>
                     </template>
@@ -54,6 +54,44 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@keyframes bounceInDown {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(-50px, 0, 0);
+        transform: translate3d(-50px, 0, 0);
+    }
+
+    50% {
+        opacity: 1;
+        -webkit-transform: translate3d(5px, 0, 0);
+        transform: translate3d(5px, 0, 0);
+    }
+
+    to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes bounceInDown {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(-50px, 0, 0);
+        transform: translate3d(-50px, 0, 0);
+    }
+
+    50% {
+        opacity: 1;
+        -webkit-transform: translate3d(5px, 0, 0);
+        transform: translate3d(5px, 0, 0);
+    }
+
+    to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+    }
+}
+
 .menu {
     border-right: 1px solid var(--main-border-color);
     box-shadow: 1px 1px 0.6rem 0.1rem rgba(0, 0, 0, 0.05);
@@ -101,6 +139,8 @@ export default {
         li {
             margin-bottom: 1rem;
             white-space: nowrap;
+            animation: bounceInDown 0.3s;
+            animation-fill-mode: both;
 
             a {
                 padding: 0.6rem 1rem;

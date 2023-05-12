@@ -4,14 +4,8 @@
             <div class="head flex">
                 <el-input v-model="state.account" size="small" style="width:10rem;margin:0 .4rem 0 0rem"></el-input>
                 <el-button size="small" @click="getData" :loading="state.loading">刷新列表</el-button>
-                <el-popover placement="top-start" title="说明" :width="300" trigger="hover" content="对账号配置在本节点的权限">
-                    <template #reference>
-                        <el-icon>
-                            <Warning />
-                        </el-icon>
-                    </template>
-                </el-popover>
                 <span class="flex-1"></span>
+                <span>对服务器账号配置在本节点的权限</span>
             </div>
             <div class="content">
                 <el-table :data="state.data.Data" stripe border size="small" @sort-change="handleSort">
@@ -20,15 +14,22 @@
                             【{{scope.row.ID}}】{{scope.row.Account}}
                         </template>
                     </el-table-column>
-                    <el-table-column prop="EndTime" sortable label="时间" width="140"></el-table-column>
+                    <el-table-column prop="EndTime" sortable label="时间" width="140">
+                        <template #default="scope">
+                            <p>{{scope.row.AddTime}}</p>
+                            <p>{{scope.row.EndTime}}</p>
+                        </template>
+                    </el-table-column>
                     <el-table-column prop="NetFlow" sortable label="流量">
                         <template #default="scope">
-                            <a href="javascript:;">{{scope.row.NetFlow == -1 ?'//无限制' :scope.row.NetFlow.sizeFormat().join('')}}</a>
+                            <p>已用 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p>
+                            <p>总量 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p>
                         </template>
                     </el-table-column>
                     <el-table-column prop="SignLimit" sortable label="登入数" width="90">
                         <template #default="scope">
-                            <a href="javascript:;">{{scope.row.SignLimit == -1 ?'//无限制':scope.row.SignLimit}}</a>
+                            <p>已用 : {{scope.row.SignCount}}</p>
+                            <p>总量 : {{scope.row.SignLimit == -1 ?'//无限':scope.row.SignLimit}}</p>
                         </template>
                     </el-table-column>
                     <el-table-column prop="Access" label="本机权限" width="90">
@@ -76,8 +77,8 @@ export default {
             account: '',
             sort: 0,
             accesss: computed(() => {
-                return Object.keys(shareData.serverAccess).map(key => {
-                    return shareData.serverAccess[key];
+                return Object.keys(shareData.clientAccess).map(key => {
+                    return shareData.clientAccess[key];
                 });
             }),
             data: {
@@ -181,6 +182,7 @@ export default {
 
     .head {
         padding: 1rem;
+        line-height: 2.5rem;
         border-bottom: 1px solid var(--main-border-color);
     }
 

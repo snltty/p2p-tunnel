@@ -43,6 +43,7 @@ namespace server.service
             services.AddSingleton<IAsymmetricCrypto, RsaCrypto>();
             services.AddSingleton<WheelTimer<object>>();
 
+            services.AddSingleton<common.proxy.Config>();
             services.AddSingleton<IProxyMessengerSender, ProxyMessengerSender>();
             services.AddSingleton<IProxyClient, ProxyClient>();
             services.AddSingleton<IProxyServer, ProxyServer>();

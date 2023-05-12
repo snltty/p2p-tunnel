@@ -6,6 +6,7 @@
                 <el-input v-model="state.account" size="small" style="width:10rem;margin:0 .4rem 0 1rem"></el-input>
                 <el-button size="small" @click="getData">刷新列表</el-button>
                 <span class="flex-1"></span>
+                <span>去除登入权限将会踢出此账号登入状态</span>
             </div>
             <div class="content">
                 <el-table :data="state.data.Data" stripe border size="small" @sort-change="handleSort">
@@ -22,12 +23,18 @@
                     </el-table-column>
                     <el-table-column prop="NetFlow" sortable label="流量">
                         <template #default="scope">
-                            <a href="javascript:;" @click="handleNetFlow(scope.row)">{{scope.row.NetFlow == -1 ?'//无限制' :scope.row.NetFlow.sizeFormat().join('')}}</a>
+                            <a href="javascript:;" @click="handleNetFlow(scope.row)">
+                                <p>已用 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p>
+                                <p>总量 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p>
+                            </a>
                         </template>
                     </el-table-column>
                     <el-table-column prop="SignLimit" sortable label="登入数" width="90">
                         <template #default="scope">
-                            <a href="javascript:;" @click="handleSignLimit(scope.row)">{{scope.row.SignLimit == -1 ?'//无限制':scope.row.SignLimit}}</a>
+                            <a href="javascript:;" @click="handleSignLimit(scope.row)">
+                                <p>已用 : {{scope.row.SignCount}}</p>
+                                <p>总量 : {{scope.row.SignLimit == -1 ?'//无限':scope.row.SignLimit}}</p>
+                            </a>
                         </template>
                     </el-table-column>
                     <el-table-column prop="Access" label="服务端权限" width="90">
@@ -245,6 +252,7 @@ export default {
 
     .head {
         padding: 1rem;
+        line-height: 2.5rem;
         border-bottom: 1px solid var(--main-border-color);
     }
 

@@ -33,12 +33,13 @@ namespace common.proxy
         public List<FirewallItem> Firewall { get; set; } = new List<FirewallItem>();
         [JsonIgnore]
         public Dictionary<FirewallKey, FirewallCache> AllowFirewalls { get; set; } = new Dictionary<FirewallKey, FirewallCache>(new FirewallKeyComparer());
+        [JsonIgnore]
         public Dictionary<FirewallKey, FirewallCache> DeniedFirewalls { get; set; } = new Dictionary<FirewallKey, FirewallCache>(new FirewallKeyComparer());
 
 
         public async Task<bool> AddFirewall(FirewallItem model)
         {
-            FirewallItem item = Firewall.FirstOrDefault(c => c.ID == model.ID);
+            FirewallItem item = Firewall.FirstOrDefault(c => c.ID == model.ID) ?? new FirewallItem { };
             FirewallItem old = Firewall.FirstOrDefault(c => c.Port == model.Port && c.Protocol == model.Protocol && c.Type == model.Type);
             if (old != null && old.ID != model.ID)
             {
@@ -139,7 +140,7 @@ namespace common.proxy
 
         public async Task<Config> ReadConfig()
         {
-            var config = await configDataProvider.Load();
+            Config config = await configDataProvider.Load();
             return config;
         }
         public async Task<string> ReadString()

@@ -1,6 +1,6 @@
 export default {
     service: 'ServerSocks5ClientService',
     config: 'ServerSocks5Configure',
-    text: 'socks5代理',
+    text: '代理(socks5)',
     access: 16
 }

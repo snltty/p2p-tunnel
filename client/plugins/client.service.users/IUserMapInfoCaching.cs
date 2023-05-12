@@ -1,30 +1,54 @@
-﻿using System.Collections.Concurrent;
+﻿using common.libs.database;
+using common.libs.extends;
+using System;
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks;
 
 namespace client.service.users
 {
     public interface IUserMapInfoCaching
     {
-        public bool Add(UserMapInfo map);
+        public Task<bool> Add(UserMapInfo map);
         public bool Get(ulong userid, out UserMapInfo map);
     }
-    public sealed class UserMapInfoCaching: IUserMapInfoCaching
-    {
-        private ConcurrentDictionary<ulong, UserMapInfo> mapDic = new ConcurrentDictionary<ulong, UserMapInfo>();
-        private readonly Config config;
-        public UserMapInfoCaching()
-        {
 
+    [Table("users")]
+    public class UserMapInfoCaching : IUserMapInfoCaching
+    {
+        public ConcurrentDictionary<ulong, UserMapInfo> Users { get; set; } = new ConcurrentDictionary<ulong, UserMapInfo>();
+
+        private readonly IConfigDataProvider<UserMapInfoCaching> configDataProvider;
+        public UserMapInfoCaching() { }
+        public UserMapInfoCaching(IConfigDataProvider<UserMapInfoCaching> configDataProvider)
+        {
+            this.configDataProvider = configDataProvider;
+            UserMapInfoCaching cache = ReadConfig().Result;
+            if (cache != null)
+            {
+                Users = cache.Users;
+            }
         }
 
-        public bool Add(UserMapInfo map)
+        public async Task<bool>Add(UserMapInfo map)
         {
-            mapDic.AddOrUpdate(map.ID, map, (a, b) => map);
+            Users.AddOrUpdate(map.ID, map, (a, b) => map);
+            await SaveConfig();
             return true;
         }
         public bool Get(ulong userid, out UserMapInfo map)
         {
-            return mapDic.TryGetValue(userid, out map);
+            return Users.TryGetValue(userid, out map);
+        }
+
+        public async Task<UserMapInfoCaching> ReadConfig()
+        {
+            UserMapInfoCaching config = await configDataProvider.Load();
+            return config;
+        }
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this).ConfigureAwait(false);
         }
     }
 
@@ -34,9 +58,4 @@ namespace client.service.users
         public uint Access { get; set; }
     }
 
-    [Table("users")]
-    public sealed class UserStoreModel
-    {
-        public ConcurrentDictionary<ulong, UserMapInfo> Users { get; set; }
-    }
 }

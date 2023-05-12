@@ -1,6 +1,7 @@
 export default {
     service: 'Socks5ClientService',
-    text: 'socks5代理',
+    text: '代理(socks5)',
     path: '/nodes/socks5.html',
     name: 'NodesSocks5',
+    access: 16
 }

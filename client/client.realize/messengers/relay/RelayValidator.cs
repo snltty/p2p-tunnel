@@ -2,8 +2,11 @@
 
 namespace client.realize.messengers.relay
 {
-    public sealed class RelayValidator : IRelayValidator
+    public sealed class RelayValidator : IRelayValidator,IAccess
     {
+        public uint Access => (uint)EnumServiceAccess.Relay;
+        public string Name => "relay";
+
         private readonly Config config;
         private readonly IServiceAccessValidator serviceAccessValidator;
 

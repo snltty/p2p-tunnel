@@ -164,6 +164,7 @@ namespace client.service
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
             Logger.Instance.Debug("权限值,uint 每个权限占一位，最多32个权限");
+            Logger.Instance.Info($"{Convert.ToString((uint)EnumServiceAccess.Relay, 2).PadLeft(Logger.Instance.PaddingWidth, '0')}  relay");
             foreach (var item in iAccesss.OrderBy(c => c.Access))
             {
                 Logger.Instance.Info($"{Convert.ToString(item.Access, 2).PadLeft(Logger.Instance.PaddingWidth, '0')}  {item.Name}");

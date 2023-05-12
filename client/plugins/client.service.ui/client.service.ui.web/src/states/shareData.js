@@ -1,7 +1,16 @@
 import { inject, provide, reactive } from "vue";
 
-const files = require.context('../views/', true, /plugin(-[a-zA-Z0-9]+)?\.js/);
-const accesss = files.keys().map(c => files(c).default).filter(c => c.access > 0).reduce((all, value, index) => {
+const files = require.context('../views/server/', true, /plugin(-[a-zA-Z0-9]+)?\.js/);
+const serverAccesss = files.keys().map(c => files(c).default).filter(c => c.access > 0).reduce((all, value, index) => {
+    all.push({
+        text: value.accessText || value.text,
+        value: value.access
+    });
+    return all;
+}, []);
+
+const filesClient = require.context('../views/nodes/', true, /plugin(-[a-zA-Z0-9]+)?\.js/);
+const clientAccess = filesClient.keys().map(c => filesClient(c).default).filter(c => c.access > 0).reduce((all, value, index) => {
     all.push({
         text: value.accessText || value.text,
         value: value.access
@@ -15,7 +24,8 @@ export const shareData = {
     clientConnectTypes: { 0: '未连接', 1: '打洞', 2: '节点中继', 4: '服务器中继' },
     serverTypes: { 1: 'TCP', 2: 'UDP', 3: '/' },
     bufferSizes: ['KB_1', 'KB_2', 'KB_4', 'KB_8', 'KB_16', 'KB_32', 'KB_64', 'KB_128', 'KB_256', 'KB_512', 'KB_1024'],
-    serverAccess: accesss,
+    clientAccess: clientAccess,
+    serverAccess: serverAccesss,
     serverImgs: {
         'zg': { img: require('../assets/zg.png'), name: '中国' },
         'zgxg': { img: require('../assets/zgxg.png'), name: '中国香港' },

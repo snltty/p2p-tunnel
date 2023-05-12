@@ -14,7 +14,6 @@ using common.libs;
 using Microsoft.Extensions.DependencyInjection;
 using common.server;
 using System;
-using System.Linq;
 using System.Reflection;
 using common.libs.database;
 using common.server.servers.rudp;
@@ -22,7 +21,6 @@ using common.server.servers.iocp;
 using client.realize.messengers.relay;
 using client.messengers.relay;
 using common.proxy;
-using System.ComponentModel.DataAnnotations;
 
 namespace client.realize.messengers
 {

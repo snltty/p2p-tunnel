@@ -173,7 +173,7 @@ namespace common.proxy
                     token.Data.Data = Helper.EmptyArray;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 if (udpConnections.TryRemove(key, out UdpToken _token))
                 {
@@ -219,7 +219,7 @@ namespace common.proxy
                 }
                 result = token.TargetSocket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 if (udpConnections.TryRemove(token.Key, out _))
                 {

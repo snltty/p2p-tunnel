@@ -14,7 +14,6 @@ namespace server.service.validators
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
 
         public uint Access => (uint)EnumServiceAccess.Relay;
-
         public string Name => "relay";
 
         public RelayValidator(Config config, IServiceAccessValidator serviceAccessProvider)

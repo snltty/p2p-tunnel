@@ -2,25 +2,33 @@
     <div class="wrap" v-if="state.user.ID > 0">
         <el-row>
             <el-col :span="6">
-                <el-statistic title="限制登入" :value="state.user.SignLimit"></el-statistic>
-                <div class="countdown-footer">{{state.user.SignLimit == -1 ? '//无限制':''}}</div>
+                <el-statistic title="登入" :value="state.user.SignCount"></el-statistic>
+                <div class="countdown-footer">{{state.user.SignLimit == -1 ? '//无限':''}}</div>
             </el-col>
             <el-col :span="6">
-                <el-statistic title="剩余流量" :value="state.user.NetFlow">
+                <el-statistic title="流量" :value="state.user.NetFlow">
                     <template #suffix>
-                        <template v-if="state.user.NetFlow != -1"><span class="suffix">/{{state.user.netFlow}}</span></template>
+                        <span class="suffix">/{{state.user.netFlow}}</span>
                     </template>
                 </el-statistic>
-                <div class="countdown-footer">{{state.user.NetFlow == -1 ? '//无限制':''}}</div>
+                <div class="countdown-footer">{{state.user.NetFlow == -1 ? '//无限':`${state.user.NetFlow}/${state.user.netFlow}`}}</div>
             </el-col>
             <el-col :span="6">
-                <el-statistic title="拥有权限" :value="state.user.access">
-                    <template #suffix><span class="suffix">/个</span></template>
+                <el-statistic title="权限" :value="state.user.access">
+                    <template #suffix>
+                        <el-popover placement="top-start" title="权限列表" :width="200" trigger="hover" :content="`【${state.accessText}】`">
+                            <template #reference>
+                                <span class="suffix">/个<el-icon>
+                                        <Warning />
+                                    </el-icon></span>
+                            </template>
+                        </el-popover>
+                    </template>
                 </el-statistic>
-                <div class="countdown-footer">{{state.user.Access == 0 ? '//无权限':''}}</div>
+                <div class="countdown-footer">{{state.user.Access == 0 ? '//无':''}}</div>
             </el-col>
             <el-col :span="6">
-                <el-statistic title="剩余时间" :value="state.user.endTime">
+                <el-statistic title="时间" :value="state.user.endTime">
                     <template #suffix><span class="suffix">/{{state.user._endTime}}</span></template>
                 </el-statistic>
                 <div class="countdown-footer">{{state.user.EndTime}}</div>
@@ -32,6 +40,7 @@
 <script>
 import { onMounted, reactive } from 'vue'
 import { info } from '../../../apis/users-server'
+import { shareData } from '../../../states/shareData'
 export default {
     setup() {
 
@@ -41,13 +50,15 @@ export default {
                 "Access": 0,
                 "access": 0,
                 "SignLimit": -1,
+                "SignCount": 0,
                 "NetFlow": -1,
                 'netFlow': 'B',
                 "EndTime": '',
                 "endTime": 0,
                 "_endTime": '',
 
-            }
+            },
+            accessText: ''
         });
 
         const timeFormat = (num) => {
@@ -75,8 +86,11 @@ export default {
 
                 state.user.Access = json.Access;
                 state.user.access = json.Access.toString(2).split('').filter(c => c == '1').length;
+                state.accessText = shareData.serverAccess.filter(c => shareData.serverAccessHas(state.user.Access, c.value)).map(c => c.text).join('】【')
 
                 state.user.SignLimit = json.SignLimit;
+                state.user.SignCount = json.SignCount;
+
 
                 let format = json.NetFlow.sizeFormat();
                 state.user.NetFlow = format[0];
