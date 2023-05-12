@@ -13,7 +13,8 @@ namespace client.service.users
 
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
         {
-            services.AddSingleton<IUserInfoCaching, UserInfoCaching>();
+            services.AddSingleton<IUserMapInfoCaching, UserMapInfoCaching>();
+
         }
     }
 }

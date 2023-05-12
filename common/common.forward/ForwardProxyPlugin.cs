@@ -71,11 +71,7 @@ namespace common.forward
         }
         public virtual bool ValidateAccess(ProxyInfo info)
         {
-#if DEBUG
-            return true;
-#else
             return config.ConnectEnable ||  serviceAccessValidator.Validate(info.Connection.ConnectId,Access);
-#endif
         }
 
         public void Started(ushort port)

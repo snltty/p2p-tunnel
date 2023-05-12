@@ -127,8 +127,10 @@ namespace common.user
                 {
                     if (storeModel.Users.TryGetValue(user.ID, out UserInfo _user))
                     {
-                        //_user.Account = user.Account;
-                        _user.Password = user.Password;
+                        if (string.IsNullOrWhiteSpace(user.Password) == false)
+                        {
+                            _user.Password = user.Password;
+                        }
                         _user.Access = user.Access;
                         _user.NetFlow = user.NetFlow;
                         _user.EndTime = user.EndTime;

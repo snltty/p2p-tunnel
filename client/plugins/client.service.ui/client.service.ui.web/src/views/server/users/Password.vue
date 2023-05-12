@@ -14,7 +14,7 @@
 
 <script>
 import { reactive, ref } from '@vue/reactivity';
-import { add } from '../../../apis/users-server'
+import { setPassword } from '../../../apis/users-server'
 import { inject, watch } from '@vue/runtime-core';
 import { ElMessage } from 'element-plus';
 export default {
@@ -50,11 +50,11 @@ export default {
                 if (!valid) {
                     return false;
                 }
-
-                let json = JSON.parse(JSON.stringify(addData.value));
-                json.Password = state.form.password;
                 state.loading = true;
-                add(json).then((msg) => {
+                setPassword({
+                    ID: addData.value.ID,
+                    Password: state.form.password
+                }).then((msg) => {
                     state.loading = false;
                     if (!msg) {
                         ElMessage.success('操作成功');

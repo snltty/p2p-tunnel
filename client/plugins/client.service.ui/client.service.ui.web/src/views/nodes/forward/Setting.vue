@@ -7,7 +7,7 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="允许连接" prop="ConnectEnable">
                                 <el-checkbox v-model="state.form.ConnectEnable">开启
-                                    <el-tooltip class="box-item" effect="dark" content="是否允许被连接" placement="top">
+                                    <el-tooltip class="box-item" effect="dark" content="是否允许被连接，不允许则只有权限时可连接" placement="top">
                                         <el-icon>
                                             <Warning />
                                         </el-icon>

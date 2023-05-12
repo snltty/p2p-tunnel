@@ -91,7 +91,6 @@ namespace client.service.vea
 
             lock (this)
             {
-                ResetMask(_ips.LanIPs);
                 var cache = ips.Values.FirstOrDefault(c => c.Client.ConnectionId == client.ConnectionId);
                 if (cache != null)
                 {
@@ -111,7 +110,6 @@ namespace client.service.vea
         /// </summary>
         public void UpdateIp()
         {
-            ResetMask(config.VeaLanIPs);
             foreach (var item in clientInfoCaching.All().Where(c => c.ConnectionId != signInStateInfo.ConnectId))
             {
                 var connection = item.Connection;
@@ -299,7 +297,7 @@ namespace client.service.vea
             {
                 if (item.StartsWith("default via"))
                 {
-                    var strs = item.Split(' ');
+                    var strs = item.Split(Helper.SeparatorCharSpace);
                     for (int i = 0; i < strs.Length; i++)
                     {
                         if (strs[i] == "dev")
@@ -392,7 +390,7 @@ namespace client.service.vea
                     byte[] maskArr = BitConverter.GetBytes(BinaryPrimitives.ReverseEndianness(item.MaskValue));
                     return $"route add {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())} mask {string.Join(".", maskArr)} {config.IP} metric 5 if {interfaceNumber}";
                 }).ToArray();
-                if(commands.Length > 0)
+                if (commands.Length > 0)
                 {
                     Command.Windows(string.Empty, commands);
                 }
@@ -511,31 +509,6 @@ namespace client.service.vea
                 }).ToArray();
             }
             return lanips;
-        }
-
-        /// <summary>
-        /// 计算器掩码值，网络号
-        /// </summary>
-        /// <param name="_ips"></param>
-        public void ResetMask(VeaLanIPAddress[] _lanips)
-        {
-            foreach (var item in _lanips)
-            {
-                if (item.MaskLength == 0)
-                {
-                    item.MaskLength = 32;
-                    for (int i = 0; i < sizeof(uint); i++)
-                    {
-                        if (((item.IPAddress >> (i * 8)) & 0x000000ff) != 0)
-                        {
-                            break;
-                        }
-                        item.MaskLength -= 8;
-                    }
-                }
-                item.MaskValue = (uint)(0xffffffff << (32 - item.MaskLength));
-                item.NetWork = item.IPAddress & item.MaskValue;
-            }
         }
 
     }

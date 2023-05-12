@@ -16,6 +16,7 @@ namespace common.user
 
             Config config = ReadConfig().Result;
             Enable = config.Enable;
+            ForceOffline = config.ForceOffline;
         }
 
         /// <summary>
@@ -26,7 +27,7 @@ namespace common.user
         /// 强制显现
         /// </summary>
         public bool ForceOffline { get; set; }
-        
+
 
         private async Task<Config> ReadConfig()
         {

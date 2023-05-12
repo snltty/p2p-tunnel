@@ -1,29 +1,29 @@
 <template>
-    <el-dialog title="添加短连接转发" top="1vh" destroy-on-close v-model="show" center :close-on-click-modal="false" width="350px">
-        <el-form ref="formDom" :model="form" :rules="rules" label-width="100px">
+    <el-dialog title="添加短连接转发" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="350px">
+        <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="100px">
             <el-form-item label="服务器域名" prop="Domain">
-                <el-input v-model="form.Domain"></el-input>
+                <el-input v-model="state.form.Domain"></el-input>
             </el-form-item>
             <el-form-item label="本机ip" prop="LocalIp">
-                <el-input v-model="form.LocalIp"></el-input>
+                <el-input v-model="state.form.LocalIp"></el-input>
             </el-form-item>
             <el-form-item label="本机端口" prop="LocalPort">
-                <el-input v-model="form.LocalPort"></el-input>
+                <el-input v-model="state.form.LocalPort"></el-input>
             </el-form-item>
             <el-form-item label="简单说明" prop="Desc">
-                <el-input v-model="form.Desc"></el-input>
+                <el-input v-model="state.form.Desc"></el-input>
             </el-form-item>
         </el-form>
         <div class="remark t-c" v-html="remark"></div>
         <template #footer>
             <el-button @click="handleCancel">取 消</el-button>
-            <el-button type="primary" :loading="loading" @click="handleSubmit">确 定</el-button>
+            <el-button type="primary" :loading="state.loading" @click="handleSubmit">确 定</el-button>
         </template>
     </el-dialog>
 </template>
 
 <script>
-import { computed, reactive, ref, toRefs } from '@vue/reactivity';
+import { computed, reactive, ref } from '@vue/reactivity';
 import { inject, watch } from '@vue/runtime-core';
 import { AddServerForward } from '../../../apis/forward-server'
 import { injectShareData } from '../../../states/shareData'
@@ -103,7 +103,7 @@ export default {
         }
 
         return {
-            shareData, ...toRefs(state), formDom, remark, handleSubmit, handleCancel
+            shareData, state, formDom, remark, handleSubmit, handleCancel
         }
     }
 }

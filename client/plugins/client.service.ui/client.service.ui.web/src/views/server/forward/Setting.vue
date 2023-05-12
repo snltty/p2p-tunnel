@@ -7,7 +7,7 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="开启" prop="ConnectEnable">
                                 <el-checkbox size="default" v-model="state.form.ConnectEnable">开启
-                                    <el-tooltip class="box-item" effect="dark" content="允许所有账号使用端口转发穿透，包括匿名" placement="top">
+                                    <el-tooltip class="box-item" effect="dark" content="允许所有账号使用端口转发穿透，包括匿名，不允许则只有权限时可使用" placement="top">
                                         <el-icon>
                                             <Warning />
                                         </el-icon>
@@ -56,7 +56,7 @@
                     </el-row>
                 </el-form-item>
                 <el-form-item label="" label-width="0">
-                    你可以设置一个端口范围，客户端只能添加此范围内的长连接端口监听
+                    你可以设置一个端口范围，节点只能添加此范围内的长连接端口监听
                 </el-form-item>
 
             </el-form>

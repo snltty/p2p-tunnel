@@ -19,11 +19,6 @@ namespace common.libs
         private static extern int inet_addr(string cp);
         [DllImport("IPHLPAPI.dll")]
         private static extern int SendARP(Int32 DestIP, Int32 SrcIP, ref Int64 pMacAddr, ref Int32 PhyAddrLen);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="hostip"></param>
-        /// <returns></returns>
         public static string GetMacAddress(string hostip)
         {
             string mac;
@@ -237,66 +232,26 @@ namespace common.libs
             return list[0];
         }
 
-        /// <summary>
-        /// 地址转数组，端口必须2字节
-        /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <returns></returns>
-        public static Memory<byte> EndpointToArray(string ip, ushort port)
-        {
-            return EndpointToArray(ip.ToBytes(), port.ToBytes());
-        }
-        /// <summary>
-        /// 地址转数组，端口必须2字节
-        /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <returns></returns>
-        public static Memory<byte> EndpointToArray(Memory<byte> ip, Memory<byte> port)
-        {
-            Memory<byte> endpoint = new byte[ip.Length + port.Length];
-            ip.CopyTo(endpoint.Slice(0, ip.Length));
-            port.CopyTo(endpoint.Slice(ip.Length, port.Length));
 
-            return endpoint;
-        }
-        /// <summary>
-        /// 从数组获取端口
-        /// </summary>
-        /// <param name="array"></param>
-        /// <returns></returns>
-        public static ushort PortFromArray(Memory<byte> array)
+        public static byte MaskLength(uint ip)
         {
-            return array.Span.Slice(array.Length - 2, 2).ToUInt16();
+            byte maskLength = 32;
+            for (int i = 0; i < sizeof(uint); i++)
+            {
+                if (((ip >> (i * 8)) & 0x000000ff) != 0)
+                {
+                    break;
+                }
+                maskLength -= 8;
+            }
+            return maskLength;
         }
-        /// <summary>
-        /// 从数组中解析地址，端口必须2字节
-        /// </summary>
-        /// <param name="array"></param>
-        /// <returns></returns>
-        public static IPEndPoint EndpointFromArray(Memory<byte> array)
+        public static uint MaskValue(byte maskLength)
         {
-            var span = array.Span;
-            try
-            {
-                string ip = span.Slice(0, array.Length - 2).GetString();
-                int port = span.Slice(array.Length - 2, 2).ToUInt16();
-                return new IPEndPoint(GetDomainIp(ip), port);
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.Error(span.Slice(0, array.Length - 2).GetString());
-                Logger.Instance.Error(ex);
-            }
-            return null;
+            return 0xffffffff << (32 - maskLength);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mac"></param>
-        /// <returns></returns>
+
         public static byte[] Mac2Bytes(string mac)
         {
             mac = mac.Replace("-", "", StringComparison.Ordinal).Replace(":", "", StringComparison.Ordinal);
@@ -307,11 +262,6 @@ namespace common.libs
             }
             return res;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mac"></param>
-        /// <returns></returns>
         public static byte[] MagicPacket(string mac)
         {
             var macBytes = Mac2Bytes(mac);

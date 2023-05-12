@@ -35,7 +35,7 @@
                                 <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
                                     <el-form-item label="允许访问" prop="ConnectEnable">
                                         <el-checkbox v-model="state.form.ConnectEnable">开启
-                                            <el-tooltip class="box-item" effect="dark" content="作为被访问端时，是否允许访问" placement="top">
+                                            <el-tooltip class="box-item" effect="dark" content="作为被访问端时，是否允许访问，不允许则只有权限时可访问" placement="top">
                                                 <el-icon>
                                                     <Warning />
                                                 </el-icon>
@@ -47,7 +47,7 @@
                                     <el-form-item label="本机IP" prop="IP">
                                         <el-input size="default" v-model="state.form.IP">
                                             <template #append>
-                                                <el-tooltip class="box-item" effect="dark" content="当前客户端的虚拟网卡ip，各个客户端之间设置不一样的ip，相同网段即可" placement="top">
+                                                <el-tooltip class="box-item" effect="dark" content="当前节点的虚拟网卡ip，各个节点之间设置不一样的ip，相同网段即可" placement="top">
                                                     <el-icon>
                                                         <Warning />
                                                     </el-icon>
@@ -105,7 +105,7 @@
                             <el-row :gutter="10">
                                 <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
                                     <el-form-item label="局域网段" prop="LanIPs">
-                                        <el-input type="textarea" size="default" v-model="state.form.LanIPs" resize="none" :autosize="{minRows:4,maxRows:6}" placeholder="当前客户端的局域网段，多条使用英文逗号间隔或者换行"></el-input>
+                                        <el-input type="textarea" size="default" v-model="state.form.LanIPs" resize="none" :autosize="{minRows:4,maxRows:6}" placeholder="当前节点的局域网段，多条使用英文逗号间隔或者换行"></el-input>
                                     </el-form-item>
                                 </el-col>
                             </el-row>

@@ -68,10 +68,9 @@ namespace client.realize.messengers.relay
                 {
                     Id = signInStateInfo.ConnectId,
                     ToId = fromid,
-                    Connects = clientInfoCaching.All().Where(c => c.Connected && c.ConnectType == ClientConnectTypes.P2P).Select(c => c.ConnectionId).ToArray(),
+                    Connects = clientInfoCaching.All().Where(c => c.Connected && c.ConnectType == ClientConnectTypes.P2P && relayValidator.Validate(connection)).Select(c => c.ConnectionId).ToArray(),
                 });
             }
-
         }
 
         [MessengerId((ushort)RelayMessengerIds.Connects)]

@@ -17,6 +17,7 @@ namespace server.service.users
         private readonly common.user.Config config;
         private readonly MessengerSender messengerSender;
         private readonly IClientSignInCaching clientSignInCaching;
+        private const string useridKey = "UserInfoID";
 
         public SignInAccessValidator(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, IClientSignInCaching clientSignInCaching, common.user.Config config, MessengerSender messengerSender)
         {
@@ -44,6 +45,7 @@ namespace server.service.users
             if (GetUser(args, out UserInfo user))
             {
                 access |= user.Access;
+                args[useridKey] = user.ID.ToString();
             }
             if (config.Enable)
             {
@@ -109,7 +111,12 @@ namespace server.service.users
         private bool GetUser(Dictionary<string, string> args, out UserInfo user)
         {
             user = default;
-            if (GetAccountPassword(args, out string account, out string password))
+
+            if (args.ContainsKey(useridKey))
+            {
+                return userStore.Get(ulong.Parse(args[useridKey]), out user);
+            }
+            else if (GetAccountPassword(args, out string account, out string password))
             {
                 return userStore.Get(account, password, out user);
             }

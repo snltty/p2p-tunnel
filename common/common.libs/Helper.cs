@@ -13,9 +13,18 @@ namespace common.libs
         public static byte[] AnyIpv6Array = IPAddress.IPv6Any.GetAddressBytes();
         public static byte[] AnyPoryArray = new byte[] { 0, 0 };
 
-
-        public static string SeparatorString = ",";
-        public static char SeparatorChar = ',';
+        /// <summary>
+        /// 空格
+        /// </summary>
+        public static char SeparatorCharSpace = ' ';
+        /// <summary>
+        /// 逗号
+        /// </summary>
+        public static char SeparatorCharComma = ',';
+        /// <summary>
+        /// 斜杠
+        /// </summary>
+        public static char SeparatorCharSlash = '/';
         public static string Version = "2.1.0.0-beta";
 
         public static string GetStackTraceModelName()

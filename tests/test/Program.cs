@@ -12,21 +12,6 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            ushort[] res = "123,1/4,2/5".Split(',').SelectMany(c =>
-            {
-                string[] arr = c.Split('/');
-                if (arr.Length == 1) return new ushort[1] { ushort.Parse(arr[0]) };
-
-                ushort start = ushort.Parse(arr[0]);
-                ushort end = ushort.Parse(arr[1]);
-                ushort[] result = new ushort[(end - start) + 1];
-                for (ushort p = start, i = 0; p <= end; p++, i++)
-                {
-                    result[i] = p;
-                }
-                return result;
-            }).ToArray();
-            Console.WriteLine(string.Join(",",res));
             //var summary = BenchmarkRunner.Run<Test>();
         }
 

@@ -63,7 +63,7 @@
     </div>
 </template>
 <script>
-import { reactive, ref, toRefs } from '@vue/reactivity'
+import { reactive, ref } from '@vue/reactivity'
 import { getList, removeListen, startListen, stopListen, removeForward } from '../../../apis/forward'
 import { computed, onMounted, provide } from '@vue/runtime-core'
 import AddForward from './AddForward.vue'

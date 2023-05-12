@@ -88,7 +88,7 @@
                             <el-form-item label="加密秘钥" prop="EncodePassword">
                                 <el-input size="default" v-model="state.form.EncodePassword" placeholder="加密秘钥">
                                     <template #append>
-                                        <el-tooltip class="box-item" effect="dark" content="加密密钥32位，如果服务器填写了秘钥，客户端选择加密时，必须填写相同秘钥" placement="top">
+                                        <el-tooltip class="box-item" effect="dark" content="加密密钥32位，如果服务器填写了秘钥，节点选择加密时，必须填写相同秘钥" placement="top">
                                             <el-icon>
                                                 <Warning />
                                             </el-icon>

@@ -86,7 +86,8 @@ namespace common.server.model
         /// <summary>
         /// 权限
         /// </summary>
-        public uint Access { get; set; }
+        public uint ClientAccess { get; set; }
+        public uint UserAccess { get; set; }
 
         /// <summary>
         /// 连接对象
@@ -100,6 +101,7 @@ namespace common.server.model
 
             var bytes = new byte[
                 4
+                + 4
                 + 8
                 + 1 + 1 + nameBytes.Length
                 ];
@@ -107,7 +109,9 @@ namespace common.server.model
 
             int index = 0;
 
-            Access.ToBytes(memory.Slice(index));
+            ClientAccess.ToBytes(memory.Slice(index));
+            index += 4;
+            UserAccess.ToBytes(memory.Slice(index));
             index += 4;
 
             ConnectionId.ToBytes(memory.Slice(index));
@@ -128,7 +132,9 @@ namespace common.server.model
             var span = data.Span;
             int index = 0;
 
-            Access = span.Slice(index, 4).ToUInt32();
+            ClientAccess = span.Slice(index, 4).ToUInt32();
+            index += 4;
+            UserAccess = span.Slice(index, 4).ToUInt32();
             index += 4;
 
             ConnectionId = span.Slice(index, 8).ToUInt64();

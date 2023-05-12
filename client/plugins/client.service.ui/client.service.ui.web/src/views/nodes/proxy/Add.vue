@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { reactive, ref, toRefs } from '@vue/reactivity';
+import { reactive, ref } from '@vue/reactivity';
 import { add } from '../../../apis/proxy'
 import { injectShareData } from '../../../states/shareData'
 import { inject, watch } from '@vue/runtime-core';

@@ -114,7 +114,7 @@ export default {
 
         const remark = computed(() => {
             return [
-                `本客户端(${state.form.SourceIp}:${addForwardData.value.currentLsiten.Port})`,
+                `本节点(${state.form.SourceIp}:${addForwardData.value.currentLsiten.Port})`,
                 `<br/>`,
                 ` -> `,
                 `【${shareData.aliveTypes[addForwardData.value.currentLsiten.AliveType]}】`,

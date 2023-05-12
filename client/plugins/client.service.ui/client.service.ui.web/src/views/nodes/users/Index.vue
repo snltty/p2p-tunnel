@@ -2,35 +2,36 @@
     <div class="forward-wrap">
         <div class="inner">
             <div class="head flex">
-                <el-button type="primary" size="small" @click="handleAdd">增加账号</el-button>
-                <el-input v-model="state.account" size="small" style="width:10rem;margin:0 .4rem 0 1rem"></el-input>
-                <el-button size="small" @click="getData">刷新列表</el-button>
+                <el-input v-model="state.account" size="small" style="width:10rem;margin:0 .4rem 0 0rem"></el-input>
+                <el-button size="small" @click="getData" :loading="state.loading">刷新列表</el-button>
+                <el-popover placement="top-start" title="说明" :width="300" trigger="hover" content="对账号配置在本节点的权限">
+                    <template #reference>
+                        <el-icon>
+                            <Warning />
+                        </el-icon>
+                    </template>
+                </el-popover>
                 <span class="flex-1"></span>
             </div>
             <div class="content">
                 <el-table :data="state.data.Data" stripe border size="small" @sort-change="handleSort">
                     <el-table-column prop="ID" sortable label="账号">
                         <template #default="scope">
-                            <a href="javascript:;" @click="handleAccount(scope.row)">【{{scope.row.ID}}】{{scope.row.Account}}</a>
+                            【{{scope.row.ID}}】{{scope.row.Account}}
                         </template>
                     </el-table-column>
-                    <el-table-column prop="EndTime" sortable label="时间" width="140">
-                        <template #default="scope">
-                            <p>{{scope.row.AddTime}}</p>
-                            <p><a href="javascript:;" @click="handleEndTime(scope.row)">{{scope.row.EndTime}}</a></p>
-                        </template>
-                    </el-table-column>
+                    <el-table-column prop="EndTime" sortable label="时间" width="140"></el-table-column>
                     <el-table-column prop="NetFlow" sortable label="流量">
                         <template #default="scope">
-                            <a href="javascript:;" @click="handleNetFlow(scope.row)">{{scope.row.NetFlow == -1 ?'//无限制' :scope.row.NetFlow.sizeFormat().join('')}}</a>
+                            <a href="javascript:;">{{scope.row.NetFlow == -1 ?'//无限制' :scope.row.NetFlow.sizeFormat().join('')}}</a>
                         </template>
                     </el-table-column>
                     <el-table-column prop="SignLimit" sortable label="登入数" width="90">
                         <template #default="scope">
-                            <a href="javascript:;" @click="handleSignLimit(scope.row)">{{scope.row.SignLimit == -1 ?'//无限制':scope.row.SignLimit}}</a>
+                            <a href="javascript:;">{{scope.row.SignLimit == -1 ?'//无限制':scope.row.SignLimit}}</a>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="Access" label="服务端权限" width="90">
+                    <el-table-column prop="Access" label="本机权限" width="90">
                         <template #default="scope">
                             <el-dropdown size="small" style="margin-top:.4rem" @command="handleAccessCommand">
                                 <span class="el-dropdown-link" style="font-size:1.2rem">
@@ -51,47 +52,23 @@
                             </el-dropdown>
                         </template>
                     </el-table-column>
-                    <el-table-column fixed="right" width="55">
-                        <template #default="scope">
-                            <el-popconfirm title="删除不可逆，是否确认?" @confirm="handleDelete(scope.row)">
-                                <template #reference>
-                                    <el-button size="small" type="danger">
-                                        <el-icon>
-                                            <Delete />
-                                        </el-icon>
-                                    </el-button>
-                                </template>
-                            </el-popconfirm>
-
-                        </template>
-                    </el-table-column>
                 </el-table>
             </div>
         </div>
-        <Add v-if="state.showAdd" v-model="state.showAdd" @success="getData"></Add>
-        <Password v-if="state.showAccount" v-model="state.showAccount" @success="getData"></Password>
-        <EndTime v-if="state.showEndTime" v-model="state.showEndTime" @success="getData"></EndTime>
-        <NetFlow v-if="state.showNetFlow" v-model="state.showNetFlow" @success="getData"></NetFlow>
-        <SignLimit v-if="state.showSignLimit" v-model="state.showSignLimit" @success="getData"></SignLimit>
     </div>
 </template>
 <script>
-import { reactive, ref } from '@vue/reactivity'
-import { computed, onMounted, provide } from '@vue/runtime-core'
+import { reactive } from '@vue/reactivity'
+import { computed, onMounted } from '@vue/runtime-core'
 import { Select } from '@element-plus/icons'
 import { ElMessage } from 'element-plus'
-import { getPage, add, remove } from '../../../apis/users-server'
+import { getPage, update } from '../../../apis/users'
 import { shareData } from '../../../states/shareData'
-import Add from './Add.vue'
-import Password from './Password.vue'
-import EndTime from './EndTime.vue'
-import NetFlow from './NetFlow.vue'
-import SignLimit from './SignLimit.vue'
 import plugin from './plugin'
-import settingPlugin from '../settings/plugin'
+import settingPlugin from '../../server/settings/plugin'
 export default {
     plugin: Object.assign(JSON.parse(JSON.stringify(plugin)), { access: settingPlugin.access }),
-    components: { Add, Password, EndTime, NetFlow, SignLimit, Select },
+    components: { Select },
     setup() {
 
         const state = reactive({
@@ -108,12 +85,7 @@ export default {
                 PageSize: 10,
                 Count: 0,
                 Data: [],
-            },
-            showAdd: false,
-            showAccount: false,
-            showEndTime: false,
-            showNetFlow: false,
-            showSignLimit: false
+            }
         });
 
         const getData = () => {
@@ -146,7 +118,7 @@ export default {
                 command.row.Access = shareData.serverAccessAdd(command.row.Access, command.item.value);
             }
             let json = JSON.parse(JSON.stringify(command.row));
-            add(json).then((msg) => {
+            update(json).then((msg) => {
                 if (msg) {
                     ElMessage.error(msg);
                     command.row.Access = access;
@@ -158,34 +130,7 @@ export default {
                 command.row.Access = access;
             });
         }
-        const handleAccount = (row) => {
-            addData.value = row;
-            state.showAccount = true;
-        }
-        const handleEndTime = (row) => {
-            addData.value = row;
-            state.showEndTime = true;
-        }
-        const handleNetFlow = (row) => {
-            addData.value = row;
-            state.showNetFlow = true;
-        }
-        const handleSignLimit = (row) => {
-            addData.value = row;
-            state.showSignLimit = true;
-        }
-        const handleDelete = (row) => {
-            remove(row.ID).then((msg) => {
-                if (msg) {
-                    ElMessage.error(msg);
-                } else {
-                    getData();
-                    ElMessage.success('操作成功');
-                }
-            }).catch(() => {
-                ElMessage.error('操作失败');
-            });
-        }
+
         const handleSort = ({ column, prop, order }) => {
             const sortField = {
                 'ID': 1,
@@ -206,17 +151,8 @@ export default {
             getData();
         }
 
-
-        const addData = ref({ ID: 0, NetFlow: 0 });
-        provide('add-data', addData);
-        const handleAdd = () => {
-            addData.value = { ID: 0 };
-            state.showAdd = true;
-        }
-
         return {
-            state, getData, Select, shareData, handleAccessCommand, handleAdd,
-            handleAccount, handleEndTime, handleNetFlow, handleSignLimit, handleDelete, handleSort
+            state, getData, Select, shareData, handleAccessCommand, handleSort
         }
     }
 }

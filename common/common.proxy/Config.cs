@@ -104,9 +104,9 @@ namespace common.proxy
         {
             if (string.IsNullOrWhiteSpace(port)) return Array.Empty<ushort>();
 
-            return port.Split((char)44).SelectMany(c =>
+            return port.Split(Helper.SeparatorCharComma).SelectMany(c =>
             {
-                string[] arr = c.Split((char)47);
+                string[] arr = c.Split(Helper.SeparatorCharSlash);
                 if (arr.Length == 1)
                 {
                     return new ushort[1] { ushort.Parse(arr[0]) };
@@ -117,25 +117,17 @@ namespace common.proxy
         }
         private FirewallCacheIp[] ParseIp(string[] ips)
         {
-            return ips.Select(c => c.Split((char)47)).Where(c => c[0] != IPAddress.Any.ToString()).Select(c =>
+            return ips.Select(c => c.Split(Helper.SeparatorCharSlash)).Select(c =>
             {
                 byte maskLength = c.Length > 1 ? byte.Parse(c[1]) : (byte)0;
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse(c[0]).GetAddressBytes());
                 //每填写掩码，自动计算
                 if (c.Length == 1)
                 {
-                    maskLength = 32;
-                    for (int i = 0; i < sizeof(uint); i++)
-                    {
-                        if (((ip >> (i * 8)) & 0x000000ff) != 0)
-                        {
-                            break;
-                        }
-                        maskLength -= 8;
-                    }
+                    maskLength = NetworkHelper.MaskLength(ip);
                 }
                 //掩码十进制
-                uint maskValue = 0xffffffff << (32 - maskLength);
+                uint maskValue = NetworkHelper.MaskValue(maskLength);
                 return new FirewallCacheIp
                 {
                     MaskValue = maskValue,

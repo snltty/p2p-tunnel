@@ -4,7 +4,7 @@
             <div class="inner flex-1 scrollbar">
                 <template v-for="(item,index) in leftMenus" :key="index">
 
-                    <div class="setting-item">
+                    <div class="setting-item" :style="`animation-delay:${index*0.1}s`">
                         <el-divider content-position="left" border-style="dotted">{{item.text}}</el-divider>
                         <component :is="item.component.value" :ref="`setting_item_${item.text}`" />
                     </div>
@@ -117,6 +117,8 @@ export default {
     border-radius: 4px;
     border: 1px solid #ddd;
     box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
+    animation: bounceInDown 0.3s;
+    animation-fill-mode: both;
 
     .el-divider {
         margin-top: 0;

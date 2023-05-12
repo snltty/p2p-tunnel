@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { ref, toRefs, reactive } from "@vue/reactivity";
+import { ref, reactive } from "@vue/reactivity";
 import { getConfig, updateConfig } from "../../../apis/logger";
 import { onMounted } from "@vue/runtime-core";
 import plugin from './plugin'

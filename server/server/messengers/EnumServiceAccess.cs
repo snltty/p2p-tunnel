@@ -9,10 +9,7 @@ namespace server.messengers
     [Flags]
     public enum EnumServiceAccess : uint
     {
-        /// <summary>
-        /// 中继
-        /// </summary>
-        Relay = 0b00000000_00000000_00000000_00000001,
+        
         /// <summary>
         /// 登入
         /// </summary>

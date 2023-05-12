@@ -7,7 +7,7 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="P2P加密" prop="ClientEncode">
                                 <el-checkbox v-model="state.form.ClientEncode">开启
-                                    <el-tooltip class="box-item" effect="dark" content="客户端之间通信使用加密" placement="top">
+                                    <el-tooltip class="box-item" effect="dark" content="节点之间通信使用加密" placement="top">
                                         <el-icon>
                                             <Warning />
                                         </el-icon>
@@ -19,7 +19,7 @@
                             <el-form-item label="密钥" prop="ClientEncodePassword">
                                 <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="state.form.ClientEncodePassword" placeholder="加密密钥32位">
                                     <template #append>
-                                        <el-tooltip class="box-item" effect="dark" content="加密密钥32位，为空则每次加密随机密钥，如果填写，则各客户端都填写" placement="top">
+                                        <el-tooltip class="box-item" effect="dark" content="加密密钥32位，为空则每次加密随机密钥，如果填写，则各节点都填写" placement="top">
                                             <el-icon>
                                                 <Warning />
                                             </el-icon>
@@ -35,7 +35,7 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="登入加密" prop="ServerEncode">
                                 <el-checkbox v-model="state.form.ServerEncode">开启
-                                    <el-tooltip class="box-item" effect="dark" content="客户端与服务端之间通信使用加密" placement="top">
+                                    <el-tooltip class="box-item" effect="dark" content="节点与服务端之间通信使用加密" placement="top">
                                         <el-icon>
                                             <Warning />
                                         </el-icon>
@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { ref, toRefs, reactive } from '@vue/reactivity';
+import { ref, reactive } from '@vue/reactivity';
 import { getSignInInfo, updateConfig } from '../../../apis/signin'
 import { onMounted } from '@vue/runtime-core';
 import plugin from './plugin'

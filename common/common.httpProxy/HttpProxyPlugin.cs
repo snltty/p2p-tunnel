@@ -41,12 +41,7 @@ namespace common.httpProxy
 
         public virtual bool ValidateAccess(ProxyInfo info)
         {
-#if DEBUG
-            return true;
-
-#else
-            return Enable ||  serviceAccessValidator.Validate(info.Connection.ConnectId,Access);
-#endif
+            return Enable || serviceAccessValidator.Validate(info.Connection.ConnectId, Access);
         }
 
         public virtual bool HandleAnswerData(ProxyInfo info)

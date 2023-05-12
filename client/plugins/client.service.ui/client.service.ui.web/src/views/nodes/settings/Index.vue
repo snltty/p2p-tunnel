@@ -3,7 +3,7 @@
         <div class="content h-100 flex-1 flex flex-column">
             <div class="inner flex-1 scrollbar" ref="contentDom">
                 <template v-for="(item,index) in leftMenus" :key="index">
-                    <div class="setting-item">
+                    <div class="setting-item" :class="{animate:state.animate}" :style="`animation-delay:${index*0.1}s`">
                         <el-divider content-position="left" border-style="dotted">{{item.text}}</el-divider>
                         <component :is="item.component.value" :ref="`setting_item_${item.text}`" />
                     </div>
@@ -17,7 +17,7 @@
 </template> 
 
 <script>
-import { getCurrentInstance, computed, watch, reactive, ref, shallowRef } from '@vue/runtime-core'
+import { getCurrentInstance, computed, watch, reactive, ref, shallowRef, onMounted } from '@vue/runtime-core'
 import { useRouter } from 'vue-router'
 import { injectServices, accessService } from '../../../states/services'
 import { ElMessage } from 'element-plus/lib/components'
@@ -70,11 +70,16 @@ export default {
 
         const state = reactive({
             loading: false,
-            currentMenu: 0
+            currentMenu: 0,
+            animate: false
         });
+        onMounted(() => {
+            setTimeout(() => {
+                state.animate = true;
+            }, 1000);
+        })
 
         const contentDom = ref(null);
-
         const getFuns = () => {
             const refs = instance.refs;
             const promises = [];
@@ -133,6 +138,13 @@ export default {
     padding: 2rem;
     border-radius: 4px;
     box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
+    transition: 0.3s;
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    animation: bounceInDown 0.3s;
+    animation-fill-mode: both;
 
     .el-divider {
         margin-top: 0;

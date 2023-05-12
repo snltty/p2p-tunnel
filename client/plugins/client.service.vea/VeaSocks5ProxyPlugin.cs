@@ -99,12 +99,7 @@ namespace client.service.vea
 
         public override bool ValidateAccess(ProxyInfo info)
         {
-#if DEBUG
-
-            return true;
-#else
-            return Enable || serviceAccessValidator.Validate(info.Connection.ConnectId,Access);
-#endif
+            return Enable || serviceAccessValidator.Validate(info.Connection.ConnectId, Access);
         }
 
         private void GetConnection(ProxyInfo info)

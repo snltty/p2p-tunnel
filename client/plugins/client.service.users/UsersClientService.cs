@@ -1,12 +1,9 @@
-﻿using client.messengers.clients;
+﻿using client.messengers.singnin;
 using client.service.ui.api.clientServer;
-using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
 using common.user;
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace client.service.users.server
@@ -17,87 +14,58 @@ namespace client.service.users.server
     public sealed class UsersClientService : IClientService
     {
         private readonly MessengerSender messengerSender;
-        private readonly IClientInfoCaching clientInfoCaching;
-        private readonly IUserStore userStore;
+        private readonly SignInStateInfo signInStateInfo;
+        private readonly IUserMapInfoCaching userMapInfoCaching;
 
-        public UsersClientService(MessengerSender messengerSender, IClientInfoCaching clientInfoCaching, IUserStore userStore)
+        public UsersClientService(MessengerSender messengerSender, SignInStateInfo signInStateInfo, IUserMapInfoCaching userMapInfoCaching)
         {
             this.messengerSender = messengerSender;
-            this.clientInfoCaching = clientInfoCaching;
-            this.userStore = userStore;
+            this.signInStateInfo = signInStateInfo;
+            this.userMapInfoCaching = userMapInfoCaching;
         }
 
-        public string List(ClientServiceParamsInfo arg)
+        public async Task<string> List(ClientServiceParamsInfo arg)
         {
             UserInfoPageModel page = arg.Content.DeJson<UserInfoPageModel>();
-
-            return new UserInfoPageResultModel
+            MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
-                Count = userStore.Count(),
-                Page = page.Page,
-                PageSize = page.PageSize,
-                Data = userStore.Get(page.Page, page.PageSize, page.Sort, page.Account).ToList()
-            }.ToJson();
-        }
-
-        public string Add(ClientServiceParamsInfo arg)
-        {
-            bool res = userStore.Add(arg.Content.DeJson<UserInfo>());
-            return string.Empty;
-        }
-        public string Password(ClientServiceParamsInfo arg)
-        {
-            PasswordModel passwordModel = arg.Content.DeJson<PasswordModel>();
-            bool res = userStore.UpdatePassword(passwordModel.ID, passwordModel.Password);
-            return string.Empty;
-        }
-        public string Remove(ClientServiceParamsInfo arg)
-        {
-            bool res = userStore.Remove(ulong.Parse(arg.Content));
-            return string.Empty;
-        }
-
-        public async Task<bool> SignIn(ClientServiceParamsInfo arg)
-        {
-            ulong toid = ulong.Parse(arg.Content);
-            if (clientInfoCaching.Get(toid, out ClientInfo client))
+                Connection = signInStateInfo.Connection,
+                MessengerId = (ushort)UsersMessengerIds.Page,
+                Payload = page.ToBytes()
+            });
+            if (resp.Code == MessageResponeCodes.OK)
             {
-                var resp = await messengerSender.SendReply(new MessageRequestWrap
+                UserInfoPageResultModel pageResult = resp.Data.GetUTF8String().DeJson<UserInfoPageResultModel>();
+                foreach (UserInfo item in pageResult.Data)
                 {
-                    Connection = client.Connection,
-                    MessengerId = (ushort)UsersMessengerIds.SignIn,
-                    Payload = arg.Content.ToUTF8Bytes(),
-                });
-                if (resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray))
-                {
-                    return true;
+                    if (userMapInfoCaching.Get(item.ID, out UserMapInfo map))
+                    {
+                        item.Access = map.Access;
+                    }
+                    else
+                    {
+                        item.Access = (uint)EnumServiceAccess.None;
+                    }
                 }
+                return pageResult.ToJson();
             }
-            return false;
+
+            return string.Empty;
         }
 
-        public async Task<string> Info(ClientServiceParamsInfo arg)
+        public string Update(ClientServiceParamsInfo arg)
         {
-            ulong toid = ulong.Parse(arg.Content);
-            if (clientInfoCaching.Get(toid, out ClientInfo client))
+            UserMapInfo map = arg.Content.DeJson<UserMapInfo>();
+            if (userMapInfoCaching.Get(map.ID, out UserMapInfo mapInfo))
             {
-                var resp = await messengerSender.SendReply(new MessageRequestWrap
-                {
-                    Connection = client.Connection,
-                    MessengerId = (ushort)UsersMessengerIds.Info
-                });
-                if (resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.FalseArray) == false)
-                {
-                    return resp.Data.GetUTF8String();
-                }
+                mapInfo.Access = map.Access;
             }
-            return new UserInfo().ToJson();
+            else
+            {
+                userMapInfoCaching.Add(map);
+            }
+            return string.Empty;
         }
     }
 
-    public class PasswordModel
-    {
-        public ulong ID { get; set; }
-        public string Password { get; set; }
-    }
 }

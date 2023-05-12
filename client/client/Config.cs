@@ -175,7 +175,6 @@ namespace client
                 | (UseUdp ? EnumClientAccess.UseUdp : EnumClientAccess.None)
                 | (UseTcp ? EnumClientAccess.UseTcp : EnumClientAccess.None)
                 | (UsePunchHole ? EnumClientAccess.UsePunchHole : EnumClientAccess.None)
-                | (UseRelay ? EnumClientAccess.UseRelay : EnumClientAccess.None)
                 | (AutoRelay ? EnumClientAccess.UseAutoRelay : EnumClientAccess.None);
 
         }
@@ -213,10 +212,9 @@ namespace client
         /// </summary>
         UsePunchHole = 4,
         /// <summary>
-        /// 中继节点
+        /// 自动中继
         /// </summary>
-        UseRelay = 8,
-        UseAutoRelay = 16,
+        UseAutoRelay = 8,
         /// <summary>
         /// 全部
         /// </summary>

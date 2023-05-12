@@ -100,11 +100,7 @@ namespace common.socks5
 
         public virtual bool ValidateAccess(ProxyInfo info)
         {
-#if DEBUG
-            return true;
-#else
             return Enable || serviceAccessValidator.Validate(info.Connection.ConnectId,Access);;
-#endif
         }
         public bool HandleAnswerData(ProxyInfo info)
         {

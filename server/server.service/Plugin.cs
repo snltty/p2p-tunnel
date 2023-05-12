@@ -93,7 +93,8 @@ namespace server.service
                     Connection = c.Connection,
                     ConnectionId = c.ConnectionId,
                     Name = c.Name,
-                    Access = c.ClientAccess,
+                    ClientAccess = c.ClientAccess,
+                    UserAccess = c.UserAccess
                 }).ToList();
 
                 if (clients.Any())
@@ -141,6 +142,6 @@ namespace server.service
             };
         }
 
-     
+
     }
 }

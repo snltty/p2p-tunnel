@@ -13,7 +13,7 @@ namespace server.service.validators
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.Level9;
 
-        public uint Access => (uint)server.messengers.EnumServiceAccess.Relay;
+        public uint Access => (uint)EnumServiceAccess.Relay;
 
         public string Name => "relay";
 

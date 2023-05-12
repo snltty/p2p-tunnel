@@ -327,7 +327,7 @@ namespace client.realize.messengers.clients
             {
                 return EnumConnectResult.BreakOff;
             }
-            if ((config.Client.UseUdp & client.UseUdp) == false)
+            if ((config.Client.UseUdp & ((EnumClientAccess.UseUdp & (EnumClientAccess)client.ClientAccess) == EnumClientAccess.UseUdp)) == false)
             {
                 return EnumConnectResult.Fail;
             }
@@ -358,7 +358,7 @@ namespace client.realize.messengers.clients
             {
                 return EnumConnectResult.BreakOff;
             }
-            if ((config.Client.UseTcp & client.UseTcp) == false)
+            if ((config.Client.UseTcp & ((EnumClientAccess.UseTcp & (EnumClientAccess)client.ClientAccess) == EnumClientAccess.UseTcp)) == false)
             {
                 return EnumConnectResult.Fail;
             }
@@ -449,7 +449,7 @@ namespace client.realize.messengers.clients
                     //新上线的或者更新的
                     foreach (ClientsClientInfo item in clients.Clients.Where(c => c.ConnectionId != signInState.ConnectId))
                     {
-                        EnumClientAccess enumClientAccess = (EnumClientAccess)item.Access;
+                        EnumClientAccess enumClientAccess = (EnumClientAccess)item.ClientAccess;
                         bool has = clientInfoCaching.Get(item.ConnectionId, out ClientInfo client);
                         if (has == false)
                         {
@@ -457,17 +457,13 @@ namespace client.realize.messengers.clients
                             client.ConnectionId = item.ConnectionId;
                         }
 
+                        client.ClientAccess = item.ClientAccess;
                         client.Name = item.Name;
-                        client.UseTcp = (enumClientAccess & EnumClientAccess.UseTcp) == EnumClientAccess.UseTcp;
-                        client.UseUdp = (enumClientAccess & EnumClientAccess.UseUdp) == EnumClientAccess.UseUdp;
-                        client.UsePunchHole = (enumClientAccess & EnumClientAccess.UsePunchHole) == EnumClientAccess.UsePunchHole;
-                        client.UseRelay = (enumClientAccess & EnumClientAccess.UseRelay) == EnumClientAccess.UseRelay;
-                        client.UseAutoRelay = (enumClientAccess & EnumClientAccess.UseAutoRelay) == EnumClientAccess.UseAutoRelay;
                         clientInfoCaching.Add(client);
 
                         if (has == false && firstClients.IsDefault && client.Connected == false)
                         {
-                            if (config.Client.UsePunchHole && client.UsePunchHole)
+                            if (config.Client.UsePunchHole && ((EnumClientAccess.UsePunchHole & (EnumClientAccess)client.ClientAccess) == EnumClientAccess.UsePunchHole))
                             {
                                 //主动打洞成功过
                                 if (punchHoleDirectionConfig.Contains(client.Name))
@@ -480,7 +476,7 @@ namespace client.realize.messengers.clients
                                     ConnectReverse(client);
                                 }
                             }
-                            else if (config.Client.AutoRelay && client.UseAutoRelay)
+                            else if (config.Client.AutoRelay && ((EnumClientAccess.UseAutoRelay & (EnumClientAccess)client.ClientAccess) == EnumClientAccess.UseAutoRelay))
                             {
                                 _ = Relay(client, true);
                             }

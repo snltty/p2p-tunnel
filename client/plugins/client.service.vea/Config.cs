@@ -131,11 +131,28 @@ namespace client.service.vea
         {
             try
             {
-                VeaLanIPs = LanIPs.Select(c => c.Split('/')).Where(c => c[0] != IPAddress.Any.ToString()).Select(c => new VeaLanIPAddress
+                VeaLanIPs = LanIPs.Select(c => c.Split(Helper.SeparatorCharSlash)).Where(c => c[0] != IPAddress.Any.ToString()).Select(c =>
                 {
-                    IPAddress = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse(c[0]).GetAddressBytes()),
-                    MaskLength = c.Length > 1 ? byte.Parse(c[1]) : (byte)0
+                    byte maskLength = c.Length > 1 ? byte.Parse(c[1]) : (byte)0;
+                    uint ip = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse(c[0]).GetAddressBytes());
+                    //每填写掩码，自动计算
+                    if (c.Length == 1)
+                    {
+                        maskLength = NetworkHelper.MaskLength(ip);
+                    }
+                    //掩码十进制
+                    uint maskValue = NetworkHelper.MaskValue(maskLength);
+                    return new VeaLanIPAddress
+                    {
+                        MaskValue = maskValue,
+                        NetWork = ip & maskValue,
+                        IPAddress = ip,
+                        MaskLength = maskLength
+                    };
+
                 }).ToArray();
+
+
             }
             catch (Exception ex)
             {

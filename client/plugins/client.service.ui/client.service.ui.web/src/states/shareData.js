@@ -7,9 +7,7 @@ const accesss = files.keys().map(c => files(c).default).filter(c => c.access > 0
         value: value.access
     });
     return all;
-}, [
-    { text: '中继', value: 1 }
-]);
+}, []);
 
 export const shareData = {
     aliveTypes: { 0: '长连接(tcp,udp)', 1: '短链接(web)' },

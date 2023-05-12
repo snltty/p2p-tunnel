@@ -21,7 +21,7 @@
                             <el-form-item label="所在分组" prop="GroupId">
                                 <el-select size="default" v-model="state.form.GroupId" @change="handleGroupIdChange" allow-create clearable filterable default-first-option placeholder="选择或输入分组编号">
                                     <template #prefix>
-                                        <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个客户端之间分组编号一致时相互可见" placement="top">
+                                        <el-tooltip class="box-item" effect="dark" content="设置你的分组编号，两个节点之间分组编号一致时相互可见" placement="top">
                                             <el-icon>
                                                 <Warning />
                                             </el-icon>
@@ -81,7 +81,7 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动登入" prop="AutoReg">
                                 <el-checkbox size="default" v-model="state.form.AutoReg">开启
-                                    <el-tooltip class="box-item" effect="dark" content="开启自动登入，客户端启动后，立即连接服务端" placement="top">
+                                    <el-tooltip class="box-item" effect="dark" content="开启自动登入，节点启动后，立即连接服务端" placement="top">
                                         <el-icon>
                                             <Warning />
                                         </el-icon>
@@ -102,7 +102,7 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动打洞" prop="UsePunchHole">
                                 <el-checkbox v-model="state.form.UsePunchHole">开启
-                                    <el-tooltip class="box-item" effect="dark" content="发现新客户端后是否自动打洞" placement="top">
+                                    <el-tooltip class="box-item" effect="dark" content="发现新节点后是否自动打洞" placement="top">
                                         <el-icon>
                                             <Warning />
                                         </el-icon>
@@ -170,7 +170,7 @@
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="中继节点" prop="UseRelay">
                                 <el-checkbox v-model="state.form.UseRelay">开启
-                                    <el-tooltip class="box-item" effect="dark" content="是否允许本客户端作为中继节点" placement="top">
+                                    <el-tooltip class="box-item" effect="dark" content="是否允许本节点作为中继节点" placement="top">
                                         <el-icon>
                                             <Warning />
                                         </el-icon>
@@ -186,7 +186,7 @@
 </template>
 
 <script>
-import { ref, toRefs, reactive } from '@vue/reactivity';
+import { ref, reactive } from '@vue/reactivity';
 import { getSignInInfo, updateConfig } from '../../../apis/signin'
 import { injectServices, accessService } from '../../../states/services';
 import { shareData } from '../../../states/shareData';

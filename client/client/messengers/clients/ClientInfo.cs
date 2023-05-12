@@ -17,6 +17,11 @@ namespace client.messengers.clients
         /// </summary>
         public bool Connecting { get; private set; }
         /// <summary>
+        /// 连接对象
+        /// </summary>
+        [JsonIgnore]
+        public IConnection Connection { get; set; }
+        /// <summary>
         /// 已连接
         /// </summary>
         public bool Connected { get => Connection != null && Connection.Connected; }
@@ -33,29 +38,15 @@ namespace client.messengers.clients
         /// 连接id
         /// </summary>
         public ulong ConnectionId { get; set; }
-        /// <summary>
-        /// 自动打洞
-        /// </summary>
-        public bool UsePunchHole { get; set; }
-        /// <summary>
-        /// 用udp
-        /// </summary>
-        public bool UseUdp { get; set; }
-        /// <summary>
-        /// 用tco
-        /// </summary>
-        public bool UseTcp { get; set; }
-        /// <summary>
-        /// 中继节点
-        /// </summary>
-        public bool UseRelay { get; set; }
-        public bool UseAutoRelay { get; set; }
 
-        public uint UserAccess { get; set; }
         /// <summary>
-        /// 额外参数
+        /// 对方客户端的一些配置权限
         /// </summary>
-        public Dictionary<string, string> Args { get; set; } = new Dictionary<string, string>();
+        public uint ClientAccess { get; set; }
+        /// <summary>
+        /// 对方客户端在服务器的权限，或者通信功能权限
+        /// </summary>
+        public uint UserAccess { get; set; }
 
         /// <summary>
         /// ping值
@@ -104,12 +95,7 @@ namespace client.messengers.clients
         /// </summary>
         [JsonIgnore]
         public byte TryReverseValue { get; set; }
-        /// <summary>
-        /// 连接对象
-        /// </summary>
-        [JsonIgnore]
-        public IConnection Connection { get; set; }
-
+        
         /// <summary>
         /// 通道服务
         /// </summary>
@@ -164,13 +150,6 @@ namespace client.messengers.clients
             Connecting = val;
         }
 
-        public void UpdateArgs(Dictionary<string, string> source, string key)
-        {
-            if(source.TryGetValue(key,out string value))
-            {
-                Args[key] = value;
-            }
-        }
     }
 
     /// <summary>

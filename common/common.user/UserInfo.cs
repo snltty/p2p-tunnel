@@ -100,6 +100,79 @@ namespace common.user
             index += 2 + span[index];
         }
     }
+
+    public sealed class UserPasswordInfo
+    {
+        public ulong ID { get; set; }
+        public string Password { get; set; }
+
+        public byte[] ToBytes()
+        {
+            int index = 0;
+            var passwordBytes = Password.GetUTF16Bytes();
+            var bytes = new byte[
+                8  //ID
+                + 2 + passwordBytes.Length];
+            var span = bytes.AsSpan();
+
+            ID.ToBytes(bytes);
+            index += 8;
+
+            span[index] = (byte)passwordBytes.Length;
+            index += 1;
+            span[index] = (byte)Password.Length;
+            index += 1;
+            passwordBytes.CopyTo(span.Slice(index));
+
+            return bytes;
+
+        }
+        public void DeBytes(ReadOnlyMemory<byte> data)
+        {
+            var span = data.Span;
+            int index = 0;
+
+            ID = span.Slice(index, 8).ToUInt64();
+            index += 8;
+
+            Password = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+            index += 2 + span[index];
+        }
+    }
+
+    public sealed class UserSignInfo
+    {
+        public ulong ID { get; set; }
+        public ulong ConnectionId { get; set; }
+
+        public byte[] ToBytes()
+        {
+            int index = 0;
+            var bytes = new byte[8 * 2];
+            var span = bytes.AsSpan();
+
+            ID.ToBytes(bytes);
+            index += 8;
+
+            ConnectionId.ToBytes(bytes);
+            index += 8;
+
+            return bytes;
+
+        }
+        public void DeBytes(ReadOnlyMemory<byte> data)
+        {
+            var span = data.Span;
+            int index = 0;
+
+            ID = span.Slice(index, 8).ToUInt64();
+            index += 8;
+
+            ConnectionId = span.Slice(index, 8).ToUInt64();
+            index += 8;
+        }
+    }
+
     public sealed class UserInfoPageResultModel
     {
         public int Page { get; set; }
@@ -127,28 +200,29 @@ namespace common.user
         /// 更新密码
         /// </summary>
         Password = 1003,
+        PasswordSelf = 1004,
         /// <summary>
         /// 删除
         /// </summary>
-        Remove = 1004,
+        Remove = 1005,
         /// <summary>
         /// 信息
         /// </summary>
-        Info = 1005,
+        Info = 1006,
 
         /// <summary>
         /// 获取配置
         /// </summary>
-        GetSetting = 1006,
+        GetSetting = 1007,
         /// <summary>
         /// 设置配置
         /// </summary>
-        Setting = 1007,
+        Setting = 1008,
 
         /// <summary>
-        /// 用于单独登录，每个客户端可能有不通的账号配置，需要单独登录
+        /// 验证登入
         /// </summary>
-        SignIn = 1008,
+        SignIn = 1009,
 
         Max = 1099,
     }

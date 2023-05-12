@@ -443,9 +443,11 @@ html.dark .setting-item {
 }
 
 .route-animate-enter-active {
-    animation: bounceInDown .5s;
+    animation: bounceInDown .3s;
+    animation-fill-mode: both;
 }
 
 .route-animate-leave-active {
     animation: fadeOutDown 0.1s;
+    animation-fill-mode: both;
 }

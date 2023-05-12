@@ -1,11 +1,11 @@
 <template>
-    <el-dialog :title="form.ID > 0?'编辑监听':'新增监听'" top="1vh" destroy-on-close v-model="show" center :close-on-click-modal="false" width="260px">
-        <el-form ref="formDom" :model="form" :rules="rules" label-width="80px">
+    <el-dialog :title="state.form.ID > 0?'编辑监听':'新增监听'" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="260px">
+        <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="80px">
             <el-form-item label="监听端口" prop="Port">
-                <el-input v-model="form.Port" :readonly="form.ID > 0"></el-input>
+                <el-input v-model="state.form.Port" :readonly="state.form.ID > 0"></el-input>
             </el-form-item>
             <el-form-item label="连接类型" prop="AliveType">
-                <el-select v-model="form.AliveType" placeholder="选择类型">
+                <el-select v-model="state.form.AliveType" placeholder="选择类型">
                     <el-option v-for="(item,index) in shareData.aliveTypes" :key="index" :label="item" :value="index">
                     </el-option>
                 </el-select>
@@ -14,18 +14,18 @@
                 http的选啥类型都可以，其它的选长连接
             </el-form-item>
             <el-form-item label="简单说明" prop="Desc">
-                <el-input v-model="form.Desc"></el-input>
+                <el-input v-model="state.form.Desc"></el-input>
             </el-form-item>
         </el-form>
         <template #footer>
             <el-button @click="handleCancel">取 消</el-button>
-            <el-button type="primary" :loading="loading" @click="handleSubmit">确 定</el-button>
+            <el-button type="primary" :loading="state.loading" @click="handleSubmit">确 定</el-button>
         </template>
     </el-dialog>
 </template>
 
 <script>
-import { reactive, ref, toRefs } from '@vue/reactivity';
+import { reactive, ref, } from '@vue/reactivity';
 import { addListen } from '../../../apis/forward'
 import { injectShareData } from '../../../states/shareData'
 import { inject, watch } from '@vue/runtime-core';
@@ -88,7 +88,7 @@ export default {
         }
 
         return {
-            shareData, ...toRefs(state), formDom, handleSubmit, handleCancel
+            shareData, state, formDom, handleSubmit, handleCancel
         }
     }
 }

@@ -12,7 +12,7 @@
                     <el-button size="small" :loading="state.loading" @click="handleClear">移除目标</el-button>
                 </el-dropdown-item>
                 <el-dropdown-item v-else>
-                    <el-button size="small" :loading="state.loading" @click="handleSet" title="将此客户端端设为http代理目标端">设为目标</el-button>
+                    <el-button size="small" :loading="state.loading" @click="handleSet" title="将此节点设为http代理目标节点">设为目标</el-button>
                 </el-dropdown-item>
             </el-dropdown-menu>
         </template>

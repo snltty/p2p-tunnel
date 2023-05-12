@@ -56,10 +56,6 @@ namespace client.realize.messengers.relay
             return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public async Task<bool> AskConnects()
         {
             return await messengerSender.SendOnly(new MessageRequestWrap
@@ -69,11 +65,7 @@ namespace client.realize.messengers.relay
                 Connection = signInStateInfo.Connection
             }).ConfigureAwait(false);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connects"></param>
-        /// <returns></returns>
+
         public async Task<bool> Connects(ConnectsInfo connects)
         {
             return await messengerSender.SendOnly(new MessageRequestWrap
