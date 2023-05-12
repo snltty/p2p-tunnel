@@ -1,8 +1,5 @@
-﻿using common.user;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 
 namespace client.service.users
 {
