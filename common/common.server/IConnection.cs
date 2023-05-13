@@ -92,6 +92,9 @@ namespace common.server
         public Memory<byte> ReceiveData { get; set; }
         #endregion
 
+
+        public ulong SentBytes { get; set; }
+
         /// <summary>
         /// 发送
         /// </summary>
@@ -196,6 +199,7 @@ namespace common.server
                 connectId = value;
             }
         }
+
         /// <summary>
         /// 已连接
         /// </summary>
@@ -351,6 +355,7 @@ namespace common.server
         #endregion
 
 
+        public ulong SentBytes { get; set; }
         /// <summary>
         /// 发送
         /// </summary>
@@ -511,6 +516,7 @@ namespace common.server
                         } while (len < data.Length);
 
                         NetPeer.Send(data, 0, data.Length, DeliveryMethod.ReliableOrdered);
+                        //SentBytes += (ulong)data.Length;
                         NetPeer.Update();
                     }
                     else
@@ -607,6 +613,7 @@ namespace common.server
                 try
                 {
                     await TcpSocket.SendAsync(data, SocketFlags.None);
+                    //SentBytes += (ulong)data.Length;
                     return true;
                 }
                 catch (Exception ex)

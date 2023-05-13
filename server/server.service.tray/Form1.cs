@@ -133,84 +133,73 @@ namespace server.service.tray
         }
 
 
-        private Model GetReg()
+        private Model GetInfo()
         {
             string currentPath = Application.StartupPath;
             string exeName = AppDomain.CurrentDomain.FriendlyName;
-            string value = string.Empty;
-            Microsoft.Win32.RegistryKey Rkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
             string keyName = exeName.Replace(".exe", "");
-
-            try
-            {
-                if (Rkey == null)
-                {
-                    Rkey = Microsoft.Win32.Registry.CurrentUser.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
-                }
-                try
-                {
-                    object val = Rkey.GetValue(keyName);
-                    if (val != null)
-                    {
-                        value = val.ToString();
-                    }
-                }
-                catch (Exception)
-                {
-                }
-            }
-            catch (Exception)
-            {
-            }
             return new Model
             {
                 Key = keyName,
-                Value = value,
-                Path = System.IO.Path.Combine(currentPath, exeName),
-                RegKey = Rkey
-
+                Path = System.IO.Path.Combine(currentPath, exeName)
             };
         }
+        bool isStartUp = false;
         private void StartUp(object sender, EventArgs e)
         {
-            Model model = GetReg();
+            Model model = GetInfo();
             try
             {
-                if (string.IsNullOrEmpty(model.Value))
+                if (isStartUp == false)
                 {
-                    model.RegKey.SetValue(model.Key, "\"" + model.Path + "\"");
+                    Command.Windows("schtasks.exe", new string[] {
+                        "schtasks.exe /create /tn \""+model.Key+"\" /rl highest /sc ONSTART /delay 0000:30 /tr \""+model.Path+"\" /f"
+                    });
                     notifyIcon.BalloonTipText = "已设置自启动";
                     notifyIcon.ShowBalloonTip(1000);
                 }
                 else
                 {
-                    model.RegKey.DeleteValue(model.Key, false);
+                    Command.Windows("schtasks.exe", new string[] {
+                        "schtasks /delete  /TN "+model.Key+" /f"
+                    });
                     notifyIcon.BalloonTipText = "已取消自启动";
                     notifyIcon.ShowBalloonTip(1000);
                 }
-
-                model.RegKey.Flush();
             }
             catch (Exception ex)
             {
                 notifyIcon.BalloonTipText = ex.Message;
                 notifyIcon.ShowBalloonTip(1000);
             }
-            model.RegKey.Close();
             StartUp();
         }
         private void StartUp()
         {
-            Model model = GetReg();
-            if (string.IsNullOrEmpty(model.Value))
+            Model model = GetInfo();
+            string res = Command.Windows("", new string[] {
+                "schtasks.exe /query /fo TABLE|findstr \"" + model.Key + "\""
+            });
+            bool has = false;
+            foreach (string item in res.Split('\n'))
             {
+                if (item.StartsWith(model.Key))
+                {
+                    has = true;
+                    break;
+                }
+            }
+
+            if (has == false)
+            {
+                isStartUp = false;
                 notifyIcon.ContextMenuStrip.Items[1].Image = unright;
             }
             else
             {
                 notifyIcon.ContextMenuStrip.Items[1].Image = right;
+                isStartUp = true;
             }
-            model.RegKey.Close();
         }
 
 

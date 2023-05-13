@@ -39,6 +39,7 @@ namespace common.proxy
                 Connection = info.Connection,
                 Payload = bytes.AsMemory(0, length)
             }, unconnectedMessage: unconnectedMessage);
+            if (info.Connection != null) info.Connection.SentBytes += (byte)bytes.Length;
             info.Return(bytes);
             return res;
         }
@@ -53,6 +54,7 @@ namespace common.proxy
                 Connection = info.Connection,
                 Payload = bytes.AsMemory(0, length)
             }, unconnectedMessage: unconnectedMessage);
+            if (info.Connection != null) info.Connection.SentBytes += (byte)bytes.Length;
             info.Return(bytes);
             return res;
         }

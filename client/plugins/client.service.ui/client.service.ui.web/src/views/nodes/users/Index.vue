@@ -22,8 +22,9 @@
                     </el-table-column>
                     <el-table-column prop="NetFlow" sortable label="流量">
                         <template #default="scope">
-                            <p>已用 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p>
-                            <p>总量 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p>
+                            <span>--</span>
+                            <!-- <p>已用 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p>
+                            <p>总量 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p> -->
                         </template>
                     </el-table-column>
                     <el-table-column prop="SignLimit" sortable label="登入数" width="90">

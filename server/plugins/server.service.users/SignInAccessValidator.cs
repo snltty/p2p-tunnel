@@ -3,6 +3,7 @@ using common.server.model;
 using common.user;
 using server.messengers.singnin;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace server.service.users
@@ -12,11 +13,13 @@ namespace server.service.users
     /// </summary>
     public sealed class SignInAccessValidator : ISignInValidator, IUserInfoCaching, IAccess
     {
+        private readonly ConcurrentDictionary<ulong,UserInfo> connectionUserMap = new ConcurrentDictionary<ulong,UserInfo>();
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IUserStore userStore;
         private readonly common.user.Config config;
         private readonly MessengerSender messengerSender;
         private readonly IClientSignInCaching clientSignInCaching;
+
         private const string useridKey = "UserInfoID";
 
         public SignInAccessValidator(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, IClientSignInCaching clientSignInCaching, common.user.Config config, MessengerSender messengerSender)
@@ -37,7 +40,6 @@ namespace server.service.users
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.None;
         public uint Access => (uint)messengers.EnumServiceAccess.SignIn;
-
         public string Name => "sign in";
 
         public SignInResultInfo.SignInResultInfoCodes Validate(Dictionary<string, string> args, ref uint access)
@@ -89,13 +91,12 @@ namespace server.service.users
             }
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }
-
-
         public void Validated(SignInCacheInfo cache)
         {
             if (GetUser(cache.Args, out UserInfo user))
             {
                 user.Connections.TryAdd(cache.ConnectionId, cache.Connection);
+                connectionUserMap.AddOrUpdate(cache.ConnectionId, user, (a, b) => user);
             }
         }
 

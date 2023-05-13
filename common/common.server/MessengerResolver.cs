@@ -92,7 +92,7 @@ namespace common.server
             Logger.Instance.Debug($"枚举类型ushort，已存在消息列表如下:");
             foreach (var item in ushorts)
             {
-                Logger.Instance.Info($"{item.Item1.PadLeft(32,'-')}  {item.Item2}-{item.Item3}");
+                Logger.Instance.Info($"{item.Item1.PadLeft(32, '-')}  {item.Item2}-{item.Item3}");
             }
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
@@ -141,6 +141,7 @@ namespace common.server
 
                         await _connection.WaitOne();
                         await _connection.Send(receive).ConfigureAwait(false);
+                        _connection.SentBytes += (ulong)receive.Length;
                         _connection.Release();
                     }
                     else
@@ -180,6 +181,7 @@ namespace common.server
                             await _connection.WaitOne();
                             //中继数据不再次序列化，直接在原数据上更新数据然后发送
                             await _connection.Send(receive).ConfigureAwait(false);
+                            _connection.SentBytes += (ulong)receive.Length;
                             _connection.Release();
                         }
                         return;

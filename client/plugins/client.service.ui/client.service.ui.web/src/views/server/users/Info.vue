@@ -6,12 +6,18 @@
                 <div class="countdown-footer">{{state.user.SignLimit == -1 ? '//无限':''}}</div>
             </el-col>
             <el-col :span="6">
-                <el-statistic title="流量" :value="state.user.NetFlow">
+                <el-statistic title="流量" :value="0">
+                    <template #suffix>
+                        <span class="suffix">/B</span>
+                    </template>
+                </el-statistic>
+                <div class="countdown-footer">//无限</div>
+                <!-- <el-statistic title="流量" :value="state.user.NetFlow">
                     <template #suffix>
                         <span class="suffix">/{{state.user.netFlow}}</span>
                     </template>
                 </el-statistic>
-                <div class="countdown-footer">{{state.user.NetFlow == -1 ? '//无限':`${state.user.NetFlow}/${state.user.netFlow}`}}</div>
+                <div class="countdown-footer">{{state.user.NetFlow == -1 ? '//无限':`${state.user.NetFlow}/${state.user.netFlow}`}}</div> -->
             </el-col>
             <el-col :span="6">
                 <el-statistic title="权限" :value="state.user.access">

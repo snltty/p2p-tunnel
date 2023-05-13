@@ -20,8 +20,8 @@ namespace common.user
         /// 限制登录数，-1无限制
         /// </summary>
         public int SignLimit { get; set; } = -1;
-
         private uint signCount = 0;
+        [JsonIgnore]
         public uint SignCount
         {
             get
@@ -40,11 +40,11 @@ namespace common.user
 
         [JsonIgnore]
         public ConcurrentDictionary<ulong, IConnection> Connections { get; set; } = new ConcurrentDictionary<ulong, IConnection>();
-
         /// <summary>
         /// 限制流量 -1 无限制
         /// </summary>
         public long NetFlow { get; set; } = -1;
+        public ulong SentBytes { get; set; }
 
         /// <summary>
         /// 账号添加时间
