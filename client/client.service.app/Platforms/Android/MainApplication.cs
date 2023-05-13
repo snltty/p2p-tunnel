@@ -16,9 +16,8 @@ namespace client.service.app
         public override void OnCreate()
         {
 
-            Intent intent = new Intent(Android.App.Application.Context, typeof(ForegroundService));
-            Android.App.Application.Context.StartService(intent);
-
+           // Intent intent = new Intent(Android.App.Application.Context, typeof(ForegroundService));
+           // Android.App.Application.Context.StartService(intent);
             base.OnCreate();
         }
 

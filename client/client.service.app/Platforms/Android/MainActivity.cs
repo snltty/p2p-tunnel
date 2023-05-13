@@ -1,9 +1,8 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
-using Android.Media;
+using Android.Net;
 using Android.OS;
-using Android.Util;
 using Android.Views;
 using AndroidX.Core.App;
 
@@ -18,22 +17,25 @@ namespace client.service.app
             Window.SetStatusBarColor(Android.Graphics.Color.Transparent);
             Window.SetNavigationBarColor(Android.Graphics.Color.Transparent);
 
-            //KeepManager.GetInstance().RegisterKeep(this);
-            //StartForegroundService(new Intent(this, typeof(ForegroundService)));
-
             base.OnCreate(savedInstanceState);
         }
 
         protected override void OnStart()
         {
             base.OnStart();
-            //StartService(new Intent(this, typeof(ForegroundService)));
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
         }
+    }
+
+
+    //https://www.superweb999.com/article/1971766.html
+    public class Myvpnservice: VpnService
+    {
+
     }
 
 
