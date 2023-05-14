@@ -11,25 +11,23 @@ namespace common.socks5
     public interface ISocks5ProxyPlugin : IProxyPlugin
     {
     }
-
     public class Socks5ProxyPlugin : ISocks5ProxyPlugin
     {
         public virtual byte Id => config.Plugin;
-        public virtual uint Access => 0b00000000_00000000_00000000_00010000;
-        public virtual string Name => "socks5";
+        public virtual bool ConnectEnable => config.ListenEnable;
         public virtual EnumBufferSize BufferSize => config.BufferSize;
         public virtual IPAddress BroadcastBind => IPAddress.Any;
-        public virtual ushort Port => (ushort)config.ListenPort;
-        public virtual bool Enable => config.ListenEnable;
 
+        public virtual uint Access => 0b00000000_00000000_00000000_00010000;
+        public virtual string Name => "socks5";
+        public virtual ushort Port => (ushort)config.ListenPort;
+       
         private readonly Config config;
         private readonly IProxyServer proxyServer;
-        private readonly IServiceAccessValidator serviceAccessValidator;
-        public Socks5ProxyPlugin(Config config, IProxyServer proxyServer, IServiceAccessValidator serviceAccessValidator)
+        public Socks5ProxyPlugin(Config config, IProxyServer proxyServer)
         {
             this.config = config;
             this.proxyServer = proxyServer;
-            this.serviceAccessValidator = serviceAccessValidator;
         }
 
         public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
@@ -98,10 +96,6 @@ namespace common.socks5
             return true;
         }
 
-        public virtual bool ValidateAccess(ProxyInfo info)
-        {
-            return Enable || serviceAccessValidator.Validate(info.Connection.ConnectId,Access);;
-        }
         public bool HandleAnswerData(ProxyInfo info)
         {
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;

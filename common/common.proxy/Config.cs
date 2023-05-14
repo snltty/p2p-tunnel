@@ -15,7 +15,6 @@ namespace common.proxy
     [Table("proxy-appsettings")]
     public sealed class Config
     {
-
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
         NumberSpaceUInt32 ids = new NumberSpaceUInt32(0);

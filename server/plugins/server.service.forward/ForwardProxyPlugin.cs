@@ -13,7 +13,9 @@ namespace server.service.forward
 
     public sealed class ForwardProxyPlugin : common.forward.ForwardProxyPlugin, IForwardProxyPlugin
     {
-        public ForwardProxyPlugin(common.forward.Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IServiceAccessValidator serviceAccessProvider, IClientSignInCaching clientSignInCaching, IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching) : base(config, proxyServer, forwardTargetProvider, serviceAccessProvider)
+        public ForwardProxyPlugin(common.forward.Config config, IProxyServer proxyServer,
+            IForwardTargetProvider forwardTargetProvider, IClientSignInCaching clientSignInCaching,
+            IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching) : base(config, proxyServer, forwardTargetProvider)
         {
             clientSignInCaching.OnOffline += (client) =>
             {

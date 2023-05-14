@@ -1,4 +1,5 @@
 ﻿using common.libs.database;
+using common.server;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,7 +7,7 @@ using System.Linq;
 
 namespace common.user
 {
-    internal class UserStore : IUserStore
+    public sealed class UserStore : IUserStore
     {
         private readonly IConfigDataProvider<UserStoreModel> configDataProvider;
         UserStoreModel storeModel = new UserStoreModel { Users = new Dictionary<ulong, UserInfo>() };
@@ -156,6 +157,10 @@ namespace common.user
         {
             if (storeModel.Users.Remove(id, out UserInfo user))
             {
+                foreach (IConnection item in user.Connections.Values)
+                {
+                    item?.Disponse();
+                }
                 configDataProvider.Save(storeModel);
                 return true;
             }

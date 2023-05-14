@@ -18,23 +18,23 @@ namespace common.forward
     public class ForwardProxyPlugin : IForwardProxyPlugin
     {
         public byte Id => config.Plugin;
-        public virtual uint Access => 0b00000000_00000000_00000000_00001000;
-        public virtual string Name => "port forward";
+        public bool ConnectEnable => config.ConnectEnable;
         public EnumBufferSize BufferSize => config.BufferSize;
         public IPAddress BroadcastBind => IPAddress.Any;
+        public virtual uint Access => 0b00000000_00000000_00000000_00001000;
+        public virtual string Name => "port forward";
+    
         public Action<ushort> OnStarted { get; set; } = (port) => { };
         public Action<ushort> OnStoped { get; set; } = (port) => { };
 
         private readonly Config config;
         private readonly IProxyServer proxyServer;
         private readonly IForwardTargetProvider forwardTargetProvider;
-        private readonly IServiceAccessValidator serviceAccessValidator;
-        public ForwardProxyPlugin(Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider, IServiceAccessValidator serviceAccessValidator)
+        public ForwardProxyPlugin(Config config, IProxyServer proxyServer, IForwardTargetProvider forwardTargetProvider)
         {
             this.config = config;
             this.proxyServer = proxyServer;
             this.forwardTargetProvider = forwardTargetProvider;
-            this.serviceAccessValidator = serviceAccessValidator;
         }
 
         public EnumProxyValidateDataResult ValidateData(ProxyInfo info)
@@ -68,10 +68,6 @@ namespace common.forward
                 return false;
             }
             return true;
-        }
-        public virtual bool ValidateAccess(ProxyInfo info)
-        {
-            return config.ConnectEnable ||  serviceAccessValidator.Validate(info.Connection.ConnectId,Access);
         }
 
         public void Started(ushort port)

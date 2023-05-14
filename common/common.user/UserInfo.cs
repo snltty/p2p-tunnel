@@ -159,7 +159,7 @@ namespace common.user
 
     public sealed class UserSignInfo
     {
-        public ulong ID { get; set; }
+        public ulong UserId { get; set; }
         public ulong ConnectionId { get; set; }
 
         public byte[] ToBytes()
@@ -168,7 +168,7 @@ namespace common.user
             var bytes = new byte[8 * 2];
             var span = bytes.AsSpan();
 
-            ID.ToBytes(bytes);
+            UserId.ToBytes(bytes);
             index += 8;
 
             ConnectionId.ToBytes(bytes.AsMemory(index));
@@ -182,7 +182,7 @@ namespace common.user
             var span = data.Span;
             int index = 0;
 
-            ID = span.Slice(index, 8).ToUInt64();
+            UserId = span.Slice(index, 8).ToUInt64();
             index += 8;
 
             ConnectionId = span.Slice(index, 8).ToUInt64();

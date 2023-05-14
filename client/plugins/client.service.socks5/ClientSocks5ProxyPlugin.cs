@@ -16,8 +16,8 @@ namespace client.service.socks5
         private readonly common.socks5.Config config;
         private readonly SignInStateInfo signInStateInfo;
         private readonly IClientInfoCaching clientInfoCaching;
-        public ClientSocks5ProxyPlugin(common.socks5.Config config, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching, IProxyServer proxyServer, IServiceAccessValidator serviceAccessValidator)
-            : base(config, proxyServer, serviceAccessValidator)
+        public ClientSocks5ProxyPlugin(common.socks5.Config config, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching, IProxyServer proxyServer)
+            : base(config, proxyServer)
         {
             this.config = config;
             this.signInStateInfo = signInStateInfo;

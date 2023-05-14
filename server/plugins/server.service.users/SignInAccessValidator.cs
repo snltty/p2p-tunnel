@@ -13,7 +13,6 @@ namespace server.service.users
     /// </summary>
     public sealed class SignInAccessValidator : ISignInValidator, IUserInfoCaching, IAccess
     {
-        private readonly ConcurrentDictionary<ulong,UserInfo> connectionUserMap = new ConcurrentDictionary<ulong,UserInfo>();
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IUserStore userStore;
         private readonly common.user.Config config;
@@ -96,7 +95,6 @@ namespace server.service.users
             if (GetUser(cache.Args, out UserInfo user))
             {
                 user.Connections.TryAdd(cache.ConnectionId, cache.Connection);
-                connectionUserMap.AddOrUpdate(cache.ConnectionId, user, (a, b) => user);
             }
         }
 

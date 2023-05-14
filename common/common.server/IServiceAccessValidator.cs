@@ -2,7 +2,6 @@
 
 namespace common.server
 {
-
     public interface IAccess
     {
         /// <summary>

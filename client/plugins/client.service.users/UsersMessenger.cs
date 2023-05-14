@@ -46,7 +46,7 @@ namespace client.service.users
                     {
                         Connection = client.Connection,
                         MessengerId = (ushort)UsersMessengerIds.SignIn,
-                        Payload = new UserSignInfo { ConnectionId = signInStateInfo.ConnectId, ID = user.ID }.ToBytes()
+                        Payload = new UserSignInfo { ConnectionId = signInStateInfo.ConnectId, UserId = user.ID }.ToBytes()
                     }).ContinueWith((resp) =>
                     {
                         if (resp.Result.Code == MessageResponeCodes.OK && resp.Result.Data.Span.SequenceEqual(Helper.TrueArray))
@@ -77,12 +77,18 @@ namespace client.service.users
                 MessengerId = (ushort)UsersMessengerIds.SignIn,
                 Payload = userSignInfo.ToBytes()
             });
-            if (resp.Code == common.server.model.MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray))
+            if (resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray))
             {
-                if (userMapInfoCaching.Get(userSignInfo.ID, out UserMapInfo map) && clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
+                if (clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
                 {
+                    if (userMapInfoCaching.Get(userSignInfo.UserId, out UserMapInfo map) == false)
+                    {
+                        map = new UserMapInfo { Access = 0, ID = userSignInfo.UserId, ConnectionId = userSignInfo.ConnectionId };
+                        await userMapInfoCaching.Add(map);
+                    }
                     //更新客户端的权限值
                     client.UserAccess = map.Access;
+                    map.ConnectionId = userSignInfo.ConnectionId;
                     connection.FromConnection.Write(Helper.TrueArray);
                     return;
                 }

@@ -26,23 +26,27 @@ namespace common.proxy
         private readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         private readonly IProxyMessengerSender proxyMessengerSender;
         private readonly Config config;
+        private readonly ProxyPluginValidatorHandler pluginValidatorHandler;
 
         private readonly WheelTimer<object> wheelTimer;
 
-        public ProxyClient(WheelTimer<object> wheelTimer, IProxyMessengerSender proxyMessengerSender, Config config)
+        public ProxyClient(WheelTimer<object> wheelTimer, IProxyMessengerSender proxyMessengerSender, Config config, ProxyPluginValidatorHandler pluginValidatorHandler)
         {
             this.wheelTimer = wheelTimer;
             this.proxyMessengerSender = proxyMessengerSender;
             this.config = config;
+            this.pluginValidatorHandler = pluginValidatorHandler;
             TimeoutUdp();
+
         }
 
         public async Task InputData(ProxyInfo info)
         {
-            bool pluginExists = ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin);
             if (info.Step == EnumProxyStep.Command)
             {
-                if (pluginExists == false || plugin.ValidateAccess(info) == false)
+                if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false) return;
+                info.ProxyPlugin = plugin;
+                if (pluginValidatorHandler.Validate(info) == false)
                 {
                     _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow);
                     return;
@@ -55,24 +59,16 @@ namespace common.proxy
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
-                await ForwardUdp(info, plugin);
+                await ForwardUdp(info);
             }
         }
-
         private async Task Command(ProxyInfo info)
         {
             try
             {
                 if (info.Command == EnumProxyCommand.Connect)
                 {
-                    if (FirewallDenied(info, FirewallProtocolType.TCP))
-                    {
-                        _ = ConnectReponse(info, EnumProxyCommandStatus.AddressNotAllow);
-                    }
-                    else
-                    {
-                        Connect(info);
-                    }
+                    Connect(info);
                 }
                 else if (info.Command == EnumProxyCommand.UdpAssociate)
                 {
@@ -96,7 +92,6 @@ namespace common.proxy
             await Task.CompletedTask;
 
         }
-
         private async Task ForwardTcp(ProxyInfo info)
         {
             ConnectionKey key = new ConnectionKey(info.Connection.ConnectId, info.RequestId);
@@ -123,26 +118,26 @@ namespace common.proxy
                 }
             }
         }
-        private async Task ForwardUdp(ProxyInfo info, IProxyPlugin plugin)
+        private async Task ForwardUdp(ProxyInfo info)
         {
-            IPEndPoint remoteEndpoint = ReadRemoteEndPoint(info);
-            if (remoteEndpoint.Port == 0) return;
-
-            bool isBroadcast = info.TargetAddress.GetIsBroadcastAddress();
-            if (isBroadcast && plugin.BroadcastBind.Equals(IPAddress.Any))
-            {
-                remoteEndpoint.Address = IPAddress.Loopback;
-            }
-
             ConnectionKeyUdp key = new ConnectionKeyUdp(info.Connection.ConnectId, info.SourceEP);
             try
             {
-
                 if (udpConnections.TryGetValue(key, out UdpToken token) == false)
                 {
-                    if (FirewallDenied(info, FirewallProtocolType.UDP))
+                    IPEndPoint remoteEndpoint = ReadRemoteEndPoint(info);
+                    if (remoteEndpoint.Port == 0) return;
+
+                    if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false) return;
+                    info.ProxyPlugin = plugin;
+                    if (pluginValidatorHandler.Validate(info) == false)
                     {
                         return;
+                    }
+                    bool isBroadcast = info.TargetAddress.GetIsBroadcastAddress();
+                    if (isBroadcast && plugin.BroadcastBind.Equals(IPAddress.Any))
+                    {
+                        remoteEndpoint.Address = IPAddress.Loopback;
                     }
 
                     Socket socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
@@ -152,7 +147,7 @@ namespace common.proxy
                         socket.EnableBroadcast = true;
                     }
                     socket.WindowsUdpBug();
-                    token = new UdpToken { Data = info, TargetSocket = socket, Key = key };
+                    token = new UdpToken { Data = info, TargetSocket = socket, Key = key, TargetEP = remoteEndpoint };
                     token.PoolBuffer = new byte[65535];
                     udpConnections.AddOrUpdate(key, token, (a, b) => token);
 
@@ -169,7 +164,7 @@ namespace common.proxy
                     token.Data.Command = info.Command;
                     token.Data.Rsv = info.Rsv;
                     token.Update();
-                    await token.TargetSocket.SendToAsync(info.Data, SocketFlags.None, remoteEndpoint);
+                    await token.TargetSocket.SendToAsync(info.Data, SocketFlags.None, token.TargetEP);
                     token.Data.Data = Helper.EmptyArray;
                 }
             }
@@ -469,66 +464,6 @@ namespace common.proxy
             return new IPEndPoint(ip, info.TargetPort);
         }
 
-        /// <summary>
-        /// 防火墙阻止
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="protocolType"></param>
-        /// <returns></returns>
-        private bool FirewallDenied(ProxyInfo info, FirewallProtocolType protocolType)
-        {
-            //阻止IPV6的内网ip
-            if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
-            {
-                Span<byte> span = info.TargetAddress.Span;
-                return span.SequenceEqual(EndPointExtends.ipv6Loopback.Span)
-                     || span.SequenceEqual(EndPointExtends.ipv6Multicast.Span)
-                     || (span[0] == EndPointExtends.ipv6Local.Span[0] && span[1] == EndPointExtends.ipv6Local.Span[1]);
-            }
-            //IPV4的，防火墙验证
-            else if (info.TargetAddress.Length == 4)
-            {
-                uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
-                FirewallKey key = new FirewallKey(info.TargetPort, protocolType);
-                FirewallKey key0 = new FirewallKey(0, protocolType);
-                //局域网或者组播，验证白名单
-                if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
-                {
-                    if (config.AllowFirewalls.Count > 0)
-                    {
-                        if (config.AllowFirewalls.TryGetValue(key, out FirewallCache cache) || config.AllowFirewalls.TryGetValue(key0, out cache))
-                        {
-                            for (int i = 0; i < cache.IPs.Length; i++)
-                            {
-                                //有一项通过就通过
-                                if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
-                                {
-                                    return false;
-                                }
-                            }
-                        }
-                        return true;
-                    }
-                }
-                //黑名单
-                if (config.DeniedFirewalls.Count > 0)
-                {
-                    if (config.DeniedFirewalls.TryGetValue(key, out FirewallCache cache) || config.DeniedFirewalls.TryGetValue(key0, out cache))
-                    {
-                        for (int i = 0; i < cache.IPs.Length; i++)
-                        {
-                            //有一项匹配就不通过
-                            if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            //其它的直接通过
-            return false;
-        }
     }
 
     public sealed class AsyncServerUserToken
@@ -577,6 +512,7 @@ namespace common.proxy
         public byte[] PoolBuffer { get; set; }
         public long LastTime { get; set; } = DateTimeHelper.GetTimeStamp();
         public EndPoint TempRemoteEP = new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort);
+        public EndPoint TargetEP = new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort);
         public void Clear()
         {
             TargetSocket?.SafeClose();

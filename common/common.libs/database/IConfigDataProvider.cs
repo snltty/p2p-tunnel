@@ -45,17 +45,18 @@ namespace common.libs.database
     {
         public async Task<T> Load()
         {
+            string fileName = GetTableName(typeof(T));
             try
             {
-                string fileName = GetTableName(typeof(T));
                 if (File.Exists(fileName))
                 {
                     string str = (await File.ReadAllTextAsync(fileName).ConfigureAwait(false));
                     return str.DeJson<T>();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.Instance.Error($"{fileName} 配置文件解析有误~ :{ex}");
             }
             return default;
         }

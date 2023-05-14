@@ -1,4 +1,5 @@
-﻿using client.messengers.singnin;
+﻿using client.messengers.clients;
+using client.messengers.singnin;
 using client.service.ui.api.clientServer;
 using common.libs.extends;
 using common.server;
@@ -16,12 +17,14 @@ namespace client.service.users.server
         private readonly MessengerSender messengerSender;
         private readonly SignInStateInfo signInStateInfo;
         private readonly IUserMapInfoCaching userMapInfoCaching;
+        private readonly IClientInfoCaching clientInfoCaching;
 
-        public UsersClientService(MessengerSender messengerSender, SignInStateInfo signInStateInfo, IUserMapInfoCaching userMapInfoCaching)
+        public UsersClientService(MessengerSender messengerSender, SignInStateInfo signInStateInfo, IUserMapInfoCaching userMapInfoCaching, IClientInfoCaching clientInfoCaching)
         {
             this.messengerSender = messengerSender;
             this.signInStateInfo = signInStateInfo;
             this.userMapInfoCaching = userMapInfoCaching;
+            this.clientInfoCaching = clientInfoCaching;
         }
 
         public async Task<string> List(ClientServiceParamsInfo arg)
@@ -59,6 +62,10 @@ namespace client.service.users.server
             if (userMapInfoCaching.Get(map.ID, out UserMapInfo mapInfo))
             {
                 mapInfo.Access = map.Access;
+                if (clientInfoCaching.Get(mapInfo.ConnectionId, out ClientInfo client))
+                {
+                    client.UserAccess = mapInfo.Access;
+                }
             }
             else
             {

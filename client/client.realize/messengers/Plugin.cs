@@ -98,6 +98,10 @@ namespace client.realize.messengers
             services.AddSingleton<IProxyClient, ProxyClient>();
             services.AddSingleton<IProxyServer, ProxyServer>();
             services.AddSingleton<ProxyPluginValidatorHandler>();
+            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IProxyPluginValidator)))
+            {
+                services.AddSingleton(item);
+            }
 
 
             //注入所有的消息处理器

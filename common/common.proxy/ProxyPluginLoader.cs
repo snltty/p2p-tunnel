@@ -1,10 +1,11 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server;
 using common.server.model;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -14,9 +15,9 @@ namespace common.proxy
     public interface IProxyPlugin : IAccess
     {
         public byte Id { get; }
+        public bool ConnectEnable { get; }
         public EnumBufferSize BufferSize { get; }
         public IPAddress BroadcastBind { get; }
-
 
         /// <summary>
         /// 验证数据完整性
@@ -33,13 +34,6 @@ namespace common.proxy
         public bool HandleRequestData(ProxyInfo info);
 
         /// <summary>
-        /// 验证权限，可以在这里阻止访问
-        /// </summary>
-        /// <param name="info"></param>
-        /// <returns>是否通过验证</returns>
-        public bool ValidateAccess(ProxyInfo info);
-
-        /// <summary>
         /// 回复数据预处理
         /// </summary>
         /// <param name="info"></param>
@@ -50,10 +44,7 @@ namespace common.proxy
         public void Started(ushort port) { }
         public void Stoped(ushort port) { }
     }
-    public interface IProxyPluginValidator
-    {
-        bool Validate(ProxyInfo info);
-    }
+
 
     public static class ProxyPluginLoader
     {
@@ -78,6 +69,95 @@ namespace common.proxy
             return plugins.TryGetValue(id, out plugin);
         }
 
+    }
+
+
+    public interface IProxyPluginValidator
+    {
+        bool Validate(ProxyInfo info);
+    }
+    public class ProxyPluginValidator : IProxyPluginValidator
+    {
+        private readonly IServiceAccessValidator serviceAccessValidator;
+        private readonly Config config;
+
+        public ProxyPluginValidator(IServiceAccessValidator serviceAccessValidator, Config config)
+        {
+            this.serviceAccessValidator = serviceAccessValidator;
+            this.config = config;
+        }
+        public bool Validate(ProxyInfo info)
+        {
+            return
+                (
+                info.ProxyPlugin.ConnectEnable
+                || serviceAccessValidator.Validate(info.Connection.ConnectId, info.ProxyPlugin.Access)
+                )
+                && FirewallDenied(info) == false;
+        }
+
+        /// <summary>
+        /// 防火墙阻止
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="protocolType"></param>
+        /// <returns></returns>
+        private bool FirewallDenied(ProxyInfo info)
+        {
+            FirewallProtocolType protocolType = info.Step == EnumProxyStep.Command && info.Command == EnumProxyCommand.Connect ? FirewallProtocolType.TCP : FirewallProtocolType.UDP;
+
+            //阻止IPV6的内网ip
+            if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
+            {
+                Span<byte> span = info.TargetAddress.Span;
+                return span.SequenceEqual(EndPointExtends.ipv6Loopback.Span)
+                     || span.SequenceEqual(EndPointExtends.ipv6Multicast.Span)
+                     || (span[0] == EndPointExtends.ipv6Local.Span[0] && span[1] == EndPointExtends.ipv6Local.Span[1]);
+            }
+            //IPV4的，防火墙验证
+            else if (info.TargetAddress.Length == 4)
+            {
+                uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
+                FirewallKey key = new FirewallKey(info.TargetPort, protocolType);
+                FirewallKey key0 = new FirewallKey(0, protocolType);
+                //局域网或者组播，验证白名单
+                if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
+                {
+                    if (config.AllowFirewalls.Count > 0)
+                    {
+                        if (config.AllowFirewalls.TryGetValue(key, out FirewallCache cache) || config.AllowFirewalls.TryGetValue(key0, out cache))
+                        {
+                            for (int i = 0; i < cache.IPs.Length; i++)
+                            {
+                                //有一项通过就通过
+                                if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                        return true;
+                    }
+                }
+                //黑名单
+                if (config.DeniedFirewalls.Count > 0)
+                {
+                    if (config.DeniedFirewalls.TryGetValue(key, out FirewallCache cache) || config.DeniedFirewalls.TryGetValue(key0, out cache))
+                    {
+                        for (int i = 0; i < cache.IPs.Length; i++)
+                        {
+                            //有一项匹配就不通过
+                            if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            //其它的直接通过
+            return false;
+        }
     }
 
     public sealed class ProxyPluginValidatorHandler
@@ -121,8 +201,6 @@ namespace common.proxy
             return true;
         }
     }
-
-
     sealed class Wrap<T>
     {
         public T Value { get; set; }

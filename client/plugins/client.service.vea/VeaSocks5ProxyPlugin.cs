@@ -16,27 +16,26 @@ namespace client.service.vea
     public class VeaSocks5ProxyPlugin : Socks5ProxyPlugin, IVeaSocks5ProxyPlugin
     {
         public override byte Id => config.Plugin;
-        public override uint Access => 0b00000000_00000000_00000000_01000000;
-        public override string Name => "vea";
+        public override bool ConnectEnable => config.ConnectEnable;
         public override EnumBufferSize BufferSize => config.BufferSize;
         public override IPAddress BroadcastBind => config.BroadcastBind;
+
+        public override uint Access => 0b00000000_00000000_00000000_01000000;
+        public override string Name => "vea";
+
         public override ushort Port => (ushort)config.ListenPort;
-        public override bool Enable => config.ConnectEnable;
 
         private readonly Config config;
         private readonly IProxyServer proxyServer;
         private readonly VeaTransfer veaTransfer;
         private readonly IProxyMessengerSender proxyMessengerSender;
-        private readonly IServiceAccessValidator serviceAccessValidator;
         public VeaSocks5ProxyPlugin(Config config, IProxyServer proxyServer
-            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender, IServiceAccessValidator serviceAccessValidator) :
-            base(null, proxyServer, serviceAccessValidator)
+            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender) : base(null, proxyServer)
         {
             this.config = config;
             this.proxyServer = proxyServer;
             this.veaTransfer = veaTransfer;
             this.proxyMessengerSender = proxyMessengerSender;
-            this.serviceAccessValidator = serviceAccessValidator;
         }
 
         public override bool HandleRequestData(ProxyInfo info)
@@ -96,11 +95,6 @@ namespace client.service.vea
             }
 
             return true;
-        }
-
-        public override bool ValidateAccess(ProxyInfo info)
-        {
-            return Enable || serviceAccessValidator.Validate(info.Connection.ConnectId, Access);
         }
 
         private void GetConnection(ProxyInfo info)

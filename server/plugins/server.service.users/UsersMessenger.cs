@@ -2,6 +2,7 @@
 using common.libs.extends;
 using common.server;
 using common.user;
+using server.messengers.singnin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +20,15 @@ namespace server.service.users
         private readonly IUserStore userStore;
         private readonly Config config;
         private readonly IUserInfoCaching userInfoCaching;
+        private readonly IClientSignInCaching clientSignInCaching;
 
-        public UsersMessenger(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, Config config, IUserInfoCaching userInfoCaching)
+        public UsersMessenger(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, Config config, IUserInfoCaching userInfoCaching, IClientSignInCaching clientSignInCaching)
         {
             this.serviceAccessValidator = serviceAccessValidator;
             this.userStore = userStore;
             this.config = config;
             this.userInfoCaching = userInfoCaching;
+            this.clientSignInCaching = clientSignInCaching;
         }
 
         [MessengerId((ushort)UsersMessengerIds.Page)]
@@ -63,7 +66,18 @@ namespace server.service.users
                 return;
             }
 
-            bool res = userStore.Add(connection.ReceiveRequestWrap.Payload.GetUTF8String().DeJson<UserInfo>());
+            UserInfo user = connection.ReceiveRequestWrap.Payload.GetUTF8String().DeJson<UserInfo>();
+            bool res = userStore.Add(user);
+            if (userStore.Get(user.ID, out UserInfo _user))
+            {
+                foreach (ulong connectionid in _user.Connections.Keys)
+                {
+                    if (clientSignInCaching.Get(connectionid, out SignInCacheInfo client))
+                    {
+                        client.UserAccess = user.Access;
+                    }
+                }
+            }
 
             connection.Write(res ? Helper.TrueArray : Helper.FalseArray);
         }
@@ -137,7 +151,7 @@ namespace server.service.users
 
             UserSignInfo userSignInfo = new UserSignInfo();
             userSignInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
-            if (userStore.Get(userSignInfo.ID, out UserInfo user))
+            if (userStore.Get(userSignInfo.UserId, out UserInfo user))
             {
                 if (user.Connections.TryGetValue(userSignInfo.ConnectionId, out IConnection _connection) && _connection != null && _connection.Connected)
                 {

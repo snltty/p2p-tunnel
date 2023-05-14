@@ -56,6 +56,7 @@ namespace client.service.users
     {
         public ulong ID { get; set; }
         public uint Access { get; set; }
+        public ulong  ConnectionId { get; set; }
     }
 
 }

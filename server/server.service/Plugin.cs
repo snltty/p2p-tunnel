@@ -48,7 +48,11 @@ namespace server.service
             services.AddSingleton<IProxyClient, ProxyClient>();
             services.AddSingleton<IProxyServer, ProxyServer>();
             services.AddSingleton<ProxyPluginValidatorHandler>();
-            
+            foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IProxyPluginValidator)))
+            {
+                services.AddSingleton(item);
+            }
+
 
             foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)))
             {
