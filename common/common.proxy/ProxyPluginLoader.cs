@@ -1,9 +1,13 @@
 ﻿using common.libs;
 using common.server;
 using common.server.model;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Reflection;
 
 namespace common.proxy
 {
@@ -46,6 +50,10 @@ namespace common.proxy
         public void Started(ushort port) { }
         public void Stoped(ushort port) { }
     }
+    public interface IProxyPluginValidator
+    {
+        bool Validate(ProxyInfo info);
+    }
 
     public static class ProxyPluginLoader
     {
@@ -70,5 +78,54 @@ namespace common.proxy
             return plugins.TryGetValue(id, out plugin);
         }
 
+    }
+
+    public sealed class ProxyPluginValidatorHandler
+    {
+        Wrap<IProxyPluginValidator> first;
+        Wrap<IProxyPluginValidator> last;
+
+        private readonly ServiceProvider serviceProvider;
+        public ProxyPluginValidatorHandler(ServiceProvider serviceProvider)
+        {
+            this.serviceProvider = serviceProvider;
+        }
+
+        public void LoadValidator(Assembly[] assemblys)
+        {
+            foreach (IProxyPluginValidator validator in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IProxyPluginValidator)).Distinct().Select(c => (IProxyPluginValidator)serviceProvider.GetService(c)))
+            {
+                if (first == null)
+                {
+                    first = new Wrap<IProxyPluginValidator> { Value = validator };
+                    last = first;
+                }
+                else
+                {
+                    last.Next = new Wrap<IProxyPluginValidator> { Value = validator };
+                    last = last.Next;
+                }
+            }
+        }
+        public bool Validate(ProxyInfo info)
+        {
+            Wrap<IProxyPluginValidator> current = first;
+            while (current != null)
+            {
+                if (current.Value.Validate(info) == false)
+                {
+                    return false;
+                }
+                current = current.Next;
+            }
+            return true;
+        }
+    }
+
+
+    sealed class Wrap<T>
+    {
+        public T Value { get; set; }
+        public Wrap<T> Next { get; set; }
     }
 }

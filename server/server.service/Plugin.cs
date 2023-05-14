@@ -47,6 +47,8 @@ namespace server.service
             services.AddSingleton<IProxyMessengerSender, ProxyMessengerSender>();
             services.AddSingleton<IProxyClient, ProxyClient>();
             services.AddSingleton<IProxyServer, ProxyServer>();
+            services.AddSingleton<ProxyPluginValidatorHandler>();
+            
 
             foreach (Type item in ReflectionHelper.GetInterfaceSchieves(assemblys, typeof(IMessenger)))
             {
@@ -76,6 +78,9 @@ namespace server.service
 
             ISignInValidatorHandler signInMiddlewareHandler = services.GetService<ISignInValidatorHandler>();
             signInMiddlewareHandler.LoadValidator(assemblys);
+
+            ProxyPluginValidatorHandler proxyPluginValidatorHandler = services.GetService<ProxyPluginValidatorHandler>();
+            proxyPluginValidatorHandler.LoadValidator(assemblys);
 
             Loop(services);
             Udp((UdpServer)udpServer, messengerResolver);

@@ -36,6 +36,9 @@ namespace client.realize.messengers
             messengerResolver.LoadMessenger(assemblys);
             //加载所有的打洞消息处理器
             services.GetService<PunchHoleMessengerSender>().LoadPlugins(assemblys);
+
+            ProxyPluginValidatorHandler proxyPluginValidatorHandler = services.GetService<ProxyPluginValidatorHandler>();
+            proxyPluginValidatorHandler.LoadValidator(assemblys);
         }
 
         public void LoadBefore(ServiceCollection services, Assembly[] assemblys)
@@ -94,6 +97,7 @@ namespace client.realize.messengers
             services.AddSingleton<IProxyMessengerSender, ProxyMessengerSender>();
             services.AddSingleton<IProxyClient, ProxyClient>();
             services.AddSingleton<IProxyServer, ProxyServer>();
+            services.AddSingleton<ProxyPluginValidatorHandler>();
 
 
             //注入所有的消息处理器

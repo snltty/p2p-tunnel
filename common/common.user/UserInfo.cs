@@ -21,12 +21,11 @@ namespace common.user
         /// </summary>
         public int SignLimit { get; set; } = -1;
         private uint signCount = 0;
-        [JsonIgnore]
         public uint SignCount
         {
             get
             {
-                if (signCount == 0)
+                if (signCount < Connections.Count)
                 {
                     signCount = (uint)Connections.Count;
                 }
@@ -172,7 +171,7 @@ namespace common.user
             ID.ToBytes(bytes);
             index += 8;
 
-            ConnectionId.ToBytes(bytes);
+            ConnectionId.ToBytes(bytes.AsMemory(index));
             index += 8;
 
             return bytes;

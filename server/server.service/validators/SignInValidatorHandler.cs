@@ -90,7 +90,7 @@ namespace server.service.validators
             }
         }
 
-        class Wrap<T>
+        sealed class Wrap<T>
         {
             public T Value { get; set; }
             public Wrap<T> Next { get; set; }
