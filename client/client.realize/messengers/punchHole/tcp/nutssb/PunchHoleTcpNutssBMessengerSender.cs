@@ -241,7 +241,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     return null;
                 });
 
-                foreach (Socket item in sockets.Where(c => c != null))
+                foreach (Socket item in sockets.Where(c => c != null && c.Connected == false))
                 {
                     item.SafeClose();
                 }

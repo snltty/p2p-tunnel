@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
+using System.Text.Json.Serialization;
 
 namespace common.server.model
 {
@@ -45,6 +46,9 @@ namespace common.server.model
         /// 客户端自定义的权限列表
         /// </summary>
         public uint ClientAccess { get; set; }
+
+        [JsonIgnore]
+        public IConnection Connection { get; set; }
 
         public byte[] ToBytes()
         {

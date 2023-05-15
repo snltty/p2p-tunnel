@@ -120,29 +120,11 @@ namespace common.proxy
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
                 FirewallKey key = new FirewallKey(info.TargetPort, protocolType);
                 FirewallKey key0 = new FirewallKey(0, protocolType);
-                //局域网或者组播，验证白名单
-                if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
-                {
-                    if (config.AllowFirewalls.Count > 0)
-                    {
-                        if (config.AllowFirewalls.TryGetValue(key, out FirewallCache cache) || config.AllowFirewalls.TryGetValue(key0, out cache))
-                        {
-                            for (int i = 0; i < cache.IPs.Length; i++)
-                            {
-                                //有一项通过就通过
-                                if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
-                                {
-                                    return false;
-                                }
-                            }
-                        }
-                        return true;
-                    }
-                }
+
                 //黑名单
                 if (config.DeniedFirewalls.Count > 0)
                 {
-                    if (config.DeniedFirewalls.TryGetValue(key, out FirewallCache cache) || config.DeniedFirewalls.TryGetValue(key0, out cache))
+                    if (config.DeniedFirewalls.TryGetValue(key0, out FirewallCache cache) || config.DeniedFirewalls.TryGetValue(key, out cache))
                     {
                         for (int i = 0; i < cache.IPs.Length; i++)
                         {
@@ -154,6 +136,24 @@ namespace common.proxy
                         }
                     }
                 }
+                //局域网或者组播，验证白名单
+                if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
+                {
+                    if (config.AllowFirewalls.Count == 0) return true;
+                    if (config.AllowFirewalls.TryGetValue(key0, out FirewallCache cache) || config.AllowFirewalls.TryGetValue(key, out cache))
+                    {
+                        for (int i = 0; i < cache.IPs.Length; i++)
+                        {
+                            //有一项通过就通过
+                            if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+
             }
             //其它的直接通过
             return false;

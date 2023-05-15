@@ -114,7 +114,7 @@ namespace common.libs
             }
             return result;
         }
-     
+
         public static bool Ping(IPAddress address, int timeout = 100)
         {
             try
@@ -248,6 +248,8 @@ namespace common.libs
         }
         public static uint MaskValue(byte maskLength)
         {
+            //最多<<31 所以0需要单独计算
+            if (maskLength < 1) return 0;
             return 0xffffffff << (32 - maskLength);
         }
 

@@ -1,4 +1,6 @@
-﻿using common.server;
+﻿using common.libs;
+using common.libs.extends;
+using common.server;
 using System;
 using System.Threading.Tasks;
 
@@ -9,10 +11,15 @@ namespace common.proxy
     {
         private readonly IProxyClient proxyClient;
         private readonly IProxyServer proxyServer;
-        public ProxyMessenger(IProxyClient proxyClient, IProxyServer proxyServer)
+        private readonly IServiceAccessValidator serviceAccessValidator;
+        private readonly Config config;
+
+        public ProxyMessenger(IProxyClient proxyClient, IProxyServer proxyServer, IServiceAccessValidator serviceAccessValidator, Config config)
         {
             this.proxyClient = proxyClient;
             this.proxyServer = proxyServer;
+            this.serviceAccessValidator = serviceAccessValidator;
+            this.config = config;
         }
 
         [MessengerId((ushort)ProxyMessengerIds.Request)]
@@ -29,6 +36,49 @@ namespace common.proxy
         {
             ProxyInfo info = ProxyInfo.Debytes(connection.ReceiveRequestWrap.Payload);
             await proxyServer.InputData(info);
+        }
+
+
+        [MessengerId((ushort)ProxyMessengerIds.GetFirewall)]
+        public void GetFirewall(IConnection connection)
+        {
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)EnumServiceAccess.Setting))
+            {
+                connection.FromConnection.Write(config.ToJson().ToUTF8Bytes());
+            }
+            else
+            {
+                connection.FromConnection.Write(new Config().ToJson().ToUTF8Bytes());
+            }
+        }
+
+        [MessengerId((ushort)ProxyMessengerIds.AddFirewall)]
+        public async Task AddFirewall(IConnection connection)
+        {
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)EnumServiceAccess.Setting))
+            {
+                FirewallItem item = connection.ReceiveRequestWrap.Payload.GetUTF8String().DeJson<FirewallItem>();
+                await config.AddFirewall(item);
+                connection.FromConnection.Write(Helper.TrueArray);
+            }
+            else
+            {
+                connection.FromConnection.Write(Helper.FalseArray);
+            }
+        }
+
+        [MessengerId((ushort)ProxyMessengerIds.RemoveFirewall)]
+        public async Task RemoveFirewall(IConnection connection)
+        {
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)EnumServiceAccess.Setting))
+            {
+                await config.RemoveFirewall(connection.ReceiveRequestWrap.Payload.ToUInt32());
+                connection.FromConnection.Write(Helper.TrueArray);
+            }
+            else
+            {
+                connection.FromConnection.Write(Helper.FalseArray);
+            }
         }
     }
 }

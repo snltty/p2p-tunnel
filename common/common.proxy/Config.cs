@@ -121,7 +121,7 @@ namespace common.proxy
             {
                 byte maskLength = c.Length > 1 ? byte.Parse(c[1]) : (byte)0;
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse(c[0]).GetAddressBytes());
-                //每填写掩码，自动计算
+                //没填写掩码，自动计算
                 if (c.Length == 1)
                 {
                     maskLength = NetworkHelper.MaskLength(ip);

@@ -12,6 +12,7 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
+            Console.WriteLine(Convert.ToString(0xffffffff << 31 << 1,2));
             //var summary = BenchmarkRunner.Run<Test>();
         }
 

@@ -2,6 +2,7 @@
 using common.server;
 using System;
 using System.Buffers.Binary;
+using System.Threading.Tasks;
 
 namespace client.service.vea
 {
@@ -27,7 +28,10 @@ namespace client.service.vea
         [MessengerId((ushort)VeaSocks5MessengerIds.Ip)]
         public void IP(IConnection connection)
         {
-            veaTransfer.OnNotify(connection);
+            Task.Run(() =>
+            {
+                veaTransfer.OnNotify(connection);
+            });
             connection.Write(new IPAddressInfo { IP = BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()), LanIPs = config.VeaLanIPs }.ToBytes());
         }
 
@@ -39,8 +43,10 @@ namespace client.service.vea
         [MessengerId((ushort)VeaSocks5MessengerIds.Reset)]
         public void Reset(IConnection connection)
         {
-            veaTransfer.Run();
-
+            Task.Run(() =>
+            {
+                veaTransfer.Run();
+            });
             connection.Write(Helper.TrueArray);
         }
     }

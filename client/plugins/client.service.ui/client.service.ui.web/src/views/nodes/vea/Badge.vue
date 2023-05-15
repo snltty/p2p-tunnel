@@ -66,7 +66,7 @@ export default {
             reset(id).then((res) => {
                 state.loading = false;
                 if (res) {
-                    ElMessage.success('成功');
+                    ElMessage.success('已令其重装网卡，安装过程可能需要一定的时间');
                 } else {
                     ElMessage.error('失败');
                 }

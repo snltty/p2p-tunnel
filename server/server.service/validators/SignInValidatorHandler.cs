@@ -5,7 +5,6 @@ using common.libs;
 using System.Reflection;
 using System.Linq;
 using System;
-using common.proxy;
 
 namespace server.service.validators
 {
@@ -52,9 +51,23 @@ namespace server.service.validators
             //重名
             if (clientSignInCache.Get(model.ConnectionId, out SignInCacheInfo client))
             {
-                clientSignInCache.Remove(client.ConnectionId);
+                try
+                {
+                    //同个设备
+                    if (model.Connection.Address.Address.Equals(client.Connection.Address.Address) && model.LocalIps[1].Equals(client.LocalIps[1]))
+                    {
+                        clientSignInCache.Remove(client.ConnectionId);
+                    }
+                    else
+                    {
+                        model.ConnectionId = 0;
+                    }
+                }
+                catch (Exception)
+                {
+                    clientSignInCache.Remove(client.ConnectionId);
+                }
             }
-
 
             //是管理员分组的
             if (string.IsNullOrWhiteSpace(config.AdminGroup) == false && model.GroupId == config.AdminGroup)

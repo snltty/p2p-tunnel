@@ -315,6 +315,9 @@ namespace common.proxy
         Min = 900,
         Request = 901,
         Response = 902,
+        GetFirewall = 903,
+        AddFirewall = 904,
+        RemoveFirewall = 905,
         Max = 999,
     }
 }

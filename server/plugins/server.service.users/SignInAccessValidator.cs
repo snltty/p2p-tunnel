@@ -45,16 +45,8 @@ namespace server.service.users
         {
             if (GetUser(args, out UserInfo user))
             {
-                access |= user.Access;
-                args[useridKey] = user.ID.ToString();
-            }
-            if (config.Enable)
-            {
-                if (user == null)
-                    return SignInResultInfo.SignInResultInfoCodes.NOT_FOUND;
-
                 //该账号不允许登入
-                if (serviceAccessValidator.Validate(access, Access) == false)
+                if (serviceAccessValidator.Validate(user.Access, Access) == false)
                 {
                     return SignInResultInfo.SignInResultInfoCodes.ENABLE;
                 }
@@ -86,7 +78,13 @@ namespace server.service.users
                         }
                     }
                 }
+                access |= user.Access;
+                args[useridKey] = user.ID.ToString();
+            }
 
+            if (config.Enable && user == null)
+            {
+                return SignInResultInfo.SignInResultInfoCodes.NOT_FOUND;
             }
             return SignInResultInfo.SignInResultInfoCodes.OK;
         }

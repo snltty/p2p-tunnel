@@ -158,7 +158,7 @@ namespace client.realize.messengers.singnin
                     }
                     catch (TaskCanceledException tex)
                     {
-                        Logger.Instance.DebugError(tex + "");
+                        //Logger.Instance.DebugError(tex + "");
                         success.ErrorMsg = tex.Message;
                         signInState.LocalInfo.IsConnecting = false;
                         break;

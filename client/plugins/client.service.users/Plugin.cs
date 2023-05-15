@@ -12,15 +12,7 @@ namespace client.service.users
         {
             var config = services.GetService<common.user.Config>();
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Info("账号模块已加载");
-            if (config.Enable)
-            {
-                Logger.Instance.Debug($"已启用账号验证");
-            }
-            else
-            {
-                Logger.Instance.Info($"未启用账号验证");
-            }
+            Logger.Instance.Info("账号权限模块已加载");
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
         }
 

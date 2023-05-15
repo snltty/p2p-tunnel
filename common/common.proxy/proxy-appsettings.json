@@ -1,18 +1,20 @@
 ﻿{
   "Firewall": [
+    /*
     {
       "ID": 1,
       "Protocol": 0,
-      "Port": "1/65535",
+      "Port": "0",
       "IP": [ "0.0.0.0/0" ],
-      "Remark": "TCP全部"
+      "Remark": "TCP"
     },
     {
       "ID": 2,
       "Protocol": 1,
-      "Port": "1/65535",
+      "Port": "0",
       "IP": [ "0.0.0.0/0" ],
-      "Remark": "UDP全部"
+      "Remark": "UDP"
     }
+  */
   ]
 }

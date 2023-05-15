@@ -32,6 +32,7 @@ namespace server.service.messengers.singnin
         {
             SignInParamsInfo model = new SignInParamsInfo();
             model.DeBytes(connection.ReceiveRequestWrap.Payload);
+            model.Connection = connection;
 
             uint access = (uint)common.server.EnumServiceAccess.None;
             //登入验证
