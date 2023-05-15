@@ -12,7 +12,11 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(Convert.ToString(0xffffffff << 31 << 1,2));
+            for (int i = 0; i < 100; i++)
+            {
+                string str = BitConverter.ToUInt64(Guid.NewGuid().ToByteArray()).ToString();
+                Console.WriteLine(str.Substring(str.Length-15,15));
+            }
             //var summary = BenchmarkRunner.Run<Test>();
         }
 

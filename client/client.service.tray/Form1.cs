@@ -39,6 +39,7 @@ namespace client.service.tray
             lnk = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Startup), AppDomain.CurrentDomain.FriendlyName) + ".lnk";
             InitializeComponent();
             InitialTray();
+           
         }
 
 
@@ -61,6 +62,7 @@ namespace client.service.tray
             notifyIcon.ContextMenuStrip.Items.Add("退出", null, Close);
             notifyIcon.DoubleClick += ContextMenuStrip_MouseDoubleClick;
 
+            WriteBat();
             Service(null, null);
             StartUp();
         }
@@ -269,6 +271,30 @@ namespace client.service.tray
             shortcutType.InvokeMember("Arguments", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { args });
             shortcutType.InvokeMember("WorkingDirectory", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { AppDomain.CurrentDomain.SetupInformation.ApplicationBase });
             shortcutType.InvokeMember("Save", BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod, null, shortcut, null);
+        }
+        private void WriteBat()
+        {
+            string content = @"@echo off
+cd  ""%CD%""
+for /f ""tokens=4,5 delims=. "" %%a in ('ver') do if %%a%%b geq 60 goto new
+
+:old
+cmd /c netsh firewall delete allowedprogram program=""%CD%\client.service.exe"" profile=ALL
+cmd /c netsh firewall add allowedprogram program=""%CD%\client.service.exe"" name=""client.service"" ENABLE
+cmd /c netsh firewall add allowedprogram program=""%CD%\client.service.exe"" name=""client.service"" ENABLE profile=ALL
+goto end
+:new
+cmd /c netsh advfirewall firewall delete rule name=""client.service""
+cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action=allow program=""%CD%\client.service.exe"" protocol=tcp enable=yes profile=public
+cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action=allow program=""%CD%\client.service.exe"" protocol=udp enable=yes profile=public
+cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action=allow program=""%CD%\client.service.exe"" protocol=tcp enable=yes profile=domain
+cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action=allow program=""%CD%\client.service.exe"" protocol=udp enable=yes profile=domain
+cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action=allow program=""%CD%\client.service.exe"" protocol=tcp enable=yes profile=private
+cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action=allow program=""%CD%\client.service.exe"" protocol=udp enable=yes profile=private
+:end";
+            System.IO.File.WriteAllText("firewall.bat",content);
+
+            Command.Execute("firewall.bat",string.Empty,new string[0]);
         }
 
         class Model
