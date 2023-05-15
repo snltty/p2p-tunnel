@@ -25,7 +25,7 @@ namespace common.libs
         /// 斜杠
         /// </summary>
         public static char SeparatorCharSlash = '/';
-        public static string Version = "2.1.0.0-beta";
+        public static string Version = "2.1.0.0-beta2";
 
         public static string GetStackTraceModelName()
         {

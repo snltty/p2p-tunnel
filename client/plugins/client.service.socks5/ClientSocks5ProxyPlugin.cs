@@ -1,7 +1,6 @@
 ﻿using client.messengers.clients;
 using client.messengers.singnin;
 using common.proxy;
-using common.server;
 using common.socks5;
 
 namespace client.service.socks5

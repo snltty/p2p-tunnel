@@ -53,12 +53,16 @@ namespace common.libs.database
                     string str = (await File.ReadAllTextAsync(fileName).ConfigureAwait(false));
                     return str.DeJson<T>();
                 }
+                else
+                {
+                    Logger.Instance.Warning($"{fileName} 配置文件缺失~");
+                }
             }
             catch (Exception ex)
             {
                 Logger.Instance.Error($"{fileName} 配置文件解析有误~ :{ex}");
             }
-            return default;
+            return new T();
         }
         public async Task<string> LoadString()
         {
