@@ -3,6 +3,7 @@ using common.libs.extends;
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace client.service.users
@@ -56,6 +57,7 @@ namespace client.service.users
     {
         public ulong ID { get; set; }
         public uint Access { get; set; }
+        [JsonIgnore]
         public ulong  ConnectionId { get; set; }
     }
 

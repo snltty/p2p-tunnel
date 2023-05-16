@@ -12,7 +12,13 @@ namespace client.service.tray
     {
         private NotifyIcon notifyIcon = null;
         private Process proc;
-        static string lnk = "";
+        Image unright = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right-gray.png"));
+        Image right = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right.png"));
+
+        Icon icon = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo.ico"));
+        Icon iconGray = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo-gray.ico"));
+
+        string name = "p2p-tunnel托盘程序";
 
         protected override CreateParams CreateParams
         {
@@ -36,23 +42,18 @@ namespace client.service.tray
             this.Opacity = 0;
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
-            lnk = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Startup), AppDomain.CurrentDomain.FriendlyName) + ".lnk";
             InitializeComponent();
             InitialTray();
-           
         }
 
-
-        Image unright = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right1.png"));
-        Image right = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right.png"));
         private void InitialTray()
         {
             notifyIcon = new NotifyIcon();
-            notifyIcon.BalloonTipTitle = "p2p-tunnel";
-            notifyIcon.BalloonTipText = "p2p-tunnel托盘程序已启动";
-            notifyIcon.Text = "p2p-tunnel客户端托盘程序";
+            notifyIcon.BalloonTipTitle = name;
+            notifyIcon.BalloonTipText = name+"已启动";
+            notifyIcon.Text = name;
 
-            notifyIcon.Icon = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo.ico"));
+            notifyIcon.Icon = iconGray;
             notifyIcon.Visible = true;
 
             notifyIcon.ContextMenuStrip = new ContextMenuStrip();
@@ -67,7 +68,6 @@ namespace client.service.tray
             StartUp();
         }
 
-
         private void Service(object sender, EventArgs e)
         {
             if (proc == null)
@@ -76,6 +76,7 @@ namespace client.service.tray
                 {
                     notifyIcon.BalloonTipText = "已托管服务";
                     notifyIcon.ContextMenuStrip.Items[0].Image = right;
+                    notifyIcon.Icon = icon;
                 }
                 else
                 {
@@ -89,6 +90,7 @@ namespace client.service.tray
                 notifyIcon.BalloonTipText = "已取消托管服务";
                 notifyIcon.ShowBalloonTip(1000);
                 notifyIcon.ContextMenuStrip.Items[0].Image = unright;
+                notifyIcon.Icon = iconGray;
                 KillExe();
             }
         }
@@ -96,10 +98,9 @@ namespace client.service.tray
         {
             try
             {
-                string dir = Directory.GetCurrentDirectory();
+                string filename = Process.GetCurrentProcess().MainModule.FileName;
+                string dir = Path.GetDirectoryName(filename);
                 string file = Path.Combine(dir, "./client.service.exe");
-
-
                 ProcessStartInfo processStartInfo = new ProcessStartInfo()
                 {
                     WorkingDirectory = dir,
@@ -258,20 +259,7 @@ namespace client.service.tray
                 return null;
             }
         }
-
-        private static void CreateShortcut(string args = "")
-        {
-            var shellType = Type.GetTypeFromProgID("WScript.Shell");
-            var shell = Activator.CreateInstance(shellType);
-            var shortcut = shellType.InvokeMember("CreateShortcut", BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod, null, shell, new object[] { lnk });
-
-            var shortcutType = shortcut.GetType();
-            shortcutType.InvokeMember("WindowStyle", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { 1 });
-            shortcutType.InvokeMember("TargetPath", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { Assembly.GetEntryAssembly().Location });
-            shortcutType.InvokeMember("Arguments", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { args });
-            shortcutType.InvokeMember("WorkingDirectory", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { AppDomain.CurrentDomain.SetupInformation.ApplicationBase });
-            shortcutType.InvokeMember("Save", BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod, null, shortcut, null);
-        }
+        
         private void WriteBat()
         {
             string content = @"@echo off
@@ -302,5 +290,23 @@ cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action
             public string Key { get; set; }
             public string Path { get; set; }
         }
+
+        //lnk = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Startup), AppDomain.CurrentDomain.FriendlyName) + ".lnk";
+        //static string lnk = "";
+        /*
+        private static void CreateShortcut(string args = "")
+        {
+            var shellType = Type.GetTypeFromProgID("WScript.Shell");
+            var shell = Activator.CreateInstance(shellType);
+            var shortcut = shellType.InvokeMember("CreateShortcut", BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod, null, shell, new object[] { lnk });
+
+            var shortcutType = shortcut.GetType();
+            shortcutType.InvokeMember("WindowStyle", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { 1 });
+            shortcutType.InvokeMember("TargetPath", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { Assembly.GetEntryAssembly().Location });
+            shortcutType.InvokeMember("Arguments", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { args });
+            shortcutType.InvokeMember("WorkingDirectory", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty, null, shortcut, new object[] { AppDomain.CurrentDomain.SetupInformation.ApplicationBase });
+            shortcutType.InvokeMember("Save", BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod, null, shortcut, null);
+        }
+        */
     }
 }

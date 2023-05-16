@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -31,15 +32,15 @@ namespace common.proxy
 
         public List<FirewallItem> Firewall { get; set; } = new List<FirewallItem>();
         [JsonIgnore]
-        public Dictionary<FirewallKey, FirewallCache> AllowFirewalls { get; set; } = new Dictionary<FirewallKey, FirewallCache>(new FirewallKeyComparer());
+        public Dictionary<uint, FirewallCache> AllowFirewalls { get; set; } = new Dictionary<uint, FirewallCache>();
         [JsonIgnore]
-        public Dictionary<FirewallKey, FirewallCache> DeniedFirewalls { get; set; } = new Dictionary<FirewallKey, FirewallCache>(new FirewallKeyComparer());
+        public Dictionary<uint, FirewallCache> DeniedFirewalls { get; set; } = new Dictionary<uint, FirewallCache>();
 
 
         public async Task<bool> AddFirewall(FirewallItem model)
         {
             FirewallItem item = Firewall.FirstOrDefault(c => c.ID == model.ID) ?? new FirewallItem { };
-            FirewallItem old = Firewall.FirstOrDefault(c => c.Port == model.Port && c.Protocol == model.Protocol && c.Type == model.Type);
+            FirewallItem old = Firewall.FirstOrDefault(c => c.Port == model.Port && c.Protocol == model.Protocol && c.Type == model.Type && c.PluginId == model.PluginId);
             if (old != null && old.ID != model.ID)
             {
                 return false;
@@ -49,6 +50,7 @@ namespace common.proxy
             {
                 item.Type = model.Type;
                 item.Protocol = model.Protocol;
+                item.PluginId = model.PluginId;
                 item.Port = model.Port;
                 item.Remark = model.Remark;
                 item.IP = model.IP;
@@ -87,11 +89,17 @@ namespace common.proxy
                     {
                         if (item.Type == FirewallType.Allow)
                         {
-                            AllowFirewalls[new FirewallKey(ports[i], item.Protocol)] = cache;
+                            if ((item.Protocol & FirewallProtocolType.TCP) == FirewallProtocolType.TCP)
+                                AllowFirewalls[new FirewallKey(ports[i], FirewallProtocolType.TCP, item.PluginId).Memory] = cache;
+                            if ((item.Protocol & FirewallProtocolType.UDP) == FirewallProtocolType.UDP)
+                                AllowFirewalls[new FirewallKey(ports[i], FirewallProtocolType.UDP, item.PluginId).Memory] = cache;
                         }
                         else
                         {
-                            DeniedFirewalls[new FirewallKey(ports[i], item.Protocol)] = cache;
+                            if ((item.Protocol & FirewallProtocolType.TCP) == FirewallProtocolType.TCP)
+                                DeniedFirewalls[new FirewallKey(ports[i], FirewallProtocolType.TCP, item.PluginId).Memory] = cache;
+                            if ((item.Protocol & FirewallProtocolType.UDP) == FirewallProtocolType.UDP)
+                                DeniedFirewalls[new FirewallKey(ports[i], FirewallProtocolType.UDP, item.PluginId).Memory] = cache;
                         }
                     }
                 }
@@ -111,7 +119,11 @@ namespace common.proxy
                 {
                     return new ushort[1] { ushort.Parse(arr[0]) };
                 }
-                return Helper.Range(ushort.Parse(arr[0]), ushort.Parse(arr[1]));
+                ushort start = ushort.Parse(arr[0]);
+                ushort end = ushort.Parse(arr[1]);
+                if (start == 1 && end == 65535) return new ushort[1] { 0 };
+
+                return Helper.Range(start, end);
 
             }).ToArray();
         }
@@ -173,6 +185,7 @@ namespace common.proxy
     public sealed class FirewallItem
     {
         public uint ID { get; set; }
+        public byte PluginId { get; set; }
         public FirewallProtocolType Protocol { get; set; }
         public FirewallType Type { get; set; }
         public string Port { get; set; } = string.Empty;
@@ -182,8 +195,9 @@ namespace common.proxy
 
     public enum FirewallProtocolType : byte
     {
-        TCP = 0,
-        UDP = 1,
+        TCP = 1,
+        UDP = 2,
+        TCP_UDP = TCP | UDP,
     }
     public enum FirewallType : byte
     {
@@ -192,25 +206,26 @@ namespace common.proxy
     }
 
 
+    [StructLayout(LayoutKind.Explicit)]
     public readonly struct FirewallKey
     {
-        public readonly ushort Port { get; }
-        public readonly FirewallProtocolType Protocol { get; }
-        public FirewallKey(ushort port, FirewallProtocolType protocol)
+        [FieldOffset(0)]
+        public readonly uint Memory;
+
+        [FieldOffset(0)]
+        public readonly ushort Port;
+
+        [FieldOffset(2)]
+        public readonly FirewallProtocolType Protocol;
+
+        [FieldOffset(3)]
+        public readonly byte PluginId;
+
+        public FirewallKey(ushort port, FirewallProtocolType protocol, byte pluginId)
         {
             Port = port;
             Protocol = protocol;
-        }
-    }
-    public sealed class FirewallKeyComparer : IEqualityComparer<FirewallKey>
-    {
-        public bool Equals(FirewallKey x, FirewallKey y)
-        {
-            return x.Port == y.Port && x.Protocol == y.Protocol;
-        }
-        public int GetHashCode(FirewallKey obj)
-        {
-            return obj.Port.GetHashCode() ^ obj.Protocol.GetHashCode();
+            PluginId = pluginId;
         }
     }
 }

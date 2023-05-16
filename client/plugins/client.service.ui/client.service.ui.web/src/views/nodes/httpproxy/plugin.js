@@ -4,5 +4,6 @@ export default {
     text: '代理(http)',
     path: '/nodes/proxy.html',
     name: 'NodesProxy',
-    access: 32
+    access: 32,
+    proxyId: 4
 }

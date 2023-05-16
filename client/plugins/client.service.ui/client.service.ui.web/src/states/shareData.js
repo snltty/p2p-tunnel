@@ -1,7 +1,18 @@
 import { inject, provide, reactive } from "vue";
 
 const files = require.context('../views/server/', true, /plugin(-[a-zA-Z0-9]+)?\.js/);
-const serverAccesss = files.keys().map(c => files(c).default).filter(c => c.access > 0).reduce((all, value, index) => {
+const filesClient = require.context('../views/nodes/', true, /plugin(-[a-zA-Z0-9]+)?\.js/);
+const serverPlugins = files.keys().map(c => files(c).default);
+const clientPlugins = filesClient.keys().map(c => filesClient(c).default);
+
+const serverAccesss = serverPlugins.filter(c => c.access > 0).reduce((all, value, index) => {
+    all.push({
+        text: value.accessText || value.text,
+        value: value.access
+    });
+    return all;
+}, []);
+const clientAccess = clientPlugins.filter(c => c.access > 0).reduce((all, value, index) => {
     all.push({
         text: value.accessText || value.text,
         value: value.access
@@ -9,14 +20,21 @@ const serverAccesss = files.keys().map(c => files(c).default).filter(c => c.acce
     return all;
 }, []);
 
-const filesClient = require.context('../views/nodes/', true, /plugin(-[a-zA-Z0-9]+)?\.js/);
-const clientAccess = filesClient.keys().map(c => filesClient(c).default).filter(c => c.access > 0).reduce((all, value, index) => {
+const serverProxys = serverPlugins.filter(c => c.proxyId > 0).reduce((all, value, index) => {
     all.push({
-        text: value.accessText || value.text,
-        value: value.access
+        text: value.text,
+        value: value.proxyId
     });
     return all;
 }, []);
+const clientProxys = clientPlugins.filter(c => c.proxyId > 0).reduce((all, value, index) => {
+    all.push({
+        text: value.text,
+        value: value.proxyId
+    });
+    return all;
+}, []);
+
 
 export const shareData = {
     aliveTypes: { 0: '长连接(tcp,udp)', 1: '短链接(web)' },
@@ -26,6 +44,8 @@ export const shareData = {
     bufferSizes: ['KB_1', 'KB_2', 'KB_4', 'KB_8', 'KB_16', 'KB_32', 'KB_64', 'KB_128', 'KB_256', 'KB_512', 'KB_1024'],
     clientAccess: clientAccess,
     serverAccess: serverAccesss,
+    serverProxys: serverProxys,
+    clientProxys: clientProxys,
     serverImgs: {
         'zg': { img: require('../assets/zg.png'), name: '中国' },
         'zgxg': { img: require('../assets/zgxg.png'), name: '中国香港' },

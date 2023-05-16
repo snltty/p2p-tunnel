@@ -1,10 +1,13 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using System.Buffers;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Net.Mail;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace invokeSpeed
 {
@@ -12,15 +15,39 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            for (int i = 0; i < 100; i++)
-            {
-                string str = BitConverter.ToUInt64(Guid.NewGuid().ToByteArray()).ToString();
-                Console.WriteLine(str.Substring(str.Length-15,15));
-            }
-            //var summary = BenchmarkRunner.Run<Test>();
+            var summary = BenchmarkRunner.Run<Test>();
         }
 
 
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public readonly struct FirewallKey
+    {
+        [FieldOffset(0)]
+        public readonly uint Memory;
+
+        [FieldOffset(0)]
+        public readonly ushort Port;
+
+        [FieldOffset(2)]
+        public readonly FirewallProtocolType Protocol;
+
+        [FieldOffset(3)]
+        public readonly byte PluginId;
+
+        public FirewallKey(ushort port, FirewallProtocolType protocol, byte pluginId)
+        {
+            Port = port;
+            Protocol = protocol;
+            PluginId = pluginId;
+        }
+    }
+
+    public enum FirewallProtocolType : byte
+    {
+        TCP = 0,
+        UDP = 1,
     }
 
 
@@ -31,9 +58,8 @@ namespace invokeSpeed
         [Benchmark]
         public void Test1()
         {
-            Span<byte> span = Guid.NewGuid().ToByteArray().AsSpan(0, 8);
-            string str = BitConverter.ToUInt64(span).ToString();
-            ulong id = ulong.Parse(str.Substring(0, 9));
+            FirewallKey firewallKey = new FirewallKey(1, FirewallProtocolType.UDP, 1);
+            uint value = firewallKey.Memory;
         }
     }
 }
