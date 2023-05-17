@@ -15,7 +15,8 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<Test>();
+            Console.WriteLine(Convert.ToString(BinaryPrimitives.ReadUInt32BigEndian(new byte[] { 255, 255, 255, 255 }),16));
+            //var summary = BenchmarkRunner.Run<Test>();
         }
 
 
