@@ -69,6 +69,7 @@ namespace client.messengers.singnin
             LocalInfo.Connected = false;
 
             RemoteInfo.Ip = IPAddress.Any;
+            RemoteInfo.Access = 0;
 
             Connection?.Disponse();
             Connection = null;

@@ -18,11 +18,11 @@ namespace server.service.users
     {
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IUserStore userStore;
-        private readonly Config config;
+        private readonly common.user.Config config;
         private readonly IUserInfoCaching userInfoCaching;
         private readonly IClientSignInCaching clientSignInCaching;
 
-        public UsersMessenger(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, Config config, IUserInfoCaching userInfoCaching, IClientSignInCaching clientSignInCaching)
+        public UsersMessenger(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, common.user.Config config, IUserInfoCaching userInfoCaching, IClientSignInCaching clientSignInCaching)
         {
             this.serviceAccessValidator = serviceAccessValidator;
             this.userStore = userStore;
