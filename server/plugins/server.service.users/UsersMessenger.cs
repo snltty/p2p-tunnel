@@ -42,11 +42,20 @@ namespace server.service.users
             UserInfoPageModel userInfoPage = new UserInfoPageModel();
             userInfoPage.DeBytes(connection.ReceiveRequestWrap.Payload);
 
-            List<UserInfo> users = userStore.Get(userInfoPage.Page, userInfoPage.PageSize, userInfoPage.Sort, userInfoPage.Account).ToList().ToJson().DeJson<List<UserInfo>>();
-            foreach (UserInfo item in users)
+            List<UserInfo> users = userStore.Get(userInfoPage.Page, userInfoPage.PageSize, userInfoPage.Sort, userInfoPage.Account).Select(c => new UserInfo
             {
-                item.Password = string.Empty;
-            }
+                Access = c.Access,
+                Account = c.Account,
+                AddTime = c.AddTime,
+                Connections = null,
+                EndTime = c.EndTime,
+                ID = c.ID,
+                NetFlow = c.NetFlow,
+                Password = string.Empty,
+                SentBytes = c.SentBytes,
+                SignCount = (uint)c.Connections.Count,
+                SignLimit = c.SignLimit,
+            }).ToList();
 
             connection.WriteUTF8(new UserInfoPageResultModel
             {
@@ -136,9 +145,20 @@ namespace server.service.users
         {
             if (userInfoCaching.GetUser(connection, out UserInfo user))
             {
-                UserInfo _user = user.ToJson().DeJson<UserInfo>();
-                _user.Password = string.Empty;
-                connection.Write(_user.ToJson().ToUTF8Bytes());
+                connection.Write(new UserInfo
+                {
+                    Access = user.Access,
+                    Account = user.Account,
+                    AddTime = user.AddTime,
+                    Connections = null,
+                    EndTime = user.EndTime,
+                    ID = user.ID,
+                    NetFlow = user.NetFlow,
+                    Password = string.Empty,
+                    SentBytes = user.SentBytes,
+                    SignCount = (uint)user.Connections.Count,
+                    SignLimit = user.SignLimit,
+                }.ToJson().ToUTF8Bytes());
                 return;
             }
             connection.Write(new UserInfo().ToJson().ToUTF8Bytes());

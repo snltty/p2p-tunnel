@@ -18,7 +18,7 @@ namespace client.service.tray
         Icon icon = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo.ico"));
         Icon iconGray = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo-gray.ico"));
 
-        string name = "p2p-tunnel托盘程序";
+        string name = "p2p-tunnel客户端托盘程序";
 
         protected override CreateParams CreateParams
         {
@@ -50,7 +50,7 @@ namespace client.service.tray
         {
             notifyIcon = new NotifyIcon();
             notifyIcon.BalloonTipTitle = name;
-            notifyIcon.BalloonTipText = name+"已启动";
+            notifyIcon.BalloonTipText = name + "已启动";
             notifyIcon.Text = name;
 
             notifyIcon.Icon = iconGray;
@@ -82,6 +82,7 @@ namespace client.service.tray
                 {
                     notifyIcon.BalloonTipText = "托管服务失败";
                     notifyIcon.ContextMenuStrip.Items[0].Image = unright;
+                    notifyIcon.Icon = iconGray;
                 }
                 notifyIcon.ShowBalloonTip(1000);
             }
@@ -190,7 +191,7 @@ namespace client.service.tray
         private void StartUp()
         {
             Model model = GetInfo();
-            string res = Command.Windows("",new string[] {
+            string res = Command.Windows("", new string[] {
                 "schtasks.exe /query /fo TABLE|findstr \"" + model.Key + "\""
             });
             bool has = false;
@@ -217,9 +218,10 @@ namespace client.service.tray
 
         private void OpenWeb(object sender, EventArgs e)
         {
-            if (System.IO.File.Exists("./ui-appsettings.json"))
+            string path = Path.Combine(Application.StartupPath, "ui-appsettings.json");
+            if (System.IO.File.Exists(path))
             {
-                string texts = System.IO.File.ReadAllText("./ui-appsettings.json");
+                string texts = System.IO.File.ReadAllText(path);
                 JObject jsObj = JObject.Parse(texts);
                 Process.Start($"http://127.0.0.1:{jsObj["web"]["Port"]}/#/?port={jsObj["websocket"]["Port"]}");
             }
@@ -259,7 +261,7 @@ namespace client.service.tray
                 return null;
             }
         }
-        
+
         private void WriteBat()
         {
             string content = @"@echo off
@@ -280,9 +282,9 @@ cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action
 cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action=allow program=""%CD%\client.service.exe"" protocol=tcp enable=yes profile=private
 cmd /c netsh advfirewall firewall add rule name=""client.service"" dir=in action=allow program=""%CD%\client.service.exe"" protocol=udp enable=yes profile=private
 :end";
-            System.IO.File.WriteAllText("firewall.bat",content);
+            System.IO.File.WriteAllText("firewall.bat", content);
 
-            Command.Execute("firewall.bat",string.Empty,new string[0]);
+            Command.Execute("firewall.bat", string.Empty, new string[0]);
         }
 
         class Model

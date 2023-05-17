@@ -11,6 +11,14 @@ namespace server.service.tray
     {
         private NotifyIcon notifyIcon = null;
         private Process proc;
+        Image unright = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right-gray.png"));
+        Image right = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right.png"));
+
+        Icon icon = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo.ico"));
+        Icon iconGray = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo-gray.ico"));
+
+        string name = "p2p-tunnel服务端托盘程序";
+
         protected override CreateParams CreateParams
         {
             get
@@ -34,17 +42,14 @@ namespace server.service.tray
             InitializeComponent();
             InitialTray();
         }
-
-        Image unright = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"server.service.tray.right1.png"));
-        Image right = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"server.service.tray.right.png"));
         private void InitialTray()
         {
             notifyIcon = new NotifyIcon();
-            notifyIcon.BalloonTipTitle = "p2p-tunnel";
-            notifyIcon.BalloonTipText = "p2p-tunnel托盘程序已启动";
-            notifyIcon.Text = "p2p-tunnel服务端托盘程序";
+            notifyIcon.BalloonTipTitle = name;
+            notifyIcon.BalloonTipText = name + "已启动";
+            notifyIcon.Text = name;
 
-            notifyIcon.Icon = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"server.service.tray.logo.ico"));
+            notifyIcon.Icon = iconGray;
             notifyIcon.Visible = true;
 
             notifyIcon.ContextMenuStrip = new ContextMenuStrip();
@@ -65,11 +70,13 @@ namespace server.service.tray
                 {
                     notifyIcon.BalloonTipText = "已托管服务";
                     notifyIcon.ContextMenuStrip.Items[0].Image = right;
+                    notifyIcon.Icon = icon;
                 }
                 else
                 {
                     notifyIcon.BalloonTipText = "托管服务失败";
                     notifyIcon.ContextMenuStrip.Items[0].Image = unright;
+                    notifyIcon.Icon = iconGray;
                 }
                 notifyIcon.ShowBalloonTip(1000);
             }
@@ -78,6 +85,7 @@ namespace server.service.tray
                 notifyIcon.BalloonTipText = "已取消托管服务";
                 notifyIcon.ShowBalloonTip(1000);
                 notifyIcon.ContextMenuStrip.Items[0].Image = unright;
+                notifyIcon.Icon = iconGray;
                 KillExe();
             }
         }
@@ -85,7 +93,8 @@ namespace server.service.tray
         {
             try
             {
-                string dir = Directory.GetCurrentDirectory();
+                string filename = Process.GetCurrentProcess().MainModule.FileName;
+                string dir = Path.GetDirectoryName(filename);
                 string file = Path.Combine(dir, "./server.service.exe");
 
                 ProcessStartInfo processStartInfo = new ProcessStartInfo()
