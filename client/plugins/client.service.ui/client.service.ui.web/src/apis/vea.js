@@ -18,3 +18,11 @@ export const reset = (id) => {
 export const update = () => {
     return sendWebsocketMsg(`vea/update`);
 }
+
+export const getOnlines = (id) => {
+    return sendWebsocketMsg(`vea/GetOnline`, id);
+}
+
+export const onlines = (id) => {
+    return sendWebsocketMsg(`vea/onlines`, id);
+}

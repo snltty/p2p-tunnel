@@ -57,6 +57,34 @@ namespace client.service.vea
             }
         }
 
+        /// <summary>
+        /// 去获取在线设备
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public async Task<bool> GetOnline(ClientServiceParamsInfo arg)
+        {
+            ulong id = ulong.Parse(arg.Content);
+            if (clientInfoCaching.Get(id, out ClientInfo client))
+            {
+                return await veaMessengerSender.GetOnLine(client.Connection);
+            }
+            return false;
+        }
+        /// <summary>
+        /// 在线设备
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public VeaLanIPAddressOnLine Onlines(ClientServiceParamsInfo arg)
+        {
+            ulong id = ulong.Parse(arg.Content);
+            if (VeaTransfer.Onlines.TryGetValue(id, out VeaLanIPAddressOnLine online))
+            {
+                return online;
+            }
+            return new VeaLanIPAddressOnLine();
+        }
 
         /// <summary>
         /// 各个客户端

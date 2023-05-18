@@ -1,10 +1,10 @@
 ﻿using common.libs;
 using common.libs.database;
 using common.libs.extends;
-using common.proxy;
 using common.server.model;
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
@@ -144,15 +144,14 @@ namespace client.service.vea
                     uint maskValue = NetworkHelper.MaskValue(maskLength);
                     return new VeaLanIPAddress
                     {
+                        IPAddress = ip,
+                        MaskLength = maskLength,
                         MaskValue = maskValue,
                         NetWork = ip & maskValue,
-                        IPAddress = ip,
-                        MaskLength = maskLength
+                        Broadcast = ip | (~maskValue),
                     };
 
                 }).ToArray();
-
-
             }
             catch (Exception ex)
             {
@@ -175,5 +174,9 @@ namespace client.service.vea
         public byte MaskLength { get; set; }
         public uint MaskValue { get; set; }
         public uint NetWork { get; set; }
+        public uint Broadcast { get; set; }
+
     }
+
+   
 }

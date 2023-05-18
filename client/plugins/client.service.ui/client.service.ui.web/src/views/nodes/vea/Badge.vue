@@ -21,9 +21,13 @@
                     <el-button size="small" :loading="state.loading" @click="handleResetVea">重装网卡</el-button>
                     <el-button size="small" :loading="state.loading" @click.stop="handleUpdate">刷新列表</el-button>
                 </el-dropdown-item>
+                <el-dropdown-item divided class="t-c">
+                    <el-button size="small" @click="handleOnlines">局域网段在线设备</el-button>
+                </el-dropdown-item>
             </el-dropdown-menu>
         </template>
     </el-dropdown>
+    <Onlines :id="state.id" v-if="state.showOnlines" v-model="state.showOnlines"></Onlines>
 </template>
 
 <script>
@@ -31,15 +35,19 @@ import { websocketState } from '../../../apis/request'
 import { getList, reset, update } from '../../../apis/vea'
 import { reactive } from '@vue/reactivity'
 import { ElMessage } from 'element-plus'
+import Onlines from './OnLines.vue'
 import plugin from './plugin'
 export default {
     plugin: plugin,
     props: ['params'],
+    components: { Onlines },
     setup(props) {
 
         const id = props.params.ConnectionId;
         const state = reactive({
             loading: false,
+            showOnlines: false,
+            id: id,
             data: { IP: '', LanIPs: [] }
         });
 
@@ -76,8 +84,12 @@ export default {
             });
         }
 
+        const handleOnlines = () => {
+            state.showOnlines = true;
+        }
+
         return {
-            state, loadData, handleUpdate, handleResetVea
+            state, loadData, handleUpdate, handleResetVea, handleOnlines
         }
     }
 }

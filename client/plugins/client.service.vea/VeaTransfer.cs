@@ -3,11 +3,12 @@ using client.messengers.singnin;
 using common.libs;
 using common.libs.extends;
 using common.proxy;
-using common.server;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -30,8 +31,11 @@ namespace client.service.vea
 
         private readonly ConcurrentDictionary<uint, IPAddressCacheInfo> ips = new ConcurrentDictionary<uint, IPAddressCacheInfo>();
         private readonly ConcurrentDictionary<uint, IPAddressCacheInfo> lanips = new ConcurrentDictionary<uint, IPAddressCacheInfo>();
+        private readonly ConcurrentDictionary<ulong, VeaLanIPAddressOnLine> onlines = new ConcurrentDictionary<ulong, VeaLanIPAddressOnLine>();
+
         public ConcurrentDictionary<uint, IPAddressCacheInfo> IPList => ips;
         public ConcurrentDictionary<uint, IPAddressCacheInfo> LanIPList => lanips;
+        public ConcurrentDictionary<ulong, VeaLanIPAddressOnLine> Onlines => onlines;
 
         private readonly Config config;
         private readonly IClientInfoCaching clientInfoCaching;
@@ -66,24 +70,19 @@ namespace client.service.vea
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) => Stop();
         }
 
-        /// <summary>
-        /// 收到通知
-        /// </summary>
-        /// <param name="connection"></param>
-        public void OnNotify(IConnection connection)
+        public void OnIPs(ulong connectionid, IPAddressInfo ips)
         {
-            if (connection.FromConnection != null)
+            if (clientInfoCaching.Get(connectionid, out ClientInfo client))
             {
-                bool res = clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client);
-                if (res)
-                {
-                    IPAddressInfo ips = new IPAddressInfo();
-                    ips.DeBytes(connection.ReceiveRequestWrap.Payload);
-                    UpdateIp(client, ips);
-                }
+                UpdateIp(client, ips);
             }
 
         }
+        public void OnOnline(ulong connectionid, VeaLanIPAddressOnLine online)
+        {
+            onlines.AddOrUpdate(connectionid, online, (a, b) => online);
+        }
+
         private void UpdateIp(ClientInfo client, IPAddressInfo _ips)
         {
             if (client == null || _ips == null) return;
@@ -622,5 +621,62 @@ namespace client.service.vea
                 };
             }
         }
+    }
+
+
+    public sealed class VeaLanIPAddressOnLine
+    {
+        public Dictionary<uint, VeaLanIPAddressOnLineItem> Items { get; set; } = new Dictionary<uint, VeaLanIPAddressOnLineItem>();
+
+        public byte[] ToBytes()
+        {
+            if (Items.Count == 0) return Helper.EmptyArray;
+
+            MemoryStream memoryStream = new MemoryStream();
+            byte[] keyBytes = new byte[4];
+            foreach (var item in Items.ToArray())
+            {
+                item.Key.ToBytes(keyBytes);
+                memoryStream.Write(keyBytes, 0, keyBytes.Length);
+
+                memoryStream.WriteByte((byte)(item.Value.Online ? 1 : 0));
+
+                ReadOnlySpan<byte> name = item.Value.Name.GetUTF16Bytes();
+                memoryStream.WriteByte((byte)name.Length);
+                memoryStream.WriteByte((byte)item.Value.Name.Length);
+                memoryStream.Write(name);
+            }
+
+            return memoryStream.ToArray();
+        }
+
+        public void DeBytes(ReadOnlyMemory<byte> memory)
+        {
+            if (memory.Length == 0) return;
+
+            ReadOnlySpan<byte> span = memory.Span;
+
+            int index = 0;
+            while (index < memory.Length)
+            {
+                uint key = span.Slice(index).ToUInt32();
+                index += 4;
+
+                bool online = span[index] == 1;
+                index += 1;
+
+                string name = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
+                index += 1 + 1 + span[index];
+
+                Items[key] = new VeaLanIPAddressOnLineItem { Online = online, Name = name };
+            }
+        }
+
+    }
+
+    public sealed class VeaLanIPAddressOnLineItem
+    {
+        public bool Online { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }

@@ -88,7 +88,6 @@ export default {
         onMounted(() => {
             info().then((res) => {
                 let json = JSON.parse(res);
-                console.log(json);
                 state.user.ID = json.ID;
 
                 state.user.Access = json.Access;
