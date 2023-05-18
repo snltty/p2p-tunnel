@@ -68,7 +68,7 @@ namespace common.libs.extends
         public static bool GetIsBroadcastAddress(this Span<byte> address)
         {
             uint ip = BinaryPrimitives.ReadUInt32BigEndian(address);
-            return ip >= 0xE0000000 && ip <= 0xEFFFFFFF;
+            return (ip >= 0xE0000000 && ip <= 0xEFFFFFFF) || ip == 0xFFFFFFFF;
         }
 
 
