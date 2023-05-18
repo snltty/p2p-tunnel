@@ -15,7 +15,9 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<Test>();
+            var entry = Dns.GetHostEntryAsync(IPAddress.Parse("192.168.1.3")).WaitAsync(TimeSpan.FromSeconds(5)).Result;
+            Console.WriteLine(entry.HostName);
+            //var summary = BenchmarkRunner.Run<Test>();
         }
 
 
