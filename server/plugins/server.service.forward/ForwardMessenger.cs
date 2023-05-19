@@ -137,6 +137,7 @@ namespace server.service.forward
                             connection.Write(new ForwardSignInResultInfo { Code = ForwardSignInResultCodes.EXISTS }.ToBytes());
                             return;
                         }
+
                         forwardTargetCaching.AddOrUpdate(model.SourcePort, new ForwardTargetCacheInfo
                         {
                             ConnectionId = source.ConnectionId,
@@ -144,6 +145,15 @@ namespace server.service.forward
                             IPAddress = model.TargetIp.GetAddressBytes(),
                             Port = model.TargetPort,
                         });
+
+                        try
+                        {
+                            proxyServer.Stop(model.SourcePort);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Instance.DebugError(ex);
+                        }
                         try
                         {
                             proxyServer.Start(model.SourcePort, config.Plugin,(byte)ForwardAliveTypes.Tunnel);

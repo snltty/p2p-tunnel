@@ -227,6 +227,7 @@ namespace common.proxy
         private void Connect(ProxyInfo info)
         {
             IPEndPoint remoteEndpoint = ReadRemoteEndPoint(info);
+
             Socket socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);

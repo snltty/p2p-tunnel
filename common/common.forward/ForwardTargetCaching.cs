@@ -55,14 +55,14 @@ namespace common.forward
 
             return cache.TryRemove(port, out _);
         }
-        public IEnumerable<ushort> Remove(ulong id)
+        public List<ushort> Remove(ulong id)
         {
-            var keys = cache.Where(c => c.Value.ConnectionId == id).Select(c => c.Key).ToList();
+            List<ushort> keys = cache.Where(c => c.Value.ConnectionId == id).Select(c => c.Key).ToList();
             foreach (var key in keys)
             {
                 cache.TryRemove(key, out _);
             }
-            var keys1 = cacheHost.Where(c => c.Value.ConnectionId == id).Select(c => c.Key).ToList();
+            List<string> keys1 = cacheHost.Where(c => c.Value.ConnectionId == id).Select(c => c.Key).ToList();
             foreach (var key in keys1)
             {
                 cacheHost.TryRemove(key, out _);

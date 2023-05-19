@@ -2,6 +2,7 @@
 using common.proxy;
 using common.server;
 using server.messengers.singnin;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,7 +20,7 @@ namespace server.service.forward
         {
             clientSignInCaching.OnOffline += (client) =>
             {
-                IEnumerable<ushort> keys = forwardTargetCaching.Remove(client.ConnectionId);
+                List<ushort> keys = forwardTargetCaching.Remove(client.ConnectionId).ToList();
                 if (keys.Any())
                 {
                     foreach (ushort item in keys)

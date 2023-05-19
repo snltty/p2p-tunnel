@@ -26,7 +26,7 @@ namespace common.forward
         void AddOrUpdate(ushort port, T mdoel);
         bool Remove(string domain, ushort port);
         bool Remove(ushort port);
-        IEnumerable<ushort> Remove(ulong id);
+        List<ushort> Remove(ulong id);
         bool Contains(string domain, ushort port);
         bool Contains(ushort port);
         void ClearConnection();
