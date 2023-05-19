@@ -24,14 +24,17 @@ Number.prototype.splitStr = function () {
     return this.toString().split(/,|\n/).map(c => c.replace(/\s/g, '')).filter(c => c.length > 0);
 }
 Number.prototype.toIpv4Str = function () {
-    if (this.toString().length > 32) return '';
-    let num = this;
-    let pow24 = Math.pow(2, 24);
+    if (this.toString().length > 32) {
+        return '';
+    }
 
-    let num1 = parseInt(num / pow24) >>> 0;
-    let num2 = parseInt(((num << 8) >>> 0) / pow24) >>> 0;
-    let num3 = parseInt(((num << 16) >>> 0) / pow24) >>> 0;
-    let num4 = parseInt(((num << 24) >>> 0) / pow24) >>> 0;
+    const num = this;
+    const pow24 = Math.pow(2, 24);
+
+    const num1 = parseInt(num / pow24) >>> 0;
+    const num2 = parseInt(((num << 8) >>> 0) / pow24) >>> 0;
+    const num3 = parseInt(((num << 16) >>> 0) / pow24) >>> 0;
+    const num4 = parseInt(((num << 24) >>> 0) / pow24) >>> 0;
     return `${num1}.${num2}.${num3}.${num4}`;
 }
 

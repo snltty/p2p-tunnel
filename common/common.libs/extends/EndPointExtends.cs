@@ -5,9 +5,6 @@ using System.Net;
 
 namespace common.libs.extends
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public static class EndPointExtends
     {
         public static Memory<byte> ipv6Loopback = IPAddress.IPv6Loopback.GetAddressBytes();

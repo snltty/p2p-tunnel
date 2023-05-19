@@ -140,7 +140,9 @@ namespace client.service.vea
                 veaTransfer.OnIPs(connection.FromConnection.ConnectId, ips);
             });
 
-            connection.FromConnection.Write(new IPAddressInfo { IP = BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()), LanIPs = config.VeaLanIPs }.ToBytes());
+            uint ip = BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes());
+            IPAddressInfo iPAddressInfo = new IPAddressInfo { IP = ip, LanIPs = config.VeaLanIPs };
+            connection.FromConnection?.Write(iPAddressInfo.ToBytes());
         }
 
         /// <summary>
@@ -155,7 +157,7 @@ namespace client.service.vea
             {
                 veaTransfer.Run();
             });
-            connection.FromConnection.Write(Helper.TrueArray);
+            connection.FromConnection?.Write(Helper.TrueArray);
         }
     }
 
