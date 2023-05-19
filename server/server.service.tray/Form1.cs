@@ -11,11 +11,11 @@ namespace server.service.tray
     {
         private NotifyIcon notifyIcon = null;
         private Process proc;
-        Image unright = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right-gray.png"));
-        Image right = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.right.png"));
+        Image unright = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"server.service.tray.right-gray.png"));
+        Image right = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"server.service.tray.right.png"));
 
-        Icon icon = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo.ico"));
-        Icon iconGray = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"client.service.tray.logo-gray.ico"));
+        Icon icon = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"server.service.tray.logo.ico"));
+        Icon iconGray = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(@"server.service.tray.logo-gray.ico"));
 
         string name = "p2p-tunnel服务端托盘程序";
 

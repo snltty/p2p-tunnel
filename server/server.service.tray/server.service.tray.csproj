@@ -95,7 +95,7 @@
     <EmbeddedResource Include="right.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="right1.png" />
+    <EmbeddedResource Include="right-gray.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="logo-gray.ico" />
