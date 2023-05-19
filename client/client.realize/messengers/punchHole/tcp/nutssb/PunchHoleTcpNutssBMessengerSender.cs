@@ -405,7 +405,6 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         }
         public void OnStep2Retry(PunchHoleStepModel model)
         {
-            Console.WriteLine($"OnStep2Retry {model.RawData.FromId}");
             if (connectTcpCache.TryGetValue(model.RawData.FromId, out ConnectCacheModel cache) == false || cache.Success)
             {
                 return;

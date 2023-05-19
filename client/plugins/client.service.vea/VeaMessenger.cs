@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server;
 using System;
 using System.Buffers.Binary;
@@ -133,6 +134,7 @@ namespace client.service.vea
         {
             IPAddressInfo ips = new IPAddressInfo();
             ips.DeBytes(connection.ReceiveRequestWrap.Payload);
+
             Task.Run(() =>
             {
                 veaTransfer.OnIPs(connection.FromConnection.ConnectId, ips);

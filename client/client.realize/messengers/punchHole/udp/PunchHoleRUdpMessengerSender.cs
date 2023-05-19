@@ -76,7 +76,7 @@ namespace client.realize.messengers.punchHole.udp
         public async Task InputData(PunchHoleStepModel model)
         {
             PunchHoleUdpSteps step = (PunchHoleUdpSteps)model.RawData.PunchStep;
-            if (step ==  PunchHoleUdpSteps.STEP_4) return;
+            //if (step ==  PunchHoleUdpSteps.STEP_4) return;
             OnStepHandler?.Invoke(this, model);
             switch (step)
             {
@@ -154,7 +154,7 @@ namespace client.realize.messengers.punchHole.udp
         {
             if (connectCache.TryGetValue(toid, out ConnectCacheModel cache))
             {
-                cache.SendTimeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendTimeout, State = toid }, 5000);
+                cache.SendTimeout = wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object> { Callback = SendTimeout, State = toid }, 10000);
             }
         }
         private void RemoveSendTimeout(ulong toid)

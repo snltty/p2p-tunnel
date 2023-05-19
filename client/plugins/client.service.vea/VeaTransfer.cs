@@ -565,7 +565,11 @@ namespace client.service.vea
         /// <returns></returns>
         public byte[] ToBytes()
         {
-            var bytes = new byte[1 + 4 + 1 + LanIPs.Length * 5];
+            var bytes = new byte[
+                1   //ip length
+                + 4 //ip
+                + 1 // LanIPs length
+                + LanIPs.Length * 17];
             var span = bytes.AsSpan();
 
             int index = 0;
@@ -582,6 +586,12 @@ namespace client.service.vea
                 index += 4;
                 bytes[index] = LanIPs[i].MaskLength;
                 index += 1;
+                LanIPs[i].MaskValue.ToBytes(bytes.AsMemory(index));
+                index += 4;
+                LanIPs[i].NetWork.ToBytes(bytes.AsMemory(index));
+                index += 4;
+                LanIPs[i].Broadcast.ToBytes(bytes.AsMemory(index));
+                index += 4;
             }
 
             return bytes;
@@ -614,10 +624,22 @@ namespace client.service.vea
                 byte mask = span[index];
                 index += 1;
 
+                ReadOnlyMemory<byte> maskvalue = memory.Slice(index, 4);
+                index += 4;
+
+                ReadOnlyMemory<byte> network = memory.Slice(index, 4);
+                index += 4;
+
+                ReadOnlyMemory<byte> broadcast = memory.Slice(index, 4);
+                index += 4;
+
                 LanIPs[i] = new VeaLanIPAddress
                 {
                     IPAddress = ip.ToUInt32(),
-                    MaskLength = mask
+                    MaskLength = mask,
+                    MaskValue = maskvalue.ToUInt32(),
+                    NetWork = network.ToUInt32(),
+                    Broadcast = broadcast.ToUInt32(),
                 };
             }
         }
