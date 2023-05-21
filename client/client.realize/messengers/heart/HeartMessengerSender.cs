@@ -29,7 +29,7 @@ namespace client.realize.messengers.heart
                 Connection = connection,
                 MessengerId = (ushort)HeartMessengerIds.Alive,
                 Timeout = 2000
-            }).ConfigureAwait(false);
+            }, unconnectedMessage: true).ConfigureAwait(false);
             return resp.Code == MessageResponeCodes.OK && Helper.TrueArray.AsSpan().SequenceEqual(resp.Data.Span);
         }
 

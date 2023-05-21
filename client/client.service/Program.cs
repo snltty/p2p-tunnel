@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime;
 using System.Threading;
 
 namespace client.service
@@ -40,10 +41,13 @@ namespace client.service
     {
         public static void Start()
         {
+            Console.WriteLine($"GCSettings.IsServerGC:{GCSettings.IsServerGC}");
+
             AppDomain.CurrentDomain.UnhandledException += (a, b) =>
             {
                 Logger.Instance.Error(b.ExceptionObject + "");
             };
+
 
             ThreadPool.SetMinThreads(1024, 1024);
             ThreadPool.SetMaxThreads(65535, 65535);
@@ -149,11 +153,14 @@ namespace client.service
                  Console.WriteLine(line);
                  Console.ForegroundColor = currentForeColor;
 
-                 using StreamWriter sw = File.AppendText(Path.Combine("log", $"{DateTime.Now:yyyy-MM-dd}.log"));
-                 sw.WriteLine(line);
-                 sw.Flush();
-                 sw.Close();
-                 sw.Dispose();
+                 if (model.Type >= LoggerTypes.WARNING)
+                 {
+                     using StreamWriter sw = File.AppendText(Path.Combine("log", $"{DateTime.Now:yyyy-MM-dd}.log"));
+                     sw.WriteLine(line);
+                     sw.Flush();
+                     sw.Close();
+                     sw.Dispose();
+                 }
              };
         }
 

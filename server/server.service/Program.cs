@@ -105,11 +105,14 @@ namespace server.service
                 Console.WriteLine(line);
                 Console.ForegroundColor = currentForeColor;
 
-                using StreamWriter sw = File.AppendText(Path.Combine("log", $"{DateTime.Now:yyyy-MM-dd}.log"));
-                sw.WriteLine(line);
-                sw.Flush();
-                sw.Close();
-                sw.Dispose();
+                if(model.Type >= LoggerTypes.WARNING)
+                {
+                    using StreamWriter sw = File.AppendText(Path.Combine("log", $"{DateTime.Now:yyyy-MM-dd}.log"));
+                    sw.WriteLine(line);
+                    sw.Flush();
+                    sw.Close();
+                    sw.Dispose();
+                }
             };
         }
 

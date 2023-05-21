@@ -23,7 +23,6 @@ namespace client.realize.messengers.punchHole.udp
         public async Task Execute(IConnection connection, PunchHoleRequestInfo info)
         {
             await punchHoleUdp.InputData(new PunchHoleStepModel { Connection = connection, RawData = info });
-
         }
     }
 

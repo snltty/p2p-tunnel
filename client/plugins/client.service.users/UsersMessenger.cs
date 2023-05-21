@@ -42,21 +42,11 @@ namespace client.service.users
                 if (resp.Result.Code == MessageResponeCodes.OK)
                 {
                     UserInfo user = resp.Result.Data.GetUTF8String().DeJson<UserInfo>();
-                    messengerSender.SendReply(new MessageRequestWrap
+                    _ = messengerSender.SendOnly(new MessageRequestWrap
                     {
                         Connection = client.Connection,
                         MessengerId = (ushort)UsersMessengerIds.SignIn,
                         Payload = new UserSignInfo { ConnectionId = signInStateInfo.ConnectId, UserId = user.ID }.ToBytes()
-                    }).ContinueWith((resp) =>
-                    {
-                        if (resp.Result.Code == MessageResponeCodes.OK && resp.Result.Data.Span.SequenceEqual(Helper.TrueArray))
-                        {
-                            Logger.Instance.Debug($"向 {client.Name} 节点请求账号权限成功");
-                        }
-                        else
-                        {
-                            Logger.Instance.Debug($"向 {client.Name} 节点请求账号权限失败");
-                        }
                     });
                 }
             });
@@ -64,37 +54,35 @@ namespace client.service.users
 
 
         [MessengerId((ushort)UsersMessengerIds.SignIn)]
-        public async Task SignIn(IConnection connection)
+        public void SignIn(IConnection connection)
         {
             UserSignInfo userSignInfo = new UserSignInfo();
             userSignInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
             userSignInfo.ConnectionId = connection.FromConnection.ConnectId;
 
             //去服务器验证登录是否正确，
-            MessageResponeInfo resp = await messengerSender.SendReply(new common.server.model.MessageRequestWrap
+            _ = messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = signInStateInfo.Connection,
                 MessengerId = (ushort)UsersMessengerIds.SignIn,
                 Payload = userSignInfo.ToBytes()
-            });
-            if (resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray))
+            }).ContinueWith(async (resp) =>
             {
-                if (clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
+                if (resp.Result.Code == MessageResponeCodes.OK && resp.Result.Data.Span.SequenceEqual(Helper.TrueArray))
                 {
-                    if (userMapInfoCaching.Get(userSignInfo.UserId, out UserMapInfo map) == false)
+                    if (clientInfoCaching.Get(connection.FromConnection.ConnectId, out ClientInfo client))
                     {
-                        map = new UserMapInfo { Access = 0, ID = userSignInfo.UserId, ConnectionId = userSignInfo.ConnectionId };
-                        await userMapInfoCaching.Add(map);
+                        if (userMapInfoCaching.Get(userSignInfo.UserId, out UserMapInfo map) == false)
+                        {
+                            map = new UserMapInfo { Access = 0, ID = userSignInfo.UserId, ConnectionId = userSignInfo.ConnectionId };
+                            await userMapInfoCaching.Add(map);
+                        }
+                        //更新客户端的权限值
+                        client.UserAccess = map.Access;
+                        map.ConnectionId = userSignInfo.ConnectionId;
                     }
-                    //更新客户端的权限值
-                    client.UserAccess = map.Access;
-                    map.ConnectionId = userSignInfo.ConnectionId;
-                    connection.FromConnection.Write(Helper.TrueArray);
-                    return;
                 }
-            }
-
-            connection.FromConnection.Write(Helper.FalseArray);
+            });
         }
     }
 }

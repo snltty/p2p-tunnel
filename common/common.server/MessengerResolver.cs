@@ -229,7 +229,7 @@ namespace common.server
             }
             catch (Exception ex)
             {
-                Logger.Instance.Error(ex);
+                Logger.Instance.DebugError(ex);
                 if (receive.Length > 1024)
                 {
                     Logger.Instance.Error($"{connection.Address}:{string.Join(",", receive.Slice(0, 1024).ToArray())}");
@@ -238,7 +238,7 @@ namespace common.server
                 {
                     Logger.Instance.Error($"{connection.Address}:{string.Join(",", receive.ToArray())}");
                 }
-                connection.Disponse();
+                //connection.Disponse();
             }
             finally
             {

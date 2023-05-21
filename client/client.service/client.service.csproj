@@ -7,6 +7,7 @@
 		<TieredPGO>true</TieredPGO>
 		<PublishAot>false</PublishAot>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<!--<ServerGarbageCollection>false</ServerGarbageCollection>-->
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
