@@ -24,16 +24,17 @@ using System.Net;
 using System.Reflection;
 using System.Runtime;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace client.service
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Startup.Start();
 
-            Console.ReadLine();
+            await Helper.Await();
         }
     }
 

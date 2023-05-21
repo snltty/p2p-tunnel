@@ -11,13 +11,13 @@ using server.service.users;
 using common.proxy;
 using server.service.httpProxy;
 using server.service.forward;
-using common.user;
+using System.Threading.Tasks;
 
 namespace server.service
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += (a, b) =>
             {
@@ -69,7 +69,7 @@ namespace server.service
             Logger.Instance.Warning($"当前版本：{Helper.Version}，如果客户端版本与此不一致，则可能无法连接");
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
-            Console.ReadLine();
+            await Helper.Await();
         }
 
 

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace common.libs
 {
@@ -47,6 +50,14 @@ namespace common.libs
                 result[i] = p;
             }
             return result;
+        }
+
+        public static async Task Await()
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            AppDomain.CurrentDomain.ProcessExit += (sender, e) => cancellationTokenSource.Cancel();
+            Console.CancelKeyPress += (sender, e) => cancellationTokenSource.Cancel();
+            await Task.Delay(-1, cancellationTokenSource.Token);
         }
     }
 }
