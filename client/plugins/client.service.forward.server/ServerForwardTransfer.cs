@@ -269,7 +269,6 @@ namespace client.service.forward.server
         {
             bool success = false;
             StringBuilder sb = new StringBuilder();
-
             sb.Append($"注册服务器代理转发【{type.GetDesc((byte)type)}】代理 {item.Domain}:{item.ServerPort} -> {item.LocalIp}:{item.LocalPort}");
             if (resp.Code != MessageResponeCodes.OK)
             {

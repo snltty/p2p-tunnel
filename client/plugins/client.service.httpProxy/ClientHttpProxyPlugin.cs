@@ -49,7 +49,7 @@ namespace client.service.httpProxy
                 }
             }
 
-            if (info.Connection == null || info.Connection.Connected == false)
+            if (info.Connection == null || info.Connection.Connected == false || info.TargetAddress.Length == 0)
             {
                 proxyServer.InputData(info);
                 return false;
@@ -60,6 +60,7 @@ namespace client.service.httpProxy
         private void GetTargetEndPoint(ProxyInfo info)
         {
             info.TargetPort = 80;
+            info.TargetAddress = Helper.EmptyArray;
 
             int portStart = 0;
             Memory<byte> memory = HttpParser.GetHost(info.Data, ref portStart);
@@ -74,17 +75,19 @@ namespace client.service.httpProxy
                     info.TargetPort = port;
                 }
             }
-
-            //是ip
-            if (IPAddress.TryParse(hostMemory.GetString(), out IPAddress ip))
+            if(hostMemory.Length > 0)
             {
-                info.TargetAddress = ip.GetAddressBytes();
-                info.AddressType = ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? EnumProxyAddressType.IPV4 : EnumProxyAddressType.IPV6;
-            }
-            else
-            {
-                info.AddressType = EnumProxyAddressType.Domain;
-                info.TargetAddress = hostMemory;
+                //是ip
+                if (IPAddress.TryParse(hostMemory.GetString(), out IPAddress ip))
+                {
+                    info.TargetAddress = ip.GetAddressBytes();
+                    info.AddressType = ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? EnumProxyAddressType.IPV4 : EnumProxyAddressType.IPV6;
+                }
+                else
+                {
+                    info.AddressType = EnumProxyAddressType.Domain;
+                    info.TargetAddress = hostMemory;
+                }
             }
         }
     }

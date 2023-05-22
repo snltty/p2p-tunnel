@@ -152,7 +152,7 @@ namespace server.service.forward
                         }
                         catch (Exception ex)
                         {
-                            Logger.Instance.DebugError(ex);
+                            Logger.Instance.Error(ex);
                         }
                         try
                         {
@@ -160,7 +160,7 @@ namespace server.service.forward
                         }
                         catch (Exception ex)
                         {
-                            Logger.Instance.DebugError(ex);
+                            Logger.Instance.Error(ex);
                             forwardTargetCaching.Remove(model.SourcePort);
                         }
                     }

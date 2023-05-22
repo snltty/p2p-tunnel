@@ -10,6 +10,7 @@ using System.Net.Mail;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace invokeSpeed
 {
@@ -17,10 +18,14 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            
-            IPAddress ip = IPAddress.Parse("192.168.1.3");
-            uint intip = BinaryPrimitives.ReadUInt32BigEndian(ip.GetAddressBytes());
-            Console.WriteLine(intip);
+
+            string str = "GET /systembc/password.php HTTP/1.0";
+
+            var bytes = Encoding.UTF8.GetBytes(str);
+
+            int port = 0;
+            GetHost(bytes,ref port);
+
 
             /*
             byte maskLength = 19;
@@ -34,6 +39,48 @@ namespace invokeSpeed
             */
 
             //var summary = BenchmarkRunner.Run<Test>();
+        }
+
+
+        private static byte[] hostBytes = Encoding.ASCII.GetBytes("host: ");
+        public static Memory<byte> GetHost(in Memory<byte> memory, ref int portStart)
+        {
+            int keyIndex = -1;
+            var span = memory.Span;
+            for (int i = 0, len = span.Length; i < len; i++)
+            {
+                //找到key之前
+                if (keyIndex == -1)
+                {
+                    if (span[i] == 10)
+                    {
+                        //两个换行，headers已结束
+                        if (i + 1 + hostBytes.Length >= span.Length || i+1>=span.Length || span[i + 1] == 10)
+                        {
+                            break;
+                        }
+                        //因为 headers 是从第二行开始，所以，可以在碰到每个\n时，向后获取与目标key相同长度的内容与之匹配，成功则已找到key，标识位置
+                        Span<byte> keySpan = span.Slice(i + 1, hostBytes.Length);
+                        keySpan[0] |= 32;
+                        if (keySpan[0] == hostBytes[0] && keySpan.SequenceEqual(hostBytes))
+                        {
+                            keyIndex = i + 1 + hostBytes.Length;
+                            i += hostBytes.Length - 1;
+                        }
+                    }
+
+                }
+                //找到key之后，如果碰到了\n，就说明value内容已结束，截取key的位置到当前\n位置，就是值内容
+                else if (span[i] == 10)
+                {
+                    return memory.Slice(keyIndex, i - 1 - keyIndex);
+                }
+                else if (span[i] == 58)
+                {
+                    portStart = i - keyIndex;
+                }
+            }
+            return Array.Empty<byte>();
         }
 
 

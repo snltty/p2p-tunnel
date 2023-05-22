@@ -261,7 +261,7 @@ namespace common.proxy
             catch (Exception ex)
             {
                 CloseClientSocket(e);
-                Logger.Instance.DebugError($"{token.Request.RequestId} {ex + ""}");
+                Logger.Instance.Error($"{token.Request.RequestId} {ex + ""}");
             }
         }
 
@@ -297,16 +297,22 @@ namespace common.proxy
         private async Task Receive(ProxyInfo info)
         {
             await Semaphore.WaitAsync();
-            if (info.Data.Length > 0 || info.Step > EnumProxyStep.Command)
+            try
             {
-                if (info.ProxyPlugin.HandleRequestData(info))
+                if (info.Data.Length > 0 || info.Step > EnumProxyStep.Command)
                 {
-                    bool res = await proxyMessengerSender.Request(info);
-                    if (res == false)
+                    if (info.ProxyPlugin.HandleRequestData(info))
                     {
-                        clientsManager.TryRemove(info.RequestId, out _);
+                        bool res = await proxyMessengerSender.Request(info);
+                        if (res == false)
+                        {
+                            clientsManager.TryRemove(info.RequestId, out _);
+                        }
                     }
                 }
+            }
+            catch (Exception)
+            {
             }
             Semaphore.Release();
         }
@@ -369,7 +375,7 @@ namespace common.proxy
                 {
                     if (clientsManager.TryGetValue(info.RequestId, out ProxyUserToken token))
                     {
-                        if(info.Step == EnumProxyStep.Command)
+                        if (info.Step == EnumProxyStep.Command)
                         {
                             if ((EnumProxyCommandStatus)info.Data.Span[0] != EnumProxyCommandStatus.ConnecSuccess)
                             {

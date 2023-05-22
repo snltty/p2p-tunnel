@@ -23,7 +23,7 @@ namespace common.forward
         public IPAddress BroadcastBind => IPAddress.Any;
         public virtual uint Access => 0b00000000_00000000_00000000_00001000;
         public virtual string Name => "port forward";
-    
+
         public Action<ushort> OnStarted { get; set; } = (port) => { };
         public Action<ushort> OnStoped { get; set; } = (port) => { };
 
@@ -89,8 +89,11 @@ namespace common.forward
             else
             {
                 int portStart = 0;
-                string host = HttpParser.GetHost(info.Data, ref portStart).GetString();
-                forwardTargetProvider.Get(host, info);
+                Memory<byte> hostBytes = HttpParser.GetHost(info.Data, ref portStart);
+                if (hostBytes.Length > 0)
+                {
+                    forwardTargetProvider.Get(hostBytes.GetString(), info);
+                }
             }
         }
     }

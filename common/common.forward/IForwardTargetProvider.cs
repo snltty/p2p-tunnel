@@ -11,10 +11,6 @@ namespace common.forward
         void Get(ushort port, ProxyInfo info);
     }
 
-    /// <summary>
-    /// 目标缓存器，缓存注册的监听和转发信息，以提供后续查询
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
     public interface IForwardTargetCaching<T>
     {
         T Get(string host);

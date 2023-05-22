@@ -24,8 +24,8 @@ namespace common.libs
                 {
                     if (span[i] == 10)
                     {
-                        //两个换行，headers已结束
-                        if (span[i + 1] == 10)
+                        //索引超出 或者 两个换行，headers已结束
+                        if (i + 1 + hostBytes.Length >= span.Length || i + 1 >= span.Length || span[i + 1] == 10)
                         {
                             break;
                         }
@@ -52,6 +52,7 @@ namespace common.libs
             }
             return Array.Empty<byte>();
         }
+
         /// <summary>
         /// 构造一条简单的http消息
         /// </summary>
