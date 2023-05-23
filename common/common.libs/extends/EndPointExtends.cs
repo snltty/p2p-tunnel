@@ -10,34 +10,22 @@ namespace common.libs.extends
         public static Memory<byte> ipv6Loopback = IPAddress.IPv6Loopback.GetAddressBytes();
         public static Memory<byte> ipv6Multicast = IPAddress.Parse("ff00::").GetAddressBytes();
         public static Memory<byte> ipv6Local = IPAddress.Parse("fe80::").GetAddressBytes();
-        /// <summary>
-        /// 判断是不是本地地址
-        /// </summary>
-        /// <param name="endPoint"></param>
-        /// <returns></returns>
+
         public static bool IsLan(this IPEndPoint endPoint)
         {
             if (endPoint == null) return false;
             return endPoint.Address.IsLan();
         }
-
-        /// <summary>
-        /// 判断是不是本地地址
-        /// </summary>
-        /// <param name="adress"></param>
-        /// <returns></returns>
         public static bool IsLan(this IPAddress address)
         {
             if (address == null) return false;
 
             return IsLan(address.GetAddressBytes().AsSpan());
         }
-
         public static bool IsLan(this Memory<byte> address)
         {
             return IsLan(address.Span);
         }
-
         public static bool IsLan(Span<byte> address)
         {
             if (address.Length < 4) return false;

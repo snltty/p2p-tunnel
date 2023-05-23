@@ -88,31 +88,22 @@ namespace common.proxy
         }
         public bool Validate(ProxyInfo info)
         {
-            return
-                (
-                info.ProxyPlugin.ConnectEnable
-                || serviceAccessValidator.Validate(info.Connection.ConnectId, info.ProxyPlugin.Access)
-                )
-                && FirewallDenied(info) == false;
+            return (info.ProxyPlugin.ConnectEnable || serviceAccessValidator.Validate(info.Connection.ConnectId, info.ProxyPlugin.Access)) && FirewallDenied(info) == false;
         }
 
         /// <summary>
         /// 防火墙阻止
         /// </summary>
         /// <param name="info"></param>
-        /// <param name="protocolType"></param>
         /// <returns></returns>
         private bool FirewallDenied(ProxyInfo info)
         {
             FirewallProtocolType protocolType = info.Step == EnumProxyStep.Command && info.Command == EnumProxyCommand.Connect ? FirewallProtocolType.TCP : FirewallProtocolType.UDP;
-
             //阻止IPV6的内网ip
             if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
             {
                 Span<byte> span = info.TargetAddress.Span;
-                return span.SequenceEqual(EndPointExtends.ipv6Loopback.Span)
-                     || span.SequenceEqual(EndPointExtends.ipv6Multicast.Span)
-                     || (span[0] == EndPointExtends.ipv6Local.Span[0] && span[1] == EndPointExtends.ipv6Local.Span[1]);
+                return span.SequenceEqual(EndPointExtends.ipv6Loopback.Span) || span.SequenceEqual(EndPointExtends.ipv6Multicast.Span) || (span[0] == EndPointExtends.ipv6Local.Span[0] && span[1] == EndPointExtends.ipv6Local.Span[1]);
             }
             //IPV4的，防火墙验证
             else if (info.TargetAddress.Length == 4)
@@ -136,10 +127,7 @@ namespace common.proxy
                         for (int i = 0; i < cache.IPs.Length; i++)
                         {
                             //有一项匹配就不通过
-                            if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
-                            {
-                                return true;
-                            }
+                            if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return true;
                         }
                     }
                 }
@@ -158,10 +146,7 @@ namespace common.proxy
                             for (int i = 0; i < cache.IPs.Length; i++)
                             {
                                 //有一项通过就通过
-                                if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork)
-                                {
-                                    return false;
-                                }
+                                if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return false;
                             }
                         }
 

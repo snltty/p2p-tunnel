@@ -18,138 +18,192 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-
-            string str = "GET /systembc/password.php HTTP/1.0";
-
-            var bytes = Encoding.UTF8.GetBytes(str);
-
-            int port = 0;
-            GetHost(bytes,ref port);
-
-
-            /*
-            byte maskLength = 19;
-            uint maskValue = 0xffffffff << (32 - maskLength);
-
-            uint netWork = ip & maskValue;
-            uint gb = ip | (~maskValue);
-
-            Console.WriteLine($"网络号:{string.Join(",", BitConverter.GetBytes(netWork).Reverse())}");
-            Console.WriteLine($"广播:{string.Join(",", BitConverter.GetBytes(gb).Reverse())}");
-            */
-
-            //var summary = BenchmarkRunner.Run<Test>();
+            var summary = BenchmarkRunner.Run<Test>();
         }
 
-
-        private static byte[] hostBytes = Encoding.ASCII.GetBytes("host: ");
-        public static Memory<byte> GetHost(in Memory<byte> memory, ref int portStart)
-        {
-            int keyIndex = -1;
-            var span = memory.Span;
-            for (int i = 0, len = span.Length; i < len; i++)
-            {
-                //找到key之前
-                if (keyIndex == -1)
-                {
-                    if (span[i] == 10)
-                    {
-                        //两个换行，headers已结束
-                        if (i + 1 + hostBytes.Length >= span.Length || i+1>=span.Length || span[i + 1] == 10)
-                        {
-                            break;
-                        }
-                        //因为 headers 是从第二行开始，所以，可以在碰到每个\n时，向后获取与目标key相同长度的内容与之匹配，成功则已找到key，标识位置
-                        Span<byte> keySpan = span.Slice(i + 1, hostBytes.Length);
-                        keySpan[0] |= 32;
-                        if (keySpan[0] == hostBytes[0] && keySpan.SequenceEqual(hostBytes))
-                        {
-                            keyIndex = i + 1 + hostBytes.Length;
-                            i += hostBytes.Length - 1;
-                        }
-                    }
-
-                }
-                //找到key之后，如果碰到了\n，就说明value内容已结束，截取key的位置到当前\n位置，就是值内容
-                else if (span[i] == 10)
-                {
-                    return memory.Slice(keyIndex, i - 1 - keyIndex);
-                }
-                else if (span[i] == 58)
-                {
-                    portStart = i - keyIndex;
-                }
-            }
-            return Array.Empty<byte>();
-        }
 
 
     }
 
-    public sealed class VeaLanIPAddressOnLine
+    public sealed class FirewallCache
     {
-        public Dictionary<uint, VeaLanIPAddressOnLineItem> Items { get; set; } = new Dictionary<uint, VeaLanIPAddressOnLineItem>();
-
-        public byte[] ToBytes()
-        {
-            if (Items.Count == 0) return Helper.EmptyArray;
-
-            MemoryStream memoryStream = new MemoryStream();
-            byte[] keyBytes = new byte[4];
-            foreach (var item in Items)
-            {
-                item.Key.ToBytes(keyBytes);
-                memoryStream.Write(keyBytes, 0, keyBytes.Length);
-
-                memoryStream.WriteByte((byte)(item.Value.Online ? 1 : 0));
-
-                ReadOnlySpan<byte> name = item.Value.Name.GetUTF16Bytes();
-                memoryStream.WriteByte((byte)name.Length);
-                memoryStream.WriteByte((byte)item.Value.Name.Length);
-                memoryStream.Write(name);
-            }
-
-            return memoryStream.ToArray();
-        }
-
-        public void DeBytes(ReadOnlyMemory<byte> memory)
-        {
-            if (memory.Length == 0) return;
-
-            ReadOnlySpan<byte> span = memory.Span;
-
-            int index = 0;
-            while (index < memory.Length)
-            {
-                uint key = span.Slice(index).ToUInt32();
-                index += 4;
-
-                bool online = span[index] == 1;
-                index += 1;
-
-                string name = span.Slice(index + 2, span[index]).GetUTF16String(span[index + 1]);
-                index += 1 + 1 + span[index];
-
-                Items[key] = new VeaLanIPAddressOnLineItem { Online = online, Name = name };
-            }
-        }
-
+        public FirewallCacheIp[] IPs { get; set; } = Array.Empty<FirewallCacheIp>();
     }
-
-    public sealed class VeaLanIPAddressOnLineItem
+    public sealed class FirewallCacheIp
     {
-        public bool Online { get; set; }
-        public string Name { get; set; } = string.Empty;
+        public uint MaskValue { get; set; }
+        public uint NetWork { get; set; }
     }
-
 
 
     [MemoryDiagnoser]
     public unsafe class Test
     {
+
+        public Dictionary<uint, FirewallCache> AllowFirewalls { get; set; } = new Dictionary<uint, FirewallCache>();
+        public Dictionary<uint, FirewallCache> DeniedFirewalls { get; set; } = new Dictionary<uint, FirewallCache>();
+        public ProxyInfo proxyInfo = new ProxyInfo
+        {
+            ListenPort = 8080,
+            PluginId = 1,
+            RequestId = 0,
+            Step = EnumProxyStep.Command,
+            Command = EnumProxyCommand.Connect,
+            TargetAddress = new byte[] { 127, 0, 0, 1 },
+            TargetPort = 8080,
+
+        };
+        [StructLayout(LayoutKind.Explicit)]
+        public readonly struct FirewallKey
+        {
+            [FieldOffset(0)]
+            public readonly uint Memory;
+
+            [FieldOffset(0)]
+            public readonly ushort Port;
+
+            [FieldOffset(2)]
+            public readonly FirewallProtocolType Protocol;
+
+            [FieldOffset(3)]
+            public readonly byte PluginId;
+
+            public FirewallKey(ushort port, FirewallProtocolType protocol, byte pluginId)
+            {
+                Port = port;
+                Protocol = protocol;
+                PluginId = pluginId;
+            }
+        }
+        public enum EnumProxyStep : byte
+        {
+            Command = 1,
+            /// <summary>
+            /// TCP转发
+            /// </summary>
+            ForwardTcp = 2,
+            /// <summary>
+            /// UDP转发
+            /// </summary>
+            ForwardUdp = 3
+        }
+        public enum EnumProxyCommand : byte
+        {
+            /// <summary>
+            /// 连接上游服务器
+            /// </summary>
+            Connect = 1,
+            /// <summary>
+            /// 绑定，客户端会接收来自代理服务器的链接，著名的FTP被动模式
+            /// </summary>
+            Bind = 2,
+            /// <summary>
+            /// UDP中继
+            /// </summary>
+            UdpAssociate = 3
+        }
+        public enum FirewallProtocolType : byte
+        {
+            TCP = 1,
+            UDP = 2,
+            TCP_UDP = TCP | UDP,
+        }
+        public sealed class ProxyInfo
+        {
+            public byte Rsv { get; set; }
+            public EnumProxyStep Step { get; set; } = EnumProxyStep.Command;
+            public EnumProxyCommand Command { get; set; } = EnumProxyCommand.Connect;
+            public byte PluginId { get; set; }
+            public uint RequestId { get; set; }
+            public IPEndPoint SourceEP { get; set; }
+            public Memory<byte> TargetAddress { get; set; }
+            public ushort TargetPort { get; set; }
+            public Memory<byte> Data { get; set; }
+            /// <summary>
+            /// 监听的端口
+            /// </summary>
+            public ushort ListenPort { get; set; }
+        }
+
+
+        [GlobalSetup]
+        public void Startup()
+        {
+            for (uint i = 0; i < 100; i++)
+            {
+                AllowFirewalls.Add(i, new FirewallCache { IPs = new FirewallCacheIp[] { new FirewallCacheIp { MaskValue = 0, NetWork = 0 } } });
+                DeniedFirewalls.Add(i, new FirewallCache { IPs = new FirewallCacheIp[] { new FirewallCacheIp { MaskValue = 0, NetWork = 0 } } });
+            }
+        }
+
         [Benchmark]
         public void Test1()
         {
+            FirewallDenied(proxyInfo);
+        }
+
+
+        private bool FirewallDenied(ProxyInfo info)
+        {
+            FirewallProtocolType protocolType = info.Step == EnumProxyStep.Command && info.Command == EnumProxyCommand.Connect ? FirewallProtocolType.TCP : FirewallProtocolType.UDP;
+            //阻止IPV6的内网ip
+            if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
+            {
+                Span<byte> span = info.TargetAddress.Span;
+                return span.SequenceEqual(EndPointExtends.ipv6Loopback.Span) || span.SequenceEqual(EndPointExtends.ipv6Multicast.Span) || (span[0] == EndPointExtends.ipv6Local.Span[0] && span[1] == EndPointExtends.ipv6Local.Span[1]);
+            }
+            //IPV4的，防火墙验证
+            else if (info.TargetAddress.Length == 4)
+            {
+                uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
+
+                uint keyGlobal = new FirewallKey(info.TargetPort, protocolType, 0).Memory;
+                uint keyGlobal0 = new FirewallKey(0, protocolType, 0).Memory;
+                uint keyPlugin = new FirewallKey(info.TargetPort, protocolType, info.PluginId).Memory;
+                uint keyPlugin0 = new FirewallKey(0, protocolType, info.PluginId).Memory;
+
+                //黑名单
+                if (DeniedFirewalls.Count > 0)
+                {
+                    //全局0 || 全局端口 || 局部0 || 局部端口
+                    bool res = DeniedFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
+                        || DeniedFirewalls.TryGetValue(keyGlobal, out cache)
+                        || DeniedFirewalls.TryGetValue(keyPlugin0, out cache)
+                        || DeniedFirewalls.TryGetValue(keyPlugin, out cache);
+                    if (res)
+                    {
+                        //有一项匹配就不通过
+                        for (int i = 0; i < cache.IPs.Length; i++)
+                        {
+                            if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return true;
+                        }
+                    }
+                }
+                //局域网或者组播，验证白名单
+                if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
+                {
+                    if (AllowFirewalls.Count > 0)
+                    {
+                        //全局0 || 全局端口 || 局部0 || 局部端口
+                        bool res = AllowFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
+                            || AllowFirewalls.TryGetValue(keyGlobal, out cache)
+                            || AllowFirewalls.TryGetValue(keyPlugin0, out cache)
+                            || AllowFirewalls.TryGetValue(keyPlugin, out cache);
+                        if (res)
+                        {
+                            //有一项通过就通过
+                            for (int i = 0; i < cache.IPs.Length; i++)
+                            {
+                                if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+
+            }
+            //其它的直接通过
+            return false;
         }
     }
 }
