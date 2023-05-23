@@ -18,6 +18,7 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
+           
             var summary = BenchmarkRunner.Run<Test>();
         }
 
@@ -145,6 +146,7 @@ namespace invokeSpeed
 
         private bool FirewallDenied(ProxyInfo info)
         {
+            FirewallCache cache = new FirewallCache { IPs = new FirewallCacheIp[] { new FirewallCacheIp { MaskValue=0, NetWork=0 } } };
             FirewallProtocolType protocolType = info.Step == EnumProxyStep.Command && info.Command == EnumProxyCommand.Connect ? FirewallProtocolType.TCP : FirewallProtocolType.UDP;
             //阻止IPV6的内网ip
             if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
@@ -166,16 +168,18 @@ namespace invokeSpeed
                 if (DeniedFirewalls.Count > 0)
                 {
                     //全局0 || 全局端口 || 局部0 || 局部端口
-                    bool res = DeniedFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
+                    bool res = false;
+                    /*DeniedFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
                         || DeniedFirewalls.TryGetValue(keyGlobal, out cache)
                         || DeniedFirewalls.TryGetValue(keyPlugin0, out cache)
                         || DeniedFirewalls.TryGetValue(keyPlugin, out cache);
-                    if (res)
+                    */
+                    if (cache != null)
                     {
                         //有一项匹配就不通过
                         for (int i = 0; i < cache.IPs.Length; i++)
                         {
-                            if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return true;
+                           // if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return true;
                         }
                     }
                 }
@@ -185,16 +189,19 @@ namespace invokeSpeed
                     if (AllowFirewalls.Count > 0)
                     {
                         //全局0 || 全局端口 || 局部0 || 局部端口
-                        bool res = AllowFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
+                        bool res = false;
+                        /*
+                         * AllowFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
                             || AllowFirewalls.TryGetValue(keyGlobal, out cache)
                             || AllowFirewalls.TryGetValue(keyPlugin0, out cache)
                             || AllowFirewalls.TryGetValue(keyPlugin, out cache);
-                        if (res)
+                        */
+                        if (cache != null)
                         {
                             //有一项通过就通过
                             for (int i = 0; i < cache.IPs.Length; i++)
                             {
-                                if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return false;
+                                //if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return false;
                             }
                         }
                     }
