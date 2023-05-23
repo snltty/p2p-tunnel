@@ -14,7 +14,6 @@ using client.service.vea;
 using common.libs;
 using common.proxy;
 using common.server;
-using common.user;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,33 +57,29 @@ namespace client.service
                 typeof(ClientServer).Assembly,
                 typeof(LoggerClientService).Assembly,
                 typeof(PunchHoleMessenger).Assembly,
+                typeof(common.server.model.SignInMessengerIds).Assembly,
 
                 typeof(ProxyMessenger).Assembly,
+                typeof(ProxyClientService).Assembly,
+                typeof(ProxyMessengerIds).Assembly,
 
                 typeof(ForwardClientService).Assembly,
                 typeof(ServerForwardClientService).Assembly,
+                typeof(common.forward.ForwardMessengerIds).Assembly,
 
                 typeof(HttpProxyClientService).Assembly,
                 typeof(ServerHttpProxyClientService).Assembly,
+                typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
 
                 typeof(Socks5ClientService).Assembly,
                 typeof(ServerSocks5ClientService).Assembly,
+                typeof(common.socks5.Socks5MessengerIds).Assembly,
 
                 typeof(VeaClientService).Assembly,
 
                 typeof(UsersClientService).Assembly,
                 typeof(ServerUsersClientService).Assembly,
-
-                typeof(ProxyClientService).Assembly,
-
-                //以下是为了获取信息
-                typeof(common.server.model.SignInMessengerIds).Assembly,
-                typeof(ProxyMessengerIds).Assembly,
-                typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
-                typeof(common.socks5.Socks5MessengerIds).Assembly,
-                typeof(common.forward.ForwardMessengerIds).Assembly,
-
-                typeof(UsersMessengerIds).Assembly,
+                typeof(common.user.UsersMessengerIds).Assembly,
 
             }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
 

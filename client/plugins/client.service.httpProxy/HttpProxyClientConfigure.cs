@@ -1,7 +1,7 @@
 ﻿using client.service.ui.api.clientServer;
 using System.Threading.Tasks;
 
-namespace client.service.forward
+namespace client.service.httpProxy
 {
     public sealed class HttpProxyClientConfigure : IClientConfigure
     {

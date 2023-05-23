@@ -5,6 +5,7 @@
 	</PropertyGroup>
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
+		<TieredPGO>true</TieredPGO>
 		<PublishAot>false</PublishAot>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
@@ -33,11 +34,6 @@
 		</Content>
 		<Content Include="logo.ico" />
 	</ItemGroup>
-	
-	<ItemGroup>
-	  <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
-	</ItemGroup>
-
 	<ItemGroup>
 	  <ProjectReference Include="..\..\common\common.libs\common.libs.csproj" />
 	  <ProjectReference Include="..\..\common\common.server\common.server.csproj" />
