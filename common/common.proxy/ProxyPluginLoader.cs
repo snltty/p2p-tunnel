@@ -110,50 +110,48 @@ namespace common.proxy
             {
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
 
-                uint keyGlobal = new FirewallKey(info.TargetPort, protocolType, 0).Memory;
-                uint keyGlobal0 = new FirewallKey(0, protocolType, 0).Memory;
-                uint keyPlugin = new FirewallKey(info.TargetPort, protocolType, info.PluginId).Memory;
-                uint keyPlugin0 = new FirewallKey(0, protocolType, info.PluginId).Memory;
+
+                FirewallCacheType[] denieds = new FirewallCacheType[2];
+                FirewallCacheType[] allows = new FirewallCacheType[2];
+                denieds[0] = config.Firewall0[(int)FirewallType.Denied];
+                allows[0] = config.Firewall0[(int)FirewallType.Denied];
+
+                if (config.Firewalls.TryGetValue(info.TargetPort, out FirewallCacheType[] caches))
+                {
+                    denieds[1] = caches[(int)FirewallType.Denied];
+                    allows[1] = caches[(int)FirewallType.Allow];
+                }
 
                 //黑名单
-                if (config.DeniedFirewalls.Count > 0)
+                for (int i = 0; i < denieds.Length; i++)
                 {
-                    bool res = config.DeniedFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
-                        || config.DeniedFirewalls.TryGetValue(keyGlobal, out cache)
-                        || config.DeniedFirewalls.TryGetValue(keyPlugin0, out cache)
-                        || config.DeniedFirewalls.TryGetValue(keyPlugin, out cache);
-                    if (res)
+                    if (denieds[i] != null && (denieds[i].PluginIds & info.PluginId) == info.PluginId && (denieds[i].Protocols & protocolType) == protocolType)
                     {
-                        for (int i = 0; i < cache.IPs.Length; i++)
+                        for (int j = 0; j < denieds[i].Ips.Length; j++)
                         {
+                            FirewallCacheIp ipcache = new FirewallCacheIp(denieds[i].Ips[j]);
                             //有一项匹配就不通过
-                            if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return true;
+                            if ((ip & ipcache.MaskValue) == ipcache.NetWork) return true;
                         }
                     }
                 }
                 //局域网或者组播，验证白名单
                 if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
                 {
-                    if (config.AllowFirewalls.Count > 0)
+                    for (int i = 0; i < allows.Length; i++)
                     {
-                        bool res = config.AllowFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
-                       || config.AllowFirewalls.TryGetValue(keyGlobal, out cache)
-                       || config.AllowFirewalls.TryGetValue(keyPlugin0, out cache)
-                       || config.AllowFirewalls.TryGetValue(keyPlugin, out cache);
-
-                        if (res)
+                        if (allows[i] != null && (allows[i].PluginIds & info.PluginId) == info.PluginId && (allows[i].Protocols & protocolType) == protocolType)
                         {
-                            for (int i = 0; i < cache.IPs.Length; i++)
+                            for (int j = 0; j < allows[i].Ips.Length; j++)
                             {
-                                //有一项通过就通过
-                                if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return false;
+                                FirewallCacheIp ipcache = new FirewallCacheIp(allows[i].Ips[j]);
+                                //有一项匹配就通过
+                                if ((ip & ipcache.MaskValue) == ipcache.NetWork) return false;
                             }
                         }
-
                     }
                     return true;
                 }
-
             }
             //其它的直接通过
             return false;

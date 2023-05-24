@@ -31,12 +31,6 @@ namespace common.proxy
         }
 
         public List<FirewallItem> Firewall { get; set; } = new List<FirewallItem>();
-        [JsonIgnore]
-        public Dictionary<uint, FirewallCache> AllowFirewalls { get; set; } = new Dictionary<uint, FirewallCache>();
-        [JsonIgnore]
-        public Dictionary<uint, FirewallCache> DeniedFirewalls { get; set; } = new Dictionary<uint, FirewallCache>();
-
-
         public async Task<bool> AddFirewall(FirewallItem model)
         {
             FirewallItem item = Firewall.FirstOrDefault(c => c.ID == model.ID) ?? new FirewallItem { };
@@ -70,37 +64,65 @@ namespace common.proxy
             await SaveConfig();
             return true;
         }
+        public async Task<Config> ReadConfig()
+        {
+            Config config = await configDataProvider.Load();
+            return config;
+        }
+        public async Task<string> ReadString()
+        {
+            return await configDataProvider.LoadString();
+        }
+        public async Task SaveConfig(string jsonStr)
+        {
+            Config config = jsonStr.DeJson<Config>();
+            Firewall = config.Firewall;
+            ParseFirewall();
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+        }
+        public async Task SaveConfig()
+        {
+            ParseFirewall();
+            await configDataProvider.Save(this).ConfigureAwait(false);
+        }
 
+
+        [JsonIgnore]
+        public FirewallCacheType[] Firewall0 { get; } = new FirewallCacheType[2];
+        [JsonIgnore]
+        public Dictionary<ushort, FirewallCacheType[]> Firewalls { get; } = new Dictionary<ushort, FirewallCacheType[]>();
         private void ParseFirewall()
         {
-            AllowFirewalls.Clear();
-            DeniedFirewalls.Clear();
+            Array.Clear(Firewall0);
+            Firewalls.Clear();
             foreach (FirewallItem item in Firewall)
             {
                 try
                 {
                     ushort[] ports = PrarsePort(item.Port);
-                    FirewallCacheIp[] ips = ParseIp(item.IP);
-                    FirewallCache cache = new FirewallCache
-                    {
-                        IPs = ips
-                    };
+                    ulong[] ips = ParseIp(item.IP);
                     for (int i = 0; i < ports.Length; i++)
                     {
-                        if (item.Type == FirewallType.Allow)
+                        FirewallCacheType[] types = Firewall0;
+                        if (ports[i] != 0)
                         {
-                            if ((item.Protocol & FirewallProtocolType.TCP) == FirewallProtocolType.TCP)
-                                AllowFirewalls[new FirewallKey(ports[i], FirewallProtocolType.TCP, item.PluginId).Memory] = cache;
-                            if ((item.Protocol & FirewallProtocolType.UDP) == FirewallProtocolType.UDP)
-                                AllowFirewalls[new FirewallKey(ports[i], FirewallProtocolType.UDP, item.PluginId).Memory] = cache;
+                            if (Firewalls.TryGetValue(ports[i], out types) == false)
+                            {
+                                types = new FirewallCacheType[2];
+                                Firewalls.Add(ports[i], types);
+                            }
                         }
-                        else
+
+                        FirewallCacheType type = types[(byte)item.Type];
+                        if(type == null)
                         {
-                            if ((item.Protocol & FirewallProtocolType.TCP) == FirewallProtocolType.TCP)
-                                DeniedFirewalls[new FirewallKey(ports[i], FirewallProtocolType.TCP, item.PluginId).Memory] = cache;
-                            if ((item.Protocol & FirewallProtocolType.UDP) == FirewallProtocolType.UDP)
-                                DeniedFirewalls[new FirewallKey(ports[i], FirewallProtocolType.UDP, item.PluginId).Memory] = cache;
+                            type = new FirewallCacheType();
+                            types[(byte)item.Type] = type;
                         }
+
+                        type.PluginIds |= item.PluginId;
+                        type.Protocols |= item.Protocol;
+                        type.Ips = type.Ips.Concat(type.Ips).Distinct().ToArray();
                     }
                 }
                 catch (Exception)
@@ -127,7 +149,7 @@ namespace common.proxy
 
             }).ToArray();
         }
-        private FirewallCacheIp[] ParseIp(string[] ips)
+        private ulong[] ParseIp(string[] ips)
         {
             return ips.Select(c => c.Split(Helper.SeparatorCharSlash)).Select(c =>
             {
@@ -140,46 +162,49 @@ namespace common.proxy
                 }
                 //掩码十进制
                 uint maskValue = NetworkHelper.MaskValue(maskLength);
-                return new FirewallCacheIp
-                {
-                    MaskValue = maskValue,
-                    //网络号
-                    NetWork = ip & maskValue
-                };
+                return new FirewallCacheIp(maskValue, ip & maskValue).Value;
             }).ToArray();
         }
 
-        public async Task<Config> ReadConfig()
-        {
-            Config config = await configDataProvider.Load();
-            return config;
-        }
-        public async Task<string> ReadString()
-        {
-            return await configDataProvider.LoadString();
-        }
-        public async Task SaveConfig(string jsonStr)
-        {
-            Config config = jsonStr.DeJson<Config>();
-            Firewall = config.Firewall;
-            ParseFirewall();
-            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
-        }
-        public async Task SaveConfig()
-        {
-            ParseFirewall();
-            await configDataProvider.Save(this).ConfigureAwait(false);
-        }
+
     }
 
-    public sealed class FirewallCache
+
+    public sealed class FirewallCacheType
     {
-        public FirewallCacheIp[] IPs { get; set; } = Array.Empty<FirewallCacheIp>();
+        public FirewallProtocolType Protocols { get; set; }
+        public byte PluginIds { get; set; }
+        public ulong[] Ips { get; set; } = Array.Empty<ulong>();
     }
-    public sealed class FirewallCacheIp
+    [StructLayout(LayoutKind.Explicit)]
+    public struct FirewallCacheIp
     {
-        public uint MaskValue { get; set; }
-        public uint NetWork { get; set; }
+        [FieldOffset(0)]
+        public ulong Value;
+        [FieldOffset(0)]
+        public uint MaskValue;
+        [FieldOffset(4)]
+        public uint NetWork;
+        public FirewallCacheIp(ulong value)
+        {
+            Value = value;
+        }
+        public FirewallCacheIp(uint maskValue, uint netWork)
+        {
+            MaskValue = maskValue;
+            NetWork = netWork;
+        }
+    }
+    public enum FirewallProtocolType : byte
+    {
+        TCP = 1,
+        UDP = 2,
+        TCP_UDP = TCP | UDP,
+    }
+    public enum FirewallType : byte
+    {
+        Allow = 0,
+        Denied = 1,
     }
 
     public sealed class FirewallItem
@@ -193,39 +218,5 @@ namespace common.proxy
         public string Remark { get; set; } = string.Empty;
     }
 
-    public enum FirewallProtocolType : byte
-    {
-        TCP = 1,
-        UDP = 2,
-        TCP_UDP = TCP | UDP,
-    }
-    public enum FirewallType : byte
-    {
-        Allow = 0,
-        Denied = 1,
-    }
-
-
-    [StructLayout(LayoutKind.Explicit)]
-    public readonly struct FirewallKey
-    {
-        [FieldOffset(0)]
-        public readonly uint Memory;
-
-        [FieldOffset(0)]
-        public readonly ushort Port;
-
-        [FieldOffset(2)]
-        public readonly FirewallProtocolType Protocol;
-
-        [FieldOffset(3)]
-        public readonly byte PluginId;
-
-        public FirewallKey(ushort port, FirewallProtocolType protocol, byte pluginId)
-        {
-            Port = port;
-            Protocol = protocol;
-            PluginId = pluginId;
-        }
-    }
+   
 }

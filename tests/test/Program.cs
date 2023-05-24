@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Running;
 using common.libs;
 using common.libs.extends;
+using Iced.Intel;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
@@ -11,6 +12,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace invokeSpeed
 {
@@ -18,124 +20,46 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-           
-            var summary = BenchmarkRunner.Run<Test>();
+             var summary = BenchmarkRunner.Run<Test>();
         }
-
-
-
     }
 
-    public sealed class FirewallCache
-    {
-        public FirewallCacheIp[] IPs { get; set; } = Array.Empty<FirewallCacheIp>();
-    }
-    public sealed class FirewallCacheIp
-    {
-        public uint MaskValue { get; set; }
-        public uint NetWork { get; set; }
-    }
 
 
     [MemoryDiagnoser]
     public unsafe class Test
     {
+        public static FirewallCacheType[] Firewall0 { get; } = new FirewallCacheType[2];
+        public static Dictionary<ushort, FirewallCacheType[]> Firewalls { get; } = new Dictionary<ushort, FirewallCacheType[]>();
 
-        public Dictionary<uint, FirewallCache> AllowFirewalls { get; set; } = new Dictionary<uint, FirewallCache>();
-        public Dictionary<uint, FirewallCache> DeniedFirewalls { get; set; } = new Dictionary<uint, FirewallCache>();
         public ProxyInfo proxyInfo = new ProxyInfo
         {
-            ListenPort = 8080,
+            ListenPort = 50,
             PluginId = 1,
             RequestId = 0,
             Step = EnumProxyStep.Command,
             Command = EnumProxyCommand.Connect,
             TargetAddress = new byte[] { 127, 0, 0, 1 },
-            TargetPort = 8080,
+            TargetPort = 50,
 
         };
-        [StructLayout(LayoutKind.Explicit)]
-        public readonly struct FirewallKey
-        {
-            [FieldOffset(0)]
-            public readonly uint Memory;
-
-            [FieldOffset(0)]
-            public readonly ushort Port;
-
-            [FieldOffset(2)]
-            public readonly FirewallProtocolType Protocol;
-
-            [FieldOffset(3)]
-            public readonly byte PluginId;
-
-            public FirewallKey(ushort port, FirewallProtocolType protocol, byte pluginId)
-            {
-                Port = port;
-                Protocol = protocol;
-                PluginId = pluginId;
-            }
-        }
-        public enum EnumProxyStep : byte
-        {
-            Command = 1,
-            /// <summary>
-            /// TCP转发
-            /// </summary>
-            ForwardTcp = 2,
-            /// <summary>
-            /// UDP转发
-            /// </summary>
-            ForwardUdp = 3
-        }
-        public enum EnumProxyCommand : byte
-        {
-            /// <summary>
-            /// 连接上游服务器
-            /// </summary>
-            Connect = 1,
-            /// <summary>
-            /// 绑定，客户端会接收来自代理服务器的链接，著名的FTP被动模式
-            /// </summary>
-            Bind = 2,
-            /// <summary>
-            /// UDP中继
-            /// </summary>
-            UdpAssociate = 3
-        }
-        public enum FirewallProtocolType : byte
-        {
-            TCP = 1,
-            UDP = 2,
-            TCP_UDP = TCP | UDP,
-        }
-        public sealed class ProxyInfo
-        {
-            public byte Rsv { get; set; }
-            public EnumProxyStep Step { get; set; } = EnumProxyStep.Command;
-            public EnumProxyCommand Command { get; set; } = EnumProxyCommand.Connect;
-            public byte PluginId { get; set; }
-            public uint RequestId { get; set; }
-            public IPEndPoint SourceEP { get; set; }
-            public Memory<byte> TargetAddress { get; set; }
-            public ushort TargetPort { get; set; }
-            public Memory<byte> Data { get; set; }
-            /// <summary>
-            /// 监听的端口
-            /// </summary>
-            public ushort ListenPort { get; set; }
-        }
 
 
         [GlobalSetup]
         public void Startup()
         {
-            for (uint i = 0; i < 100; i++)
+            for (ushort i = 0; i < 65535; i++)
             {
-                AllowFirewalls.Add(i, new FirewallCache { IPs = new FirewallCacheIp[] { new FirewallCacheIp { MaskValue = 0, NetWork = 0 } } });
-                DeniedFirewalls.Add(i, new FirewallCache { IPs = new FirewallCacheIp[] { new FirewallCacheIp { MaskValue = 0, NetWork = 0 } } });
+                Firewalls.Add(i, new FirewallCacheType[]{ new FirewallCacheType
+                {
+                    Ips = new ulong[] { 0 },
+                    PluginIds = 3,
+                    Protocols = FirewallProtocolType.TCP_UDP,
+                    Type = FirewallType.Allow
+                }, null });
             }
         }
+
 
         [Benchmark]
         public void Test1()
@@ -144,9 +68,8 @@ namespace invokeSpeed
         }
 
 
-        private bool FirewallDenied(ProxyInfo info)
+        public static bool FirewallDenied(ProxyInfo info)
         {
-            FirewallCache cache = new FirewallCache { IPs = new FirewallCacheIp[] { new FirewallCacheIp { MaskValue=0, NetWork=0 } } };
             FirewallProtocolType protocolType = info.Step == EnumProxyStep.Command && info.Command == EnumProxyCommand.Connect ? FirewallProtocolType.TCP : FirewallProtocolType.UDP;
             //阻止IPV6的内网ip
             if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
@@ -159,58 +82,134 @@ namespace invokeSpeed
             {
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
 
-                uint keyGlobal = new FirewallKey(info.TargetPort, protocolType, 0).Memory;
-                uint keyGlobal0 = new FirewallKey(0, protocolType, 0).Memory;
-                uint keyPlugin = new FirewallKey(info.TargetPort, protocolType, info.PluginId).Memory;
-                uint keyPlugin0 = new FirewallKey(0, protocolType, info.PluginId).Memory;
+
+                FirewallCacheType[] denieds = new FirewallCacheType[2];
+                FirewallCacheType[] allows = new FirewallCacheType[2];
+                denieds[0] = Firewall0[(int)FirewallType.Denied];
+                allows[0] = Firewall0[(int)FirewallType.Denied];
+
+                if (Firewalls.TryGetValue(info.TargetPort, out FirewallCacheType[] caches))
+                {
+                    denieds[1] = caches[(int)FirewallType.Denied];
+                    allows[1] = caches[(int)FirewallType.Allow];
+                }
 
                 //黑名单
-                if (DeniedFirewalls.Count > 0)
+                for (int i = 0; i < denieds.Length; i++)
                 {
-                    //全局0 || 全局端口 || 局部0 || 局部端口
-                    bool res = false;
-                    /*DeniedFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
-                        || DeniedFirewalls.TryGetValue(keyGlobal, out cache)
-                        || DeniedFirewalls.TryGetValue(keyPlugin0, out cache)
-                        || DeniedFirewalls.TryGetValue(keyPlugin, out cache);
-                    */
-                    if (cache != null)
+                    if (denieds[i] != null && (denieds[i].PluginIds & info.PluginId) == info.PluginId && (denieds[i].Protocols & protocolType) == protocolType)
                     {
-                        //有一项匹配就不通过
-                        for (int i = 0; i < cache.IPs.Length; i++)
+                        for (int j = 0; j < denieds[i].Ips.Length; j++)
                         {
-                           // if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return true;
+                            FirewallCacheIp ipcache = new FirewallCacheIp(denieds[i].Ips[j]);
+                            //有一项匹配就不通过
+                            if ((ip & ipcache.MaskValue) == ipcache.NetWork) return true;
                         }
                     }
                 }
                 //局域网或者组播，验证白名单
                 if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
                 {
-                    if (AllowFirewalls.Count > 0)
+                    for (int i = 0; i < allows.Length; i++)
                     {
-                        //全局0 || 全局端口 || 局部0 || 局部端口
-                        bool res = false;
-                        /*
-                         * AllowFirewalls.TryGetValue(keyGlobal0, out FirewallCache cache)
-                            || AllowFirewalls.TryGetValue(keyGlobal, out cache)
-                            || AllowFirewalls.TryGetValue(keyPlugin0, out cache)
-                            || AllowFirewalls.TryGetValue(keyPlugin, out cache);
-                        */
-                        if (cache != null)
+                        if (allows[i] != null && (allows[i].PluginIds & info.PluginId) == info.PluginId && (allows[i].Protocols & protocolType) == protocolType)
                         {
-                            //有一项通过就通过
-                            for (int i = 0; i < cache.IPs.Length; i++)
+                            for (int j = 0; j < allows[i].Ips.Length; j++)
                             {
-                                //if ((ip & cache.IPs[i].MaskValue) == cache.IPs[i].NetWork) return false;
+                                FirewallCacheIp ipcache = new FirewallCacheIp(allows[i].Ips[j]);
+                                //有一项匹配就通过
+                                if ((ip & ipcache.MaskValue) == ipcache.NetWork) return false;
                             }
                         }
                     }
                     return true;
                 }
-
             }
             //其它的直接通过
             return false;
         }
     }
+
+    public enum EnumProxyStep : byte
+    {
+        Command = 1,
+        /// <summary>
+        /// TCP转发
+        /// </summary>
+        ForwardTcp = 2,
+        /// <summary>
+        /// UDP转发
+        /// </summary>
+        ForwardUdp = 3
+    }
+    public enum EnumProxyCommand : byte
+    {
+        /// <summary>
+        /// 连接上游服务器
+        /// </summary>
+        Connect = 1,
+        /// <summary>
+        /// 绑定，客户端会接收来自代理服务器的链接，著名的FTP被动模式
+        /// </summary>
+        Bind = 2,
+        /// <summary>
+        /// UDP中继
+        /// </summary>
+        UdpAssociate = 3
+    }
+    public sealed class ProxyInfo
+    {
+        public byte Rsv { get; set; }
+        public EnumProxyStep Step { get; set; } = EnumProxyStep.Command;
+        public EnumProxyCommand Command { get; set; } = EnumProxyCommand.Connect;
+        public byte PluginId { get; set; }
+        public uint RequestId { get; set; }
+        public IPEndPoint SourceEP { get; set; }
+        public Memory<byte> TargetAddress { get; set; }
+        public ushort TargetPort { get; set; }
+        public Memory<byte> Data { get; set; }
+        /// <summary>
+        /// 监听的端口
+        /// </summary>
+        public ushort ListenPort { get; set; }
+    }
+
+    public sealed class FirewallCacheType
+    {
+        public FirewallProtocolType Protocols { get; set; }
+        public FirewallType Type { get; set; }
+        public byte PluginIds { get; set; }
+        public ulong[] Ips { get; set; } = Array.Empty<ulong>();
+    }
+    [StructLayout(LayoutKind.Explicit)]
+    public struct FirewallCacheIp
+    {
+        [FieldOffset(0)]
+        public ulong Value;
+        [FieldOffset(0)]
+        public uint MaskValue;
+        [FieldOffset(4)]
+        public uint NetWork;
+        public FirewallCacheIp(ulong value)
+        {
+            Value = value;
+        }
+        public FirewallCacheIp(uint maskValue, uint netWork)
+        {
+            MaskValue = maskValue;
+            NetWork = netWork;
+        }
+    }
+    public enum FirewallProtocolType : byte
+    {
+        TCP = 1,
+        UDP = 2,
+        TCP_UDP = TCP | UDP,
+    }
+    public enum FirewallType : byte
+    {
+        Allow = 0,
+        Denied = 1,
+    }
+
 }
