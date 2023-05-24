@@ -20,7 +20,7 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-             var summary = BenchmarkRunner.Run<Test>();
+            var summary = BenchmarkRunner.Run<Test>();
         }
     }
 
@@ -50,13 +50,15 @@ namespace invokeSpeed
         {
             for (ushort i = 0; i < 65535; i++)
             {
-                Firewalls.Add(i, new FirewallCacheType[]{ new FirewallCacheType
+                FirewallCacheType[] firewallCacheTypes = new FirewallCacheType[2];
+                firewallCacheTypes[0] = new FirewallCacheType
                 {
                     Ips = new ulong[] { 0 },
                     PluginIds = 3,
                     Protocols = FirewallProtocolType.TCP_UDP,
                     Type = FirewallType.Allow
-                }, null });
+                };
+                Firewalls.Add(i, firewallCacheTypes);
             }
         }
 
@@ -81,51 +83,38 @@ namespace invokeSpeed
             else if (info.TargetAddress.Length == 4)
             {
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
+                byte aloow = (byte)FirewallType.Allow;
+                byte denied = (byte)FirewallType.Denied;
 
-
-                FirewallCacheType[] denieds = new FirewallCacheType[2];
-                FirewallCacheType[] allows = new FirewallCacheType[2];
-                denieds[0] = Firewall0[(int)FirewallType.Denied];
-                allows[0] = Firewall0[(int)FirewallType.Denied];
-
-                if (Firewalls.TryGetValue(info.TargetPort, out FirewallCacheType[] caches))
+                Firewalls.TryGetValue(info.TargetPort, out FirewallCacheType[] cache);
+                if (Comparison(info, Firewall0[denied], ip, protocolType) || (cache !=null && Comparison(info, cache[denied], ip, protocolType)))
                 {
-                    denieds[1] = caches[(int)FirewallType.Denied];
-                    allows[1] = caches[(int)FirewallType.Allow];
+                    return true;
                 }
-
-                //黑名单
-                for (int i = 0; i < denieds.Length; i++)
-                {
-                    if (denieds[i] != null && (denieds[i].PluginIds & info.PluginId) == info.PluginId && (denieds[i].Protocols & protocolType) == protocolType)
-                    {
-                        for (int j = 0; j < denieds[i].Ips.Length; j++)
-                        {
-                            FirewallCacheIp ipcache = new FirewallCacheIp(denieds[i].Ips[j]);
-                            //有一项匹配就不通过
-                            if ((ip & ipcache.MaskValue) == ipcache.NetWork) return true;
-                        }
-                    }
-                }
-                //局域网或者组播，验证白名单
                 if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
                 {
-                    for (int i = 0; i < allows.Length; i++)
+                    if (Comparison(info, Firewall0[aloow], ip, protocolType) || (cache != null && Comparison(info, cache[aloow], ip, protocolType)))
                     {
-                        if (allows[i] != null && (allows[i].PluginIds & info.PluginId) == info.PluginId && (allows[i].Protocols & protocolType) == protocolType)
-                        {
-                            for (int j = 0; j < allows[i].Ips.Length; j++)
-                            {
-                                FirewallCacheIp ipcache = new FirewallCacheIp(allows[i].Ips[j]);
-                                //有一项匹配就通过
-                                if ((ip & ipcache.MaskValue) == ipcache.NetWork) return false;
-                            }
-                        }
+                        return false;
                     }
                     return true;
                 }
             }
             //其它的直接通过
+            return false;
+        }
+
+        public static bool Comparison(ProxyInfo info, FirewallCacheType cache, uint ip, FirewallProtocolType protocolType)
+        {
+            if (cache == null) return false;
+            if ((cache.PluginIds & info.PluginId) == info.PluginId && (cache.Protocols & protocolType) == protocolType)
+            {
+                for (int j = 0; j < cache.Ips.Length; j++)
+                {
+                    FirewallCacheIp ipcache = new FirewallCacheIp(cache.Ips[j]);
+                    if ((ip & ipcache.MaskValue) == ipcache.NetWork) return true;
+                }
+            }
             return false;
         }
     }
@@ -180,6 +169,13 @@ namespace invokeSpeed
         public FirewallType Type { get; set; }
         public byte PluginIds { get; set; }
         public ulong[] Ips { get; set; } = Array.Empty<ulong>();
+
+        public FirewallCacheType()
+        {
+
+        }
+
+
     }
     [StructLayout(LayoutKind.Explicit)]
     public struct FirewallCacheIp

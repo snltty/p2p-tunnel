@@ -114,7 +114,7 @@ namespace common.proxy
                 FirewallCacheType[] denieds = new FirewallCacheType[2];
                 FirewallCacheType[] allows = new FirewallCacheType[2];
                 denieds[0] = config.Firewall0[(int)FirewallType.Denied];
-                allows[0] = config.Firewall0[(int)FirewallType.Denied];
+                allows[0] = config.Firewall0[(int)FirewallType.Allow];
 
                 if (config.Firewalls.TryGetValue(info.TargetPort, out FirewallCacheType[] caches))
                 {
