@@ -20,7 +20,16 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<Test>();
+            int len = 0;
+            for (int i = 0; i < 65536; i++)
+            {
+                if( i % 16384 == 8080)
+                {
+                    len++;
+                }
+            }
+            Console.WriteLine(len);
+            //var summary = BenchmarkRunner.Run<Test>();
         }
     }
 
@@ -63,10 +72,15 @@ namespace invokeSpeed
         }
 
 
+        FirewallCacheType[] data = new FirewallCacheType[8];
         [Benchmark]
         public void Test1()
         {
-            FirewallDenied(proxyInfo);
+            for (int i = 0; i < data.Length; i++)
+            {
+                if (data[i] == null) { }
+            }
+            //FirewallDenied(proxyInfo);
         }
 
 
@@ -88,7 +102,7 @@ namespace invokeSpeed
 
                 Firewalls.TryGetValue(info.TargetPort, out FirewallCacheType[] cache);
                 //黑名单
-                if (Comparison(info, Firewall0[denied], ip, protocolType) || (cache !=null && Comparison(info, cache[denied], ip, protocolType)))
+                if (Comparison(info, Firewall0[denied], ip, protocolType) || (cache != null && Comparison(info, cache[denied], ip, protocolType)))
                 {
                     return true;
                 }
