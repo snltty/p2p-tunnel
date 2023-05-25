@@ -62,7 +62,7 @@ export default {
     components: { Add },
     setup() {
 
-        const clientProxys = computed(() => [{ text: '全局', value: 0 }].concat(JSON.parse(JSON.stringify(shareData.clientProxys))));
+        const clientProxys = computed(() => [{ text: '全局', value: 0xff }].concat(JSON.parse(JSON.stringify(shareData.clientProxys))));
         const allproxyMaps = computed(() => clientProxys.value.reduce((value, current) => {
             value[current.value] = current.text;
             return value;

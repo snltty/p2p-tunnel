@@ -4,5 +4,5 @@ export default {
     path: '/nodes/forward.html',
     name: 'NodesForward',
     access: 8,
-    proxyId: 3
+    proxyId: 1
 }

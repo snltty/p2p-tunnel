@@ -4,5 +4,5 @@ export default {
     path: '/nodes/vea.html',
     name: 'NodesVea',
     access: 64,
-    proxyId: 2
+    proxyId: 8
 }

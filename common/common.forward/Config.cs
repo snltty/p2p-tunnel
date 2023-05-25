@@ -34,7 +34,7 @@ namespace common.forward
         }
 
         [JsonIgnore]
-        public byte Plugin => 3;
+        public byte Plugin => 1;
 
         /// <summary>
         /// 允许连接

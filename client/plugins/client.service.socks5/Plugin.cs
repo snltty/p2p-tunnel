@@ -16,7 +16,7 @@ namespace client.service.socks5
            
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Debug($"socks5已加载");
+            Logger.Instance.Debug($"socks5已加载，插件id:{config.Plugin}");
             if (config.ListenEnable)
             {
                 services.GetService<IProxyServer>().Start((ushort)config.ListenPort, config.Plugin);

@@ -4,5 +4,5 @@ export default {
     path: '/nodes/socks5.html',
     name: 'NodesSocks5',
     access: 16,
-    proxyId: 1
+    proxyId: 4
 }

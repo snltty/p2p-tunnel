@@ -3,6 +3,7 @@ using common.server.model;
 using common.user;
 using server.messengers.singnin;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace server.service.users
@@ -12,6 +13,7 @@ namespace server.service.users
     /// </summary>
     public sealed class SignInAccessValidator : ISignInValidator, IUserInfoCaching, IAccess
     {
+        public ConcurrentDictionary<ulong, UserInfo> Connections { get; set; } = new ConcurrentDictionary<ulong, UserInfo>();
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly IUserStore userStore;
         private readonly common.user.Config config;

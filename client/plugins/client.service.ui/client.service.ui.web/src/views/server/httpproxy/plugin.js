@@ -3,5 +3,5 @@ export default {
     config: 'ServerHttpProxyConfigure',
     text: '代理(http)',
     access: 32,
-    proxyId: 4
+    proxyId: 2
 }

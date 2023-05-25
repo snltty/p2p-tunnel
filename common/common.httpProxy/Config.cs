@@ -34,7 +34,7 @@ namespace common.httpProxy
         }
 
         [System.Text.Json.Serialization.JsonIgnore]
-        public byte Plugin => 4;
+        public byte Plugin => 2;
 
         public IPAddress ProxyIp { get; set; } = IPAddress.Loopback;
         public bool IsPac { get; set; }

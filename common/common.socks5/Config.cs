@@ -34,7 +34,7 @@ namespace common.socks5
         }
 
         [System.Text.Json.Serialization.JsonIgnore]
-        public byte Plugin => 1;
+        public byte Plugin => 4;
 
         public bool ListenEnable { get; set; }
         public int ListenPort { get; set; } = 5412;

@@ -14,9 +14,9 @@ namespace server.service.forward
             ProxyPluginLoader.LoadPlugin(services.GetService<IForwardProxyPlugin>());
             IProxyServer proxyServer = services.GetService<IProxyServer>();
 
+            common.forward.Config config = services.GetService<common.forward.Config>();
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Info($"端口转发穿透已加载");
-            var config = services.GetService<common.forward.Config>();
+            Logger.Instance.Info($"端口转发穿透已加载，插件id:{config.Plugin}");
             if (config.ConnectEnable)
             {
                 Logger.Instance.Debug($"端口转发穿透已允许注册");

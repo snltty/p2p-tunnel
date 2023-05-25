@@ -5,5 +5,5 @@ export default {
     path: '/nodes/proxy.html',
     name: 'NodesProxy',
     access: 32,
-    proxyId: 4
+    proxyId: 2
 }

@@ -3,5 +3,5 @@ export default {
     config: 'ServerSocks5Configure',
     text: '代理(socks5)',
     access: 16,
-    proxyId: 1
+    proxyId: 4
 }

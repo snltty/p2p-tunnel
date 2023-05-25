@@ -19,7 +19,7 @@ namespace client.service.httpProxy
            
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Debug($"http代理已加载");
+            Logger.Instance.Debug($"http代理已加载，插件id:{config.Plugin}");
             if (config.ListenEnable)
             {
                 httpProxyTransfer.Update();

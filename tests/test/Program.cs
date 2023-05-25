@@ -87,10 +87,12 @@ namespace invokeSpeed
                 byte denied = (byte)FirewallType.Denied;
 
                 Firewalls.TryGetValue(info.TargetPort, out FirewallCacheType[] cache);
+                //黑名单
                 if (Comparison(info, Firewall0[denied], ip, protocolType) || (cache !=null && Comparison(info, cache[denied], ip, protocolType)))
                 {
                     return true;
                 }
+                //白名单
                 if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
                 {
                     if (Comparison(info, Firewall0[aloow], ip, protocolType) || (cache != null && Comparison(info, cache[aloow], ip, protocolType)))

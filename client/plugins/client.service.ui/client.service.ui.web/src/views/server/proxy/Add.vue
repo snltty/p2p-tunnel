@@ -74,12 +74,12 @@ export default {
         const state = reactive({
             show: props.modelValue,
             loading: false,
-            clientProxys: computed(() => [{ text: '全局', value: 0 }].concat(shareData.clientProxys)),
+            clientProxys: computed(() => [{ text: '全局', value: 0xff }].concat(shareData.clientProxys)),
             form: {
                 ID: addData.value.ID || 0,
                 Port: addData.value.Port || '0',
                 Protocol: addData.value.Protocol || 1,
-                PluginId: addData.value.PluginId || 0,
+                PluginId: addData.value.PluginId || 0xff,
                 Type: addData.value.Type || 0,
                 IP: (addData.value.IP || ['0.0.0.0/0']).join('\n'),
                 Remark: addData.value.Remark || ''

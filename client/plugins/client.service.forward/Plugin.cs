@@ -14,9 +14,10 @@ namespace client.service.forward
             ProxyPluginLoader.LoadPlugin(services.GetService<IForwardProxyPlugin>());
             ForwardTransfer forwardTransfer = services.GetService<ForwardTransfer>();
 
+            common.forward.Config config = services.GetService<common.forward.Config>();
+
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Debug("端口转发已加载");
-            var config = services.GetService<common.forward.Config>();
+            Logger.Instance.Debug($"端口转发已加载，插件id:{config.Plugin}");
             if (config.ConnectEnable)
             {
                 Logger.Instance.Debug($"端口转发已允许连接");

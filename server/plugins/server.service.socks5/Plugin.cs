@@ -1,7 +1,6 @@
 ﻿using common.libs;
 using common.proxy;
 using common.server;
-using common.socks5;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -13,9 +12,9 @@ namespace server.service.socks5
         {
             ProxyPluginLoader.LoadPlugin(services.GetService<IServerSocks5ProxyPlugin>());
 
-            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
-            Logger.Instance.Info("socks5已加载");
             common.socks5.Config config = services.GetService<common.socks5.Config>();
+            Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
+            Logger.Instance.Info($"socks5已加载，插件id:{config.Plugin}");
             if (config.ConnectEnable)
             {
                 Logger.Instance.Debug($"socks5已允许连接");

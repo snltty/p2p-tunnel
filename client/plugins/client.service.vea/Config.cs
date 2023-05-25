@@ -4,7 +4,6 @@ using common.libs.extends;
 using common.server.model;
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
@@ -43,7 +42,7 @@ namespace client.service.vea
         }
 
         [JsonIgnore]
-        public byte Plugin => 2;
+        public byte Plugin => 8;
 
         /// <summary>
         /// 启用

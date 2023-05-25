@@ -120,9 +120,10 @@ namespace common.proxy
                             types[(byte)item.Type] = type;
                         }
 
+                        if (item.PluginId == 0) item.PluginId = 0xff;
                         type.PluginIds |= item.PluginId;
                         type.Protocols |= item.Protocol;
-                        type.Ips = type.Ips.Concat(type.Ips).Distinct().ToArray();
+                        type.Ips = type.Ips.Concat(ips).Distinct().ToArray();
                     }
                 }
                 catch (Exception)

@@ -24,22 +24,11 @@ namespace common.libs
         ConcurrentQueue<WheelTimerTimeout<T>> timeouts = new ConcurrentQueue<WheelTimerTimeout<T>>();
         AutoResetEvent autoReset = new AutoResetEvent(true);
 
-        /// <summary>
-        /// 
-        /// </summary>
         public WheelTimer()
         {
             CreateBuckets();
             Worker();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="delayMs"></param>
-        /// <param name="reuse"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
         public WheelTimerTimeout<T> NewTimeout(WheelTimerTimeoutTask<T> task, int delayMs, bool reuse = false)
         {
             if (task == null)

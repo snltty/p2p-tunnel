@@ -5,5 +5,5 @@ export default {
     path: '/server-forward.html',
     name: 'ServerForward',
     access: 8,
-    proxyId: 3
+    proxyId: 1
 }
