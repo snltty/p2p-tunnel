@@ -2,7 +2,7 @@
 SET target=$(cd $(dirname $0); pwd)
 
 image=$1
-if [ "$image" = ""]; then
+if [ "${image}" = ""]; then
 image="snltty/p2p-tunnel"
 fi
 
