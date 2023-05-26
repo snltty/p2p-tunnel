@@ -1,6 +1,4 @@
-@echo off
-SET target=$(cd $(dirname $0); pwd)
-
+target=$(cd $(dirname $0); pwd)
 image="snltty/p2p-tunnel"
 
 
