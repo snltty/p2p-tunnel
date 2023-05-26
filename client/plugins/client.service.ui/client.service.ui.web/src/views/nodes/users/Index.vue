@@ -22,15 +22,14 @@
                     </el-table-column>
                     <el-table-column prop="NetFlow" sortable label="流量">
                         <template #default="scope">
-                            <span>--</span>
-                            <!-- <p>已用 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p>
-                            <p>总量 : {{scope.row.NetFlow == -1 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p> -->
+                            <p>已用 : {{scope.row.SentBytes.sizeFormat().join('')}}</p>
+                            <p>剩余 : {{scope.row.NetFlowType == 0 ?'//无限' :scope.row.NetFlow.sizeFormat().join('')}}</p>
                         </template>
                     </el-table-column>
                     <el-table-column prop="SignLimit" sortable label="登入数" width="90">
                         <template #default="scope">
                             <p>已用 : {{scope.row.SignCount}}</p>
-                            <p>总量 : {{scope.row.SignLimit == -1 ?'//无限':scope.row.SignLimit}}</p>
+                            <p>总量 : {{scope.row.SignLimitType == 0 ?'//无限':scope.row.SignLimit}}</p>
                         </template>
                     </el-table-column>
                     <el-table-column prop="Access" label="本机权限" width="90">

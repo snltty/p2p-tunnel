@@ -1,6 +1,7 @@
 ﻿using common.libs.database;
 using common.libs.extends;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace common.user
@@ -28,6 +29,8 @@ namespace common.user
         /// </summary>
         public bool ForceOffline { get; set; }
 
+        [JsonIgnore]
+        public byte NetFlowBit = 0x01;
 
         private async Task<Config> ReadConfig()
         {

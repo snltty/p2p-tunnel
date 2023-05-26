@@ -133,8 +133,10 @@ namespace common.user
                             _user.Password = user.Password;
                         }
                         _user.Access = user.Access;
+                        _user.NetFlowType = user.NetFlowType;
                         _user.NetFlow = user.NetFlow;
                         _user.EndTime = user.EndTime;
+                        _user.SignLimitType = user.SignLimitType;
                         _user.SignLimit = user.SignLimit;
                         configDataProvider.Save(storeModel);
                         return true;

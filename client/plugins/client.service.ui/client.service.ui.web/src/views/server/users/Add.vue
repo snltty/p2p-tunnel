@@ -32,8 +32,8 @@ export default {
                 Account: '',
                 Password: '',
                 Access: 0,
-                SignLimit: -1,
-                NetFlow: -1,
+                SignLimit: 0,
+                NetFlow: 0,
                 EndTime: new Date().format('yyyy-MM-dd hh:mm:ss'),
             },
             rules: {

@@ -24,16 +24,21 @@ namespace common.proxy
         [MessengerId((ushort)ProxyMessengerIds.Request)]
         public async Task Request(IConnection connection)
         {
-            ProxyInfo data = ProxyInfo.Debytes(connection.ReceiveRequestWrap.Payload);
-            data.Connection = connection.FromConnection;
-            await proxyClient.InputData(data);
+            if (connection.FromConnection.SendDenied > 0) return;
+
+            ProxyInfo info = ProxyInfo.Debytes(connection.ReceiveRequestWrap.Payload);
+            info.Connection = connection.FromConnection;
+            info.Connection.SentBytes += (uint)info.Data.Length;
+            await proxyClient.InputData(info);
         }
 
 
         [MessengerId((ushort)ProxyMessengerIds.Response)]
         public async Task Response(IConnection connection)
         {
+            if (connection.FromConnection.SendDenied > 0) return;
             ProxyInfo info = ProxyInfo.Debytes(connection.ReceiveRequestWrap.Payload);
+            connection.FromConnection.SentBytes += (ulong)info.Data.Length;
             await proxyServer.InputData(info);
         }
 

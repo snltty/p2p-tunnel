@@ -16,19 +16,31 @@ namespace common.user
         /// 权限，0无任何权限
         /// </summary>
         public uint Access { get; set; }
+
         /// <summary>
         /// 限制登录数，-1无限制
         /// </summary>
-        public int SignLimit { get; set; } = -1;
+        public int SignLimit { get; set; }
+        public LimitType SignLimitType { get; set; }
+        /// <summary>
+        /// 登录数，只用于序列化，判断时请用 Connections.Count
+        /// </summary>
         public uint SignCount { get; set; }
-
+        [JsonIgnore]
+        public bool SignLimitDenied => SignLimitType == LimitType.Limit && Connections.Count >= SignLimit;
         [JsonIgnore]
         public ConcurrentDictionary<ulong, IConnection> Connections { get; set; } = new ConcurrentDictionary<ulong, IConnection>();
+
         /// <summary>
-        /// 限制流量 -1 无限制
+        /// 限制流量 
         /// </summary>
-        public long NetFlow { get; set; } = -1;
+        public long NetFlow { get; set; }
+        public LimitType NetFlowType { get; set; }
         public ulong SentBytes { get; set; }
+        [JsonIgnore]
+        public ulong LastSentBytes { get; set; }
+        [JsonIgnore]
+        public bool NetFlowDenied => NetFlowType == LimitType.Limit && NetFlow <= 0;
 
         /// <summary>
         /// 账号添加时间
@@ -181,6 +193,12 @@ namespace common.user
         public int PageSize { get; set; }
         public int Count { get; set; }
         public List<UserInfo> Data { get; set; }
+    }
+
+    public enum LimitType : byte
+    {
+        None = 0,
+        Limit = 1
     }
 
     /// <summary>

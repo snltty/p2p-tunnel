@@ -2,9 +2,9 @@
     <el-dialog title="设置流量" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="90">
             <el-form-item label="" label-width="0">
-                <el-switch v-model="state.type" active-text="限制流量" inactive-text="无限流量" />
+                <el-switch v-model="state.form.netFlowType" active-text="限制流量" inactive-text="无限流量" />
             </el-form-item>
-            <el-form-item label="流量(byte)" prop="netflow" v-if="state.type">
+            <el-form-item label="流量(byte)" prop="netflow" v-if="state.form.netFlowType">
                 <div>
                     <el-input v-model="state.form.netflow" />
                 </div>
@@ -12,7 +12,7 @@
                     {{format}}
                 </div>
             </el-form-item>
-            <el-form-item label="" label-width="0" v-if="state.type">
+            <el-form-item label="" label-width="0" v-if="state.form.netFlowType">
                 <div class="flex w-100">
                     <div>
                         <el-input size="small" v-model="state.form.addTB" style="width:4rem"></el-input>TB
@@ -48,8 +48,8 @@ export default {
         const state = reactive({
             show: props.modelValue,
             loading: false,
-            type: addData.value.NetFlow != -1,
             form: {
+                netFlowType: Boolean(addData.value.NetFlowType),
                 netflow: addData.value.NetFlow,
                 addTB: 0,
                 addGB: 0,
@@ -59,7 +59,7 @@ export default {
                 netflow: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: -1, max: 9223372036854775807, message: '数字 -1-9223372036854775807', trigger: 'blur', transform(value) {
+                        type: 'number', min: 0, max: 9223372036854775807, message: '数字 0-9223372036854775807', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }
@@ -97,7 +97,8 @@ export default {
                 }
 
                 let json = JSON.parse(JSON.stringify(addData.value));
-                json.NetFlow = state.type ? +state.form.netflow : -1;
+                json.NetFlow = +state.form.netflow;
+                json.NetFlowType = +state.form.netFlowType;
                 state.loading = true;
                 add(json).then((msg) => {
                     state.loading = false;

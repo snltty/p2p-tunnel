@@ -1,10 +1,12 @@
-﻿using common.server;
+﻿using common.libs;
+using common.server;
 using common.server.model;
 using common.user;
 using server.messengers.singnin;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace server.service.users
 {
@@ -19,16 +21,18 @@ namespace server.service.users
         private readonly common.user.Config config;
         private readonly MessengerSender messengerSender;
         private readonly IClientSignInCaching clientSignInCaching;
+        private readonly WheelTimer<object> wheelTimer;
 
         private const string useridKey = "UserInfoID";
 
-        public SignInAccessValidator(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, IClientSignInCaching clientSignInCaching, common.user.Config config, MessengerSender messengerSender)
+        public SignInAccessValidator(IServiceAccessValidator serviceAccessValidator, IUserStore userStore, IClientSignInCaching clientSignInCaching, common.user.Config config, MessengerSender messengerSender, WheelTimer<object> wheelTimer)
         {
             this.serviceAccessValidator = serviceAccessValidator;
             this.userStore = userStore;
             this.config = config;
             this.messengerSender = messengerSender;
             this.clientSignInCaching = clientSignInCaching;
+            this.wheelTimer = wheelTimer;
             clientSignInCaching.OnOffline += (SignInCacheInfo cache) =>
             {
                 if (GetUser(cache.Args, out UserInfo user))
@@ -36,6 +40,10 @@ namespace server.service.users
                     user.Connections.TryRemove(cache.ConnectionId, out _);
                 }
             };
+            wheelTimer.NewTimeout(new WheelTimerTimeoutTask<object>
+            {
+                Callback = NetFlowTimeout
+            }, 5000, true);
         }
 
         public EnumSignInValidatorOrder Order => EnumSignInValidatorOrder.None;
@@ -57,26 +65,23 @@ namespace server.service.users
                     return SignInResultInfo.SignInResultInfoCodes.TIME_OUT_RANGE;
                 }
                 //超过登录数量
-                if (user.SignLimit > -1)
+                if (user.SignLimitDenied)
                 {
-                    if (user.Connections.Count >= user.SignLimit)
+                    if (config.ForceOffline)
                     {
-                        if (config.ForceOffline)
+                        foreach (var item in user.Connections)
                         {
-                            foreach (var item in user.Connections)
+                            _ = messengerSender.SendOnly(new MessageRequestWrap
                             {
-                                _ = messengerSender.SendOnly(new MessageRequestWrap
-                                {
-                                    Connection = item.Value,
-                                    MessengerId = (ushort)ClientsMessengerIds.Exit,
-                                });
-                            }
-                            user.Connections.Clear();
+                                Connection = item.Value,
+                                MessengerId = (ushort)ClientsMessengerIds.Exit,
+                            });
                         }
-                        else
-                        {
-                            return SignInResultInfo.SignInResultInfoCodes.LIMIT_OUT_RANGE;
-                        }
+                        user.Connections.Clear();
+                    }
+                    else
+                    {
+                        return SignInResultInfo.SignInResultInfoCodes.LIMIT_OUT_RANGE;
                     }
                 }
                 access |= user.Access;
@@ -93,6 +98,10 @@ namespace server.service.users
         {
             if (GetUser(cache.Args, out UserInfo user))
             {
+                if (user.NetFlowDenied)
+                {
+                    cache.Connection.SendDenied |= config.NetFlowBit;
+                }
                 user.Connections.TryAdd(cache.ConnectionId, cache.Connection);
             }
         }
@@ -109,10 +118,9 @@ namespace server.service.users
         private bool GetUser(Dictionary<string, string> args, out UserInfo user)
         {
             user = default;
-
-            if (args.ContainsKey(useridKey))
+            if (args.TryGetValue(useridKey, out string uid))
             {
-                return userStore.Get(ulong.Parse(args[useridKey]), out user);
+                return userStore.Get(ulong.Parse(uid), out user);
             }
             else if (GetAccountPassword(args, out string account, out string password))
             {
@@ -125,6 +133,45 @@ namespace server.service.users
             bool res = args.TryGetValue("account", out account);
             bool res1 = args.TryGetValue("password", out password);
             return res && res1;
+        }
+
+        private void NetFlowTimeout(WheelTimerTimeout<object> timeout)
+        {
+            try
+            {
+                List<SignInCacheInfo> caches = clientSignInCaching.Get();
+                foreach (SignInCacheInfo item in caches.Where(c => c.Connection != null && c.Connection.Connected))
+                {
+                    if (GetUser(item.Args, out UserInfo user))
+                    {
+                        ulong netflow = (item.Connection.SentBytes - user.LastSentBytes);
+                        user.SentBytes += netflow;
+
+                        user.NetFlow -= (long)netflow;
+                        if(user.NetFlow < 0)
+                        {
+                            user.NetFlow = 0;
+                        }
+
+                        user.LastSentBytes = item.Connection.SentBytes;
+
+                        foreach (var connection in user.Connections)
+                        {
+                            if (user.NetFlowDenied)
+                            {
+                                connection.Value.SendDenied |= config.NetFlowBit;
+                            }
+                            else
+                            {
+                                connection.Value.SendDenied &= (byte)(~config.NetFlowBit);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
     }
 

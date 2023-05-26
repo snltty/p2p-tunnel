@@ -2,9 +2,9 @@
     <el-dialog title="设置登录限制" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="60">
             <el-form-item label="" label-width="0">
-                <el-switch v-model="state.type" active-text="限制登录数" inactive-text="无限制" />
+                <el-switch v-model="state.form.signLimitType" active-text="限制登录数" inactive-text="无限制" />
             </el-form-item>
-            <el-form-item label="数量" prop="signLimit" v-if="state.type">
+            <el-form-item label="数量" prop="signLimit" v-if="state.form.signLimitType">
                 <el-input v-model="state.form.signLimit" />
             </el-form-item>
         </el-form>
@@ -30,15 +30,15 @@ export default {
         const state = reactive({
             show: props.modelValue,
             loading: false,
-            type: addData.value.SignLimit != -1,
             form: {
+                signLimitType: Boolean(addData.value.SignLimitType),
                 signLimit: addData.value.SignLimit,
             },
             rules: {
                 signLimit: [
                     { required: true, message: '必填', trigger: 'blur' },
                     {
-                        type: 'number', min: -1, max: 65535, message: '数字 -1-65535', trigger: 'blur', transform(value) {
+                        type: 'number', min: 0, max: 65535, message: '数字 0-65535', trigger: 'blur', transform(value) {
                             return Number(value)
                         }
                     }
@@ -61,7 +61,8 @@ export default {
                 }
 
                 let json = JSON.parse(JSON.stringify(addData.value));
-                json.SignLimit = state.type ? +state.form.signLimit : -1;
+                json.SignLimit = +state.form.signLimit;
+                json.SignLimitType = +state.form.signLimitType;
                 state.loading = true;
                 add(json).then((msg) => {
                     state.loading = false;

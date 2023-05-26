@@ -53,12 +53,11 @@ namespace common.proxy
             }
             else if (info.Step == EnumProxyStep.ForwardTcp)
             {
-                info.Connection.SentBytes += (uint)info.Data.Length;
+               
                 await ForwardTcp(info);
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
-                info.Connection.SentBytes += (uint)info.Data.Length;
                 await ForwardUdp(info);
             }
         }
@@ -416,7 +415,6 @@ namespace common.proxy
         private async Task<bool> Receive(ProxyInfo info)
         {
             await Semaphore.WaitAsync();
-            info.Connection.SentBytes += (uint)info.Data.Length;
             bool res = await proxyMessengerSender.Response(info);
             Semaphore.Release();
             return res;

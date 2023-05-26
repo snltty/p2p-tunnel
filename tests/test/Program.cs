@@ -20,15 +20,10 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            int len = 0;
-            for (int i = 0; i < 65536; i++)
-            {
-                if( i % 16384 == 8080)
-                {
-                    len++;
-                }
-            }
-            Console.WriteLine(len);
+            long a = 0;
+            a -= 1;
+            Console.WriteLine(a);
+
             //var summary = BenchmarkRunner.Run<Test>();
         }
     }
@@ -76,10 +71,7 @@ namespace invokeSpeed
         [Benchmark]
         public void Test1()
         {
-            for (int i = 0; i < data.Length; i++)
-            {
-                if (data[i] == null) { }
-            }
+            int a = int.Parse("1");
             //FirewallDenied(proxyInfo);
         }
 

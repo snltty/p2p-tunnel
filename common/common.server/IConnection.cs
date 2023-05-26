@@ -92,8 +92,11 @@ namespace common.server
         public Memory<byte> ReceiveData { get; set; }
         #endregion
 
-
         public ulong SentBytes { get; set; }
+        /// <summary>
+        /// 发送数据权限，当任何一位上为1时，不可发送数据
+        /// </summary>
+        public byte SendDenied { get; set; }
 
         /// <summary>
         /// 发送
@@ -357,6 +360,10 @@ namespace common.server
 
         public ulong SentBytes { get; set; }
         /// <summary>
+        /// 发送数据权限，当任何一位上为1时，不可发送数据
+        /// </summary>
+        public byte SendDenied { get; set; }
+        /// <summary>
         /// 发送
         /// </summary>
         /// <param name="data"></param>
@@ -551,7 +558,6 @@ namespace common.server
                     }
                     NetPeer = null;
                 }
-
             }
         }
 

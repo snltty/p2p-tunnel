@@ -30,7 +30,7 @@ namespace common.proxy
 
         public async Task<bool> Request(ProxyInfo info, bool unconnectedMessage = false)
         {
-            if (info.Connection == null || info.Connection.Connected == false) return false;
+            if (info.Connection == null || info.Connection.Connected == false || info.Connection.SendDenied > 0) return false;
 
             byte[] bytes = info.ToBytes(out int length);
             bool res = await messengerSender.SendOnly(new MessageRequestWrap
@@ -39,12 +39,13 @@ namespace common.proxy
                 Connection = info.Connection,
                 Payload = bytes.AsMemory(0, length)
             }, unconnectedMessage: unconnectedMessage);
+            if (info.Connection != null) info.Connection.SentBytes += (ulong)info.Data.Length;
             info.Return(bytes);
             return res;
         }
         public async Task<bool> Response(ProxyInfo info, bool unconnectedMessage = false)
         {
-            if (info.Connection == null || info.Connection.Connected == false) return false;
+            if (info.Connection == null || info.Connection.Connected == false || info.Connection.SendDenied > 0) return false;
 
             byte[] bytes = info.ToBytes(out int length);
             bool res = await messengerSender.SendOnly(new MessageRequestWrap
@@ -53,6 +54,7 @@ namespace common.proxy
                 Connection = info.Connection,
                 Payload = bytes.AsMemory(0, length)
             }, unconnectedMessage: unconnectedMessage);
+            if (info.Connection != null) info.Connection.SentBytes += (ulong)info.Data.Length;
             info.Return(bytes);
             return res;
         }

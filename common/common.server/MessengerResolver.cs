@@ -139,10 +139,13 @@ namespace common.server
                         //RelayIdIndex 后移一位
                         receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
 
-                        await _connection.WaitOne();
-                        await _connection.Send(receive).ConfigureAwait(false);
-                        _connection.SentBytes += (ulong)receive.Length;
-                        _connection.Release();
+                        if(_connection.SendDenied == 0)
+                        {
+                            await _connection.WaitOne();
+                            await _connection.Send(receive).ConfigureAwait(false);
+                            _connection.SentBytes += (ulong)receive.Length;
+                            _connection.Release();
+                        }
                     }
                     else
                     {
@@ -177,12 +180,14 @@ namespace common.server
 
                             //RelayIdIndex 后移一位
                             receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
-
-                            await _connection.WaitOne();
-                            //中继数据不再次序列化，直接在原数据上更新数据然后发送
-                            await _connection.Send(receive).ConfigureAwait(false);
-                            _connection.SentBytes += (ulong)receive.Length;
-                            _connection.Release();
+                            if (_connection.SendDenied == 0)
+                            {
+                                await _connection.WaitOne();
+                                //中继数据不再次序列化，直接在原数据上更新数据然后发送
+                                await _connection.Send(receive).ConfigureAwait(false);
+                                _connection.SentBytes += (ulong)receive.Length;
+                                _connection.Release();
+                            }
                         }
                         return;
                     }

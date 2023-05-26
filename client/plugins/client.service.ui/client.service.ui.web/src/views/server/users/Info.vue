@@ -3,21 +3,15 @@
         <el-row>
             <el-col :span="6">
                 <el-statistic title="登入" :value="state.user.SignCount"></el-statistic>
-                <div class="countdown-footer">{{state.user.SignLimit == -1 ? '//无限':''}}</div>
+                <div class="countdown-footer">{{state.user.SignLimitType == 0 ? '//无限':''}}</div>
             </el-col>
             <el-col :span="6">
-                <el-statistic title="流量" :value="0">
-                    <template #suffix>
-                        <span class="suffix">/B</span>
-                    </template>
-                </el-statistic>
-                <div class="countdown-footer">//无限</div>
-                <!-- <el-statistic title="流量" :value="state.user.NetFlow">
+                <el-statistic title="流量" :value="state.user.NetFlow">
                     <template #suffix>
                         <span class="suffix">/{{state.user.netFlow}}</span>
                     </template>
                 </el-statistic>
-                <div class="countdown-footer">{{state.user.NetFlow == -1 ? '//无限':`${state.user.NetFlow}/${state.user.netFlow}`}}</div> -->
+                <div class="countdown-footer">{{state.user.NetFlowType == 0 ? '//无限':`${state.user.NetFlow}/${state.user.netFlow}`}}</div>
             </el-col>
             <el-col :span="6">
                 <el-statistic title="权限" :value="state.user.access">
@@ -55,9 +49,11 @@ export default {
                 'ID': 0,
                 "Access": 0,
                 "access": 0,
-                "SignLimit": -1,
+                "SignLimit": 0,
+                "SignLimitType": 0,
                 "SignCount": 0,
-                "NetFlow": -1,
+                "NetFlowType": 0,
+                "NetFlow": 0,
                 'netFlow': 'B',
                 "EndTime": '',
                 "endTime": 0,
@@ -94,10 +90,11 @@ export default {
                 state.user.access = json.Access.toString(2).split('').filter(c => c == '1').length;
                 state.accessText = shareData.serverAccess.filter(c => shareData.serverAccessHas(state.user.Access, c.value)).map(c => c.text).join('】【')
 
+                state.user.SignLimitType = json.SignLimitType;
                 state.user.SignLimit = json.SignLimit;
                 state.user.SignCount = json.SignCount;
 
-
+                state.user.NetFlowType = json.NetFlowType;
                 let format = json.NetFlow.sizeFormat();
                 state.user.NetFlow = format[0];
                 state.user.netFlow = format[1];
@@ -118,7 +115,7 @@ export default {
 
 <style lang="stylus" scoped>
 .wrap {
-    width: 50%;
+    width: 70%;
     margin: 0 auto;
     border: 1px solid #ddd;
     border-radius: 0.4rem;
