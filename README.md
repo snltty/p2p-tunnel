@@ -26,13 +26,9 @@
 
 </div>
 
-## 由来理念
+## 纯属兴趣爱好
 1. 这是一个内网穿透项目，包括p2p打洞穿透，服务器代理穿透，还包含了一些有趣的功能
-2. 之前用了一些穿透工具，存在一些问题
-    1. 有go的，rust的，c++的，都看不太懂，不好加自己需要的功能
-    2. .NET平台的极少，且，或仅支持服务器代理穿透，或内存占用量非常大(100MB+)，都不是很符合自己的期望
-3. 基于这些有的没的，就决定了自己实现，做一个自己喜欢的内网穿透工具，也是为了学习网络协议相关知识
-4. 除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是手写，所以代码量，内存占用率，都比较小，速度也比较快。
+2. 除了rudp(<a href="https://github.com/RevenantX/LiteNetLib" target="_blank">LiteNetLib</a>)，其它代码都是手写，所以代码量，内存占用率，都比较小，速度也比较快。
 
 ## 大致原理
 <p><img src="./readme/path.jpg"></p>
@@ -76,9 +72,6 @@
     - 支持tcp、udp(支持组播，如果客户端之间是udp连接的，那将会以纯udp方式广播，不考虑是否到达，降低延迟)，方便联机游戏
     - 支持windows、linux、osx
     - 如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
-
-#### 代理模块大致原理、流程
-<p><img src="./readme/proxy.jpg"></p> 
 
 ## 支持作者
 请作者喝一杯咖啡，使其更有精力更新代码
