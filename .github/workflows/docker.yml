@@ -22,21 +22,21 @@ jobs:
       with:
         dotnet-version: 7.0.x
         
-    - name: restore
+    - name: restore projects
       run: 
         dotnet restore ./client/client.service &&
         dotnet restore ./server/server.service
         
-    - name: login
+    - name: docker login
       uses: docker/login-action@v2.1.0
       with:
         username: '${{secrets.DOCKER_USERNAME}}'
         password: '${{secrets.DOCKER_PASSWORD}}'
     
-    - name: buildx
+    - name: docker buildx
       uses: docker/setup-buildx-action@v2.5.0
       
-    - name: chmod
+    - name: chmod shell
       run: chmod +x publish-docker.sh
-    - name: publish
-      run: ./publish-docker.sh
+    - name: publish projects
+      run: ./publish-docker.sh 
