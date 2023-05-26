@@ -18,11 +18,11 @@ for %%f in (client,server) do (
 		)
 
 		cd public/publish/linux-%%p-x64/%%f
-		docker buildx build -f "%target%\\public\\publish\\linux-%%p-x64\\%%f\\Dockerfile-%%p-%%f" --platform="linux/x86_64" --force-rm -t "%image%-%%f-%%p-x64" . --push
+		docker buildx build -f "%target%\\public\\publish\\linux-%%p-x64\\%%f\\Dockerfile-%%p-%%f" --platform="linux/x86_64"  --force-rm -t "%image%-%%f-%%p-x64" . --push
 		cd ../../../../
 
 		cd public/publish/linux-%%p-arm64/%%f
-		docker buildx build -f "%target%\\public\\publish\\linux-%%p-arm64\\%%f\\Dockerfile-%%p-%%f" --platform="linux/arm64" --force-rm -t "%image%-%%f-%%p-arm64" . --push
+		docker buildx build -f "%target%\\public\\publish\\linux-%%p-arm64\\%%f\\Dockerfile-%%p-%%f" --platform="linux/arm64"  --force-rm -t "%image%-%%f-%%p-arm64" . --push
 		cd ../../../../
 	)
 )
