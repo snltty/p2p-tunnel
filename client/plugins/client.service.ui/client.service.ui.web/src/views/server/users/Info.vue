@@ -6,9 +6,9 @@
                 <div class="countdown-footer">{{state.user.SignLimitType == 0 ? '//无限':''}}</div>
             </el-col>
             <el-col :span="6">
-                <el-statistic title="流量" :value="state.user.NetFlow">
+                <el-statistic title="流量" :value="state.user.SentBytes">
                     <template #suffix>
-                        <span class="suffix">/{{state.user.netFlow}}</span>
+                        <span class="suffix">/{{state.user.sentBytes}}</span>
                     </template>
                 </el-statistic>
                 <div class="countdown-footer">{{state.user.NetFlowType == 0 ? '//无限':`${state.user.NetFlow}/${state.user.netFlow}`}}</div>
@@ -53,6 +53,8 @@ export default {
                 "SignLimitType": 0,
                 "SignCount": 0,
                 "NetFlowType": 0,
+                "SentBytes": 0,
+                "sentBytes": 'B',
                 "NetFlow": 0,
                 'netFlow': 'B',
                 "EndTime": '',
@@ -94,8 +96,14 @@ export default {
                 state.user.SignLimit = json.SignLimit;
                 state.user.SignCount = json.SignCount;
 
+
                 state.user.NetFlowType = json.NetFlowType;
-                let format = json.NetFlow.sizeFormat();
+                state.user.SentBytes = json.SentBytes;
+                let format = json.SentBytes.sizeFormat();
+                state.user.SentBytes = format[0];
+                state.user.sentBytes = format[1];
+
+                format = json.NetFlow.sizeFormat();
                 state.user.NetFlow = format[0];
                 state.user.netFlow = format[1];
 
