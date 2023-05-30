@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace common.user
 {
@@ -13,6 +14,8 @@ namespace common.user
         public bool Add(UserInfo user);
         public bool UpdatePassword(ulong id, string password);
         public bool Remove(ulong uid);
+
+        public void Save();
 
         public UserInfo DefaultUser();
     }

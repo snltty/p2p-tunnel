@@ -76,13 +76,25 @@ namespace common.libs.database
 
         public async Task Save(T model)
         {
-            string fileName = GetTableName(typeof(T));
-            await File.WriteAllTextAsync(fileName, model.ToJsonIndented(), Encoding.UTF8).ConfigureAwait(false);
+            try
+            {
+                string fileName = GetTableName(typeof(T));
+                await File.WriteAllTextAsync(fileName, model.ToJsonIndented(), Encoding.UTF8).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+            }
         }
         public async Task Save(string jsonStr)
         {
-            string fileName = GetTableName(typeof(T));
-            await File.WriteAllTextAsync(fileName, jsonStr, Encoding.UTF8).ConfigureAwait(false);
+            try
+            {
+                string fileName = GetTableName(typeof(T));
+                await File.WriteAllTextAsync(fileName, jsonStr, Encoding.UTF8).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private string GetTableName(Type type)

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Threading;
 
 namespace common.user
 {
@@ -121,7 +122,7 @@ namespace common.user
                     user.AddTime = DateTime.UtcNow;
                     storeModel.Users.TryAdd(user.ID, user);
 
-                    configDataProvider.Save(storeModel);
+                    _ = Save();
                     return true;
                 }
                 else
@@ -138,7 +139,7 @@ namespace common.user
                         _user.EndTime = user.EndTime;
                         _user.SignLimitType = user.SignLimitType;
                         _user.SignLimit = user.SignLimit;
-                        configDataProvider.Save(storeModel);
+                        _ = Save();
                         return true;
                     }
                 }
@@ -150,7 +151,7 @@ namespace common.user
             if (storeModel.Users.TryGetValue(id, out UserInfo _user))
             {
                 _user.Password = password;
-                configDataProvider.Save(storeModel);
+                _ = Save();
                 return true;
             }
             return false;
@@ -163,10 +164,19 @@ namespace common.user
                 {
                     item?.Disponse();
                 }
-                configDataProvider.Save(storeModel);
+                _ = Save();
                 return true;
             }
             return false;
+        }
+
+        object lockObj = new object();
+        public void Save()
+        {
+            lock (lockObj)
+            {
+                configDataProvider.Save(storeModel).Wait();
+            }
         }
 
         public UserInfo DefaultUser()

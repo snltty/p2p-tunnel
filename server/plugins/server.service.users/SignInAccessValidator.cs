@@ -148,7 +148,7 @@ namespace server.service.users
                         user.SentBytes += netflow;
 
                         user.NetFlow -= (long)netflow;
-                        if(user.NetFlow < 0)
+                        if (user.NetFlow < 0)
                         {
                             user.NetFlow = 0;
                         }
@@ -166,8 +166,10 @@ namespace server.service.users
                                 connection.Value.SendDenied &= (byte)(~config.NetFlowBit);
                             }
                         }
+
                     }
                 }
+                userStore.Save();
             }
             catch (Exception)
             {

@@ -20,10 +20,19 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            long a = 0;
-            a -= 1;
-            Console.WriteLine(a);
 
+            SemaphoreSlim Semaphore = new SemaphoreSlim(1);
+
+            for (int i = 0; i < 10; i++)
+            {
+                Semaphore.Wait(TimeSpan.FromSeconds(5));
+                Task.Run(async () =>
+                {
+                   await Task.Delay(TimeSpan.FromSeconds(10));
+                    Console.WriteLine(i);
+                    Semaphore.Release();
+                });
+            }
             //var summary = BenchmarkRunner.Run<Test>();
         }
     }
