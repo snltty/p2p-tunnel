@@ -135,6 +135,10 @@ namespace server.service.users
             return res && res1;
         }
 
+        /// <summary>
+        /// 定时检查和保存
+        /// </summary>
+        /// <param name="timeout"></param>
         private void NetFlowTimeout(WheelTimerTimeout<object> timeout)
         {
             try
