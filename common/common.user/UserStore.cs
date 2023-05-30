@@ -122,7 +122,7 @@ namespace common.user
                     user.AddTime = DateTime.UtcNow;
                     storeModel.Users.TryAdd(user.ID, user);
 
-                    _ = Save();
+                    Save();
                     return true;
                 }
                 else
@@ -139,7 +139,7 @@ namespace common.user
                         _user.EndTime = user.EndTime;
                         _user.SignLimitType = user.SignLimitType;
                         _user.SignLimit = user.SignLimit;
-                        _ = Save();
+                        Save();
                         return true;
                     }
                 }
@@ -151,7 +151,7 @@ namespace common.user
             if (storeModel.Users.TryGetValue(id, out UserInfo _user))
             {
                 _user.Password = password;
-                _ = Save();
+                Save();
                 return true;
             }
             return false;
@@ -164,7 +164,7 @@ namespace common.user
                 {
                     item?.Disponse();
                 }
-                _ = Save();
+                Save();
                 return true;
             }
             return false;
