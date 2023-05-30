@@ -42,10 +42,16 @@ namespace common.proxy
         {
             if (info.Step == EnumProxyStep.Command)
             {
-                if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false) return;
+                if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false)
+                {
+                    Logger.Instance.Error($"proxy plugin {info.PluginId} not found");
+                    _ = ConnectReponse(info, EnumProxyCommandStatus.ServerError);
+                    return;
+                }
                 info.ProxyPlugin = plugin;
                 if (pluginValidatorHandler.Validate(info) == false)
                 {
+                    Logger.Instance.Error($"proxy plugin [{info.ProxyPlugin.Name}] validate fail:{string.Join(",", info.TargetAddress.Span.ToArray())}:{info.TargetPort}，【connect enable】 or 【user access】 or 【firewall】 denied");
                     _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow);
                     return;
                 }
@@ -53,7 +59,6 @@ namespace common.proxy
             }
             else if (info.Step == EnumProxyStep.ForwardTcp)
             {
-               
                 await ForwardTcp(info);
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
@@ -269,6 +274,7 @@ namespace common.proxy
             EnumProxyCommandStatus command = EnumProxyCommandStatus.ServerError;
             try
             {
+
                 if (e.SocketError == SocketError.Success)
                 {
                     int length = token.Data.Data.Length;
@@ -286,6 +292,7 @@ namespace common.proxy
                 }
                 else
                 {
+                    Logger.Instance.Error($"connect {e.RemoteEndPoint} fail {e.SocketError}");
                     if (e.SocketError == SocketError.ConnectionRefused)
                     {
                         command = EnumProxyCommandStatus.DistReject;
@@ -313,6 +320,8 @@ namespace common.proxy
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
+                Logger.Instance.Error($"connect {e.RemoteEndPoint} fail {e.SocketError}:{ex.Message}");
+
                 command = EnumProxyCommandStatus.ServerError;
                 await ConnectReponse(token.Data, command);
                 CloseClientSocket(token);
