@@ -348,7 +348,7 @@ namespace client.service.vea
                 return false;
             }
 
-            for (int i = 0; i < 60; i++)
+            for (int i = 0; i < 5; i++)
             {
                 string output = Command.Osx(string.Empty, new string[] { "ifconfig" });
                 if (output.Contains(veaNameOsx))
