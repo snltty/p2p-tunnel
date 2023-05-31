@@ -49,7 +49,10 @@ namespace client.service.vea
         {
             try
             {
-                VeaTransfer.Run();
+                if(VeaTransfer.Run() == false)
+                {
+                    arg.SetCode(ClientServiceResponseCodes.Error, $"tuntap run fail");
+                }
             }
             catch (Exception ex)
             {

@@ -125,15 +125,17 @@ namespace client.service.vea
         /// <summary>
         /// 开启
         /// </summary>
-        public void Run()
+        public bool Run()
         {
+            bool res = true;
             Stop();
             if (config.ListenEnable)
             {
-                RunTun2Socks();
+                res = RunTun2Socks();
                 proxyServer.Start((ushort)config.ListenPort, config.Plugin); ;
             }
             UpdateIp();
+            return res;
         }
         /// <summary>
         /// 停止
@@ -155,7 +157,7 @@ namespace client.service.vea
             }
         }
 
-        private void RunTun2Socks()
+        private bool RunTun2Socks()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -163,7 +165,7 @@ namespace client.service.vea
                 WindowsPrincipal principal = new WindowsPrincipal(id);
                 if (principal.IsInRole(WindowsBuiltInRole.Administrator))
                 {
-                    RunWindows();
+                    return RunWindows();
                 }
                 else
                 {
@@ -172,12 +174,14 @@ namespace client.service.vea
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                RunLinux();
+                return RunLinux();
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                RunOsx();
+                return RunOsx();
             }
+
+            return false;
         }
 
         private void KillWindows()
@@ -223,10 +227,9 @@ namespace client.service.vea
             Command.Osx(string.Empty, new string[] { $"route delete -net {new IPAddress(ip)}/24 {config.IP}" });
         }
 
-        private void RunWindows()
+        private bool RunWindows()
         {
-            //return;
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 2; i++)
             {
                 Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -loglevel silent");
                 for (int k = 0; k < 4; k++)
@@ -246,13 +249,21 @@ namespace client.service.vea
                                 {
                                     //AddRoute(IPAddress.Any);
                                 }
-                                return;
+                                return true;
                             }
                         }
                     }
                 }
                 KillWindows();
             }
+
+            if (interfaceNumber <= 0)
+            {
+                string msg = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -loglevel silent", Array.Empty<string>());
+                Logger.Instance.Error(msg);
+            }
+
+            return interfaceNumber > 0;
         }
         private int GetWindowsInterfaceNum()
         {
@@ -276,7 +287,7 @@ namespace client.service.vea
             string output = Command.Windows(string.Empty, new string[] { $"ipconfig | findstr \"{ip}\"" });
             return string.IsNullOrWhiteSpace(output) == false;
         }
-        private void RunLinux()
+        private bool RunLinux()
         {
             Command.Linux(string.Empty, new string[] {
                 $"ip tuntap add mode tun dev {veaName}",
@@ -284,9 +295,26 @@ namespace client.service.vea
                 $"ip link set dev {veaName} up"
             });
             interfaceLinux = GetLinuxInterfaceNum();
-            Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -interface {interfaceLinux} -loglevel silent");
+            if (string.IsNullOrWhiteSpace(interfaceLinux))
+            {
+                string msg = Command.Linux(string.Empty, new string[] { $"ip tuntap add mode tun dev {veaName}" });
+                Logger.Instance.Error(msg);
+                return false;
+            }
+
+            try
+            {
+                Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -interface {interfaceLinux} -loglevel silent");
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex.Message);
+                return false;
+            }
 
             AddRoute();
+
+            return string.IsNullOrWhiteSpace(interfaceLinux) == false;
         }
         private string GetLinuxInterfaceNum()
         {
@@ -307,10 +335,18 @@ namespace client.service.vea
             }
             return string.Empty;
         }
-        private void RunOsx()
+        private bool RunOsx()
         {
             interfaceOsx = GetOsxInterfaceNum();
-            Tun2SocksProcess = Command.Execute("./tun2socks-osx", $" -device {veaNameOsx} -proxy socks5://127.0.0.1:{config.ListenPort} -interface {interfaceOsx} -loglevel silent");
+            try
+            {
+                Tun2SocksProcess = Command.Execute("./tun2socks-osx", $" -device {veaNameOsx} -proxy socks5://127.0.0.1:{config.ListenPort} -interface {interfaceOsx} -loglevel silent");
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex.Message);
+                return false;
+            }
 
             for (int i = 0; i < 60; i++)
             {
@@ -332,6 +368,8 @@ namespace client.service.vea
             Command.Osx(string.Empty, new string[] { $"route add -net {new IPAddress(ip)}/24 {config.IP}" });
 
             AddRoute();
+
+            return string.IsNullOrWhiteSpace(interfaceOsx) == false;
         }
         private string GetOsxInterfaceNum()
         {
