@@ -7,9 +7,5 @@ function FindProxyForURL(url, host)
     {
         return proxy;
     }
-    if (shExpMatch(host, "192.168.*.*"))
-    {
-        return proxy;
-    }
     return "DIRECT";
 }

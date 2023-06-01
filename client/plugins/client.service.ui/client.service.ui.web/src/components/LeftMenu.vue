@@ -10,7 +10,7 @@
         </div>
         <ul>
             <template v-for="(item,index) in menus" :key="index">
-                <li :style="`animation-delay:${(index+1)*.05}s;`">
+                <li :style="`animation-delay:${(index+1)*.03}s;`">
                     <template v-if="item.url">
                         <router-link :to="{name:item.url}" :class="{current:currentMenu == index}">{{item.text}}</router-link>
                     </template>

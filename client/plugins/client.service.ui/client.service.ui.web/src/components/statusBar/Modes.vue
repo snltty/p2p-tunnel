@@ -33,10 +33,10 @@ export default {
     setup() {
 
         const nodesFiles = require.context('../../views/nodes/', true, /plugin\.js/);
-        const nodesPlugins = nodesFiles.keys().map(c => nodesFiles(c).default);
+        const nodesPlugins = nodesFiles.keys().map(c => nodesFiles(c).default).filter(c => c.name);
 
         const serverFiles = require.context('../../views/server/', true, /plugin\.js/);
-        const serverPlugins = serverFiles.keys().map(c => serverFiles(c).default);
+        const serverPlugins = serverFiles.keys().map(c => serverFiles(c).default).filter(c => c.name);
 
         const servicesState = injectServices();
         const state = reactive({

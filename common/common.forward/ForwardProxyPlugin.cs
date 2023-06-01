@@ -1,7 +1,6 @@
 ﻿using common.libs;
 using common.libs.extends;
 using common.proxy;
-using common.server;
 using common.server.model;
 using System;
 using System.Net;
@@ -49,7 +48,12 @@ namespace common.forward
                 info.Connection = null;
                 GetConnection(info);
             }
-
+            /*
+            if(info.Step != EnumProxyStep.Command)
+            {
+                Console.WriteLine(info.Data.GetString());
+            }
+            */
             if (info.Connection == null || info.Connection.Connected == false)
             {
                 info.Data = Helper.EmptyArray;

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -301,6 +302,8 @@ namespace common.proxy
                 {
                     if (info.ProxyPlugin.HandleRequestData(info))
                     {
+
+
                         bool res = await proxyMessengerSender.Request(info);
                         if (res == false)
                         {
@@ -314,6 +317,58 @@ namespace common.proxy
             }
             Semaphore.Release();
         }
+
+        /// <summary>
+        /// 判断是否是http协议，并且返回第一个换行的下标
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        private int IsHttp(ProxyInfo info)
+        {
+            if (info.Data.Length < 9) return 0;
+
+            Span<byte> span = info.Data.Span;
+            int firstSpace = 0;
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                //判断是否属于某个HTTP METHOD
+                if (span.Slice(0, headers[i].Length).SequenceEqual(headers[i]))
+                {
+                    //查找换行，并截取判断是否存在HTTP关键字
+                    for (int index = headers[i].Length; index < span.Length; index++)
+                    {
+                        //碰到空格，记录一下，用于截取HTTP关键字
+                        if (span[index] == 0)
+                        {
+                            firstSpace = index;
+                        }
+                        else if (span[index] == 10)
+                        {
+                            //找到换行，并且截取到了HTTP关键字，表示这是一个http协议，否则是误判了
+                            if (firstSpace > 0 && span.Slice(index, httpByte.Length).SequenceEqual(httpByte))
+                            {
+                                return index + 1;
+                            }
+                            return 0;
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+
+        public byte[] httpByte = Encoding.UTF8.GetBytes("HTTP");
+        public byte[][] headers = new byte[][] {
+            Encoding.UTF8.GetBytes("GET /"),
+            Encoding.UTF8.GetBytes("POST /"),
+            Encoding.UTF8.GetBytes("OPTIONS /"),
+            Encoding.UTF8.GetBytes("PUT /"),
+            Encoding.UTF8.GetBytes("DELETE /"),
+            Encoding.UTF8.GetBytes("PATCH /"),
+            Encoding.UTF8.GetBytes("HEAD /"),
+        };
+
 
         private void CloseClientSocket(SocketAsyncEventArgs e)
         {

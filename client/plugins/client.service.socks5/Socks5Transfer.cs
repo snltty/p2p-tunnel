@@ -38,6 +38,12 @@ namespace client.service.socks5
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                /*
+                if (File.Exists(Path.Join(uiconfig.Web.Root, "socks-custom.pac")))
+                {
+                    return File.ReadAllText((Path.Join(uiconfig.Web.Root, "socks-custom.pac"));
+                }
+                */
                 return File.ReadAllText("./socks-custom.pac");
             }
             return string.Empty;
@@ -57,7 +63,7 @@ namespace client.service.socks5
                     string file = string.Empty;
                     if (config.IsCustomPac)
                     {
-                        file = Path.Join(uiconfig.Web.Root, "socks-custom.pac"); ;
+                        file = Path.Join(uiconfig.Web.Root, "socks-custom.pac");
                         pacContent = File.ReadAllText("./socks-custom.pac");
                     }
                     else

@@ -5,8 +5,10 @@ namespace client.service.app
 {
     public sealed class WebServerFileReader : IWebServerFileReader
     {
-        public byte[] Read(string fileName)
+        DateTime lastModified = DateTime.Now;
+        public byte[] Read(string fileName, out DateTime lastModified)
         {
+            lastModified = this.lastModified;
             fileName = Path.Join("public/web", fileName);
             using Stream fileStream = FileSystem.Current.OpenAppPackageFileAsync(fileName).Result;
             using StreamReader reader = new StreamReader(fileStream);

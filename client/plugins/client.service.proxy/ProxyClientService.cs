@@ -1,5 +1,8 @@
 ﻿using client.service.ui.api.clientServer;
 using common.libs.extends;
+using common.proxy;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace client.service.proxy
@@ -19,6 +22,12 @@ namespace client.service.proxy
         public common.proxy.Config Get(ClientServiceParamsInfo arg)
         {
             return config;
+        }
+
+        public async Task<bool> SetHeaders(ClientServiceParamsInfo arg)
+        {
+            await config.SetHeaders(arg.Content.DeJson<List<HttpHeaderItem>>());
+            return true;
         }
 
         public async Task<bool> Add(ClientServiceParamsInfo arg)

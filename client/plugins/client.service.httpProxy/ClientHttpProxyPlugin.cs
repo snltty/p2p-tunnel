@@ -34,6 +34,7 @@ namespace client.service.httpProxy
                 GetTargetEndPoint(info);
                 info.Data = Helper.EmptyArray;
             }
+            
             if (info.Connection == null || info.Connection.Connected == false)
             {
                 if (config.TargetConnectionId == 0)

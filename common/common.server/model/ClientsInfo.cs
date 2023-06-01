@@ -16,10 +16,6 @@ namespace common.server.model
         /// </summary>
         public ClientsClientInfo[] Clients { get; set; } = Array.Empty<ClientsClientInfo>();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             int length = 0, dataLength = Clients.Length;
@@ -47,10 +43,6 @@ namespace common.server.model
             return bytes;
 
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
         public void DeBytes(ReadOnlyMemory<byte> data)
         {
             var span = data.Span;

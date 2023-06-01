@@ -26,11 +26,40 @@ namespace common.proxy
 
             Config config = ReadConfig().Result;
             Firewall = config.Firewall;
+            HttpHeader = config.HttpHeader;
             ParseFirewall();
             ids.Reset(Firewall.Count > 0 ? Firewall.Max(c => c.ID) : 0);
         }
 
+        public async Task<Config> ReadConfig()
+        {
+            Config config = await configDataProvider.Load();
+            return config;
+        }
+        public async Task<string> ReadString()
+        {
+            return await configDataProvider.LoadString();
+        }
+        public async Task SaveConfig(string jsonStr)
+        {
+            Config config = jsonStr.DeJson<Config>();
+            Firewall = config.Firewall;
+            HttpHeader = config.HttpHeader;
+            ParseFirewall();
+            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+        }
+        public async Task SaveConfig()
+        {
+            ParseFirewall();
+            await configDataProvider.Save(this).ConfigureAwait(false);
+        }
+
+
         public List<FirewallItem> Firewall { get; set; } = new List<FirewallItem>();
+        [JsonIgnore]
+        public FirewallCacheType[] Firewall0 { get; } = new FirewallCacheType[2];
+        [JsonIgnore]
+        public Dictionary<ushort, FirewallCacheType[]> Firewalls { get; } = new Dictionary<ushort, FirewallCacheType[]>();
         public async Task<bool> AddFirewall(FirewallItem model)
         {
             FirewallItem item = Firewall.FirstOrDefault(c => c.ID == model.ID) ?? new FirewallItem { };
@@ -64,33 +93,6 @@ namespace common.proxy
             await SaveConfig();
             return true;
         }
-        public async Task<Config> ReadConfig()
-        {
-            Config config = await configDataProvider.Load();
-            return config;
-        }
-        public async Task<string> ReadString()
-        {
-            return await configDataProvider.LoadString();
-        }
-        public async Task SaveConfig(string jsonStr)
-        {
-            Config config = jsonStr.DeJson<Config>();
-            Firewall = config.Firewall;
-            ParseFirewall();
-            await configDataProvider.Save(jsonStr).ConfigureAwait(false);
-        }
-        public async Task SaveConfig()
-        {
-            ParseFirewall();
-            await configDataProvider.Save(this).ConfigureAwait(false);
-        }
-
-
-        [JsonIgnore]
-        public FirewallCacheType[] Firewall0 { get; } = new FirewallCacheType[2];
-        [JsonIgnore]
-        public Dictionary<ushort, FirewallCacheType[]> Firewalls { get; } = new Dictionary<ushort, FirewallCacheType[]>();
         private void ParseFirewall()
         {
             Array.Clear(Firewall0);
@@ -114,7 +116,7 @@ namespace common.proxy
                         }
 
                         FirewallCacheType type = types[(byte)item.Type];
-                        if(type == null)
+                        if (type == null)
                         {
                             type = new FirewallCacheType();
                             types[(byte)item.Type] = type;
@@ -167,7 +169,17 @@ namespace common.proxy
             }).ToArray();
         }
 
+        public List<HttpHeaderItem> HttpHeader { get; set; } = new List<HttpHeaderItem>();
+        [JsonIgnore]
+        public FirewallCacheType[] HttpHeader0 { get; } = new FirewallCacheType[2];
+        [JsonIgnore]
+        public Dictionary<ushort, FirewallCacheType[]> HttpHeaders { get; } = new Dictionary<ushort, FirewallCacheType[]>();
 
+        public async Task SetHeaders(List<HttpHeaderItem> headers)
+        {
+            HttpHeader = headers;
+            await SaveConfig();
+        }
     }
 
 
@@ -207,7 +219,6 @@ namespace common.proxy
         Allow = 0,
         Denied = 1,
     }
-
     public sealed class FirewallItem
     {
         public uint ID { get; set; }
@@ -219,5 +230,18 @@ namespace common.proxy
         public string Remark { get; set; } = string.Empty;
     }
 
-   
+
+
+    public sealed class HttpHeaderItem
+    {
+        public byte PluginId { get; set; }
+        public HttpHeaderDynamicType Dynamics { get; set; }
+        public Dictionary<string, string> Statics { get; set; } = new Dictionary<string, string>();
+    }
+    public enum HttpHeaderDynamicType:byte
+    {
+        Addr = 1,
+        Name = 2,
+        Account = 4
+    }
 }

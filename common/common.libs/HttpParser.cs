@@ -8,6 +8,17 @@ namespace common.libs
     public static class HttpParser
     {
         private static byte[] hostBytes = Encoding.ASCII.GetBytes("host: ");
+        private static byte[] httpByte = Encoding.UTF8.GetBytes("HTTP");
+        private static byte[][] headers = new byte[][] {
+            Encoding.UTF8.GetBytes("GET /"),
+            Encoding.UTF8.GetBytes("POST /"),
+            Encoding.UTF8.GetBytes("OPTIONS /"),
+            Encoding.UTF8.GetBytes("PUT /"),
+            Encoding.UTF8.GetBytes("DELETE /"),
+            Encoding.UTF8.GetBytes("PATCH /"),
+            Encoding.UTF8.GetBytes("HEAD /"),
+        };
+
         /// <summary>
         /// 从http报文中获取host
         /// </summary>
@@ -108,5 +119,43 @@ namespace common.libs
         {
             return span.Length > connectMethodValue.Length && span.Slice(0, connectMethodValue.Length).SequenceEqual(connectMethodValue.Span);
         }
+
+
+        public static int IsHttp(Memory<byte> data)
+        {
+            if (data.Length < 9) return 0;
+
+            Span<byte> span = data.Span;
+            int firstSpace = 0;
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                //判断是否属于某个HTTP METHOD
+                if (span.Slice(0, headers[i].Length).SequenceEqual(headers[i]))
+                {
+                    //查找换行，并截取判断是否存在HTTP关键字
+                    for (int index = headers[i].Length; index < span.Length; index++)
+                    {
+                        //碰到空格，记录一下，用于截取HTTP关键字
+                        if (span[index] == 32)
+                        {
+                            firstSpace = index+1;
+                        }
+                        else if (span[index] == 10)
+                        {
+                            //找到换行，并且截取到了HTTP关键字，表示这是一个http协议，否则是误判了
+                            if (firstSpace > 0 && span.Slice(firstSpace, httpByte.Length).SequenceEqual(httpByte))
+                            {
+                                return index;
+                            }
+                            return 0;
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+
+
     }
 }

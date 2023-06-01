@@ -92,7 +92,7 @@ namespace common.proxy
         }
 
         /// <summary>
-        /// 防火墙阻止
+        /// 防火墙阻止 22ns
         /// </summary>
         /// <param name="info"></param>
         /// <returns></returns>

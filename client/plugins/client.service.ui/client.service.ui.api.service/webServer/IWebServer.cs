@@ -26,7 +26,7 @@ namespace client.service.ui.api.service.webServer
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public byte[] Read(string fileName);
+        public byte[] Read(string fileName,out DateTime lastModified);
     }
 
     /// <summary>
@@ -45,11 +45,13 @@ namespace client.service.ui.api.service.webServer
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public byte[] Read(string fileName)
+        public byte[] Read(string fileName, out DateTime lastModified)
         {
             fileName = Path.Join(config.Web.Root, fileName);
+            lastModified = DateTime.UtcNow;
             if (File.Exists(fileName))
             {
+                lastModified = File.GetLastWriteTimeUtc(fileName);
                 return File.ReadAllBytes(fileName);
             }
             return Helper.EmptyArray;

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace client.service.ui.api.service.webServer
@@ -33,9 +32,7 @@ namespace client.service.ui.api.service.webServer
             {
                 while (true)
                 {
-                    var context = http.GetContext();
-
-
+                    HttpListenerContext context = http.GetContext();
                     HttpListenerRequest request = context.Request;
                     using HttpListenerResponse response = context.Response;
                     using Stream stream = response.OutputStream;
@@ -48,11 +45,12 @@ namespace client.service.ui.api.service.webServer
                         //默认页面
                         if (path == "/") path = "index.html";
 
-                        byte[] bytes = webServerFileReader.Read(path);
+                        byte[] bytes = webServerFileReader.Read(path,out DateTime last);
                         if (bytes.Length > 0)
                         {
                             response.ContentLength64 = bytes.Length;
                             response.ContentType = GetContentType(path);
+                            response.Headers["Last-Modified"] = last.ToString();
                             stream.Write(bytes, 0, bytes.Length);
                         }
                         else
