@@ -73,7 +73,8 @@
     - 支持windows、linux、osx
     - 如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
 
-- [x] **代理模块遇到HTTP协议时，往请求头添加一些代理信息，包括来源ip，节点名，代理名**
+- [x] **【端口转发】，【虚拟网卡组网】以最小代价往HTTP协议添加自定义请求头**
+    <p><img src="./readme/headers.jpg" ></p>
 
 ## 支持作者
 请作者喝一杯咖啡，使其更有精力更新代码
