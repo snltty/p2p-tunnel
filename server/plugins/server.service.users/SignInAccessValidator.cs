@@ -21,7 +21,6 @@ namespace server.service.users
         private readonly common.user.Config config;
         private readonly MessengerSender messengerSender;
         private readonly IClientSignInCaching clientSignInCaching;
-        private readonly WheelTimer<object> wheelTimer;
 
         private const string useridKey = "UserInfoID";
 
@@ -32,7 +31,6 @@ namespace server.service.users
             this.config = config;
             this.messengerSender = messengerSender;
             this.clientSignInCaching = clientSignInCaching;
-            this.wheelTimer = wheelTimer;
             clientSignInCaching.OnOffline += (SignInCacheInfo cache) =>
             {
                 if (GetUser(cache.Args, out UserInfo user))

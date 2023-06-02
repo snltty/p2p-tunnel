@@ -4,7 +4,6 @@ using common.server.model;
 using System;
 using System.Buffers;
 using System.Net;
-using System.Text;
 
 namespace common.proxy
 {
@@ -81,11 +80,12 @@ namespace common.proxy
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Headers { get; set; }
-
         [System.Text.Json.Serialization.JsonIgnore]
         public int HttpIndex { get; set; }
         [System.Text.Json.Serialization.JsonIgnore]
         public IPEndPoint ClientEP { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public HttpHeaderCacheInfo HeadersCache { get; set; }
 
         #endregion
 
@@ -220,6 +220,17 @@ namespace common.proxy
             ArrayPool<byte>.Shared.Return(data);
         }
 
+    }
+    public sealed class HttpHeaderCacheInfo
+    {
+        public IPAddress Addr { get; set; }
+        public string Name { get; set; }
+        public string Proxy { get; set; }
+
+        public byte[] Build()
+        {
+            return $"Snltty-Kvs: ip={Addr};node={Uri.UnescapeDataString(Name)};proxy={Proxy}\r\n".ToBytes();
+        }
     }
 
     /// <summary>

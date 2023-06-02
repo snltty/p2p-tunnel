@@ -27,9 +27,7 @@ namespace common.proxy
 
             Config config = ReadConfig().Result;
             Firewall = config.Firewall;
-            HttpHeader = config.HttpHeader;
             ParseFirewall();
-            ParseHeaders();
             ids.Reset(Firewall.Count > 0 ? Firewall.Max(c => c.ID) : 0);
         }
 
@@ -46,15 +44,12 @@ namespace common.proxy
         {
             Config config = jsonStr.DeJson<Config>();
             Firewall = config.Firewall;
-            HttpHeader = config.HttpHeader;
             ParseFirewall();
-            ParseHeaders();
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
         public async Task SaveConfig()
         {
             ParseFirewall();
-            ParseHeaders();
             await configDataProvider.Save(this).ConfigureAwait(false);
         }
 
@@ -173,28 +168,7 @@ namespace common.proxy
             }).ToArray();
         }
 
-        public List<HttpHeaderItem> HttpHeader { get; set; } = new List<HttpHeaderItem>();
-        [JsonIgnore]
-        public Dictionary<byte, HttpHeaderDynamicWrapInfo> HttpHeaders { get; } = new Dictionary<byte, HttpHeaderDynamicWrapInfo>();
-        private void ParseHeaders()
-        {
-            HttpHeaders.Clear();
-            foreach (HttpHeaderItem item in HttpHeader)
-            {
-                HttpHeaderDynamicWrapInfo wrap = new HttpHeaderDynamicWrapInfo { Item = item };
-                if (ProxyPluginLoader.GetPlugin(item.PluginId, out IProxyPlugin plugin))
-                {
-                    wrap.Headers = plugin.Headers;
-                }
-                HttpHeaders[item.PluginId] = wrap;
-            }
-        }
-
-        public async Task SetHeaders(List<HttpHeaderItem> headers)
-        {
-            HttpHeader = headers;
-            await SaveConfig();
-        }
+       
     }
 
     public sealed class FirewallCacheType
@@ -242,54 +216,6 @@ namespace common.proxy
         public string Port { get; set; } = string.Empty;
         public string[] IP { get; set; } = Array.Empty<string>();
         public string Remark { get; set; } = string.Empty;
-    }
-
-
-    public sealed class HttpHeaderItem
-    {
-        public byte PluginId { get; set; }
-        public HttpHeaderDynamicType Dynamics { get; set; }
-        public Dictionary<string, string> Statics { get; set; } = new Dictionary<string, string>();
-    }
-    public enum HttpHeaderDynamicType : byte
-    {
-        Addr = 1,
-        Name = 2
-    }
-    public sealed class HttpHeaderDynamicWrapInfo
-    {
-        public HttpHeaderItem Item { get; set; }
-        public HttpHeaderDynamicInfo Headers { get; set; }
-        public Memory<byte> HeadersBytes { get; set; }
-
-        public void Build()
-        {
-            if (Item == null || (Headers == null && Item.Statics.Count == 0)) return;
-
-            StringBuilder sb = new StringBuilder("Snltty-Kvs: ");
-            if (Headers != null)
-            {
-                if ((Item.Dynamics & HttpHeaderDynamicType.Addr) == HttpHeaderDynamicType.Addr)
-                {
-                    sb.Append($"ip={Headers.Addr};");
-                }
-                if ((Item.Dynamics & HttpHeaderDynamicType.Name) == HttpHeaderDynamicType.Name)
-                {
-                    sb.Append($"node={Headers.Name};");
-                }
-            }
-            foreach (var itemStatic in Item.Statics)
-            {
-                sb.Append($"{itemStatic.Key}={Uri.EscapeDataString(itemStatic.Value)};");
-            }
-            sb.Append("\r\n");
-            HeadersBytes = Encoding.UTF8.GetBytes(sb.ToString());
-        }
-    }
-    public sealed class HttpHeaderDynamicInfo
-    {
-        public IPAddress Addr { get; set; }
-        public string Name { get; set; }
     }
 
 }

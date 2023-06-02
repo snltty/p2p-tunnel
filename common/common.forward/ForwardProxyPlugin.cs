@@ -20,10 +20,11 @@ namespace common.forward
         public bool ConnectEnable => config.ConnectEnable;
         public EnumBufferSize BufferSize => config.BufferSize;
         public IPAddress BroadcastBind => IPAddress.Any;
-        public virtual HttpHeaderDynamicInfo Headers { get; set; }
+        public virtual HttpHeaderCacheInfo Headers { get; set; }
+        public virtual Memory<byte> HeadersBytes { get; set; }
 
         public virtual uint Access => 0b00000000_00000000_00000000_00001000;
-        public virtual string Name => "port forward";
+        public virtual string Name => "port-forward";
 
         public Action<ushort> OnStarted { get; set; } = (port) => { };
         public Action<ushort> OnStoped { get; set; } = (port) => { };

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -154,7 +155,7 @@ namespace common.proxy
                         PluginId = acceptToken.ProxyPlugin.Id,
                         ProxyPlugin = acceptToken.ProxyPlugin,
                         Rsv = acceptToken.Rsv,
-                        ClientEP = e.RemoteEndPoint as IPEndPoint
+                        ClientEP = e.AcceptSocket.RemoteEndPoint as IPEndPoint
                     },
                     SourcePort = acceptToken.SourcePort,
                     ProxyPlugin = acceptToken.ProxyPlugin,
@@ -315,30 +316,32 @@ namespace common.proxy
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.Instance.Error(ex);
             }
             Semaphore.Release();
         }
         private void BuildHeaders(ProxyInfo info)
         {
             info.Headers = Helper.EmptyArray;
-            if (config.HttpHeaders.TryGetValue(info.PluginId, out HttpHeaderDynamicWrapInfo wrapInfo))
+            if (info.ProxyPlugin.Headers != null)
             {
                 //缓存为空 或者 不是最新数据
-                if (wrapInfo.HeadersBytes.Length == 0 || ReferenceEquals(wrapInfo.Headers, info.ProxyPlugin.Headers) == false)
+                if (info.ProxyPlugin.HeadersBytes.Length == 0 || ReferenceEquals(info.ProxyPlugin.Headers, info.HeadersCache) == false)
                 {
-                    wrapInfo.Headers = info.ProxyPlugin.Headers;
-                    wrapInfo.Build();
+                    info.HeadersCache = info.ProxyPlugin.Headers;
+                    info.ProxyPlugin.HeadersBytes = info.HeadersCache.Build();
                 }
                 info.HttpIndex = HttpParser.IsHttp(info.Data);
                 if (info.HttpIndex > 0)
                 {
                     info.HttpIndex += 2;
-                    info.Headers = wrapInfo.HeadersBytes;
+                    info.Headers = info.ProxyPlugin.HeadersBytes;
                 }
             }
         }
+
 
         private void CloseClientSocket(SocketAsyncEventArgs e)
         {

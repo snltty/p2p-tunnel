@@ -20,7 +20,8 @@ namespace client.service.vea
         public override bool ConnectEnable => config.ConnectEnable;
         public override EnumBufferSize BufferSize => config.BufferSize;
         public override IPAddress BroadcastBind => config.BroadcastBind;
-        public override HttpHeaderDynamicInfo Headers { get; set; }
+        public override HttpHeaderCacheInfo Headers { get; set; }
+        public override Memory<byte> HeadersBytes { get; set; }
 
         public override uint Access => 0b00000000_00000000_00000000_01000000;
         public override string Name => "vea";
@@ -42,10 +43,11 @@ namespace client.service.vea
 
             signInStateInfo.OnChange += (bool state) =>
             {
-                Headers = new HttpHeaderDynamicInfo
+                Headers = new HttpHeaderCacheInfo
                 {
                     Addr = signInStateInfo.RemoteInfo.Ip,
-                    Name = config1.Client.Name
+                    Name = config1.Client.Name,
+                    Proxy = Name
                 };
             };
         }

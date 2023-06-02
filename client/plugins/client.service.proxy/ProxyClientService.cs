@@ -24,12 +24,6 @@ namespace client.service.proxy
             return config;
         }
 
-        public async Task<bool> SetHeaders(ClientServiceParamsInfo arg)
-        {
-            await config.SetHeaders(arg.Content.DeJson<List<HttpHeaderItem>>());
-            return true;
-        }
-
         public async Task<bool> Add(ClientServiceParamsInfo arg)
         {
             return await config.AddFirewall(arg.Content.DeJson<common.proxy.FirewallItem>());

@@ -17,7 +17,8 @@ namespace common.socks5
         public virtual bool ConnectEnable => config.ListenEnable;
         public virtual EnumBufferSize BufferSize => config.BufferSize;
         public virtual IPAddress BroadcastBind => IPAddress.Any;
-        public virtual HttpHeaderDynamicInfo Headers { get; set; }
+        public virtual HttpHeaderCacheInfo Headers { get; set; }
+        public virtual Memory<byte> HeadersBytes { get; set; }
 
         public virtual uint Access => 0b00000000_00000000_00000000_00010000;
         public virtual string Name => "socks5";

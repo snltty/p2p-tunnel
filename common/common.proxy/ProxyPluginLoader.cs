@@ -19,7 +19,8 @@ namespace common.proxy
         public bool ConnectEnable { get; }
         public EnumBufferSize BufferSize { get; }
         public IPAddress BroadcastBind { get; }
-        public HttpHeaderDynamicInfo Headers { get; set; }
+        public HttpHeaderCacheInfo Headers { get; set; }
+        public Memory<byte> HeadersBytes { get; set; }
 
         /// <summary>
         /// 验证数据完整性

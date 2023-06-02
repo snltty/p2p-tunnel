@@ -23,7 +23,8 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-           Console.WriteLine(Uri.EscapeDataString("1ad;.',&%$@!中文"));
+            IPEndPoint ep = null;
+           Console.WriteLine($"ip={ep}");
            // var summary = BenchmarkRunner.Run<Test>();
         }
     }
