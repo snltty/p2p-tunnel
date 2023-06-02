@@ -1,6 +1,7 @@
-﻿using common.libs.extends;
+﻿using client.messengers.clients;
+using client.messengers.singnin;
+using common.libs.extends;
 using common.proxy;
-using common.server;
 using common.server.model;
 using common.socks5;
 using System;
@@ -19,6 +20,7 @@ namespace client.service.vea
         public override bool ConnectEnable => config.ConnectEnable;
         public override EnumBufferSize BufferSize => config.BufferSize;
         public override IPAddress BroadcastBind => config.BroadcastBind;
+        public override HttpHeaderDynamicInfo Headers { get; set; }
 
         public override uint Access => 0b00000000_00000000_00000000_01000000;
         public override string Name => "vea";
@@ -29,13 +31,23 @@ namespace client.service.vea
         private readonly IProxyServer proxyServer;
         private readonly VeaTransfer veaTransfer;
         private readonly IProxyMessengerSender proxyMessengerSender;
-        public VeaSocks5ProxyPlugin(Config config, IProxyServer proxyServer
-            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender) : base(null, proxyServer)
+
+        public VeaSocks5ProxyPlugin(Config config, client.Config config1, IProxyServer proxyServer
+            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender, IClientInfoCaching clientInfoCaching, SignInStateInfo signInStateInfo) : base(null, proxyServer)
         {
             this.config = config;
             this.proxyServer = proxyServer;
             this.veaTransfer = veaTransfer;
             this.proxyMessengerSender = proxyMessengerSender;
+
+            signInStateInfo.OnChange += (bool state) =>
+            {
+                Headers = new HttpHeaderDynamicInfo
+                {
+                    Addr = signInStateInfo.RemoteInfo.Ip,
+                    Name = config1.Client.Name
+                };
+            };
         }
 
         public override bool HandleRequestData(ProxyInfo info)

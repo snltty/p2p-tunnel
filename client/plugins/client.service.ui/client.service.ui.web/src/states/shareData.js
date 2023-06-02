@@ -23,14 +23,16 @@ const clientAccess = clientPlugins.filter(c => c.access > 0).reduce((all, value,
 const serverProxys = serverPlugins.filter(c => c.proxyId > 0).reduce((all, value, index) => {
     all.push({
         text: value.text,
-        value: value.proxyId
+        value: value.proxyId,
+        local: value.local
     });
     return all;
 }, []);
 const clientProxys = clientPlugins.filter(c => c.proxyId > 0).reduce((all, value, index) => {
     all.push({
         text: value.text,
-        value: value.proxyId
+        value: value.proxyId,
+        local: value.local
     });
     return all;
 }, []);

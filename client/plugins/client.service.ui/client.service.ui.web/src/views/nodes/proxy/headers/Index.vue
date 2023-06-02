@@ -4,7 +4,7 @@
             <div class="head flex">
                 <el-button type="primary" size="small" :loading="state.loading" @click="submit">保存更改</el-button>
                 <el-button size="small" :loading="state.loading" @click="loadData">刷新列表</el-button>
-                <el-popover placement="top-start" title="说明" :width="300" trigger="hover" content="为http添加请求头，内容将以类似cookie的方式放在名为Snltty-Keys的key中">
+                <el-popover placement="top-start" title="说明" :width="300" trigger="hover" content="为http协议添加请求头，内容将以类似cookie的方式放在名为Snltty-Kvs的key中">
                     <template #reference>
                         <el-icon>
                             <Warning />
@@ -24,7 +24,7 @@
                                     <template v-for="(item,index) in scope.row.dynamics" :key="index">
                                         <li class="flex">
                                             <el-checkbox v-model="item.checked" size="small">{{item.text}}</el-checkbox>
-                                            <el-input class="key-name" size="small" v-model="item.key" />
+                                            <el-input class="key-name" size="small" v-model="item.key" disabled />
                                         </li>
                                     </template>
                                 </ul>
@@ -64,13 +64,12 @@ export default {
     components: {},
     setup() {
 
-        const clientProxys = [{ text: '全局', pluginId: 0xff }].concat(shareData.clientProxys.map(c => {
+        const clientProxys = shareData.clientProxys.filter(c => c.local).map(c => {
             return { text: c.text, pluginId: c.value };
-        })).map(c => {
+        }).map(c => {
             c.dynamics = [
-                { text: 'ip', value: 1, key: 'ip', checked: false },
-                { text: '节点名', value: 2, key: 'node', checked: false },
-                { text: '节点账号', value: 4, key: 'account', checked: false },
+                { text: '节点ip', value: 1, key: 'ip', checked: false },
+                { text: '节点名', value: 2, key: 'node', checked: false }
             ];
             c.statics = [{ key: '', value: '' }]
             return c;
@@ -95,6 +94,7 @@ export default {
         const loadData = () => {
             state.loading = true;
             get().then((res) => {
+                console.log(res);
                 state.loading = false;
                 const headers = res.HttpHeader;
                 if (headers.length > 0) {
@@ -102,7 +102,6 @@ export default {
                     for (let i = 0; i < headers.length; i++) {
                         const header = headers[i];
                         const proxy = data.filter(c => c.pluginId == header.PluginId)[0];
-                        console.log(proxy);
                         if (proxy) {
                             proxy.pluginId = header.PluginId;
                             proxy.dynamics.forEach(item => {

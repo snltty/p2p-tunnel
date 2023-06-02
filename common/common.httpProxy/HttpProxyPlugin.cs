@@ -17,6 +17,7 @@ namespace common.httpProxy
         public virtual bool ConnectEnable => config.ConnectEnable;
         public virtual EnumBufferSize BufferSize => config.BufferSize;
         public IPAddress BroadcastBind => IPAddress.Any;
+        public HttpHeaderDynamicInfo Headers { get; set; }
 
         public virtual uint Access => 0b00000000_00000000_00000000_00100000;
         public virtual string Name => "http proxy";

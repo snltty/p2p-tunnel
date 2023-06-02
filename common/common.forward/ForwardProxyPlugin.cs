@@ -20,6 +20,8 @@ namespace common.forward
         public bool ConnectEnable => config.ConnectEnable;
         public EnumBufferSize BufferSize => config.BufferSize;
         public IPAddress BroadcastBind => IPAddress.Any;
+        public virtual HttpHeaderDynamicInfo Headers { get; set; }
+
         public virtual uint Access => 0b00000000_00000000_00000000_00001000;
         public virtual string Name => "port forward";
 
@@ -41,19 +43,13 @@ namespace common.forward
             return EnumProxyValidateDataResult.Equal;
         }
 
-        public bool HandleRequestData(ProxyInfo info)
+        public virtual bool HandleRequestData(ProxyInfo info)
         {
             if (info.Connection == null || info.Connection.Connected == false)
             {
                 info.Connection = null;
                 GetConnection(info);
             }
-            /*
-            if(info.Step != EnumProxyStep.Command)
-            {
-                Console.WriteLine(info.Data.GetString());
-            }
-            */
             if (info.Connection == null || info.Connection.Connected == false)
             {
                 info.Data = Helper.EmptyArray;

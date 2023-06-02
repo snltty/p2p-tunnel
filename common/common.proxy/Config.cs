@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -28,6 +29,7 @@ namespace common.proxy
             Firewall = config.Firewall;
             HttpHeader = config.HttpHeader;
             ParseFirewall();
+            ParseHeaders();
             ids.Reset(Firewall.Count > 0 ? Firewall.Max(c => c.ID) : 0);
         }
 
@@ -46,11 +48,13 @@ namespace common.proxy
             Firewall = config.Firewall;
             HttpHeader = config.HttpHeader;
             ParseFirewall();
+            ParseHeaders();
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
         public async Task SaveConfig()
         {
             ParseFirewall();
+            ParseHeaders();
             await configDataProvider.Save(this).ConfigureAwait(false);
         }
 
@@ -171,9 +175,20 @@ namespace common.proxy
 
         public List<HttpHeaderItem> HttpHeader { get; set; } = new List<HttpHeaderItem>();
         [JsonIgnore]
-        public FirewallCacheType[] HttpHeader0 { get; } = new FirewallCacheType[2];
-        [JsonIgnore]
-        public Dictionary<ushort, FirewallCacheType[]> HttpHeaders { get; } = new Dictionary<ushort, FirewallCacheType[]>();
+        public Dictionary<byte, HttpHeaderDynamicWrapInfo> HttpHeaders { get; } = new Dictionary<byte, HttpHeaderDynamicWrapInfo>();
+        private void ParseHeaders()
+        {
+            HttpHeaders.Clear();
+            foreach (HttpHeaderItem item in HttpHeader)
+            {
+                HttpHeaderDynamicWrapInfo wrap = new HttpHeaderDynamicWrapInfo { Item = item };
+                if (ProxyPluginLoader.GetPlugin(item.PluginId, out IProxyPlugin plugin))
+                {
+                    wrap.Headers = plugin.Headers;
+                }
+                HttpHeaders[item.PluginId] = wrap;
+            }
+        }
 
         public async Task SetHeaders(List<HttpHeaderItem> headers)
         {
@@ -181,7 +196,6 @@ namespace common.proxy
             await SaveConfig();
         }
     }
-
 
     public sealed class FirewallCacheType
     {
@@ -231,17 +245,51 @@ namespace common.proxy
     }
 
 
-
     public sealed class HttpHeaderItem
     {
         public byte PluginId { get; set; }
         public HttpHeaderDynamicType Dynamics { get; set; }
         public Dictionary<string, string> Statics { get; set; } = new Dictionary<string, string>();
     }
-    public enum HttpHeaderDynamicType:byte
+    public enum HttpHeaderDynamicType : byte
     {
         Addr = 1,
-        Name = 2,
-        Account = 4
+        Name = 2
     }
+    public sealed class HttpHeaderDynamicWrapInfo
+    {
+        public HttpHeaderItem Item { get; set; }
+        public HttpHeaderDynamicInfo Headers { get; set; }
+        public Memory<byte> HeadersBytes { get; set; }
+
+        public void Build()
+        {
+            if (Item == null || (Headers == null && Item.Statics.Count == 0)) return;
+
+            StringBuilder sb = new StringBuilder("Snltty-Kvs: ");
+            if (Headers != null)
+            {
+                if ((Item.Dynamics & HttpHeaderDynamicType.Addr) == HttpHeaderDynamicType.Addr)
+                {
+                    sb.Append($"ip={Headers.Addr};");
+                }
+                if ((Item.Dynamics & HttpHeaderDynamicType.Name) == HttpHeaderDynamicType.Name)
+                {
+                    sb.Append($"node={Headers.Name};");
+                }
+            }
+            foreach (var itemStatic in Item.Statics)
+            {
+                sb.Append($"{itemStatic.Key}={Uri.EscapeDataString(itemStatic.Value)};");
+            }
+            sb.Append("\r\n");
+            HeadersBytes = Encoding.UTF8.GetBytes(sb.ToString());
+        }
+    }
+    public sealed class HttpHeaderDynamicInfo
+    {
+        public IPAddress Addr { get; set; }
+        public string Name { get; set; }
+    }
+
 }

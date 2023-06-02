@@ -3,6 +3,7 @@ using common.server.model;
 using common.server;
 using System;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace common.proxy
 {
@@ -33,6 +34,7 @@ namespace common.proxy
             if (info.Connection == null || info.Connection.Connected == false || info.Connection.SendDenied > 0) return false;
 
             byte[] bytes = info.ToBytes(out int length);
+
             bool res = await messengerSender.SendOnly(new MessageRequestWrap
             {
                 MessengerId = (ushort)ProxyMessengerIds.Request,

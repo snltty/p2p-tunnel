@@ -4,6 +4,7 @@ using common.server.model;
 using System;
 using System.Buffers;
 using System.Net;
+using System.Text;
 
 namespace common.proxy
 {
@@ -57,7 +58,6 @@ namespace common.proxy
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Data { get; set; }
 
-
         #endregion
 
         #region 辅助字段
@@ -76,6 +76,17 @@ namespace common.proxy
         [System.Text.Json.Serialization.JsonIgnore]
         public IProxyPlugin ProxyPlugin { get; set; }
 
+        /// <summary>
+        /// 加入请求头
+        /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        public Memory<byte> Headers { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public int HttpIndex { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public IPEndPoint ClientEP { get; set; }
+
         #endregion
 
         public byte[] ToBytes(out int length)
@@ -86,7 +97,7 @@ namespace common.proxy
                 + 4  // RequestId
                 + 1  //source length
                 + 1 // target
-                + Data.Length;
+                + Headers.Length + Data.Length;
 
             int sepLength = 0;
             if (SourceEP != null)
@@ -100,7 +111,7 @@ namespace common.proxy
             }
 
             byte[] bytes = ArrayPool<byte>.Shared.Rent(length);
-            var memory = bytes.AsMemory(0, length);
+            Memory<byte> memory = bytes.AsMemory(0, length);
             var span = memory.Span;
             int index = 0;
 
@@ -139,7 +150,17 @@ namespace common.proxy
 
             if (Data.Length > 0)
             {
-                Data.CopyTo(memory.Slice(index));
+                Memory<byte> target = memory.Slice(index);
+                if (Headers.Length > 0)
+                {
+                    Data.Slice(0, HttpIndex).CopyTo(target);
+                    Headers.CopyTo(target.Slice(HttpIndex));
+                    Data.Slice(HttpIndex).CopyTo(target.Slice(HttpIndex + Headers.Length));
+                }
+                else
+                {
+                    Data.CopyTo(target);
+                }
             }
             return bytes;
         }

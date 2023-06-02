@@ -78,7 +78,7 @@ export default {
             form: {
                 ID: addData.value.ID || 0,
                 Port: addData.value.Port || '0',
-                Protocol: addData.value.Protocol || 1,
+                Protocol: addData.value.Protocol || 3,
                 PluginId: addData.value.PluginId || 0xff,
                 Type: addData.value.Type || 0,
                 IP: (addData.value.IP || ['0.0.0.0/0']).join('\n'),

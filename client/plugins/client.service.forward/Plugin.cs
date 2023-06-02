@@ -39,7 +39,7 @@ namespace client.service.forward
 
 
             services.AddSingleton<IForwardTargetProvider, ForwardTargetProvider>();
-            services.AddSingleton<IForwardProxyPlugin, ForwardProxyPlugin>();
+            services.AddSingleton<IForwardProxyPlugin, ClientForwardProxyPlugin>();
 
 
         }

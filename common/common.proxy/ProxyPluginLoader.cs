@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Text;
 
 namespace common.proxy
 {
@@ -18,6 +19,7 @@ namespace common.proxy
         public bool ConnectEnable { get; }
         public EnumBufferSize BufferSize { get; }
         public IPAddress BroadcastBind { get; }
+        public HttpHeaderDynamicInfo Headers { get; set; }
 
         /// <summary>
         /// 验证数据完整性

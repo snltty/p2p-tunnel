@@ -26,13 +26,15 @@ namespace common.proxy
     {
         private readonly ServersManager serversManager = new ServersManager();
         private readonly ClientsManager clientsManager = new ClientsManager();
+        private readonly Config config;
         private NumberSpaceUInt32 requestIdNs = new NumberSpaceUInt32(0);
         SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         private readonly IProxyMessengerSender proxyMessengerSender;
 
-        public ProxyServer(IProxyMessengerSender proxyMessengerSender)
+        public ProxyServer(IProxyMessengerSender proxyMessengerSender, Config config)
         {
             this.proxyMessengerSender = proxyMessengerSender;
+            this.config = config;
         }
 
         public void Start(ushort port, byte pluginId, byte rsv = 0)
@@ -151,7 +153,8 @@ namespace common.proxy
                         Step = EnumProxyStep.Command,
                         PluginId = acceptToken.ProxyPlugin.Id,
                         ProxyPlugin = acceptToken.ProxyPlugin,
-                        Rsv = acceptToken.Rsv
+                        Rsv = acceptToken.Rsv,
+                        ClientEP = e.RemoteEndPoint as IPEndPoint
                     },
                     SourcePort = acceptToken.SourcePort,
                     ProxyPlugin = acceptToken.ProxyPlugin,
@@ -273,6 +276,7 @@ namespace common.proxy
 
                 server.UdpInfo.Data = server.UdpClient.EndReceive(result, ref rep);
                 server.UdpInfo.SourceEP = rep;
+                server.UdpInfo.ClientEP = rep;
                 await Receive(server.UdpInfo);
                 server.UdpInfo.Data = Helper.EmptyArray;
 
@@ -302,8 +306,7 @@ namespace common.proxy
                 {
                     if (info.ProxyPlugin.HandleRequestData(info))
                     {
-
-
+                        BuildHeaders(info);
                         bool res = await proxyMessengerSender.Request(info);
                         if (res == false)
                         {
@@ -317,58 +320,25 @@ namespace common.proxy
             }
             Semaphore.Release();
         }
-
-        /// <summary>
-        /// 判断是否是http协议，并且返回第一个换行的下标
-        /// </summary>
-        /// <param name="info"></param>
-        /// <returns></returns>
-        private int IsHttp(ProxyInfo info)
+        private void BuildHeaders(ProxyInfo info)
         {
-            if (info.Data.Length < 9) return 0;
-
-            Span<byte> span = info.Data.Span;
-            int firstSpace = 0;
-
-            for (int i = 0; i < headers.Length; i++)
+            info.Headers = Helper.EmptyArray;
+            if (config.HttpHeaders.TryGetValue(info.PluginId, out HttpHeaderDynamicWrapInfo wrapInfo))
             {
-                //判断是否属于某个HTTP METHOD
-                if (span.Slice(0, headers[i].Length).SequenceEqual(headers[i]))
+                //缓存为空 或者 不是最新数据
+                if (wrapInfo.HeadersBytes.Length == 0 || ReferenceEquals(wrapInfo.Headers, info.ProxyPlugin.Headers) == false)
                 {
-                    //查找换行，并截取判断是否存在HTTP关键字
-                    for (int index = headers[i].Length; index < span.Length; index++)
-                    {
-                        //碰到空格，记录一下，用于截取HTTP关键字
-                        if (span[index] == 0)
-                        {
-                            firstSpace = index;
-                        }
-                        else if (span[index] == 10)
-                        {
-                            //找到换行，并且截取到了HTTP关键字，表示这是一个http协议，否则是误判了
-                            if (firstSpace > 0 && span.Slice(index, httpByte.Length).SequenceEqual(httpByte))
-                            {
-                                return index + 1;
-                            }
-                            return 0;
-                        }
-                    }
+                    wrapInfo.Headers = info.ProxyPlugin.Headers;
+                    wrapInfo.Build();
+                }
+                info.HttpIndex = HttpParser.IsHttp(info.Data);
+                if (info.HttpIndex > 0)
+                {
+                    info.HttpIndex += 2;
+                    info.Headers = wrapInfo.HeadersBytes;
                 }
             }
-            return 0;
         }
-
-        public byte[] httpByte = Encoding.UTF8.GetBytes("HTTP");
-        public byte[][] headers = new byte[][] {
-            Encoding.UTF8.GetBytes("GET /"),
-            Encoding.UTF8.GetBytes("POST /"),
-            Encoding.UTF8.GetBytes("OPTIONS /"),
-            Encoding.UTF8.GetBytes("PUT /"),
-            Encoding.UTF8.GetBytes("DELETE /"),
-            Encoding.UTF8.GetBytes("PATCH /"),
-            Encoding.UTF8.GetBytes("HEAD /"),
-        };
-
 
         private void CloseClientSocket(SocketAsyncEventArgs e)
         {

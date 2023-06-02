@@ -3,9 +3,11 @@ using BenchmarkDotNet.Running;
 using common.libs;
 using common.libs.extends;
 using Iced.Intel;
+using Microsoft.Diagnostics.Tracing.Parsers.FrameworkEventSource;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Net.NetworkInformation;
@@ -21,9 +23,8 @@ namespace invokeSpeed
     {
         static void Main(string[] args)
         {
-            //yte[] data = Encoding.UTF8.GetBytes("GET /AAA/AAA?sdfsgfgergergt=egt=ert=ret==yte=yrt=yr=tyr=tyh=rth=rth=r=j=tr=jhr=jhrt=y=tr=r=ur=utr=uty=uty=ujyr=jytr=j= HTTP/1.1\r\nHost:www.baidu.com");
-            // int index = HttpParser.IsHttp(data);
-            var summary = BenchmarkRunner.Run<Test>();
+           Console.WriteLine(Uri.EscapeDataString("1ad;.',&%$@!中文"));
+           // var summary = BenchmarkRunner.Run<Test>();
         }
     }
 
@@ -32,7 +33,8 @@ namespace invokeSpeed
     [MemoryDiagnoser]
     public unsafe class Test
     {
-        byte[] data = Encoding.UTF8.GetBytes("GET /AAA/AAA HTTP/1.1\r\nHost:www.baidu.com");
+        byte[] data = Encoding.UTF8.GetBytes("HEAD /AAA/AAA?tytryrhfghbhfghfhf5454f5hbfdgregregre=fgfdewdfdfdfertggregregreeretergfger HTTP/1.1\r\nHost:www.baidu.com");
+        StringBuilder sb = new StringBuilder();
 
         [GlobalSetup]
         public void Startup()
@@ -43,8 +45,10 @@ namespace invokeSpeed
         [Benchmark]
         public void Test1()
         {
-            Encoding.UTF8.GetString(data);
-            // int index = HttpParser.IsHttp(data);
+            
+            sb.Clear();
+            sb.Append("HEAD /AAA/AAA?tytryrhfghbhfghfhf5454f5hbfdgregregre=fgfdewdfdfdfertggregregreeretergfger HTTP/1.1\r\nHost:www.baidu.com");
+           // int index = HttpParser.IsHttp(data);
         }
 
     }
