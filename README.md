@@ -45,13 +45,13 @@
     - 服务器代理
         - 服务器<-->A客户端 <u>(也就是通过服务器ip，或者域名，访问到内网服务)</u>
 2. [x] **【.NET7】** 跨平台，高性能，小尺寸，小内存
-<p><img src="./readme/size.jpg"></p>
+    <p><img src="./readme/size.jpg"></p>
 
 3. [x] **【UI界面】** 简单易用的web管理页面
-<p><img src="./readme/ui.jpg" ></p>
+    <p><img src="./readme/ui.jpg" ></p>
 
 4. [x] **【高效】** 高效的打包解包，作死的全手写序列化，通信速度极佳，以下结果基于 CPU：i5 8400，memory：3600
-<p><img src="./readme/speed.jpg" ></p>
+    <p><img src="./readme/speed.jpg" ></p>
 
 5. [x] **【加密】** 支持通信数据加密(预配置密钥或自动交换密钥)
 6. [x] **【插件式】** 可扩展的插件式
