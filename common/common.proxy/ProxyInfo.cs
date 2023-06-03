@@ -229,7 +229,7 @@ namespace common.proxy
 
         public byte[] Build()
         {
-            return $"Snltty-Kvs: ip={Addr};node={Uri.UnescapeDataString(Name)};proxy={Proxy}\r\n".ToBytes();
+            return $"Snltty-Addr: {Addr}\r\nSnltty-Node: {Uri.UnescapeDataString(Name)}\r\nSnltty-Proxy: {Proxy}\r\n".ToBytes();
         }
     }
 
