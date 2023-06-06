@@ -160,9 +160,9 @@ namespace common.user
         {
             if (storeModel.Users.Remove(id, out UserInfo user))
             {
-                foreach (IConnection item in user.Connections.Values)
+                foreach (UserConnectionWrap item in user.Connections.Values)
                 {
-                    item?.Disponse();
+                    item.Connection?.Disponse();
                 }
                 Save();
                 return true;

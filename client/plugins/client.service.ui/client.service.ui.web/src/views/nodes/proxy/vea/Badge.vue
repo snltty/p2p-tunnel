@@ -53,6 +53,7 @@ export default {
 
         const loadData = () => {
             if (websocketState.connected) {
+                update();
                 getList().then((res) => {
                     if (res[id]) {
                         state.data = res[id];
@@ -64,7 +65,7 @@ export default {
             state.loading = true;
             update().then(() => {
                 state.loading = false;
-                ElMessage.success('已更新');
+                ElMessage.success('已更新,请稍后一点时间再次查看列表');
             }).catch(() => {
                 state.loading = false;
             });

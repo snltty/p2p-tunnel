@@ -115,11 +115,17 @@ namespace common.server
         /// <returns></returns>
         public async Task InputData(IConnection connection)
         {
-            var receive = connection.ReceiveData;
+            Memory<byte> receive = connection.ReceiveData;
             //去掉表示数据长度的4字节
-            var readReceive = receive.Slice(4);
-            var responseWrap = connection.ReceiveResponseWrap;
-            var requestWrap = connection.ReceiveRequestWrap;
+            Memory<byte> readReceive = receive.Slice(4);
+            MessageResponseWrap responseWrap = connection.ReceiveResponseWrap;
+            MessageRequestWrap requestWrap = connection.ReceiveRequestWrap;
+
+            /*
+             * 中继
+             * request   A<-->B<-->C  计入A流量
+             * response  C<-->B<-->A  计入A流量
+             */
 
             connection.FromConnection = connection;
             try
@@ -131,14 +137,11 @@ namespace common.server
                     if (responseWrap.Relay && responseWrap.RelayIdLength - 1 - responseWrap.RelayIdIndex >= 0)
                     {
                         ulong nextId = responseWrap.RelayIds.Span.Slice(responseWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize).ToUInt64();
-
                         //目的地连接对象
                         IConnection _connection = sourceConnectionSelector.Select(connection, nextId);
                         if (_connection == null || ReferenceEquals(connection, _connection)) return;
-
                         //RelayIdIndex 后移一位
                         receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
-
                         if(_connection.SendDenied == 0)
                         {
                             await _connection.WaitOne();
@@ -173,11 +176,9 @@ namespace common.server
                         if (relayValidator.Validate(connection))
                         {
                             ulong nextId = requestWrap.RelayIds.Span.Slice(requestWrap.RelayIdIndex * MessageRequestWrap.RelayIdSize).ToUInt64();
-
                             //目的地连接对象
                             IConnection _connection = sourceConnectionSelector.Select(connection, nextId);
                             if (_connection == null || ReferenceEquals(connection, _connection)) return;
-
                             //RelayIdIndex 后移一位
                             receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
                             if (_connection.SendDenied == 0)
@@ -185,7 +186,7 @@ namespace common.server
                                 await _connection.WaitOne();
                                 //中继数据不再次序列化，直接在原数据上更新数据然后发送
                                 await _connection.Send(receive).ConfigureAwait(false);
-                                _connection.SentBytes += (ulong)receive.Length;
+                                connection.SentBytes += (ulong)receive.Length;
                                 _connection.Release();
                             }
                         }

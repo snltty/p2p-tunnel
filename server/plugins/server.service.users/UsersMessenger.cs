@@ -173,7 +173,7 @@ namespace server.service.users
             userSignInfo.DeBytes(connection.ReceiveRequestWrap.Payload);
             if (userStore.Get(userSignInfo.UserId, out UserInfo user))
             {
-                if (user.Connections.TryGetValue(userSignInfo.ConnectionId, out IConnection _connection) && _connection != null && _connection.Connected)
+                if (user.Connections.TryGetValue(userSignInfo.ConnectionId, out UserConnectionWrap wrap) && wrap != null && wrap.Connection.Connected)
                 {
                     connection.Write(Helper.TrueArray);
                     return;

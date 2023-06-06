@@ -71,7 +71,7 @@ namespace server.service.users
                         {
                             _ = messengerSender.SendOnly(new MessageRequestWrap
                             {
-                                Connection = item.Value,
+                                Connection = item.Value.Connection,
                                 MessengerId = (ushort)ClientsMessengerIds.Exit,
                             });
                         }
@@ -100,7 +100,7 @@ namespace server.service.users
                 {
                     cache.Connection.SendDenied |= config.NetFlowBit;
                 }
-                user.Connections.TryAdd(cache.ConnectionId, cache.Connection);
+                user.Connections.TryAdd(cache.ConnectionId, new UserConnectionWrap { Connection = cache.Connection });
             }
         }
 
@@ -144,9 +144,9 @@ namespace server.service.users
                 List<SignInCacheInfo> caches = clientSignInCaching.Get();
                 foreach (SignInCacheInfo item in caches.Where(c => c.Connection != null && c.Connection.Connected))
                 {
-                    if (GetUser(item.Args, out UserInfo user))
+                    if (GetUser(item.Args, out UserInfo user) && user.Connections.TryGetValue(item.ConnectionId, out UserConnectionWrap wrap))
                     {
-                        ulong netflow = (item.Connection.SentBytes - user.LastSentBytes);
+                        ulong netflow = (item.Connection.SentBytes - wrap.LastSentBytes);
                         user.SentBytes += netflow;
 
                         user.NetFlow -= (long)netflow;
@@ -155,17 +155,17 @@ namespace server.service.users
                             user.NetFlow = 0;
                         }
 
-                        user.LastSentBytes = item.Connection.SentBytes;
+                        wrap.LastSentBytes = item.Connection.SentBytes;
 
                         foreach (var connection in user.Connections)
                         {
                             if (user.NetFlowDenied)
                             {
-                                connection.Value.SendDenied |= config.NetFlowBit;
+                                connection.Value.Connection.SendDenied |= config.NetFlowBit;
                             }
                             else
                             {
-                                connection.Value.SendDenied &= (byte)(~config.NetFlowBit);
+                                connection.Value.Connection.SendDenied &= (byte)(~config.NetFlowBit);
                             }
                         }
 

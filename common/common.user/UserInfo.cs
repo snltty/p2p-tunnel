@@ -29,7 +29,7 @@ namespace common.user
         [JsonIgnore]
         public bool SignLimitDenied => SignLimitType == LimitType.Limit && Connections.Count >= SignLimit;
         [JsonIgnore]
-        public ConcurrentDictionary<ulong, IConnection> Connections { get; set; } = new ConcurrentDictionary<ulong, IConnection>();
+        public ConcurrentDictionary<ulong, UserConnectionWrap> Connections { get; set; } = new ConcurrentDictionary<ulong, UserConnectionWrap>();
 
         /// <summary>
         /// 限制流量 
@@ -37,8 +37,6 @@ namespace common.user
         public long NetFlow { get; set; }
         public LimitType NetFlowType { get; set; }
         public ulong SentBytes { get; set; }
-        [JsonIgnore]
-        public ulong LastSentBytes { get; set; }
         [JsonIgnore]
         public bool NetFlowDenied => NetFlowType == LimitType.Limit && NetFlow <= 0;
 
@@ -59,6 +57,12 @@ namespace common.user
         public const byte SortSignLimit = 0b0001_0000;
         public const byte SortAsc = 0b0000_00000;
         public const byte SortDesc = 0b0000_0001;
+    }
+
+    public sealed class UserConnectionWrap
+    {
+        public ulong LastSentBytes { get; set; }
+        public IConnection Connection { get; set; }
     }
 
     public sealed class UserInfoPageModel
