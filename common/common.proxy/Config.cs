@@ -8,7 +8,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -92,7 +91,7 @@ namespace common.proxy
             await SaveConfig();
             return true;
         }
-        private void ParseFirewall()
+        public void ParseFirewall()
         {
             Array.Clear(Firewall0);
             Firewalls.Clear();
@@ -168,7 +167,54 @@ namespace common.proxy
             }).ToArray();
         }
 
-       
+        public bool FirewallDenied(ProxyInfo info)
+        {
+            FirewallProtocolType protocolType = info.Step == EnumProxyStep.Command && info.Command == EnumProxyCommand.Connect ? FirewallProtocolType.TCP : FirewallProtocolType.UDP;
+            //阻止IPV6的内网ip
+            if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
+            {
+                Span<byte> span = info.TargetAddress.Span;
+                return span.SequenceEqual(EndPointExtends.ipv6Loopback.Span) || span.SequenceEqual(EndPointExtends.ipv6Multicast.Span) || (span[0] == EndPointExtends.ipv6Local.Span[0] && span[1] == EndPointExtends.ipv6Local.Span[1]);
+            }
+            //IPV4的，防火墙验证
+            else if (info.TargetAddress.Length == 4)
+            {
+                uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
+                byte allow = (byte)FirewallType.Allow;
+                byte denied = (byte)FirewallType.Denied;
+
+                Firewalls.TryGetValue(info.TargetPort, out FirewallCacheType[] cache);
+                //黑名单
+                if (Comparison(info, Firewall0[denied], ip, protocolType) || (cache != null && Comparison(info, cache[denied], ip, protocolType)))
+                {
+                    return true;
+                }
+                //白名单
+                if (info.TargetAddress.IsLan() || info.TargetAddress.GetIsBroadcastAddress())
+                {
+                    if (Comparison(info, Firewall0[allow], ip, protocolType) || (cache != null && Comparison(info, cache[allow], ip, protocolType)))
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            //其它的直接通过
+            return false;
+        }
+        private bool Comparison(ProxyInfo info, FirewallCacheType cache, uint ip, FirewallProtocolType protocolType)
+        {
+            if (cache == null) return false;
+            if ((cache.PluginIds & info.PluginId) == info.PluginId && (cache.Protocols & protocolType) == protocolType)
+            {
+                for (int j = 0; j < cache.Ips.Length; j++)
+                {
+                    FirewallCacheIp ipcache = new FirewallCacheIp(cache.Ips[j]);
+                    if ((ip & ipcache.MaskValue) == ipcache.NetWork) return true;
+                }
+            }
+            return false;
+        }
     }
 
     public sealed class FirewallCacheType

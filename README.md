@@ -45,13 +45,13 @@
     - 服务器代理
         - 服务器<-->A客户端 <u>(也就是通过服务器ip，或者域名，访问到内网服务)</u>
 2. [x] **【.NET7】** 跨平台，高性能，小尺寸，小内存
-    <p><img src="./readme/size.jpg"></p>
+<p><img src="./readme/size.jpg"></p>
 
 3. [x] **【UI界面】** 简单易用的web管理页面
-    <p><img src="./readme/ui.jpg" ></p>
+<p><img src="./readme/ui.jpg" ></p>
 
 4. [x] **【高效】** 高效的打包解包，作死的全手写序列化，通信速度极佳，以下结果基于 CPU：i5 8400，memory：3600
-    <p><img src="./readme/speed.jpg" ></p>
+<p><img src="./readme/speed.jpg" ></p>
 
 5. [x] **【加密】** 支持通信数据加密(预配置密钥或自动交换密钥)
 6. [x] **【插件式】** 可扩展的插件式
@@ -74,7 +74,7 @@
     - 如果无法运行虚拟网卡软件，你可能得自行下载对应系统及cpu版本的软件进行同名替换 <a href="https://github.com/xjasonlyu/tun2socks/releases" target="_blank">tun2socks下载</a>
 
 - [x] **【端口转发】，【虚拟网卡组网】以最小代价往HTTP协议添加自定义请求头**
-    <p><img src="./readme/headers.jpg" ></p>
+<p><img src="./readme/headers.jpg" ></p>
 
 ## 支持作者
 请作者喝一杯咖啡，使其更有精力更新代码

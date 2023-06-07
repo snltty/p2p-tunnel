@@ -121,10 +121,6 @@ namespace client.service.ui.api.clientServer
         /// 参数类型
         /// </summary>
         public Type Param { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="param"></param>
         public ClientServiceAttribute(Type param)
         {
             Param = param;

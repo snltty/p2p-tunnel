@@ -134,9 +134,9 @@ namespace common.libs
             {
                 if (span.Slice(0, headers[i].Length).SequenceEqual(headers[i]))
                 {
-                    if(span.IndexOf(httpByte) > 0)
+                    if(span.Slice(headers[i].Length).IndexOf(httpByte) > 0)
                     {
-                        return span.IndexOf(wrapByte);
+                        return span.Slice(headers[i].Length + httpByte.Length).IndexOf(wrapByte);
                     }
                     return -1;
                 }
