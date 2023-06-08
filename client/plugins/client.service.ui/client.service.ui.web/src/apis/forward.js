@@ -38,3 +38,9 @@ export const removeForward = (listenid, forwardid) => {
         ForwardID: forwardid
     });
 }
+export const testForward = (listenid, forwardid) => {
+    return sendWebsocketMsg(`forward/testForward`, {
+        ListenID: listenid,
+        ForwardID: forwardid
+    });
+}

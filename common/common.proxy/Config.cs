@@ -171,13 +171,13 @@ namespace common.proxy
         {
             FirewallProtocolType protocolType = info.Step == EnumProxyStep.Command && info.Command == EnumProxyCommand.Connect ? FirewallProtocolType.TCP : FirewallProtocolType.UDP;
             //阻止IPV6的内网ip
-            if (info.TargetAddress.Length == EndPointExtends.ipv6Loopback.Length)
+            if (info.AddressType == EnumProxyAddressType.IPV6)
             {
                 Span<byte> span = info.TargetAddress.Span;
                 return span.SequenceEqual(EndPointExtends.ipv6Loopback.Span) || span.SequenceEqual(EndPointExtends.ipv6Multicast.Span) || (span[0] == EndPointExtends.ipv6Local.Span[0] && span[1] == EndPointExtends.ipv6Local.Span[1]);
             }
             //IPV4的，防火墙验证
-            else if (info.TargetAddress.Length == 4)
+            else if (info.AddressType == EnumProxyAddressType.IPV4 && info.TargetAddress.Length == 4)
             {
                 uint ip = BinaryPrimitives.ReadUInt32BigEndian(info.TargetAddress.Span);
                 byte allow = (byte)FirewallType.Allow;

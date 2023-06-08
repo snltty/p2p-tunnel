@@ -134,7 +134,7 @@ namespace client.service.tray
         {
             try
             {
-                proc?.Kill();
+                proc?.Close();
                 proc?.Dispose();
 
             }

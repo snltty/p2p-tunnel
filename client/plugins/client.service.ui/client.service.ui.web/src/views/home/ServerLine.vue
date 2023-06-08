@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="line flex" title="选择服务器线路" @click="handleClick">
+        <div class="line flex" id="server-select" title="选择服务器线路" @click="handleClick">
             <div class="country-img">
                 <img :src="shareData.serverImgs[state.item.Img].img">
             </div>

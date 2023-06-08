@@ -10,6 +10,7 @@ namespace common.proxy
     public interface IProxyMessengerSender
     {
         public Task<bool> Request(ProxyInfo data, bool unconnectedMessage = false);
+        public Task<ProxyConnectTestResult> Test(ProxyInfo data);
         public Task<bool> Response(ProxyInfo data, bool unconnectedMessage = false);
 
         public Task<bool> ResponseClose(ProxyInfo data);
@@ -45,6 +46,33 @@ namespace common.proxy
             info.Return(bytes);
             return res;
         }
+        public async Task<ProxyConnectTestResult> Test(ProxyInfo info)
+        {
+            if (info.Connection == null || info.Connection.Connected == false)
+            {
+                return ProxyConnectTestResult.Connection;
+            }
+            if (info.Connection.SendDenied > 0)
+            {
+                return ProxyConnectTestResult.Denied;
+            }
+
+            byte[] bytes = info.ToBytes(out int length);
+            var res = await messengerSender.SendReply(new MessageRequestWrap
+            {
+                MessengerId = (ushort)ProxyMessengerIds.Test,
+                Connection = info.Connection,
+                Payload = bytes.AsMemory(0, length)
+            });
+            info.Return(bytes);
+            
+            if(res.Code != MessageResponeCodes.OK)
+            {
+                return ProxyConnectTestResult.Connection;
+            }
+            return (ProxyConnectTestResult)res.Data.Span[0];
+        }
+
         public async Task<bool> Response(ProxyInfo info, bool unconnectedMessage = false)
         {
             if (info.Connection == null || info.Connection.Connected == false || info.Connection.SendDenied > 0) return false;

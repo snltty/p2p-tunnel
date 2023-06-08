@@ -2,8 +2,10 @@
 using BenchmarkDotNet.Running;
 using common.libs;
 using common.proxy;
+using common.server;
 using common.server.model;
 using System.Buffers;
+using System.Net;
 using System.Text;
 
 namespace test
@@ -12,7 +14,7 @@ namespace test
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<Test>();
+            //BenchmarkRunner.Run<Test>();
         }
     }
 

@@ -59,7 +59,9 @@ export default {
     background-color: #fff;
     left: 50%;
     top: 50%;
-    transform: translateX(-50%) translateY(-50%);
+    margin-left: -40rem;
+    margin-top: -30rem;
+    // transform: translateX(-50%) translateY(-50%);
     box-shadow: 0 0 10px 6px #ffffff08;
     border-radius: 4px;
     border: 1px solid #297c5c;

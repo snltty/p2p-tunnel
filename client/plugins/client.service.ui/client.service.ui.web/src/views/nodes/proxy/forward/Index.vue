@@ -26,7 +26,7 @@
                                                     <template v-for="(fitem,findex) in item.Forwards" :key="findex">
                                                         <li>
                                                             <p class="flex"><span class="flex-1">访问</span><span>{{fitem.SourceIp}}:{{item.Port}}</span></p>
-                                                            <p class="flex"><span class="flex-1">目标</span><span>【{{ fitem.name}}】{{fitem.TargetIp}}:{{fitem.TargetPort}}</span></p>
+                                                            <p class="flex"><span class="flex-1">目标</span><span>【{{ targetJson[fitem.ConnectionId]}}】{{fitem.TargetIp}}:{{fitem.TargetPort}}</span></p>
                                                             <p class="t-r">
                                                                 <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveForward(item,fitem)">
                                                                     <template #reference>
@@ -34,6 +34,7 @@
                                                                     </template>
                                                                 </el-popconfirm>
                                                                 <el-button plain size="small" @click="handleEditForward(item,fitem)">编辑</el-button>
+                                                                <el-button plain size="small" @click="handleTestForward(item,fitem)">检测</el-button>
                                                             </p>
                                                         </li>
                                                     </template>
@@ -64,7 +65,7 @@
 </template>
 <script>
 import { reactive, ref } from '@vue/reactivity'
-import { getList, removeListen, startListen, stopListen, removeForward } from '../../../../apis/forward'
+import { getList, removeListen, startListen, stopListen, removeForward, testForward } from '../../../../apis/forward'
 import { computed, onMounted, provide } from '@vue/runtime-core'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
@@ -100,11 +101,6 @@ export default {
         const expandKeys = ref([]);
         const getData = () => {
             getList().then((res) => {
-                res.forEach(c => {
-                    c.Forwards.forEach(d => {
-                        d.name = targetJson.value[d.ConnectionId];
-                    });
-                });
                 state.list = res;
             });
         };
@@ -154,15 +150,20 @@ export default {
                 getData();
             });
         }
+        const handleTestForward = (listen, forward) => {
+            testForward(listen.ID, forward.ID).then((res) => {
+                console.log(res);
+            });
+        }
 
         onMounted(() => {
             getData();
         });
 
         return {
-            state, shareData, getData, expandKeys, onExpand,
+            targetJson, state, shareData, getData, expandKeys, onExpand,
             handleRemoveListen, handleAddListen, handleEditListen, onListeningChange,
-            handleAddForward, handleEditForward, handleRemoveForward,
+            handleAddForward, handleEditForward, handleRemoveForward, handleTestForward
         }
     }
 }

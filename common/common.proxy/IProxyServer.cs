@@ -311,6 +311,7 @@ namespace common.proxy
                         bool res = await proxyMessengerSender.Request(info);
                         if (res == false)
                         {
+                            Logger.Instance.Error($"proxy 【{info.ProxyPlugin.Name}】 send message fail");
                             clientsManager.TryRemove(info.RequestId, out _);
                         }
                     }

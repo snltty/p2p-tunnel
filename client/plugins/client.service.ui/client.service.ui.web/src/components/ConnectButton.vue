@@ -1,6 +1,6 @@
 <template>
     <div>
-        <a href="javascript:;" class="t-c" :class="className" @click="handle">
+        <a id="connect-btn" href="javascript:;" class="t-c" :class="className" @click="handle">
             <template v-if="loading">
                 <div class="loading">
                     <Loading :size="20" color="#f5f5f5"></Loading>

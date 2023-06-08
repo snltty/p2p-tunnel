@@ -1,12 +1,17 @@
-﻿using common.forward;
+﻿using client.messengers.clients;
+using client.messengers.singnin;
+using common.forward;
 using common.libs;
 using common.libs.database;
+using common.libs.extends;
 using common.proxy;
+using common.server;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace client.service.forward
 {
@@ -23,6 +28,9 @@ namespace client.service.forward
         private readonly IConfigDataProvider<P2PConfigInfo> p2pConfigDataProvider;
         private readonly IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching;
         private readonly IProxyServer proxyServer;
+        private readonly IProxyMessengerSender proxyMessengerSender;
+        private readonly SignInStateInfo signInStateInfo;
+        private readonly IClientInfoCaching clientInfoCaching;
 
         NumberSpaceUInt32 listenNS = new NumberSpaceUInt32();
         NumberSpaceUInt32 forwardNS = new NumberSpaceUInt32();
@@ -32,12 +40,16 @@ namespace client.service.forward
         public ForwardTransfer(
             IConfigDataProvider<P2PConfigInfo> p2pConfigDataProvider,
             IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching,
-            common.forward.Config config, IForwardProxyPlugin forwardProxyPlugin, IProxyServer proxyServer)
+            common.forward.Config config, IForwardProxyPlugin forwardProxyPlugin, IProxyServer proxyServer,
+            IProxyMessengerSender proxyMessengerSender, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching)
         {
             this.p2pConfigDataProvider = p2pConfigDataProvider;
             this.forwardTargetCaching = forwardTargetCaching;
             this.config = config;
             this.proxyServer = proxyServer;
+            this.proxyMessengerSender = proxyMessengerSender;
+            this.signInStateInfo = signInStateInfo;
+            this.clientInfoCaching = clientInfoCaching;
 
             p2PConfigInfo = ReadP2PConfig();
 
@@ -264,6 +276,30 @@ namespace client.service.forward
             listen.Forwards.Remove(forwardInfo);
             forwardTargetCaching.Remove(forwardInfo.SourceIp, listen.Port);
             SaveP2PConfig();
+        }
+        public async Task<ProxyConnectTestResult> TestP2PForward(P2PForwardRemoveParams model)
+        {
+            var listen = GetP2PByID(model.ListenID);
+            var forward = listen.Forwards.FirstOrDefault(c => c.ID == model.ForwardID);
+            IConnection connection = signInStateInfo.Connection;
+            if (forward.ConnectionId > 0)
+            {
+                if (clientInfoCaching.Get(forward.ConnectionId, out ClientInfo client))
+                {
+                    connection = client.Connection;
+                }
+            }
+            return await proxyMessengerSender.Test(new ProxyInfo
+            {
+                AddressType = EnumProxyAddressType.IPV4,
+                Command = EnumProxyCommand.Connect,
+                Connection = connection,
+                PluginId = config.Plugin,
+                RequestId = 1,
+                Step = EnumProxyStep.Command,
+                TargetAddress = forward.TargetIp.GetAddressBytes(),
+                TargetPort = forward.TargetPort
+            });
         }
 
         /// <summary>

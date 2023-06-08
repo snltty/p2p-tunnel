@@ -1,6 +1,8 @@
 ﻿using client.service.ui.api.clientServer;
 using common.libs.extends;
+using common.proxy;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace client.service.forward
 {
@@ -59,6 +61,12 @@ namespace client.service.forward
         {
             P2PForwardRemoveParams fmodel = arg.Content.DeJson<P2PForwardRemoveParams>();
             forwardTransfer.RemoveP2PForward(fmodel);
+        }
+        public async Task<ProxyConnectTestResult> TestForward(ClientServiceParamsInfo arg)
+        {
+            P2PForwardRemoveParams fmodel = arg.Content.DeJson<P2PForwardRemoveParams>();
+            return await forwardTransfer.TestP2PForward(fmodel);
+
         }
         /// <summary>
         /// 监听列表

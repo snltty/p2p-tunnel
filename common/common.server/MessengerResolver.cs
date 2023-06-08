@@ -205,13 +205,11 @@ namespace common.server
                     requestWrap.Payload = connection.FromConnection.Crypto.Decode(requestWrap.Payload);
                 }
                 //404,没这个插件
-                if (messengers.ContainsKey(requestWrap.MessengerId) == false)
+                if (messengers.TryGetValue(requestWrap.MessengerId,out MessengerCacheInfo plugin) == false)
                 {
                     Logger.Instance.DebugError($"{requestWrap.MessengerId},{connection.ServerType}, not found");
                     return;
                 }
-
-                MessengerCacheInfo plugin = messengers[requestWrap.MessengerId];
                 if (plugin.VoidMethod != null)
                 {
                     plugin.VoidMethod(connection);

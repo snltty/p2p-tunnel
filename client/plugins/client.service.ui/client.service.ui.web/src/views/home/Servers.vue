@@ -1,9 +1,9 @@
 <template>
     <div class="servers-mark absolute" :class="{show:state.animation}" @click="handleClose(0)" ref="rootDom">
         <div class="servers-wrap absolute scrollbar" @click.stop>
-            <ul>
+            <ul id="select-server">
                 <li>
-                    <el-button size="small" @click="handleAdd">添加服务器节点</el-button>
+                    <el-button id="add-server" size="small" @click="handleAdd">添加服务器节点</el-button>
                 </li>
                 <template v-for="(item,index) in state.servers" :key="index">
                     <li class="flex" @click="handleSelect(item)">
@@ -161,14 +161,14 @@ export default {
     &.show {
         .servers-wrap {
             left: 100%;
-            transform: translateX(-20rem);
+            margin-left: -20rem;
         }
     }
 }
 
 .servers-wrap {
     left: 100%;
-    transform: translateX(0);
+    margin-left: 0;
     right: auto;
     width: 20rem;
     border-left: 1px solid #ddd;

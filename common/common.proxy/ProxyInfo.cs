@@ -350,6 +350,19 @@ namespace common.proxy
         GetFirewall = 903,
         AddFirewall = 904,
         RemoveFirewall = 905,
+        Test = 906,
         Max = 999,
+    }
+
+    [Flags]
+    public enum ProxyConnectTestResult : byte
+    {
+        Connection = 0,
+        Denied = 1,
+        Access = 2,
+        Plugin = 3,
+        Firewail = 4,
+        Connect = 5,
+        Success = 6,
     }
 }
