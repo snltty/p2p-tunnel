@@ -78,10 +78,19 @@ export default {
                 json.TargetConnectionId = state.TargetConnectionId;
                 json.ListenEnable = state.ListenEnable;
                 saveConfigure(plugin.config, JSON.stringify(json)).then(() => {
-                    update().then(() => {
+                    update().then((state) => {
                         loadConfig();
                         state.loading = false;
+                        if (state == false) {
+                            ElMessage.error('失败,具体信息看日志');
+                            state.ListenEnable = false;
+                            json.ListenEnable = state.ListenEnable;
+                            saveConfigure(plugin.config, JSON.stringify(json));
+                        }
                     }).catch(() => {
+                        state.ListenEnable = false;
+                        json.ListenEnable = state.ListenEnable;
+                        saveConfigure(plugin.config, JSON.stringify(json));
                         state.loading = false;
                     });
                 }).catch(() => {

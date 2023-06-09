@@ -48,14 +48,14 @@ namespace client.service.socks5
         {
             await config.SaveConfig(arg.Content);
         }
-        public void Run(ClientServiceParamsInfo arg)
+        public bool Run(ClientServiceParamsInfo arg)
         {
             proxyServer.Stop(config.Plugin);
             if (config.ListenEnable)
             {
                 try
                 {
-                    proxyServer.Start((ushort)config.ListenPort, config.Plugin);
+                    return proxyServer.Start((ushort)config.ListenPort, config.Plugin);
                 }
                 catch (Exception ex)
                 {
@@ -63,6 +63,7 @@ namespace client.service.socks5
                 }
             }
             socks5Transfer.UpdatePac();
+            return true;
         }
 
 

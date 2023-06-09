@@ -66,14 +66,16 @@ namespace client.service.vea
                 {
                     info.Response[0] = (byte)Socks5EnumResponseCommand.AddressNotAllow;
                     info.Data = info.Response;
+                    info.CommandMsg = EnumProxyCommandStatusMsg.Address;
                     proxyServer.InputData(info);
                     return false;
                 }
                 GetConnection(info);
                 if (info.Connection == null || info.Connection.Connected == false)
                 {
-                    info.Response[0] = (byte)Socks5EnumResponseCommand.AddressNotAllow;
+                    info.Response[0] = (byte)Socks5EnumResponseCommand.NetworkError;
                     info.Data = info.Response;
+                    info.CommandMsg = EnumProxyCommandStatusMsg.Connection;
                     proxyServer.InputData(info);
                     return false;
                 }

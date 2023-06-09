@@ -34,13 +34,20 @@ namespace server.service.users
         [MessengerId((ushort)UsersMessengerIds.Page)]
         public void Page(IConnection connection)
         {
-            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)EnumServiceAccess.Setting) == false)
-            {
-                return;
-            }
 
             UserInfoPageModel userInfoPage = new UserInfoPageModel();
             userInfoPage.DeBytes(connection.ReceiveRequestWrap.Payload);
+            if (serviceAccessValidator.Validate(connection.ConnectId, (uint)EnumServiceAccess.Setting) == false)
+            {
+                connection.WriteUTF8(new UserInfoPageResultModel
+                {
+                    Count = 0,
+                    Page = userInfoPage.Page,
+                    PageSize = userInfoPage.PageSize,
+                    Data = new List<UserInfo>()
+                }.ToJson());
+                return;
+            }
 
             List<UserInfo> users = userStore.Get(userInfoPage.Page, userInfoPage.PageSize, userInfoPage.Sort, userInfoPage.Account).Select(c => new UserInfo
             {

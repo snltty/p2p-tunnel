@@ -22,7 +22,23 @@
                     <el-button size="small" :loading="state.loading" @click.stop="handleUpdate">刷新列表</el-button>
                 </el-dropdown-item>
                 <el-dropdown-item divided class="t-c">
-                    <el-button size="small" @click="handleOnlines">局域网段在线设备</el-button>
+                    <el-button size="small" @click="handleOnlines">在线设备</el-button>
+                    <el-dropdown style="height:auto;margin-left:.6rem">
+                        <el-button size="small" class="forward-status" :class="`forward-status-${state.data.LastError}`">最后失败
+                            <el-icon>
+                                <Warning />
+                            </el-icon>
+                        </el-button>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <template v-for="(item,index) in shareData.commandMsgs" :key="index">
+                                    <el-dropdown-item class="forward-success" v-if="state.data.LastError==0 || state.data.LastError > index" :icon="CircleCheck">{{item}}</el-dropdown-item>
+                                    <el-dropdown-item class="forward-error" v-else :icon="CircleClose">{{item}}</el-dropdown-item>
+                                </template>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
                 </el-dropdown-item>
             </el-dropdown-menu>
         </template>
@@ -33,9 +49,11 @@
 <script>
 import { websocketState } from '../../../../apis/request'
 import { getList, reset, update } from '../../../../apis/vea'
+import { shareData } from '../../../../states/shareData'
 import { reactive } from '@vue/reactivity'
 import { ElMessage } from 'element-plus'
 import Onlines from './OnLines.vue'
+import { CircleCheck, CircleClose } from '@element-plus/icons'
 import plugin from './plugin'
 export default {
     plugin: plugin,
@@ -90,7 +108,7 @@ export default {
         }
 
         return {
-            state, loadData, handleUpdate, handleResetVea, handleOnlines
+            CircleCheck, CircleClose, shareData, state, loadData, handleUpdate, handleResetVea, handleOnlines
         }
     }
 }
@@ -110,6 +128,14 @@ export default {
 
     .el-icon {
         vertical-align: middle;
+    }
+
+    .forward-status {
+        color: red;
+    }
+
+    .forward-status-0 {
+        color: green;
     }
 }
 </style>

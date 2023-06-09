@@ -54,8 +54,9 @@ namespace common.forward
             if (info.Connection == null || info.Connection.Connected == false)
             {
                 info.Data = Helper.EmptyArray;
+                info.CommandMsg = EnumProxyCommandStatusMsg.Connection;
                 proxyServer.InputData(info);
-                return true;
+                return false;
             }
 
             info.AddressType = EnumProxyAddressType.IPV4;

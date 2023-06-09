@@ -1,6 +1,7 @@
 ﻿using client.messengers.clients;
 using client.service.ui.api.clientServer;
 using common.libs.extends;
+using common.proxy;
 using System;
 using System.Buffers.Binary;
 using System.Linq;
@@ -17,13 +18,15 @@ namespace client.service.vea
         private readonly VeaTransfer VeaTransfer;
         private readonly VeaMessengerSender veaMessengerSender;
         private readonly IClientInfoCaching clientInfoCaching;
+        private readonly IProxyServer proxyServer;
 
-        public VeaClientService(Config config, VeaTransfer VeaTransfer, VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching)
+        public VeaClientService(Config config, VeaTransfer VeaTransfer, VeaMessengerSender veaMessengerSender, IClientInfoCaching clientInfoCaching, IProxyServer proxyServer)
         {
             this.config = config;
             this.VeaTransfer = VeaTransfer;
             this.veaMessengerSender = veaMessengerSender;
             this.clientInfoCaching = clientInfoCaching;
+            this.proxyServer = proxyServer;
         }
 
         /// <summary>
@@ -45,19 +48,17 @@ namespace client.service.vea
             config.SaveConfig(arg.Content).Wait();
             VeaTransfer.UpdateIp();
         }
-        public void Run(ClientServiceParamsInfo arg)
+        public bool Run(ClientServiceParamsInfo arg)
         {
             try
             {
-                if(VeaTransfer.Run() == false)
-                {
-                    arg.SetCode(ClientServiceResponseCodes.Error, $"tuntap run fail");
-                }
+                return VeaTransfer.Run();
             }
             catch (Exception ex)
             {
                 arg.SetCode(ClientServiceResponseCodes.Error, ex.Message);
             }
+            return false;
         }
 
         /// <summary>
@@ -96,12 +97,16 @@ namespace client.service.vea
         /// <returns></returns>
         public object List(ClientServiceParamsInfo arg)
         {
+            EnumProxyCommandStatusMsg lastError = EnumProxyCommandStatusMsg.Success;
+            proxyServer.LastError((ushort)config.ListenPort, out lastError);
+
             return VeaTransfer.IPList.ToDictionary(c => c.Value.Client.ConnectionId, d => new
             {
                 IP = string.Join(".", BinaryPrimitives.ReverseEndianness(d.Value.IP).ToBytes()),
                 LanIPs = d.Value.LanIPs.Select(c => new { IPAddress = string.Join(".", BinaryPrimitives.ReverseEndianness(c.IPAddress).ToBytes()), Mask = c.MaskLength }),
                 d.Value.NetWork,
-                Mask = d.Value.MaskLength
+                Mask = d.Value.MaskLength,
+                LastError = lastError
             });
         }
 

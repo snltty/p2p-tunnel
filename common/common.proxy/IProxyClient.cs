@@ -44,15 +44,16 @@ namespace common.proxy
             {
                 if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false)
                 {
-                    Logger.Instance.Error($"proxy plugin {info.PluginId} not found");
-                    _ = ConnectReponse(info, EnumProxyCommandStatus.ServerError);
+                    //Logger.Instance.Error($"proxy plugin {info.PluginId} not found");
+                    _ = ConnectReponse(info, EnumProxyCommandStatus.ServerError, EnumProxyCommandStatusMsg.Plugin);
                     return;
                 }
                 info.ProxyPlugin = plugin;
                 if (pluginValidatorHandler.Validate(info) == false)
                 {
-                    Logger.Instance.Error($"proxy plugin [{info.ProxyPlugin.Name}] validate fail:{string.Join(",", info.TargetAddress.Span.ToArray())}:{info.TargetPort}，【connect enable】 or 【user access】 or 【firewall】 denied");
-                    _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow);
+                    // Logger.Instance.Error($"proxy plugin [{info.ProxyPlugin.Name}] validate fail:{string.Join(",", info.TargetAddress.Span.ToArray())}:{info.TargetPort}，【connect enable】 or 【user access】 or 【firewall】 denied");
+                    EnumProxyCommandStatusMsg statusMsg = info.CommandMsg;
+                     _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow, statusMsg);
                     return;
                 }
                 _ = Command(info);
@@ -76,21 +77,21 @@ namespace common.proxy
                 }
                 else if (info.Command == EnumProxyCommand.UdpAssociate)
                 {
-                    _ = ConnectReponse(info, EnumProxyCommandStatus.ConnecSuccess);
+                    _ = ConnectReponse(info, EnumProxyCommandStatus.ConnecSuccess, EnumProxyCommandStatusMsg.Success);
                 }
                 else if (info.Command == EnumProxyCommand.Bind)
                 {
-                    _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow);
+                    _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow, EnumProxyCommandStatusMsg.Connect);
                 }
                 else
                 {
-                    _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow);
+                    _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow, EnumProxyCommandStatusMsg.Connect);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Instance.Error(ex);
-                _ = ConnectReponse(info, EnumProxyCommandStatus.ConnectFail);
+                _ = ConnectReponse(info, EnumProxyCommandStatus.ConnectFail, EnumProxyCommandStatusMsg.Connect);
                 return;
             }
             await Task.CompletedTask;
@@ -277,13 +278,18 @@ namespace common.proxy
 
                 if (e.SocketError == SocketError.Success)
                 {
+                    //魔术数据
+                    if (token.Data.Data.Length == Helper.MagicData.Length && token.Data.Data.Span.SequenceEqual(Helper.MagicData))
+                    {
+                        token.Data.Data = Helper.EmptyArray;
+                    }
                     int length = token.Data.Data.Length;
                     if (length > 0)
                     {
                         await token.TargetSocket.SendAsync(token.Data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                         token.Data.Data = Helper.EmptyArray;
                     }
-                    await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess);
+                    await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess, EnumProxyCommandStatusMsg.Success);
                     token.Data.TargetAddress = Helper.EmptyArray;
                     token.Data.Step = EnumProxyStep.ForwardTcp;
 
@@ -292,7 +298,7 @@ namespace common.proxy
                 }
                 else
                 {
-                    Logger.Instance.Error($"connect {e.RemoteEndPoint} fail {e.SocketError}");
+                    //Logger.Instance.Error($"connect {e.RemoteEndPoint} fail {e.SocketError}");
                     if (e.SocketError == SocketError.ConnectionRefused)
                     {
                         command = EnumProxyCommandStatus.DistReject;
@@ -313,17 +319,15 @@ namespace common.proxy
                     {
                         command = EnumProxyCommandStatus.ServerError;
                     }
-                    await ConnectReponse(token.Data, command);
+                    await ConnectReponse(token.Data, command, EnumProxyCommandStatusMsg.Connect);
                     CloseClientSocket(token);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Instance.DebugError(ex);
-                Logger.Instance.Error($"connect {e.RemoteEndPoint} fail {e.SocketError}:{ex.Message}");
-
                 command = EnumProxyCommandStatus.ServerError;
-                await ConnectReponse(token.Data, command);
+                await ConnectReponse(token.Data, command, EnumProxyCommandStatusMsg.Connect);
                 CloseClientSocket(token);
             }
         }
@@ -360,7 +364,7 @@ namespace common.proxy
                 {
                     if (token.Data.Step == EnumProxyStep.Command)
                     {
-                        await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess);
+                        await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess, EnumProxyCommandStatusMsg.Success);
                         token.Data.Step = EnumProxyStep.ForwardTcp;
                     }
 
@@ -406,10 +410,11 @@ namespace common.proxy
             }
         }
 
-        private async Task ConnectReponse(ProxyInfo info, EnumProxyCommandStatus command)
+        private async Task ConnectReponse(ProxyInfo info, EnumProxyCommandStatus command,EnumProxyCommandStatusMsg  commandStatusMsg)
         {
             info.Response[0] = (byte)command;
             info.Data = info.Response;
+            info.CommandMsg = commandStatusMsg;
             await Receive(info);
         }
         private async Task<bool> Receive(AsyncServerUserToken token)

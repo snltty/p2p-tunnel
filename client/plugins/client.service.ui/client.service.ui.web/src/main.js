@@ -28,10 +28,11 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import "driver.js/dist/driver.min.css";
 
 import {
-    CircleClose, HomeFilled, Link, Position, OfficeBuilding
+    CircleCheck, CircleClose, HomeFilled, Link, Position, OfficeBuilding
     , SwitchButton, Loading, ArrowRightBold, Setting, ArrowDown
     , DArrowLeft, DArrowRight, Edit, Delete, Promotion, Share, Select, Warning, CirclePlus
 } from '@element-plus/icons'
+app.component(CircleCheck.name, CircleCheck);
 app.component(CircleClose.name, CircleClose);
 app.component(HomeFilled.name, HomeFilled);
 app.component(Link.name, Link);

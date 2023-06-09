@@ -35,6 +35,7 @@ import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../../states/clients'
 import ConnectButton from '../../../../components/ConnectButton.vue'
 import plugin from './plugin'
+import { ElMessage } from 'element-plus/lib/components'
 export default {
     plugin: plugin,
     components: { ConnectButton },
@@ -73,9 +74,18 @@ export default {
                 res.ListenEnable = state.listenEnable;
                 set(res).then(() => {
                     loadConfig();
-                    run().then(() => {
+                    run().then((state) => {
                         state.loading = false;
+                        if (state == false) {
+                            ElMessage.error('失败,具体信息看日志');
+                            state.listenEnable = false;
+                            res.ListenEnable = state.listenEnable;
+                            set(res);
+                        }
                     }).catch(() => {
+                        state.listenEnable = false;
+                        res.ListenEnable = state.listenEnable;
+                        set(res);
                         state.loading = false;
                     });
                 }).catch(() => {

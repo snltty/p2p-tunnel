@@ -2,61 +2,85 @@
     <div class="forward-wrap">
         <div class="inner">
             <div class="head flex">
-                <el-button type="primary" size="small" @click="handleAddListen">增加转发监听</el-button>
-                <el-button size="small" @click="getData">刷新列表</el-button>
+                <el-button type="primary" size="small" @click="handleAddListen">监听</el-button>
+                <el-button size="small" @click="getData">刷新</el-button>
             </div>
             <div class="content">
-                <el-row v-if="state.list.length > 0">
-                    <template v-for="(item,index) in state.list" :key="index">
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <div class="item">
-                                <dl>
-                                    <dt class="flex">
-                                        <span>{{shareData.aliveTypes[item.AliveType]}}</span>
-                                        <span class="flex-1 t-c">0.0.0.0:{{item.Port}}</span>
-                                        <span>
-                                            <el-switch size="small" @click.stop @change="onListeningChange(item)" v-model="item.Listening" style="margin-top:-6px;"></el-switch>
-                                        </span>
-                                    </dt>
-                                    <dd>{{item.Desc}}</dd>
-                                    <dd class="forwards">
-                                        <el-collapse>
-                                            <el-collapse-item title="转发列表">
-                                                <ul>
-                                                    <template v-for="(fitem,findex) in item.Forwards" :key="findex">
-                                                        <li>
-                                                            <p class="flex"><span class="flex-1">访问</span><span>{{fitem.SourceIp}}:{{item.Port}}</span></p>
-                                                            <p class="flex"><span class="flex-1">目标</span><span>【{{ targetJson[fitem.ConnectionId]}}】{{fitem.TargetIp}}:{{fitem.TargetPort}}</span></p>
-                                                            <p class="t-r">
-                                                                <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveForward(item,fitem)">
-                                                                    <template #reference>
-                                                                        <el-button plain type="danger" size="small">删除</el-button>
-                                                                    </template>
-                                                                </el-popconfirm>
-                                                                <el-button plain size="small" @click="handleEditForward(item,fitem)">编辑</el-button>
-                                                                <el-button plain size="small" @click="handleTestForward(item,fitem)">检测</el-button>
-                                                            </p>
-                                                        </li>
-                                                    </template>
-                                                </ul>
-                                            </el-collapse-item>
-                                        </el-collapse>
-                                    </dd>
-                                    <dd class="btns t-r">
-                                        <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(item)">
+                <el-table :data="state.list" size="small" border>
+                    <el-table-column type="expand">
+                        <template #default="props">
+                            <el-table size="small" :data="props.row.Forwards" border>
+                                <el-table-column label="访问" prop="SourceIp">
+                                    <template #default="props1">
+                                        <span>{{props1.row.SourceIp}}:{{props.row.Port}}</span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="目标节点" prop="TargetIp">
+                                    <template #default="props">
+                                        <span>{{ targetJson[props.row.ConnectionId]}}</span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="目标服务" prop="TargetIp">
+                                    <template #default="props">
+                                        <span>{{props.row.TargetIp}}:{{props.row.TargetPort}}</span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column align="right" width="130">
+                                    <template #default="props1">
+                                        <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveForward(props.row,props1.row)">
                                             <template #reference>
-                                                <el-button plain type="danger" size="small">删除</el-button>
+                                                <el-button link plain type="danger" size="small">删除</el-button>
                                             </template>
                                         </el-popconfirm>
-                                        <el-button plain type="info" size="small" @click="handleEditListen(item)">编辑</el-button>
-                                        <el-button plain type="info" v-if="item.AliveType == shareData.aliveTypesName.web || item.Forwards.length < 1" size="small" @click="handleAddForward(item)">增加转发</el-button>
-                                    </dd>
-                                </dl>
+                                        <el-button link plain size="small" @click="handleEditForward(props.row,props1.row)">编辑</el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="监听类别" prop="AliveType">
+                        <template #default="props">
+                            <span>{{shareData.aliveTypes[props.row.AliveType]}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="监听端口" prop="Port">
+                        <template #default="props">
+                            <div class="flex">
+                                <span class="flex-1">
+                                    <el-dropdown style="line-height:inherit;">
+                                        <span class="el-dropdown-link forward-status" :class="`forward-status-${props.row.LastError}`" style="font-size:1.3rem">
+                                            {{props.row.Port}}<el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </span>
+                                        <template #dropdown>
+                                            <el-dropdown-menu>
+                                                <template v-for="(item,index) in shareData.commandMsgs" :key="index">
+                                                    <el-dropdown-item class="forward-success" v-if="props.row.LastError==0 || props.row.LastError > index" :icon="CircleCheck">{{item}}</el-dropdown-item>
+                                                    <el-dropdown-item class="forward-error" v-else :icon="CircleClose">{{item}}</el-dropdown-item>
+                                                </template>
+                                            </el-dropdown-menu>
+                                        </template>
+                                    </el-dropdown></span>
+                                <span>
+                                    <el-switch size="small" @click.stop @change="onListeningChange(props.row)" v-model="props.row.Listening"></el-switch>
+                                </span>
                             </div>
-                        </el-col>
-                    </template>
-                </el-row>
-                <el-empty v-else />
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="备注" prop="Desc"></el-table-column>
+                    <el-table-column align="right" width="140">
+                        <template #default="scope">
+                            <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(scope.row)">
+                                <template #reference>
+                                    <el-button plain link type="danger" size="small">删除</el-button>
+                                </template>
+                            </el-popconfirm>
+                            <el-button plain type="info" link size="small" @click="handleEditListen(scope.row)">编辑</el-button>
+                            <el-button plain type="info" link v-if="scope.row.AliveType == shareData.aliveTypesName.web || scope.row.Forwards.length < 1" size="small" @click="handleAddForward(scope.row)">转发</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
             </div>
             <AddForward v-if="state.showAddForward" v-model="state.showAddForward" @success="getData"></AddForward>
             <AddListen v-if="state.showAddListen" v-model="state.showAddListen" @success="getData"></AddListen>
@@ -65,12 +89,13 @@
 </template>
 <script>
 import { reactive, ref } from '@vue/reactivity'
-import { getList, removeListen, startListen, stopListen, removeForward, testForward } from '../../../../apis/forward'
+import { getList, removeListen, startListen, stopListen, removeForward } from '../../../../apis/forward'
 import { computed, onMounted, provide } from '@vue/runtime-core'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../../states/shareData'
 import { injectClients } from '../../../../states/clients'
+import { CircleCheck, CircleClose } from '@element-plus/icons'
 import plugin from './plugin'
 export default {
     plugin: plugin,
@@ -125,7 +150,7 @@ export default {
             });
         }
         const onListeningChange = (row) => {
-            if (!row.Listening) {
+            if (row.Listening == false) {
                 stopListen(row.ID).then(getData).catch(getData);
             } else {
                 startListen(row.ID).then(getData).catch(getData);
@@ -150,11 +175,6 @@ export default {
                 getData();
             });
         }
-        const handleTestForward = (listen, forward) => {
-            testForward(listen.ID, forward.ID).then((res) => {
-                console.log(res);
-            });
-        }
 
         onMounted(() => {
             getData();
@@ -163,21 +183,19 @@ export default {
         return {
             targetJson, state, shareData, getData, expandKeys, onExpand,
             handleRemoveListen, handleAddListen, handleEditListen, onListeningChange,
-            handleAddForward, handleEditForward, handleRemoveForward, handleTestForward
+            handleAddForward, handleEditForward, handleRemoveForward,
+            CircleCheck, CircleClose
         }
     }
 }
 </script>
 <style lang="stylus">
-.forward-wrap {
-    .el-collapse-item__header, .el-collapse-item__content, .el-collapse-item__wrap {
-        border-right: 0;
-        border-left: 0;
-    }
+.el-dropdown-menu__item.forward-success {
+    color: green;
+}
 
-    .el-collapse-item__content {
-        padding: 0;
-    }
+.el-dropdown-menu__item.forward-error {
+    color: red;
 }
 </style>
 <style lang="stylus" scoped>
@@ -205,50 +223,14 @@ export default {
 
     .content {
         padding: 1rem;
-
-        .item {
-            padding: 1rem 0.6rem;
-
-            dl {
-                border: 1px solid #eee;
-                border-radius: 0.4rem;
-
-                dt {
-                    border-bottom: 1px solid #eee;
-                    padding: 1rem;
-                    font-size: 1.4rem;
-                    font-weight: 600;
-                    color: #555;
-                    line-height: 2.4rem;
-                }
-
-                dd {
-                    padding: 0.4rem 1rem;
-
-                    &:nth-child(2) {
-                        padding: 1rem;
-                        background-color: #fafafa;
-                    }
-
-                    &.forwards {
-                        padding: 0;
-
-                        li {
-                            border-bottom: 1px solid #eee;
-                            padding: 1rem;
-
-                            &:last-child {
-                                border: 0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
-    .alert {
-        margin-top: 1rem;
+    .forward-status {
+        color: red;
+    }
+
+    .forward-status-0 {
+        color: green;
     }
 }
 </style>

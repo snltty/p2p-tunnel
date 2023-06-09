@@ -14,8 +14,7 @@ namespace client.service.httpProxy
         }
         public bool Update(ClientServiceParamsInfo arg)
         {
-            httpProxyTransfer.Update();
-            return true;
+           return httpProxyTransfer.Update();
         }
 
         public string GetPac(ClientServiceParamsInfo arg)

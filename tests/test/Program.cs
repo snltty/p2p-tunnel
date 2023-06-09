@@ -14,6 +14,7 @@ namespace test
     {
         static void Main(string[] args)
         {
+            Console.WriteLine(string.Join(",",Encoding.UTF8.GetBytes("Snltty-Snltty-Snltty-Snltty")));
             //BenchmarkRunner.Run<Test>();
         }
     }

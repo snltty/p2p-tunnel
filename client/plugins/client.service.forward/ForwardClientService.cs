@@ -11,10 +11,12 @@ namespace client.service.forward
     /// </summary>
     public sealed class ForwardClientService : IClientService
     {
-        private readonly ForwardTransfer  forwardTransfer;
-        public ForwardClientService(ForwardTransfer forwardTransfer)
+        private readonly ForwardTransfer forwardTransfer;
+        private readonly IProxyServer proxyServer;
+        public ForwardClientService(ForwardTransfer forwardTransfer, IProxyServer proxyServer)
         {
             this.forwardTransfer = forwardTransfer;
+            this.proxyServer = proxyServer;
         }
         /// <summary>
         /// 添加监听
@@ -62,12 +64,7 @@ namespace client.service.forward
             P2PForwardRemoveParams fmodel = arg.Content.DeJson<P2PForwardRemoveParams>();
             forwardTransfer.RemoveP2PForward(fmodel);
         }
-        public async Task<ProxyConnectTestResult> TestForward(ClientServiceParamsInfo arg)
-        {
-            P2PForwardRemoveParams fmodel = arg.Content.DeJson<P2PForwardRemoveParams>();
-            return await forwardTransfer.TestP2PForward(fmodel);
 
-        }
         /// <summary>
         /// 监听列表
         /// </summary>
@@ -75,6 +72,11 @@ namespace client.service.forward
         /// <returns></returns>
         public IEnumerable<P2PListenInfo> List(ClientServiceParamsInfo arg)
         {
+            foreach (var item in forwardTransfer.p2pListens)
+            {
+                proxyServer.LastError(item.Port, out EnumProxyCommandStatusMsg commandStatusMsg);
+                item.LastError = commandStatusMsg;
+            }
             return forwardTransfer.p2pListens;
         }
 

@@ -88,7 +88,19 @@ namespace common.proxy
         }
         public bool Validate(ProxyInfo info)
         {
-            return (info.ProxyPlugin.ConnectEnable || serviceAccessValidator.Validate(info.Connection.ConnectId, info.ProxyPlugin.Access)) && config.FirewallDenied(info) == false;
+            bool res = info.ProxyPlugin.ConnectEnable || serviceAccessValidator.Validate(info.Connection.ConnectId, info.ProxyPlugin.Access);
+            if (res == false)
+            {
+                info.CommandMsg = EnumProxyCommandStatusMsg.EnableOrAccess;
+                return false;
+            }
+
+            if (config.FirewallDenied(info))
+            {
+                info.CommandMsg = EnumProxyCommandStatusMsg.Firewail;
+                return false;
+            }
+            return true;
         }
     }
 

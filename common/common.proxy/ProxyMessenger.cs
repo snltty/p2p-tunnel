@@ -15,15 +15,13 @@ namespace common.proxy
         private readonly IProxyServer proxyServer;
         private readonly IServiceAccessValidator serviceAccessValidator;
         private readonly Config config;
-        private readonly ProxyPluginValidatorHandler pluginValidatorHandler;
 
-        public ProxyMessenger(IProxyClient proxyClient, IProxyServer proxyServer, IServiceAccessValidator serviceAccessValidator, Config config, ProxyPluginValidatorHandler pluginValidatorHandler)
+        public ProxyMessenger(IProxyClient proxyClient, IProxyServer proxyServer, IServiceAccessValidator serviceAccessValidator, Config config)
         {
             this.proxyClient = proxyClient;
             this.proxyServer = proxyServer;
             this.serviceAccessValidator = serviceAccessValidator;
             this.config = config;
-            this.pluginValidatorHandler = pluginValidatorHandler;
         }
 
         [MessengerId((ushort)ProxyMessengerIds.Request)]
@@ -35,56 +33,6 @@ namespace common.proxy
             info.Connection = connection.FromConnection;
             info.Connection.SentBytes += (uint)info.Data.Length;
             await proxyClient.InputData(info);
-        }
-
-        [MessengerId((ushort)ProxyMessengerIds.Test)]
-        public void Test(IConnection connection)
-        {
-            if (connection.FromConnection.SendDenied > 0)
-            {
-                connection.Write(new byte[] { (byte)ProxyConnectTestResult.Denied });
-                return;
-            }
-
-            ProxyInfo info = ProxyInfo.Debytes(connection.ReceiveRequestWrap.Payload);
-            info.Connection = connection.FromConnection;
-
-            if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false)
-            {
-                connection.Write(new byte[] { (byte)ProxyConnectTestResult.Plugin });
-                return;
-            }
-            info.ProxyPlugin = plugin;
-            if (pluginValidatorHandler.Validate(info) == false)
-            {
-                connection.Write(new byte[] { (byte)ProxyConnectTestResult.Firewail });
-                return;
-            }
-            IPEndPoint remoteEndpoint = ReadRemoteEndPoint(info);
-            Socket socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
-            socket.SendTimeout = 5000;
-            try
-            {
-                IAsyncResult result = socket.BeginConnect(remoteEndpoint, null, null);
-                result.AsyncWaitHandle.WaitOne(1000);
-                if (result.IsCompleted == false)
-                {
-                    connection.Write(new byte[] { (byte)ProxyConnectTestResult.Connect });
-                    return;
-                }
-            }
-            catch (Exception)
-            {
-                connection.Write(new byte[] { (byte)ProxyConnectTestResult.Connect });
-                return;
-            }
-            finally
-            {
-                socket.SafeClose();
-            }
-            connection.Write(new byte[] { (byte)ProxyConnectTestResult.Success });
         }
 
 

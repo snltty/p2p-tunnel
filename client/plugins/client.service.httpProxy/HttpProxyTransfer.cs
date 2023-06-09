@@ -30,7 +30,7 @@ namespace client.service.httpProxy
 
         bool set = false;
 
-        public void Update()
+        public bool Update()
         {
             string pacContent = string.Empty;
             string file = Path.Join(uiconfig.Web.Root, "proxy-custom.pac");
@@ -58,12 +58,13 @@ namespace client.service.httpProxy
 
             if (config.ListenEnable)
             {
-                proxyServer.Start(config.ListenPort, config.Plugin);
+              return  proxyServer.Start(config.ListenPort, config.Plugin);
             }
             else
             {
                 proxyServer.Stop(config.Plugin);
             }
+            return true;
         }
 
         /// <summary>

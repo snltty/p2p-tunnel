@@ -136,7 +136,7 @@ namespace common.libs
                 {
                     if(span.Slice(headers[i].Length).IndexOf(httpByte) > 0)
                     {
-                        return span.Slice(headers[i].Length + httpByte.Length).IndexOf(wrapByte);
+                        return span.IndexOf(wrapByte);
                     }
                     return -1;
                 }

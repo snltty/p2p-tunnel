@@ -3,6 +3,7 @@ using common.server;
 using common.server.model;
 using System;
 using System.Buffers;
+using System.ComponentModel;
 using System.Net;
 
 namespace common.proxy
@@ -32,9 +33,13 @@ namespace common.proxy
         /// </summary>
         public EnumBufferSize BufferSize { get; set; } = EnumBufferSize.KB_8;
         /// <summary>
-        /// 插件id
+        /// 插件id 最多 0b1111
         /// </summary>
         public byte PluginId { get; set; }
+        /// <summary>
+        /// 测试步骤返回 最多 0b1111
+        /// </summary>
+        public EnumProxyCommandStatusMsg CommandMsg { get; set; }
 
         /// <summary>
         /// 请求id
@@ -93,10 +98,10 @@ namespace common.proxy
         {
             length = 1 //0000 00 00  rsv + step + command
                 + 1 // 0000 0000 address type + buffer size
-                + 1 //PluginId
+                + 1 //TestResult + PluginId
                 + 4  // RequestId
                 + 1  //source length
-                + 1 // target
+                + 1 // target length
                 + Headers.Length + Data.Length;
 
             int sepLength = 0;
@@ -120,7 +125,7 @@ namespace common.proxy
             index += 1;
             bytes[index] = (byte)(((byte)AddressType << 4) | (byte)BufferSize);
             index += 1;
-            bytes[index] = PluginId;
+            bytes[index] = (byte)(((byte)CommandMsg << 4) | PluginId);
             index += 1;
 
             RequestId.ToBytes(memory.Slice(index));
@@ -179,7 +184,8 @@ namespace common.proxy
             BufferSize = (EnumBufferSize)(span[index] & 0b0000_1111);
             index += 1;
 
-            PluginId = span[index];
+            CommandMsg = (EnumProxyCommandStatusMsg)(span[index] >> 4);
+            PluginId = (byte)(span[index] & 0b0000_1111);
             index += 1;
 
             RequestId = span.Slice(index).ToUInt32();
@@ -355,14 +361,23 @@ namespace common.proxy
     }
 
     [Flags]
-    public enum ProxyConnectTestResult : byte
+    public enum EnumProxyCommandStatusMsg : byte
     {
-        Connection = 0,
-        Denied = 1,
-        Access = 2,
-        Plugin = 3,
-        Firewail = 4,
-        Connect = 5,
-        Success = 6,
+        [Description("成功")]
+        Success = 0,
+        [Description("服务类型未允许")]
+        Address = 1,
+        [Description("与目标节点未连接")]
+        Connection = 2,
+        [Description("目标节点未允许通信")]
+        Denied = 3,
+        [Description("目标节点相应插件未找到")]
+        Plugin = 4,
+        [Description("目标节点相应插件未允许连接，且未拥有该权限")]
+        EnableOrAccess = 5,
+        [Description("目标节点防火墙阻止")]
+        Firewail = 6,
+        [Description("目标服务连接失败")]
+        Connect = 7
     }
 }

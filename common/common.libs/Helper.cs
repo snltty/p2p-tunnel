@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
-using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,6 +15,8 @@ namespace common.libs
         public static byte[] AnyIpArray = IPAddress.Any.GetAddressBytes();
         public static byte[] AnyIpv6Array = IPAddress.IPv6Any.GetAddressBytes();
         public static byte[] AnyPoryArray = new byte[] { 0, 0 };
+
+        public static byte[] MagicData { get; } = Encoding.UTF8.GetBytes("S-n-l-t-t-y-S-n-l-t-t-y-T-e-s-t");
 
         /// <summary>
         /// 空格

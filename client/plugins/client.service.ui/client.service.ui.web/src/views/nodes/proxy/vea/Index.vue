@@ -49,9 +49,18 @@ export default {
                 res.ListenEnable = state.ListenEnable;
                 setConfig(res).then(() => {
                     loadConfig();
-                    runVea().then(() => {
+                    runVea().then((state) => {
                         state.loading = false;
+                        if (state == false) {
+                            ElMessage.error('失败,具体信息看日志');
+                            state.ListenEnable = false;
+                            res.ListenEnable = state.ListenEnable;
+                            setConfig(res);
+                        }
                     }).catch(() => {
+                        state.ListenEnable = false;
+                        res.ListenEnable = state.ListenEnable;
+                        setConfig(res);
                         state.loading = false;
                     })
                 }).catch(() => {

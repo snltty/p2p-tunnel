@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,10 +14,11 @@ namespace common.proxy
 {
     public interface IProxyServer
     {
-        public void Start(ushort port, byte plugin, byte rsv = 0);
+        public bool Start(ushort port, byte plugin, byte rsv = 0);
         public void Stop(byte plugin);
         public void Stop(ushort port);
         public void Stop();
+        public void LastError(ushort port, out EnumProxyCommandStatusMsg commandStatusMsg);
         public Task InputData(ProxyInfo info);
     }
 
@@ -28,7 +28,7 @@ namespace common.proxy
         private readonly ServersManager serversManager = new ServersManager();
         private readonly ClientsManager clientsManager = new ClientsManager();
         private readonly Config config;
-        private NumberSpaceUInt32 requestIdNs = new NumberSpaceUInt32(0);
+        private NumberSpaceUInt32 requestIdNs = new NumberSpaceUInt32(65536);
         SemaphoreSlim Semaphore = new SemaphoreSlim(1);
         private readonly IProxyMessengerSender proxyMessengerSender;
 
@@ -38,20 +38,21 @@ namespace common.proxy
             this.config = config;
         }
 
-        public void Start(ushort port, byte pluginId, byte rsv = 0)
+        public bool Start(ushort port, byte pluginId, byte rsv = 0)
         {
             if (serversManager.Contains(port))
             {
                 Logger.Instance.Error($"port:{port} already exists");
-                return;
+                return false;
             }
             if (ProxyPluginLoader.GetPlugin(pluginId, out IProxyPlugin plugin) == false)
             {
                 Logger.Instance.Error($"plugin:{pluginId} not exists");
-                return;
+                return false;
             }
 
             BindAccept(port, plugin, rsv);
+            return true;
         }
 
         private void BindAccept(ushort port, IProxyPlugin plugin, byte rsv)
@@ -63,20 +64,10 @@ namespace common.proxy
 
             ServerInfo server = new ServerInfo
             {
-                SourcePort = port,
+                Port = port,
                 Socket = socket,
                 UdpClient = new UdpClient(endpoint),
-                Plugin = plugin.Id,
-                UdpInfo = new ProxyInfo
-                {
-                    ProxyPlugin = plugin,
-                    Step = EnumProxyStep.ForwardUdp,
-                    Command = EnumProxyCommand.UdpAssociate,
-                    PluginId = plugin.Id,
-                    ListenPort = port,
-                    Rsv = rsv,
-                    BufferSize = plugin.BufferSize
-                }
+                ProxyPlugin = plugin
             };
             server.UdpClient.EnableBroadcast = true;
             server.UdpClient.Client.WindowsUdpBug();
@@ -85,19 +76,29 @@ namespace common.proxy
             SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
             ProxyUserToken token = new ProxyUserToken
             {
-                SourceSocket = socket,
-                SourcePort = port,
-                ProxyPlugin = plugin,
-                UdpClient = server.UdpClient,
-                Rsv = rsv
+                Socket = socket,
+                Server = server,
+                Rsv = rsv,
+                Request = new ProxyInfo
+                {
+                    ProxyPlugin = plugin,
+                    Step = EnumProxyStep.ForwardUdp,
+                    Command = EnumProxyCommand.UdpAssociate,
+                    PluginId = plugin.Id,
+                    ListenPort = port,
+                    Rsv = rsv,
+                    BufferSize = plugin.BufferSize,
+                    RequestId = port
+                }
             };
+            clientsManager.TryAdd(token);
             acceptEventArg.UserToken = token;
             acceptEventArg.Completed += IO_Completed;
             StartAccept(acceptEventArg);
 
             plugin.Started(port);
 
-            IAsyncResult result = server.UdpClient.BeginReceive(ProcessReceiveUdp, server);
+            IAsyncResult result = server.UdpClient.BeginReceive(ProcessReceiveUdp, token);
         }
         private void StartAccept(SocketAsyncEventArgs acceptEventArg)
         {
@@ -105,7 +106,7 @@ namespace common.proxy
             {
                 acceptEventArg.AcceptSocket = null;
                 ProxyUserToken token = ((ProxyUserToken)acceptEventArg.UserToken);
-                if (token.SourceSocket.AcceptAsync(acceptEventArg) == false)
+                if (token.Socket.AcceptAsync(acceptEventArg) == false)
                 {
                     ProcessAccept(acceptEventArg);
                 }
@@ -143,23 +144,21 @@ namespace common.proxy
                 uint id = requestIdNs.Increment();
                 ProxyUserToken token = new ProxyUserToken
                 {
-                    SourceSocket = e.AcceptSocket,
+                    Socket = e.AcceptSocket,
+                    Server = acceptToken.Server,
                     Request = new ProxyInfo
                     {
                         RequestId = id,
-                        BufferSize = acceptToken.ProxyPlugin.BufferSize,
+                        BufferSize = acceptToken.Server.ProxyPlugin.BufferSize,
                         Command = EnumProxyCommand.Connect,
                         AddressType = EnumProxyAddressType.IPV4,
-                        ListenPort = acceptToken.SourcePort,
+                        ListenPort = acceptToken.Server.Port,
                         Step = EnumProxyStep.Command,
-                        PluginId = acceptToken.ProxyPlugin.Id,
-                        ProxyPlugin = acceptToken.ProxyPlugin,
+                        PluginId = acceptToken.Server.ProxyPlugin.Id,
+                        ProxyPlugin = acceptToken.Server.ProxyPlugin,
                         Rsv = acceptToken.Rsv,
                         ClientEP = e.AcceptSocket.RemoteEndPoint as IPEndPoint
                     },
-                    SourcePort = acceptToken.SourcePort,
-                    ProxyPlugin = acceptToken.ProxyPlugin,
-                    UdpClient = acceptToken.UdpClient,
                 };
                 clientsManager.TryAdd(token);
 
@@ -170,13 +169,13 @@ namespace common.proxy
                 };
                 token.Saea = readEventArgs;
 
-                token.SourceSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
-                token.SourceSocket.SendTimeout = 5000;
-                token.PoolBuffer = new byte[(1 << (byte)acceptToken.ProxyPlugin.BufferSize) * 1024];
-                readEventArgs.SetBuffer(token.PoolBuffer, 0, (1 << (byte)acceptToken.ProxyPlugin.BufferSize) * 1024);
+                token.Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
+                token.Socket.SendTimeout = 5000;
+                token.PoolBuffer = new byte[(1 << (byte)acceptToken.Server.ProxyPlugin.BufferSize) * 1024];
+                readEventArgs.SetBuffer(token.PoolBuffer, 0, (1 << (byte)acceptToken.Server.ProxyPlugin.BufferSize) * 1024);
                 readEventArgs.Completed += IO_Completed;
 
-                if (token.SourceSocket.ReceiveAsync(readEventArgs) == false)
+                if (token.Socket.ReceiveAsync(readEventArgs) == false)
                 {
                     ProcessReceive(readEventArgs);
                 }
@@ -205,7 +204,7 @@ namespace common.proxy
                             //太短
                             while ((validate & EnumProxyValidateDataResult.TooShort) == EnumProxyValidateDataResult.TooShort)
                             {
-                                totalLength += await token.SourceSocket.ReceiveAsync(e.Buffer.AsMemory(e.Offset + totalLength), SocketFlags.None);
+                                totalLength += await token.Socket.ReceiveAsync(e.Buffer.AsMemory(e.Offset + totalLength), SocketFlags.None);
                                 token.Request.Data = e.Buffer.AsMemory(e.Offset, totalLength);
                                 validate = token.Request.ProxyPlugin.ValidateData(token.Request);
                             }
@@ -223,11 +222,11 @@ namespace common.proxy
                     await Receive(token.Request);
                     if (receive)
                     {
-                        if (token.SourceSocket.Available > 0 && token.Request.Step > EnumProxyStep.Command)
+                        if (token.Socket.Available > 0 && token.Request.Step > EnumProxyStep.Command)
                         {
-                            while (token.SourceSocket.Available > 0)
+                            while (token.Socket.Available > 0)
                             {
-                                int length = await token.SourceSocket.ReceiveAsync(e.Buffer.AsMemory(), SocketFlags.None);
+                                int length = await token.Socket.ReceiveAsync(e.Buffer.AsMemory(), SocketFlags.None);
                                 if (length > 0)
                                 {
                                     token.Request.Data = e.Buffer.AsMemory(0, length);
@@ -235,9 +234,9 @@ namespace common.proxy
                                 }
                             }
                         }
-                        if (token.SourceSocket.Connected)
+                        if (token.Socket.Connected)
                         {
-                            if (token.SourceSocket.ReceiveAsync(e) == false)
+                            if (token.Socket.ReceiveAsync(e) == false)
                             {
 
                                 ProcessReceive(e);
@@ -250,7 +249,7 @@ namespace common.proxy
                     }
                     else
                     {
-                        if (token.SourceSocket.Connected == false)
+                        if (token.Socket.Connected == false)
                         {
                             CloseClientSocket(e);
                         }
@@ -273,15 +272,15 @@ namespace common.proxy
             IPEndPoint rep = null;
             try
             {
-                ServerInfo server = result.AsyncState as ServerInfo;
+                ProxyUserToken token = result.AsyncState as ProxyUserToken;
 
-                server.UdpInfo.Data = server.UdpClient.EndReceive(result, ref rep);
-                server.UdpInfo.SourceEP = rep;
-                server.UdpInfo.ClientEP = rep;
-                await Receive(server.UdpInfo);
-                server.UdpInfo.Data = Helper.EmptyArray;
+                token.Request.Data = token.Server.UdpClient.EndReceive(result, ref rep);
+                token.Request.SourceEP = rep;
+                token.Request.ClientEP = rep;
+                await Receive(token.Request);
+                token.Request.Data = Helper.EmptyArray;
 
-                result = server.UdpClient.BeginReceive(ProcessReceiveUdp, server);
+                result = token.Server.UdpClient.BeginReceive(ProcessReceiveUdp, token);
             }
             catch (Exception)
             {
@@ -311,8 +310,18 @@ namespace common.proxy
                         bool res = await proxyMessengerSender.Request(info);
                         if (res == false)
                         {
-                            Logger.Instance.Error($"proxy 【{info.ProxyPlugin.Name}】 send message fail");
-                            clientsManager.TryRemove(info.RequestId, out _);
+                            //Logger.Instance.Error($"proxy 【{info.ProxyPlugin.Name}】 send message fail");
+                            if (info.Step == EnumProxyStep.Command)
+                            {
+                                info.Response[0] = (byte)EnumProxyCommandStatus.NetworkError;
+                                info.Data = info.Response;
+                                info.CommandMsg = EnumProxyCommandStatusMsg.Connection;
+                                await InputData(info);
+                            }
+                            else
+                            {
+                                clientsManager.TryRemove(info.RequestId, out _);
+                            }
                         }
                     }
                 }
@@ -357,16 +366,21 @@ namespace common.proxy
 
         public void Stop(byte plugin)
         {
-            if (serversManager.TryRemove(plugin, out ServerInfo model))
+            List<ushort> ports = serversManager.services.Where(c => c.Value.ProxyPlugin.Id == plugin).Select(c => c.Key).ToList();
+            foreach (var item in ports)
             {
-                clientsManager.Clear(model.SourcePort);
+                if (serversManager.TryRemove(item, out ServerInfo model))
+                {
+                    clientsManager.Clear(model.Port);
+                }
             }
         }
-        public void Stop(ushort sourcePort)
+        public void Stop(ushort port)
         {
-            if (serversManager.TryRemove(sourcePort, out ServerInfo model))
+            if (serversManager.TryRemove(port, out ServerInfo model))
             {
-                clientsManager.Clear(model.SourcePort);
+                clientsManager.Clear(model.Port);
+                clientsManager.TryRemove((ulong)model.Port, out _);
             }
         }
         public void Stop()
@@ -375,57 +389,81 @@ namespace common.proxy
             clientsManager.Clear();
         }
 
+        public void LastError(ushort port, out EnumProxyCommandStatusMsg commandStatusMsg)
+        {
+            commandStatusMsg = EnumProxyCommandStatusMsg.Success;
+            if (serversManager.TryGetValue(port, out ServerInfo model))
+            {
+                commandStatusMsg = model.LastError;
+            }
+        }
+
         public async Task InputData(ProxyInfo info)
         {
-            if (info.Data.Length == 0)
-            {
-
-                clientsManager.TryRemove(info.RequestId, out _);
-                return;
-            }
-
             try
             {
-                if (info.Step == EnumProxyStep.ForwardUdp)
+                if (clientsManager.TryGetValue(info.RequestId, out ProxyUserToken token) == false)
                 {
-                    if (serversManager.TryGetValue(info.PluginId, out ServerInfo server))
+                    return;
+                }
+                token.Request.CommandMsg = info.CommandMsg;
+                token.Server.LastError = info.CommandMsg;
+
+                if (info.Data.Length == 0)
+                {
+                    clientsManager.TryRemove(info.RequestId, out _);
+                    return;
+                }
+
+                if (info.Step > EnumProxyStep.Command)
+                {
+                    bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
+                    token.Request.Step = info.Step;
+                    token.Request.Command = info.Command;
+                    token.Request.Rsv = info.Rsv;
+                    if (res)
                     {
-                        bool res = server.UdpInfo.ProxyPlugin.HandleAnswerData(info);
-                        server.UdpInfo.Step = info.Step;
-                        server.UdpInfo.Command = info.Command;
-                        server.UdpInfo.Rsv = info.Rsv;
-                        if (res)
-                            await server.UdpClient.SendAsync(info.Data, info.SourceEP);
+                        if (info.Step == EnumProxyStep.ForwardUdp)
+                        {
+                            await token.Server.UdpClient.SendAsync(info.Data, info.SourceEP);
+                        }
+                        else
+                        {
+                            await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                        }
                     }
                 }
-                else
+                else if ((EnumProxyCommandStatus)info.Data.Span[0] != EnumProxyCommandStatus.ConnecSuccess)
                 {
-                    if (clientsManager.TryGetValue(info.RequestId, out ProxyUserToken token))
+                    /*
+                    string ip = string.Empty;
+                    switch (info.AddressType)
                     {
-                        if (info.Step == EnumProxyStep.Command)
-                        {
-                            if ((EnumProxyCommandStatus)info.Data.Span[0] != EnumProxyCommandStatus.ConnecSuccess)
-                            {
-                                clientsManager.TryRemove(info.RequestId, out _);
-                                return;
-                            }
-                        }
+                        case EnumProxyAddressType.IPV4:
+                            ip = new IPEndPoint(new IPAddress(token.Request.TargetAddress.Span), token.Request.TargetPort).ToString();
+                            break;
+                        case EnumProxyAddressType.IPV6:
+                            ip = new IPEndPoint(new IPAddress(token.Request.TargetAddress.Span), token.Request.TargetPort).ToString();
+                            break;
+                        case EnumProxyAddressType.Domain:
+                            ip = $"{token.Request.TargetAddress.Span.GetString()}:{token.Request.TargetPort}";
+                            break;
 
-                        bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
-                        token.Request.Step = info.Step;
-                        token.Request.Command = info.Command;
-                        token.Request.Rsv = info.Rsv;
-                        if (res)
-                            await token.SourceSocket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                        default:
+                            break;
+                    }
+                    Logger.Instance.Error($"【{info.ProxyPlugin.Name}】command {info.Command} [{ip}] fail : {info.CommandMsg.GetDesc((byte)info.CommandMsg)}");
+                    */
+                    clientsManager.TryRemove(info.RequestId, out _);
+                    return;
+                }
 
-                        if (token.Receive == false)
-                        {
-                            token.Receive = true;
-                            if (token.SourceSocket.ReceiveAsync(token.Saea) == false)
-                            {
-                                ProcessReceive(token.Saea);
-                            }
-                        }
+                if (token.Receive == false)
+                {
+                    token.Receive = true;
+                    if (token.Socket.ReceiveAsync(token.Saea) == false)
+                    {
+                        ProcessReceive(token.Saea);
                     }
                 }
             }
@@ -439,12 +477,10 @@ namespace common.proxy
 
     sealed class ProxyUserToken
     {
-        public ushort SourcePort { get; set; }
         public byte Rsv { get; set; }
-        public Socket SourceSocket { get; set; }
-        public UdpClient UdpClient { get; set; }
+        public Socket Socket { get; set; }
+        public ServerInfo Server { get; set; }
         public SocketAsyncEventArgs Saea { get; set; }
-        public IProxyPlugin ProxyPlugin { get; set; }
         public byte[] PoolBuffer { get; set; }
         public bool Receive { get; set; }
 
@@ -470,7 +506,7 @@ namespace common.proxy
             {
                 try
                 {
-                    c.SourceSocket.SafeClose();
+                    c.Socket.SafeClose();
                     c.PoolBuffer = Helper.EmptyArray;
                     c.Saea.Dispose();
                     GC.Collect();
@@ -485,7 +521,7 @@ namespace common.proxy
         }
         public void Clear(int sourcePort)
         {
-            IEnumerable<ulong> requestIds = clients.Where(c => c.Value.SourcePort == sourcePort).Select(c => c.Key);
+            IEnumerable<ulong> requestIds = clients.Where(c => c.Value.Server.Port == sourcePort).Select(c => c.Key);
             foreach (var requestId in requestIds)
             {
                 TryRemove(requestId, out _);
@@ -504,29 +540,18 @@ namespace common.proxy
     sealed class ServersManager
     {
         public ConcurrentDictionary<ushort, ServerInfo> services = new();
-        public ConcurrentDictionary<byte, ServerInfo> services1 = new();
         public bool TryAdd(ServerInfo model)
         {
-            services1.TryAdd(model.Plugin, model);
-            return services.TryAdd(model.SourcePort, model);
+            return services.TryAdd(model.Port, model);
         }
 
         public bool Contains(ushort port)
         {
             return services.ContainsKey(port);
         }
-        public bool Contains(byte plugin)
-        {
-            return services1.ContainsKey(plugin);
-        }
-
         public bool TryGetValue(ushort port, out ServerInfo c)
         {
             return services.TryGetValue(port, out c);
-        }
-        public bool TryGetValue(byte plugin, out ServerInfo c)
-        {
-            return services1.TryGetValue(plugin, out c);
         }
 
         public bool TryRemove(ushort port, out ServerInfo c)
@@ -536,9 +561,7 @@ namespace common.proxy
             {
                 try
                 {
-                    services1.TryRemove(c.Plugin, out _);
-
-                    c.UdpInfo.ProxyPlugin.Stoped(port);
+                    c.ProxyPlugin.Stoped(port);
                     c.Socket.SafeClose();
                     c.UdpClient.Dispose();
                     GC.Collect();
@@ -550,54 +573,33 @@ namespace common.proxy
             }
             return res;
         }
-        public bool TryRemove(byte plugin, out ServerInfo c)
-        {
-            bool res = services1.TryRemove(plugin, out c);
-            if (res)
-            {
-                try
-                {
-                    services.TryRemove(c.SourcePort, out _);
-
-                    c.UdpInfo.ProxyPlugin.Stoped(c.SourcePort);
-                    c.Socket.SafeClose();
-                    c.UdpClient.Dispose();
-                    GC.Collect();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.DebugError(ex);
-                }
-            }
-            return res;
-        }
-
         public void Clear()
         {
             foreach (var item in services.Values)
             {
                 try
                 {
-                    item.UdpInfo?.ProxyPlugin?.Stoped(item.SourcePort);
+                    item.ProxyPlugin.Stoped(item.Port);
                     item.Socket.SafeClose();
                     GC.Collect();
                     // GC.SuppressFinalize(item);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Logger.Instance.DebugError(ex);
                 }
             }
             services.Clear();
-            services1.Clear();
         }
 
     }
     sealed class ServerInfo
     {
-        public byte Plugin { get; set; }
-        public ushort SourcePort { get; set; }
+        public IProxyPlugin ProxyPlugin { get; set; }
+        public ushort Port { get; set; }
         public Socket Socket { get; set; }
         public UdpClient UdpClient { get; set; }
-        public ProxyInfo UdpInfo { get; set; }
+        public EnumProxyCommandStatusMsg LastError { get; set; }
+
     }
 }

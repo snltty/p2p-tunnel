@@ -21,6 +21,8 @@ import { computed, reactive } from '@vue/reactivity';
 import { useRouter } from 'vue-router'
 import { watch } from '@vue/runtime-core';
 import { accessService, injectServices } from '../../states/services'
+import { shareData } from '../../states/shareData'
+import { injectSignIn } from '../../states/signin'
 export default {
     components: { LeftMenu, NotAccess },
     setup() {
@@ -30,6 +32,11 @@ export default {
         });
         const router = useRouter();
         const servicesState = injectServices();
+        const signinState = injectSignIn();
+        const serviceAccess = computed(() => signinState.RemoteInfo.Access);
+        const hasAccess = (access) => {
+            return shareData.serverAccessHas(serviceAccess.value, access);
+        }
 
         const getMenuIndex = (menus) => {
             for (let i = 0; i < menus.length; i++) {
