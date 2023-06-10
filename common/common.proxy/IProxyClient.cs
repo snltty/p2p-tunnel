@@ -291,8 +291,6 @@ namespace common.proxy
                     }
                     await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess, EnumProxyCommandStatusMsg.Success);
                     token.Data.TargetAddress = Helper.EmptyArray;
-                    token.Data.Step = EnumProxyStep.ForwardTcp;
-
                     BindTargetReceive(token);
                     return;
                 }

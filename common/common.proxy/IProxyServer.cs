@@ -415,12 +415,13 @@ namespace common.proxy
                     return;
                 }
 
+                bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
+                token.Request.Step = info.Step;
+                token.Request.Command = info.Command;
+                token.Request.Rsv = info.Rsv;
                 if (info.Step > EnumProxyStep.Command)
                 {
-                    bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
-                    token.Request.Step = info.Step;
-                    token.Request.Command = info.Command;
-                    token.Request.Rsv = info.Rsv;
+                   
                     if (res)
                     {
                         if (info.Step == EnumProxyStep.ForwardUdp)
