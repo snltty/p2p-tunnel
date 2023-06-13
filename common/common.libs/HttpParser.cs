@@ -10,7 +10,7 @@ namespace common.libs
         private static byte[] httpByte = Encoding.UTF8.GetBytes(" HTTP/");
         private static byte[] wrapByte = Encoding.UTF8.GetBytes("\r\n");
         private static byte[] httpMinByte = Encoding.UTF8.GetBytes("GET / HTTP/2\r\n");
-        private static byte[] connectMethodValue = Encoding.ASCII.GetBytes("CONNECT /");
+        private static byte[] connectByte = Encoding.UTF8.GetBytes("CONNECT- ");
         private static byte[][] headers = new byte[][] {
             Encoding.UTF8.GetBytes("GET /"),
             Encoding.UTF8.GetBytes("POST /"),
@@ -66,6 +66,12 @@ namespace common.libs
             return Array.Empty<byte>();
         }
 
+        public static bool GetIsCustomConnect(in Memory<byte> memory)
+        {
+            if (memory.Length < connectByte.Length) return false;
+            return memory.Slice(0, connectByte.Length).Span.SequenceEqual(connectByte);
+        }
+
         /// <summary>
         /// 构造一条简单的http消息
         /// </summary>
@@ -112,16 +118,6 @@ namespace common.libs
         }
 
         /// <summary>
-        /// 判断http报文是否是connect方法
-        /// </summary>
-        /// <param name="span"></param>
-        /// <returns></returns>
-        public static bool IsConnectMethod(in Span<byte> span)
-        {
-            return span.Length > connectMethodValue.Length && span.Slice(0, connectMethodValue.Length).SequenceEqual(connectMethodValue);
-        }
-
-        /// <summary>
         /// 是否是http协议
         /// </summary>
         /// <param name="data"></param>
@@ -134,7 +130,7 @@ namespace common.libs
             {
                 if (span.Slice(0, headers[i].Length).SequenceEqual(headers[i]))
                 {
-                    if(span.Slice(headers[i].Length).IndexOf(httpByte) > 0)
+                    if (span.Slice(headers[i].Length).IndexOf(httpByte) > 0)
                     {
                         return span.IndexOf(wrapByte);
                     }

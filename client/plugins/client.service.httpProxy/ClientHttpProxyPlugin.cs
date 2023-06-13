@@ -32,9 +32,16 @@ namespace client.service.httpProxy
             if (info.Step == EnumProxyStep.Command)
             {
                 GetTargetEndPoint(info);
-                info.Data = Helper.EmptyArray;
+                if (HttpParser.GetIsCustomConnect(info.Data))
+                {
+                    info.Data = Helper.MagicData;
+                }
+                else
+                {
+                    info.Data = Helper.EmptyArray;
+                }
             }
-            
+
             if (info.Connection == null || info.Connection.Connected == false)
             {
                 if (config.TargetConnectionId == 0)
@@ -76,7 +83,7 @@ namespace client.service.httpProxy
                     info.TargetPort = port;
                 }
             }
-            if(hostMemory.Length > 0)
+            if (hostMemory.Length > 0)
             {
                 //是ip
                 if (IPAddress.TryParse(hostMemory.GetString(), out IPAddress ip))

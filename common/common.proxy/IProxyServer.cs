@@ -313,8 +313,7 @@ namespace common.proxy
                             //Logger.Instance.Error($"proxy 【{info.ProxyPlugin.Name}】 send message fail");
                             if (info.Step == EnumProxyStep.Command)
                             {
-                                info.Response[0] = (byte)EnumProxyCommandStatus.NetworkError;
-                                info.Data = info.Response;
+                                info.Data = new byte[] { (byte)EnumProxyCommandStatus.NetworkError };
                                 info.CommandMsg = EnumProxyCommandStatusMsg.Connection;
                                 await InputData(info);
                             }
@@ -408,20 +407,26 @@ namespace common.proxy
                 }
                 token.Request.CommandMsg = info.CommandMsg;
                 token.Server.LastError = info.CommandMsg;
-
                 if (info.Data.Length == 0)
                 {
                     clientsManager.TryRemove(info.RequestId, out _);
                     return;
                 }
-
-                bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
-                token.Request.Step = info.Step;
-                token.Request.Command = info.Command;
-                token.Request.Rsv = info.Rsv;
-                if (info.Step > EnumProxyStep.Command)
+                EnumProxyStep step = info.Step;
+                //command步骤的魔术数据，直接返回一个数据就好了，用于测试
+                if (step == EnumProxyStep.Command && info.Data.Length == Helper.MagicData.Length && info.Data.Span.SequenceEqual(Helper.MagicData))
                 {
-                   
+                    info.Data.Span[0] = (byte)info.CommandMsg;
+                    await token.Socket.SendAsync(info.Data, SocketFlags.None);
+                }
+                else
+                {
+                    //数据后处理，组织回复数据，及是否回复
+                    bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
+                    token.Request.Step = info.Step;
+                    token.Request.Command = info.Command;
+                    token.Request.Rsv = info.Rsv;
+                    //需要回复数据
                     if (res)
                     {
                         if (info.Step == EnumProxyStep.ForwardUdp)
@@ -433,30 +438,12 @@ namespace common.proxy
                             await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                         }
                     }
-                }
-                else if ((EnumProxyCommandStatus)info.Data.Span[0] != EnumProxyCommandStatus.ConnecSuccess)
-                {
-                    /*
-                    string ip = string.Empty;
-                    switch (info.AddressType)
+                    //是失败的
+                    if (step == EnumProxyStep.Command && (EnumProxyCommandStatus)info.Data.Span[0] != EnumProxyCommandStatus.ConnecSuccess)
                     {
-                        case EnumProxyAddressType.IPV4:
-                            ip = new IPEndPoint(new IPAddress(token.Request.TargetAddress.Span), token.Request.TargetPort).ToString();
-                            break;
-                        case EnumProxyAddressType.IPV6:
-                            ip = new IPEndPoint(new IPAddress(token.Request.TargetAddress.Span), token.Request.TargetPort).ToString();
-                            break;
-                        case EnumProxyAddressType.Domain:
-                            ip = $"{token.Request.TargetAddress.Span.GetString()}:{token.Request.TargetPort}";
-                            break;
-
-                        default:
-                            break;
+                        clientsManager.TryRemove(info.RequestId, out _);
+                        return;
                     }
-                    Logger.Instance.Error($"【{info.ProxyPlugin.Name}】command {info.Command} [{ip}] fail : {info.CommandMsg.GetDesc((byte)info.CommandMsg)}");
-                    */
-                    clientsManager.TryRemove(info.RequestId, out _);
-                    return;
                 }
 
                 if (token.Receive == false)

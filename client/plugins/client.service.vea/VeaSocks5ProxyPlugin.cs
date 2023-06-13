@@ -64,8 +64,7 @@ namespace client.service.vea
                 //组网支持IPV4
                 if (info.AddressType != EnumProxyAddressType.IPV4)
                 {
-                    info.Response[0] = (byte)Socks5EnumResponseCommand.AddressNotAllow;
-                    info.Data = info.Response;
+                    info.Data = new byte[] { (byte)Socks5EnumResponseCommand.AddressNotAllow };
                     info.CommandMsg = EnumProxyCommandStatusMsg.Address;
                     proxyServer.InputData(info);
                     return false;
@@ -73,8 +72,7 @@ namespace client.service.vea
                 GetConnection(info);
                 if (info.Connection == null || info.Connection.Connected == false)
                 {
-                    info.Response[0] = (byte)Socks5EnumResponseCommand.NetworkError;
-                    info.Data = info.Response;
+                    info.Data = new byte[] { (byte)Socks5EnumResponseCommand.NetworkError };
                     info.CommandMsg = EnumProxyCommandStatusMsg.Connection;
                     proxyServer.InputData(info);
                     return false;

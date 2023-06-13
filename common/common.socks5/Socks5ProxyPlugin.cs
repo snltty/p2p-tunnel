@@ -63,8 +63,7 @@ namespace common.socks5
             if (socks5EnumStep < Socks5EnumStep.Command)
             {
                 //Socks5EnumAuthType.NoAuth不验证  Socks5EnumAuthState.Success验证成功 都是 0x00
-                info.Response[0] = 0x00;
-                info.Data = info.Response;
+                info.Data = new byte[] { 0x00 };
                 info.Rsv++;
                 proxyServer.InputData(info);
                 return false;
@@ -73,25 +72,23 @@ namespace common.socks5
             if (info.Step == EnumProxyStep.Command)
             {
                 //解析出目标地址
-                GetRemoteEndPoint(info);
+                GetRemoteEndPoint(info, out int index);
                 //udp中继的时候，有可能是 0.0.0.0:0 直接通过
                 if (info.TargetAddress.GetIsAnyAddress())
                 {
-                    info.Response[0] = (byte)Socks5EnumResponseCommand.ConnecSuccess;
-                    info.Data = info.Response;
+                    info.Data = new byte[] { (byte)Socks5EnumResponseCommand.ConnecSuccess };
                     proxyServer.InputData(info);
                     return false;
                 }
 
                 //将socks5的command转化未通用command
                 info.Command = (EnumProxyCommand)info.Data.Span[1];
-                //此时的负载是socks5的command包，直接去掉
-                info.Data = Helper.EmptyArray;
+                info.Data = info.Data.Slice(index);
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
                 //解析出目标地址
-                GetRemoteEndPoint(info);
+                GetRemoteEndPoint(info, out int index);
                 //解析出udp包的数据部分
                 info.Data = Socks5Parser.GetUdpData(info.Data);
             }
@@ -142,9 +139,9 @@ namespace common.socks5
             return true;
         }
 
-        protected void GetRemoteEndPoint(ProxyInfo info)
+        protected void GetRemoteEndPoint(ProxyInfo info, out int index)
         {
-            info.TargetAddress = Socks5Parser.GetRemoteEndPoint(info.Data, out Socks5EnumAddressType addressType, out ushort port);
+            info.TargetAddress = Socks5Parser.GetRemoteEndPoint(info.Data, out Socks5EnumAddressType addressType, out ushort port, out index);
             info.AddressType = (EnumProxyAddressType)addressType;
             info.TargetPort = port;
         }

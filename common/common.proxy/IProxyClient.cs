@@ -44,16 +44,14 @@ namespace common.proxy
             {
                 if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false)
                 {
-                    //Logger.Instance.Error($"proxy plugin {info.PluginId} not found");
                     _ = ConnectReponse(info, EnumProxyCommandStatus.ServerError, EnumProxyCommandStatusMsg.Plugin);
                     return;
                 }
                 info.ProxyPlugin = plugin;
                 if (pluginValidatorHandler.Validate(info) == false)
                 {
-                    // Logger.Instance.Error($"proxy plugin [{info.ProxyPlugin.Name}] validate fail:{string.Join(",", info.TargetAddress.Span.ToArray())}:{info.TargetPort}，【connect enable】 or 【user access】 or 【firewall】 denied");
                     EnumProxyCommandStatusMsg statusMsg = info.CommandMsg;
-                     _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow, statusMsg);
+                    _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow, statusMsg);
                     return;
                 }
                 _ = Command(info);
@@ -275,23 +273,21 @@ namespace common.proxy
             EnumProxyCommandStatus command = EnumProxyCommandStatus.ServerError;
             try
             {
-
                 if (e.SocketError == SocketError.Success)
                 {
-                    //魔术数据
-                    if (token.Data.Data.Length == Helper.MagicData.Length && token.Data.Data.Span.SequenceEqual(Helper.MagicData))
-                    {
-                        token.Data.Data = Helper.EmptyArray;
-                    }
-                    int length = token.Data.Data.Length;
-                    if (length > 0)
+                    bool isMagic = token.Data.Data.Length == Helper.MagicData.Length && token.Data.Data.Span.SequenceEqual(Helper.MagicData);
+                    if (token.Data.Data.Length > 0 && isMagic == false)
                     {
                         await token.TargetSocket.SendAsync(token.Data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
-                        token.Data.Data = Helper.EmptyArray;
                     }
                     await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess, EnumProxyCommandStatusMsg.Success);
-                    token.Data.TargetAddress = Helper.EmptyArray;
-                    BindTargetReceive(token);
+                    token.Data.Step = EnumProxyStep.ForwardTcp;
+                    token.Data.Data = Helper.EmptyArray;
+                    if (isMagic == false)
+                    {
+                        token.Data.TargetAddress = Helper.EmptyArray;
+                        BindTargetReceive(token);
+                    }
                     return;
                 }
                 else
@@ -408,10 +404,14 @@ namespace common.proxy
             }
         }
 
-        private async Task ConnectReponse(ProxyInfo info, EnumProxyCommandStatus command,EnumProxyCommandStatusMsg  commandStatusMsg)
+        private async Task ConnectReponse(ProxyInfo info, EnumProxyCommandStatus command, EnumProxyCommandStatusMsg commandStatusMsg)
         {
-            info.Response[0] = (byte)command;
-            info.Data = info.Response;
+            bool isMagic = info.Data.Length == Helper.MagicData.Length && info.Data.Span.SequenceEqual(Helper.MagicData);
+            if (isMagic == false)
+            {
+                info.Data = new byte[] { (byte)command };
+            }
+
             info.CommandMsg = commandStatusMsg;
             await Receive(info);
         }

@@ -5,6 +5,7 @@ using System;
 using System.Buffers;
 using System.ComponentModel;
 using System.Net;
+using System.Reflection;
 
 namespace common.proxy
 {
@@ -76,10 +77,7 @@ namespace common.proxy
         [System.Text.Json.Serialization.JsonIgnore]
         public IConnection Connection { get; set; }
         [System.Text.Json.Serialization.JsonIgnore]
-        public byte[] Response { get; set; } = new byte[1];
-        [System.Text.Json.Serialization.JsonIgnore]
         public IProxyPlugin ProxyPlugin { get; set; }
-
         /// <summary>
         /// 加入请求头
         /// </summary>
@@ -212,6 +210,11 @@ namespace common.proxy
             }
 
             Data = bytes.Slice(index);
+        }
+
+        public static uint GetRequestId(Memory<byte> bytes)
+        {
+            return bytes.Span.Slice(3).ToUInt32();
         }
 
         public static ProxyInfo Debytes(Memory<byte> data)
@@ -365,19 +368,21 @@ namespace common.proxy
     {
         [Description("成功")]
         Success = 0,
+        [Description("未监听")]
+        Listen = 1,
         [Description("服务类型未允许")]
-        Address = 1,
+        Address = 2,
         [Description("与目标节点未连接")]
-        Connection = 2,
+        Connection = 3,
         [Description("目标节点未允许通信")]
-        Denied = 3,
+        Denied = 4,
         [Description("目标节点相应插件未找到")]
-        Plugin = 4,
+        Plugin = 5,
         [Description("目标节点相应插件未允许连接，且未拥有该权限")]
-        EnableOrAccess = 5,
+        EnableOrAccess = 6,
         [Description("目标节点防火墙阻止")]
-        Firewail = 6,
+        Firewail = 7,
         [Description("目标服务连接失败")]
-        Connect = 7
+        Connect = 8
     }
 }

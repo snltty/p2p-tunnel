@@ -53,14 +53,14 @@ namespace common.socks5
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static Memory<byte> GetRemoteEndPoint(Memory<byte> data, out Socks5EnumAddressType addressType, out ushort port)
+        public static Memory<byte> GetRemoteEndPoint(Memory<byte> data, out Socks5EnumAddressType addressType, out ushort port,out int index)
         {
             //VERSION COMMAND RSV ATYPE  DST.ADDR  DST.PORT
             //去掉 VERSION COMMAND RSV
             Memory<byte> memory = data.Slice(3);
             Span<byte> span = memory.Span;
             addressType = (Socks5EnumAddressType)span[0];
-            int index = 0;
+            index = 0;
             Memory<byte> result = Helper.EmptyArray;
 
             switch (addressType)
@@ -88,6 +88,7 @@ namespace common.socks5
             }
 
             port = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(index, 2));
+            index += 2;
             return result;
         }
 
@@ -202,10 +203,11 @@ namespace common.socks5
             {
                 return EnumProxyValidateDataResult.TooShort;
             }
+            /*
             if (data.Length > 2 + data.Span[1])
             {
                 return EnumProxyValidateDataResult.TooLong;
-            }
+            }*/
 
             return EnumProxyValidateDataResult.Equal;
         }
@@ -219,9 +221,9 @@ namespace common.socks5
             /*
              * VERSION  COMMAND RSV ADDRESS_TYPE    DST.ADDR    DST.PORT
              * 1        1       1   1               1-255       2
-             * 域名模式下 DST.ADDR第一个字节是域名长度，那么整个数据至少5个字节
+             * 域名模式下 DST.ADDR第一个字节是域名长度，那么整个数据至少8个字节
              */
-            if (data.Length < 5) return EnumProxyValidateDataResult.TooShort;
+            if (data.Length < 8) return EnumProxyValidateDataResult.TooShort;
 
             var span = data.Span;
             int addrLength = (Socks5EnumAddressType)span[3] switch
@@ -235,10 +237,12 @@ namespace common.socks5
             {
                 return EnumProxyValidateDataResult.TooShort;
             }
+            /*
             if (data.Length > 4 + addrLength)
             {
                 return EnumProxyValidateDataResult.TooLong;
             }
+            */
             return EnumProxyValidateDataResult.Equal;
         }
         /// <summary>
@@ -287,10 +291,12 @@ namespace common.socks5
             {
                 return EnumProxyValidateDataResult.TooShort;
             }
+            /*
             if (span.Length > 1 + 1 + nameLength + passwordLength)
             {
                 return EnumProxyValidateDataResult.TooLong;
             }
+            */
             return EnumProxyValidateDataResult.Equal;
         }
 
