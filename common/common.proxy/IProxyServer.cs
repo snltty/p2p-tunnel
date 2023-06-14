@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -413,14 +412,20 @@ namespace common.proxy
                     return;
                 }
                 EnumProxyStep step = info.Step;
+
                 //command步骤的魔术数据，直接返回一个数据就好了，用于测试
-                if (step == EnumProxyStep.Command && info.Data.Length == Helper.MagicData.Length && info.Data.Span.SequenceEqual(Helper.MagicData))
+                if (step == EnumProxyStep.Command && ProxyHelper.GetIsMagicData(info.Data))
                 {
                     info.Data.Span[0] = (byte)info.CommandMsg;
                     await token.Socket.SendAsync(info.Data, SocketFlags.None);
                 }
                 else
                 {
+                    EnumProxyCommandStatus status = EnumProxyCommandStatus.ConnecSuccess;
+                    if (step == EnumProxyStep.Command)
+                    {
+                        status = (EnumProxyCommandStatus)info.Data.Span[0];
+                    }
                     //数据后处理，组织回复数据，及是否回复
                     bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
                     token.Request.Step = info.Step;
@@ -439,7 +444,7 @@ namespace common.proxy
                         }
                     }
                     //是失败的
-                    if (step == EnumProxyStep.Command && (EnumProxyCommandStatus)info.Data.Span[0] != EnumProxyCommandStatus.ConnecSuccess)
+                    if (status != EnumProxyCommandStatus.ConnecSuccess)
                     {
                         clientsManager.TryRemove(info.RequestId, out _);
                         return;

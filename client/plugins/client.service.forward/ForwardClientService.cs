@@ -1,4 +1,5 @@
 ﻿using client.service.ui.api.clientServer;
+using common.forward;
 using common.libs.extends;
 using common.proxy;
 using System.Collections.Generic;
@@ -13,10 +14,12 @@ namespace client.service.forward
     {
         private readonly ForwardTransfer forwardTransfer;
         private readonly IProxyServer proxyServer;
-        public ForwardClientService(ForwardTransfer forwardTransfer, IProxyServer proxyServer)
+        private readonly common.forward.Config config;
+        public ForwardClientService(ForwardTransfer forwardTransfer, IProxyServer proxyServer, common.forward.Config config)
         {
             this.forwardTransfer = forwardTransfer;
             this.proxyServer = proxyServer;
+            this.config = config;
         }
         /// <summary>
         /// 添加监听
@@ -72,11 +75,6 @@ namespace client.service.forward
         /// <returns></returns>
         public IEnumerable<P2PListenInfo> List(ClientServiceParamsInfo arg)
         {
-            foreach (var item in forwardTransfer.p2pListens)
-            {
-                proxyServer.LastError(item.Port, out EnumProxyCommandStatusMsg commandStatusMsg);
-                item.LastError = commandStatusMsg;
-            }
             return forwardTransfer.p2pListens;
         }
 
@@ -116,5 +114,11 @@ namespace client.service.forward
             return true;
         }
 
+
+        public async Task<EnumProxyCommandStatusMsg> Test(ClientServiceParamsInfo arg)
+        {
+            P2PForwardRemoveParams fmodel = arg.Content.DeJson<P2PForwardRemoveParams>();
+            return await forwardTransfer.Test(fmodel);
+        }
     }
 }

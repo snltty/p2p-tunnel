@@ -1,7 +1,12 @@
 ﻿using common.libs;
 using common.proxy;
 using System;
+using System.Buffers;
 using System.IO;
+using System.Net.Sockets;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace client.service.httpProxy
 {
@@ -116,6 +121,42 @@ namespace client.service.httpProxy
         {
             set = false;
             ProxySystemSetting.Clear();
+        }
+
+        public async Task<EnumProxyCommandStatusMsg> Test()
+        {
+            if (config.ListenEnable == false)
+            {
+                return EnumProxyCommandStatusMsg.Listen;
+            }
+            if (ProxyPluginLoader.GetPlugin(config.Plugin, out IProxyPlugin plugin) == false)
+            {
+                return EnumProxyCommandStatusMsg.Listen;
+            }
+
+            IPEndPoint target = new IPEndPoint(config.ProxyIp, config.ListenPort);
+
+            try
+            {
+                using Socket socket = new Socket(target.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                await socket.ConnectAsync(target);
+                await socket.SendAsync(Encoding.UTF8.GetBytes($"CONNECT- / HTTP/1.1\r\nHost: www.baidu.com:443\r\n\r\n"), SocketFlags.None);
+                byte[] bytes = ArrayPool<byte>.Shared.Rent(ProxyHelper.MagicData.Length);
+                int length = await socket.ReceiveAsync(bytes, SocketFlags.None);
+
+                EnumProxyCommandStatusMsg statusMsg = EnumProxyCommandStatusMsg.Listen;
+                if (length > 0)
+                {
+                    statusMsg = (EnumProxyCommandStatusMsg)bytes[0];
+                }
+                ArrayPool<byte>.Shared.Return(bytes);
+                return statusMsg;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex + "");
+            }
+            return EnumProxyCommandStatusMsg.Listen;
         }
     }
 }

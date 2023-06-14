@@ -21,7 +21,7 @@ namespace common.httpProxy
 
         public virtual uint Access => 0b00000000_00000000_00000000_00100000;
         public virtual string Name => "http-proxy";
-        
+
 
         private readonly Config config;
         public HttpProxyPlugin(Config config)

@@ -16,8 +16,6 @@ namespace common.libs
         public static byte[] AnyIpv6Array = IPAddress.IPv6Any.GetAddressBytes();
         public static byte[] AnyPoryArray = new byte[] { 0, 0 };
 
-        public static byte[] MagicData { get; } = Encoding.UTF8.GetBytes("\0S-n-l-t-t-y-S-n-l-t-t-y-T-e-s-t");
-
         /// <summary>
         /// 空格
         /// </summary>

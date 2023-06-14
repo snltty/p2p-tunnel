@@ -9,3 +9,6 @@ export const getPac = () => {
 export const setPac = (content) => {
     return sendWebsocketMsg(`httpproxy/SetPac`, content);
 }
+export const testProxy = () => {
+    return sendWebsocketMsg(`httpproxy/test`);
+}

@@ -3,7 +3,9 @@ using common.libs.extends;
 using common.proxy;
 using common.server.model;
 using System;
+using System.Buffers;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 
 namespace common.forward
@@ -46,14 +48,21 @@ namespace common.forward
 
         public virtual bool HandleRequestData(ProxyInfo info)
         {
+            bool isMagicData = info.Step == EnumProxyStep.Command && HttpParser.GetIsCustomConnect(info.Data);
             if (info.Connection == null || info.Connection.Connected == false)
             {
                 info.Connection = null;
                 GetConnection(info);
             }
+            if (isMagicData)
+            {
+                info.Data = ProxyHelper.MagicData;
+            }
+
             if (info.Connection == null || info.Connection.Connected == false)
             {
-                info.Data = Helper.EmptyArray;
+                if (isMagicData == false)
+                    info.Data = Helper.EmptyArray;
                 info.CommandMsg = EnumProxyCommandStatusMsg.Connection;
                 proxyServer.InputData(info);
                 return false;
@@ -98,5 +107,7 @@ namespace common.forward
                 }
             }
         }
+
+
     }
 }

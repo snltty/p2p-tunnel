@@ -77,5 +77,9 @@ namespace client.service.socks5
             socks5Transfer.UpdatePac(arg.Content);
         }
 
+        public async Task<EnumProxyCommandStatusMsg> Test(ClientServiceParamsInfo arg)
+        {
+            return await socks5Transfer.Test();
+        }
     }
 }

@@ -34,7 +34,7 @@ namespace client.service.httpProxy
                 GetTargetEndPoint(info);
                 if (HttpParser.GetIsCustomConnect(info.Data))
                 {
-                    info.Data = Helper.MagicData;
+                    info.Data = ProxyHelper.MagicData;
                 }
                 else
                 {

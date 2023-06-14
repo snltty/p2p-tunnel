@@ -275,7 +275,7 @@ namespace common.proxy
             {
                 if (e.SocketError == SocketError.Success)
                 {
-                    bool isMagic = token.Data.Data.Length == Helper.MagicData.Length && token.Data.Data.Span.SequenceEqual(Helper.MagicData);
+                    bool isMagic = ProxyHelper.GetIsMagicData(token.Data.Data);
                     if (token.Data.Data.Length > 0 && isMagic == false)
                     {
                         await token.TargetSocket.SendAsync(token.Data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
@@ -406,7 +406,7 @@ namespace common.proxy
 
         private async Task ConnectReponse(ProxyInfo info, EnumProxyCommandStatus command, EnumProxyCommandStatusMsg commandStatusMsg)
         {
-            bool isMagic = info.Data.Length == Helper.MagicData.Length && info.Data.Span.SequenceEqual(Helper.MagicData);
+            bool isMagic = ProxyHelper.GetIsMagicData(info.Data);
             if (isMagic == false)
             {
                 info.Data = new byte[] { (byte)command };

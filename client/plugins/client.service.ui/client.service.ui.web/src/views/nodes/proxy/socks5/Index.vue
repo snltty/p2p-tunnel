@@ -13,6 +13,7 @@
                             <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.id">
                             </el-option>
                         </el-select>
+                        <el-button @click="handleTest">测试</el-button>
                     </div>
                 </el-form-item>
                 <el-form-item>
@@ -25,20 +26,22 @@
                 </el-form-item>
             </el-form>
         </div>
+        <StatusMsg v-if="state.showStatusMsg" v-model="state.showStatusMsg" :msgCallback="state.statusMsgCallback"></StatusMsg>
     </div>
 </template>
 
 <script>
 import { computed, reactive } from '@vue/reactivity'
-import { get, set, run } from '../../../../apis/socks5'
+import { get, set, run, testProxy } from '../../../../apis/socks5'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../../states/clients'
 import ConnectButton from '../../../../components/ConnectButton.vue'
+import StatusMsg from '../../../../components/StatusMsg.vue'
 import plugin from './plugin'
 import { ElMessage } from 'element-plus/lib/components'
 export default {
     plugin: plugin,
-    components: { ConnectButton },
+    components: { ConnectButton, StatusMsg },
     setup() {
 
         const clientsState = injectClients();
@@ -53,7 +56,9 @@ export default {
             listenPort: 5413,
             targetConnectionId: '',
             ProxyIp: '127.0.0.1',
-            port: window.location.port
+            port: window.location.port,
+            showStatusMsg: false,
+            statusMsgCallback: () => 0
         });
         const loadConfig = () => {
             get().then((res) => {
@@ -74,9 +79,9 @@ export default {
                 res.ListenEnable = state.listenEnable;
                 set(res).then(() => {
                     loadConfig();
-                    run().then((state) => {
+                    run().then((res1) => {
                         state.loading = false;
-                        if (state == false) {
+                        if (res1 == false) {
                             ElMessage.error('失败,具体信息看日志');
                             state.listenEnable = false;
                             res.ListenEnable = state.listenEnable;
@@ -105,8 +110,13 @@ export default {
             state.targetConnectionId = id;
             submit();
         }
+        const handleTest = () => {
+            state.statusMsgCallback = testProxy();
+            state.showStatusMsg = true;
+        }
+
         return {
-            targets, state, handle, handleChange
+            targets, state, handle, handleChange, handleTest
         }
     }
 }

@@ -15,8 +15,9 @@ namespace test
     {
         static void Main(string[] args)
         {
+            Console.WriteLine(BitConverter.GetBytes(53)[1]);
 
-            BenchmarkRunner.Run<Test>();
+           // BenchmarkRunner.Run<Test>();
         }
     }
 

@@ -1,17 +1,15 @@
-﻿using client.messengers.clients;
-using client.messengers.singnin;
-using common.forward;
+﻿using common.forward;
 using common.libs;
 using common.libs.database;
-using common.libs.extends;
 using common.proxy;
-using common.server;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
-using System.Text.Json.Serialization;
+using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace client.service.forward
@@ -270,6 +268,54 @@ namespace client.service.forward
             listen.Forwards.Remove(forwardInfo);
             forwardTargetCaching.Remove(forwardInfo.SourceIp, listen.Port);
             SaveP2PConfig();
+        }
+
+        public async Task<EnumProxyCommandStatusMsg> Test(P2PForwardRemoveParams forward)
+        {
+            P2PListenInfo listen = GetP2PByID(forward.ListenID);
+            if (listen.ID == 0 || listen.Listening == false)
+            {
+                return EnumProxyCommandStatusMsg.Listen;
+            }
+            P2PForwardInfo forwardInfo = listen.Forwards.FirstOrDefault(c => c.ID == forward.ForwardID);
+            if (forwardInfo == null)
+            {
+                return EnumProxyCommandStatusMsg.Listen;
+            }
+
+            if (ProxyPluginLoader.GetPlugin(config.Plugin, out IProxyPlugin plugin) == false)
+            {
+                return EnumProxyCommandStatusMsg.Listen;
+            }
+
+            if (IPAddress.TryParse(forwardInfo.SourceIp, out IPAddress ip) == false)
+            {
+                ip = Dns.GetHostEntry(forwardInfo.SourceIp).AddressList[0];
+            }
+            if (ip.Equals(IPAddress.Any)) ip = IPAddress.Loopback;
+            IPEndPoint target = new IPEndPoint(ip, listen.Port);
+
+            try
+            {
+                using Socket socket = new Socket(target.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                await socket.ConnectAsync(target);
+                await socket.SendAsync(Encoding.UTF8.GetBytes($"CONNECT- / HTTP/1.1\r\nHost: {forwardInfo.SourceIp}:{listen.Port}\r\n\r\n"), SocketFlags.None);
+                byte[] bytes = ArrayPool<byte>.Shared.Rent(ProxyHelper.MagicData.Length);
+                int length = await socket.ReceiveAsync(bytes, SocketFlags.None);
+
+                EnumProxyCommandStatusMsg statusMsg = EnumProxyCommandStatusMsg.Listen;
+                if (length > 0)
+                {
+                    statusMsg = (EnumProxyCommandStatusMsg)bytes[0];
+                }
+                ArrayPool<byte>.Shared.Return(bytes);
+                return statusMsg;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex + "");
+            }
+            return EnumProxyCommandStatusMsg.Listen;
         }
 
         /// <summary>

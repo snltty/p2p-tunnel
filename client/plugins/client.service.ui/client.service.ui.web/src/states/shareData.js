@@ -45,7 +45,7 @@ export const shareData = {
     serverTypes: { 1: 'TCP', 2: 'UDP', 3: '/' },
     bufferSizes: ['KB_1', 'KB_2', 'KB_4', 'KB_8', 'KB_16', 'KB_32', 'KB_64', 'KB_128', 'KB_256', 'KB_512', 'KB_1024'],
     commandMsgs: [
-        '最后一次通信的错误情况',
+        '已开启监听',
         '服务类型允许',
         '与目标节点已连接',
         '目标节点允许通信',

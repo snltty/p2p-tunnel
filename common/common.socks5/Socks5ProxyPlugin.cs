@@ -5,6 +5,7 @@ using common.server.model;
 using common.libs.extends;
 using System;
 using common.server;
+using System.Text;
 
 namespace common.socks5
 {
@@ -84,6 +85,9 @@ namespace common.socks5
                 //将socks5的command转化未通用command
                 info.Command = (EnumProxyCommand)info.Data.Span[1];
                 info.Data = info.Data.Slice(index);
+                Console.WriteLine($"data:{index}");
+                Console.WriteLine($"data:{string.Join(",", info.Data.ToArray())}");
+                Console.WriteLine($"data:{Encoding.UTF8.GetString(info.Data.Span)}");
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
@@ -145,5 +149,7 @@ namespace common.socks5
             info.AddressType = (EnumProxyAddressType)addressType;
             info.TargetPort = port;
         }
+
+
     }
 }

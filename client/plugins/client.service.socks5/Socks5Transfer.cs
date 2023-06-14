@@ -1,7 +1,14 @@
-﻿using common.libs;
+﻿using client.service.ui.api.clientServer;
+using common.libs;
+using common.proxy;
 using System;
+using System.Buffers;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace client.service.socks5
 {
@@ -119,6 +126,50 @@ namespace client.service.socks5
         {
             set = false;
             ProxySystemSetting.Clear();
+        }
+
+        public async Task<EnumProxyCommandStatusMsg> Test()
+        {
+            if (config.ListenEnable == false)
+            {
+                return EnumProxyCommandStatusMsg.Listen;
+            }
+            if (ProxyPluginLoader.GetPlugin(config.Plugin, out IProxyPlugin plugin) == false)
+            {
+                return EnumProxyCommandStatusMsg.Listen;
+            }
+
+            IPEndPoint target = new IPEndPoint(config.ProxyIp, config.ListenPort);
+            try
+            {
+                using Socket socket = new Socket(target.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                await socket.ConnectAsync(target);
+
+                byte[] bytes = new byte[ProxyHelper.MagicData.Length];
+                //request
+                await socket.SendAsync(new byte[] { 0x05, 0x01, 0 }, SocketFlags.None);
+                await socket.ReceiveAsync(bytes, SocketFlags.None);
+                //command
+                byte[] socks5Data = new byte[] { 0x05, 0x01, 0, 0x01, 8, 8, 8, 8, 0,53 };
+                byte[] data = new byte[bytes.Length + socks5Data.Length];
+                socks5Data.AsSpan().CopyTo(data);
+                ProxyHelper.MagicData.AsSpan().CopyTo(data.AsSpan(socks5Data.Length));
+                await socket.SendAsync(data, SocketFlags.None);
+
+                int length = await socket.ReceiveAsync(bytes, SocketFlags.None);
+
+                EnumProxyCommandStatusMsg statusMsg = EnumProxyCommandStatusMsg.Listen;
+                if (length > 0)
+                {
+                    statusMsg = (EnumProxyCommandStatusMsg)bytes[0];
+                }
+                return statusMsg;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex + "");
+            }
+            return EnumProxyCommandStatusMsg.Listen;
         }
     }
 

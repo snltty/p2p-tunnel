@@ -13,6 +13,7 @@
                             <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.id">
                             </el-option>
                         </el-select>
+                        <el-button @click="handleTest">测试</el-button>
                     </div>
                 </el-form-item>
                 <el-form-item>
@@ -25,20 +26,23 @@
                 </el-form-item>
             </el-form>
         </div>
+        <StatusMsg v-if="state.showStatusMsg" v-model="state.showStatusMsg" :msgCallback="state.statusMsgCallback"></StatusMsg>
     </div>
 </template>
 
 <script>
 import { computed, reactive } from '@vue/reactivity'
 import { getConfigure, saveConfigure } from '../../../../apis/configure'
-import { update } from '../../../../apis/httpproxy'
+import { update, testProxy } from '../../../../apis/httpproxy'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../../states/clients'
 import ConnectButton from '../../../../components/ConnectButton.vue'
+import StatusMsg from '../../../../components/StatusMsg.vue'
 import plugin from './plugin'
+import { ElMessage } from 'element-plus'
 export default {
     plugin: plugin,
-    components: { ConnectButton },
+    components: { ConnectButton, StatusMsg },
     setup() {
 
         const clientsState = injectClients();
@@ -49,13 +53,14 @@ export default {
         });
         const state = reactive({
             loading: false,
-
             ListenPort: 5414,
             TargetConnectionId: 0,
             ListenEnable: false,
             ProxyIp: '127.0.0.1',
-
             port: window.location.port,
+
+            showStatusMsg: false,
+            statusMsgCallback: () => 0
         });
         const loadConfig = () => {
             getConfigure(plugin.config).then((res) => {
@@ -64,7 +69,6 @@ export default {
                 state.TargetConnectionId = json.TargetConnectionId;
                 state.ListenEnable = json.ListenEnable;
                 state.ProxyIp = json.ProxyIp;
-
             });
         }
         onMounted(() => {
@@ -78,16 +82,17 @@ export default {
                 json.TargetConnectionId = state.TargetConnectionId;
                 json.ListenEnable = state.ListenEnable;
                 saveConfigure(plugin.config, JSON.stringify(json)).then(() => {
-                    update().then((state) => {
+                    update().then((res) => {
                         loadConfig();
                         state.loading = false;
-                        if (state == false) {
+                        if (res == false) {
                             ElMessage.error('失败,具体信息看日志');
                             state.ListenEnable = false;
                             json.ListenEnable = state.ListenEnable;
                             saveConfigure(plugin.config, JSON.stringify(json));
                         }
-                    }).catch(() => {
+                    }).catch((error) => {
+                        console.log(error);
                         state.ListenEnable = false;
                         json.ListenEnable = state.ListenEnable;
                         saveConfigure(plugin.config, JSON.stringify(json));
@@ -110,9 +115,13 @@ export default {
             state.TargetConnectionId = id;
             submit();
         }
+        const handleTest = () => {
+            state.statusMsgCallback = testProxy();
+            state.showStatusMsg = true;
+        }
 
         return {
-            targets, state, handle, handleChange
+            targets, state, handle, handleChange, handleTest
         }
     }
 }

@@ -5,14 +5,11 @@ using System;
 using System.Buffers;
 using System.ComponentModel;
 using System.Net;
-using System.Reflection;
 
 namespace common.proxy
 {
-    public sealed class ProxyInfo
+    public class ProxyBaseInfo
     {
-        #region 数据字段
-
         /// <summary>
         /// 保留字段，各协议可以根据自己的实际需求拿去玩儿
         /// </summary>
@@ -63,34 +60,11 @@ namespace common.proxy
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Data { get; set; }
 
-        #endregion
-
-        #region 辅助字段
-
-        /// <summary>
-        /// 监听的端口
-        /// </summary>
-        public ushort ListenPort { get; set; }
-        /// <summary>
-        /// 连接对象，在发送端表示目标连接，在接收端表示来源连接
-        /// </summary>
-        [System.Text.Json.Serialization.JsonIgnore]
-        public IConnection Connection { get; set; }
-        [System.Text.Json.Serialization.JsonIgnore]
-        public IProxyPlugin ProxyPlugin { get; set; }
-        /// <summary>
-        /// 加入请求头
-        /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public Memory<byte> Headers { get; set; }
         [System.Text.Json.Serialization.JsonIgnore]
         public int HttpIndex { get; set; }
-        [System.Text.Json.Serialization.JsonIgnore]
-        public IPEndPoint ClientEP { get; set; }
-        [System.Text.Json.Serialization.JsonIgnore]
-        public HttpHeaderCacheInfo HeadersCache { get; set; }
 
-        #endregion
 
         public byte[] ToBytes(out int length)
         {
@@ -167,7 +141,6 @@ namespace common.proxy
             }
             return bytes;
         }
-
         public void DeBytes(Memory<byte> bytes)
         {
             var span = bytes.Span;
@@ -211,24 +184,38 @@ namespace common.proxy
 
             Data = bytes.Slice(index);
         }
-
-        public static uint GetRequestId(Memory<byte> bytes)
-        {
-            return bytes.Span.Slice(3).ToUInt32();
-        }
-
         public static ProxyInfo Debytes(Memory<byte> data)
         {
             ProxyInfo info = new ProxyInfo();
             info.DeBytes(data);
             return info;
         }
-
         public void Return(byte[] data)
         {
             ArrayPool<byte>.Shared.Return(data);
         }
 
+        public static uint GetRequestId(Memory<byte> bytes)
+        {
+            return bytes.Span.Slice(3).ToUInt32();
+        }
+    }
+
+    public sealed class ProxyInfo : ProxyBaseInfo
+    {
+        public ushort ListenPort { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public IConnection Connection { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public IProxyPlugin ProxyPlugin { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public IPEndPoint ClientEP { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public HttpHeaderCacheInfo HeadersCache { get; set; }
     }
     public sealed class HttpHeaderCacheInfo
     {

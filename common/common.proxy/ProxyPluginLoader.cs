@@ -40,7 +40,6 @@ namespace common.proxy
         /// <returns>是否发送给来源端</returns>
         public bool HandleAnswerData(ProxyInfo info);
 
-
         public void Started(ushort port) { }
         public void Stoped(ushort port) { }
     }

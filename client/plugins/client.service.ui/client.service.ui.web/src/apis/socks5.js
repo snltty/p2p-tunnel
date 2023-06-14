@@ -15,3 +15,6 @@ export const getPac = () => {
 export const updatePac = (content) => {
     return sendWebsocketMsg(`socks5/updatepac`, content);
 }
+export const testProxy = (content) => {
+    return sendWebsocketMsg(`socks5/test`, content);
+}

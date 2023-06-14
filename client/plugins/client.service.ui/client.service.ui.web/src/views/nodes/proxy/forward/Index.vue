@@ -25,7 +25,7 @@
                                         <span>{{props.row.TargetIp}}:{{props.row.TargetPort}}</span>
                                     </template>
                                 </el-table-column>
-                                <el-table-column align="right" width="130">
+                                <el-table-column align="right" width="140">
                                     <template #default="props1">
                                         <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveForward(props.row,props1.row)">
                                             <template #reference>
@@ -33,6 +33,7 @@
                                             </template>
                                         </el-popconfirm>
                                         <el-button link plain size="small" @click="handleEditForward(props.row,props1.row)">编辑</el-button>
+                                        <el-button link plain size="small" @click="handleTestForward(props.row,props1.row)">测试</el-button>
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -46,22 +47,7 @@
                     <el-table-column label="监听端口" prop="Port">
                         <template #default="props">
                             <div class="flex">
-                                <span class="flex-1">
-                                    <el-dropdown style="line-height:inherit;">
-                                        <span class="el-dropdown-link forward-status" :class="`forward-status-${props.row.LastError}`" style="font-size:1.3rem">
-                                            {{props.row.Port}}<el-icon>
-                                                <Warning />
-                                            </el-icon>
-                                        </span>
-                                        <template #dropdown>
-                                            <el-dropdown-menu>
-                                                <template v-for="(item,index) in shareData.commandMsgs" :key="index">
-                                                    <el-dropdown-item class="forward-success" v-if="props.row.LastError==0 || props.row.LastError > index" :icon="CircleCheck">{{item}}</el-dropdown-item>
-                                                    <el-dropdown-item class="forward-error" v-else :icon="CircleClose">{{item}}</el-dropdown-item>
-                                                </template>
-                                            </el-dropdown-menu>
-                                        </template>
-                                    </el-dropdown></span>
+                                <span class="flex-1">{{props.row.Port}}</span>
                                 <span>
                                     <el-switch size="small" @click.stop @change="onListeningChange(props.row)" v-model="props.row.Listening"></el-switch>
                                 </span>
@@ -84,22 +70,23 @@
             </div>
             <AddForward v-if="state.showAddForward" v-model="state.showAddForward" @success="getData"></AddForward>
             <AddListen v-if="state.showAddListen" v-model="state.showAddListen" @success="getData"></AddListen>
+            <StatusMsg v-if="state.showStatusMsg" v-model="state.showStatusMsg" :msgCallback="state.statusMsgCallback"></StatusMsg>
         </div>
     </div>
 </template>
 <script>
 import { reactive, ref } from '@vue/reactivity'
-import { getList, removeListen, startListen, stopListen, removeForward } from '../../../../apis/forward'
+import { getList, removeListen, startListen, stopListen, removeForward, testForward } from '../../../../apis/forward'
 import { computed, onMounted, provide } from '@vue/runtime-core'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
 import { injectShareData } from '../../../../states/shareData'
 import { injectClients } from '../../../../states/clients'
-import { CircleCheck, CircleClose } from '@element-plus/icons'
+import StatusMsg from '../../../../components/StatusMsg.vue'
 import plugin from './plugin'
 export default {
     plugin: plugin,
-    components: { AddListen, AddForward },
+    components: { AddListen, AddForward, StatusMsg },
     setup() {
 
         const shareData = injectShareData();
@@ -109,6 +96,8 @@ export default {
             currentLsiten: { Port: 0 },
             showAddListen: false,
             showAddForward: false,
+            showStatusMsg: false,
+            statusMsgCallback: () => 0
         });
         const clientsState = injectClients();
         const targets = computed(() => {
@@ -175,6 +164,10 @@ export default {
                 getData();
             });
         }
+        const handleTestForward = (listen, forward) => {
+            state.statusMsgCallback = testForward(listen.ID, forward.ID);
+            state.showStatusMsg = true;
+        }
 
         onMounted(() => {
             getData();
@@ -183,8 +176,7 @@ export default {
         return {
             targetJson, state, shareData, getData, expandKeys, onExpand,
             handleRemoveListen, handleAddListen, handleEditListen, onListeningChange,
-            handleAddForward, handleEditForward, handleRemoveForward,
-            CircleCheck, CircleClose
+            handleAddForward, handleEditForward, handleRemoveForward, handleTestForward
         }
     }
 }
