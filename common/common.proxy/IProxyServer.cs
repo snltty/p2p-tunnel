@@ -426,7 +426,7 @@ namespace common.proxy
                         return;
                     }
 
-                    if (token.Receive == false && step == EnumProxyStep.Command)
+                    if (token.Receive == false)
                     {
                         token.Receive = true;
                         if (token.Socket.ReceiveAsync(token.Saea) == false)
