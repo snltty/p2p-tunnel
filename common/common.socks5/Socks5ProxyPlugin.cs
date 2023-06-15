@@ -1,11 +1,8 @@
-﻿using common.libs;
-using common.proxy;
+﻿using common.proxy;
 using System.Net;
 using common.server.model;
 using common.libs.extends;
 using System;
-using common.server;
-using System.Text;
 
 namespace common.socks5
 {
@@ -61,7 +58,7 @@ namespace common.socks5
 
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
             //request  auth 的 直接通过,跳过验证部分
-            if (socks5EnumStep < Socks5EnumStep.Command)
+            if (socks5EnumStep < Socks5EnumStep.Command && info.Step == EnumProxyStep.Command)
             {
                 //Socks5EnumAuthType.NoAuth不验证  Socks5EnumAuthState.Success验证成功 都是 0x00
                 info.Data = new byte[] { 0x00 };
@@ -85,9 +82,6 @@ namespace common.socks5
                 //将socks5的command转化未通用command
                 info.Command = (EnumProxyCommand)info.Data.Span[1];
                 info.Data = info.Data.Slice(index);
-                Console.WriteLine($"data:{index}");
-                Console.WriteLine($"data:{string.Join(",", info.Data.ToArray())}");
-                Console.WriteLine($"data:{Encoding.UTF8.GetString(info.Data.Span)}");
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
@@ -106,7 +100,7 @@ namespace common.socks5
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
 
             //request auth 步骤的，只需回复一个字节的状态码
-            if (socks5EnumStep < Socks5EnumStep.Command)
+            if (socks5EnumStep < Socks5EnumStep.Command && info.Step == EnumProxyStep.Command)
             {
                 info.Data = new byte[] { 5, info.Data.Span[0] };
                 info.Rsv = (byte)Socks5EnumStep.Command;
@@ -118,7 +112,7 @@ namespace common.socks5
                 case EnumProxyStep.Command:
                     {
                         //command的，需要区分成功和失败，成功则回复指定数据，失败则关闭连接
-                        Socks5EnumResponseCommand type = (Socks5EnumResponseCommand)info.Data.Span[0];
+                        Socks5EnumResponseCommand type = (Socks5EnumResponseCommand)info.CommandStatus;
                         info.Data = Socks5Parser.MakeConnectResponse(new IPEndPoint(IPAddress.Any, Port), (byte)type);
                         //走到转发步骤
                         info.Rsv = (byte)Socks5EnumStep.Forward;

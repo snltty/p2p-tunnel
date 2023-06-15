@@ -89,6 +89,7 @@ namespace common.socks5
 
             port = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(index, 2));
             index += 2;
+            index += 3;
             return result;
         }
 

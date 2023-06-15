@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using common.libs.extends;
 
 namespace client.service.httpProxy
 {
@@ -143,6 +144,7 @@ namespace client.service.httpProxy
                 await socket.SendAsync(Encoding.UTF8.GetBytes($"CONNECT- / HTTP/1.1\r\nHost: www.baidu.com:443\r\n\r\n"), SocketFlags.None);
                 byte[] bytes = ArrayPool<byte>.Shared.Rent(ProxyHelper.MagicData.Length);
                 int length = await socket.ReceiveAsync(bytes, SocketFlags.None);
+                socket.SafeClose();
 
                 EnumProxyCommandStatusMsg statusMsg = EnumProxyCommandStatusMsg.Listen;
                 if (length > 0)

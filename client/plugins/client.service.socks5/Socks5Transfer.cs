@@ -1,5 +1,6 @@
 ﻿using client.service.ui.api.clientServer;
 using common.libs;
+using common.libs.extends;
 using common.proxy;
 using System;
 using System.Buffers;
@@ -157,6 +158,7 @@ namespace client.service.socks5
                 await socket.SendAsync(data, SocketFlags.None);
 
                 int length = await socket.ReceiveAsync(bytes, SocketFlags.None);
+                socket.SafeClose();
 
                 EnumProxyCommandStatusMsg statusMsg = EnumProxyCommandStatusMsg.Listen;
                 if (length > 0)

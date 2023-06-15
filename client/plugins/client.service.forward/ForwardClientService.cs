@@ -114,11 +114,16 @@ namespace client.service.forward
             return true;
         }
 
-
         public async Task<EnumProxyCommandStatusMsg> Test(ClientServiceParamsInfo arg)
         {
-            P2PForwardRemoveParams fmodel = arg.Content.DeJson<P2PForwardRemoveParams>();
-            return await forwardTransfer.Test(fmodel);
+            TestTargetInfo fmodel = arg.Content.DeJson<TestTargetInfo>();
+            return await forwardTransfer.Test(fmodel.Host, fmodel.Port);
         }
+    }
+
+    public sealed class TestTargetInfo
+    {
+        public string Host { get; set; }
+        public int Port { get; set; }
     }
 }

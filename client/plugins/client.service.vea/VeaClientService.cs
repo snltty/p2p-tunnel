@@ -61,6 +61,12 @@ namespace client.service.vea
             return false;
         }
 
+        public async Task<EnumProxyCommandStatusMsg> Test(ClientServiceParamsInfo arg)
+        {
+            TestTargetInfo fmodel = arg.Content.DeJson<TestTargetInfo>();
+            return await VeaTransfer.Test(fmodel.Host, fmodel.Port);
+        }
+
         /// <summary>
         /// 去获取在线设备
         /// </summary>
@@ -135,6 +141,12 @@ namespace client.service.vea
             VeaTransfer.UpdateIp();
             return true;
         }
+    }
+
+    public sealed class TestTargetInfo
+    {
+        public string Host { get; set; }
+        public int Port { get; set; }
     }
 
 }

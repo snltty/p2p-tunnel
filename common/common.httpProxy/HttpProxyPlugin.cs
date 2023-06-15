@@ -42,9 +42,7 @@ namespace common.httpProxy
         {
             if (info.Step == EnumProxyStep.Command)
             {
-                EnumProxyCommandStatus enumProxyCommandStatus = (EnumProxyCommandStatus)info.Data.Span[0];
-
-                if (enumProxyCommandStatus == EnumProxyCommandStatus.ConnecSuccess)
+                if (info.CommandStatus == EnumProxyCommandStatus.ConnecSuccess)
                 {
                     info.Data = HttpParser.ConnectSuccessMessage();
                 }

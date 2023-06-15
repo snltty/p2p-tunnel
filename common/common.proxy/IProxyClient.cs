@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ namespace common.proxy
         {
             if (info.Step == EnumProxyStep.Command)
             {
+                info.IsMagicData = ProxyHelper.GetIsMagicData(info.Data);
                 if (ProxyPluginLoader.GetPlugin(info.PluginId, out IProxyPlugin plugin) == false)
                 {
                     _ = ConnectReponse(info, EnumProxyCommandStatus.ServerError, EnumProxyCommandStatusMsg.Plugin);
@@ -50,7 +52,7 @@ namespace common.proxy
                 info.ProxyPlugin = plugin;
                 if (pluginValidatorHandler.Validate(info) == false)
                 {
-                    EnumProxyCommandStatusMsg statusMsg = info.CommandMsg;
+                    EnumProxyCommandStatusMsg statusMsg = info.CommandStatusMsg;
                     _ = ConnectReponse(info, EnumProxyCommandStatus.CommandNotAllow, statusMsg);
                     return;
                 }
@@ -275,15 +277,14 @@ namespace common.proxy
             {
                 if (e.SocketError == SocketError.Success)
                 {
-                    bool isMagic = ProxyHelper.GetIsMagicData(token.Data.Data);
-                    if (token.Data.Data.Length > 0 && isMagic == false)
+                    if (token.Data.Data.Length > 0 && token.Data.IsMagicData == false)
                     {
                         await token.TargetSocket.SendAsync(token.Data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                     }
                     await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess, EnumProxyCommandStatusMsg.Success);
                     token.Data.Step = EnumProxyStep.ForwardTcp;
                     token.Data.Data = Helper.EmptyArray;
-                    if (isMagic == false)
+                    if (token.Data.IsMagicData == false)
                     {
                         token.Data.TargetAddress = Helper.EmptyArray;
                         BindTargetReceive(token);
@@ -406,13 +407,13 @@ namespace common.proxy
 
         private async Task ConnectReponse(ProxyInfo info, EnumProxyCommandStatus command, EnumProxyCommandStatusMsg commandStatusMsg)
         {
-            bool isMagic = ProxyHelper.GetIsMagicData(info.Data);
-            if (isMagic == false)
+            if (info.IsMagicData == false)
             {
-                info.Data = new byte[] { (byte)command };
+                info.Data = Helper.TrueArray;
             }
 
-            info.CommandMsg = commandStatusMsg;
+            info.CommandStatus = command;
+            info.CommandStatusMsg = commandStatusMsg;
             await Receive(info);
         }
         private async Task<bool> Receive(AsyncServerUserToken token)

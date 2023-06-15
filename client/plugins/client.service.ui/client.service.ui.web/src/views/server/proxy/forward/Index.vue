@@ -7,72 +7,82 @@
                 <span class="flex-1"></span>
             </div>
             <div class="content">
-                <el-row v-if="state.list.length > 0">
-                    <template v-for="(item,index) in state.list" :key="index">
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <div class="item">
-                                <dl>
-                                    <dt class="flex">
-                                        <span>{{shareData.aliveTypes[item.AliveType]}}</span>
-                                        <span class="flex-1 t-c">{{item.Domain}}:{{item.ServerPort}}</span>
-                                        <span v-if="item.AliveType == shareData.aliveTypesName.tunnel">
-                                            <el-switch size="small" @click.stop @change="onListeningChange(item,item.Forwards[0])" v-model="item.Forwards[0].Listening" style="margin-top:-6px;"></el-switch>
-                                        </span>
-                                    </dt>
-                                    <dd>{{item.Desc}}</dd>
-                                    <dd class="forwards">
-                                        <el-collapse>
-                                            <el-collapse-item title="转发列表">
-                                                <ul>
-                                                    <template v-for="(fitem,findex) in item.Forwards" :key="findex">
-                                                        <li>
-                                                            <p class="flex"><span class="flex-1">访问</span><span>{{fitem.sourceText}}</span></p>
-                                                            <p class="flex"><span class="flex-1">目标</span><span>【本机】{{fitem.distText}}</span></p>
-                                                            <p class="t-r">
-                                                                <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(item,fitem)">
-                                                                    <template #reference>
-                                                                        <el-button plain type="danger" v-if="item.AliveType == shareData.aliveTypesName.web" size="small">删除</el-button>
-                                                                    </template>
-                                                                </el-popconfirm>
-                                                            </p>
-                                                        </li>
-                                                    </template>
-                                                </ul>
-                                            </el-collapse-item>
-                                        </el-collapse>
-                                    </dd>
-                                    <dd class="btns t-r">
-                                        <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(item,item.Forwards[0])">
+                <el-table :data="state.list" size="small" border>
+                    <el-table-column type="expand">
+                        <template #default="props">
+                            <el-table size="small" :data="props.row.Forwards" border>
+                                <el-table-column label="访问" prop="SourceIp">
+                                    <template #default="props1">
+                                        <span>{{props1.row.sourceText}}</span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="目标" prop="TargetIp">
+                                    <template #default="props1">
+                                        <span>【本机】{{ props1.row.distText}}</span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column align="right" width="90">
+                                    <template #default="props1">
+                                        <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(props.row,props1.row)">
                                             <template #reference>
-                                                <el-button v-if="item.AliveType == shareData.aliveTypesName.tunnel" plain type="danger" size="small">删除</el-button>
+                                                <el-button link plain type="danger" size="small" v-if="props.row.AliveType == shareData.aliveTypesName.web">删除</el-button>
                                             </template>
                                         </el-popconfirm>
-                                        <el-button plain type="info" v-if="item.AliveType == shareData.aliveTypesName.web" size="small" @click="handleAddForward(item)">增加转发</el-button>
-                                    </dd>
-                                </dl>
+                                        <el-button link plain size="small" @click.stop="handleTestForward(props.row,props1.row)">测试</el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="监听类别" prop="AliveType" width="80">
+                        <template #default="props">
+                            <span>{{shareData.aliveTypes[props.row.AliveType]}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="监听端口" prop="Port">
+                        <template #default="props">
+                            <div class="flex">
+                                <span class="flex-1">{{props.row.Domain}}:{{props.row.ServerPort}}</span>
+                                <span v-if="props.row.AliveType == shareData.aliveTypesName.tunnel">
+                                    <el-switch size="small" @click.stop @change="onListeningChange(props.row,props.row.Forwards[0])" v-model="props.row.Forwards[0].Listening"></el-switch>
+                                </span>
                             </div>
-                        </el-col>
-                    </template>
-                </el-row>
-                <el-empty v-else></el-empty>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="备注" prop="Desc"></el-table-column>
+                    <el-table-column align="right" width="90">
+                        <template #default="props">
+                            <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(props.row,props.row.Forwards[0])">
+                                <template #reference>
+                                    <el-button plain link type="danger" size="small">删除</el-button>
+                                </template>
+                            </el-popconfirm>
+                            <el-button plain type="info" link v-if="props.row.AliveType == shareData.aliveTypesName.web" size="small" @click="handleAddForward(props.row)">转发</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
             </div>
         </div>
         <AddForward v-if="state.showAddForward" v-model="state.showAddForward" @success="loadPorts"></AddForward>
         <AddListen v-if="state.showAddListen" v-model="state.showAddListen" @success="loadPorts"></AddListen>
+        <StatusMsg v-if="state.showStatusMsg" v-model="state.showStatusMsg" :msgCallback="state.statusMsgCallback"></StatusMsg>
     </div>
 </template>
 
 <script>
 import { onMounted, provide, reactive, ref, watch } from '@vue/runtime-core';
 import { getServerPorts, getServerForwards, startServerForward, stopServerForward, removeServerForward } from '../../../../apis/forward-server'
+import { testForward } from '../../../../apis/forward'
 import { injectShareData } from '../../../../states/shareData'
 import { injectSignIn } from '../../../../states/signin'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
+import StatusMsg from '../../../../components/StatusMsg.vue'
 import plugin from './plugin'
+import { ElMessageBox } from 'element-plus';
 export default {
     plugin: plugin,
-    components: { AddForward, AddListen },
+    components: { AddForward, AddListen, StatusMsg },
     setup() {
 
         const shareData = injectShareData();
@@ -81,7 +91,9 @@ export default {
             loading: false,
             list: [],
             showAddForward: false,
-            showAddListen: false
+            showAddListen: false,
+            showStatusMsg: false,
+            statusMsgCallback: () => 0
         });
         watch(() => signinState.ServerConfig.Ip, () => {
             loadPorts();
@@ -188,13 +200,27 @@ export default {
         const handleAddListen = () => {
             state.showAddListen = true;
         }
+        const handleTestForward = (listen, forward) => {
+            let host = listen.AliveType == shareData.aliveTypesName.tunnel ? signinState.ServerConfig.Ip : forward.Domain;
+            let port = listen.ServerPort;
+            ElMessageBox.prompt('不带http://，带端口', '测试', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                inputValue: `${host}:${port}`
+            }).then(({ value }) => {
+                let arr = value.split(':');
+                state.statusMsgCallback = testForward(arr[0], +arr[1]);
+                state.showStatusMsg = true;
+            }).catch(() => {
+            });
+        }
         onMounted(() => {
             loadPorts();
         });
 
         return {
             state, shareData, loadPorts, onExpand, expandKeys,
-            handleRemoveListen, handleAddForward, handleAddListen, onListeningChange
+            handleRemoveListen, handleAddForward, handleAddListen, onListeningChange, handleTestForward
         }
     }
 }

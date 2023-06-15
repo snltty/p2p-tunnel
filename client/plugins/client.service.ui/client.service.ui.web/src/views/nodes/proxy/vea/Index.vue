@@ -23,6 +23,7 @@ import { getConfig, setConfig, runVea } from '../../../../apis/vea'
 import { onMounted } from '@vue/runtime-core'
 import ConnectButton from '../../../../components/ConnectButton.vue'
 import plugin from './plugin'
+import { ElMessage } from 'element-plus'
 export default {
     plugin: plugin,
     components: { ConnectButton },
@@ -49,9 +50,9 @@ export default {
                 res.ListenEnable = state.ListenEnable;
                 setConfig(res).then(() => {
                     loadConfig();
-                    runVea().then((state) => {
+                    runVea().then((res1) => {
                         state.loading = false;
-                        if (state == false) {
+                        if (res1 == false) {
                             ElMessage.error('失败,具体信息看日志');
                             state.ListenEnable = false;
                             res.ListenEnable = state.ListenEnable;

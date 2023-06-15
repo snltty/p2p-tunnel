@@ -5,6 +5,7 @@ using common.proxy;
 using common.server;
 using common.server.model;
 using Iced.Intel;
+using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -15,7 +16,7 @@ namespace test
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(BitConverter.GetBytes(53)[1]);
+            Console.WriteLine(BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse("192.168.54.1").GetAddressBytes()));
 
            // BenchmarkRunner.Run<Test>();
         }

@@ -8,57 +8,42 @@
         </span>
         <template #dropdown>
             <el-dropdown-menu>
-                <el-dropdown-item>网卡IP : {{state.data.IP}}</el-dropdown-item>
+                <el-dropdown-item class="flex">
+                    <span>网卡IP : {{state.data.IP}}</span>
+                    <span class="flex-1"></span>
+                    <el-button size="small" @click.stop="handleTest(state.data.IP,32)">测试</el-button></el-dropdown-item>
                 <template v-for="(item,index) in state.data.LanIPs" :key="index">
-                    <template v-if="index == 0">
-                        <el-dropdown-item divided>网段{{index+1}} : {{item.IPAddress}}/{{item.Mask}}</el-dropdown-item>
-                    </template>
-                    <template v-else>
-                        <el-dropdown-item>网段{{index+1}} : {{item.IPAddress}}/{{item.Mask}}</el-dropdown-item>
-                    </template>
+                    <el-dropdown-item>
+                        <span>网段{{index+1}} : {{item.IPAddress}}/{{item.Mask}}</span>
+                        <span class="flex-1"></span>
+                        <el-button size="small" @click.stop="handleTest(item.IPAddress,item.Mask)">测试</el-button></el-dropdown-item>
                 </template>
                 <el-dropdown-item divided>
                     <el-button size="small" :loading="state.loading" @click="handleResetVea">重装网卡</el-button>
                     <el-button size="small" :loading="state.loading" @click.stop="handleUpdate">刷新列表</el-button>
-                </el-dropdown-item>
-                <el-dropdown-item divided class="t-c">
                     <el-button size="small" @click="handleOnlines">在线设备</el-button>
-                    <el-dropdown style="height:auto;margin-left:.6rem">
-                        <el-button size="small" class="forward-status" :class="`forward-status-${state.data.LastError}`">最后失败
-                            <el-icon>
-                                <Warning />
-                            </el-icon>
-                        </el-button>
-                        <template #dropdown>
-                            <el-dropdown-menu>
-                                <template v-for="(item,index) in shareData.commandMsgs" :key="index">
-                                    <el-dropdown-item class="forward-success" v-if="state.data.LastError==0 || state.data.LastError > index" :icon="CircleCheck">{{item}}</el-dropdown-item>
-                                    <el-dropdown-item class="forward-error" v-else :icon="CircleClose">{{item}}</el-dropdown-item>
-                                </template>
-                            </el-dropdown-menu>
-                        </template>
-                    </el-dropdown>
-
                 </el-dropdown-item>
             </el-dropdown-menu>
         </template>
     </el-dropdown>
     <Onlines :id="state.id" v-if="state.showOnlines" v-model="state.showOnlines"></Onlines>
+    <StatusMsg v-if="state.showStatusMsg" v-model="state.showStatusMsg" :msgCallback="state.statusMsgCallback"></StatusMsg>
 </template>
 
 <script>
 import { websocketState } from '../../../../apis/request'
-import { getList, reset, update } from '../../../../apis/vea'
+import { getList, reset, update, test } from '../../../../apis/vea'
 import { shareData } from '../../../../states/shareData'
 import { reactive } from '@vue/reactivity'
-import { ElMessage } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
 import Onlines from './OnLines.vue'
+import StatusMsg from '../../../../components/StatusMsg.vue'
 import { CircleCheck, CircleClose } from '@element-plus/icons'
 import plugin from './plugin'
 export default {
     plugin: plugin,
     props: ['params'],
-    components: { Onlines },
+    components: { Onlines, StatusMsg },
     setup(props) {
 
         const id = props.params.ConnectionId;
@@ -66,7 +51,9 @@ export default {
             loading: false,
             showOnlines: false,
             id: id,
-            data: { IP: '', LanIPs: [] }
+            data: { IP: '', LanIPs: [] },
+            showStatusMsg: false,
+            statusMsgCallback: () => 0
         });
 
         const loadData = () => {
@@ -106,9 +93,28 @@ export default {
         const handleOnlines = () => {
             state.showOnlines = true;
         }
+        const handleTest = (ip, mask) => {
+            const maskValue = mask.maskLength2value();
+            const ipValue = ip.ipv42number();
+            const network = ipValue.ipv42network(maskValue);
+            const broadcast = ipValue.ipv42broadcast(maskValue);
+            //第一个可用ip
+            const firstIp = ipValue == network && ipValue == broadcast ? ipValue.toIpv4Str() : (network + 1).toIpv4Str();
+
+            ElMessageBox.prompt('不带http://，带端口', '测试', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                inputValue: `${firstIp}:80`
+            }).then(({ value }) => {
+                let arr = value.split(':');
+                state.statusMsgCallback = test(arr[0], +arr[1]);
+                state.showStatusMsg = true;
+            }).catch(() => {
+            });
+        }
 
         return {
-            CircleCheck, CircleClose, shareData, state, loadData, handleUpdate, handleResetVea, handleOnlines
+            CircleCheck, CircleClose, shareData, state, loadData, handleUpdate, handleResetVea, handleOnlines, handleTest
         }
     }
 }

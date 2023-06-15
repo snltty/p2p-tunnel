@@ -90,13 +90,13 @@ namespace common.proxy
             bool res = info.ProxyPlugin.ConnectEnable || serviceAccessValidator.Validate(info.Connection.ConnectId, info.ProxyPlugin.Access);
             if (res == false)
             {
-                info.CommandMsg = EnumProxyCommandStatusMsg.EnableOrAccess;
+                info.CommandStatusMsg = EnumProxyCommandStatusMsg.EnableOrAccess;
                 return false;
             }
 
             if (config.FirewallDenied(info))
             {
-                info.CommandMsg = EnumProxyCommandStatusMsg.Firewail;
+                info.CommandStatusMsg = EnumProxyCommandStatusMsg.Firewail;
                 return false;
             }
             return true;

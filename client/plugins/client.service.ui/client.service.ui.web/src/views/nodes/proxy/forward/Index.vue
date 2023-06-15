@@ -56,14 +56,14 @@
                     </el-table-column>
                     <el-table-column label="备注" prop="Desc"></el-table-column>
                     <el-table-column align="right" width="140">
-                        <template #default="scope">
-                            <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(scope.row)">
+                        <template #default="props">
+                            <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(props.row)">
                                 <template #reference>
                                     <el-button plain link type="danger" size="small">删除</el-button>
                                 </template>
                             </el-popconfirm>
-                            <el-button plain type="info" link size="small" @click="handleEditListen(scope.row)">编辑</el-button>
-                            <el-button plain type="info" link v-if="scope.row.AliveType == shareData.aliveTypesName.web || scope.row.Forwards.length < 1" size="small" @click="handleAddForward(scope.row)">转发</el-button>
+                            <el-button plain type="info" link size="small" @click="handleEditListen(props.row)">编辑</el-button>
+                            <el-button plain type="info" link v-if="props.row.AliveType == shareData.aliveTypesName.web || props.row.Forwards.length < 1" size="small" @click="handleAddForward(props.row)">转发</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -84,6 +84,7 @@ import { injectShareData } from '../../../../states/shareData'
 import { injectClients } from '../../../../states/clients'
 import StatusMsg from '../../../../components/StatusMsg.vue'
 import plugin from './plugin'
+import { ElMessageBox } from 'element-plus'
 export default {
     plugin: plugin,
     components: { AddListen, AddForward, StatusMsg },
@@ -165,8 +166,18 @@ export default {
             });
         }
         const handleTestForward = (listen, forward) => {
-            state.statusMsgCallback = testForward(listen.ID, forward.ID);
-            state.showStatusMsg = true;
+            let host = listen.AliveType == shareData.aliveTypesName.tunnel ? '127.0.0.1' : forward.SourceIp;
+            let port = listen.Port;
+            ElMessageBox.prompt('不带http://，带端口', '测试', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                inputValue: `${host}:${port}`
+            }).then(({ value }) => {
+                let arr = value.split(':');
+                state.statusMsgCallback = testForward(arr[0], +arr[1]);
+                state.showStatusMsg = true;
+            }).catch(() => {
+            });
         }
 
         onMounted(() => {

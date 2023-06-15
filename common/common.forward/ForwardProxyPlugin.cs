@@ -3,9 +3,7 @@ using common.libs.extends;
 using common.proxy;
 using common.server.model;
 using System;
-using System.Buffers;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 
 namespace common.forward
@@ -63,7 +61,7 @@ namespace common.forward
             {
                 if (isMagicData == false)
                     info.Data = Helper.EmptyArray;
-                info.CommandMsg = EnumProxyCommandStatusMsg.Connection;
+                info.CommandStatusMsg = EnumProxyCommandStatusMsg.Connection;
                 proxyServer.InputData(info);
                 return false;
             }

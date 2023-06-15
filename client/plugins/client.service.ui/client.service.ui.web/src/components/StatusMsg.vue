@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="代理通顺情况" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="260px">
+    <el-dialog title="TCP" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="260px">
         <div v-loading="state.loading">
             <el-steps direction="vertical" :active="msg">
                 <template v-for="(item,index) in shareData.commandMsgs" :key="index">

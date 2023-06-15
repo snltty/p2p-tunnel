@@ -13,7 +13,7 @@
                             <el-option v-for="(item,index) in targets" :key="index" :label="item.label" :value="item.id">
                             </el-option>
                         </el-select>
-                        <el-button @click="handleTest">测试</el-button>
+                        <el-button @click="handleTest" style="margin-left:.6rem">测试</el-button>
                     </div>
                 </el-form-item>
                 <el-form-item>

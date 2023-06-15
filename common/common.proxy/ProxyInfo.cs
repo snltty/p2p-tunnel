@@ -37,7 +37,9 @@ namespace common.proxy
         /// <summary>
         /// 测试步骤返回 最多 0b1111
         /// </summary>
-        public EnumProxyCommandStatusMsg CommandMsg { get; set; }
+        public EnumProxyCommandStatusMsg CommandStatusMsg { get; set; }
+
+        public EnumProxyCommandStatus CommandStatus { get; set; }
 
         /// <summary>
         /// 请求id
@@ -71,6 +73,7 @@ namespace common.proxy
             length = 1 //0000 00 00  rsv + step + command
                 + 1 // 0000 0000 address type + buffer size
                 + 1 //TestResult + PluginId
+                + 1 //CommandResponse
                 + 4  // RequestId
                 + 1  //source length
                 + 1 // target length
@@ -97,7 +100,10 @@ namespace common.proxy
             index += 1;
             bytes[index] = (byte)(((byte)AddressType << 4) | (byte)BufferSize);
             index += 1;
-            bytes[index] = (byte)(((byte)CommandMsg << 4) | PluginId);
+            bytes[index] = (byte)(((byte)CommandStatusMsg << 4) | PluginId);
+            index += 1;
+
+            bytes[index] = (byte)CommandStatus;
             index += 1;
 
             RequestId.ToBytes(memory.Slice(index));
@@ -155,8 +161,11 @@ namespace common.proxy
             BufferSize = (EnumBufferSize)(span[index] & 0b0000_1111);
             index += 1;
 
-            CommandMsg = (EnumProxyCommandStatusMsg)(span[index] >> 4);
+            CommandStatusMsg = (EnumProxyCommandStatusMsg)(span[index] >> 4);
             PluginId = (byte)(span[index] & 0b0000_1111);
+            index += 1;
+
+            CommandStatus = (EnumProxyCommandStatus)span[index];
             index += 1;
 
             RequestId = span.Slice(index).ToUInt32();
@@ -216,6 +225,8 @@ namespace common.proxy
 
         [System.Text.Json.Serialization.JsonIgnore]
         public HttpHeaderCacheInfo HeadersCache { get; set; }
+
+        public bool IsMagicData { get; set; }
     }
     public sealed class HttpHeaderCacheInfo
     {

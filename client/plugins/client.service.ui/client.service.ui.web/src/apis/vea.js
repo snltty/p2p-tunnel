@@ -26,3 +26,7 @@ export const getOnlines = (id) => {
 export const onlines = (id) => {
     return sendWebsocketMsg(`vea/onlines`, id);
 }
+
+export const test = (host, port) => {
+    return sendWebsocketMsg(`vea/test`, { host, port });
+}

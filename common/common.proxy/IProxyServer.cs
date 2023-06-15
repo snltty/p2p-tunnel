@@ -75,14 +75,15 @@ namespace common.proxy
             SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
             ProxyUserToken token = new ProxyUserToken
             {
-                Socket = socket,
                 Server = server,
                 Rsv = rsv,
+                Saea = acceptEventArg,
                 Request = new ProxyInfo
                 {
                     ProxyPlugin = plugin,
                     Step = EnumProxyStep.ForwardUdp,
                     Command = EnumProxyCommand.UdpAssociate,
+                    CommandStatus = EnumProxyCommandStatus.ConnecSuccess,
                     PluginId = plugin.Id,
                     ListenPort = port,
                     Rsv = rsv,
@@ -103,15 +104,17 @@ namespace common.proxy
         {
             try
             {
+
                 acceptEventArg.AcceptSocket = null;
                 ProxyUserToken token = ((ProxyUserToken)acceptEventArg.UserToken);
-                if (token.Socket.AcceptAsync(acceptEventArg) == false)
+                if (token.Server.Socket.AcceptAsync(acceptEventArg) == false)
                 {
                     ProcessAccept(acceptEventArg);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.Instance.DebugError(ex);
             }
         }
         private void IO_Completed(object sender, SocketAsyncEventArgs e)
@@ -309,14 +312,13 @@ namespace common.proxy
                         bool res = await proxyMessengerSender.Request(info);
                         if (res == false)
                         {
-                            //Logger.Instance.Error($"proxy 【{info.ProxyPlugin.Name}】 send message fail");
                             if (info.Step == EnumProxyStep.Command)
                             {
-                                info.Data = new byte[] { (byte)EnumProxyCommandStatus.NetworkError };
-                                info.CommandMsg = EnumProxyCommandStatusMsg.Connection;
+                                info.CommandStatus = EnumProxyCommandStatus.NetworkError;
+                                info.CommandStatusMsg = EnumProxyCommandStatusMsg.Connection;
                                 await InputData(info);
                             }
-                            else
+                            else if (info.Step == EnumProxyStep.ForwardTcp)
                             {
                                 clientsManager.TryRemove(info.RequestId, out _);
                             }
@@ -404,61 +406,61 @@ namespace common.proxy
                 {
                     return;
                 }
-                token.Request.CommandMsg = info.CommandMsg;
-                token.Server.LastError = info.CommandMsg;
+                token.Request.CommandStatusMsg = info.CommandStatusMsg;
+                token.Server.LastError = info.CommandStatusMsg;
+                EnumProxyStep step = info.Step;
+
                 if (info.Data.Length == 0)
                 {
                     clientsManager.TryRemove(info.RequestId, out _);
                     return;
                 }
-                EnumProxyStep step = info.Step;
 
-                //command步骤的魔术数据，直接返回一个数据就好了，用于测试
-                if (step == EnumProxyStep.Command && ProxyHelper.GetIsMagicData(info.Data))
+                if (step == EnumProxyStep.Command)
                 {
-                    info.Data.Span[0] = (byte)info.CommandMsg;
-                    await token.Socket.SendAsync(info.Data, SocketFlags.None);
-                }
-                else
-                {
-                    EnumProxyCommandStatus status = EnumProxyCommandStatus.ConnecSuccess;
-                    if (step == EnumProxyStep.Command)
+                    //command步骤的魔术数据，直接返回一个数据就好了，用于测试
+                    if (ProxyHelper.GetIsMagicData(info.Data))
                     {
-                        status = (EnumProxyCommandStatus)info.Data.Span[0];
-                    }
-                    //数据后处理，组织回复数据，及是否回复
-                    bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
-                    token.Request.Step = info.Step;
-                    token.Request.Command = info.Command;
-                    token.Request.Rsv = info.Rsv;
-                    //需要回复数据
-                    if (res)
-                    {
-                        if (info.Step == EnumProxyStep.ForwardUdp)
-                        {
-                            await token.Server.UdpClient.SendAsync(info.Data, info.SourceEP);
-                        }
-                        else
-                        {
-                            await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
-                        }
-                    }
-                    //是失败的
-                    if (status != EnumProxyCommandStatus.ConnecSuccess)
-                    {
-                        clientsManager.TryRemove(info.RequestId, out _);
+                        info.Data.Span[0] = (byte)info.CommandStatusMsg;
+                        await token.Socket.SendAsync(info.Data, SocketFlags.None);
                         return;
                     }
-                }
 
-                if (token.Receive == false)
-                {
-                    token.Receive = true;
-                    if (token.Socket.ReceiveAsync(token.Saea) == false)
+                    if (token.Receive == false && step == EnumProxyStep.Command)
                     {
-                        ProcessReceive(token.Saea);
+                        token.Receive = true;
+                        if (token.Socket.ReceiveAsync(token.Saea) == false)
+                        {
+                            ProcessReceive(token.Saea);
+                        }
                     }
                 }
+
+                EnumProxyCommandStatus status = info.CommandStatus;
+                //数据后处理，组织回复数据，及是否回复
+                bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
+                token.Request.Step = info.Step;
+                token.Request.Command = info.Command;
+                token.Request.Rsv = info.Rsv;
+                //需要回复数据
+                if (res)
+                {
+                    if (info.Step == EnumProxyStep.ForwardUdp)
+                    {
+                        await token.Server.UdpClient.SendAsync(info.Data, info.SourceEP);
+                    }
+                    else
+                    {
+                        await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                    }
+                }
+                //是失败的
+                if (step == EnumProxyStep.Command && status != EnumProxyCommandStatus.ConnecSuccess)
+                {
+                    clientsManager.TryRemove(info.RequestId, out _);
+                    return;
+                }
+
             }
             catch (Exception ex)
             {
@@ -499,7 +501,7 @@ namespace common.proxy
             {
                 try
                 {
-                    c.Socket.SafeClose();
+                    c?.Socket.SafeClose();
                     c.PoolBuffer = Helper.EmptyArray;
                     c.Saea.Dispose();
                     GC.Collect();

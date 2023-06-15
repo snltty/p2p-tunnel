@@ -11,8 +11,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace client.service.vea
 {
@@ -132,7 +134,8 @@ namespace client.service.vea
             if (config.ListenEnable)
             {
                 res = RunTun2Socks();
-                proxyServer.Start((ushort)config.ListenPort, config.Plugin); ;
+                if (res)
+                    proxyServer.Start((ushort)config.ListenPort, config.Plugin);
             }
             UpdateIp();
             return res;
@@ -155,6 +158,58 @@ namespace client.service.vea
             {
                 KillOsx();
             }
+        }
+
+        public async Task<EnumProxyCommandStatusMsg> Test(string host,int port)
+        {
+            if (config.ListenEnable == false)
+            {
+                return EnumProxyCommandStatusMsg.Listen;
+            }
+            if (ProxyPluginLoader.GetPlugin(config.Plugin, out IProxyPlugin plugin) == false)
+            {
+                return EnumProxyCommandStatusMsg.Listen;
+            }
+
+            if (IPAddress.TryParse(host, out IPAddress ip) == false)
+            {
+                ip = Dns.GetHostEntry(host).AddressList[0];
+            }
+            if (ip.Equals(IPAddress.Any)) ip = IPAddress.Loopback;
+
+            byte[] ips = ip.GetAddressBytes();
+            byte[] ports = BitConverter.GetBytes(port);
+            IPEndPoint target = new IPEndPoint(IPAddress.Loopback, config.ListenPort);
+            try
+            {
+                using Socket socket = new Socket(target.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                await socket.ConnectAsync(target);
+
+                byte[] bytes = new byte[ProxyHelper.MagicData.Length];
+                //request
+                await socket.SendAsync(new byte[] { 0x05, 0x01, 0 }, SocketFlags.None);
+                await socket.ReceiveAsync(bytes, SocketFlags.None);
+                //command
+                byte[] socks5Data = new byte[] { 0x05, 0x01, 0, 0x01, ips[0], ips[1], ips[2], ips[3], ports[1], ports[0] };
+                byte[] data = new byte[bytes.Length + socks5Data.Length];
+                socks5Data.AsSpan().CopyTo(data);
+                ProxyHelper.MagicData.AsSpan().CopyTo(data.AsSpan(socks5Data.Length));
+                await socket.SendAsync(data, SocketFlags.None);
+
+                int length = await socket.ReceiveAsync(bytes, SocketFlags.None);
+
+                EnumProxyCommandStatusMsg statusMsg = EnumProxyCommandStatusMsg.Listen;
+                if (length > 0)
+                {
+                    statusMsg = (EnumProxyCommandStatusMsg)bytes[0];
+                }
+                return statusMsg;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex + "");
+            }
+            return EnumProxyCommandStatusMsg.Listen;
         }
 
         private bool RunTun2Socks()

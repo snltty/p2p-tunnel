@@ -1,6 +1,7 @@
 ﻿using common.forward;
 using common.libs;
 using common.libs.database;
+using common.libs.extends;
 using common.proxy;
 using System;
 using System.Buffers;
@@ -270,38 +271,23 @@ namespace client.service.forward
             SaveP2PConfig();
         }
 
-        public async Task<EnumProxyCommandStatusMsg> Test(P2PForwardRemoveParams forward)
+        public async Task<EnumProxyCommandStatusMsg> Test(string host, int port)
         {
-            P2PListenInfo listen = GetP2PByID(forward.ListenID);
-            if (listen.ID == 0 || listen.Listening == false)
+            if (IPAddress.TryParse(host, out IPAddress ip) == false)
             {
-                return EnumProxyCommandStatusMsg.Listen;
-            }
-            P2PForwardInfo forwardInfo = listen.Forwards.FirstOrDefault(c => c.ID == forward.ForwardID);
-            if (forwardInfo == null)
-            {
-                return EnumProxyCommandStatusMsg.Listen;
-            }
-
-            if (ProxyPluginLoader.GetPlugin(config.Plugin, out IProxyPlugin plugin) == false)
-            {
-                return EnumProxyCommandStatusMsg.Listen;
-            }
-
-            if (IPAddress.TryParse(forwardInfo.SourceIp, out IPAddress ip) == false)
-            {
-                ip = Dns.GetHostEntry(forwardInfo.SourceIp).AddressList[0];
+                ip = Dns.GetHostEntry(host).AddressList[0];
             }
             if (ip.Equals(IPAddress.Any)) ip = IPAddress.Loopback;
-            IPEndPoint target = new IPEndPoint(ip, listen.Port);
+            IPEndPoint target = new IPEndPoint(ip, port);
 
             try
             {
                 using Socket socket = new Socket(target.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 await socket.ConnectAsync(target);
-                await socket.SendAsync(Encoding.UTF8.GetBytes($"CONNECT- / HTTP/1.1\r\nHost: {forwardInfo.SourceIp}:{listen.Port}\r\n\r\n"), SocketFlags.None);
+                await socket.SendAsync(Encoding.UTF8.GetBytes($"CONNECT- / HTTP/1.1\r\nHost: {host}:{port}\r\n\r\n"), SocketFlags.None);
                 byte[] bytes = ArrayPool<byte>.Shared.Rent(ProxyHelper.MagicData.Length);
                 int length = await socket.ReceiveAsync(bytes, SocketFlags.None);
+                socket.SafeClose();
 
                 EnumProxyCommandStatusMsg statusMsg = EnumProxyCommandStatusMsg.Listen;
                 if (length > 0)

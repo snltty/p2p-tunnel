@@ -59,21 +59,21 @@ namespace client.service.vea
 
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
 
-            if (socks5EnumStep == Socks5EnumStep.Command)
+            if (info.Step == EnumProxyStep.Command && socks5EnumStep == Socks5EnumStep.Command)
             {
                 //组网支持IPV4
                 if (info.AddressType != EnumProxyAddressType.IPV4)
                 {
-                    info.Data = new byte[] { (byte)Socks5EnumResponseCommand.AddressNotAllow };
-                    info.CommandMsg = EnumProxyCommandStatusMsg.Address;
+                    info.CommandStatus = (EnumProxyCommandStatus)Socks5EnumResponseCommand.AddressNotAllow;
+                    info.CommandStatusMsg = EnumProxyCommandStatusMsg.Address;
                     proxyServer.InputData(info);
                     return false;
                 }
                 GetConnection(info);
                 if (info.Connection == null || info.Connection.Connected == false)
                 {
-                    info.Data = new byte[] { (byte)Socks5EnumResponseCommand.NetworkError };
-                    info.CommandMsg = EnumProxyCommandStatusMsg.Connection;
+                    info.CommandStatus = (EnumProxyCommandStatus)Socks5EnumResponseCommand.NetworkError;
+                    info.CommandStatusMsg = EnumProxyCommandStatusMsg.Connection;
                     proxyServer.InputData(info);
                     return false;
                 }
