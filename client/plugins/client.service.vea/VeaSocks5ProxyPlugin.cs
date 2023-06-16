@@ -34,7 +34,7 @@ namespace client.service.vea
         private readonly IProxyMessengerSender proxyMessengerSender;
 
         public VeaSocks5ProxyPlugin(Config config, client.Config config1, IProxyServer proxyServer
-            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender, IClientInfoCaching clientInfoCaching, SignInStateInfo signInStateInfo) : base(null, proxyServer)
+            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender, SignInStateInfo signInStateInfo) : base(null, proxyServer)
         {
             this.config = config;
             this.proxyServer = proxyServer;

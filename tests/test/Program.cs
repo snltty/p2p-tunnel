@@ -16,9 +16,37 @@ namespace test
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse("192.168.54.1").GetAddressBytes()));
+            ulong[] array = new ulong[4] { ulong.MaxValue, ulong.MaxValue, ulong.MaxValue, 0x7Fffffffffffffff };
+            for (byte groupIndex = 0; groupIndex < array.Length; groupIndex++)
+            {
+                ulong group = array[groupIndex];
+                if (group < ulong.MaxValue)
+                {
+                    Console.WriteLine($"group:{groupIndex},{group},{Convert.ToString((uint)((group >> 32) & uint.MaxValue), 2)}{Convert.ToString((uint)(group& uint.MaxValue), 2)}");
+                    for (byte byteIndex = 0; byteIndex < 8; byteIndex++)
+                    {
+                        byte _byte = (byte)((group >> byteIndex*8) & 0b11111111);
+                        Console.WriteLine($"byte:{byteIndex},{Convert.ToString(_byte,2)}");
+                        if (_byte < byte.MaxValue)
+                        {
+                            for (byte bitIndex = 0; bitIndex < 8; bitIndex++)
+                            {
+                                byte bit = (byte)((_byte >> bitIndex) & 0b1);
+                                if (bit == 0)
+                                {
+                                    Console.WriteLine($"bit:{bitIndex},{bit}");
+                                    Console.WriteLine(groupIndex * 64 + byteIndex * 8 + bitIndex);
+                                    return;
+                                }
+                            }
+                        }
 
-           // BenchmarkRunner.Run<Test>();
+                    }
+                    Console.WriteLine("===================================");
+                }
+
+            }
+            //BenchmarkRunner.Run<Test>();
         }
     }
 
@@ -29,34 +57,9 @@ namespace test
         public void Startup()
         {
             //config.ParseFirewall();
-            voidMethod = (VoidDelegate)Delegate.CreateDelegate(typeof(VoidDelegate), info1, info1.GetType().GetMethod("Test"));
-        }
-
-        delegate void VoidDelegate();
-        VoidDelegate voidMethod;
-        TestInfo info1 = new TestInfo();
-        ITestInfo info2 = new TestInfo();
-
-        [Benchmark]
-        public void Info1()
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                voidMethod.Invoke();
-            }
-        }
-        [Benchmark]
-        public void Info2()
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                info2.Test();
-            }
         }
 
         #region 隐藏
-
-
 
         byte[] requestData = new byte[1024];
         private MessageRequestWrap messageRequestWrap = new MessageRequestWrap { };
@@ -109,7 +112,7 @@ namespace test
     {
         public void Test();
     }
-    class TestInfo: ITestInfo
+    class TestInfo : ITestInfo
     {
         public void Test()
         {

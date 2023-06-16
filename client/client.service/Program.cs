@@ -8,7 +8,6 @@ using client.service.logger;
 using client.service.proxy;
 using client.service.socks5;
 using client.service.socks5.server;
-using client.service.ui.api.clientServer;
 using client.service.ui.api.service.clientServer;
 using client.service.users.server;
 using client.service.vea;
@@ -18,7 +17,6 @@ using common.server;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -78,6 +76,7 @@ namespace client.service
                 typeof(common.socks5.Socks5MessengerIds).Assembly,
 
                 typeof(VeaClientService).Assembly,
+                typeof(common.vea.VeaSocks5MessengerIds).Assembly,
 
                 typeof(UsersClientService).Assembly,
                 typeof(ServerUsersClientService).Assembly,

@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 	</PropertyGroup>
@@ -18,12 +17,8 @@
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
-
-	<ItemGroup Condition="'$(VisualStudioVersion)'&gt;='17.0'">
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-preview.7.22375.6" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(VisualStudioVersion)'&lt;'17.0'">
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+	<ItemGroup>
+	  <ProjectReference Include="..\common.server\common.server.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -1,8 +1,10 @@
-﻿using common.libs;
+﻿using client.service.vea.platforms;
+using common.libs;
 using common.proxy;
 using common.server;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace client.service.vea
 {
@@ -12,7 +14,7 @@ namespace client.service.vea
         {
             ProxyPluginLoader.LoadPlugin(services.GetService<IVeaSocks5ProxyPlugin>());
             var transfer = services.GetService<VeaTransfer>();
-           
+
             Config config = services.GetService<Config>();
 
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
@@ -44,6 +46,19 @@ namespace client.service.vea
             services.AddSingleton<VeaMessengerSender>();
 
             services.AddSingleton<IVeaSocks5ProxyPlugin, VeaSocks5ProxyPlugin>();
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                services.AddSingleton<IVeaPlatform, Windows>();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                services.AddSingleton<IVeaPlatform, MacOs>();
+            }
+            else
+            {
+                services.AddSingleton<IVeaPlatform, Linux>();
+            }
 
         }
     }

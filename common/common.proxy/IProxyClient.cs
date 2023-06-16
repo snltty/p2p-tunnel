@@ -284,12 +284,13 @@ namespace common.proxy
                     await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess, EnumProxyCommandStatusMsg.Success);
                     token.Data.Step = EnumProxyStep.ForwardTcp;
                     token.Data.Data = Helper.EmptyArray;
-                    if (token.Data.IsMagicData == false)
+                    if (token.Data.IsMagicData)
                     {
-                        token.Data.TargetAddress = Helper.EmptyArray;
-                        BindTargetReceive(token);
+                        CloseClientSocket(token);
+                        return;
                     }
-                    return;
+                    token.Data.TargetAddress = Helper.EmptyArray;
+                    BindTargetReceive(token);
                 }
                 else
                 {

@@ -1,10 +1,8 @@
 ﻿using common.libs;
-using common.libs.extends;
 using common.server;
+using common.vea;
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -33,6 +31,11 @@ namespace client.service.vea
             this.veaMessengerSender = veaMessengerSender;
         }
 
+        /// <summary>
+        /// 获取在线设备
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         [MessengerId((ushort)VeaSocks5MessengerIds.GetOnLine)]
         public async Task GetOnLine(IConnection connection)
         {
@@ -115,7 +118,10 @@ namespace client.service.vea
             }
             connection.FromConnection.Write(Helper.TrueArray);
         }
-
+        /// <summary>
+        /// 收到在线设备
+        /// </summary>
+        /// <param name="connection"></param>
         [MessengerId((ushort)VeaSocks5MessengerIds.OnLine)]
         public void OnLine(IConnection connection)
         {
@@ -129,8 +135,8 @@ namespace client.service.vea
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
-        [MessengerId((ushort)VeaSocks5MessengerIds.Ip)]
-        public void IP(IConnection connection)
+        [MessengerId((ushort)VeaSocks5MessengerIds.UpdateIp)]
+        public void UpdateIP(IConnection connection)
         {
             IPAddressInfo ips = new IPAddressInfo();
             ips.DeBytes(connection.ReceiveRequestWrap.Payload);
@@ -162,35 +168,5 @@ namespace client.service.vea
     }
 
 
-    /// <summary>
-    /// 组网消息
-    /// </summary>
-    [Flags, MessengerIdEnum]
-    public enum VeaSocks5MessengerIds : ushort
-    {
-        /// <summary>
-        /// 最小
-        /// </summary>
-        Min = 1100,
-        /// <summary>
-        /// 更新ip
-        /// </summary>
-        Ip = 1101,
-        /// <summary>
-        /// 重装网卡
-        /// </summary>
-        Reset = 1102,
-        /// <summary>
-        /// 获取在线设备
-        /// </summary>
-        GetOnLine = 1103,
-        /// <summary>
-        /// 在线设备数据
-        /// </summary>
-        OnLine = 1104,
-        /// <summary>
-        /// 最大
-        /// </summary>
-        Max = 1199,
-    }
+    
 }

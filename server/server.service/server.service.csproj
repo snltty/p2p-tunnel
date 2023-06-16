@@ -38,6 +38,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\common\common.libs\common.libs.csproj" />
 	  <ProjectReference Include="..\..\common\common.server\common.server.csproj" />
+	  <ProjectReference Include="..\..\common\common.vea\common.vea.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.forward\server.service.forward.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.httpProxy\server.service.httpProxy.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.socks5\server.service.socks5.csproj" />

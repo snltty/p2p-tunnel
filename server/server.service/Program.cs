@@ -38,6 +38,8 @@ namespace server.service
                 typeof(UsersMessenger).Assembly,
                 typeof(ProxyMessenger).Assembly,
 
+                typeof(common.vea.VeaSocks5MessengerIds).Assembly,
+
                  //以下是为了获取信息
                 typeof(common.server.model.SignInMessengerIds).Assembly,
                 typeof(ProxyMessengerIds).Assembly,

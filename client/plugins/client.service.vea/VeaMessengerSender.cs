@@ -2,6 +2,7 @@
 using common.libs.extends;
 using common.server;
 using common.server.model;
+using common.vea;
 using System;
 using System.Buffers.Binary;
 using System.Threading.Tasks;
@@ -58,16 +59,16 @@ namespace client.service.vea
         }
 
         /// <summary>
-        /// 获取ip
+        /// 更新ip
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public async Task<IPAddressInfo> IP(IConnection connection)
+        public async Task<IPAddressInfo> UpdateIp(IConnection connection)
         {
             var resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
-                MessengerId = (ushort)VeaSocks5MessengerIds.Ip,
+                MessengerId = (ushort)VeaSocks5MessengerIds.UpdateIp,
                 Payload = new IPAddressInfo { IP = BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()), LanIPs = config.VeaLanIPs }.ToBytes(),
                 Timeout = 2000
             }).ConfigureAwait(false);
