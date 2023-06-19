@@ -190,7 +190,6 @@ namespace client.service.vea
                         Stop();
                     }
                 }
-
             }
             UpdateIp();
             return res;
@@ -246,18 +245,13 @@ namespace client.service.vea
         /// <returns></returns>
         private VeaLanIPAddress[] ExcludeLanIP(VeaLanIPAddress[] lanips, ClientInfo client)
         {
-            IPAddress ip = client.IPAddress.Address;
-
-            //跟目标客户端是局域网连接，则排除连接的ip网段, 连接的ip，与目标传来的局域网ip，进行ip匹配，是否是同网段
-            if (client.ConnectType == ClientConnectTypes.P2P && ip.IsLan())
+            uint ip = BinaryPrimitives.ReadUInt32BigEndian(client.IPAddress.Address.GetAddressBytes());
+            uint ip1 = BinaryPrimitives.ReadUInt32BigEndian(signInStateInfo.LocalInfo.LocalIp.GetAddressBytes());
+            return lanips.Where(c =>
             {
-                lanips = lanips.Where(c =>
-                {
-                    //取网络号不一样的
-                    return (BinaryPrimitives.ReadUInt32BigEndian(ip.GetAddressBytes()) & c.MaskValue) != c.NetWork;
-                }).ToArray();
-            }
-            return lanips;
+                //取网络号不一样的
+                return (ip & c.MaskValue) != c.NetWork && (ip1 & c.MaskValue) != c.NetWork;
+            }).ToArray();
         }
 
     }

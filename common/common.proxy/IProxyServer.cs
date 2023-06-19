@@ -503,7 +503,7 @@ namespace common.proxy
                 {
                     c?.Socket.SafeClose();
                     c.PoolBuffer = Helper.EmptyArray;
-                    c.Saea.Dispose();
+                    c?.Saea.Dispose();
                     GC.Collect();
                     //  GC.SuppressFinalize(c);
                 }

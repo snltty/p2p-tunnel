@@ -16,37 +16,11 @@ namespace test
     {
         static void Main(string[] args)
         {
-            ulong[] array = new ulong[4] { ulong.MaxValue, ulong.MaxValue, ulong.MaxValue, 0x7Fffffffffffffff };
-            for (byte groupIndex = 0; groupIndex < array.Length; groupIndex++)
-            {
-                ulong group = array[groupIndex];
-                if (group < ulong.MaxValue)
-                {
-                    Console.WriteLine($"group:{groupIndex},{group},{Convert.ToString((uint)((group >> 32) & uint.MaxValue), 2)}{Convert.ToString((uint)(group& uint.MaxValue), 2)}");
-                    for (byte byteIndex = 0; byteIndex < 8; byteIndex++)
-                    {
-                        byte _byte = (byte)((group >> byteIndex*8) & 0b11111111);
-                        Console.WriteLine($"byte:{byteIndex},{Convert.ToString(_byte,2)}");
-                        if (_byte < byte.MaxValue)
-                        {
-                            for (byte bitIndex = 0; bitIndex < 8; bitIndex++)
-                            {
-                                byte bit = (byte)((_byte >> bitIndex) & 0b1);
-                                if (bit == 0)
-                                {
-                                    Console.WriteLine($"bit:{bitIndex},{bit}");
-                                    Console.WriteLine(groupIndex * 64 + byteIndex * 8 + bitIndex);
-                                    return;
-                                }
-                            }
-                        }
-
-                    }
-                    Console.WriteLine("===================================");
-                }
-
-            }
-            //BenchmarkRunner.Run<Test>();
+            //FindPoerTest t = new FindPoerTest();
+            // t.Delete(t.array, 2);
+            // t.Find(t.array, out byte point);
+            // Console.WriteLine(point);
+            BenchmarkRunner.Run<Test>();
         }
     }
 
@@ -57,6 +31,24 @@ namespace test
         public void Startup()
         {
             //config.ParseFirewall();
+        }
+
+
+        FindPoerTest t = new FindPoerTest();
+        [Benchmark]
+        public void FindIP()
+        {
+            t.Find(t.array, out byte point);
+        }
+        [Benchmark]
+        public void AddIP()
+        {
+            t.Add(t.array, 253);
+        }
+        [Benchmark]
+        public void DeleteIP()
+        {
+            t.Delete(t.array, 253);
         }
 
         #region 隐藏
@@ -108,15 +100,84 @@ namespace test
         #endregion
     }
 
-    interface ITestInfo
+    class FindPoerTest
     {
-        public void Test();
-    }
-    class TestInfo : ITestInfo
-    {
-        public void Test()
+        public ulong[] array = new ulong[4] { ulong.MaxValue, ulong.MaxValue, ulong.MaxValue, 0 };
+        /// <summary>
+        /// 查找网段内可用ip(/24)
+        /// </summary>
+        /// <param name="array">缓存数组</param>
+        /// <param name="value">找到的值</param>
+        /// <returns></returns>
+        /// <exception cref="Exception">array length must be 4</exception>
+        public bool Find(ulong[] array, out byte value)
         {
+            value = 0;
+            if (array.Length != 4) throw new Exception("array length must be 4");
+            //排除 .1 .255 .256
+            array[0] |= 0b1;
+            array[3] |= (ulong)0b11 << 62;
 
+            if (array[0] < ulong.MaxValue) value = Find(array[0], 0);
+            else if (array[1] < ulong.MaxValue) value = Find(array[1], 1);
+            else if (array[2] < ulong.MaxValue) value = Find(array[2], 2);
+            else if (array[3] < ulong.MaxValue) value = Find(array[3], 3);
+            return value > 0;
+        }
+        private byte Find(ulong group, byte index)
+        {
+            byte value = (byte)(index * 64);
+            //每次对半开，也可以循环，循环稍微会慢3-4ns，常量值快一点
+            ulong _group = (group & uint.MaxValue);
+            if (_group >= uint.MaxValue) { _group = group >> 32; value += 32; }
+            group = _group;
+
+            _group = (group & ushort.MaxValue);
+            if (_group >= ushort.MaxValue) { _group = group >> 16; value += 16; }
+            group = _group;
+
+            _group = (group & byte.MaxValue);
+            if (_group >= byte.MaxValue) { _group = group >> 8; value += 8; }
+            group = _group;
+
+            _group = (group & 0b1111);
+            if (_group >= 0b1111) { _group = group >> 4; value += 4; }
+            group = _group;
+
+            _group = (group & 0b11);
+            if (_group >= 0b11) { _group = group >> 2; value += 2; }
+            group = _group;
+
+            _group = (group & 0b1);
+            if (_group >= 0b1) { value += 1; }
+            value += 1;
+
+            return value;
+        }
+        /// <summary>
+        /// 将一个ip(/24)设为已使用
+        /// </summary>
+        /// <param name="array">缓存数组</param>
+        /// <param name="value">值</param>
+        public void Add(ulong[] array, byte value)
+        {
+            if (array.Length != 4) throw new Exception("array length must be 4");
+            int arrayIndex = value / 64;
+            int length = value - arrayIndex * 64;
+            array[arrayIndex] |= (ulong)1 << (length - 1);
+        }
+        /// <summary>
+        /// 删除一个ip(/24),设为未使用
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="value"></param>
+        /// <exception cref="Exception"></exception>
+        public void Delete(ulong[] array, byte value)
+        {
+            if (array.Length != 4) throw new Exception("array length must be 4");
+            int arrayIndex = value / 64;
+            int length = value - arrayIndex * 64;
+            array[arrayIndex] &= ~((ulong)1 << (length - 1));
         }
     }
 }

@@ -38,7 +38,7 @@ namespace client.realize.messengers.singnin
                 LocalTcpPort = signInState.LocalInfo.Port,
                 ClientAccess = (uint)config.Client.GetAccess()
             };
-            param.Args.TryAdd("version", Helper.Version);
+            param.Args["version"] = Helper.Version;
 
             MessageResponeInfo tcpResult = await messengerSender.SendReply(new MessageRequestWrap
             {

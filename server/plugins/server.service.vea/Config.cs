@@ -1,9 +1,9 @@
 ﻿using common.libs.database;
 using common.libs.extends;
 using server.messengers.singnin;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace server.service.vea
@@ -29,75 +29,55 @@ namespace server.service.vea
         object lockObj = new object();
         public Dictionary<string, DHCPInfo> DHCP { get; set; } = new Dictionary<string, DHCPInfo>();
 
-        public DHCPInfo Add(string group, uint ip)
+        public DHCPInfo AddNetwork(string group, uint ip)
         {
             if (DHCP.TryGetValue(group, out DHCPInfo info) == false)
             {
                 info = new DHCPInfo();
                 DHCP.Add(group, info);
             }
-            info.Start = ip & 0xffffff00 | 1;
-            info.End = ip & 0xffffff00 | 254;
+            info.IP = ip & 0xffffff00;
+            SaveConfig().Wait();
             return info;
         }
-        public DHCPInfo Get(string group, uint ip)
+        public DHCPInfo GetNetwork(string group, uint ip)
         {
             if (DHCP.TryGetValue(group, out DHCPInfo info))
             {
                 return info;
             }
-            return Add(group, ip);
+            return AddNetwork(group, ip);
         }
-        public uint Assign(SignInCacheInfo sign, uint ip)
+        public uint AssignIP(SignInCacheInfo sign, uint ip)
         {
             lock (lockObj)
             {
-                DHCPInfo info = Get(sign.GroupId, ip);
+                DHCPInfo info = GetNetwork(sign.GroupId, ip);
                 if (info.Assigned.TryGetValue(sign.ConnectionId, out AssignedInfo assign) == false)
                 {
-                    uint _ip = 0;
-                    if (info.Assigned.Count == 0)
+                    if (info.Used.Length != 4) info.Used = new ulong[4];
+                    if (Find(info.Used, out byte value) == false)
                     {
-                        _ip = info.Start;
+                        return 0;
                     }
-                    else
-                    {
-                        //每一段
-                        for (uint i = 0; i < info.Used.Length; i++)
-                        {
-                            ulong item = info.Used[i];
-                            //这一段满了
-                            if (item >= ulong.MaxValue)
-                            {
-                                continue;
-                            }
-                            //每个字节
-                            for (int j = 0; j < 8; j++)
-                            {
-                                byte b = (byte)((item >> j) & 0b11111111);
-                                //这字节
-                                if (b >= byte.MaxValue)
-                                {
-                                    continue;
-                                }
-                                //每一位
-                                for (int k = 0; k < 8; k++)
-                                {
-                                    if (((b >> k) & 0b1) == 0)
-                                    {
-                                        //找到了可用的ip
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (_ip == 0) return 0;
-                    assign = new AssignedInfo { IP = _ip, Name = sign.Name };
+                    Add(info.Used, value);
+                    assign = new AssignedInfo { IP = info.IP | value, Name = sign.Name };
                     info.Assigned.Add(sign.ConnectionId, assign);
+                    SaveConfig().Wait();
                 }
                 return assign.IP;
             }
+        }
+        public bool DeleteIP(string group, ulong connectionId)
+        {
+            if (DHCP.TryGetValue(group, out DHCPInfo info))
+            {
+                if (info.Assigned.Remove(connectionId, out AssignedInfo assign))
+                {
+                    Delete(info.Used, (byte)(assign.IP & 0b11111111));
+                }
+            }
+            return true;
         }
 
 
@@ -129,15 +109,96 @@ namespace server.service.vea
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
 
         }
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this).ConfigureAwait(false);
+
+        }
+
+        /// <summary>
+        /// 查找网段内可用ip(/24)
+        /// </summary>
+        /// <param name="array">缓存数组</param>
+        /// <param name="value">找到的值</param>
+        /// <returns></returns>
+        /// <exception cref="Exception">array length must be 4</exception>
+        private bool Find(ulong[] array, out byte value)
+        {
+            value = 0;
+            if (array.Length != 4) throw new Exception("array length must be 4");
+            //排除 .1 .255 .256
+            array[0] |= 0b1;
+            array[3] |= (ulong)0b11 << 62;
+
+            if (array[0] < ulong.MaxValue) value = Find(array[0], 0);
+            else if (array[1] < ulong.MaxValue) value = Find(array[1], 1);
+            else if (array[2] < ulong.MaxValue) value = Find(array[2], 2);
+            else if (array[3] < ulong.MaxValue) value = Find(array[3], 3);
+            return value > 0;
+        }
+        private byte Find(ulong group, byte index)
+        {
+            byte value = (byte)(index * 64);
+            //每次对半开，也可以循环，循环稍微会慢3-4ns，常量值快一点
+            ulong _group = (group & uint.MaxValue);
+            if (_group >= uint.MaxValue) { _group = group >> 32; value += 32; }
+            group = _group;
+
+            _group = (group & ushort.MaxValue);
+            if (_group >= ushort.MaxValue) { _group = group >> 16; value += 16; }
+            group = _group;
+
+            _group = (group & byte.MaxValue);
+            if (_group >= byte.MaxValue) { _group = group >> 8; value += 8; }
+            group = _group;
+
+            _group = (group & 0b1111);
+            if (_group >= 0b1111) { _group = group >> 4; value += 4; }
+            group = _group;
+
+            _group = (group & 0b11);
+            if (_group >= 0b11) { _group = group >> 2; value += 2; }
+            group = _group;
+
+            _group = (group & 0b1);
+            if (_group >= 0b1) { value += 1; }
+            value += 1;
+
+            return value;
+        }
+        /// <summary>
+        /// 将一个ip(/24)设为已使用
+        /// </summary>
+        /// <param name="array">缓存数组</param>
+        /// <param name="value">值</param>
+        private void Add(ulong[] array, byte value)
+        {
+            if (array.Length != 4) throw new Exception("array length must be 4");
+            int arrayIndex = value / 64;
+            int length = value - arrayIndex * 64;
+            array[arrayIndex] |= (ulong)1 << (length - 1);
+        }
+        /// <summary>
+        /// 删除一个ip(/24),设为未使用
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="value"></param>
+        /// <exception cref="Exception"></exception>
+        private void Delete(ulong[] array, byte value)
+        {
+            if (array.Length != 4) throw new Exception("array length must be 4");
+            int arrayIndex = value / 64;
+            int length = value - arrayIndex * 64;
+            array[arrayIndex] &= ~((ulong)1 << (length - 1));
+        }
 
     }
 
     public sealed class DHCPInfo
     {
-        public uint Start { get; set; }
-        public uint End { get; set; }
+        public uint IP { get; set; }
         public Dictionary<ulong, AssignedInfo> Assigned { get; set; } = new Dictionary<ulong, AssignedInfo>();
-        public ulong[] Used { get; set; } = new ulong[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+        public ulong[] Used { get; set; } = new ulong[4] { 0, 0, 0, 0 };
     }
     public sealed class AssignedInfo
     {

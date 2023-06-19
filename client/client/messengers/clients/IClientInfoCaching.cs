@@ -118,6 +118,6 @@ namespace client.messengers.clients
         /// <summary>
         /// 清除所有
         /// </summary>
-        public void Clear();
+        public void Clear(bool empty = false);
     }
 }

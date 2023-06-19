@@ -9,14 +9,12 @@ namespace server.service.vea
     [MessengerIdRange((ushort)VeaSocks5MessengerIds.Min, (ushort)VeaSocks5MessengerIds.Max)]
     public sealed class VeaMessenger : IMessenger
     {
-
-
         public VeaMessenger()
         {
         }
 
         [MessengerId((ushort)VeaSocks5MessengerIds.Network)]
-        public void Network(IConnection connection)
+        public void GetNetwork(IConnection connection)
         {
 
         }
@@ -33,7 +31,4 @@ namespace server.service.vea
 
         }
     }
-
-
-
 }

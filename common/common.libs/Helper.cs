@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,7 +27,7 @@ namespace common.libs
         /// 斜杠
         /// </summary>
         public static char SeparatorCharSlash = '/';
-        public static string Version = "2.1.0.0-beta";
+        public static string Version = "2.1.0.1-beta";
 
         public static string GetStackTraceModelName()
         {

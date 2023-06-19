@@ -229,10 +229,10 @@ namespace client.realize.messengers.clients
         /// <summary>
         /// 清除所有
         /// </summary>
-        public void Clear()
+        public void Clear(bool empty = false)
         {
             var _clients = clients.Values;
-            foreach (var item in _clients.Where(c => c.Connected == false).ToList())
+            foreach (var item in _clients.Where(c => c.Connected == false || empty).ToList())
             {
                 OnOffline?.Invoke(item);
                 item.Offline(ClientOfflineTypes.Manual);
