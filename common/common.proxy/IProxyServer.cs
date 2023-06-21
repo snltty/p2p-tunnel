@@ -301,31 +301,31 @@ namespace common.proxy
         }
         private async Task Receive(ProxyInfo info)
         {
-            Logger.Instance.DebugDebug($"proxy receive");
+            Logger.Instance.DebugDebug($"proxy receive:{info.RequestId}");
             await Semaphore.WaitAsync();
-            Logger.Instance.DebugDebug($"proxy receive1");
+            Logger.Instance.DebugDebug($"proxy receive1:{info.RequestId}");
             try
             {
-                Logger.Instance.DebugDebug($"proxy receive2");
+                Logger.Instance.DebugDebug($"proxy receive2:{info.RequestId}");
                 if (info.Data.Length > 0 || info.Step > EnumProxyStep.Command)
                 {
-                    Logger.Instance.DebugDebug($"proxy receive3");
+                    Logger.Instance.DebugDebug($"proxy receive3:{info.RequestId}");
                     if (info.ProxyPlugin.HandleRequestData(info))
                     {
-                        Logger.Instance.DebugDebug($"proxy receive4");
+                        Logger.Instance.DebugDebug($"proxy receive4:{info.RequestId}");
                         BuildHeaders(info);
                         bool res = await proxyMessengerSender.Request(info);
-                        Logger.Instance.DebugDebug($"proxy receive5");
+                        Logger.Instance.DebugDebug($"proxy receive5:{info.RequestId}");
                         if (res == false)
                         {
-                            Logger.Instance.DebugDebug($"proxy receive6");
+                            Logger.Instance.DebugDebug($"proxy receive6:{info.RequestId}");
                             if (info.Step == EnumProxyStep.Command)
                             {
-                                Logger.Instance.DebugDebug($"proxy receive7");
+                                Logger.Instance.DebugDebug($"proxy receive7:{info.RequestId}");
                                 info.CommandStatus = EnumProxyCommandStatus.NetworkError;
                                 info.CommandStatusMsg = EnumProxyCommandStatusMsg.Connection;
                                 await InputData(info);
-                                Logger.Instance.DebugDebug($"proxy receive8");
+                                Logger.Instance.DebugDebug($"proxy receive8:{info.RequestId}");
                             }
                             else if (info.Step == EnumProxyStep.ForwardTcp)
                             {
@@ -340,7 +340,7 @@ namespace common.proxy
             {
                 Logger.Instance.Error(ex);
             }
-            Logger.Instance.DebugDebug($"proxy receive9");
+            Logger.Instance.DebugDebug($"proxy receive9:{info.RequestId}");
             Semaphore.Release();
         }
         private void BuildHeaders(ProxyInfo info)
