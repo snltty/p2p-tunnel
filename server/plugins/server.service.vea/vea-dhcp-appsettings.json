@@ -1,0 +1,5 @@
+﻿{
+  "Enable": false,
+  "DefaultIP": "192.168.54.0",
+  "DHCP": {}
+}

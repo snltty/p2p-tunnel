@@ -42,6 +42,19 @@ namespace common.vea
         /// 获取一个可用ip
         /// </summary>
         AssignIP = 1107,
+        /// <summary>
+        /// 更新ip
+        /// </summary>
+        ModifyIP = 1108,
+
+        /// <summary>
+        /// 获取配置
+        /// </summary>
+        GetSetting = 1109,
+        /// <summary>
+        /// 设置配置
+        /// </summary>
+        Setting = 1110,
 
         /// <summary>
         /// 最大

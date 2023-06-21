@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
@@ -19,14 +19,8 @@
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Content Include="vea-dhcp-appsettings.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\..\..\common\common.proxy\common.proxy.csproj" />
 	  <ProjectReference Include="..\..\..\common\common.vea\common.vea.csproj" />
-	  <ProjectReference Include="..\..\server\server.csproj" />
+	  <ProjectReference Include="..\client.service.ui\client.service.ui.api.service\client.service.ui.api.service.csproj" />
 	</ItemGroup>
 
 </Project>

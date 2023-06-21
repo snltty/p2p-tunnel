@@ -35,7 +35,7 @@ namespace client.service.forward.server
         /// <returns></returns>
         public async Task<string> Load()
         {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 MessengerId = (ushort)ForwardMessengerIds.GetSetting,
                 Connection = signInStateInfo.Connection,
@@ -51,19 +51,15 @@ namespace client.service.forward.server
         /// </summary>
         /// <param name="jsonStr"></param>
         /// <returns></returns>
-        public async Task<string> Save(string jsonStr)
+        public async Task<bool> Save(string jsonStr)
         {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 MessengerId = (ushort)ForwardMessengerIds.Setting,
                 Connection = signInStateInfo.Connection,
                 Payload = jsonStr.ToUTF8Bytes()
             }).ConfigureAwait(false);
-            if (resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray))
-            {
-                return string.Empty;
-            }
-            return "配置失败";
+            return resp.Code == MessageResponeCodes.OK && resp.Data.Span.SequenceEqual(Helper.TrueArray);
         }
     }
 }

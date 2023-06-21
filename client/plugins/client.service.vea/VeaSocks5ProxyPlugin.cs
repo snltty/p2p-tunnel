@@ -1,5 +1,4 @@
-﻿using client.messengers.clients;
-using client.messengers.singnin;
+﻿using client.messengers.singnin;
 using common.libs.extends;
 using common.proxy;
 using common.server.model;
@@ -23,7 +22,7 @@ namespace client.service.vea
         public override HttpHeaderCacheInfo Headers { get; set; }
         public override Memory<byte> HeadersBytes { get; set; }
 
-        public override uint Access => 0b00000000_00000000_00000000_01000000;
+        public override uint Access => common.vea.Config.Access;
         public override string Name => "vea";
 
         public override ushort Port => (ushort)config.ListenPort;

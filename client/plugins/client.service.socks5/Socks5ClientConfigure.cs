@@ -50,10 +50,10 @@ namespace client.service.socks5
         /// </summary>
         /// <param name="jsonStr"></param>
         /// <returns></returns>
-        public async Task<string> Save(string jsonStr)
+        public async Task<bool> Save(string jsonStr)
         {
             await config.SaveConfig(jsonStr).ConfigureAwait(false);
-            return string.Empty;
+            return true;
         }
     }
 }

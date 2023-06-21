@@ -50,11 +50,11 @@ namespace client.service.vea
         /// </summary>
         /// <param name="jsonStr"></param>
         /// <returns></returns>
-        public async Task<string> Save(string jsonStr)
+        public async Task<bool> Save(string jsonStr)
         {
             await config.SaveConfig(jsonStr).ConfigureAwait(false);
             VeaTransfer.UpdateIp();
-            return string.Empty;
+            return true;
         }
     }
 }

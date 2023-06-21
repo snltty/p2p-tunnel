@@ -1,9 +1,13 @@
 ﻿using common.libs.database;
 using common.libs.extends;
+using common.server;
 using server.messengers.singnin;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace server.service.vea
@@ -11,7 +15,7 @@ namespace server.service.vea
     /// <summary>
     /// 组网配置文件
     /// </summary>
-    [Table("vea-dhcp")]
+    [Table("vea-dhcp-appsettings")]
     public sealed class Config
     {
         public Config() { }
@@ -24,62 +28,32 @@ namespace server.service.vea
 
             Config config = ReadConfig().Result;
             DHCP = config.DHCP;
+            Enable = config.Enable;
+            DefaultIP = config.DefaultIP;
+        }
+
+        [JsonIgnore]
+        public byte Plugin => common.vea.Config.Plugin;
+        [JsonIgnore]
+        public uint Access => common.vea.Config.Access;
+
+        public uint DefaultIPValue => _defaultIPValue;
+        private uint _defaultIPValue = 0;
+
+        public bool Enable { get; set; }
+
+        private IPAddress _defaultIP = IPAddress.Parse("192.168.54.0");
+        public IPAddress DefaultIP
+        {
+            get => _defaultIP; set
+            {
+                _defaultIP = value;
+                _defaultIPValue = BinaryPrimitives.ReadUInt32BigEndian(_defaultIP.GetAddressBytes()) & 0xffffff00;
+            }
         }
 
         object lockObj = new object();
         public Dictionary<string, DHCPInfo> DHCP { get; set; } = new Dictionary<string, DHCPInfo>();
-
-        public DHCPInfo AddNetwork(string group, uint ip)
-        {
-            if (DHCP.TryGetValue(group, out DHCPInfo info) == false)
-            {
-                info = new DHCPInfo();
-                DHCP.Add(group, info);
-            }
-            info.IP = ip & 0xffffff00;
-            SaveConfig().Wait();
-            return info;
-        }
-        public DHCPInfo GetNetwork(string group, uint ip)
-        {
-            if (DHCP.TryGetValue(group, out DHCPInfo info))
-            {
-                return info;
-            }
-            return AddNetwork(group, ip);
-        }
-        public uint AssignIP(SignInCacheInfo sign, uint ip)
-        {
-            lock (lockObj)
-            {
-                DHCPInfo info = GetNetwork(sign.GroupId, ip);
-                if (info.Assigned.TryGetValue(sign.ConnectionId, out AssignedInfo assign) == false)
-                {
-                    if (info.Used.Length != 4) info.Used = new ulong[4];
-                    if (Find(info.Used, out byte value) == false)
-                    {
-                        return 0;
-                    }
-                    Add(info.Used, value);
-                    assign = new AssignedInfo { IP = info.IP | value, Name = sign.Name };
-                    info.Assigned.Add(sign.ConnectionId, assign);
-                    SaveConfig().Wait();
-                }
-                return assign.IP;
-            }
-        }
-        public bool DeleteIP(string group, ulong connectionId)
-        {
-            if (DHCP.TryGetValue(group, out DHCPInfo info))
-            {
-                if (info.Assigned.Remove(connectionId, out AssignedInfo assign))
-                {
-                    Delete(info.Used, (byte)(assign.IP & 0b11111111));
-                }
-            }
-            return true;
-        }
-
 
         /// <summary>
         /// 读取配置文件
@@ -105,7 +79,8 @@ namespace server.service.vea
         public async Task SaveConfig(string jsonStr)
         {
             var _config = jsonStr.DeJson<Config>();
-            DHCP = _config.DHCP;
+            Enable = _config.Enable;
+            DefaultIP = _config.DefaultIP;
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
 
         }
@@ -113,6 +88,70 @@ namespace server.service.vea
         {
             await configDataProvider.Save(this).ConfigureAwait(false);
 
+        }
+
+        public DHCPInfo AddNetwork(string group, uint ip)
+        {
+            if (DHCP.TryGetValue(group, out DHCPInfo info) == false)
+            {
+                info = new DHCPInfo();
+                DHCP.Add(group, info);
+            }
+            info.IP = ip & 0xffffff00;
+            SaveConfig().Wait();
+            return info;
+        }
+        public DHCPInfo GetNetwork(string group)
+        {
+            if (DHCP.TryGetValue(group, out DHCPInfo info))
+            {
+                return info;
+            }
+            return AddNetwork(group, DefaultIPValue);
+        }
+        public uint AssignIP(SignInCacheInfo sign)
+        {
+            lock (lockObj)
+            {
+                DHCPInfo info = GetNetwork(sign.GroupId);
+                if (info.Assigned.TryGetValue(sign.ConnectionId, out AssignedInfo assign) == false)
+                {
+                    if (info.Used.Length != 4) info.Used = new ulong[4];
+                    if (Find(info.Used, out byte value) == false)
+                    {
+                        return 0;
+                    }
+                    Add(info.Used, value);
+                    assign = new AssignedInfo { IP = info.IP | value, Name = sign.Name };
+                    info.Assigned.Add(sign.ConnectionId, assign);
+                    SaveConfig().Wait();
+                }
+                return assign.IP;
+            }
+        }
+        public uint ModifyIP(string group, ulong connectionId, byte ip)
+        {
+            lock (lockObj)
+            {
+                DHCPInfo info = GetNetwork(group);
+                if (info.Assigned.TryGetValue(connectionId, out AssignedInfo assign))
+                {
+                    assign.IP = (info.IP & 0xffffff00) | ip;
+                    return assign.IP;
+                }
+            }
+            return 0;
+        }
+        public bool DeleteIP(string group, ulong connectionId)
+        {
+            if (DHCP.TryGetValue(group, out DHCPInfo info))
+            {
+                if (info.Assigned.Remove(connectionId, out AssignedInfo assign))
+                {
+                    Delete(info.Used, (byte)(assign.IP & 0b11111111));
+                }
+            }
+            return true;
         }
 
         /// <summary>

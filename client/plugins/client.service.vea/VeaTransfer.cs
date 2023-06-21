@@ -57,6 +57,16 @@ namespace client.service.vea
                     RemoveLanMasks(cache.LanIPs);
                 }
             };
+            signInStateInfo.OnChange += (state) =>
+            {
+                if (state)
+                {
+                    Task.Run(async () =>
+                    {
+                        await Run();
+                    });
+                }
+            };
 
             AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) => Stop();
         }
@@ -172,16 +182,22 @@ namespace client.service.vea
                 AddRoute();
             }
         }
-        
+
         /// <summary>
         /// 开启
         /// </summary>
-        public bool Run()
+        public async Task<bool> Run()
         {
             bool res = true;
             Stop();
             if (config.ListenEnable)
             {
+                IPAddress ip = await veaMessengerSender.AssignIP(signInStateInfo.Connection);
+                if (ip != null)
+                {
+                    config.IP = ip;
+                    await config.SaveConfig();
+                }
                 res = veaPlatform.Run();
                 if (res)
                 {

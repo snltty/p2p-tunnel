@@ -42,7 +42,7 @@ namespace client.service.vea
         }
 
         [JsonIgnore]
-        public byte Plugin => 8;
+        public byte Plugin => common.vea.Config.Plugin;
 
         /// <summary>
         /// 启用
@@ -123,6 +123,15 @@ namespace client.service.vea
             ParseBroadcastList();
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+
+        }
+
+        public async Task SaveConfig()
+        {
+            ParseLanIPs();
+            ParseBroadcastList();
+
+            await configDataProvider.Save(this).ConfigureAwait(false);
 
         }
 

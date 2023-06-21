@@ -423,8 +423,10 @@ namespace client.realize.messengers.clients
 
         private void OnBind(bool state)
         {
+            Logger.Instance.Info($"clients 登出清理");
             firstClients.Reset();
             clientInfoCaching.Clear();
+            Logger.Instance.Info($"clients 登出清理结束");
         }
 
         private void OnServerSendClients(ClientsInfo clients)
@@ -543,7 +545,6 @@ namespace client.realize.messengers.clients
 
             return data;
         }
-
         private async Task Relay(ClientInfo client, bool notify = false)
         {
             if ((signInState.RemoteInfo.Access & 1) != 1)
@@ -559,7 +560,6 @@ namespace client.realize.messengers.clients
             }
             await Relay(connection, new ulong[] { signInState.ConnectId, 0, client.ConnectionId }, notify);
         }
-
         /// <summary>
         /// 中继
         /// </summary>

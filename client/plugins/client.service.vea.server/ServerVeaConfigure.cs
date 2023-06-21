@@ -4,23 +4,23 @@ using common.libs;
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using common.user;
+using common.vea;
 using System;
 using System.Threading.Tasks;
 
-namespace client.service.users.server
+namespace client.service.vea.server
 {
-    public sealed class ServerUsersConfigure : IClientConfigure
+    public sealed class ServerVeaConfigure : IClientConfigure
     {
         private readonly MessengerSender messengerSender;
         private readonly SignInStateInfo signInStateInfo;
-        public ServerUsersConfigure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
+        public ServerVeaConfigure(MessengerSender messengerSender, SignInStateInfo signInStateInfo)
         {
             this.messengerSender = messengerSender;
             this.signInStateInfo = signInStateInfo;
         }
 
-        public string Name => "服务端用户管理";
+        public string Name => "服务端网卡管理";
         public string Author => "snltty";
         public string Desc => string.Empty;
         public bool Enable => true;
@@ -33,7 +33,7 @@ namespace client.service.users.server
         {
             MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)UsersMessengerIds.GetSetting,
+                MessengerId = (ushort)VeaSocks5MessengerIds.GetSetting,
                 Connection = signInStateInfo.Connection,
             }).ConfigureAwait(false);
             if (resp.Code == MessageResponeCodes.OK)
@@ -52,7 +52,7 @@ namespace client.service.users.server
         {
             MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
-                MessengerId = (ushort)UsersMessengerIds.Setting,
+                MessengerId = (ushort)VeaSocks5MessengerIds.Setting,
                 Connection = signInStateInfo.Connection,
                 Payload = jsonStr.ToUTF8Bytes()
             }).ConfigureAwait(false);

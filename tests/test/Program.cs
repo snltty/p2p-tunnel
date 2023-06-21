@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using common.libs;
+using common.libs.extends;
 using common.proxy;
 using common.server;
 using common.server.model;
@@ -16,11 +17,13 @@ namespace test
     {
         static void Main(string[] args)
         {
-            //FindPoerTest t = new FindPoerTest();
-            // t.Delete(t.array, 2);
-            // t.Find(t.array, out byte point);
-            // Console.WriteLine(point);
-            BenchmarkRunner.Run<Test>();
+            uint ip = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse("192.168.54.0").GetAddressBytes());
+            byte[] bytes = ip.ToBytes();
+
+           ;
+
+            Console.WriteLine(new IPAddress(BinaryPrimitives.ReadUInt32BigEndian(bytes).ToBytes()).ToString());
+           // BenchmarkRunner.Run<Test>();
         }
     }
 

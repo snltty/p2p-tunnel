@@ -48,11 +48,11 @@ namespace client.service.vea
             config.SaveConfig(arg.Content).Wait();
             VeaTransfer.UpdateIp();
         }
-        public bool Run(ClientServiceParamsInfo arg)
+        public async Task<bool> Run(ClientServiceParamsInfo arg)
         {
             try
             {
-                return VeaTransfer.Run();
+                return await VeaTransfer.Run();
             }
             catch (Exception ex)
             {

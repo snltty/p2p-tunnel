@@ -57,10 +57,9 @@ namespace client.service.ui.api.service.clientServer.services
             var plugin = clientServer.GetConfigure(model.ClassName);
             if (plugin != null)
             {
-                string msg = await plugin.Save(model.Content).ConfigureAwait(false);
-                if (string.IsNullOrWhiteSpace(msg) == false)
+                if (await plugin.Save(model.Content).ConfigureAwait(false) == false)
                 {
-                    arg.SetCode(ClientServiceResponseCodes.Error, msg);
+                    arg.SetCode(ClientServiceResponseCodes.Error, "configure fail");
                 }
             }
         }

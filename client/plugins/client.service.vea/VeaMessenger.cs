@@ -1,4 +1,5 @@
 ﻿using common.libs;
+using common.libs.extends;
 using common.server;
 using common.vea;
 using System;
@@ -62,7 +63,7 @@ namespace client.service.vea
                                  using Ping ping = new Ping();
                                  PingReply reply = await ping.SendPingAsync(new IPAddress(bytes)).WaitAsync(TimeSpan.FromMilliseconds(30));
 
-                                 onlineItem.Online =  reply.Status == IPStatus.Success;
+                                 onlineItem.Online = reply.Status == IPStatus.Success;
                                  if (onlineItem.Online == false)
                                  {
                                      veaLanIPAddressOnLine.Items.Remove(i);
@@ -159,14 +160,30 @@ namespace client.service.vea
         [MessengerId((ushort)VeaSocks5MessengerIds.Reset)]
         public void Reset(IConnection connection)
         {
-            Task.Run(() =>
+            Task.Run(async () =>
             {
-                veaTransfer.Run();
+                await veaTransfer.Run();
             });
             connection.FromConnection?.Write(Helper.TrueArray);
         }
+
+        /// <summary>
+        /// 收到修改ip指令，更新ip，重装网卡
+        /// </summary>
+        /// <param name="connection"></param>
+        [MessengerId((ushort)VeaSocks5MessengerIds.ModifyIP)]
+        public void ModifyIP(IConnection connection)
+        {
+            uint ip = BinaryPrimitives.ReadUInt32BigEndian(connection.ReceiveRequestWrap.Payload.Span);
+            if(ip > 0)
+            {
+                config.IP = new IPAddress(ip.ToBytes());
+                Task.Run(async () =>
+                {
+                    await config.SaveConfig();
+                    await veaTransfer.Run();
+                });
+            }
+        }
     }
-
-
-    
 }

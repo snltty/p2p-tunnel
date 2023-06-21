@@ -70,10 +70,15 @@ namespace client.realize.messengers.singnin
         }
         private void Exit1()
         {
+            Logger.Instance.Info($"开始登出");
             signInState.Offline();
+            Logger.Instance.Info($"开始停止监听");
             udpServer.Stop();
+            Logger.Instance.Info($"已停止UDP监听");
             tcpServer.Stop();
+            Logger.Instance.Info($"已停止TCP监听");
             GCHelper.FlushMemory();
+            Logger.Instance.Info($"已登出");
         }
 
         /// <summary>
@@ -88,6 +93,7 @@ namespace client.realize.messengers.singnin
             if (signInState.LocalInfo.IsConnecting)
             {
                 success.ErrorMsg = "登入操作中...";
+                Logger.Instance.Error(success.ErrorMsg);
                 return success;
             }
 
@@ -116,7 +122,7 @@ namespace client.realize.messengers.singnin
                         signInState.LocalInfo.Port = NetworkHelper.GetRandomPort();
                         config.Client.UseIpv6 = NetworkHelper.IPv6Support;
                         signInState.LocalInfo.Ipv6s = iPv6AddressRequest.GetIPV6();
-                        signInState.OnBind?.Invoke(true);
+
 
                         TcpBind(serverAddress);
                         //交换密钥
@@ -147,7 +153,7 @@ namespace client.realize.messengers.singnin
                         config.Client.ConnectId = result.Data.ConnectionId;
                         signInState.RemoteInfo.Access = result.Data.UserAccess;
                         signInState.Online(result.Data.ConnectionId, result.Data.Ip);
-                       
+
                         await config.SaveConfig(config);
                         await signinMessengerSender.Notify().ConfigureAwait(false);
 
@@ -158,7 +164,6 @@ namespace client.realize.messengers.singnin
                     }
                     catch (TaskCanceledException tex)
                     {
-                        //Logger.Instance.DebugError(tex + "");
                         success.ErrorMsg = tex.Message;
                         signInState.LocalInfo.IsConnecting = false;
                         break;
@@ -180,6 +185,7 @@ namespace client.realize.messengers.singnin
         }
         private void TcpBind(IPAddress serverAddress)
         {
+            signInState.OnBind?.Invoke(true);
             //TCP 本地开始监听
             tcpServer.SetBufferSize((1 << (byte)config.Client.TcpBufferSize) * 1024);
             tcpServer.Start(signInState.LocalInfo.Port);

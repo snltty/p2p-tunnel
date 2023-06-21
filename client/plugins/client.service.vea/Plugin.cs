@@ -21,7 +21,6 @@ namespace client.service.vea
             Logger.Instance.Debug($"虚拟网卡插件已加载，插件id:{config.Plugin}");
             if (config.ListenEnable)
             {
-                transfer.Run();
                 Logger.Instance.Debug($"虚拟网卡插件已开启");
             }
             else

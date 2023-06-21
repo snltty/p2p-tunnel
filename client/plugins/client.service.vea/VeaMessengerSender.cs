@@ -5,6 +5,7 @@ using common.server.model;
 using common.vea;
 using System;
 using System.Buffers.Binary;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace client.service.vea
@@ -105,6 +106,31 @@ namespace client.service.vea
                 return resp.Data.Span.SequenceEqual(Helper.TrueArray);
             }
             return false;
+        }
+
+        /// <summary>
+        /// 分配个ip
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task<IPAddress> AssignIP(IConnection connection)
+        {
+            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            {
+                Connection = connection,
+                MessengerId = (ushort)VeaSocks5MessengerIds.AssignIP,
+                Timeout = 2000
+            }).ConfigureAwait(false);
+
+            if (resp.Code == MessageResponeCodes.OK)
+            {
+                uint ip = BinaryPrimitives.ReadUInt32BigEndian(resp.Data.Span);
+                if (ip > 0)
+                {
+                    return new IPAddress(ip.ToBytes());
+                }
+            }
+            return null;
 
         }
     }

@@ -301,27 +301,37 @@ namespace common.proxy
         }
         private async Task Receive(ProxyInfo info)
         {
+            Logger.Instance.Info($"proxy receive");
             await Semaphore.WaitAsync();
+            Logger.Instance.Info($"proxy receive1");
             try
             {
+                Logger.Instance.Info($"proxy receive2");
                 if (info.Data.Length > 0 || info.Step > EnumProxyStep.Command)
                 {
+                    Logger.Instance.Info($"proxy receive3");
                     if (info.ProxyPlugin.HandleRequestData(info))
                     {
+                        Logger.Instance.Info($"proxy receive4");
                         BuildHeaders(info);
                         bool res = await proxyMessengerSender.Request(info);
+                        Logger.Instance.Info($"proxy receive5");
                         if (res == false)
                         {
+                            Logger.Instance.Info($"proxy receive6");
                             if (info.Step == EnumProxyStep.Command)
                             {
+                                Logger.Instance.Info($"proxy receive7");
                                 info.CommandStatus = EnumProxyCommandStatus.NetworkError;
                                 info.CommandStatusMsg = EnumProxyCommandStatusMsg.Connection;
                                 await InputData(info);
+                                Logger.Instance.Info($"proxy receive8");
                             }
                             else if (info.Step == EnumProxyStep.ForwardTcp)
                             {
                                 clientsManager.TryRemove(info.RequestId, out _);
                             }
+
                         }
                     }
                 }
@@ -330,6 +340,7 @@ namespace common.proxy
             {
                 Logger.Instance.Error(ex);
             }
+            Logger.Instance.Info($"proxy receive9");
             Semaphore.Release();
         }
         private void BuildHeaders(ProxyInfo info)

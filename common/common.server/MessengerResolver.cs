@@ -142,7 +142,7 @@ namespace common.server
                         if (_connection == null || ReferenceEquals(connection, _connection)) return;
                         //RelayIdIndex 后移一位
                         receive.Span[MessageRequestWrap.RelayIdIndexPos]++;
-                        if(_connection.SendDenied == 0)
+                        if (_connection.SendDenied == 0)
                         {
                             await _connection.WaitOne();
                             await _connection.Send(receive).ConfigureAwait(false);
@@ -205,9 +205,20 @@ namespace common.server
                     requestWrap.Payload = connection.FromConnection.Crypto.Decode(requestWrap.Payload);
                 }
                 //404,没这个插件
-                if (messengers.TryGetValue(requestWrap.MessengerId,out MessengerCacheInfo plugin) == false)
+                if (messengers.TryGetValue(requestWrap.MessengerId, out MessengerCacheInfo plugin) == false)
                 {
                     Logger.Instance.DebugError($"{requestWrap.MessengerId},{connection.ServerType}, not found");
+                    if (requestWrap.Reply == true)
+                    {
+                        bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
+                        {
+                            Connection = responseConnection,
+                            Encode = requestWrap.Encode,
+                            Code = MessageResponeCodes.NOT_FOUND,
+                            RelayIds = requestWrap.RelayIds,
+                            RequestId = requestWrap.RequestId
+                        }).ConfigureAwait(false);
+                    }
                     return;
                 }
                 if (plugin.VoidMethod != null)

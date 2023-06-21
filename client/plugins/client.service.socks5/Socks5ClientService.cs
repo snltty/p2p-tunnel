@@ -66,8 +66,6 @@ namespace client.service.socks5
             return true;
         }
 
-
-
         /// <summary>
         /// 更新pac内容
         /// </summary>

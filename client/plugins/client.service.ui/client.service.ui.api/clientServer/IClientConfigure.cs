@@ -33,6 +33,7 @@ namespace client.service.ui.api.clientServer
         /// </summary>
         /// <param name="jsonStr"></param>
         /// <returns></returns>
-        Task<string> Save(string jsonStr);
+        Task<bool> Save(string jsonStr);
     }
+
 }
