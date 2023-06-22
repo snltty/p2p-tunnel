@@ -98,6 +98,7 @@ namespace common.proxy
 
             plugin.Started(port);
 
+            Logger.Instance.DebugDebug($"udp端口:{token.Request.RequestId} 开始异步接收数据");
             IAsyncResult result = server.UdpClient.BeginReceive(ProcessReceiveUdp, token);
         }
         private void StartAccept(SocketAsyncEventArgs acceptEventArg)
@@ -107,6 +108,7 @@ namespace common.proxy
 
                 acceptEventArg.AcceptSocket = null;
                 ProxyUserToken token = ((ProxyUserToken)acceptEventArg.UserToken);
+                Logger.Instance.DebugDebug($"端口:{token.Server.Port} 开始接收连接");
                 if (token.Server.Socket.AcceptAsync(acceptEventArg) == false)
                 {
                     ProcessAccept(acceptEventArg);
@@ -142,6 +144,7 @@ namespace common.proxy
             try
             {
                 ProxyUserToken acceptToken = (e.UserToken as ProxyUserToken);
+                Logger.Instance.DebugDebug($"端口:{acceptToken.Server.Port} 收到连接");
 
                 uint id = requestIdNs.Increment();
                 ProxyUserToken token = new ProxyUserToken
@@ -177,6 +180,7 @@ namespace common.proxy
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, (1 << (byte)acceptToken.Server.ProxyPlugin.BufferSize) * 1024);
                 readEventArgs.Completed += IO_Completed;
 
+                Logger.Instance.DebugDebug($"连接:{token.Request.RequestId} 开始异步接收数据");
                 if (token.Socket.ReceiveAsync(readEventArgs) == false)
                 {
                     ProcessReceive(readEventArgs);
@@ -192,7 +196,7 @@ namespace common.proxy
             ProxyUserToken token = (ProxyUserToken)e.UserToken;
             try
             {
-
+                Logger.Instance.DebugDebug($"连接:{token.Request.RequestId} 收到数据:{e.BytesTransferred}");
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
                     int totalLength = e.BytesTransferred;
@@ -206,7 +210,9 @@ namespace common.proxy
                             //太短
                             while ((validate & EnumProxyValidateDataResult.TooShort) == EnumProxyValidateDataResult.TooShort)
                             {
+                                Logger.Instance.DebugDebug($"连接:{token.Request.RequestId} 包头数据");
                                 totalLength += await token.Socket.ReceiveAsync(e.Buffer.AsMemory(e.Offset + totalLength), SocketFlags.None);
+                                Logger.Instance.DebugDebug($"连接:{token.Request.RequestId} 收到包头数据:{totalLength}");
                                 token.Request.Data = e.Buffer.AsMemory(e.Offset, totalLength);
                                 validate = token.Request.ProxyPlugin.ValidateData(token.Request);
                             }
@@ -228,7 +234,9 @@ namespace common.proxy
                         {
                             while (token.Socket.Available > 0)
                             {
+                                Logger.Instance.DebugDebug($"连接:{token.Request.RequestId} 开始同步接收数据");
                                 int length = await token.Socket.ReceiveAsync(e.Buffer.AsMemory(), SocketFlags.None);
+                                Logger.Instance.DebugDebug($"连接:{token.Request.RequestId} 收到同步数据:{length}");
                                 if (length > 0)
                                 {
                                     token.Request.Data = e.Buffer.AsMemory(0, length);
@@ -238,6 +246,7 @@ namespace common.proxy
                         }
                         if (token.Socket.Connected)
                         {
+                            Logger.Instance.DebugDebug($"连接:{token.Request.RequestId} 开始异步接收数据");
                             if (token.Socket.ReceiveAsync(e) == false)
                             {
 
@@ -277,16 +286,20 @@ namespace common.proxy
                 ProxyUserToken token = result.AsyncState as ProxyUserToken;
 
                 token.Request.Data = token.Server.UdpClient.EndReceive(result, ref rep);
+                Logger.Instance.DebugDebug($"udp端口:{token.Request.RequestId} 收到数据:{token.Request.Data.Length}");
+
                 token.Request.SourceEP = rep;
                 token.Request.ClientEP = rep;
                 await Receive(token.Request);
                 token.Request.Data = Helper.EmptyArray;
 
+                Logger.Instance.DebugDebug($"udp端口:{token.Request.RequestId} 开始异步接收数据");
                 result = token.Server.UdpClient.BeginReceive(ProcessReceiveUdp, token);
+                Logger.Instance.DebugDebug($"udp端口:{token.Request.RequestId} 开始异步接收数据:CompletedSynchronously:{result.CompletedSynchronously}");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //Logger.Instance.Error($"socks5 listen udp -> error " + ex);
+                Logger.Instance.DebugError($"listen udp -> error " + ex);
             }
         }
 
