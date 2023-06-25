@@ -1,10 +1,8 @@
 ﻿using common.libs.database;
-using common.server;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Threading;
 
 namespace common.user
 {
@@ -21,7 +19,26 @@ namespace common.user
             {
                 storeModel = result;
             }
-            AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) =>
+            else
+            {
+                storeModel.Users.Add(1, new UserInfo
+                {
+                    ID = 1,
+                    Access = uint.MaxValue,
+                    Account = "admin",
+                    Password = "admin",
+                    AddTime = DateTime.Now,
+                    EndTime = DateTime.MaxValue,
+                    NetFlowType = LimitType.None,
+                    SignLimitType = LimitType.None
+                });
+            }
+            configDataProvider.Save(storeModel).Wait();
+            AppDomain.CurrentDomain.ProcessExit += (sender,e) =>
+            {
+                configDataProvider.Save(storeModel).Wait();
+            };
+            Console.CancelKeyPress += (sender, e) =>
             {
                 configDataProvider.Save(storeModel).Wait();
             };
@@ -119,7 +136,7 @@ namespace common.user
                         user.ID = 1;
                     }
 
-                    user.AddTime = DateTime.UtcNow;
+                    user.AddTime = DateTime.Now;
                     storeModel.Users.TryAdd(user.ID, user);
 
                     Save();

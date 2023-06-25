@@ -46,15 +46,22 @@ namespace common.vea
         /// 更新ip
         /// </summary>
         ModifyIP = 1108,
-
+        /// <summary>
+        /// 已更新IP
+        /// </summary>
+        ModifiedIP = 1109,
+        /// <summary>
+        /// 删除分配ip
+        /// </summary>
+        DeleteIP = 1110,
         /// <summary>
         /// 获取配置
         /// </summary>
-        GetSetting = 1109,
+        GetSetting = 1111,
         /// <summary>
         /// 设置配置
         /// </summary>
-        Setting = 1110,
+        Setting = 1112,
 
         /// <summary>
         /// 最大

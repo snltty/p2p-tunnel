@@ -32,6 +32,13 @@ namespace client.service.httpProxy
                     ClearPac();
                 }
             };
+            Console.CancelKeyPress += (s, e) =>
+            {
+                if (set == true)
+                {
+                    ClearPac();
+                }
+            };
         }
 
         bool set = false;

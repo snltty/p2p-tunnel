@@ -19,14 +19,6 @@
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Content Include="users-appsettings.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="users.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-	<ItemGroup>
 	  <ProjectReference Include="..\common.libs\common.libs.csproj" />
 	  <ProjectReference Include="..\common.server\common.server.csproj" />
 	</ItemGroup>

@@ -34,6 +34,13 @@ namespace client.service.socks5
                     ClearPac();
                 }
             };
+            Console.CancelKeyPress += (s, e) =>
+            {
+                if (set)
+                {
+                    ClearPac();
+                }
+            };
             //安卓注释
             //Console.CancelKeyPress += (s, e) => ClearPac();
         }

@@ -62,7 +62,7 @@ namespace common.libs.database
             {
                 Logger.Instance.Error($"{fileName} 配置文件解析有误~ :{ex}");
             }
-            return new T();
+            return null;
         }
         public async Task<string> LoadString()
         {

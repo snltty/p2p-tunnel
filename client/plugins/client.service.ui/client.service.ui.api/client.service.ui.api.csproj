@@ -22,9 +22,4 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\client\client.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-	  <None Update="ui-appsettings.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
 </Project>

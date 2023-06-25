@@ -37,12 +37,11 @@ namespace client.service.vea
             BroadcastBind = config.BroadcastBind;
             BroadcastEnable = config.BroadcastEnable;
             BroadcastList = config.BroadcastList;
-            ParseLanIPs();
-            ParseBroadcastList();
+            SaveConfig().Wait();
         }
 
         [JsonIgnore]
-        public byte Plugin => common.vea.Config.Plugin;
+        public byte Plugin => common.vea.Config.plugin;
 
         /// <summary>
         /// 启用
@@ -90,7 +89,7 @@ namespace client.service.vea
         /// <returns></returns>
         public async Task<Config> ReadConfig()
         {
-            return await configDataProvider.Load();
+            return await configDataProvider.Load() ?? new Config();
         }
         /// <summary>
         /// 读取配置文件

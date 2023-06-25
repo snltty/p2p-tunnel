@@ -13,6 +13,7 @@ using server.service.httpProxy;
 using server.service.forward;
 using System.Threading.Tasks;
 using server.service.vea;
+using common.vea;
 
 namespace server.service
 {
@@ -38,9 +39,11 @@ namespace server.service
                 typeof(HttpProxySettingMessenger).Assembly,
                 typeof(UsersMessenger).Assembly,
                 typeof(ProxyMessenger).Assembly,
+
+                typeof(VeaSocks5ProxyPlugin).Assembly,
                 typeof(VeaMessenger).Assembly,
 
-                typeof(common.vea.VeaSocks5MessengerIds).Assembly,
+                typeof(VeaSocks5MessengerIds).Assembly,
 
                  //以下是为了获取信息
                 typeof(common.server.model.SignInMessengerIds).Assembly,

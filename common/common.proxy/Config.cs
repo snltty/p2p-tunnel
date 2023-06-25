@@ -26,13 +26,13 @@ namespace common.proxy
 
             Config config = ReadConfig().Result;
             Firewall = config.Firewall;
-            ParseFirewall();
+            SaveConfig().Wait();
             ids.Reset(Firewall.Count > 0 ? Firewall.Max(c => c.ID) : 0);
         }
 
         public async Task<Config> ReadConfig()
         {
-            Config config = await configDataProvider.Load();
+            Config config = await configDataProvider.Load() ?? new Config();
             return config;
         }
         public async Task<string> ReadString()

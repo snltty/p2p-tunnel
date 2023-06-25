@@ -20,12 +20,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include="socks5-appsettings.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-
-	<ItemGroup>
 	  <ProjectReference Include="..\common.libs\common.libs.csproj" />
 	  <ProjectReference Include="..\common.proxy\common.proxy.csproj" />
 	</ItemGroup>

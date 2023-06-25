@@ -2,6 +2,7 @@
 using common.libs;
 using common.proxy;
 using common.server;
+using common.vea;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -45,6 +46,10 @@ namespace client.service.vea
             services.AddSingleton<VeaMessengerSender>();
 
             services.AddSingleton<IVeaSocks5ProxyPlugin, VeaSocks5ProxyPlugin>();
+
+
+            services.AddSingleton<common.vea.Config>();
+            services.AddSingleton<IVeaAccessValidator, VeaSocks5ProxyPlugin>();
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

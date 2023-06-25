@@ -17,13 +17,11 @@ namespace test
     {
         static void Main(string[] args)
         {
-            uint ip = BinaryPrimitives.ReadUInt32BigEndian(IPAddress.Parse("192.168.54.0").GetAddressBytes());
-            byte[] bytes = ip.ToBytes();
-
-           ;
-
-            Console.WriteLine(new IPAddress(BinaryPrimitives.ReadUInt32BigEndian(bytes).ToBytes()).ToString());
-           // BenchmarkRunner.Run<Test>();
+            FindPoerTest t = new FindPoerTest();
+            Console.WriteLine(t.Exists(t.array,253));
+            t.Add(t.array,253);
+            Console.WriteLine(t.Exists(t.array,253));
+            // BenchmarkRunner.Run<Test>();
         }
     }
 
@@ -156,6 +154,21 @@ namespace test
             value += 1;
 
             return value;
+        }
+        /// <summary>
+        /// 是否存在一个ip
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public bool Exists(ulong[] array, byte value)
+        {
+            if (array.Length != 4) throw new Exception("array length must be 4");
+            int arrayIndex = value / 64;
+            int length = value - arrayIndex * 64;
+
+            return (array[arrayIndex] >> (length - 1) & 1) == 1;
         }
         /// <summary>
         /// 将一个ip(/24)设为已使用

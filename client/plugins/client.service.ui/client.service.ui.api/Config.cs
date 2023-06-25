@@ -23,6 +23,7 @@ namespace client.service.ui.api
             EnableApi = config.EnableApi;
             Websocket = config.Websocket;
             Web = config.Web;
+            SaveConfig().Wait();
         }
         /// <summary>
         /// 启用web
@@ -52,9 +53,13 @@ namespace client.service.ui.api
         /// <returns></returns>
         public async Task<Config> ReadConfig()
         {
-            return await configDataProvider.Load();
+            return await configDataProvider.Load() ?? new Config();
         }
-       
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this);
+        }
+
     }
 
     /// <summary>
@@ -65,7 +70,7 @@ namespace client.service.ui.api
         /// <summary>
         /// 端口
         /// </summary>
-        public int Port { get; set; } = 8098;
+        public int Port { get; set; } = 5411;
         /// <summary>
         /// 根目录
         /// </summary>
@@ -84,10 +89,10 @@ namespace client.service.ui.api
         /// <summary>
         /// 端口
         /// </summary>
-        public int Port { get; set; } = 8098;
+        public int Port { get; set; } = 5412;
         /// <summary>
         /// 绑定ip
         /// </summary>
-        public IPAddress BindIp { get; set; } = IPAddress.Loopback;
+        public IPAddress BindIp { get; set; } = IPAddress.Any;
     }
 }

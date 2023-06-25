@@ -40,6 +40,7 @@ namespace client.realize.messengers.singnin
             this.iPv6AddressRequest = iPv6AddressRequest;
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
+            Console.CancelKeyPress += (s, e) => Exit();
 
             tcpServer.OnDisconnect += (connection) => Disconnect(connection, signInState.Connection);
         }

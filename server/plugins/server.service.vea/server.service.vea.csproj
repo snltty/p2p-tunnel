@@ -19,11 +19,6 @@
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Content Include="vea-dhcp-appsettings.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-	<ItemGroup>
 	  <ProjectReference Include="..\..\..\common\common.proxy\common.proxy.csproj" />
 	  <ProjectReference Include="..\..\..\common\common.vea\common.vea.csproj" />
 	  <ProjectReference Include="..\..\server\server.csproj" />

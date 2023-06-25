@@ -23,6 +23,7 @@ namespace client.messengers.punchHole
             this.configDataProvider = configDataProvider;
 
             config = ReadConfig().Result ?? new PunchHoleDirectionConfig1();
+            SaveConfig().Wait();
         }
 
         PunchHoleDirectionConfig1 config { get; set; }
@@ -58,11 +59,15 @@ namespace client.messengers.punchHole
 
         private async Task<PunchHoleDirectionConfig1> ReadConfig()
         {
-            return await configDataProvider.Load();
+            return await configDataProvider.Load() ?? new PunchHoleDirectionConfig1();
         }
         private async Task SaveConfig(string jsonStr)
         {
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+        }
+        private async Task SaveConfig()
+        {
+            await configDataProvider.Save(config).ConfigureAwait(false);
         }
     }
 
