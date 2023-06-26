@@ -65,7 +65,7 @@ namespace client.service.ui.api
         /// <summary>
         /// 端口
         /// </summary>
-        public int Port { get; set; } = 8098;
+        public int Port { get; set; } = 5411;
         /// <summary>
         /// 根目录
         /// </summary>
@@ -84,10 +84,10 @@ namespace client.service.ui.api
         /// <summary>
         /// 端口
         /// </summary>
-        public int Port { get; set; } = 8098;
+        public int Port { get; set; } = 5412;
         /// <summary>
         /// 绑定ip
         /// </summary>
-        public IPAddress BindIp { get; set; } = IPAddress.Loopback;
+        public IPAddress BindIp { get; set; } = IPAddress.Any;
     }
 }
