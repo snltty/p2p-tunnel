@@ -17,12 +17,6 @@
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
-	
-	<ItemGroup>
-		<Content Include="forward-appsettings.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\common.proxy\common.proxy.csproj" />

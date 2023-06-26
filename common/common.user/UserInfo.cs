@@ -18,7 +18,7 @@ namespace common.user
         public uint Access { get; set; }
 
         /// <summary>
-        /// 限制登录数，-1无限制
+        /// 限制登录数
         /// </summary>
         public int SignLimit { get; set; }
         public LimitType SignLimitType { get; set; }

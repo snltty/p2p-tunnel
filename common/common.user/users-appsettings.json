@@ -1,4 +1,0 @@
-﻿{
-  "Enable": false, //启用账号验证
-  "ForceOffline": false //超过登入数限制后的处理方式，是否强制对方下线
-}

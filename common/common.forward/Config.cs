@@ -31,6 +31,7 @@ namespace common.forward
             BufferSize = config.BufferSize;
             WebListens = config.WebListens;
             TunnelListenRange = config.TunnelListenRange;
+            SaveConfig().Wait();
         }
 
         [JsonIgnore]
@@ -59,7 +60,7 @@ namespace common.forward
         /// <returns></returns>
         public async Task<Config> ReadConfig()
         {
-            return await configDataProvider.Load();
+            return await configDataProvider.Load() ?? new Config();
         }
         /// <summary>
         /// 读取
@@ -84,6 +85,10 @@ namespace common.forward
             TunnelListenRange = _config.TunnelListenRange;
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+        }
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this).ConfigureAwait(false);
         }
 
     }

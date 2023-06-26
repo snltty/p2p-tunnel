@@ -11,6 +11,7 @@ using client.service.socks5.server;
 using client.service.ui.api.service.clientServer;
 using client.service.users.server;
 using client.service.vea;
+using client.service.vea.server;
 using common.libs;
 using common.proxy;
 using common.server;
@@ -76,6 +77,7 @@ namespace client.service
                 typeof(common.socks5.Socks5MessengerIds).Assembly,
 
                 typeof(VeaClientService).Assembly,
+                typeof(ServerVeaClientService).Assembly,
                 typeof(common.vea.VeaSocks5MessengerIds).Assembly,
 
                 typeof(UsersClientService).Assembly,

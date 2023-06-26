@@ -31,6 +31,7 @@ namespace common.httpProxy
             ProxyIp = config.ProxyIp;
             IsCustomPac = config.IsCustomPac;
             TargetConnectionId = config.TargetConnectionId;
+            SaveConfig().Wait();
         }
 
         [System.Text.Json.Serialization.JsonIgnore]
@@ -62,7 +63,7 @@ namespace common.httpProxy
         /// <returns></returns>
         public async Task<Config> ReadConfig()
         {
-            return await configDataProvider.Load();
+            return await configDataProvider.Load() ?? new Config();
         }
         /// <summary>
         /// 读取
@@ -91,6 +92,10 @@ namespace common.httpProxy
             TargetConnectionId = _config.TargetConnectionId;
 
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+        }
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this).ConfigureAwait(false);
         }
     }
 }

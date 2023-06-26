@@ -1,4 +1,5 @@
 ﻿using client.service.ui.api.clientServer;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace client.service.vea
@@ -54,6 +55,10 @@ namespace client.service.vea
         {
             await config.SaveConfig(jsonStr).ConfigureAwait(false);
             VeaTransfer.UpdateIp();
+            Task.Run(() =>
+            {
+                VeaTransfer.Run();
+            });
             return true;
         }
     }

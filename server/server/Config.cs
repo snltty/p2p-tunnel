@@ -29,16 +29,17 @@ namespace server
             RelayEnable = config.RelayEnable;
             EncodePassword = config.EncodePassword;
             AdminGroup = config.AdminGroup;
+            SaveConfig().Wait();
         }
 
         /// <summary>
         /// udp端口
         /// </summary>
-        public int Udp { get; set; }
+        public int Udp { get; set; } = 5410;
         /// <summary>
         /// tcp端口
         /// </summary>
-        public int Tcp { get; set; }
+        public int Tcp { get; set; } = 5410;
         /// <summary>
         /// 连接频率每秒
         /// </summary>
@@ -76,7 +77,7 @@ namespace server
 
         private async Task<Config> ReadConfig()
         {
-            return await configDataProvider.Load();
+            return await configDataProvider.Load() ?? new Config();
         }
         public async Task<string> ReadString()
         {

@@ -44,7 +44,7 @@ namespace client.service.users
 
         public async Task<UserMapInfoCaching> ReadConfig()
         {
-            UserMapInfoCaching config = await configDataProvider.Load();
+            UserMapInfoCaching config = await configDataProvider.Load() ?? new UserMapInfoCaching();
             return config;
         }
         public async Task SaveConfig()

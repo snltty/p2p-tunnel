@@ -30,6 +30,7 @@ namespace common.socks5
             IsPac = config.IsPac;
             ProxyIp = config.ProxyIp;
             TargetConnectionId = config.TargetConnectionId;
+            SaveConfig().Wait();
 
         }
 
@@ -37,17 +38,17 @@ namespace common.socks5
         public byte Plugin => 4;
 
         public bool ListenEnable { get; set; }
-        public int ListenPort { get; set; } = 5412;
+        public int ListenPort { get; set; } = 5413;
         public EnumBufferSize BufferSize { get; set; } = EnumBufferSize.KB_8;
-        public bool ConnectEnable { get; set; } 
-        public bool IsCustomPac { get; set; } 
+        public bool ConnectEnable { get; set; }
+        public bool IsCustomPac { get; set; }
         public bool IsPac { get; set; }
         public IPAddress ProxyIp { get; set; } = IPAddress.Loopback;
         public ulong TargetConnectionId { get; set; }
 
         public async Task<Config> ReadConfig()
         {
-            var config = await configDataProvider.Load();
+            var config = await configDataProvider.Load() ?? new Config();
             return config;
         }
 
@@ -68,6 +69,10 @@ namespace common.socks5
             ProxyIp = config.ProxyIp;
             TargetConnectionId = config.TargetConnectionId;
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+        }
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this).ConfigureAwait(false);
         }
     }
 }

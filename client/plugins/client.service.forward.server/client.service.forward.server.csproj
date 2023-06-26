@@ -20,12 +20,6 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <Content Include="server-forwards.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\common\common.forward\common.forward.csproj" />
     <ProjectReference Include="..\..\..\server\plugins\server.service.forward.model\server.service.forward.model.csproj" />
     <ProjectReference Include="..\client.service.ui\client.service.ui.api\client.service.ui.api.csproj" />

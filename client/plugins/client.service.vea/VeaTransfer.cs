@@ -68,7 +68,8 @@ namespace client.service.vea
                 }
             };
 
-            AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) => Stop();
+            AppDomain.CurrentDomain.ProcessExit += (sender, e) => Stop();
+            Console.CancelKeyPress += (sender, e) => Stop();
         }
         /// <summary>
         /// 收到某个客户端的ip信息
@@ -190,14 +191,16 @@ namespace client.service.vea
         {
             bool res = true;
             Stop();
+
+            byte oldIP = (byte)(BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()) & 0xff);
+            IPAddress ip = await veaMessengerSender.AssignIP(signInStateInfo.Connection, oldIP);
+            if (ip != null)
+            {
+                config.IP = ip;
+                await config.SaveConfig();
+            }
             if (config.ListenEnable)
             {
-                IPAddress ip = await veaMessengerSender.AssignIP(signInStateInfo.Connection);
-                if (ip != null)
-                {
-                    config.IP = ip;
-                    await config.SaveConfig();
-                }
                 res = veaPlatform.Run();
                 if (res)
                 {

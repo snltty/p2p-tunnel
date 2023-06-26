@@ -1,8 +1,10 @@
-﻿using client.messengers.singnin;
+﻿using client.messengers.clients;
+using client.messengers.singnin;
 using common.libs.extends;
 using common.proxy;
 using common.server.model;
 using common.socks5;
+using common.vea;
 using System;
 using System.Buffers.Binary;
 using System.Linq;
@@ -13,7 +15,7 @@ namespace client.service.vea
     public interface IVeaSocks5ProxyPlugin : IProxyPlugin { }
 
 
-    public class VeaSocks5ProxyPlugin : Socks5ProxyPlugin, IVeaSocks5ProxyPlugin
+    public class VeaSocks5ProxyPlugin : Socks5ProxyPlugin, IVeaSocks5ProxyPlugin, IVeaAccessValidator
     {
         public override byte Id => config.Plugin;
         public override bool ConnectEnable => config.ConnectEnable;
@@ -22,7 +24,7 @@ namespace client.service.vea
         public override HttpHeaderCacheInfo Headers { get; set; }
         public override Memory<byte> HeadersBytes { get; set; }
 
-        public override uint Access => common.vea.Config.Access;
+        public override uint Access => common.vea.Config.access;
         public override string Name => "vea";
 
         public override ushort Port => (ushort)config.ListenPort;
@@ -31,14 +33,16 @@ namespace client.service.vea
         private readonly IProxyServer proxyServer;
         private readonly VeaTransfer veaTransfer;
         private readonly IProxyMessengerSender proxyMessengerSender;
+        private readonly IClientInfoCaching clientInfoCaching;
 
         public VeaSocks5ProxyPlugin(Config config, client.Config config1, IProxyServer proxyServer
-            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender, SignInStateInfo signInStateInfo) : base(null, proxyServer)
+            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching) : base(null, proxyServer)
         {
             this.config = config;
             this.proxyServer = proxyServer;
             this.veaTransfer = veaTransfer;
             this.proxyMessengerSender = proxyMessengerSender;
+            this.clientInfoCaching = clientInfoCaching;
 
             signInStateInfo.OnChange += (bool state) =>
             {
@@ -128,6 +132,19 @@ namespace client.service.vea
                     }
                 }
             }
+        }
+
+        public bool Validate(ulong connectionId, out VeaAccessValidateResult result)
+        {
+            if (clientInfoCaching.Get(connectionId, out ClientInfo client))
+            {
+                result = new VeaAccessValidateResult { Key = "client_vea", Connection = client.Connection, Name = client.Name };
+            }
+            else
+            {
+                result = new VeaAccessValidateResult();
+            }
+            return true;
         }
     }
 }

@@ -19,11 +19,6 @@
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Content Include="vea-appsettings.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-	<ItemGroup>
 		<None Update="tun2socks-windows.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

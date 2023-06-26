@@ -27,13 +27,14 @@ namespace client.service.logger
             Config config = ReadConfig().Result;
             Enable = config.Enable;
             MaxLength = config.MaxLength;
+            SaveConfig().Wait();
         }
 
 
         /// <summary>
         /// 开启
         /// </summary>
-        public bool Enable { get; set; } = false;
+        public bool Enable { get; set; } = true;
         /// <summary>
         /// 行数
         /// </summary>
@@ -45,7 +46,7 @@ namespace client.service.logger
         /// <returns></returns>
         public async Task<Config> ReadConfig()
         {
-            return await configDataProvider.Load();
+            return await configDataProvider.Load() ?? new Config();
         }
         /// <summary>
         /// 读取
@@ -68,6 +69,10 @@ namespace client.service.logger
             Enable = _config.Enable;
             MaxLength = _config.MaxLength;
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
+        }
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this).ConfigureAwait(false);
         }
     }
 }

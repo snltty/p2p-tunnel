@@ -171,8 +171,8 @@ namespace client.service.vea
         /// 收到修改ip指令，更新ip，重装网卡
         /// </summary>
         /// <param name="connection"></param>
-        [MessengerId((ushort)VeaSocks5MessengerIds.ModifyIP)]
-        public void ModifyIP(IConnection connection)
+        [MessengerId((ushort)VeaSocks5MessengerIds.ModifiedIP)]
+        public void ModifiedIP(IConnection connection)
         {
             uint ip = BinaryPrimitives.ReadUInt32BigEndian(connection.ReceiveRequestWrap.Payload.Span);
             if(ip > 0)

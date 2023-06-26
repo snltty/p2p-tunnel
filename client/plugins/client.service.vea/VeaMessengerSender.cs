@@ -31,7 +31,7 @@ namespace client.service.vea
         /// <returns></returns>
         public async Task<bool> GetOnLine(IConnection connection)
         {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
                 MessengerId = (ushort)VeaSocks5MessengerIds.GetOnLine,
@@ -66,7 +66,7 @@ namespace client.service.vea
         /// <returns></returns>
         public async Task<IPAddressInfo> UpdateIp(IConnection connection)
         {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
                 MessengerId = (ushort)VeaSocks5MessengerIds.UpdateIp,
@@ -93,7 +93,7 @@ namespace client.service.vea
         /// <returns></returns>
         public async Task<bool> Reset(IConnection connection, ulong id)
         {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
                 MessengerId = (ushort)VeaSocks5MessengerIds.Reset,
@@ -112,25 +112,27 @@ namespace client.service.vea
         /// 分配个ip
         /// </summary>
         /// <param name="connection"></param>
+        /// <param name="ip"></param>
         /// <returns></returns>
-        public async Task<IPAddress> AssignIP(IConnection connection)
+        public async Task<IPAddress> AssignIP(IConnection connection, byte ip)
         {
-            var resp = await messengerSender.SendReply(new MessageRequestWrap
+            MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
                 Connection = connection,
                 MessengerId = (ushort)VeaSocks5MessengerIds.AssignIP,
-                Timeout = 2000
+                Timeout = 2000,
+                Payload = new byte[] { ip },
             }).ConfigureAwait(false);
 
             if (resp.Code == MessageResponeCodes.OK)
             {
-                uint ip = BinaryPrimitives.ReadUInt32BigEndian(resp.Data.Span);
-                if (ip > 0)
+                uint newip = BinaryPrimitives.ReadUInt32BigEndian(resp.Data.Span);
+                if (newip > 0)
                 {
-                    return new IPAddress(ip.ToBytes());
+                    return new IPAddress(newip.ToBytes());
                 }
             }
-            return null;
+            return config.IP;
 
         }
     }

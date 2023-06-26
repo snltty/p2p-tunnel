@@ -227,7 +227,7 @@ namespace client.service.tray
             }
             else
             {
-                notifyIcon.BalloonTipText = "未找到相应的配置文件";
+                notifyIcon.BalloonTipText = "未找到相应的配置文件,可以先运行客户端生成配置文件";
                 notifyIcon.ShowBalloonTip(1000);
             }
         }

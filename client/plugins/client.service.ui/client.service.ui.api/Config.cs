@@ -23,6 +23,7 @@ namespace client.service.ui.api
             EnableApi = config.EnableApi;
             Websocket = config.Websocket;
             Web = config.Web;
+            SaveConfig().Wait();
         }
         /// <summary>
         /// 启用web
@@ -52,9 +53,13 @@ namespace client.service.ui.api
         /// <returns></returns>
         public async Task<Config> ReadConfig()
         {
-            return await configDataProvider.Load();
+            return await configDataProvider.Load() ?? new Config();
         }
-       
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this);
+        }
+
     }
 
     /// <summary>

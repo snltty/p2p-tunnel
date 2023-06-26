@@ -18,6 +18,7 @@ namespace common.user
             Config config = ReadConfig().Result;
             Enable = config.Enable;
             ForceOffline = config.ForceOffline;
+            SaveConfig().Wait();
         }
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace common.user
 
         private async Task<Config> ReadConfig()
         {
-            return await configDataProvider.Load();
+            return await configDataProvider.Load() ?? new Config();
         }
         public async Task<string> ReadString()
         {
@@ -52,6 +53,10 @@ namespace common.user
             config.ForceOffline = ForceOffline;
 
             await configDataProvider.Save(config).ConfigureAwait(false);
+        }
+        public async Task SaveConfig()
+        {
+            await configDataProvider.Save(this).ConfigureAwait(false);
         }
     }
 
