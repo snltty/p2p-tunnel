@@ -46,7 +46,6 @@ namespace client.service
                 Logger.Instance.Error(b.ExceptionObject + "");
             };
 
-
             ThreadPool.SetMinThreads(1024, 1024);
             ThreadPool.SetMaxThreads(65535, 65535);
             LoggerConsole();
