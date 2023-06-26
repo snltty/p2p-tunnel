@@ -258,7 +258,7 @@ namespace client.realize.messengers.punchHole.udp
                         .Select(c => new IPEndPoint(c, data.Port)));
                 }
 
-                Logger.Instance.DebugDebug($"尝试连接:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
+                Logger.Instance.DebugDebug($"尝试连接局域网:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
                 try
                 {
                     //链接局域网
@@ -282,7 +282,7 @@ namespace client.realize.messengers.punchHole.udp
                                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + i));
                             }
                         }
-                        Logger.Instance.DebugDebug($"尝试连接:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
+                        //Logger.Instance.DebugDebug($"尝试连接:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
                         peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
                         await Task.Delay(1000);
                         peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
