@@ -434,8 +434,6 @@ namespace client.realize.messengers.clients
         {
             try
             {
-                Console.WriteLine($"收到节点列表:{clients.ToJson()}");
-
                 if (signInState.Connection == null || clients.Clients == null)
                 {
                     return;
