@@ -21,7 +21,7 @@ namespace common.server.servers.iocp
         public Action<IConnection> OnDisconnect { get; set; } = (IConnection connection) => { };
         public Action<IConnection> OnConnected { get; set; } = (connection) => { };
         public Action<Socket> OnConnected1 { get; set; } = (socket) => { };
-       
+
 
         public TcpServer() { }
         public void SetBufferSize(int bufferSize = 8 * 1024)
@@ -98,19 +98,17 @@ namespace common.server.servers.iocp
         }
         private void ProcessAccept(SocketAsyncEventArgs e)
         {
-            if (isReceive)
+            if (e.AcceptSocket != null)
             {
-                if (e.AcceptSocket != null)
+                e.AcceptSocket.KeepAlive(20, 5, 5);
+                if (isReceive)
                 {
                     BindReceive(e.AcceptSocket, bufferSize);
+                    StartAccept(e);
                 }
-                StartAccept(e);
-            }
-            else
-            {
-                if (OnConnected1 != null)
+                else
                 {
-                    OnConnected1(e.AcceptSocket);
+                    OnConnected1?.Invoke(e.AcceptSocket);
                 }
             }
         }
@@ -123,7 +121,6 @@ namespace common.server.servers.iocp
                 {
                     return null;
                 }
-
 
                 this.bufferSize = bufferSize;
                 AsyncUserToken userToken = new AsyncUserToken
@@ -286,7 +283,7 @@ namespace common.server.servers.iocp
         }
     }
 
-   
+
     public sealed class AsyncUserToken
     {
         public IConnection Connection { get; set; }

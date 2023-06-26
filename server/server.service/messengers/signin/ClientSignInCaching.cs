@@ -63,6 +63,7 @@ namespace server.service.messengers.singnin
         }
         private void Disconnected(IConnection connection)
         {
+            Console.WriteLine($"断线:{connection.ConnectId}");
             if (connection.ConnectId > 0)
             {
                 Remove(connection.ConnectId);
