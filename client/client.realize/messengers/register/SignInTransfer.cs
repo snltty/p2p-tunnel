@@ -52,6 +52,7 @@ namespace client.realize.messengers.singnin
             }
 
             Logger.Instance.Error($"{connection.ServerType} signin 断开~~~~${connection.Address}");
+            Exit();
             if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
             {
                 SignIn(true).ContinueWith((result) =>

@@ -65,6 +65,15 @@ namespace common.libs
             }
             Enqueue(new LoggerModel { Type = LoggerTypes.INFO, Content = content });
         }
+        [Conditional("DEBUG")]
+        public void DebugInfo(string content, params object[] args)
+        {
+            if (args != null && args.Length > 0)
+            {
+                content = string.Format(content, args);
+            }
+            Enqueue(new LoggerModel { Type = LoggerTypes.INFO, Content = content });
+        }
         public void Warning(string content, params object[] args)
         {
             if (args != null && args.Length > 0)

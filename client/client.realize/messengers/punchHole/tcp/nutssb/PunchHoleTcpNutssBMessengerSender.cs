@@ -313,6 +313,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 }
                 ips.Add(new IPEndPoint(data.Ip, data.Port));
                 ips.Add(new IPEndPoint(data.Ip, data.Port + 1));
+                Logger.Instance.DebugDebug($"尝试连接:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
 
                 for (byte i = 0; i < ips.Count; i++)
                 {

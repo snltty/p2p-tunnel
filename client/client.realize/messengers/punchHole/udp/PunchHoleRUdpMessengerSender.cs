@@ -248,7 +248,7 @@ namespace client.realize.messengers.punchHole.udp
                         .Where(c => c.Equals(IPAddress.Any) == false && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6))
                         .Select(c => new IPEndPoint(c, data.LocalPort)));
                     ips.AddRange(data.LocalIps
-                        .Where(c => c.Equals(IPAddress.Any) == false && c.Equals(IPAddress.Loopback) && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6))
+                        .Where(c => c.Equals(IPAddress.Any) == false && c.Equals(IPAddress.Loopback) == false && (c.AddressFamily == AddressFamily.InterNetwork || c.IsIPv4MappedToIPv6))
                         .Select(c => new IPEndPoint(c, data.Port)));
                 }
                 if (IPv6Support() && data.Ip.IsLan() == false)
@@ -258,7 +258,7 @@ namespace client.realize.messengers.punchHole.udp
                         .Select(c => new IPEndPoint(c, data.Port)));
                 }
 
-
+                Logger.Instance.DebugDebug($"尝试连接:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
                 try
                 {
                     //链接局域网
@@ -282,6 +282,7 @@ namespace client.realize.messengers.punchHole.udp
                                 udpServer.SendUnconnectedMessage(Helper.EmptyArray, new IPEndPoint(data.Ip, data.Port + i));
                             }
                         }
+                        Logger.Instance.DebugDebug($"尝试连接:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
                         peers = ips.Select(ip => udpServer.Connect(ip)).ToList();
                         await Task.Delay(1000);
                         peer = peers.FirstOrDefault(c => c != null && c.ConnectionState == ConnectionState.Connected);
