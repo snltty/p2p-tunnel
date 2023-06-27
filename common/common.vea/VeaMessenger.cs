@@ -69,7 +69,9 @@ namespace common.vea
                 connection.Write((uint)0);
                 return;
             }
-            connection.Write(config.AssignIP(result.Key, connection.ReceiveRequestWrap.Payload.Span[0], connection, result.Name));
+            byte ip = connection.ReceiveRequestWrap.Payload.Span[0];
+            uint newIP = config.AssignIP(result.Key, ip, connection, result.Name);
+            connection.Write(newIP);
         }
 
         [MessengerId((ushort)VeaSocks5MessengerIds.ModifyIP)]

@@ -121,9 +121,14 @@ namespace common.vea
         {
             if (DHCP.TryGetValue(key, out DHCPInfo info) == false)
             {
-                info = new DHCPInfo();
-                info.IP = ip & 0xffffff00;
+                info = new DHCPInfo
+                {
+                    IP = ip & 0xffffff00
+                };
                 DHCP.Add(key, info);
+                Add(info.Used, 1);
+                Add(info.Used, 254);
+                Add(info.Used, 255);
                 Interlocked.Exchange(ref lockObject, 1);
             }
             else
@@ -175,15 +180,15 @@ namespace common.vea
                 byte value = ip;
                 if (info.Assigned.TryGetValue(connection.ConnectId, out AssignedInfo assign) == false)
                 {
-                    if (info.Used.Length != 4) info.Used = new ulong[4];
                     assign = new AssignedInfo();
                     info.Assigned.Add(connection.ConnectId, assign);
+                    Interlocked.Exchange(ref lockObject, 1);
                 }
 
                 //存在了，但是不是本节点的ip，就找个新的ip，找不到，就返回失败
-                if(Exists(info.Used, ip) && (assign.IP & 0xff) != ip)
+                if (Exists(info.Used, ip))
                 {
-                    if(Find(info.Used, out value) == false)
+                    if((assign.IP & 0xff) != ip && Find(info.Used, out value) == false)
                     {
                         return 0;
                     }
@@ -233,6 +238,7 @@ namespace common.vea
 
             if (info.Assigned.TryGetValue(connectionId, out AssignedInfo assign))
             {
+                Delete(info.Used, (byte)(assign.IP & 0xff));
                 assign.IP = (info.IP & 0xffffff00) | ip;
                 Interlocked.Exchange(ref lockObject, 1);
                 return assign.IP;
@@ -269,9 +275,6 @@ namespace common.vea
         {
             value = 0;
             if (array.Length != 4) throw new Exception("array length must be 4");
-            //排除 .1 .255 .256
-            array[0] |= 0b1;
-            array[3] |= (ulong)0b11 << 62;
 
             if (array[0] < ulong.MaxValue) value = Find(array[0], 0);
             else if (array[1] < ulong.MaxValue) value = Find(array[1], 1);
