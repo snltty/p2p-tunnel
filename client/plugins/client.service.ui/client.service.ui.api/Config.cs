@@ -74,7 +74,7 @@ namespace client.service.ui.api
         /// <summary>
         /// 根目录
         /// </summary>
-        public string Root { get; set; } = "./web";
+        public string Root { get; set; } = "./public/web";
         /// <summary>
         /// 绑定ip
         /// </summary>

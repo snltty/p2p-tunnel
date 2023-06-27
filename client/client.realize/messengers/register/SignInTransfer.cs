@@ -72,15 +72,15 @@ namespace client.realize.messengers.singnin
         }
         private void Exit1()
         {
-            Logger.Instance.Info($"开始登出");
+            Logger.Instance.DebugInfo($"开始登出");
             signInState.Offline();
-            Logger.Instance.Info($"开始停止监听");
+            Logger.Instance.DebugInfo($"开始停止监听");
             udpServer.Stop();
-            Logger.Instance.Info($"已停止UDP监听");
+            Logger.Instance.DebugInfo($"已停止UDP监听");
             tcpServer.Stop();
-            Logger.Instance.Info($"已停止TCP监听");
+            Logger.Instance.DebugInfo($"已停止TCP监听");
             GCHelper.FlushMemory();
-            Logger.Instance.Info($"已登出");
+            Logger.Instance.DebugInfo($"已登出");
         }
 
         /// <summary>

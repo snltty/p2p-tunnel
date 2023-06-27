@@ -256,7 +256,7 @@ namespace client.realize.messengers.clients
                         ConnectReverse(client);
                     }
                     //都试过了， 都不行，中继 
-                    else
+                    else if (config.Client.AutoRelay && ((EnumClientAccess.UseAutoRelay & (EnumClientAccess)client.ClientAccess) == EnumClientAccess.UseAutoRelay))
                     {
                         _ = Relay(client, true);
                     }
@@ -424,10 +424,10 @@ namespace client.realize.messengers.clients
 
         private void OnBind(bool state)
         {
-            Logger.Instance.Info($"clients 登出清理");
+            Logger.Instance.DebugInfo($"clients 登出清理");
             firstClients.Reset();
             clientInfoCaching.Clear();
-            Logger.Instance.Info($"clients 登出清理结束");
+            Logger.Instance.DebugInfo($"clients 登出清理结束");
         }
 
         private void OnServerSendClients(ClientsInfo clients)
