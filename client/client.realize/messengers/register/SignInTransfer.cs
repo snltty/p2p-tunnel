@@ -55,10 +55,15 @@ namespace client.realize.messengers.singnin
             Exit();
             if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
             {
+                Logger.Instance.Warning($"{connection.ServerType} signin 触发重新登入");
                 SignIn(true).ContinueWith((result) =>
                 {
                     Interlocked.Exchange(ref lockObject, 0);
                 });
+            }
+            else
+            {
+                Logger.Instance.Error($"{connection.ServerType} signin 触发重新登入失败");
             }
         }
 
