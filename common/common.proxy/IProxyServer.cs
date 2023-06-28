@@ -320,7 +320,7 @@ namespace common.proxy
             try
             {
                 Logger.Instance.DebugDebug($"proxy receive2:{info.RequestId}");
-                if (info.Data.Length == 0 && info.Step > EnumProxyStep.Command)
+                if (info.Data.Length == 0 && info.Step == EnumProxyStep.Command)
                 {
                     return;
                 }

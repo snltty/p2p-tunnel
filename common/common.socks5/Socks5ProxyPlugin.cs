@@ -3,6 +3,7 @@ using System.Net;
 using common.server.model;
 using common.libs.extends;
 using System;
+using common.libs;
 
 namespace common.socks5
 {
@@ -139,9 +140,19 @@ namespace common.socks5
 
         protected void GetRemoteEndPoint(ProxyInfo info, out int index)
         {
-            info.TargetAddress = Socks5Parser.GetRemoteEndPoint(info.Data, out Socks5EnumAddressType addressType, out ushort port, out index);
-            info.AddressType = (EnumProxyAddressType)addressType;
-            info.TargetPort = port;
+            try
+            {
+                info.TargetAddress = Socks5Parser.GetRemoteEndPoint(info.Data, out Socks5EnumAddressType addressType, out ushort port, out index);
+                info.AddressType = (EnumProxyAddressType)addressType;
+                info.TargetPort = port;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+                Logger.Instance.Error($"step:{info.Step},data:{string.Join(",", info.Data.ToArray())}");
+
+                throw;
+            }
         }
 
 
