@@ -1,4 +1,4 @@
-﻿log-level: debug
+﻿#log-level: debug
 allow-lan: true
 
 mode: rule
@@ -9,9 +9,10 @@ port: 7890
 socks-port: 7891
 external-controller: 127.0.0.1:9090
 
+
 proxies:
     #socks5
-  - name: "socks5"
+  - name: "socks"
     type: socks5
     server: 127.0.0.1
     port: 5413
@@ -28,14 +29,6 @@ proxies:
     # username: username
     # password: password
 
-
-PROCESS-NAME:
-  cmd: 
-    - MATCH: 
-      bin: chrome.exe   # 匹配 cmd.exe 这个进程
-    - PROXY:
-      SOCKS5: 127.0.0.1:5413  # 为该进程指定 SOCKS5 代理
-
 rules:
   #- GEOIP,CN,DIRECT
   #- PROCESS-NAME,Google Chrome,socks5 #进程名
@@ -49,4 +42,4 @@ rules:
   #- DST-PORT,80,socks5 #目标端口
   #- GEOIP,CN,socks5
 
-  - MATCH,socks5
+  - MATCH,socks
