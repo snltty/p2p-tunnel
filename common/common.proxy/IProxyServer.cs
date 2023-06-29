@@ -325,7 +325,7 @@ namespace common.proxy
                     return;
                 }
 
-                Logger.Instance.DebugDebug($"proxy receive3:{info.RequestId}");
+                Logger.Instance.DebugDebug($"proxy receive3:{info.RequestId}，{info.Step},{info.Rsv}");
                 if (info.ProxyPlugin.HandleRequestData(info) == false)
                 {
                     return;

@@ -62,7 +62,8 @@ namespace client.service.httpProxy
 
             if (config.ListenEnable && config.IsPac)
             {
-                SetPac($"http://{(uiconfig.Web.BindIp == "+" ? config.ProxyIp.ToString() : uiconfig.Web.BindIp)}:{uiconfig.Web.Port}/{Path.GetFileName(file)}");
+                string pac = $"http://{(uiconfig.Web.BindIp == "+" ? config.ProxyIp.ToString() : uiconfig.Web.BindIp)}:{uiconfig.Web.Port}/{Path.GetFileName(file)}";
+                SetPac(pac, $"http://{config.ProxyIp}:{config.ListenPort}");
             }
             else
             {
@@ -71,7 +72,7 @@ namespace client.service.httpProxy
 
             if (config.ListenEnable)
             {
-              return  proxyServer.Start(config.ListenPort, config.Plugin);
+                return proxyServer.Start(config.ListenPort, config.Plugin);
             }
             else
             {
@@ -116,11 +117,12 @@ namespace client.service.httpProxy
         /// <summary>
         /// 设置系统pac
         /// </summary>
-        /// <param name="url"></param>
-        public void SetPac(string url)
+        /// <param name="pacUrl"></param>
+        /// <param name="proxyUrl"></param>
+        public void SetPac(string pacUrl, string proxyUrl)
         {
             set = true;
-            ProxySystemSetting.Set(url);
+            ProxySystemSetting.Set(pacUrl, proxyUrl);
         }
         /// <summary>
         /// 清除pac

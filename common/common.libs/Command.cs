@@ -3,47 +3,20 @@ using System.Diagnostics;
 
 namespace common.libs
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class Command
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <param name="commands"></param>
-        /// <returns></returns>
         public static string Windows(string arg, string[] commands)
         {
             return Execute("cmd.exe", arg, commands);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <param name="commands"></param>
-        /// <returns></returns>
         public static string Linux(string arg, string[] commands)
         {
             return Execute("/bin/bash", arg, commands);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <param name="commands"></param>
-        /// <returns></returns>
         public static string Osx(string arg, string[] commands)
         {
             return Execute("/bin/bash", arg, commands);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="arg"></param>
-        /// <returns></returns>
         public static Process Execute(string fileName, string arg)
         {
             Process proc = new Process();
@@ -60,13 +33,6 @@ namespace common.libs
             //Process proc = Process.Start(fileName, arg);
             return proc;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="arg"></param>
-        /// <param name="commands"></param>
-        /// <returns></returns>
         public static string Execute(string fileName, string arg, string[] commands)
         {
             Process proc = new Process();

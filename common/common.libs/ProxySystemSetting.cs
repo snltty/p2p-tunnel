@@ -17,7 +17,7 @@ namespace common.libs
         /// 所以，直接获取 HKEY_USERS 下的所有key，直接修改所有用户的注册表，反而更简单
         /// </summary>
         /// <param name="url"></param>
-        private static void WindowsSet(string url)
+        private static void WindowsSet(string pacUrl, string proxyUrl)
         {
             try
             {
@@ -29,13 +29,15 @@ namespace common.libs
                         try
                         {
                             RegistryKey reg = Registry.Users.OpenSubKey($"{item}\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-                            reg.SetValue("AutoConfigURL", url);
+                            reg.SetValue("AutoConfigURL", pacUrl);
                             reg.Close();
                         }
                         catch (Exception)
                         {
                         }
                     }
+                    Command.Windows(string.Empty, new string[] { $"setx http_proxy {proxyUrl}", $"setx https_proxy {proxyUrl}" });
+
                     FlushOs();
                 }
             }
@@ -62,6 +64,7 @@ namespace common.libs
                         {
                         }
                     }
+                    Command.Windows(string.Empty, new string[] { $"setx http_proxy \"\" -m", $"setx https_proxy \"\" -m" });
 
                     FlushOs();
                 }
@@ -71,53 +74,26 @@ namespace common.libs
             }
         }
 
-        private static void MacExcute(string command)
+        private static void MacSet(string pacUrl, string proxyUrl)
         {
-            Process proc = new();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                proc.StartInfo.FileName = "cmd.exe";
-            }
-            else
-            {
-                proc.StartInfo.FileName = "/bin/bash";
-            }
-            proc.StartInfo.CreateNoWindow = true;
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardError = true;
-            proc.StartInfo.RedirectStandardInput = true;
-            proc.StartInfo.RedirectStandardOutput = true;
-            proc.StartInfo.Verb = "runas";
-            proc.Start();
-
-            proc.StandardInput.WriteLine(command);
-            proc.StandardInput.AutoFlush = true;
-            proc.StandardInput.WriteLine("exit");
-            proc.StandardOutput.ReadToEnd();
-            proc.StandardError.ReadToEnd();
-            proc.WaitForExit();
-            proc.Close();
-            proc.Dispose();
-        }
-        private static void MacSet(string url)
-        {
-            MacExcute($"networksetup -setautoproxyurl ethernet {url}");
-            MacExcute($"networksetup -setautoproxyurl Wi-Fi {url}");
+            Command.Osx(string.Empty, new string[] { $"networksetup -setautoproxyurl ethernet {pacUrl}" });
+            Command.Osx(string.Empty, new string[] { $"networksetup -setautoproxyurl Wi-Fi {pacUrl}" });
         }
         private static void MacClear()
         {
-            MacExcute($"networksetup -setautoproxystate ethernet off");
-            MacExcute($"networksetup -setautoproxystate Wi-Fi off");
+            Command.Osx(string.Empty, new string[] { $"networksetup -setautoproxystate ethernet off" });
+            Command.Osx(string.Empty, new string[] { $"networksetup -setautoproxystate Wi-Fi off" });
         }
-        public static void Set(string url)
+
+        public static void Set(string pacUrl, string proxyUrl)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                WindowsSet(url);
+                WindowsSet(pacUrl, proxyUrl);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                MacSet(url);
+                MacSet(pacUrl, proxyUrl);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
