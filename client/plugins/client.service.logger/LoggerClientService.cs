@@ -34,10 +34,10 @@ namespace client.service.logger
 
             return new PageInfo
             {
-                PageIndex = model.PageIndex,
+                Page = model.Page,
                 PageSize = model.PageSize,
                 Count = Data.Count(),
-                Data = res.Skip((model.PageIndex - 1) * model.PageSize).Take(model.PageSize)
+                Data = res.Skip((model.Page - 1) * model.PageSize).Take(model.PageSize)
             };
         }
 
@@ -59,7 +59,7 @@ namespace client.service.logger
         /// <summary>
         /// 当前页
         /// </summary>
-        public int PageIndex { get; set; } = 1;
+        public int Page { get; set; } = 1;
         /// <summary>
         /// 页大小
         /// </summary>
@@ -77,7 +77,7 @@ namespace client.service.logger
         /// <summary>
         /// 当前页
         /// </summary>
-        public int PageIndex { get; set; } = 1;
+        public int Page { get; set; } = 1;
         /// <summary>
         /// 页大小
         /// </summary>

@@ -56,7 +56,7 @@ namespace client.service.users.server
             return string.Empty;
         }
 
-        public async Task<string> Update(ClientServiceParamsInfo arg)
+        public async Task<bool> Update(ClientServiceParamsInfo arg)
         {
             UserMapInfo map = arg.Content.DeJson<UserMapInfo>();
             if (userMapInfoCaching.Get(map.ID, out UserMapInfo mapInfo))
@@ -71,7 +71,7 @@ namespace client.service.users.server
             {
                 await userMapInfoCaching.Add(map);
             }
-            return string.Empty;
+            return true;
         }
     }
 

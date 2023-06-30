@@ -30,7 +30,7 @@
                 <el-empty v-else />
             </div>
             <div class="pages t-c">
-                <el-pagination small :total="state.page.Count" v-model:currentPage="state.page.PageIndex" :page-size="state.page.PageSize" @current-change="loadData" background layout="total,prev, pager, next">
+                <el-pagination small :total="state.page.Count" v-model:currentPage="state.page.Page" :page-size="state.page.PageSize" @current-change="loadData" background layout="total,prev, pager, next">
                 </el-pagination>
             </div>
         </div>
@@ -50,7 +50,7 @@ export default {
 
         const state = reactive({
             loading: true,
-            page: { PageIndex: 1, PageSize: 10, Count: 0, Data: [] },
+            page: { Page: 1, PageSize: 10, Count: 0, Data: [] },
             types: ['debug', 'info', 'warning', 'error'],
             Type: -1
         })

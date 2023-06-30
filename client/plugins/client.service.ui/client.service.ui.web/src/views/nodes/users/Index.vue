@@ -119,12 +119,12 @@ export default {
                 command.row.Access = shareData.serverAccessAdd(command.row.Access, command.item.value);
             }
             let json = JSON.parse(JSON.stringify(command.row));
-            update(json).then((msg) => {
-                if (msg) {
-                    ElMessage.error(msg);
-                    command.row.Access = access;
-                } else {
+            update(json).then((res) => {
+                if (res) {
                     ElMessage.success('操作成功');
+                } else {
+                    ElMessage.error('操作失败');
+                    command.row.Access = access;
                 }
             }).catch(() => {
                 ElMessage.error('操作失败');

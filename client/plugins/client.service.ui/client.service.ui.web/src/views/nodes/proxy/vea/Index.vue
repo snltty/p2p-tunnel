@@ -19,7 +19,8 @@
 
 <script>
 import { reactive } from '@vue/reactivity'
-import { getConfigure, saveConfigure, runVea } from '../../../../apis/configure'
+import { getConfigure, saveConfigure } from '../../../../apis/configure'
+import { runVea } from '../../../../apis/vea'
 import { onMounted } from '@vue/runtime-core'
 import ConnectButton from '../../../../components/ConnectButton.vue'
 import plugin from './plugin'
