@@ -1,12 +1,18 @@
 export default [
     {
+        text: '配置信息',
+        path: '',
+        params: `//直接去使用配置文件接口修改配置即可`,
+        response: `略`
+    },
+    {
         text: '运行组网',
         path: 'vea/run',
-        params: `略`,
+        params: `略 //配置文件中有一个 ListenEnable 当为true时，此接口开启组网，false时此接口关闭组网`,
         response: `true //true成功，false失败`
     },
     {
-        text: '重启目标节点组网',
+        text: '重启组网',
         path: 'vea/run',
         params: `1 //目标节点连接id`,
         response: `true //true成功，false失败`
@@ -14,8 +20,31 @@ export default [
     {
         text: '刷新组网信息',
         path: 'vea/update',
-        params: `略`,
+        params: `略 //向各个节点请求组网信息，本来是自动的，但是也会有失败的时候，就可以用此接口手动刷新`,
         response: `true //true成功，false失败`
+    },
+    {
+        text: '组网信息列表',
+        path: 'vea/list',
+        params: `略`,
+        response: `
+//当获取不到信息时，可以调用  vea/update 刷新一下
+//连接id与信息对应，1未某节点的连接id
+{
+    1:{
+        IP:'',      //组网ip
+        NetWork:0, //大端uint，网络号
+        Mask:24, //byte 掩码长度
+        //局域网段列表
+        LanIPs:[
+            {
+                IPAddress:'', //局域网ip
+                Mask:24, //byte 掩码长度
+            }
+        ]
+    }
+}
+        `
     },
     {
         text: '请求在线设备',
@@ -26,7 +55,7 @@ export default [
     {
         text: '获取在线设备',
         path: 'vea/online',
-        params: `1 //目标节点连接id`,
+        params: `1 //目标节点连接id //当获取不到时，可以调用 vea/onlines 刷新一下`,
         response: `
 {
     Items:{
@@ -39,28 +68,7 @@ export default [
 }
         `
     },
-    {
-        text: '节点的组网列表',
-        path: 'vea/list',
-        params: `略`,
-        response: `
-//连接id与信息对应，1未某节点的连接id
-{
-    1:{
-        IP:'',      //组网ip
-        NetWork:0, //网络号
-        Mask:24, //掩码长度
-        //局域网段列表
-        LanIPs:[
-            {
-                IPAddress:'', //局域网ip
-                Mask:24, //掩码长度
-            }
-        ]
-    }
-}
-        `
-    },
+
     {
         text: '测试连通',
         path: 'vea/test',

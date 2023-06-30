@@ -419,7 +419,6 @@ namespace client.service.forward
         public uint ID { get; set; }
         public ushort Port { get; set; }
         public bool Listening { get; set; }
-        public string Name { get; set; } = string.Empty;
         public ForwardAliveTypes AliveType { get; set; } = ForwardAliveTypes.Web;
         public string Desc { get; set; } = string.Empty;
     }

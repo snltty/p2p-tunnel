@@ -14,7 +14,7 @@ namespace client.service.httpProxy
         {
             this.httpProxyTransfer = httpProxyTransfer;
         }
-        public bool Update(ClientServiceParamsInfo arg)
+        public bool Run(ClientServiceParamsInfo arg)
         {
             return httpProxyTransfer.Update();
         }

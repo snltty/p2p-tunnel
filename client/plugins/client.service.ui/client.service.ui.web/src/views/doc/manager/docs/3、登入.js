@@ -68,19 +68,19 @@ export default [
         `
     },
     {
-        text: '登入',
+        text: '与服务器连接',
         path: 'signin/start',
         params: `略`,
         response: `true //true成功，false失败`
     },
     {
-        text: '登出',
+        text: '与服务器断开',
         path: 'signin/exit',
         params: `略`,
         response: `true //true成功，false失败`
     },
     {
-        text: 'ping服务器',
+        text: '服务器延迟',
         path: 'signin/ping',
         params: `[] //服务器ip列表`,
         response: `[] //延迟列表，-1超时`

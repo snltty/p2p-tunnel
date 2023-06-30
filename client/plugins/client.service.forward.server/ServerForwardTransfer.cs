@@ -121,11 +121,11 @@ namespace client.service.forward.server
             }
             var resp = await serverForwardMessengerSender.SignIn(signInStateInfo.Connection, new ForwardSignInInfo
             {
-                AliveType = forward.AliveType,
-                SourceIp = forward.Domain,
-                SourcePort = forward.ServerPort,
-                TargetIp = forward.LocalIp,
-                TargetPort = forward.LocalPort,
+                AliveType = forwardInfo.AliveType,
+                SourceIp = forwardInfo.Domain,
+                SourcePort = forwardInfo.ServerPort,
+                TargetIp = forwardInfo.LocalIp,
+                TargetPort = forwardInfo.LocalPort,
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)
             {
@@ -160,9 +160,9 @@ namespace client.service.forward.server
             }
             var resp = await serverForwardMessengerSender.SignOut(signInStateInfo.Connection, new ForwardSignOutInfo
             {
-                AliveType = forward.AliveType,
-                SourceIp = forward.Domain,
-                SourcePort = forward.ServerPort,
+                AliveType = forwardInfo.AliveType,
+                SourceIp = forwardInfo.Domain,
+                SourcePort = forwardInfo.ServerPort,
 
             }).ConfigureAwait(false);
             if (resp.Code != MessageResponeCodes.OK)

@@ -1,7 +1,7 @@
 export default [
     {
 
-        text: '获取节点列表',
+        text: '节点列表',
         path: 'clients/list',
         params: `略`,
         response: `
@@ -30,7 +30,7 @@ export default [
         response: `true //true成功，false失败`
     },
     {
-        text: '反向连接节点',
+        text: '连接节点(反向)',
         path: 'clients/connectReverse',
         params: `1 //连接id`,
         response: `true //true成功，false失败`,
@@ -48,13 +48,13 @@ export default [
         response: `true //true成功，false失败`
     },
     {
-        text: 'ping',
+        text: '节点延迟',
         path: 'clients/ping',
         params: `略`,
         response: `略 //会去ping所有节点，更新到节点信息的Ping中，再次获取节点列表即可`
     },
     {
-        text: '节点连接情况',
+        text: '节点线路',
         path: 'clients/connects',
         params: `略`,
         response: `
@@ -64,13 +64,13 @@ export default [
         `
     },
     {
-        text: '节点线路延迟情况',
+        text: '节点线路延迟',
         path: 'clients/delay',
         params: `[][] //多个线路，每个线路都是id列表 `,
         response: `[] //按顺序，每个线路的延迟 -1超时`
     },
     {
-        text: '中继',
+        text: '选择中继',
         path: 'clients/relay',
         params: `[1,2,3,4] //线路，1通过2,3中继到4，也就是第一项为来源节点，最后一项为目标节点，中间为中间节点`,
         response: `true //true成功，false失败`

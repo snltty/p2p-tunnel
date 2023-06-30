@@ -22,15 +22,6 @@ namespace client.service.socks5
         }
 
         /// <summary>
-        /// 获取配置
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public common.socks5.Config Get(ClientServiceParamsInfo arg)
-        {
-            return config;
-        }
-        /// <summary>
         /// 获取pac
         /// </summary>
         /// <param name="arg"></param>
@@ -40,14 +31,6 @@ namespace client.service.socks5
             return socks5Transfer.GetPac();
         }
 
-        /// <summary>
-        /// 设置配置
-        /// </summary>
-        /// <param name="arg"></param>
-        public async Task Set(ClientServiceParamsInfo arg)
-        {
-            await config.SaveConfig(arg.Content);
-        }
         public bool Run(ClientServiceParamsInfo arg)
         {
             proxyServer.Stop(config.Plugin);

@@ -13,13 +13,9 @@ namespace client.service.forward
     public sealed class ForwardClientService : IClientService
     {
         private readonly ForwardTransfer forwardTransfer;
-        private readonly IProxyServer proxyServer;
-        private readonly common.forward.Config config;
-        public ForwardClientService(ForwardTransfer forwardTransfer, IProxyServer proxyServer, common.forward.Config config)
+        public ForwardClientService(ForwardTransfer forwardTransfer)
         {
             this.forwardTransfer = forwardTransfer;
-            this.proxyServer = proxyServer;
-            this.config = config;
         }
         /// <summary>
         /// 添加监听
@@ -62,10 +58,11 @@ namespace client.service.forward
         /// 删除转发
         /// </summary>
         /// <param name="arg"></param>
-        public void RemoveForward(ClientServiceParamsInfo arg)
+        public bool RemoveForward(ClientServiceParamsInfo arg)
         {
             P2PForwardRemoveParams fmodel = arg.Content.DeJson<P2PForwardRemoveParams>();
             forwardTransfer.RemoveP2PForward(fmodel);
+            return true;
         }
 
         /// <summary>
