@@ -2,60 +2,62 @@
     <div class="register-form">
         <div class="inner">
             <el-form label-width="8rem" ref="formDom" :model="state.form" :rules="state.rules">
-                <el-form-item label="" label-width="0">
-                    <el-row>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="连接限流" prop="ConnectLimit">
-                                <el-input size="default" v-model="state.form.ConnectLimit" placeholder="连接限流">
-                                    <template #append>
-                                        <el-tooltip class="box-item" effect="dark" content="连接限流,一分钟内，同ip可连接数，0不限制，需要重启" placement="top">
-                                            <el-icon>
-                                                <Warning />
-                                            </el-icon>
-                                        </el-tooltip>
-                                    </template>
-                                </el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="bufsize" prop="TcpBufferSize">
-                                <el-select size="default" v-model="state.form.TcpBufferSize" placeholder="选择合适的buff">
-                                    <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form-item>
-                <el-form-item label="" label-width="0">
-                    <el-row>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="掉线超时" prop="TimeoutDelay">
-                                <el-input size="default" v-model="state.form.TimeoutDelay" placeholder="掉线超时">
-                                    <template #append>
-                                        <el-tooltip class="box-item" effect="dark" content="超时强制下线时间 ms" placement="top">
-                                            <el-icon>
-                                                <Warning />
-                                            </el-icon>
-                                        </el-tooltip>
-                                    </template>
-                                </el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="登入超时" prop="RegisterTimeout">
-                                <el-input size="default" v-model="state.form.RegisterTimeout" placeholder="登入超时">
-                                    <template #append>
-                                        <el-tooltip class="box-item" effect="dark" content="登入超时，tcp连接后，多久没登入，就断开" placement="top">
-                                            <el-icon>
-                                                <Warning />
-                                            </el-icon>
-                                        </el-tooltip>
-                                    </template>
-                                </el-input>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form-item>
+                <high-config>
+                    <el-form-item label="" label-width="0">
+                        <el-row>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="连接限流" prop="ConnectLimit">
+                                    <el-input size="default" v-model="state.form.ConnectLimit" placeholder="连接限流">
+                                        <template #append>
+                                            <el-tooltip class="box-item" effect="dark" content="连接限流,一分钟内，同ip可连接数，0不限制，需要重启" placement="top">
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="bufsize" prop="TcpBufferSize">
+                                    <el-select size="default" v-model="state.form.TcpBufferSize" placeholder="选择合适的buff">
+                                        <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form-item>
+                    <el-form-item label="" label-width="0">
+                        <el-row>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="掉线超时" prop="TimeoutDelay">
+                                    <el-input size="default" v-model="state.form.TimeoutDelay" placeholder="掉线超时">
+                                        <template #append>
+                                            <el-tooltip class="box-item" effect="dark" content="超时强制下线时间 ms" placement="top">
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="登入超时" prop="RegisterTimeout">
+                                    <el-input size="default" v-model="state.form.RegisterTimeout" placeholder="登入超时">
+                                        <template #append>
+                                            <el-tooltip class="box-item" effect="dark" content="登入超时，tcp连接后，多久没登入，就断开" placement="top">
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form-item>
+                </high-config>
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -167,11 +169,7 @@ export default {
         });
 
         const loadConfig = () => {
-            return new Promise((resolve, reject) => {
-                getConfigure(plugin.config).then((json) => {
-                    resolve(new Function(`return ${json}`)());
-                }).catch(reject);
-            });
+            return getConfigure(plugin.config);
         }
         const submit = () => {
             return new Promise((resolve, reject) => {

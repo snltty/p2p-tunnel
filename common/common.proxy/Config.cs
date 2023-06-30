@@ -53,11 +53,14 @@ namespace common.proxy
         }
 
 
-        public List<FirewallItem> Firewall { get; set; } = new List<FirewallItem>();
+        public List<FirewallItem> Firewall { get; set; } = new List<FirewallItem>
+        {
+            new FirewallItem { ID = 1, IP = new string[] { "0.0.0.0/0" }, PluginId=0xff, Port="0", Protocol= FirewallProtocolType.TCP_UDP, Type= FirewallType.Allow }
+        };
         [JsonIgnore]
-        public FirewallCacheType[] Firewall0 { get; } = new FirewallCacheType[2];
+        private FirewallCacheType[] Firewall0 { get; } = new FirewallCacheType[2];
         [JsonIgnore]
-        public Dictionary<ushort, FirewallCacheType[]> Firewalls { get; } = new Dictionary<ushort, FirewallCacheType[]>();
+        private Dictionary<ushort, FirewallCacheType[]> Firewalls { get; } = new Dictionary<ushort, FirewallCacheType[]>();
         public async Task<bool> AddFirewall(FirewallItem model)
         {
             FirewallItem item = Firewall.FirstOrDefault(c => c.ID == model.ID) ?? new FirewallItem { };

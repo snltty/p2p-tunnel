@@ -15,13 +15,15 @@
                                 </el-checkbox>
                             </el-form-item>
                         </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="bufsize" prop="BufferSize">
-                                <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
-                                    <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
+                        <high-config>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="bufsize" prop="BufferSize">
+                                    <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
+                                        <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </high-config>
                     </el-row>
                 </el-form-item>
             </el-form>
@@ -51,7 +53,6 @@ export default {
         const loadConfig = () => {
             getConfig()
                 .then((json) => {
-                    json = new Function("return" + json)();
                     state.configInfo = json;
                     state.form.ConnectEnable = json.ConnectEnable;
                     state.form.BufferSize = json.BufferSize;

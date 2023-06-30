@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { injectServices, accessService } from '../../states/services'
+import { injectServices, accessService } from '../../../states/services'
 export default {
     props: ['name'],
     setup() {

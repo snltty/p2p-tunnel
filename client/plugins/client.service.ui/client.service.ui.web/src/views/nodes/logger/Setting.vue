@@ -56,7 +56,6 @@ export default {
         const loadConfig = () => {
             getConfig()
                 .then((json) => {
-                    json = new Function("return" + json)();
                     state.configInfo = json;
                     state.form.Enable = json.Enable;
                     state.form.MaxLength = json.MaxLength;

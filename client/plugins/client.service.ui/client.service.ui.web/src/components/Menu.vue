@@ -27,20 +27,24 @@
                     <span>服务器</span>
                 </router-link>
             </auth-item-or>
+            <router-link :to="{name:'Manager'}">
+                <el-icon>
+                    <List />
+                </el-icon>
+                <span>管理接口</span>
+            </router-link>
         </div>
         <div class="flex-1"></div>
         <div class="meta"></div>
     </div>
 </template>
 <script>
-import AuthItem from './auth/AuthItem.vue';
 import { useRouter } from 'vue-router'
 import { injectSignIn } from '../states/signin'
 import { accessService, injectServices } from '../states/services'
 import { shareData } from '../states/shareData'
 import { computed } from 'vue';
 export default {
-    components: { AuthItem },
     setup() {
 
         const router = useRouter();

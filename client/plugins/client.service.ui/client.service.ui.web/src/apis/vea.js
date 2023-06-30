@@ -1,11 +1,5 @@
 import { sendWebsocketMsg } from "./request";
 
-export const getConfig = () => {
-    return sendWebsocketMsg(`vea/get`);
-}
-export const setConfig = (data) => {
-    return sendWebsocketMsg(`vea/set`, data);
-}
 export const runVea = (data) => {
     return sendWebsocketMsg(`vea/run`, data);
 }
@@ -20,7 +14,7 @@ export const update = () => {
 }
 
 export const getOnlines = (id) => {
-    return sendWebsocketMsg(`vea/GetOnline`, id);
+    return sendWebsocketMsg(`vea/online`, id);
 }
 
 export const onlines = (id) => {

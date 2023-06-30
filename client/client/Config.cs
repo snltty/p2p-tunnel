@@ -142,6 +142,8 @@ namespace client
 
         public ushort TTL { get; set; } = 1;
 
+        public bool HighConfig { get; set; } = false;
+
         /// <summary>
         /// 绑定ip
         /// </summary>

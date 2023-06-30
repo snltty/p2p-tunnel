@@ -5,7 +5,11 @@ export const getConfigures = () => {
 }
 
 export const getConfigure = (className) => {
-    return sendWebsocketMsg(`configure/configure`, className);
+    return new Promise((resolve, reject) => {
+        sendWebsocketMsg(`configure/configure`, className).then((res) => {
+            resolve(new Function(`return ${res}`)());
+        }).catch(reject);
+    });
 }
 export const saveConfigure = (className, content) => {
     return sendWebsocketMsg(`configure/save`, { ClassName: className, Content: content });

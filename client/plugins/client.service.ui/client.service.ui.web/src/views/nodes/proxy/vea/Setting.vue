@@ -19,13 +19,15 @@
                                         </el-input>
                                     </el-form-item>
                                 </el-col>
-                                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                    <el-form-item label="bufsize" prop="BufferSize">
-                                        <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
-                                            <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
-                                        </el-select>
-                                    </el-form-item>
-                                </el-col>
+                                <high-config>
+                                    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                        <el-form-item label="bufsize" prop="BufferSize">
+                                            <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
+                                                <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                            </el-select>
+                                        </el-form-item>
+                                    </el-col>
+                                </high-config>
                             </el-row>
                         </div>
                     </el-form-item>
@@ -59,47 +61,49 @@
                             </el-row>
                         </div>
                     </el-form-item>
-                    <el-form-item label-width="0">
-                        <div class="w-100">
-                            <el-row :gutter="10">
-                                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-                                    <el-form-item label="开启组播" prop="BroadcastEnable">
-                                        <el-checkbox v-model="state.form.BroadcastEnable">开启
-                                            <el-tooltip class="box-item" effect="dark" content="是否将组播消息发送到对端" placement="top">
-                                                <el-icon>
-                                                    <Warning />
-                                                </el-icon>
-                                            </el-tooltip>
-                                        </el-checkbox>
-                                    </el-form-item>
-                                </el-col>
-                                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                    <el-form-item label="组播绑定" prop="BroadcastBind">
-                                        <el-input size="default" v-model="state.form.BroadcastBind" placeholder="udp组播绑定端点发送，当为0.0.0.0时，组播消息将发送到127.0.0.1">
-                                            <template #append>
-                                                <el-tooltip class="box-item" effect="dark" content="udp组播绑定端点发送，当为0.0.0.0时，组播消息将发送到127.0.0.1" placement="top">
+                    <high-config>
+                        <el-form-item label-width="0">
+                            <div class="w-100">
+                                <el-row :gutter="10">
+                                    <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+                                        <el-form-item label="开启组播" prop="BroadcastEnable">
+                                            <el-checkbox v-model="state.form.BroadcastEnable">开启
+                                                <el-tooltip class="box-item" effect="dark" content="是否将组播消息发送到对端" placement="top">
                                                     <el-icon>
                                                         <Warning />
                                                     </el-icon>
                                                 </el-tooltip>
-                                            </template>
-                                        </el-input>
-                                    </el-form-item>
-                                </el-col>
-                            </el-row>
-                        </div>
-                    </el-form-item>
-                    <el-form-item label-width="0">
-                        <div class="w-100">
-                            <el-row :gutter="10">
-                                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                                    <el-form-item label="组播列表" prop="BroadcastList">
-                                        <el-input type="textarea" size="default" v-model="state.form.BroadcastList" resize="none" :autosize="{minRows:4,maxRows:6}" placeholder="允许哪些组播ip，为空则允许所有，多条使用英文逗号间隔或者换行"></el-input>
-                                    </el-form-item>
-                                </el-col>
-                            </el-row>
-                        </div>
-                    </el-form-item>
+                                            </el-checkbox>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                        <el-form-item label="组播绑定" prop="BroadcastBind">
+                                            <el-input size="default" v-model="state.form.BroadcastBind" placeholder="udp组播绑定端点发送，当为0.0.0.0时，组播消息将发送到127.0.0.1">
+                                                <template #append>
+                                                    <el-tooltip class="box-item" effect="dark" content="udp组播绑定端点发送，当为0.0.0.0时，组播消息将发送到127.0.0.1" placement="top">
+                                                        <el-icon>
+                                                            <Warning />
+                                                        </el-icon>
+                                                    </el-tooltip>
+                                                </template>
+                                            </el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                        </el-form-item>
+                        <el-form-item label-width="0">
+                            <div class="w-100">
+                                <el-row :gutter="10">
+                                    <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                                        <el-form-item label="组播列表" prop="BroadcastList">
+                                            <el-input type="textarea" size="default" v-model="state.form.BroadcastList" resize="none" :autosize="{minRows:4,maxRows:6}" placeholder="允许哪些组播ip，为空则允许所有，多条使用英文逗号间隔或者换行"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                        </el-form-item>
+                    </high-config>
                     <el-form-item label-width="0">
                         <div class="w-100">
                             <el-row :gutter="10">
@@ -128,7 +132,7 @@
 
 <script>
 import { computed, reactive, ref } from '@vue/reactivity'
-import { getConfig, setConfig } from '../../../../apis/vea'
+import { getConfigure, saveConfigure } from '../../../../apis/configure'
 import { onMounted } from '@vue/runtime-core'
 import { injectClients } from '../../../../states/clients'
 import { shareData } from '../../../../states/shareData'
@@ -173,7 +177,7 @@ export default {
         });
 
         const loadConfig = () => {
-            getConfig().then((res) => {
+            getConfigure(plugin.config).then((res) => {
                 state.configInfo = res;
                 state.form.IP = res.IP;
                 state.form.LanIPs = res.LanIPs.join('\n');
@@ -205,7 +209,7 @@ export default {
                     state.configInfo.BroadcastBind = state.form.BroadcastBind;
                     state.configInfo.BroadcastEnable = state.form.BroadcastEnable;
                     state.configInfo.BroadcastList = state.form.BroadcastList.splitStr();
-                    setConfig(state.configInfo).then(resolve).catch(reject);
+                    saveConfigure(plugin.config, JSON.stringify(state.configInfo)).then(resolve).catch(reject);
                 });
             });
         }

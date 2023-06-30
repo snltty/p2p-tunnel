@@ -19,7 +19,7 @@
 
 <script>
 import { reactive } from '@vue/reactivity'
-import { getConfig, setConfig, runVea } from '../../../../apis/vea'
+import { getConfigure, saveConfigure, runVea } from '../../../../apis/configure'
 import { onMounted } from '@vue/runtime-core'
 import ConnectButton from '../../../../components/ConnectButton.vue'
 import plugin from './plugin'
@@ -35,7 +35,7 @@ export default {
         });
 
         const loadConfig = () => {
-            getConfig().then((res) => {
+            getConfigure(plugin.config).then((res) => {
                 state.ListenEnable = res.ListenEnable;
             });
         }
@@ -46,9 +46,9 @@ export default {
 
         const submit = () => {
             state.loading = true;
-            getConfig().then((res) => {
+            getConfigure(plugin.config).then((res) => {
                 res.ListenEnable = state.ListenEnable;
-                setConfig(res).then(() => {
+                saveConfigure(plugin.config, res).then(() => {
                     loadConfig();
                     runVea().then((res1) => {
                         state.loading = false;
@@ -56,12 +56,12 @@ export default {
                             ElMessage.error('失败,具体信息看日志');
                             state.ListenEnable = false;
                             res.ListenEnable = state.ListenEnable;
-                            setConfig(res);
+                            saveConfigure(plugin.config, JSON.stringify(res));
                         }
                     }).catch(() => {
                         state.ListenEnable = false;
                         res.ListenEnable = state.ListenEnable;
-                        setConfig(res);
+                        saveConfigure(plugin.config, JSON.stringify(res));
                         state.loading = false;
                     })
                 }).catch(() => {

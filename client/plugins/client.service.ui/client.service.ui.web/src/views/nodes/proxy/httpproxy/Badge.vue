@@ -35,8 +35,7 @@ export default {
             TargetConnectionId: 0
         });
         const loadData = () => {
-            getConfigure(plugin.config).then((res) => {
-                let json = new Function(`return ${res}`)();
+            getConfigure(plugin.config).then((json) => {
                 state.TargetConnectionId = json.TargetConnectionId;
             }).catch(() => {
 
@@ -48,8 +47,7 @@ export default {
 
         const handleSubmit = () => {
             state.loading = true;
-            getConfigure(plugin.config).then((res) => {
-                let json = new Function(`return ${res}`)();
+            getConfigure(plugin.config).then((json) => {
                 json.TargetConnectionId = state.TargetConnectionId;
                 console.log(JSON.stringify(json));
                 saveConfigure(plugin.config, JSON.stringify(json)).then((res) => {

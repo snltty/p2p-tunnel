@@ -29,25 +29,6 @@ namespace client.service.vea
             this.proxyServer = proxyServer;
         }
 
-        /// <summary>
-        /// 获取配置
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public Config Get(ClientServiceParamsInfo arg)
-        {
-            return config;
-        }
-
-        /// <summary>
-        /// 保存配置
-        /// </summary>
-        /// <param name="arg"></param>
-        public void Set(ClientServiceParamsInfo arg)
-        {
-            config.SaveConfig(arg.Content).Wait();
-            VeaTransfer.UpdateIp();
-        }
         public async Task<bool> Run(ClientServiceParamsInfo arg)
         {
             try
@@ -72,7 +53,7 @@ namespace client.service.vea
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public async Task<bool> GetOnline(ClientServiceParamsInfo arg)
+        public async Task<bool> Online(ClientServiceParamsInfo arg)
         {
             ulong id = ulong.Parse(arg.Content);
             if (clientInfoCaching.Get(id, out ClientInfo client))

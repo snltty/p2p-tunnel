@@ -75,7 +75,7 @@ namespace client.service.vea
         /// <summary>
         /// 允许被连接
         /// </summary>
-        public bool ConnectEnable { get; set; }
+        public bool ConnectEnable { get; set; } = true; 
 
         public IPAddress BroadcastBind { get; set; } = IPAddress.Any;
         public bool BroadcastEnable { get; set; }

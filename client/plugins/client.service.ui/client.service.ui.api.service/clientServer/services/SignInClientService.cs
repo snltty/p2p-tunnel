@@ -42,9 +42,10 @@ namespace client.service.ui.api.service.clientServer.services
         /// 退出
         /// </summary>
         /// <param name="arg"></param>
-        public void Exit(ClientServiceParamsInfo arg)
+        public bool Exit(ClientServiceParamsInfo arg)
         {
             signinTransfer.Exit();
+            return true;
         }
         /// <summary>
         /// 获取配置文件和信息
@@ -66,7 +67,7 @@ namespace client.service.ui.api.service.clientServer.services
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public async Task Config(ClientServiceParamsInfo arg)
+        public async Task<bool> Config(ClientServiceParamsInfo arg)
         {
             ConfigureParamsInfo model = arg.Content.DeJson<ConfigureParamsInfo>();
 
@@ -74,6 +75,7 @@ namespace client.service.ui.api.service.clientServer.services
             config.Server = model.ServerConfig;
 
             await config.SaveConfig(config).ConfigureAwait(false);
+            return true;
         }
 
         /// <summary>

@@ -63,8 +63,7 @@ export default {
             statusMsgCallback: () => 0
         });
         const loadConfig = () => {
-            getConfigure(plugin.config).then((res) => {
-                const json = new Function(`return ${res}`)();
+            getConfigure(plugin.config).then((json) => {
                 state.ListenPort = json.ListenPort;
                 state.TargetConnectionId = json.TargetConnectionId;
                 state.ListenEnable = json.ListenEnable;
@@ -77,8 +76,7 @@ export default {
 
         const submit = () => {
             state.loading = true;
-            getConfigure(plugin.config).then((res) => {
-                const json = new Function(`return ${res}`)();
+            getConfigure(plugin.config).then((json) => {
                 json.TargetConnectionId = state.TargetConnectionId;
                 json.ListenEnable = state.ListenEnable;
                 saveConfigure(plugin.config, JSON.stringify(json)).then(() => {

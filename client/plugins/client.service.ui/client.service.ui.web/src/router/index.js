@@ -10,6 +10,11 @@ const nodes = files1.keys().map(c => files1(c).default).filter(c => c.plugin).so
     return (a.plugin.order || 0) - (b.plugin.order || 0);
 });
 
+const files2 = require.context('../views/doc/manager/', true, /Index\.vue/);
+const managers = files2.keys().map(c => files1(c).default).filter(c => c.plugin).sort((a, b) => {
+    return (a.plugin.order || 0) - (b.plugin.order || 0);
+});
+
 const routes = [
     {
         path: '/',
@@ -37,6 +42,20 @@ const routes = [
         component: () => import('../views/server/Index.vue'),
         redirect: { name: 'ServerSettings' },
         children: servers.map(c => {
+            return {
+                path: c.plugin.path,
+                name: c.plugin.name,
+                component: c,
+                meta: { text: c.plugin.text, service: c.plugin.service, access: c.plugin.access }
+            }
+        })
+    },
+    {
+        path: '/manager.html',
+        name: 'Manager',
+        component: () => import('../views/doc/manager/Index.vue'),
+        // redirect: { name: 'Manager' },
+        children: managers.map(c => {
             return {
                 path: c.plugin.path,
                 name: c.plugin.name,

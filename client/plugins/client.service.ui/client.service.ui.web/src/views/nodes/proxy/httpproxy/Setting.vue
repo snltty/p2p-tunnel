@@ -18,35 +18,39 @@
                                     </el-input>
                                 </el-form-item>
                             </el-col>
-                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                <el-form-item label="bufsize" prop="BufferSize">
-                                    <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
-                                        <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                            </el-col>
+                            <high-config>
+                                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                    <el-form-item label="bufsize" prop="BufferSize">
+                                        <el-select size="default" v-model="state.form.BufferSize" placeholder="选择合适的buff">
+                                            <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-col>
+                            </high-config>
                         </el-row>
                     </div>
                 </el-form-item>
-                <el-form-item label="" label-width="0">
-                    <div class="w-100">
-                        <el-row :gutter="10">
-                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                <el-form-item label="绑定ip" prop="ProxyIp">
-                                    <el-input size="default" v-model="state.form.ProxyIp" placeholder="作为代理目标ip">
-                                        <template #append>
-                                            <el-tooltip class="box-item" effect="dark" content="作为代理目标ip" placement="top">
-                                                <el-icon>
-                                                    <Warning />
-                                                </el-icon>
-                                            </el-tooltip>
-                                        </template>
-                                    </el-input>
-                                </el-form-item>
-                            </el-col>
-                        </el-row>
-                    </div>
-                </el-form-item>
+                <high-config>
+                    <el-form-item label="" label-width="0">
+                        <div class="w-100">
+                            <el-row :gutter="10">
+                                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                    <el-form-item label="绑定ip" prop="ProxyIp">
+                                        <el-input size="default" v-model="state.form.ProxyIp" placeholder="作为代理目标ip">
+                                            <template #append>
+                                                <el-tooltip class="box-item" effect="dark" content="作为代理目标ip" placement="top">
+                                                    <el-icon>
+                                                        <Warning />
+                                                    </el-icon>
+                                                </el-tooltip>
+                                            </template>
+                                        </el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </el-form-item>
+                </high-config>
                 <el-form-item label="" label-width="0">
                     <div class="w-100">
                         <el-row :gutter="10">
@@ -86,25 +90,29 @@
                                     </el-checkbox>
                                 </el-form-item>
                             </el-col>
-                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                                <el-form-item label="自定义pac" prop="IsCustomPac">
-                                    <el-checkbox v-model="state.form.IsCustomPac">开启
-                                        <el-tooltip class="box-item" effect="dark" content="自定义pac还是使用预制的pac规则" placement="top">
-                                            <el-icon>
-                                                <Warning />
-                                            </el-icon>
-                                        </el-tooltip>
-                                    </el-checkbox>
-                                </el-form-item>
-                            </el-col>
+                            <high-config>
+                                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                    <el-form-item label="自定义pac" prop="IsCustomPac">
+                                        <el-checkbox v-model="state.form.IsCustomPac">开启
+                                            <el-tooltip class="box-item" effect="dark" content="自定义pac还是使用预制的pac规则" placement="top">
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </el-tooltip>
+                                        </el-checkbox>
+                                    </el-form-item>
+                                </el-col>
+                            </high-config>
                         </el-row>
                     </div>
                 </el-form-item>
-                <el-form-item label="" label-width="0">
-                    <div class="w-100 t-c">
-                        <el-button @click="state.showPac = true;" size="small">编辑pac</el-button>
-                    </div>
-                </el-form-item>
+                <high-config>
+                    <el-form-item label="" label-width="0">
+                        <div class="w-100 t-c">
+                            <el-button @click="state.showPac = true;" size="small">编辑pac</el-button>
+                        </div>
+                    </el-form-item>
+                </high-config>
             </el-form>
         </div>
     </div>
@@ -163,8 +171,7 @@ export default {
             }
         });
         const loadConfig = () => {
-            getConfigure(plugin.config).then((res) => {
-                const json = new Function(`return ${res}`)();
+            getConfigure(plugin.config).then((json) => {
                 state.form.ListenPort = json.ListenPort;
                 state.form.TargetConnectionId = json.TargetConnectionId;
                 state.form.IsPac = json.IsPac;
@@ -202,8 +209,7 @@ export default {
                         reject();
                         return false;
                     }
-                    getConfigure(plugin.config).then((res) => {
-                        const json = new Function(`return ${res}`)();
+                    getConfigure(plugin.config).then((json) => {
                         json.TargetConnectionId = state.form.TargetConnectionId;
                         json.ListenPort = +state.form.ListenPort;
                         json.IsPac = state.form.IsPac;

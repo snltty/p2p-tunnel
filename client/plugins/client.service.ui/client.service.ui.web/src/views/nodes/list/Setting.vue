@@ -49,29 +49,13 @@
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="掉线超时" prop="TimeoutDelay">
-                                <el-input size="default" v-model="state.form.TimeoutDelay" placeholder="掉线超时">
-                                    <template #append>
-                                        <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top">
-                                            <el-icon>
-                                                <Warning />
-                                            </el-icon>
-                                        </el-tooltip>
-                                    </template>
-                                </el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="udp限速" prop="UdpUploadSpeedLimit">
-                                <el-input size="default" v-model="state.form.UdpUploadSpeedLimit">
-                                    <template #append>
-                                        <el-tooltip class="box-item" effect="dark" content="udp发送速度限制（字节数,0不限制）" placement="top">
-                                            <el-icon>
-                                                <Warning />
-                                            </el-icon>
-                                        </el-tooltip>
-                                    </template>
-                                </el-input>
+                            <el-form-item label="丰富配置" prop="HighConfig">
+                                <el-checkbox size="default" v-model="state.form.HighConfig">开启
+                                    <el-tooltip class="box-item" effect="dark" content="显示更多配置项" placement="top">
+                                        <el-icon>
+                                            <Warning />
+                                        </el-icon>
+                                    </el-tooltip></el-checkbox>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -89,17 +73,6 @@
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="bufsize" prop="TcpBufferSize">
-                                <el-select size="default" v-model="state.form.TcpBufferSize" placeholder="选择合适的buff">
-                                    <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form-item>
-                <el-form-item label="" label-width="0">
-                    <el-row>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="自动打洞" prop="UsePunchHole">
                                 <el-checkbox v-model="state.form.UsePunchHole">开启
                                     <el-tooltip class="box-item" effect="dark" content="发现新节点后是否自动打洞" placement="top">
@@ -110,76 +83,125 @@
                                 </el-checkbox>
                             </el-form-item>
                         </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="附加TTL" prop="TTL">
-                                <el-input size="default" v-model="state.form.TTL">
-                                    <template #append>
-                                        <el-popover placement="top-start" title="TCP打洞可以调整TTL" :width="300" trigger="hover" content="TCP打洞，有一方将会以一个低TTL值向对方发起连接，达到在网关中留下对方信息，而不会被对方拒绝的效果，默认值1，表示你当前设备与外网的距离+1">
-                                            <template #reference>
-                                                <el-icon>
-                                                    <Warning />
-                                                </el-icon>
-                                            </template>
-                                        </el-popover>
-                                    </template>
-                                </el-input>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form-item>
-                <el-form-item label="" label-width="0">
-                    <el-row>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="tcp打洞" prop="UseTcp">
-                                <el-checkbox v-model="state.form.UseTcp">开启
-                                    <el-tooltip class="box-item" effect="dark" content="是否使用tcp打洞" placement="top">
-                                        <el-icon>
-                                            <Warning />
-                                        </el-icon>
-                                    </el-tooltip>
-                                </el-checkbox>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="udp打洞" prop="UseUdp">
-                                <el-checkbox v-model="state.form.UseUdp">开启
-                                    <el-tooltip class="box-item" effect="dark" content="是否使用udp打洞" placement="top">
-                                        <el-icon>
-                                            <Warning />
-                                        </el-icon>
-                                    </el-tooltip>
-                                </el-checkbox>
-                            </el-form-item>
-                        </el-col>
                     </el-row>
                 </el-form-item>
 
-                <el-form-item label="" label-width="0">
-                    <el-row>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="自动中继" prop="AutoRelay">
-                                <el-checkbox v-model="state.form.AutoRelay">开启
-                                    <el-tooltip class="box-item" effect="dark" content="不开启自动打洞的话，是否自动中继" placement="top">
-                                        <el-icon>
-                                            <Warning />
-                                        </el-icon>
-                                    </el-tooltip>
-                                </el-checkbox>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                            <el-form-item label="中继节点" prop="UseRelay">
-                                <el-checkbox v-model="state.form.UseRelay">开启
-                                    <el-tooltip class="box-item" effect="dark" content="是否允许本节点作为中继节点" placement="top">
-                                        <el-icon>
-                                            <Warning />
-                                        </el-icon>
-                                    </el-tooltip>
-                                </el-checkbox>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form-item>
+                <high-config>
+                    <el-form-item label="" label-width="0">
+                        <el-row>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="tcp打洞" prop="UseTcp">
+                                    <el-checkbox v-model="state.form.UseTcp">开启
+                                        <el-tooltip class="box-item" effect="dark" content="是否使用tcp打洞" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </el-checkbox>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="udp打洞" prop="UseUdp">
+                                    <el-checkbox v-model="state.form.UseUdp">开启
+                                        <el-tooltip class="box-item" effect="dark" content="是否使用udp打洞" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </el-checkbox>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form-item>
+                </high-config>
+                <high-config>
+                    <el-form-item label="" label-width="0">
+                        <el-row>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="自动中继" prop="AutoRelay">
+                                    <el-checkbox v-model="state.form.AutoRelay">开启
+                                        <el-tooltip class="box-item" effect="dark" content="不开启自动打洞的话，是否自动中继" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </el-checkbox>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="中继节点" prop="UseRelay">
+                                    <el-checkbox v-model="state.form.UseRelay">开启
+                                        <el-tooltip class="box-item" effect="dark" content="是否允许本节点作为中继节点" placement="top">
+                                            <el-icon>
+                                                <Warning />
+                                            </el-icon>
+                                        </el-tooltip>
+                                    </el-checkbox>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form-item>
+                </high-config>
+                <high-config>
+                    <el-form-item label="" label-width="0">
+                        <el-row>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="bufsize" prop="TcpBufferSize">
+                                    <el-select size="default" v-model="state.form.TcpBufferSize" placeholder="选择合适的buff">
+                                        <el-option v-for="(item,index) in shareData.bufferSizes" :key="index" :label="item" :value="index"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="附加TTL" prop="TTL">
+                                    <el-input size="default" v-model="state.form.TTL">
+                                        <template #append>
+                                            <el-popover placement="top-start" title="TCP打洞可以调整TTL" :width="300" trigger="hover" content="TCP打洞，有一方将会以一个低TTL值向对方发起连接，达到在网关中留下对方信息，而不会被对方拒绝的效果，默认值1，表示你当前设备与外网的距离+1">
+                                                <template #reference>
+                                                    <el-icon>
+                                                        <Warning />
+                                                    </el-icon>
+                                                </template>
+                                            </el-popover>
+                                        </template>
+                                    </el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form-item>
+                </high-config>
+                <high-config>
+                    <el-form-item label="" label-width="0">
+                        <el-row>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="掉线超时" prop="TimeoutDelay">
+                                    <el-input size="default" v-model="state.form.TimeoutDelay" placeholder="掉线超时">
+                                        <template #append>
+                                            <el-tooltip class="box-item" effect="dark" content="多久时间无法连通则掉线ms,使用5的倍数" placement="top">
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-form-item label="udp限速" prop="UdpUploadSpeedLimit">
+                                    <el-input size="default" v-model="state.form.UdpUploadSpeedLimit">
+                                        <template #append>
+                                            <el-tooltip class="box-item" effect="dark" content="udp发送速度限制（字节数,0不限制）" placement="top">
+                                                <el-icon>
+                                                    <Warning />
+                                                </el-icon>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form-item>
+                </high-config>
             </el-form>
         </div>
     </div>
@@ -218,6 +240,7 @@ export default {
                 TTL: 1,
                 UdpUploadSpeedLimit: 0,
                 TcpBufferSize: 0,
+                HighConfig: false
             },
             rules: {
                 Name: [{ required: true, message: '必填', trigger: 'blur' }],
@@ -267,6 +290,7 @@ export default {
                 state.form.UseRelay = json.ClientConfig.UseRelay;
                 state.form.AutoRelay = json.ClientConfig.AutoRelay;
                 state.form.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
+                state.form.HighConfig = json.ClientConfig.HighConfig;
             }).catch((msg) => {
             });
         }
@@ -288,6 +312,7 @@ export default {
                     json.ClientConfig.AutoRelay = state.form.AutoRelay;
                     json.ClientConfig.TTL = +state.form.TTL;
                     json.ClientConfig.UdpUploadSpeedLimit = +state.form.UdpUploadSpeedLimit;
+                    json.ClientConfig.HighConfig = +state.form.HighConfig;
                     resolve(json);
                 }).catch(reject);
             })

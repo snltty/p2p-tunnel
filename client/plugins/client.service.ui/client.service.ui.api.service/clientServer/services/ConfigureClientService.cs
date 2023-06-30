@@ -51,7 +51,7 @@ namespace client.service.ui.api.service.clientServer.services
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public async Task Save(ClientServiceParamsInfo arg)
+        public async Task<bool> Save(ClientServiceParamsInfo arg)
         {
             SaveParamsInfo model = arg.Content.DeJson<SaveParamsInfo>();
             var plugin = clientServer.GetConfigure(model.ClassName);
@@ -62,6 +62,7 @@ namespace client.service.ui.api.service.clientServer.services
                     arg.SetCode(ClientServiceResponseCodes.Error, "configure fail");
                 }
             }
+            return true;
         }
         /// <summary>
         /// 获取服务列表

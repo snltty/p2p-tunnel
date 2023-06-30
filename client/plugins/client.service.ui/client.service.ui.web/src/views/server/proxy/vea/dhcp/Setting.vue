@@ -53,11 +53,7 @@ export default {
         });
 
         const loadConfig = () => {
-            return new Promise((resolve, reject) => {
-                getConfigure(plugin.config).then((json) => {
-                    resolve(new Function(`return ${json}`)());
-                }).catch(reject);
-            });
+            return getConfigure(plugin.config);
         }
         const submit = () => {
             return new Promise((resolve, reject) => {

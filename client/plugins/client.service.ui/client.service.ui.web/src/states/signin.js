@@ -22,7 +22,8 @@ export const provideSignIn = () => {
             UseTcp: false,
             UseRelay: false,
             UseReConnect: false,
-            UdpUploadSpeedLimit: 0
+            UdpUploadSpeedLimit: 0,
+            HighConfig: false
         },
         ServerConfig: {
             Ip: '',

@@ -6,7 +6,7 @@
 
 <script>
 import { computed } from '@vue/reactivity';
-import { injectServices, accessService } from '../../states/services'
+import { injectServices, accessService } from '../../../states/services'
 export default {
     props: ['names'],
     setup(props) {

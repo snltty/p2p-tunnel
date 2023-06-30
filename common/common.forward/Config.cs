@@ -40,7 +40,7 @@ namespace common.forward
         /// <summary>
         /// 允许连接
         /// </summary>
-        public bool ConnectEnable { get; set; } = false;
+        public bool ConnectEnable { get; set; } = true;
         public EnumBufferSize BufferSize { get; set; } = EnumBufferSize.KB_8;
         /// <summary>
         /// 短连接端口

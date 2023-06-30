@@ -54,7 +54,7 @@ namespace common.httpProxy
         /// <summary>
         /// 允许连接
         /// </summary>
-        public bool ConnectEnable { get; set; }
+        public bool ConnectEnable { get; set; } = true;
         public EnumBufferSize BufferSize { get; set; } = EnumBufferSize.KB_8;
 
         /// <summary>

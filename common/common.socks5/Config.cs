@@ -40,9 +40,9 @@ namespace common.socks5
         public bool ListenEnable { get; set; }
         public int ListenPort { get; set; } = 5413;
         public EnumBufferSize BufferSize { get; set; } = EnumBufferSize.KB_8;
-        public bool ConnectEnable { get; set; }
+        public bool ConnectEnable { get; set; } = true;
         public bool IsCustomPac { get; set; }
-        public bool IsPac { get; set; }
+        public bool IsPac { get; set; } = false;
         public IPAddress ProxyIp { get; set; } = IPAddress.Loopback;
         public ulong TargetConnectionId { get; set; }
 
