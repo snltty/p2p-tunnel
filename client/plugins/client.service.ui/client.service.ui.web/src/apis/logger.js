@@ -1,4 +1,5 @@
 import { sendWebsocketMsg } from "./request";
+import { getConfigure, saveConfigure } from './configure'
 
 export const getLoggers = (page) => {
     return sendWebsocketMsg(`logger/list`, page);
@@ -8,8 +9,8 @@ export const clearLoggers = () => {
 }
 
 export const getConfig = () => {
-    return sendWebsocketMsg(`configure/configure`, 'LoggerClientConfigure');
+    return getConfigure('LoggerClientConfigure');
 }
 export const updateConfig = (content) => {
-    return sendWebsocketMsg(`configure/save`, { ClassName: 'LoggerClientConfigure', Content: content });
+    return saveConfigure('LoggerClientConfigure', content);
 }

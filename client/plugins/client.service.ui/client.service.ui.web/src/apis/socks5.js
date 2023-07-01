@@ -1,10 +1,11 @@
 import { sendWebsocketMsg } from "./request";
+import { getConfigure, saveConfigure } from './configure'
 
 export const get = () => {
-    return sendWebsocketMsg(`configure/configure`, 'Socks5ClientConfigure');
+    return getConfigure('Socks5ClientConfigure');
 }
 export const set = (data) => {
-    return sendWebsocketMsg(`configure/save`, { ClassName: 'LoggerClientConfigure', Content: JSON.stringify(data) });
+    return saveConfigure('Socks5ClientConfigure', JSON.stringify(data));
 }
 export const run = (data) => {
     return sendWebsocketMsg(`socks5/run`, data);

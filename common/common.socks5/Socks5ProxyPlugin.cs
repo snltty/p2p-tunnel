@@ -9,6 +9,7 @@ namespace common.socks5
 {
     public interface ISocks5ProxyPlugin : IProxyPlugin
     {
+
     }
     public class Socks5ProxyPlugin : ISocks5ProxyPlugin
     {
@@ -58,6 +59,7 @@ namespace common.socks5
             }
 
             Socks5EnumStep socks5EnumStep = (Socks5EnumStep)info.Rsv;
+
             //request  auth 的 直接通过,跳过验证部分
             if (socks5EnumStep < Socks5EnumStep.Command && info.Step == EnumProxyStep.Command)
             {
@@ -70,6 +72,7 @@ namespace common.socks5
             //command 的
             if (info.Step == EnumProxyStep.Command)
             {
+                Logger.Instance.DebugDebug($"socks5 command request {info.RequestId}:{info.Step},{socks5EnumStep}--{string.Join(",", info.Data.ToArray())}");
                 //解析出目标地址
                 GetRemoteEndPoint(info, out int index);
                 //udp中继的时候，有可能是 0.0.0.0:0 直接通过
@@ -118,6 +121,8 @@ namespace common.socks5
                         //走到转发步骤
                         info.Rsv = (byte)Socks5EnumStep.Forward;
                         info.Step = EnumProxyStep.ForwardTcp;
+
+                        Logger.Instance.DebugDebug($"socks5 command response :{info.RequestId}:{info.Step},{socks5EnumStep}--{string.Join(",", info.Data.ToArray())}");
                     }
                     break;
                 case EnumProxyStep.ForwardTcp:

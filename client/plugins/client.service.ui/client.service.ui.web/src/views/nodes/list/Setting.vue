@@ -46,7 +46,7 @@
                 <template v-for="(item1,index) in components" :key="index">
                     <component :is="item1" :args="state.form.Args" :ref="`setting_item_${index}`"></component>
                 </template>
-                <el-form-item label="" label-width="0">
+                <!-- <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                             <el-form-item label="丰富配置" prop="HighConfig">
@@ -59,7 +59,7 @@
                             </el-form-item>
                         </el-col>
                     </el-row>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="" label-width="0">
                     <el-row>
                         <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -312,7 +312,7 @@ export default {
                     json.ClientConfig.AutoRelay = state.form.AutoRelay;
                     json.ClientConfig.TTL = +state.form.TTL;
                     json.ClientConfig.UdpUploadSpeedLimit = +state.form.UdpUploadSpeedLimit;
-                    json.ClientConfig.HighConfig = +state.form.HighConfig;
+                    json.ClientConfig.HighConfig = state.form.HighConfig;
                     resolve(json);
                 }).catch(reject);
             })
