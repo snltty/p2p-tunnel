@@ -356,7 +356,7 @@ namespace common.proxy
             {
                 Semaphore.Release();
             }
-            Logger.Instance.DebugDebug($"proxy receive end requestid:{info.RequestId},step:{info.Step},res:{res}");
+            Logger.Instance.DebugDebug($"proxy receive end requestid:{info.RequestId},step:{info.Step}");
 
         }
         private void BuildHeaders(ProxyInfo info)

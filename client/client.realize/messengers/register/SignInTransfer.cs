@@ -177,7 +177,7 @@ namespace client.realize.messengers.singnin
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.DebugError(ex + "");
+                        Logger.Instance.Error(ex);
                         success.ErrorMsg = ex.Message;
                         signInState.LocalInfo.IsConnecting = false;
                         await Task.Delay((int)interval, cancellationToken.Token);
