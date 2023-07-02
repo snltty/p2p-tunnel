@@ -82,6 +82,13 @@ namespace common.socks5
                     proxyServer.InputData(info);
                     return false;
                 }
+                if (info.AddressType == EnumProxyAddressType.IPV6)
+                {
+                    Logger.Instance.DebugWarning($"socks5 command request ipv6 address--{new IPAddress(info.TargetAddress.Span).ToString()}");
+                    //info.Data = new byte[] { (byte)Socks5EnumResponseCommand.ConnecSuccess };
+                    //proxyServer.InputData(info);
+                    //return false;
+                }
 
                 //将socks5的command转化未通用command
                 info.Command = (EnumProxyCommand)info.Data.Span[1];
