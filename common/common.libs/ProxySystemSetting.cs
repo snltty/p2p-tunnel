@@ -36,7 +36,7 @@ namespace common.libs
                         {
                         }
                     }
-                    Command.Windows(string.Empty, new string[] { $"setx http_proxy {proxyUrl}", $"setx https_proxy {proxyUrl}" });
+                    Command.Windows(string.Empty, new string[] { $"setx http_proxy {proxyUrl} -m", $"setx https_proxy {proxyUrl} -m" });
 
                     FlushOs();
                 }

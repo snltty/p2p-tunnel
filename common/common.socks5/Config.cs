@@ -1,8 +1,6 @@
 ﻿using common.libs.database;
 using common.libs.extends;
-using common.proxy;
 using common.server.model;
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using System.Threading.Tasks;

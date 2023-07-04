@@ -4,6 +4,7 @@ using common.server.model;
 using common.libs.extends;
 using System;
 using common.libs;
+using System.Text;
 
 namespace common.socks5
 {
@@ -72,22 +73,16 @@ namespace common.socks5
             //command 的
             if (info.Step == EnumProxyStep.Command)
             {
-                Logger.Instance.DebugDebug($"socks5 command request {info.RequestId}:{info.Step},{socks5EnumStep}--{string.Join(",", info.Data.ToArray())}");
+                //Logger.Instance.DebugDebug($"socks5 command request {info.RequestId}:{info.Step},{socks5EnumStep}--{string.Join(",", info.Data.ToArray())}");
                 //解析出目标地址
                 GetRemoteEndPoint(info, out int index);
+                Logger.Instance.DebugDebug($"socks5 command request {info.RequestId}:{info.Step},{string.Join(",", info.TargetAddress.ToArray())}:{info.TargetPort}");
                 //udp中继的时候，有可能是 0.0.0.0:0 直接通过
                 if (info.TargetAddress.GetIsAnyAddress())
                 {
                     info.Data = new byte[] { (byte)Socks5EnumResponseCommand.ConnecSuccess };
                     proxyServer.InputData(info);
                     return false;
-                }
-                if (info.AddressType == EnumProxyAddressType.IPV6)
-                {
-                    Logger.Instance.DebugWarning($"socks5 command request ipv6 address--{new IPAddress(info.TargetAddress.Span).ToString()}");
-                    //info.Data = new byte[] { (byte)Socks5EnumResponseCommand.ConnecSuccess };
-                    //proxyServer.InputData(info);
-                    //return false;
                 }
 
                 //将socks5的command转化未通用command
@@ -100,6 +95,25 @@ namespace common.socks5
                 GetRemoteEndPoint(info, out int index);
                 //解析出udp包的数据部分
                 info.Data = Socks5Parser.GetUdpData(info.Data);
+                /*
+                if (info.TargetPort == 53)
+                {
+                    try
+                    {
+                        Span<byte> bytes = info.Data.Slice(0, 12).Span;
+                        StringBuilder sb = new StringBuilder();
+                        while (bytes[0] > 0)
+                        {
+                            sb.Append(Encoding.UTF8.GetString(bytes.Slice(1, bytes[0])));
+                            bytes = bytes.Slice(1 + bytes[0]);
+                        }
+                        Logger.Instance.DebugWarning($"[DNS查询]:{sb}");
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                */
             }
             if (info.TargetAddress.GetIsAnyAddress()) return false;
 
@@ -124,12 +138,12 @@ namespace common.socks5
                     {
                         //command的，需要区分成功和失败，成功则回复指定数据，失败则关闭连接
                         Socks5EnumResponseCommand type = (Socks5EnumResponseCommand)info.CommandStatus;
-                        info.Data = Socks5Parser.MakeConnectResponse(new IPEndPoint(IPAddress.Any, Port), (byte)type);
+                        info.Data = Socks5Parser.MakeConnectResponse(new IPEndPoint(config.ProxyIp, Port), (byte)type);
                         //走到转发步骤
                         info.Rsv = (byte)Socks5EnumStep.Forward;
                         info.Step = EnumProxyStep.ForwardTcp;
 
-                        Logger.Instance.DebugDebug($"socks5 command response :{info.RequestId}:{info.Step},{socks5EnumStep}--{string.Join(",", info.Data.ToArray())}");
+                        Logger.Instance.DebugDebug($"socks5 command response :{info.RequestId}:{info.Step},{type}--{string.Join(",", info.Data.ToArray())}");
                     }
                     break;
                 case EnumProxyStep.ForwardTcp:
