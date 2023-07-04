@@ -26,14 +26,16 @@ namespace client.service.vea.platforms
                 $"ip addr add {config.IP}/24 dev {veaName}",
                 $"ip link set dev {veaName} up"
             });
-            interfaceLinux = GetLinuxInterfaceNum();
-            if (string.IsNullOrWhiteSpace(interfaceLinux))
+
+            string str = Command.Linux(string.Empty, new string[] { $"ifconfig" });
+            if (str.Contains(veaName) == false)
             {
                 string msg = Command.Linux(string.Empty, new string[] { $"ip tuntap add mode tun dev {veaName}" });
                 Logger.Instance.Error(msg);
                 return false;
             }
 
+            interfaceLinux = GetLinuxInterfaceNum();
             try
             {
                 Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -interface {interfaceLinux} -loglevel silent");
