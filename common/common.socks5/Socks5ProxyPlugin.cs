@@ -89,31 +89,20 @@ namespace common.socks5
                 info.Command = (EnumProxyCommand)info.Data.Span[1];
                 info.Data = info.Data.Slice(index);
             }
-            else if (info.Step == EnumProxyStep.ForwardUdp)
+            else
             {
-                //解析出目标地址
-                GetRemoteEndPoint(info, out int index);
-                //解析出udp包的数据部分
-                info.Data = Socks5Parser.GetUdpData(info.Data);
-                /*
+                if (info.Step == EnumProxyStep.ForwardUdp)
+                {
+                    //解析出目标地址
+                    GetRemoteEndPoint(info, out int index);
+                    //解析出udp包的数据部分
+                    info.Data = Socks5Parser.GetUdpData(info.Data);
+                }
+
                 if (info.TargetPort == 53)
                 {
-                    try
-                    {
-                        Span<byte> bytes = info.Data.Slice(0, 12).Span;
-                        StringBuilder sb = new StringBuilder();
-                        while (bytes[0] > 0)
-                        {
-                            sb.Append(Encoding.UTF8.GetString(bytes.Slice(1, bytes[0])));
-                            bytes = bytes.Slice(1 + bytes[0]);
-                        }
-                        Logger.Instance.DebugWarning($"[DNS查询]:{sb}");
-                    }
-                    catch (Exception)
-                    {
-                    }
+                    Logger.Instance.DebugWarning($"[DNS查询]:{string.Join(",", info.Data.ToArray())}:{Encoding.UTF8.GetString(info.Data)}");
                 }
-                */
             }
             if (info.TargetAddress.GetIsAnyAddress()) return false;
 
