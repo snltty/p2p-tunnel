@@ -76,7 +76,7 @@ namespace common.socks5
                 //Logger.Instance.DebugDebug($"socks5 command request {info.RequestId}:{info.Step},{socks5EnumStep}--{string.Join(",", info.Data.ToArray())}");
                 //解析出目标地址
                 GetRemoteEndPoint(info, out int index);
-                Logger.Instance.DebugDebug($"socks5 command request {info.RequestId}:{info.Step},{string.Join(",", info.TargetAddress.ToArray())}:{info.TargetPort}");
+                //Logger.Instance.DebugDebug($"socks5 command request {info.RequestId}:{info.Step},{string.Join(",", info.TargetAddress.ToArray())}:{info.TargetPort}");
                 //udp中继的时候，有可能是 0.0.0.0:0 直接通过
                 if (info.TargetAddress.GetIsAnyAddress())
                 {
@@ -101,7 +101,7 @@ namespace common.socks5
 
                 if (info.TargetPort == 53)
                 {
-                    Logger.Instance.DebugWarning($"[DNS查询]:{string.Join(",", info.Data.ToArray())}:{Encoding.UTF8.GetString(info.Data)}");
+                    Logger.Instance.DebugWarning($"[DNS查询]:{string.Join(",", info.Data.ToArray())}:{Encoding.UTF8.GetString(info.Data.ToArray())}");
                 }
             }
             if (info.TargetAddress.GetIsAnyAddress()) return false;
@@ -132,7 +132,7 @@ namespace common.socks5
                         info.Rsv = (byte)Socks5EnumStep.Forward;
                         info.Step = EnumProxyStep.ForwardTcp;
 
-                        Logger.Instance.DebugDebug($"socks5 command response :{info.RequestId}:{info.Step},{type}--{string.Join(",", info.Data.ToArray())}");
+                        //Logger.Instance.DebugDebug($"socks5 command response :{info.RequestId}:{info.Step},{type}--{string.Join(",", info.Data.ToArray())}");
                     }
                     break;
                 case EnumProxyStep.ForwardTcp:
