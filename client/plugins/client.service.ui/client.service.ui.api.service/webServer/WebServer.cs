@@ -1,4 +1,5 @@
-﻿using System;
+﻿using common.libs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -24,46 +25,55 @@ namespace client.service.ui.api.service.webServer
         /// </summary>
         public void Start()
         {
-            HttpListener http = new HttpListener();
-            http.Prefixes.Add($"http://{config.Web.BindIp}:{config.Web.Port}/");
-            http.Start();
+
 
             Task.Factory.StartNew(() =>
             {
-                while (true)
+                try
                 {
-                    HttpListenerContext context = http.GetContext();
-                    HttpListenerRequest request = context.Request;
-                    using HttpListenerResponse response = context.Response;
-                    using Stream stream = response.OutputStream;
+                    HttpListener http = new HttpListener();
+                    http.Prefixes.Add($"http://{config.Web.BindIp}:{config.Web.Port}/");
+                    http.Start();
 
-                    try
+                    while (true)
                     {
-                        response.Headers["Server"] = "snltty";
+                        HttpListenerContext context = http.GetContext();
+                        HttpListenerRequest request = context.Request;
+                        using HttpListenerResponse response = context.Response;
+                        using Stream stream = response.OutputStream;
 
-                        string path = request.Url.AbsolutePath;
-                        //默认页面
-                        if (path == "/") path = "index.html";
+                        try
+                        {
+                            response.Headers["Server"] = "snltty";
 
-                        byte[] bytes = webServerFileReader.Read(path,out DateTime last);
-                        if (bytes.Length > 0)
-                        {
-                            response.ContentLength64 = bytes.Length;
-                            response.ContentType = GetContentType(path);
-                            response.Headers["Last-Modified"] = last.ToString();
-                            stream.Write(bytes, 0, bytes.Length);
+                            string path = request.Url.AbsolutePath;
+                            //默认页面
+                            if (path == "/") path = "index.html";
+
+                            byte[] bytes = webServerFileReader.Read(path, out DateTime last);
+                            if (bytes.Length > 0)
+                            {
+                                response.ContentLength64 = bytes.Length;
+                                response.ContentType = GetContentType(path);
+                                response.Headers["Last-Modified"] = last.ToString();
+                                stream.Write(bytes, 0, bytes.Length);
+                            }
+                            else
+                            {
+                                response.StatusCode = (int)HttpStatusCode.NotFound;
+                            }
                         }
-                        else
+                        catch (Exception)
                         {
-                            response.StatusCode = (int)HttpStatusCode.NotFound;
+                            response.StatusCode = (int)HttpStatusCode.BadRequest;
                         }
+                        stream.Close();
+                        stream.Dispose();
                     }
-                    catch (Exception)
-                    {
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    }
-                    stream.Close();
-                    stream.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.Error(ex);
                 }
             }, TaskCreationOptions.LongRunning);
         }

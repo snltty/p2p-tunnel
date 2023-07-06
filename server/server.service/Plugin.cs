@@ -70,12 +70,26 @@ namespace server.service
 
             var server = services.GetService<ITcpServer>();
             server.SetBufferSize((1 << (byte)config.TcpBufferSize) * 1024);
-            server.Start(config.Tcp);
-            Logger.Instance.Info("TCP服务已开启");
+            try
+            {
+                server.Start(config.Tcp);
+                Logger.Instance.Info("TCP服务已开启");
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
 
             var udpServer = services.GetService<IUdpServer>();
-            udpServer.Start(config.Udp, timeout: config.TimeoutDelay);
-            Logger.Instance.Info("UDP服务已开启");
+            try
+            {
+                udpServer.Start(config.Udp, timeout: config.TimeoutDelay);
+                Logger.Instance.Info("UDP服务已开启");
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
 
             MessengerResolver messengerResolver = services.GetService<MessengerResolver>();
             messengerResolver.LoadMessenger(assemblys);

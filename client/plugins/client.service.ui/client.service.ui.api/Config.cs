@@ -70,7 +70,7 @@ namespace client.service.ui.api
         /// <summary>
         /// 端口
         /// </summary>
-        public int Port { get; set; } = 5411;
+        public int Port { get; set; } = 8100;
         /// <summary>
         /// 根目录
         /// </summary>
@@ -89,7 +89,7 @@ namespace client.service.ui.api
         /// <summary>
         /// 端口
         /// </summary>
-        public int Port { get; set; } = 5412;
+        public int Port { get; set; } = 8100;
         /// <summary>
         /// 绑定ip
         /// </summary>

@@ -189,7 +189,7 @@ namespace client
         public string Name { get; set; } = string.Empty;
         public string Ip { get; set; } = string.Empty;
         public ushort UdpPort { get; set; } = 5410;
-        public ushort TcpPort { get; set; } = 59410;
+        public ushort TcpPort { get; set; } = 5410;
     }
 
     /// <summary>

@@ -72,7 +72,14 @@ namespace client.service.ui.api.service.clientServer
         public void Websocket()
         {
             server = new();
-            server.Start(config.Websocket.BindIp, config.Websocket.Port);
+            try
+            {
+                server.Start(config.Websocket.BindIp, config.Websocket.Port);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+            }
             server.OnMessage = (connection, frame, message) =>
             {
                 var req = message.DeJson<ClientServiceRequestInfo>();
