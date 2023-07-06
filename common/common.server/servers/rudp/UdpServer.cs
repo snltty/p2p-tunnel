@@ -107,7 +107,7 @@ namespace common.server.servers.rudp
                         }
                     }
                 }
-                if(data.Length > 4)
+                else
                 {
                     OnMessage?.Invoke(remoteEndPoint, data.Slice(4));
                 }

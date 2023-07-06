@@ -1,18 +1,12 @@
 ﻿using common.libs;
 using Microsoft.Extensions.DependencyInjection;
-using common.server.model;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using common.server;
 using common.server.servers.iocp;
 using common.server.servers.rudp;
 using System.Reflection;
 using common.libs.database;
 using server.service.validators;
-using System.Net;
-using server.service.messengers;
-using common.libs.extends;
 using server.messengers.singnin;
 using server.service.messengers.singnin;
 using common.proxy;
@@ -99,72 +93,8 @@ namespace server.service
 
             ProxyPluginValidatorHandler proxyPluginValidatorHandler = services.GetService<ProxyPluginValidatorHandler>();
             proxyPluginValidatorHandler.LoadValidator(assemblys);
-
-            Loop(services);
-            Udp((UdpServer)udpServer, messengerResolver);
         }
 
-        private void Loop(ServiceProvider services)
-        {
-            IClientSignInCaching clientRegisterCache = services.GetService<IClientSignInCaching>();
-            MessengerResolver messengerResolver = services.GetService<MessengerResolver>();
-            MessengerSender messengerSender = services.GetService<MessengerSender>();
-
-            clientRegisterCache.OnChanged += (changeClient) =>
-            {
-                List<ClientsClientInfo> clients = clientRegisterCache.Get(changeClient.GroupId).Where(c => c.Connection != null && c.Connection.Connected).OrderBy(c => c.ConnectionId).Select(c => new ClientsClientInfo
-                {
-                    Connection = c.Connection,
-                    ConnectionId = c.ConnectionId,
-                    Name = c.Name,
-                    ClientAccess = c.ClientAccess,
-                    UserAccess = c.UserAccess
-                }).ToList();
-
-                if (clients.Any())
-                {
-                    byte[] bytes = new ClientsInfo
-                    {
-                        Clients = clients.ToArray()
-                    }.ToBytes();
-                    foreach (ClientsClientInfo client in clients)
-                    {
-                        messengerSender.SendOnly(new MessageRequestWrap
-                        {
-                            Connection = client.Connection,
-                            Payload = bytes,
-                            MessengerId = (ushort)ClientsMessengerIds.Notify
-                        }).Wait();
-                    }
-                }
-            };
-        }
-
-        ClientsMessenger clientsMessenger;
-        private void Udp(UdpServer udpServer, MessengerResolver messenger)
-        {
-            if (messenger.GetMessenger((ushort)ClientsMessengerIds.AddTunnel, out object obj))
-            {
-                clientsMessenger = obj as ClientsMessenger;
-            }
-            udpServer.OnMessage += (IPEndPoint remoteEndpoint, Memory<byte> data) =>
-            {
-                try
-                {
-                    TunnelRegisterInfo model = new TunnelRegisterInfo();
-                    model.DeBytes(data);
-                    if (clientsMessenger != null)
-                    {
-                        clientsMessenger.AddTunnel(model, remoteEndpoint.Port);
-                        udpServer.SendUnconnectedMessage(((ushort)remoteEndpoint.Port).ToBytes(), remoteEndpoint);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.DebugError(ex);
-                }
-            };
-        }
 
 
     }

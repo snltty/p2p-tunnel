@@ -2,6 +2,8 @@
 using common.libs.extends;
 using common.libs.rateLimit;
 using common.server;
+using common.server.model;
+using common.server.servers.rudp;
 using server.messengers.singnin;
 using System;
 using System.Collections.Concurrent;
@@ -23,12 +25,21 @@ namespace server.service.messengers.singnin
         private readonly WheelTimer<IConnection> wheelTimer = new WheelTimer<IConnection>();
 
         private readonly IRateLimit<IPAddress> rateLimit;
+        private readonly MessengerSender messengerSender;
+        private readonly MessengerResolver messenger;
+        private readonly ClientsMessenger clientsMessenger;
 
         public int Count { get => cache.Count; }
 
-        public ClientSignInCaching(Config config, IUdpServer udpServer, ITcpServer tcpServer)
+        public ClientSignInCaching(Config config, IUdpServer udpServer, ITcpServer tcpServer, MessengerSender messengerSender, MessengerResolver messenger)
         {
             this.config = config;
+            this.messengerSender = messengerSender;
+            this.messenger = messenger;
+            if (messenger.GetMessenger((ushort)ClientsMessengerIds.AddTunnel, out object obj))
+            {
+                clientsMessenger = obj as ClientsMessenger;
+            }
             if (config.ConnectLimit > 0)
             {
                 rateLimit = new TokenBucketRatelimit<IPAddress>(config.ConnectLimit);
@@ -37,6 +48,24 @@ namespace server.service.messengers.singnin
             tcpServer.OnDisconnect += Disconnected;
             tcpServer.OnConnected = AddConnectedTimeout;
             udpServer.OnConnected = AddConnectedTimeout;
+
+            udpServer.OnMessage += (IPEndPoint remoteEndpoint, Memory<byte> data) =>
+            {
+                try
+                {
+                    TunnelRegisterInfo model = new TunnelRegisterInfo();
+                    model.DeBytes(data);
+                    if (clientsMessenger != null)
+                    {
+                        clientsMessenger.AddTunnel(model, remoteEndpoint.Port);
+                        udpServer.SendUnconnectedMessage(((ushort)remoteEndpoint.Port).ToBytes(), remoteEndpoint);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.DebugError(ex);
+                }
+            };
         }
 
         private void AddConnectedTimeout(IConnection connection)
@@ -132,6 +161,7 @@ namespace server.service.messengers.singnin
             {
                 client.Connection?.Disponse();
                 OnChanged?.Invoke(client);
+                Notify(client);
                 OnOffline?.Invoke(client);
 
                 if (cacheGroups.TryGetValue(client.GroupId, out ConcurrentDictionary<string, SignInCacheInfo> value))
@@ -154,8 +184,38 @@ namespace server.service.messengers.singnin
             if (Get(connectionid, out SignInCacheInfo client))
             {
                 OnChanged?.Invoke(client);
+                Notify(client);
             }
             return false;
+        }
+
+        private void Notify(SignInCacheInfo cache)
+        {
+            List<ClientsClientInfo> clients = Get(cache.GroupId).Where(c => c.Connection != null && c.Connection.Connected).OrderBy(c => c.ConnectionId).Select(c => new ClientsClientInfo
+            {
+                Connection = c.Connection,
+                ConnectionId = c.ConnectionId,
+                Name = c.Name,
+                ClientAccess = c.ClientAccess,
+                UserAccess = c.UserAccess
+            }).ToList();
+
+            if (clients.Any())
+            {
+                byte[] bytes = new ClientsInfo
+                {
+                    Clients = clients.ToArray()
+                }.ToBytes();
+                foreach (ClientsClientInfo client in clients)
+                {
+                    messengerSender.SendOnly(new MessageRequestWrap
+                    {
+                        Connection = client.Connection,
+                        Payload = bytes,
+                        MessengerId = (ushort)ClientsMessengerIds.Notify
+                    }).Wait();
+                }
+            }
         }
     }
 }
