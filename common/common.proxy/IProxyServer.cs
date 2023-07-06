@@ -108,7 +108,7 @@ namespace common.proxy
 
                 acceptEventArg.AcceptSocket = null;
                 ProxyUserToken token = ((ProxyUserToken)acceptEventArg.UserToken);
-              //  Logger.Instance.DebugDebug($"端口:{token.Server.Port} 开始接收连接");
+                //Logger.Instance.DebugDebug($"端口:{token.Server.Port} 开始接收连接");
                 if (token.Server.Socket.AcceptAsync(acceptEventArg) == false)
                 {
                     ProcessAccept(acceptEventArg);
@@ -202,7 +202,7 @@ namespace common.proxy
                 {
                    // Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 包头数据");
                     totalLength += await token.Socket.ReceiveAsync(e.Buffer.AsMemory(e.Offset + totalLength), SocketFlags.None);
-                   // Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 收到包头数据:{totalLength}");
+                  //  Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 收到包头数据:{totalLength}");
                     token.Request.Data = e.Buffer.AsMemory(e.Offset, totalLength);
                     validate = token.Request.ProxyPlugin.ValidateData(token.Request);
                 }
@@ -247,7 +247,7 @@ namespace common.proxy
                 {
                     while (token.Socket.Available > 0)
                     {
-                      //  Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 开始同步接收数据");
+                       // Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 开始同步接收数据");
                         int length = await token.Socket.ReceiveAsync(e.Buffer.AsMemory(), SocketFlags.None);
                       //  Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 收到同步数据:{length}");
                         if (length == 0)
@@ -293,9 +293,9 @@ namespace common.proxy
                 await Receive(token.Request);
                 token.Request.Data = Helper.EmptyArray;
 
-                //Logger.Instance.DebugDebug($"udp:{token.Request.RequestId} 开始异步接收数据");
+               // Logger.Instance.DebugDebug($"udp:{token.Request.RequestId} 开始异步接收数据");
                 result = token.Server.UdpClient.BeginReceive(ProcessReceiveUdp, token);
-               // Logger.Instance.DebugDebug($"udp:{token.Request.RequestId} 开始异步接收数据:CompletedSynchronously:{result.CompletedSynchronously}");
+              //  Logger.Instance.DebugDebug($"udp:{token.Request.RequestId} 开始异步接收数据:CompletedSynchronously:{result.CompletedSynchronously}");
             }
             catch (Exception ex)
             {
@@ -330,7 +330,7 @@ namespace common.proxy
 
                 BuildHeaders(info);
 
-              //  Logger.Instance.DebugDebug($"proxy receive send requestid:{info.RequestId},step:{info.Step},length:{info.Data.Length}");
+                //Logger.Instance.DebugDebug($"proxy receive send requestid:{info.RequestId},step:{info.Step},length:{info.Data.Length}");
                 bool res = await proxyMessengerSender.Request(info);
               //  Logger.Instance.DebugDebug($"proxy receive sent requestid:{info.RequestId},step:{info.Step},res:{res}");
                 if (res == false)

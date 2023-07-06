@@ -59,6 +59,7 @@ namespace common.forward
 
             if (info.Connection == null || info.Connection.Connected == false)
             {
+                Logger.Instance.DebugError($"【{info.ProxyPlugin.Name}】{info.RequestId} connection fail");
                 if (isMagicData == false)
                     info.Data = Helper.EmptyArray;
                 info.CommandStatusMsg = EnumProxyCommandStatusMsg.Connection;
@@ -88,6 +89,8 @@ namespace common.forward
             OnStoped(port);
         }
 
+        //80443
+        private Memory<byte> port = new byte[] { 56, 48, 52, 52, 51 };
         private void GetConnection(ProxyInfo info)
         {
             ForwardAliveTypes aliveTypes = (ForwardAliveTypes)info.Rsv;
@@ -99,6 +102,15 @@ namespace common.forward
             {
                 int portStart = 0;
                 Memory<byte> hostBytes = HttpParser.GetHost(info.Data, ref portStart);
+                if (portStart > 0)
+                {
+                    //80 443
+                    Span<byte> hostPort = hostBytes.Slice(portStart + 1).Span;
+                    if (hostPort.SequenceEqual(port.Span.Slice(0, 2)) || hostPort.SequenceEqual(port.Span.Slice(2)))
+                    {
+                        hostBytes = hostBytes.Slice(0, portStart);
+                    }
+                }
                 if (hostBytes.Length > 0)
                 {
                     forwardTargetProvider.Get(hostBytes.GetString(), info);

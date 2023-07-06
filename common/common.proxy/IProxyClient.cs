@@ -100,12 +100,12 @@ namespace common.proxy
         private async Task ForwardTcp(ProxyInfo info)
         {
             ConnectionKey key = new ConnectionKey(info.Connection.ConnectId, info.RequestId);
-
             if (connections.TryGetValue(key, out AsyncServerUserToken token))
             {
                 token.Data.Step = info.Step;
                 token.Data.Command = info.Command;
                 token.Data.Rsv = info.Rsv;
+                token.Data.Connection = info.Connection;
                 if (info.Data.Length > 0 && token.TargetSocket.Connected)
                 {
                     try
@@ -168,6 +168,7 @@ namespace common.proxy
                     token.Data.Step = info.Step;
                     token.Data.Command = info.Command;
                     token.Data.Rsv = info.Rsv;
+                    token.Data.Connection = info.Connection;
                     token.Update();
                     await token.TargetSocket.SendToAsync(info.Data, SocketFlags.None, token.TargetEP);
                     token.Data.Data = Helper.EmptyArray;
@@ -294,7 +295,6 @@ namespace common.proxy
                 }
                 else
                 {
-                    //Logger.Instance.Error($"connect {e.RemoteEndPoint} fail {e.SocketError}");
                     if (e.SocketError == SocketError.ConnectionRefused)
                     {
                         command = EnumProxyCommandStatus.DistReject;
@@ -353,9 +353,9 @@ namespace common.proxy
         }
         private async void TargetProcessReceive(SocketAsyncEventArgs e)
         {
+            AsyncServerUserToken token = (AsyncServerUserToken)e.UserToken;
             try
             {
-                AsyncServerUserToken token = (AsyncServerUserToken)e.UserToken;
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
                     if (token.Data.Step == EnumProxyStep.Command)

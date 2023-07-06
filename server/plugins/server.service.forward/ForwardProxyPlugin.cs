@@ -12,7 +12,7 @@ namespace server.service.forward
         public override HttpHeaderCacheInfo Headers { get; set; }
         public override Memory<byte> HeadersBytes { get; set; }
 
-        public ForwardProxyPlugin(common.forward.Config config, common.proxy.Config config1, IProxyServer proxyServer,
+        public ForwardProxyPlugin(common.forward.Config config, IProxyServer proxyServer,
             IForwardTargetProvider forwardTargetProvider, IClientSignInCaching clientSignInCaching,
             IForwardTargetCaching<ForwardTargetCacheInfo> forwardTargetCaching) : base(config, proxyServer, forwardTargetProvider)
         {

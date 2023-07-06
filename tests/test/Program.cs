@@ -17,10 +17,12 @@ namespace test
     {
         static void Main(string[] args)
         {
-            FindPoerTest t = new FindPoerTest();
-            Console.WriteLine(t.Exists(t.array,253));
-            t.Add(t.array,253);
-            Console.WriteLine(t.Exists(t.array,253));
+            Console.WriteLine(string.Join(",", Encoding.UTF8.GetBytes("80-443")));
+
+           // FindPoerTest t = new FindPoerTest();
+           // Console.WriteLine(t.Exists(t.array,253));
+          //  t.Add(t.array,253);
+           // Console.WriteLine(t.Exists(t.array,253));
             // BenchmarkRunner.Run<Test>();
         }
     }
