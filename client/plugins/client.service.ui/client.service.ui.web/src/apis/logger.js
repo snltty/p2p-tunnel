@@ -12,5 +12,5 @@ export const getConfig = () => {
     return getConfigure('LoggerClientConfigure');
 }
 export const updateConfig = (content) => {
-    return saveConfigure('LoggerClientConfigure', content);
+    return saveConfigure('LoggerClientConfigure', JSON.stringify(content));
 }

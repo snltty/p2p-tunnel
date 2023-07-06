@@ -5,7 +5,7 @@ export const getConfig = () => {
     return getConfigure('ForwardClientConfigure');
 }
 export const updateConfig = (content) => {
-    return saveConfigure('ForwardClientConfigure', content);
+    return saveConfigure('ForwardClientConfigure', JSON.stringify(content));
 }
 
 export const get = (id) => {

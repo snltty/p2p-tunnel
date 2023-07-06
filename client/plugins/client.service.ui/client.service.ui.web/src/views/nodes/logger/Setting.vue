@@ -76,7 +76,7 @@ export default {
                         return false;
                     }
                     const _json = getJson();
-                    updateConfig(JSON.stringify(_json))
+                    updateConfig(_json)
                         .then(resolve)
                         .catch(reject);
                 });

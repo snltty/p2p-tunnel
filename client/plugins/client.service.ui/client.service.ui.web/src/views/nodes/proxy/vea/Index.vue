@@ -49,7 +49,7 @@ export default {
             state.loading = true;
             getConfigure(plugin.config).then((res) => {
                 res.ListenEnable = state.ListenEnable;
-                saveConfigure(plugin.config, res).then(() => {
+                saveConfigure(plugin.config, JSON.stringify(res)).then(() => {
                     loadConfig();
                     runVea().then((res1) => {
                         state.loading = false;
