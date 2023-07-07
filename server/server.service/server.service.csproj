@@ -36,8 +36,6 @@
 	  <ProjectReference Include="..\..\common\common.libs\common.libs.csproj" />
 	  <ProjectReference Include="..\..\common\common.server\common.server.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.forward\server.service.forward.csproj" />
-	  <ProjectReference Include="..\plugins\server.service.httpProxy\server.service.httpProxy.csproj" />
-	  <ProjectReference Include="..\plugins\server.service.socks5\server.service.socks5.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.users\server.service.users.csproj" />
 	  <ProjectReference Include="..\plugins\server.service.vea\server.service.vea.csproj" />
 	  <ProjectReference Include="..\server\server.csproj" />

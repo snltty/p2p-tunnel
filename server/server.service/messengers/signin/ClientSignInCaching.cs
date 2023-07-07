@@ -26,46 +26,21 @@ namespace server.service.messengers.singnin
 
         private readonly IRateLimit<IPAddress> rateLimit;
         private readonly MessengerSender messengerSender;
-        private readonly MessengerResolver messenger;
-        private readonly ClientsMessenger clientsMessenger;
 
         public int Count { get => cache.Count; }
 
-        public ClientSignInCaching(Config config, IUdpServer udpServer, ITcpServer tcpServer, MessengerSender messengerSender, MessengerResolver messenger)
+        public ClientSignInCaching(Config config, IUdpServer udpServer, ITcpServer tcpServer, MessengerSender messengerSender)
         {
             this.config = config;
             this.messengerSender = messengerSender;
-            this.messenger = messenger;
-            if (messenger.GetMessenger((ushort)ClientsMessengerIds.AddTunnel, out object obj))
-            {
-                clientsMessenger = obj as ClientsMessenger;
-            }
+           
             if (config.ConnectLimit > 0)
             {
                 rateLimit = new TokenBucketRatelimit<IPAddress>(config.ConnectLimit);
             }
-
             tcpServer.OnDisconnect += Disconnected;
             tcpServer.OnConnected = AddConnectedTimeout;
             udpServer.OnConnected = AddConnectedTimeout;
-
-            udpServer.OnMessage += (IPEndPoint remoteEndpoint, Memory<byte> data) =>
-            {
-                try
-                {
-                    TunnelRegisterInfo model = new TunnelRegisterInfo();
-                    model.DeBytes(data);
-                    if (clientsMessenger != null)
-                    {
-                        clientsMessenger.AddTunnel(model, remoteEndpoint.Port);
-                        udpServer.SendUnconnectedMessage(((ushort)remoteEndpoint.Port).ToBytes(), remoteEndpoint);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.DebugError(ex);
-                }
-            };
         }
 
         private void AddConnectedTimeout(IConnection connection)

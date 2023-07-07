@@ -23,6 +23,7 @@ namespace client.service.vea
         public override IPAddress BroadcastBind => config.BroadcastBind;
         public override HttpHeaderCacheInfo Headers { get; set; }
         public override Memory<byte> HeadersBytes { get; set; }
+        public override IPAddress ProxyIp => IPAddress.Any;
 
         public override uint Access => common.vea.Config.access;
         public override string Name => "vea";
@@ -36,7 +37,7 @@ namespace client.service.vea
         private readonly IClientInfoCaching clientInfoCaching;
 
         public VeaSocks5ProxyPlugin(Config config, client.Config config1, IProxyServer proxyServer
-            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching) : base(null, proxyServer)
+            , VeaTransfer veaTransfer, IProxyMessengerSender proxyMessengerSender, SignInStateInfo signInStateInfo, IClientInfoCaching clientInfoCaching) : base(proxyServer)
         {
             this.config = config;
             this.proxyServer = proxyServer;
@@ -88,6 +89,7 @@ namespace client.service.vea
                 //组播数据包，直接分发
                 if (info.TargetAddress.GetIsBroadcastAddress())
                 {
+                    return false;
                     //没开启组播
                     if (config.BroadcastEnable == false) return false;
                     //组播ip不包含在允许列表里

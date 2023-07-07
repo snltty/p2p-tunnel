@@ -2,12 +2,12 @@
 using client.realize.messengers.punchHole;
 using client.service.forward;
 using client.service.forward.server;
-using client.service.httpProxy;
-using client.service.httpProxy.server;
+//using client.service.httpProxy;
+//using client.service.httpProxy.server;
 using client.service.logger;
 using client.service.proxy;
-using client.service.socks5;
-using client.service.socks5.server;
+//using client.service.socks5;
+//using client.service.socks5.server;
 using client.service.ui.api.service.clientServer;
 using client.service.users.server;
 using client.service.vea;
@@ -67,13 +67,13 @@ namespace client.service
                 typeof(ServerForwardClientService).Assembly,
                 typeof(common.forward.ForwardMessengerIds).Assembly,
 
-                typeof(HttpProxyClientService).Assembly,
-                typeof(ServerHttpProxyClientService).Assembly,
-                typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
+                //typeof(HttpProxyClientService).Assembly,
+                //typeof(ServerHttpProxyClientService).Assembly,
+                //typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
 
-                typeof(Socks5ClientService).Assembly,
-                typeof(ServerSocks5ClientService).Assembly,
-                typeof(common.socks5.Socks5MessengerIds).Assembly,
+                //typeof(Socks5ClientService).Assembly,
+                //typeof(ServerSocks5ClientService).Assembly,
+                //typeof(common.socks5.Socks5MessengerIds).Assembly,
 
                 typeof(VeaClientService).Assembly,
                 typeof(ServerVeaClientService).Assembly,

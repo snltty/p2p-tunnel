@@ -1,7 +1,7 @@
 ﻿using client.messengers.singnin;
 using client.realize.messengers.punchHole;
 using client.service.logger;
-using client.service.socks5;
+//using client.service.socks5;
 using client.service.ui.api.service.clientServer;
 using client.service.ui.api.service.webServer;
 using common.libs;
@@ -10,14 +10,14 @@ using common.server;
 using System.Reflection;
 using client.service.users.server;
 using client.service.forward;
-using client.service.httpProxy;
+//using client.service.httpProxy;
 using System.Net;
 using common.user;
 using common.proxy;
 using client.service.forward.server;
 using client.service.proxy;
-using client.service.httpProxy.server;
-using client.service.socks5.server;
+//using client.service.httpProxy.server;
+//using client.service.socks5.server;
 
 namespace client.service.app
 {
@@ -69,11 +69,11 @@ namespace client.service.app
                 typeof(ForwardClientService).Assembly,
                 typeof(ServerForwardClientService).Assembly,
 
-                typeof(HttpProxyClientService).Assembly,
-                typeof(ServerHttpProxyClientService).Assembly,
+               // typeof(HttpProxyClientService).Assembly,
+                //typeof(ServerHttpProxyClientService).Assembly,
 
-                typeof(Socks5ClientService).Assembly,
-                typeof(ServerSocks5ClientService).Assembly,
+                //typeof(Socks5ClientService).Assembly,
+                //typeof(ServerSocks5ClientService).Assembly,
 
                 //typeof(VeaClientService).Assembly,
 
@@ -86,7 +86,7 @@ namespace client.service.app
                 typeof(common.server.model.SignInMessengerIds).Assembly,
                 typeof(ProxyMessengerIds).Assembly,
                 typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
-                typeof(common.socks5.Socks5MessengerIds).Assembly,
+               // typeof(common.socks5.Socks5MessengerIds).Assembly,
                 typeof(common.forward.ForwardMessengerIds).Assembly,
 
                 typeof(UsersMessengerIds).Assembly,

@@ -3,13 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
 using System.Linq;
-using server.service.socks5;
+//using server.service.socks5;
 using System.Threading;
 using common.server;
 using System.IO;
 using server.service.users;
 using common.proxy;
-using server.service.httpProxy;
+//using server.service.httpProxy;
 using server.service.forward;
 using System.Threading.Tasks;
 using server.service.vea;
@@ -35,8 +35,8 @@ namespace server.service
             //可以改为从dll文件加载
             Assembly[] assemblys = new Assembly[] {
                 typeof(ForwardMessenger).Assembly,
-                typeof(Socks5SettingMessenger).Assembly,
-                typeof(HttpProxySettingMessenger).Assembly,
+              //  typeof(Socks5SettingMessenger).Assembly,
+              //  typeof(HttpProxySettingMessenger).Assembly,
                 typeof(UsersMessenger).Assembly,
                 typeof(ProxyMessenger).Assembly,
 
@@ -48,8 +48,8 @@ namespace server.service
                  //以下是为了获取信息
                 typeof(common.server.model.SignInMessengerIds).Assembly,
                 typeof(ProxyMessengerIds).Assembly,
-                typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
-                typeof(common.socks5.Socks5MessengerIds).Assembly,
+              //  typeof(common.httpProxy.HttpProxyMessengerIds).Assembly,
+             //   typeof(common.socks5.Socks5MessengerIds).Assembly,
                 typeof(common.forward.ForwardMessengerIds).Assembly,
 
                 typeof(SignInAccessValidator).Assembly,

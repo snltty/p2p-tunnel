@@ -4,7 +4,9 @@ import { subWebsocketState } from '../apis/request'
 const provideWebsocketKey = Symbol();
 export const provideWebsocket = () => {
     const state = reactive({
-        connected: false
+        connected: false,
+        connecting: false,
+        url: ''
     });
     provide(provideWebsocketKey, state);
 

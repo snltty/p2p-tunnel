@@ -31,7 +31,6 @@
 		<ProjectReference Include="..\..\..\common\common.libs\common.libs.csproj" />
 		<ProjectReference Include="..\..\..\common\common.socks5\common.socks5.csproj" />
 		<ProjectReference Include="..\..\..\common\common.vea\common.vea.csproj" />
-		<ProjectReference Include="..\client.service.socks5\client.service.socks5.csproj" />
 		<ProjectReference Include="..\client.service.ui\client.service.ui.api\client.service.ui.api.csproj" />
 	</ItemGroup>
 

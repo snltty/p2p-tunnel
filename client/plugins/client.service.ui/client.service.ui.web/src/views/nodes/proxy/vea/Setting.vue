@@ -61,7 +61,7 @@
                             </el-row>
                         </div>
                     </el-form-item>
-                    <high-config>
+                    <!-- <high-config>
                         <el-form-item label-width="0">
                             <div class="w-100">
                                 <el-row :gutter="10">
@@ -103,7 +103,7 @@
                                 </el-row>
                             </div>
                         </el-form-item>
-                    </high-config>
+                    </high-config> -->
                     <el-form-item label-width="0">
                         <div class="w-100">
                             <el-row :gutter="10">

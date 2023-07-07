@@ -98,7 +98,6 @@ namespace common.proxy
 
             plugin.Started(port);
 
-            //Logger.Instance.DebugDebug($"udp:{token.Request.RequestId} 开始异步接收数据");
             IAsyncResult result = server.UdpClient.BeginReceive(ProcessReceiveUdp, token);
         }
         private void StartAccept(SocketAsyncEventArgs acceptEventArg)
@@ -108,7 +107,6 @@ namespace common.proxy
 
                 acceptEventArg.AcceptSocket = null;
                 ProxyUserToken token = ((ProxyUserToken)acceptEventArg.UserToken);
-                //Logger.Instance.DebugDebug($"端口:{token.Server.Port} 开始接收连接");
                 if (token.Server.Socket.AcceptAsync(acceptEventArg) == false)
                 {
                     ProcessAccept(acceptEventArg);
@@ -144,7 +142,6 @@ namespace common.proxy
             try
             {
                 ProxyUserToken acceptToken = (e.UserToken as ProxyUserToken);
-                //Logger.Instance.DebugDebug($"端口:{acceptToken.Server.Port} 收到连接");
 
                 uint id = requestIdNs.Increment();
                 ProxyUserToken token = new ProxyUserToken
@@ -180,7 +177,6 @@ namespace common.proxy
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, (1 << (byte)acceptToken.Server.ProxyPlugin.BufferSize) * 1024);
                 readEventArgs.Completed += IO_Completed;
 
-                //Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 开始异步接收数据");
                 if (token.Socket.ReceiveAsync(readEventArgs) == false)
                 {
                     ProcessReceive(readEventArgs);
@@ -200,9 +196,7 @@ namespace common.proxy
                 //太短
                 while ((validate & EnumProxyValidateDataResult.TooShort) == EnumProxyValidateDataResult.TooShort)
                 {
-                   // Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 包头数据");
                     totalLength += await token.Socket.ReceiveAsync(e.Buffer.AsMemory(e.Offset + totalLength), SocketFlags.None);
-                  //  Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 收到包头数据:{totalLength}");
                     token.Request.Data = e.Buffer.AsMemory(e.Offset, totalLength);
                     validate = token.Request.ProxyPlugin.ValidateData(token.Request);
                 }
@@ -228,7 +222,6 @@ namespace common.proxy
                 }
 
 
-                //Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 收到数据:{e.BytesTransferred}");
                 int totalLength = e.BytesTransferred;
                 token.Request.Data = e.Buffer.AsMemory(e.Offset, e.BytesTransferred);
                 //有些客户端，会把一个包拆开发送，很奇怪，不得不验证一下数据完整性
@@ -247,9 +240,7 @@ namespace common.proxy
                 {
                     while (token.Socket.Available > 0)
                     {
-                       // Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 开始同步接收数据");
                         int length = await token.Socket.ReceiveAsync(e.Buffer.AsMemory(), SocketFlags.None);
-                      //  Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 收到同步数据:{length}");
                         if (length == 0)
                         {
                             CloseClientSocket(e);
@@ -265,7 +256,6 @@ namespace common.proxy
                     CloseClientSocket(e);
                     return;
                 }
-                //Logger.Instance.DebugDebug($"tcp:{token.Request.RequestId} 开始异步接收数据");
                 if (token.Socket.ReceiveAsync(e) == false)
                 {
                     ProcessReceive(e);
@@ -286,16 +276,13 @@ namespace common.proxy
                 ProxyUserToken token = result.AsyncState as ProxyUserToken;
 
                 token.Request.Data = token.Server.UdpClient.EndReceive(result, ref rep);
-               // Logger.Instance.DebugDebug($"udp:{token.Request.RequestId} 收到数据:{token.Request.Data.Length}");
 
                 token.Request.SourceEP = rep;
                 token.Request.ClientEP = rep;
                 await Receive(token.Request);
                 token.Request.Data = Helper.EmptyArray;
 
-               // Logger.Instance.DebugDebug($"udp:{token.Request.RequestId} 开始异步接收数据");
                 result = token.Server.UdpClient.BeginReceive(ProcessReceiveUdp, token);
-              //  Logger.Instance.DebugDebug($"udp:{token.Request.RequestId} 开始异步接收数据:CompletedSynchronously:{result.CompletedSynchronously}");
             }
             catch (Exception ex)
             {
@@ -314,9 +301,7 @@ namespace common.proxy
         }
         private async Task Receive(ProxyInfo info)
         {
-           // Logger.Instance.DebugDebug($"proxy receive wait requestid:{info.RequestId},step:{info.Step},length:{info.Data.Length}");
             await Semaphore.WaitAsync();
-           // Logger.Instance.DebugDebug($"proxy receive got lock requestid:{info.RequestId},step:{info.Step},length:{info.Data.Length}");
             try
             {
                 if (info.Data.Length == 0 && info.Step == EnumProxyStep.Command)
@@ -330,9 +315,7 @@ namespace common.proxy
 
                 BuildHeaders(info);
 
-                //Logger.Instance.DebugDebug($"proxy receive send requestid:{info.RequestId},step:{info.Step},length:{info.Data.Length}");
                 bool res = await proxyMessengerSender.Request(info);
-              //  Logger.Instance.DebugDebug($"proxy receive sent requestid:{info.RequestId},step:{info.Step},res:{res}");
                 if (res == false)
                 {
                     if (info.Step == EnumProxyStep.Command)
@@ -356,7 +339,6 @@ namespace common.proxy
             {
                 Semaphore.Release();
             }
-           // Logger.Instance.DebugDebug($"proxy receive end requestid:{info.RequestId},step:{info.Step}");
 
         }
         private void BuildHeaders(ProxyInfo info)
@@ -483,7 +465,6 @@ namespace common.proxy
 
                 if (step == EnumProxyStep.Command)
                 {
-                    //Logger.Instance.DebugDebug($"proxy command response requestid:{info.RequestId},status:{info.CommandStatus}");
                     bool canNext = await InputDataCommand(token, info);
                     if (canNext == false) return;
                 }

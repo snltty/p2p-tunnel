@@ -19,7 +19,6 @@
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\common\common.httpProxy\common.httpProxy.csproj" />
 	  <ProjectReference Include="..\..\server\server.csproj" />
 	</ItemGroup>
 

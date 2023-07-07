@@ -3,6 +3,8 @@ using common.libs.extends;
 using common.server;
 using common.server.model;
 using server.messengers.singnin;
+using System.Net;
+using System;
 
 namespace server.service.messengers
 {
@@ -13,9 +15,32 @@ namespace server.service.messengers
     public sealed class ClientsMessenger : IMessenger
     {
         private readonly IClientSignInCaching clientSignInCache;
-        public ClientsMessenger(IClientSignInCaching clientSignInCache)
+        private readonly ClientsMessenger clientsMessenger;
+        public ClientsMessenger(IClientSignInCaching clientSignInCache, IUdpServer udpServer, MessengerResolver messenger)
         {
             this.clientSignInCache = clientSignInCache;
+
+            if (messenger.GetMessenger((ushort)ClientsMessengerIds.AddTunnel, out object obj))
+            {
+                clientsMessenger = obj as ClientsMessenger;
+            }
+            udpServer.OnMessage += (IPEndPoint remoteEndpoint, Memory<byte> data) =>
+            {
+                try
+                {
+                    TunnelRegisterInfo model = new TunnelRegisterInfo();
+                    model.DeBytes(data);
+                    if (clientsMessenger != null)
+                    {
+                        clientsMessenger.AddTunnel(model, remoteEndpoint.Port);
+                        udpServer.SendUnconnectedMessage(((ushort)remoteEndpoint.Port).ToBytes(), remoteEndpoint);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.DebugError(ex);
+                }
+            };
         }
 
         [MessengerId((ushort)ClientsMessengerIds.IP)]
