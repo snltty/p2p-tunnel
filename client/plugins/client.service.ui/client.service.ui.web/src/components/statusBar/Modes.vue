@@ -1,6 +1,6 @@
 <template>
     <a href="javascript:;" class="modes-wrap" @click="handleShow">功能开关</a>
-    <el-dialog v-model="state.show" title="显示或隐藏一些功能" width="400" center top="1vh">
+    <el-dialog append-to-body v-model="state.show" title="显示或隐藏一些功能" width="400" center top="1vh">
         <div>
             <h3>节点功能</h3>
             <el-checkbox-group v-model="state.checkListNodes">

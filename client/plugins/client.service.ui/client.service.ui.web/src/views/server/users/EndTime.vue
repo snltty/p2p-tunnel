@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="设置到期时间" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="270px">
+    <el-dialog append-to-body title="设置到期时间" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="270px">
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="0px">
             <el-form-item label="" prop="endtime">
                 <el-date-picker v-model="state.form.endtime" type="datetime" :clearable="false" />

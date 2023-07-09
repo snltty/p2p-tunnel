@@ -26,6 +26,11 @@
                         </high-config>
                     </el-row>
                 </el-form-item>
+                <el-form-item label-width="0">
+                    <div class="t-c w-100">
+                        <el-button type="primary" :loading="state.loading" @click="submit">确 定</el-button>
+                    </div>
+                </el-form-item>
             </el-form>
         </div>
     </div>
@@ -37,11 +42,13 @@ import { getConfig, updateConfig } from "../../../../apis/forward";
 import { shareData } from "../../../../states/shareData";
 import { onMounted } from "@vue/runtime-core";
 import plugin from './plugin'
+import { ElMessage } from 'element-plus';
 export default {
     plugin: plugin,
     setup() {
         const formDom = ref(null);
         const state = reactive({
+            loading: false,
             configInfo: {},
             form: {
                 ConnectEnable: false,
@@ -73,9 +80,20 @@ export default {
                         return false;
                     }
                     const _json = getJson();
+                    state.loading = true;
                     updateConfig(_json)
-                        .then(resolve)
-                        .catch(reject);
+                        .then((res) => {
+                            state.loading = false;
+                            resolve();
+                            if (res) {
+                                ElMessage.success('操作成功!');
+                            } else {
+                                ElMessage.error('操作失败!');
+                            }
+                        }).catch(() => {
+                            state.loading = false;
+                            resolve();
+                        })
                 });
             });
         };
@@ -101,6 +119,10 @@ export default {
 
 .el-form-item:last-child {
     margin-bottom: 0;
+}
+
+.inner {
+    padding: 2rem;
 }
 
 @media screen and (max-width: 768px) {

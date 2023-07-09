@@ -159,7 +159,8 @@ namespace common.server.servers.websocket
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError(ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error(ex);
                 OnConnectFail(ex.Message);
             }
         }
@@ -187,7 +188,8 @@ namespace common.server.servers.websocket
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError(ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error(ex);
             }
         }
         private void TargetProcessReceive()
@@ -231,7 +233,8 @@ namespace common.server.servers.websocket
             catch (Exception ex)
             {
                 CloseClientSocket();
-                Logger.Instance.DebugError(ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error(ex);
             }
         }
 

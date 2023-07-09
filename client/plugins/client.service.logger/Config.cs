@@ -1,4 +1,5 @@
-﻿using common.libs.database;
+﻿using common.libs;
+using common.libs.database;
 using common.libs.extends;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
@@ -11,15 +12,8 @@ namespace client.service.logger
     [Table("logger-appsettings")]
     public sealed class Config
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public Config() { }
         private readonly IConfigDataProvider<Config> configDataProvider;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="configDataProvider"></param>
         public Config(IConfigDataProvider<Config> configDataProvider)
         {
             this.configDataProvider = configDataProvider;
@@ -39,6 +33,11 @@ namespace client.service.logger
         /// 行数
         /// </summary>
         public int MaxLength { get; set; } = 100;
+#if DEBUG
+        public LoggerTypes LoggerLevel { get; set; } = LoggerTypes.DEBUG;
+#else
+        public LoggerTypes LoggerLevel { get; set; } = LoggerTypes.WARNING;
+#endif
 
         /// <summary>
         /// 读取
@@ -68,10 +67,13 @@ namespace client.service.logger
 
             Enable = _config.Enable;
             MaxLength = _config.MaxLength;
+            LoggerLevel = _config.LoggerLevel;
+            Logger.Instance.LoggerLevel = LoggerLevel;
             await configDataProvider.Save(jsonStr).ConfigureAwait(false);
         }
         public async Task SaveConfig()
         {
+            Logger.Instance.LoggerLevel = LoggerLevel;
             await configDataProvider.Save(this).ConfigureAwait(false);
         }
     }

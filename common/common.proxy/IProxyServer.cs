@@ -96,6 +96,7 @@ namespace common.proxy
             acceptEventArg.Completed += IO_Completed;
             StartAccept(acceptEventArg);
 
+            Logger.Instance.Warning($"{plugin.Name}->port:{port}  started");
             plugin.Started(port);
 
             IAsyncResult result = server.UdpClient.BeginReceive(ProcessReceiveUdp, token);
@@ -114,7 +115,8 @@ namespace common.proxy
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError(ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error(ex);
             }
         }
         private void IO_Completed(object sender, SocketAsyncEventArgs e)
@@ -184,7 +186,8 @@ namespace common.proxy
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError(ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error(ex);
             }
         }
 
@@ -286,7 +289,8 @@ namespace common.proxy
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError($"listen udp -> error " + ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error($"listen udp -> error " + ex);
             }
         }
 
@@ -480,7 +484,8 @@ namespace common.proxy
             catch (Exception ex)
             {
                 clientsManager.TryRemove(info.RequestId, out _);
-                Logger.Instance.DebugError(ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error(ex);
             }
         }
     }
@@ -524,7 +529,8 @@ namespace common.proxy
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.DebugError(ex);
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        Logger.Instance.Error(ex);
                 }
             }
             return res;
@@ -571,6 +577,7 @@ namespace common.proxy
             {
                 try
                 {
+                    Logger.Instance.Warning($"{c.ProxyPlugin.Name}->port:{port}  stoped");
                     c.ProxyPlugin.Stoped(port);
                     c.Socket.SafeClose();
                     c.UdpClient.Dispose();
@@ -578,7 +585,8 @@ namespace common.proxy
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.DebugError(ex);
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        Logger.Instance.Error(ex);
                 }
             }
             return res;
@@ -589,6 +597,7 @@ namespace common.proxy
             {
                 try
                 {
+                    Logger.Instance.Warning($"{item.ProxyPlugin.Name}->port:{item.Port}  stoped");
                     item.ProxyPlugin.Stoped(item.Port);
                     item.Socket.SafeClose();
                     GC.Collect();
@@ -596,7 +605,8 @@ namespace common.proxy
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.DebugError(ex);
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        Logger.Instance.Error(ex);
                 }
             }
             services.Clear();

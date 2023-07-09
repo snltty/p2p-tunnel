@@ -322,7 +322,7 @@ namespace client.service.forward
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError(ex);
+                Logger.Instance.Error(ex);
                 return ex.Message;
             }
             return string.Empty;

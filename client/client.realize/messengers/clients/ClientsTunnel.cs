@@ -66,7 +66,7 @@ namespace client.realize.messengers.clients
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.DebugError(ex);
+                    Logger.Instance.Error(ex);
                 }
             }
         }
@@ -114,6 +114,10 @@ namespace client.realize.messengers.clients
             }.ToBytes(), new IPEndPoint(serverAddress, config.Server.UdpPort));
 
             ushort port = await tcs.Task.ConfigureAwait(false);
+            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+            {
+                Logger.Instance.Debug($"clients new udp port {port}");
+            }
 
             clientInfoCaching.AddTunnelPort(targetId, localport);
             clientInfoCaching.AddUdpserver(targetId, tempUdpServer);
@@ -153,7 +157,10 @@ namespace client.realize.messengers.clients
             IConnection connection = tcpServer.BindReceive(tcpSocket, (byte)config.Client.TcpBufferSize * 1024);
 
             ushort port = await clientsMessengerSender.AddTunnel(connection, selfId, targetId, localport);
-
+            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+            {
+                Logger.Instance.Debug($"clients new tcp port {port}");
+            }
             clientInfoCaching.AddTunnelPort(targetId, localport);
             //clientInfoCaching.AddUdpserver(targetId, tempTcpServer);
 

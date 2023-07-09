@@ -258,7 +258,10 @@ namespace client.realize.messengers.punchHole.udp
                         .Select(c => new IPEndPoint(c, data.Port)));
                 }
 
-                Logger.Instance.DebugDebug($"尝试连接局域网:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                {
+                    Logger.Instance.Debug($"尝试连接局域网:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
+                }
                 try
                 {
                     //链接局域网
@@ -306,20 +309,25 @@ namespace client.realize.messengers.punchHole.udp
                     if (peer != null && peer.ConnectionState == ConnectionState.Connected)
                     {
                         IConnection connection = peer.Tag as IConnection;
-                        Logger.Instance.DebugDebug($"udp {connection.Address} connect");
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                            Logger.Instance.Debug($"udp {connection.Address} connect");
                         await CryptoSwap(connection).ConfigureAwait(false);
                         await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
                     }
                     else
                     {
                         await SendStep2Fail(model.RawData.FromId, model.RawData.NewTunnel).ConfigureAwait(false);
-                        Logger.Instance.DebugError($"udp {data.Ip}:{data.Port} connect fail");
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                            Logger.Instance.Error($"udp {data.Ip}:{data.Port} connect fail");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.DebugError($"udp {data.Ip}:{data.Port} connect fail");
-                    Logger.Instance.DebugError(ex);
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    {
+                        Logger.Instance.Error($"udp {data.Ip}:{data.Port} connect fail");
+                        Logger.Instance.Error(ex);
+                    }
                 }
             });
         }

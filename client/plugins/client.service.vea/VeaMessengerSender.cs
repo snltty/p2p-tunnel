@@ -114,7 +114,7 @@ namespace client.service.vea
         /// <param name="connection"></param>
         /// <param name="ip"></param>
         /// <returns></returns>
-        public async Task<IPAddress> AssignIP(IConnection connection, byte ip)
+        public async Task<uint> AssignIP(IConnection connection, byte ip)
         {
             MessageResponeInfo resp = await messengerSender.SendReply(new MessageRequestWrap
             {
@@ -126,13 +126,9 @@ namespace client.service.vea
 
             if (resp.Code == MessageResponeCodes.OK)
             {
-                uint newip = BinaryPrimitives.ReadUInt32BigEndian(resp.Data.Span);
-                if (newip > 0)
-                {
-                    return new IPAddress(newip.ToBytes());
-                }
+                return  BinaryPrimitives.ReadUInt32BigEndian(resp.Data.Span);
             }
-            return config.IP;
+            return 0;
 
         }
     }

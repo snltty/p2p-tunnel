@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="设置登录限制" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
+    <el-dialog append-to-body title="设置登录限制" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="60">
             <el-form-item label="" label-width="0">
                 <el-switch v-model="state.form.signLimitType" active-text="限制登录数" inactive-text="无限制" />

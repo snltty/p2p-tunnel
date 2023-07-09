@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="重置密码" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="270px">
+    <el-dialog append-to-body title="重置密码" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="270px">
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="0px">
             <el-form-item label="" prop="password">
                 <el-input v-model="state.form.password"></el-input>

@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="在线设备" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="500px">
+    <el-dialog append-to-body title="在线设备" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="500px">
         <div class="vea-online-wrap scrollbar">
             <el-row :gutter="10">
                 <template v-for="(item,index) in state.items" :key="index">

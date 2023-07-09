@@ -149,7 +149,8 @@ namespace common.server.servers.iocp
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError(ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error(ex);
             }
             return null;
         }
@@ -202,7 +203,8 @@ namespace common.server.servers.iocp
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError(ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error(ex);
                 CloseClientSocket(e);
             }
         }

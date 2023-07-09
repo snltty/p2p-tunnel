@@ -35,9 +35,9 @@
 <script>
 import { computed, reactive, ref } from '@vue/reactivity';
 import { inject, watch } from '@vue/runtime-core';
-import { AddServerForward } from '../../../../apis/forward-server'
-import { injectShareData } from '../../../../states/shareData'
-import { injectSignIn } from '../../../../states/signin'
+import { AddServerForward } from '../../../../../apis/forward-server'
+import { injectShareData } from '../../../../../states/shareData'
+import { injectSignIn } from '../../../../../states/signin'
 export default {
     props: ['modelValue'],
     emits: ['update:modelValue', 'success'],

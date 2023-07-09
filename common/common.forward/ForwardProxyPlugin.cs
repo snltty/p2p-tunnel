@@ -59,7 +59,8 @@ namespace common.forward
 
             if (info.Connection == null || info.Connection.Connected == false)
             {
-                Logger.Instance.DebugError($"【{info.ProxyPlugin.Name}】{info.RequestId} connection fail");
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error($"【{info.ProxyPlugin.Name}】{info.RequestId} connection fail");
                 if (isMagicData == false)
                     info.Data = Helper.EmptyArray;
                 info.CommandStatusMsg = EnumProxyCommandStatusMsg.Connection;

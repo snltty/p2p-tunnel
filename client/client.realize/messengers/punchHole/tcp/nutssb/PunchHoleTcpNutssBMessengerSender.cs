@@ -94,7 +94,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_2:
                     {
-                       
+
                         PunchHoleNotifyInfo data = new PunchHoleNotifyInfo();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
@@ -117,7 +117,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                     break;
                 case PunchHoleTcpNutssBSteps.STEP_3:
                     {
-                       
+
                         PunchHoleStep3Info data = new PunchHoleStep3Info();
                         data.DeBytes(model.RawData.Data);
                         model.Data = data;
@@ -201,7 +201,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
         }
         private async Task OnStep1(PunchHoleStepModel model)
         {
-            
+
             if (model.RawData.NewTunnel == 1)
             {
                 await clientsTunnel.NewBind(ServerType.TCP, Connection.ConnectId, model.RawData.FromId);
@@ -212,7 +212,7 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
             }
 
             PunchHoleNotifyInfo data = model.Data as PunchHoleNotifyInfo;
-           
+
             if (clientInfoCaching.GetTunnelPort(model.RawData.FromId, out int localPort))
             {
                 List<IPEndPoint> ips = data.LocalIps.Where(c => c.Equals(IPAddress.Any) == false && c.Equals(IPAddress.IPv6Any) == false).Select(c => new IPEndPoint(c, data.LocalPort)).ToList();
@@ -313,7 +313,9 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                 }
                 ips.Add(new IPEndPoint(data.Ip, data.Port));
                 ips.Add(new IPEndPoint(data.Ip, data.Port + 1));
-                Logger.Instance.DebugDebug($"尝试连接:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
+
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Debug($"尝试连接:{string.Join("\n", ips.Select(c => c.ToString()).ToArray())}");
 
                 for (byte i = 0; i < ips.Count; i++)
                 {
@@ -337,13 +339,15 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         targetSocket.IPv6Only(family, false);
                         targetSocket.KeepAlive(time: config.Client.TimeoutDelay / 1000 / 5);
                         targetSocket.ReuseBind(new IPEndPoint(bindIp, cache.LocalPort));
-                        Logger.Instance.DebugDebug($"tcp {ip} connect");
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                            Logger.Instance.Debug($"tcp {ip} connect");
                         IAsyncResult result = targetSocket.BeginConnect(ip, null, null);
                         result.AsyncWaitHandle.WaitOne(ip.IsLan() ? 50 : 1000, false);
 
                         if (result.IsCompleted == false)
                         {
-                            Logger.Instance.DebugError($"tcp {ip} connect fail");
+                            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                                Logger.Instance.Error($"tcp {ip} connect fail");
                             targetSocket.SafeClose();
                             targetSocket = null;
                             continue;
@@ -358,7 +362,8 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                             continue;
                         }
 
-                        Logger.Instance.Warning($"tcp {ip} connect success");
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                            Logger.Instance.Warning($"tcp {ip} connect success");
                         IConnection connection = tcpServer.BindReceive(targetSocket, bufferSize: (byte)config.Client.TcpBufferSize * 1024);
                         await CryptoSwap(connection);
                         await SendStep3(connection, model.RawData.FromId, model.RawData.NewTunnel);
@@ -370,15 +375,18 @@ namespace client.realize.messengers.punchHole.tcp.nutssb
                         targetSocket.SafeClose();
                         targetSocket = null;
 
-                        Logger.Instance.DebugError($"tcp {ip} connect fail:{ex}");
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                            Logger.Instance.Error($"tcp {ip} connect fail:{ex}");
                         if (ex.SocketErrorCode == SocketError.AddressNotAvailable)
                         {
-                            Logger.Instance.DebugError($"{ex.SocketErrorCode}:{ip}");
+                            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                                Logger.Instance.Error($"{ex.SocketErrorCode}:{ip}");
                         }
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.DebugError($"tcp {ip} connect fail:{ex}");
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                            Logger.Instance.Error($"tcp {ip} connect fail:{ex}");
                     }
                 }
 

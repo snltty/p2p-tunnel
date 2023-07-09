@@ -1,13 +1,18 @@
 <template>
     <div class="absolute flex">
         <div class="content h-100 flex-1 flex flex-column">
-            <div class="inner flex-1 scrollbar" ref="contentDom">
-                <template v-for="(item,index) in leftMenus" :key="index">
-                    <div class="setting-item" :class="{animate:state.animate}" :style="`animation-delay:${index*0.1}s`">
-                        <el-divider content-position="left" border-style="dotted">{{item.text}}</el-divider>
-                        <component :is="item.component.value" :ref="`setting_item_${item.text}`" />
-                    </div>
-                </template>
+            <div class="wrap flex-1 scrollbar">
+                <el-tabs type="border-card">
+                    <el-tab-pane label="主页">
+                        <div class="inner " ref="contentDom">
+                            <template v-for="(item,index) in leftMenus" :key="index">
+                                <div class="setting-item" :class="{animate:state.animate}" :style="`animation-delay:${index*0.1}s`">
+                                    <component :is="item.component.value" :ref="`setting_item_${item.text}`" />
+                                </div>
+                            </template>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
             </div>
             <div class="btn" v-if="leftMenus.length > 0">
                 <el-button type="primary" size="default" @click="handleSave" :loading="state.loading">应用更改</el-button>
@@ -117,8 +122,8 @@ export default {
 
 <style lang="stylus" scoped>
 .content {
-    .inner {
-        padding: 4rem 2rem 2rem 2rem;
+    .wrap {
+        padding: 2rem;
         box-sizing: border-box;
     }
 
@@ -132,12 +137,6 @@ export default {
 }
 
 .setting-item {
-    margin: 0 2rem 2rem 2rem;
-    border: 1px solid #ddd;
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 4px;
-    box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
     transition: 0.3s;
     opacity: 0;
     transform: translate3d(0, -20px, 0);

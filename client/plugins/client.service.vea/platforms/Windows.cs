@@ -22,9 +22,14 @@ namespace client.service.vea.platforms
 
         public bool Run()
         {
+            string command = $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -loglevel silent";
+            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+            {
+                Logger.Instance.Warning($"vea windows ->exec:{command}");
+            }
             for (int i = 0; i < 2; i++)
             {
-                Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -loglevel silent");
+                Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", command);
                 for (int k = 0; k < 4; k++)
                 {
                     System.Threading.Thread.Sleep(1000);
@@ -51,7 +56,7 @@ namespace client.service.vea.platforms
 
             if (interfaceNumber <= 0)
             {
-                string msg = Command.Execute("tun2socks-windows.exe", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -loglevel silent", Array.Empty<string>());
+                string msg = Command.Execute("tun2socks-windows.exe", command, Array.Empty<string>());
                 Logger.Instance.Error(msg);
             }
 
@@ -85,6 +90,10 @@ namespace client.service.vea.platforms
                 }).ToArray();
                 if (commands.Length > 0)
                 {
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    {
+                        Logger.Instance.Warning($"vea windows ->add route:{string.Join(Environment.NewLine, commands)}");
+                    }
                     Command.Windows(string.Empty, commands);
                 }
             }
@@ -94,6 +103,10 @@ namespace client.service.vea.platforms
             if (interfaceNumber > 0)
             {
                 string[] commands = ip.Select(item => $"route delete {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())}").ToArray();
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                {
+                    Logger.Instance.Warning($"vea windows ->del route:{string.Join(Environment.NewLine, commands)}");
+                }
                 Command.Windows(string.Empty, commands.ToArray());
             }
         }

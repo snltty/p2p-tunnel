@@ -60,7 +60,11 @@
                 <el-form-item label="" label-width="0">
                     你可以设置一个端口范围，节点只能添加此范围内的长连接端口监听
                 </el-form-item>
-
+                <el-form-item label-width="0">
+                    <div class="t-c w-100">
+                        <el-button type="primary" :loading="state.loading" @click="submit">确 定</el-button>
+                    </div>
+                </el-form-item>
             </el-form>
         </div>
     </div>
@@ -72,11 +76,13 @@ import { getConfigure, saveConfigure } from '../../../../apis/configure'
 import { shareData } from '../../../../states/shareData'
 import { onMounted } from '@vue/runtime-core';
 import plugin from './plugin'
+import { ElMessage } from 'element-plus';
 export default {
     plugin: plugin,
     setup() {
         const formDom = ref(null);
         const state = reactive({
+            loading: false,
             form: {
                 ConnectEnable: true,
                 WebListens: "",
@@ -120,7 +126,19 @@ export default {
                         json.WebListens = state.form.WebListens.split(',').filter(c => c.length > 0).map(c => +c);
                         json.TunnelListenRange.Min = +state.form.min;
                         json.TunnelListenRange.Max = +state.form.max;
-                        saveConfigure(plugin.config, JSON.stringify(json)).then(resolve).catch(reject);
+                        state.loading = true;
+                        saveConfigure(plugin.config, JSON.stringify(json)).then((res) => {
+                            state.loading = false;
+                            resolve();
+                            if (res) {
+                                ElMessage.success('操作成功!');
+                            } else {
+                                ElMessage.error('操作失败!');
+                            }
+                        }).catch(() => {
+                            state.loading = false;
+                            resolve();
+                        });
                     }).catch(reject);
                 });
             })
@@ -150,6 +168,10 @@ export default {
 
 .el-form-item:last-child {
     margin-bottom: 0;
+}
+
+.inner {
+    padding: 2rem;
 }
 
 @media screen and (max-width: 768px) {

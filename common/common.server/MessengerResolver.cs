@@ -207,7 +207,8 @@ namespace common.server
                 //404,没这个插件
                 if (messengers.TryGetValue(requestWrap.MessengerId, out MessengerCacheInfo plugin) == false)
                 {
-                    Logger.Instance.DebugError($"{requestWrap.MessengerId},{connection.ServerType}, not found");
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        Logger.Instance.Error($"{requestWrap.MessengerId},{connection.ServerType}, not found");
                     if (requestWrap.Reply == true)
                     {
                         bool res = await messengerSender.ReplyOnly(new MessageResponseWrap
@@ -244,14 +245,17 @@ namespace common.server
             }
             catch (Exception ex)
             {
-                Logger.Instance.DebugError(ex);
-                if (receive.Length > 1024)
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
                 {
-                    Logger.Instance.Error($"{connection.Address}:{string.Join(",", receive.Slice(0, 1024).ToArray())}");
-                }
-                else
-                {
-                    Logger.Instance.Error($"{connection.Address}:{string.Join(",", receive.ToArray())}");
+                    Logger.Instance.Error(ex);
+                    if (receive.Length > 1024)
+                    {
+                        Logger.Instance.Error($"{connection.Address}:{string.Join(",", receive.Slice(0, 1024).ToArray())}");
+                    }
+                    else
+                    {
+                        Logger.Instance.Error($"{connection.Address}:{string.Join(",", receive.ToArray())}");
+                    }
                 }
                 //connection.Disponse();
             }

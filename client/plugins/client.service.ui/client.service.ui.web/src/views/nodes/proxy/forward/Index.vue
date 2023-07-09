@@ -1,77 +1,92 @@
 <template>
     <div class="forward-wrap">
-        <div class="inner">
-            <div class="head flex">
-                <el-button type="primary" size="small" @click="handleAddListen">监听</el-button>
-                <el-button size="small" @click="getData">刷新</el-button>
-            </div>
-            <div class="content">
-                <el-table :data="state.list" size="small" border>
-                    <el-table-column type="expand">
-                        <template #default="props">
-                            <el-table size="small" :data="props.row.Forwards" border>
-                                <el-table-column label="访问" prop="SourceIp">
-                                    <template #default="props1">
-                                        <span>{{props1.row.SourceIp}}:{{props.row.Port}}</span>
-                                    </template>
-                                </el-table-column>
-                                <el-table-column label="目标节点" prop="TargetIp">
-                                    <template #default="props">
-                                        <span>{{ targetJson[props.row.ConnectionId]}}</span>
-                                    </template>
-                                </el-table-column>
-                                <el-table-column label="目标服务" prop="TargetIp">
-                                    <template #default="props">
-                                        <span>{{props.row.TargetIp}}:{{props.row.TargetPort}}</span>
-                                    </template>
-                                </el-table-column>
-                                <el-table-column align="right" width="140">
-                                    <template #default="props1">
-                                        <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveForward(props.row,props1.row)">
-                                            <template #reference>
-                                                <el-button link plain type="danger" size="small">删除</el-button>
+        <el-tabs type="border-card">
+            <el-tab-pane label="主页">
+                <div class="inner">
+                    <div class="head flex">
+                        <div class="left">
+                            <el-button size="small" type="primary" @click="handleAddListen">监听</el-button>
+                            <el-button size="small" @click="getData">刷新</el-button>
+                        </div>
+                        <div class="flex-1"></div>
+                        <span>和已连接节点的端口转发</span>
+                    </div>
+                    <div class="content">
+                        <el-table :data="state.list" size="small" border>
+                            <el-table-column type="expand">
+                                <template #default="props">
+                                    <el-table size="small" :data="props.row.Forwards" border>
+                                        <el-table-column label="访问" prop="SourceIp">
+                                            <template #default="props1">
+                                                <span>{{props1.row.SourceIp}}:{{props.row.Port}}</span>
                                             </template>
-                                        </el-popconfirm>
-                                        <el-button link plain size="small" @click="handleEditForward(props.row,props1.row)">编辑</el-button>
-                                        <el-button link plain size="small" @click="handleTestForward(props.row,props1.row)">测试</el-button>
-                                    </template>
-                                </el-table-column>
-                            </el-table>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="监听类别" prop="AliveType">
-                        <template #default="props">
-                            <span>{{shareData.aliveTypes[props.row.AliveType]}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="监听端口" prop="Port">
-                        <template #default="props">
-                            <div class="flex">
-                                <span class="flex-1">{{props.row.Port}}</span>
-                                <span>
-                                    <el-switch size="small" @click.stop @change="onListeningChange(props.row)" v-model="props.row.Listening"></el-switch>
-                                </span>
-                            </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="备注" prop="Desc"></el-table-column>
-                    <el-table-column align="right" width="140">
-                        <template #default="props">
-                            <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(props.row)">
-                                <template #reference>
-                                    <el-button plain link type="danger" size="small">删除</el-button>
+                                        </el-table-column>
+                                        <el-table-column label="目标节点" prop="TargetIp">
+                                            <template #default="props">
+                                                <span>{{ targetJson[props.row.ConnectionId]}}</span>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column label="目标服务" prop="TargetIp">
+                                            <template #default="props">
+                                                <span>{{props.row.TargetIp}}:{{props.row.TargetPort}}</span>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column align="right" width="140">
+                                            <template #default="props1">
+                                                <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveForward(props.row,props1.row)">
+                                                    <template #reference>
+                                                        <el-button link plain type="danger" size="small">删除</el-button>
+                                                    </template>
+                                                </el-popconfirm>
+                                                <el-button link plain size="small" @click="handleEditForward(props.row,props1.row)">编辑</el-button>
+                                                <el-button link plain size="small" @click="handleTestForward(props.row,props1.row)">测试</el-button>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
                                 </template>
-                            </el-popconfirm>
-                            <el-button plain type="info" link size="small" @click="handleEditListen(props.row)">编辑</el-button>
-                            <el-button plain type="info" link v-if="props.row.AliveType == shareData.aliveTypesName.web || props.row.Forwards.length < 1" size="small" @click="handleAddForward(props.row)">转发</el-button>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </div>
-            <AddForward v-if="state.showAddForward" v-model="state.showAddForward" @success="getData"></AddForward>
-            <AddListen v-if="state.showAddListen" v-model="state.showAddListen" @success="getData"></AddListen>
-            <StatusMsg v-if="state.showStatusMsg" v-model="state.showStatusMsg" :msgCallback="state.statusMsgCallback"></StatusMsg>
-        </div>
+                            </el-table-column>
+                            <el-table-column label="监听类别" prop="AliveType">
+                                <template #default="props">
+                                    <span>{{shareData.aliveTypes[props.row.AliveType]}}</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="监听端口" prop="Port">
+                                <template #default="props">
+                                    <div class="flex">
+                                        <span class="flex-1">{{props.row.Port}}</span>
+                                        <span>
+                                            <el-switch size="small" @click.stop @change="onListeningChange(props.row)" v-model="props.row.Listening"></el-switch>
+                                        </span>
+                                    </div>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="备注" prop="Desc"></el-table-column>
+                            <el-table-column align="right" width="140">
+                                <template #default="props">
+                                    <el-popconfirm title="删除不可逆，是否确认" @confirm="handleRemoveListen(props.row)">
+                                        <template #reference>
+                                            <el-button plain link type="danger" size="small">删除</el-button>
+                                        </template>
+                                    </el-popconfirm>
+                                    <el-button plain type="info" link size="small" @click="handleEditListen(props.row)">编辑</el-button>
+                                    <el-button plain type="info" link v-if="props.row.AliveType == shareData.aliveTypesName.web || props.row.Forwards.length < 1" size="small" @click="handleAddForward(props.row)">转发</el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    <AddForward v-if="state.showAddForward" v-model="state.showAddForward" @success="getData"></AddForward>
+                    <AddListen v-if="state.showAddListen" v-model="state.showAddListen" @success="getData"></AddListen>
+                    <StatusMsg v-if="state.showStatusMsg" v-model="state.showStatusMsg" :msgCallback="state.statusMsgCallback"></StatusMsg>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="选项配置">
+                <Setting></Setting>
+            </el-tab-pane>
+            <el-tab-pane label="服务器转发">
+                <Server v-if="hasAccess"></Server>
+                <el-empty v-else description="没有此项权限"></el-empty>
+            </el-tab-pane>
+        </el-tabs>
     </div>
 </template>
 <script>
@@ -80,17 +95,21 @@ import { getList, removeListen, startListen, stopListen, removeForward, testForw
 import { computed, onMounted, provide } from '@vue/runtime-core'
 import AddForward from './AddForward.vue'
 import AddListen from './AddListen.vue'
-import { injectShareData } from '../../../../states/shareData'
+import Setting from './Setting1.vue'
+import Server from './server/Index.vue'
 import { injectClients } from '../../../../states/clients'
+import { injectSignIn } from '../../../../states/signin'
+import { shareData } from '../../../../states/shareData'
 import StatusMsg from '../../../../components/StatusMsg.vue'
 import plugin from './plugin'
 import { ElMessageBox } from 'element-plus'
 export default {
     plugin: plugin,
-    components: { AddListen, AddForward, StatusMsg },
+    components: { AddListen, AddForward, StatusMsg, Setting, Server },
     setup() {
 
-        const shareData = injectShareData();
+        const signinState = injectSignIn();
+        const hasAccess = computed(() => shareData.serverAccessHas(signinState.RemoteInfo.Access, plugin.access));
         const state = reactive({
             loading: false,
             list: [],
@@ -187,7 +206,7 @@ export default {
         return {
             targetJson, state, shareData, getData, expandKeys, onExpand,
             handleRemoveListen, handleAddListen, handleEditListen, onListeningChange,
-            handleAddForward, handleEditForward, handleRemoveForward, handleTestForward
+            handleAddForward, handleEditForward, handleRemoveForward, handleTestForward, hasAccess
         }
     }
 }
@@ -212,16 +231,9 @@ export default {
 .forward-wrap {
     padding: 2rem;
 
-    .inner {
-        background-color: #fff;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-        box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
-    }
-
     .head {
-        padding: 1rem;
-        border-bottom: 1px solid #eee;
+        padding: 1rem 1rem 0 1rem;
+        line-height: 24px;
     }
 
     .content {

@@ -55,7 +55,7 @@ export default {
         left: 50%;
         top: 50%;
         transform: translateX(-50%) translateY(-50%);
-        border: 1px solid #ddd;
+        border: 1px solid #c2c2c2;
         border-radius: 4px;
         text-align: center;
         padding: 4rem;

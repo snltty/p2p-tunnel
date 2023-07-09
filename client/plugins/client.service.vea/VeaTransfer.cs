@@ -167,6 +167,8 @@ namespace client.service.vea
         {
             if (client == null || _ips == null) return;
 
+
+
             lock (this)
             {
                 var cache = ips.Values.FirstOrDefault(c => c.Client.ConnectionId == client.ConnectionId);
@@ -192,13 +194,16 @@ namespace client.service.vea
             bool res = true;
             Stop();
 
-            byte oldIP = (byte)(BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()) & 0xff);
-            IPAddress ip = await veaMessengerSender.AssignIP(signInStateInfo.Connection, oldIP);
-            if (ip != null)
+            uint ip = await veaMessengerSender.AssignIP(signInStateInfo.Connection, (byte)(BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()) & 0xff));
+            if (ip > 0)
             {
-                config.IP = ip;
-                await config.SaveConfig();
+                config.IP = new IPAddress(ip.ToBytes());
             }
+            else
+            {
+                Logger.Instance.Warning($"未能从服务器分配到组网IP，直接返回本地配置文件配置IP");
+            }
+
             if (config.ListenEnable)
             {
                 res = veaPlatform.Run();

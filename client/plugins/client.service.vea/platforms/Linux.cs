@@ -38,7 +38,12 @@ namespace client.service.vea.platforms
             interfaceLinux = GetLinuxInterfaceNum();
             try
             {
-                Tun2SocksProcess = Command.Execute("./tun2socks-linux", $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -interface {interfaceLinux} -loglevel silent");
+                string command = $" -device {veaName} -proxy socks5://127.0.0.1:{config.ListenPort} -interface {interfaceLinux} -loglevel silent";
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                {
+                    Logger.Instance.Warning($"vea linux ->exec:{command}");
+                }
+                Tun2SocksProcess = Command.Execute("./tun2socks-linux", command);
             }
             catch (Exception ex)
             {
@@ -68,6 +73,10 @@ namespace client.service.vea.platforms
             }).ToArray();
             if (commands.Length > 0)
             {
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                {
+                    Logger.Instance.Warning($"vea linux ->add route:{string.Join(Environment.NewLine, commands)}");
+                }
                 Command.Linux(string.Empty, commands);
             }
         }
@@ -77,6 +86,11 @@ namespace client.service.vea.platforms
             {
                 return $"ip route del {string.Join(".", BinaryPrimitives.ReverseEndianness(item.IPAddress).ToBytes())}/{item.MaskLength}";
             }).ToArray();
+
+            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+            {
+                Logger.Instance.Warning($"vea linux ->del route:{string.Join(Environment.NewLine, commands)}");
+            }
             Command.Linux(string.Empty, commands);
         }
 

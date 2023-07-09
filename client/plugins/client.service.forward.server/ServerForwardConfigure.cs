@@ -24,7 +24,7 @@ namespace client.service.forward.server
             this.signInStateInfo = signInStateInfo;
         }
 
-        public string Name => "Tcp转发服务端";
+        public string Name => "端口转发服务端";
         public string Author => "snltty";
         public string Desc => "白名单不为空时只允许白名单内端口";
         public bool Enable => true;

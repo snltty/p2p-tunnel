@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :title="state.form.ID > 0?'编辑监听':'新增监听'" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="260px">
+    <el-dialog append-to-body :title="state.form.ID > 0?'编辑监听':'新增监听'" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="260px">
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="80px">
             <el-form-item label="监听端口" prop="Port">
                 <el-input v-model="state.form.Port" :readonly="state.form.ID > 0"></el-input>
@@ -9,9 +9,6 @@
                     <el-option v-for="(item,index) in shareData.aliveTypes" :key="index" :label="item" :value="index">
                     </el-option>
                 </el-select>
-            </el-form-item>
-            <el-form-item label="" prop="">
-                http的选啥类型都可以，其它的选长连接
             </el-form-item>
             <el-form-item label="简单说明" prop="Desc">
                 <el-input v-model="state.form.Desc"></el-input>

@@ -174,7 +174,7 @@ namespace client.realize.messengers.clients
             }
 
 
-            Logger.Instance.Error($"{connection.ServerType} client 断开~~~~${connection.Address}");
+            Logger.Instance.Warning($"{connection.ServerType} client 断开~~~~${connection.Address}");
             if (clientInfoCaching.Get(connection.ConnectId, out ClientInfo client))
             {
                 if (ReferenceEquals(connection, client.Connection))
@@ -424,10 +424,16 @@ namespace client.realize.messengers.clients
 
         private void OnBind(bool state)
         {
-            Logger.Instance.DebugInfo($"clients 登出清理");
+            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+            {
+                Logger.Instance.Debug($"clients 登出清理");
+            }
             firstClients.Reset();
             clientInfoCaching.Clear();
-            Logger.Instance.DebugInfo($"clients 登出清理结束");
+            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+            {
+                Logger.Instance.Debug($"clients 登出清理结束");
+            }
         }
 
         private void OnServerSendClients(ClientsInfo clients)

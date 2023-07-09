@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="增加账号" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
+    <el-dialog append-to-body title="增加账号" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="300px">
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="60px">
             <el-form-item label="账号" prop="Account">
                 <el-input v-model="state.form.Account"></el-input>

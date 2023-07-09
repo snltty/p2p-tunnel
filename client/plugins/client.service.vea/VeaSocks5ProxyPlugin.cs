@@ -1,5 +1,6 @@
 ﻿using client.messengers.clients;
 using client.messengers.singnin;
+using common.libs;
 using common.libs.extends;
 using common.proxy;
 using common.server.model;
@@ -79,6 +80,10 @@ namespace client.service.vea
                     info.CommandStatus = (EnumProxyCommandStatus)Socks5EnumResponseCommand.NetworkError;
                     info.CommandStatusMsg = EnumProxyCommandStatusMsg.Connection;
                     proxyServer.InputData(info);
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.WARNING)
+                    {
+                        Logger.Instance.Warning($"{info.ProxyPlugin.Name}->target not exists or not connect");
+                    }
                     return false;
                 }
             }

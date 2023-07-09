@@ -3,7 +3,7 @@ export default {
     config: 'ServerVeaConfigure',
     path: '/server/vea/dhcp.html',
     name: 'ServerVeaDhcp',
-    text: '代理(IP分配)',
+    text: '组网IP分配',
     access: 64,
     proxyId: 8
 }

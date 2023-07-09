@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="选择中继线路" v-model="state.show" draggable center :close-on-click-modal="false" top="1vh" width="50rem">
+    <el-dialog append-to-body title="选择中继线路" v-model="state.show" draggable center :close-on-click-modal="false" top="1vh" width="50rem">
         <ul class="nodes-ul scrollbar">
             <template v-for="(item,index) in state.paths" :key="index">
                 <li>

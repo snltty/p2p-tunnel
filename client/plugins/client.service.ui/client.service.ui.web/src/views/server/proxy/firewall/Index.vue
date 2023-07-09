@@ -1,52 +1,56 @@
 <template>
     <div class="proxy-setting-wrap flex flex-column h-100">
-        <div class="inner">
-            <div class="head flex">
-                <el-button size="small" :loading="state.loading" @click="Add">添加新项</el-button>
-                <span class="split"></span>
-                <el-select v-model="state.proxys" size="small" multiple collapse-tags collapse-tags-tooltip style="width: 220px" @change="loadData">
-                    <el-option v-for="item in state.clientProxys" :key="item.value" :label="item.text" :value="item.value" />
-                </el-select>
-                <span class="split"></span>
-                <el-button size="small" :loading="state.loading" @click="loadData">刷新列表</el-button>
-                <el-popover placement="top-start" title="说明" :width="300" trigger="hover" content="【ipv6】局域网全部阻止，【ipv4】所有ip验证黑名单，局域网ip验证白名单，【域名】全部通过">
-                    <template #reference>
-                        <el-icon>
-                            <Warning />
-                        </el-icon>
-                    </template>
-                </el-popover>
-                <span class="flex-1"></span>
-            </div>
-            <div class="body flex-1 relative">
-                <div>
-                    <el-table border stripe :data="state.data" size="small" :row-class-name="rowClassName">
-                        <el-table-column type="index" width="40" />
-                        <el-table-column prop="protocol" label="协议"></el-table-column>
-                        <el-table-column prop="text" label="作用域"></el-table-column>
-                        <el-table-column prop="Port" label="端口"></el-table-column>
-                        <el-table-column prop="IP" label="ip">
-                            <template #default="scope">
-                                <p v-for="(item,index) in scope.row.IP" :key="index">{{item}}</p>
+        <el-tabs type="border-card">
+            <el-tab-pane label="主页">
+                <div class="inner">
+                    <div class="head flex">
+                        <el-button size="small" :loading="state.loading" @click="Add">添加新项</el-button>
+                        <span class="split"></span>
+                        <el-select v-model="state.proxys" size="small" multiple collapse-tags collapse-tags-tooltip style="width: 220px" @change="loadData">
+                            <el-option v-for="item in state.clientProxys" :key="item.value" :label="item.text" :value="item.value" />
+                        </el-select>
+                        <span class="split"></span>
+                        <el-button size="small" :loading="state.loading" @click="loadData">刷新列表</el-button>
+                        <el-popover placement="top-start" title="说明" :width="300" trigger="hover" content="【ipv6】局域网全部阻止，【ipv4】所有ip验证黑名单，局域网ip验证白名单，【域名】全部通过">
+                            <template #reference>
+                                <el-icon>
+                                    <Warning />
+                                </el-icon>
                             </template>
-                        </el-table-column>
-                        <el-table-column prop="Remark" label="备注"></el-table-column>
-                        <el-table-column fixed="right" label="op" width="90">
-                            <template #default="scope">
-                                <el-button size="small" link @click="handleEdit(scope.row)">编辑</el-button>
-                                <el-popconfirm title="删除不可逆，是否确认?" @confirm="handleDel(scope.row)">
-                                    <template #reference>
-                                        <el-button link size="small">删除</el-button>
+                        </el-popover>
+                        <span class="flex-1"></span>
+                    </div>
+                    <div class="body flex-1 relative">
+                        <div>
+                            <el-table border stripe :data="state.data" size="small" :row-class-name="rowClassName">
+                                <el-table-column type="index" width="40" />
+                                <el-table-column prop="protocol" label="协议"></el-table-column>
+                                <el-table-column prop="text" label="作用域"></el-table-column>
+                                <el-table-column prop="Port" label="端口"></el-table-column>
+                                <el-table-column prop="IP" label="ip">
+                                    <template #default="scope">
+                                        <p v-for="(item,index) in scope.row.IP" :key="index">{{item}}</p>
                                     </template>
-                                </el-popconfirm>
-                            </template>
-                        </el-table-column>
-                    </el-table>
+                                </el-table-column>
+                                <el-table-column prop="Remark" label="备注"></el-table-column>
+                                <el-table-column fixed="right" label="op" width="90">
+                                    <template #default="scope">
+                                        <el-button size="small" link @click="handleEdit(scope.row)">编辑</el-button>
+                                        <el-popconfirm title="删除不可逆，是否确认?" @confirm="handleDel(scope.row)">
+                                            <template #reference>
+                                                <el-button link size="small">删除</el-button>
+                                            </template>
+                                        </el-popconfirm>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                        <!-- <el-empty v-else /> -->
+                    </div>
                 </div>
-                <!-- <el-empty v-else /> -->
-            </div>
-        </div>
-        <Add v-if="state.showAdd" v-model="state.showAdd" @success="loadData"></Add>
+                <Add v-if="state.showAdd" v-model="state.showAdd" @success="loadData"></Add>
+            </el-tab-pane>
+        </el-tabs>
     </div>
 </template>
 
@@ -153,10 +157,6 @@ export default {
 
     .inner {
         padding: 1rem;
-        background-color: #fff;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-        box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.05);
     }
 
     .head {

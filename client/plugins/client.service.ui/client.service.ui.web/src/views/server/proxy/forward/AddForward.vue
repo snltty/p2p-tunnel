@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="添加短连接转发" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="350px">
+    <el-dialog append-to-body title="添加短连接转发" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="350px">
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="100px">
             <el-form-item label="服务器域名" prop="Domain">
                 <el-input v-model="state.form.Domain"></el-input>

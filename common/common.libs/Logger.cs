@@ -9,10 +9,16 @@ namespace common.libs
     {
         private static readonly Lazy<Logger> lazy = new Lazy<Logger>(() => new Logger());
         public static Logger Instance => lazy.Value;
+
         private readonly ConcurrentQueue<LoggerModel> queue = new ConcurrentQueue<LoggerModel>();
         public Action<LoggerModel> OnLogger { get; set; } = (param) => { };
 
         public int PaddingWidth { get; set; } = 50;
+#if DEBUG
+        public LoggerTypes LoggerLevel { get; set; } = LoggerTypes.DEBUG;
+#else
+        public LoggerTypes LoggerLevel { get; set; } = LoggerTypes.WARNING;
+#endif
 
         private Logger()
         {
@@ -52,11 +58,6 @@ namespace common.libs
             }
             Enqueue(new LoggerModel { Type = LoggerTypes.DEBUG, Content = content });
         }
-        [Conditional("DEBUG")]
-        public void DebugDebug(string content, params object[] args)
-        {
-            Debug(content, args);
-        }
         public void Info(string content, params object[] args)
         {
             if (args != null && args.Length > 0)
@@ -65,25 +66,7 @@ namespace common.libs
             }
             Enqueue(new LoggerModel { Type = LoggerTypes.INFO, Content = content });
         }
-        [Conditional("DEBUG")]
-        public void DebugInfo(string content, params object[] args)
-        {
-            if (args != null && args.Length > 0)
-            {
-                content = string.Format(content, args);
-            }
-            Enqueue(new LoggerModel { Type = LoggerTypes.INFO, Content = content });
-        }
         public void Warning(string content, params object[] args)
-        {
-            if (args != null && args.Length > 0)
-            {
-                content = string.Format(content, args);
-            }
-            Enqueue(new LoggerModel { Type = LoggerTypes.WARNING, Content = content });
-        }
-        [Conditional("DEBUG")]
-        public void DebugWarning(string content, params object[] args)
         {
             if (args != null && args.Length > 0)
             {
@@ -103,20 +86,20 @@ namespace common.libs
         {
             Enqueue(new LoggerModel { Type = LoggerTypes.ERROR, Content = ex + "" });
         }
-        [Conditional("DEBUG")]
-        public void DebugError(string content, params object[] args)
+
+        public void FATAL(string content, params object[] args)
         {
             if (args != null && args.Length > 0)
             {
                 content = string.Format(content, args);
             }
-            Enqueue(new LoggerModel { Type = LoggerTypes.ERROR, Content = content });
+            Enqueue(new LoggerModel { Type = LoggerTypes.FATAL, Content = content });
         }
-        [Conditional("DEBUG")]
-        public void DebugError(Exception ex)
+        public void FATAL(Exception ex)
         {
-            Enqueue(new LoggerModel { Type = LoggerTypes.ERROR, Content = ex + "" });
+            Enqueue(new LoggerModel { Type = LoggerTypes.FATAL, Content = ex + "" });
         }
+
         public void Enqueue(LoggerModel model)
         {
             queue.Enqueue(model);
@@ -135,6 +118,7 @@ namespace common.libs
         DEBUG = 0,
         INFO = 1,
         WARNING = 2,
-        ERROR = 3
+        ERROR = 3,
+        FATAL = 4,
     }
 }

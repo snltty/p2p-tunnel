@@ -1,7 +1,7 @@
 export default {
     service: 'ServerClientService',
     config: 'ServerConfigure',
-    text: '各项配置',
+    text: '服务器配置',
     access: 2,
     path: '/server-settings.html',
     name: 'ServerSettings',

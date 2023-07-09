@@ -97,7 +97,8 @@ namespace common.socks5
 
                 if (info.TargetPort == 53)
                 {
-                    Logger.Instance.DebugWarning($"[DNS查询]:{string.Join(",", info.Data.ToArray())}:{Encoding.UTF8.GetString(info.Data.ToArray())}");
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        Logger.Instance.Debug($"[DNS查询]:{string.Join(",", info.Data.ToArray())}:{Encoding.UTF8.GetString(info.Data.ToArray())}");
                 }
             }
             if (info.TargetAddress.GetIsAnyAddress()) return false;

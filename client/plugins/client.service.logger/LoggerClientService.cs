@@ -27,10 +27,6 @@ namespace client.service.logger
             PageParamsInfo model = arg.Content.DeJson<PageParamsInfo>();
 
             IEnumerable<LoggerModel> res = Data.OrderByDescending(c => c.Time);
-            if (model.Type >= 0)
-            {
-                res = res.Where(c => c.Type == (LoggerTypes)model.Type);
-            }
 
             return new PageInfo
             {
@@ -64,10 +60,6 @@ namespace client.service.logger
         /// 页大小
         /// </summary>
         public int PageSize { get; set; } = 10;
-        /// <summary>
-        /// 日志类型
-        /// </summary>
-        public int Type { get; set; } = -1;
     }
     /// <summary>
     /// 日志分页返回

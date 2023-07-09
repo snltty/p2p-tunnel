@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :title="state.form.ID > 0?'编辑':'新增'" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="400px">
+    <el-dialog append-to-body :title="state.form.ID > 0?'编辑':'新增'" top="1vh" destroy-on-close v-model="state.show" center :close-on-click-modal="false" width="400px">
         <el-form ref="formDom" :model="state.form" :rules="state.rules" label-width="60px">
             <el-form-item label="" label-width="0">
                 <el-row>

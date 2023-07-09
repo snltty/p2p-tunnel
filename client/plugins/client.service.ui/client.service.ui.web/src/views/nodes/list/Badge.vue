@@ -1,7 +1,7 @@
 <template>
     <div>
         <a href="javascript:;" @click="state.dialogVisible = true;">速度</a>
-        <el-dialog v-model="state.dialogVisible">
+        <el-dialog append-to-body v-model="state.dialogVisible">
             <div class="t-c">
                 <span>包大小:</span> <el-input v-model="state.packet" style="width:6rem"></el-input>KB
                 <template v-if="state.loading">

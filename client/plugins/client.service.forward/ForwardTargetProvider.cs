@@ -1,6 +1,7 @@
 ﻿using client.messengers.clients;
 using client.messengers.singnin;
 using common.forward;
+using common.libs;
 using common.libs.extends;
 using common.proxy;
 using common.server;
@@ -45,6 +46,13 @@ namespace client.service.forward
         public void Get(string domain, ProxyInfo info)
         {
             GetTarget(forwardTargetCaching.Get(domain), info);
+            if (Logger.Instance.LoggerLevel <= LoggerTypes.WARNING)
+            {
+                if (info.Connection == null || info.Connection.Connected == false)
+                {
+                    Logger.Instance.Warning($"{info.ProxyPlugin.Name}->domain:{domain}->target not exists or not connect");
+                }
+            }
         }
         /// <summary>
         /// 根据端口获取目标连接
@@ -54,6 +62,13 @@ namespace client.service.forward
         public void Get(ushort port, ProxyInfo info)
         {
             GetTarget(forwardTargetCaching.Get(port), info);
+            if (Logger.Instance.LoggerLevel <= LoggerTypes.WARNING)
+            {
+                if (info.Connection == null || info.Connection.Connected == false)
+                {
+                    Logger.Instance.Warning($"{info.ProxyPlugin.Name}->port:{port}->target not exists or not connect");
+                }
+            }
         }
 
         private void GetTarget(ForwardTargetCacheInfo cacheInfo, ProxyInfo info)
