@@ -6,7 +6,7 @@
                     <div class="head flex">
                         <el-button size="small" :loading="state.loading" @click="Add">添加新项</el-button>
                         <span class="split"></span>
-                        <el-select v-model="state.proxys" size="small" multiple collapse-tags collapse-tags-tooltip style="width: 220px" @change="loadData">
+                        <el-select v-model="state.proxys" size="small" multiple collapse-tags collapse-tags-tooltip style="width: 140px" @change="loadData">
                             <el-option v-for="item in state.clientProxys" :key="item.value" :label="item.text" :value="item.value" />
                         </el-select>
                         <span class="split"></span>
