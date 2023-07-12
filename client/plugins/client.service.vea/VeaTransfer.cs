@@ -194,10 +194,14 @@ namespace client.service.vea
             bool res = true;
             Stop();
 
-            uint ip = await veaMessengerSender.AssignIP(signInStateInfo.Connection, (byte)(BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()) & 0xff));
+            byte oldIP = (byte)(BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()) & 0xff);
+            Logger.Instance.Debug($"【{signInStateInfo.Connection.ConnectId}】开始从服务器分配组网IP，本地ip:{oldIP}");
+            uint ip = await veaMessengerSender.AssignIP(signInStateInfo.Connection, oldIP);
             if (ip > 0)
             {
-                config.IP = new IPAddress(ip.ToBytes());
+                Logger.Instance.Info($"【{signInStateInfo.Connection.ConnectId}】从服务器分配到组网IP:{ip & 0x000000ff}");
+                config.IP = new IPAddress(BinaryPrimitives.ReverseEndianness(ip).ToBytes());
+                await config.SaveConfig();
             }
             else
             {

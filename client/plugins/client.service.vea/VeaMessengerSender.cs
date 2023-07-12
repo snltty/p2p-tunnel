@@ -126,7 +126,7 @@ namespace client.service.vea
 
             if (resp.Code == MessageResponeCodes.OK)
             {
-                return  BinaryPrimitives.ReadUInt32BigEndian(resp.Data.Span);
+                return  resp.Data.Span.ToUInt32();
             }
             return 0;
 
