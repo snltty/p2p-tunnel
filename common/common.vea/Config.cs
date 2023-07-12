@@ -24,6 +24,7 @@ namespace common.vea
         public Config() { }
         private int lockObject = 0;
         private readonly IConfigDataProvider<Config> configDataProvider;
+        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
 
         public Config(IConfigDataProvider<Config> configDataProvider, WheelTimer<object> wheelTimer)
         {
@@ -136,15 +137,12 @@ namespace common.vea
                 info.IP = ip & 0xffffff00;
                 if (changed)
                 {
-                    Interlocked.Exchange(ref lockObject, 1);
-                    if (changeCallback != null)
+                    foreach (var item in info.Assigned)
                     {
-                        foreach (var item in info.Assigned)
-                        {
-                            item.Value.IP = info.IP | (item.Value.IP & 0xff);
-                            changeCallback(item.Value);
-                        }
+                        item.Value.IP = info.IP | (item.Value.IP & 0xff);
+                        changeCallback?.Invoke(item.Value);
                     }
+                    Interlocked.Exchange(ref lockObject, 1);
                 }
             }
 
@@ -173,35 +171,42 @@ namespace common.vea
         /// <returns>0则失败</returns>
         public uint AssignIP(string key, byte ip, IConnection connection, string name)
         {
-            lock (DHCP)
+            semaphore.Wait();
+            try
             {
                 DHCPInfo info = GetNetwork(key);
-                byte value = ip;
+                info.Parse();
+
                 if (info.Assigned.TryGetValue(connection.ConnectId, out AssignedInfo assign) == false)
                 {
                     assign = new AssignedInfo();
-                    info.Assigned.Add(connection.ConnectId, assign);
                     Interlocked.Exchange(ref lockObject, 1);
-                }
-                info.Parse();
 
-                //存在了，但是不是本节点的ip，就找个新的ip，找不到，就返回失败
-                if (info.Exists(ip))
-                {
-                    if ((assign.IP & 0xff) != ip && info.Find(out value) == false)
+                    //存在了，就找个新的ip，找不到，就返回失败
+                    if (info.Exists(ip) && info.Find(out ip) == false)
                     {
                         return 0;
                     }
+                    info.Assigned.Add(connection.ConnectId, assign);
+                    info.Add(ip);
+                    assign.IP = info.IP | ip;
                 }
-                info.Add(value);
 
-                assign.IP = info.IP | value;
                 assign.Name = name;
                 assign.Connection = connection;
                 assign.LastTime = DateTime.Now;
                 Interlocked.Exchange(ref lockObject, 1);
                 return assign.IP;
             }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);  
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+            return 0;
         }
         /// <summary>
         /// 存在一个不属于自己的ip
@@ -298,7 +303,6 @@ namespace common.vea
 
             return (Used[arrayIndex] >> (length - 1) & 0b1) == 1;
         }
-
         public void Delete(byte value)
         {
             int arrayIndex = value / 64;

@@ -195,7 +195,7 @@ namespace client.service.vea
             Stop();
 
             byte oldIP = (byte)(BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()) & 0xff);
-            Logger.Instance.Debug($"【{signInStateInfo.Connection.ConnectId}】开始从服务器分配组网IP，本地ip:{oldIP}");
+            Logger.Instance.Info($"【{signInStateInfo.Connection.ConnectId}】开始从服务器分配组网IP，本地ip:{oldIP}");
             uint ip = await veaMessengerSender.AssignIP(signInStateInfo.Connection, oldIP);
             if (ip > 0)
             {
@@ -205,7 +205,7 @@ namespace client.service.vea
             }
             else
             {
-                Logger.Instance.Warning($"未能从服务器分配到组网IP，直接返回本地配置文件配置IP");
+                Logger.Instance.Warning($"未能从服务器分配到组网IP，将使用ip:{oldIP}");
             }
 
             if (config.ListenEnable)
