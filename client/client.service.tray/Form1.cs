@@ -223,7 +223,7 @@ namespace client.service.tray
             {
                 string texts = System.IO.File.ReadAllText(path);
                 JObject jsObj = JObject.Parse(texts);
-                Process.Start($"http://127.0.0.1:{jsObj["web"]["Port"]}/#/?port={jsObj["websocket"]["Port"]}");
+                Process.Start($"http://127.0.0.1:{jsObj["Web"]["Port"]}/#/?port={jsObj["Websocket"]["Port"]}");
             }
             else
             {
