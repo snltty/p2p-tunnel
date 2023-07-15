@@ -218,16 +218,24 @@ namespace client.service.tray
 
         private void OpenWeb(object sender, EventArgs e)
         {
-            string path = Path.Combine(Application.StartupPath, "ui-appsettings.json");
-            if (System.IO.File.Exists(path))
+            try
             {
-                string texts = System.IO.File.ReadAllText(path);
-                JObject jsObj = JObject.Parse(texts);
-                Process.Start($"http://127.0.0.1:{jsObj["Web"]["Port"]}/#/?port={jsObj["Websocket"]["Port"]}");
+                string path = Path.Combine(Application.StartupPath, "ui-appsettings.json");
+                if (System.IO.File.Exists(path))
+                {
+                    string texts = System.IO.File.ReadAllText(path);
+                    JObject jsObj = JObject.Parse(texts);
+                    Process.Start($"http://127.0.0.1:{jsObj["Web"]["Port"]}/#/?port={jsObj["Websocket"]["Port"]}");
+                }
+                else
+                {
+                    notifyIcon.BalloonTipText = "未找到相应的配置文件,可以先运行客户端生成配置文件";
+                    notifyIcon.ShowBalloonTip(1000);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                notifyIcon.BalloonTipText = "未找到相应的配置文件,可以先运行客户端生成配置文件";
+                notifyIcon.BalloonTipText = ex.Message;
                 notifyIcon.ShowBalloonTip(1000);
             }
         }
