@@ -44,7 +44,7 @@ namespace client.service.ui.api.service.webServer
 
                         try
                         {
-                            response.Headers["Server"] = "snltty";
+                            response.Headers.Set("Server", "snltty");
 
                             string path = request.Url.AbsolutePath;
                             //默认页面
@@ -55,7 +55,7 @@ namespace client.service.ui.api.service.webServer
                             {
                                 response.ContentLength64 = bytes.Length;
                                 response.ContentType = GetContentType(path);
-                                response.Headers["Last-Modified"] = last.ToString();
+                                response.Headers.Set("Last-Modified",last.ToString());
                                 stream.Write(bytes, 0, bytes.Length);
                             }
                             else
