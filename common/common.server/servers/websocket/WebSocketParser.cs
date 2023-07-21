@@ -1,5 +1,4 @@
 ﻿using common.libs;
-using common.libs.extends;
 using System;
 using System.Buffers.Binary;
 using System.Net;
@@ -22,25 +21,25 @@ namespace common.server.servers.websocket
         /// <returns></returns>
         public static byte[] BuildConnectData(WebsocketHeaderInfo header)
         {
-            string path = header.Path.Length == 0 ? "/" : header.Path.GetString();
+            string path = header.Path.Length == 0 ? "/" : Encoding.UTF8.GetString(header.Path.Span);
 
             StringBuilder sb = new StringBuilder(10);
             sb.Append($"GET {path} HTTP/1.1\r\n");
             sb.Append($"Upgrade: websocket\r\n");
             sb.Append($"Connection: Upgrade\r\n");
             sb.Append($"Sec-WebSocket-Version: 13\r\n");
-            sb.Append($"Sec-WebSocket-Key: {header.SecWebSocketKey.GetString()}\r\n");
+            sb.Append($"Sec-WebSocket-Key: {Encoding.UTF8.GetString(header.SecWebSocketKey.Span)}\r\n");
             if (header.SecWebSocketProtocol.Length > 0)
             {
-                sb.Append($"Sec-WebSocket-Protocol: {header.SecWebSocketProtocol.GetString()}\r\n");
+                sb.Append($"Sec-WebSocket-Protocol: {Encoding.UTF8.GetString(header.SecWebSocketProtocol.Span)}\r\n");
             }
             if (header.SecWebSocketExtensions.Length > 0)
             {
-                sb.Append($"Sec-WebSocket-Extensions: {header.SecWebSocketExtensions.GetString()}\r\n");
+                sb.Append($"Sec-WebSocket-Extensions: {Encoding.UTF8.GetString(header.SecWebSocketExtensions.Span)}\r\n");
             }
             sb.Append("\r\n");
 
-            return sb.ToString().ToBytes();
+            return Encoding.UTF8.GetBytes(sb.ToString());
         }
         /// <summary>
         /// 构建连接回应数据
@@ -56,27 +55,27 @@ namespace common.server.servers.websocket
             sb.Append($"Sec-WebSocket-Accept: {acceptStr}\r\n");
             if (header.Connection.Length > 0)
             {
-                sb.Append($"Connection: {header.Connection.GetString()}\r\n");
+                sb.Append($"Connection: {Encoding.UTF8.GetString(header.Connection.Span)}\r\n");
             }
             if (header.Upgrade.Length > 0)
             {
-                sb.Append($"Upgrade: {header.Upgrade.GetString()}\r\n");
+                sb.Append($"Upgrade: {Encoding.UTF8.GetString(header.Upgrade.Span)}\r\n");
             }
             if (header.SecWebSocketVersion.Length > 0)
             {
-                sb.Append($"Sec-WebSocket-Version: {header.SecWebSocketVersion.GetString()}\r\n");
+                sb.Append($"Sec-WebSocket-Version: {Encoding.UTF8.GetString(header.SecWebSocketVersion.Span)}\r\n");
             }
             if (header.SecWebSocketProtocol.Length > 0)
             {
-                sb.Append($"Sec-WebSocket-Protocol: {header.SecWebSocketProtocol.GetString()}\r\n");
+                sb.Append($"Sec-WebSocket-Protocol: {Encoding.UTF8.GetString(header.SecWebSocketProtocol.Span)}\r\n");
             }
             if (header.SecWebSocketExtensions.Length > 0)
             {
-                sb.Append($"Sec-WebSocket-Extensions: {header.SecWebSocketExtensions.GetString()}\r\n");
+                sb.Append($"Sec-WebSocket-Extensions: {Encoding.UTF8.GetString(header.SecWebSocketExtensions.Span)}\r\n");
             }
             sb.Append("\r\n");
 
-            return sb.ToString().ToBytes();
+            return Encoding.UTF8.GetBytes(sb.ToString());
         }
         /// <summary>
         /// 生成随机key
@@ -90,7 +89,7 @@ namespace common.server.servers.websocket
             {
                 bytes[i] = (byte)random.Next(0, 255);
             }
-            byte[] res = Convert.ToBase64String(bytes).ToBytes();
+            byte[] res = Encoding.UTF8.GetBytes(Convert.ToBase64String(bytes));
             return res;
         }
         /// <summary>
@@ -135,7 +134,7 @@ namespace common.server.servers.websocket
         public static bool VerifySecWebSocketAccept(Memory<byte> key, Memory<byte> accept)
         {
             string acceptStr = BuildSecWebSocketAccept(key);
-            return acceptStr == accept.GetString();
+            return acceptStr == Encoding.UTF8.GetString(accept.Span);
         }
 
         /// <summary>
@@ -261,9 +260,7 @@ namespace common.server.servers.websocket
             return resultStr;
         }
     }
-    /// <summary>
-    /// 
-    /// </summary>
+
     public sealed class WebSocketFrameRemarkInfo
     {
         /// <summary>
@@ -545,7 +542,7 @@ namespace common.server.servers.websocket
             Encoding.ASCII.GetBytes("Sec-WebSocket-Protocol: "),
             Encoding.ASCII.GetBytes("Sec-WebSocket-Accept: "),
         };
-        static byte[] httpBytes = "HTTP/".ToBytes();
+        static byte[] httpBytes = Encoding.UTF8.GetBytes("HTTP/");
 
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.SwitchingProtocols;
         public Memory<byte> Method { get; private set; }
@@ -563,7 +560,7 @@ namespace common.server.servers.websocket
             set
             {
                 _pathSet = value;
-                Path = _pathSet.ToBytes();
+                Path = Encoding.UTF8.GetBytes(_pathSet);
             }
         }
         /// <summary>
@@ -632,7 +629,7 @@ namespace common.server.servers.websocket
             int pathIndex1 = span.Slice(pathIndex + 1).IndexOf((byte)32);
             if (header.Slice(0, httpBytes.Length).Span.SequenceEqual(httpBytes))
             {
-                int code = int.Parse(header.Slice(pathIndex + 1, pathIndex1).GetString());
+                int code = int.Parse(Encoding.UTF8.GetString(header.Slice(pathIndex + 1, pathIndex1).Span));
                 headerInfo.StatusCode = (HttpStatusCode)code;
             }
             else
