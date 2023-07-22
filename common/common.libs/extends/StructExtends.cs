@@ -3,16 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace common.libs.extends
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public static class StructExtends
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="structObj"></param>
-        /// <returns></returns>
         public static byte[] StructToBytes(this object structObj)
         {
             int size = Marshal.SizeOf(structObj);

@@ -361,7 +361,7 @@ namespace common.libs.extends
         public static string GetUTF16String(this Memory<byte> memory, int strLength)
         {
             if (memory.Length == 0)
-                return string.Empty;    
+                return string.Empty;
             return ReadUtf16(memory.Span, strLength);
         }
         /// <summary>
