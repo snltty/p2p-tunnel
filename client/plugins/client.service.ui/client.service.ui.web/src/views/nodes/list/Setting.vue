@@ -248,6 +248,23 @@
                                 </el-col>
                             </el-row>
                         </el-form-item>
+                        <el-form-item label="" label-width="0">
+                            <el-row>
+                                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                    <el-form-item label="UI密码" prop="UIPassword">
+                                        <el-input size="default" type="password" show-password maxlength="32" show-word-limit v-model="state.form.UIPassword" placeholder="UI密码">
+                                            <template #append>
+                                                <el-tooltip class="box-item" effect="dark" content="不为空则需要输入此密码才能进行UI操作" placement="top">
+                                                    <el-icon>
+                                                        <Warning />
+                                                    </el-icon>
+                                                </el-tooltip>
+                                            </template>
+                                        </el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </el-form-item>
                     </el-collapse-item>
                 </el-collapse>
             </el-form>
@@ -291,6 +308,7 @@ export default {
                 UdpUploadSpeedLimit: 0,
                 TcpBufferSize: 0,
                 HighConfig: false,
+                UIPassword: '',
 
                 ClientEncode: false,
                 ClientEncodePassword: "",
@@ -346,6 +364,7 @@ export default {
                 state.form.AutoRelay = json.ClientConfig.AutoRelay;
                 state.form.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
                 state.form.HighConfig = json.ClientConfig.HighConfig;
+                state.form.UIPassword = json.ClientConfig.UIPassword;
 
                 state.form.ClientEncode = json.ClientConfig.Encode;
                 state.form.ClientEncodePassword = json.ClientConfig.EncodePassword;
@@ -374,6 +393,8 @@ export default {
                     json.ClientConfig.TTL = +state.form.TTL;
                     json.ClientConfig.UdpUploadSpeedLimit = +state.form.UdpUploadSpeedLimit;
                     json.ClientConfig.HighConfig = state.form.HighConfig;
+                    json.ClientConfig.UIPassword = state.form.UIPassword;
+
 
                     json.ClientConfig.Encode = state.form.ClientEncode;
                     json.ClientConfig.EncodePassword = state.form.ClientEncodePassword;

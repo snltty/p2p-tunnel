@@ -18,6 +18,7 @@
                         <StatusBar></StatusBar>
                     </div>
                     <WebsocketView></WebsocketView>
+                    <WebsocketLock></WebsocketLock>
                 </div>
             </div>
         </auth-wrap>
@@ -28,6 +29,7 @@ import Menu from "./components/Menu.vue";
 import Background from "./components/Background.vue";
 import StatusBar from "./components/statusBar/Index.vue";
 import WebsocketView from "./components/statusBar/WebsocketView.vue";
+import WebsocketLock from "./components/statusBar/WebsocketLock.vue";
 import { provideSignIn } from "./states/signin";
 import { provideWebsocket } from "./states/websocket";
 import { provideClients } from "./states/clients";
@@ -35,7 +37,7 @@ import { provideShareData } from "./states/shareData";
 import { ElConfigProvider } from "element-plus";
 import zhCn from "element-plus/lib/locale/lang/zh-cn";
 export default {
-    components: { Menu, Background, StatusBar, WebsocketView, ElConfigProvider },
+    components: { Menu, Background, StatusBar, WebsocketView, WebsocketLock, ElConfigProvider },
     setup() {
         provideShareData();
         provideSignIn();

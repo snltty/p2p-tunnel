@@ -23,7 +23,8 @@ export const provideSignIn = () => {
             UseRelay: false,
             UseReConnect: false,
             UdpUploadSpeedLimit: 0,
-            HighConfig: false
+            HighConfig: false,
+            UIPassword: '',
         },
         ServerConfig: {
             Ip: '',
@@ -61,6 +62,7 @@ export const provideSignIn = () => {
                 state.ClientConfig.UseTcp = json.ClientConfig.UseTcp;
                 state.ClientConfig.UseRelay = json.ClientConfig.UseRelay;
                 state.ClientConfig.UdpUploadSpeedLimit = json.ClientConfig.UdpUploadSpeedLimit;
+                state.ClientConfig.UIPassword = json.ClientConfig.UIPassword;
 
 
                 state.ClientConfig.UsePunchHole = json.ClientConfig.UsePunchHole;

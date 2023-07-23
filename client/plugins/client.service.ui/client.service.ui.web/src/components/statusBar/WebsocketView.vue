@@ -4,7 +4,10 @@
             <p><img src="../../assets/sleep.svg" alt="sleep" width="80"></p>
             <p class="text">尚未连接管理接口</p>
             <p class="mt">
-                <el-input v-model="websocketState.url" /> <el-button @click="editWsUrl">修改</el-button>
+                <el-input v-model="websocketState.url" />
+            </p>
+            <p class="mt">
+                <el-button @click="editWsUrl">修改</el-button>
             </p>
             <p class="mt">
                 <a href="javascript:;" @click="looklook">不想连接，随便看看？</a>
@@ -58,7 +61,7 @@ export default {
         border: 1px solid #c2c2c2;
         border-radius: 4px;
         text-align: center;
-        padding: 4rem;
+        padding: 2rem 4rem 0 4rem;
 
         .text {
             font-size: 1.6rem;

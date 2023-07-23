@@ -144,6 +144,8 @@ namespace client
 
         public bool HighConfig { get; set; } = false;
 
+        public string UIPassword { get; set; } = string.Empty;
+
         /// <summary>
         /// 绑定ip
         /// </summary>
