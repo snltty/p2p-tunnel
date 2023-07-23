@@ -67,8 +67,8 @@ for %%r in (x64,arm64) do (
 	echo F|xcopy "server\\server.service\\public\\server.service.tray.exe" "public\\publish\\any\\server\\win-%%r\\server.service.tray.exe"  /s /f /h /y
 	
 )
-del  "public\\publish\\any\\server\\*.pac"
-
+del  "public\\publish\\any\\server\\*.pac" 
+ 
 7z a -tzip ./public/publish-zip/p2p-tunnel-any.zip ./public/publish/any/*
 7z a -tzip ./public/publish-zip/p2p-tunnel-win-x64-single.zip ./public/publish/win-x64-single/*
 7z a -tzip ./public/publish-zip/p2p-tunnel-win-arm64-single.zip ./public/publish/win-arm64-single/*
