@@ -69,11 +69,11 @@ for %%r in (x64,arm64) do (
 )
 del  "public\\publish\\any\\server\\*.pac"
 
-7z a -tzip ./public/publish-zip/any.zip ./public/publish/any/*
-7z a -tzip ./public/publish-zip/win-x64-single.zip ./public/publish/win-x64-single/*
-7z a -tzip ./public/publish-zip/win-arm64-single.zip ./public/publish/win-arm64-single/*
-7z a -tzip ./public/publish-zip/linux-x64-single.zip ./public/publish/linux-x64-single/*
-7z a -tzip ./public/publish-zip/linux-arm64-single.zip ./public/publish/linux-arm64-single/*
-7z a -tzip ./public/publish-zip/osx-x64-single.zip ./public/publish/osx-x64-single/*
-7z a -tzip ./public/publish-zip/osx-arm64-single.zip ./public/publish/osx-arm64-single/*
+7z a -tzip ./public/publish-zip/p2p-tunnel-any.zip ./public/publish/any/*
+7z a -tzip ./public/publish-zip/p2p-tunnel-win-x64-single.zip ./public/publish/win-x64-single/*
+7z a -tzip ./public/publish-zip/p2p-tunnel-win-arm64-single.zip ./public/publish/win-arm64-single/*
+7z a -tzip ./public/publish-zip/p2p-tunnel-linux-x64-single.zip ./public/publish/linux-x64-single/*
+7z a -tzip ./public/publish-zip/p2p-tunnel-linux-arm64-single.zip ./public/publish/linux-arm64-single/*
+7z a -tzip ./public/publish-zip/p2p-tunnel-osx-x64-single.zip ./public/publish/osx-x64-single/*
+7z a -tzip ./public/publish-zip/p2p-tunnel-osx-arm64-single.zip ./public/publish/osx-arm64-single/*
 
