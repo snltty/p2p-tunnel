@@ -60,7 +60,6 @@ namespace client.service.vea.platforms
             {
                 try
                 {
-                    Tun2SocksProcess.Dispose();
                     Tun2SocksProcess.Kill();
                 }
                 catch (Exception)

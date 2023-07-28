@@ -55,10 +55,6 @@ namespace client.service.vea
         {
             await config.SaveConfig(jsonStr).ConfigureAwait(false);
             VeaTransfer.UpdateIp();
-            _ = Task.Run(() =>
-            {
-                _ = VeaTransfer.Run();
-            });
             return true;
         }
     }

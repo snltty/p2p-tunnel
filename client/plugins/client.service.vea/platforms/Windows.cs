@@ -27,46 +27,54 @@ namespace client.service.vea.platforms
             {
                 Logger.Instance.Warning($"vea windows ->exec:{command}");
             }
-            Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", command);
-            for (int i = 0; i < 10; i++)
-            {
-                System.Threading.Thread.Sleep(1000);
-                if (Tun2SocksProcess.HasExited)
-                {
-                    break;
-                }
-                if (GetWindowsHasInterface(veaName) == false)
-                {
-                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
-                    {
-                        Logger.Instance.Warning($"vea windows ->interface not dound");
-                    }
-                    continue;
-                }
-                interfaceNumber = GetWindowsInterfaceNum();
-                if (interfaceNumber == 0)
-                {
-                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
-                    {
-                        Logger.Instance.Warning($"vea windows ->interface num not dound");
-                    }
-                    continue;
-                }
 
-                Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
-                for (int k = 0; k < 5; k++)
+            Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", command);
+            try
+            {
+                for (int i = 0; i < 10; i++)
                 {
-                    System.Threading.Thread.Sleep(500);
-                    if (GetWindowsHasIp(config.IP) == false)
+                    System.Threading.Thread.Sleep(1000);
+                    if (Tun2SocksProcess.HasExited)
+                    {
+                        break;
+                    }
+                    if (GetWindowsHasInterface(veaName) == false)
                     {
                         if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
                         {
-                            Logger.Instance.Error($"vea windows ->set ip fail");
+                            Logger.Instance.Warning($"vea windows ->interface not dound");
                         }
                         continue;
                     }
-                    return true;
+                    interfaceNumber = GetWindowsInterfaceNum();
+                    if (interfaceNumber == 0)
+                    {
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        {
+                            Logger.Instance.Warning($"vea windows ->interface num not dound");
+                        }
+                        continue;
+                    }
+
+                    Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
+                    for (int k = 0; k < 5; k++)
+                    {
+                        System.Threading.Thread.Sleep(500);
+                        if (GetWindowsHasIp(config.IP) == false)
+                        {
+                            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                            {
+                                Logger.Instance.Error($"vea windows ->set ip fail");
+                            }
+                            continue;
+                        }
+                        return true;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
             }
 
             if (interfaceNumber <= 0)
@@ -84,7 +92,6 @@ namespace client.service.vea.platforms
             {
                 try
                 {
-                    Tun2SocksProcess.Dispose();
                     Tun2SocksProcess.Kill();
                 }
                 catch (Exception)
@@ -97,7 +104,6 @@ namespace client.service.vea.platforms
             {
                 try
                 {
-                    item.Dispose();
                     item.Kill();
                 }
                 catch (Exception)

@@ -175,7 +175,7 @@ namespace client.service.vea
         public void ModifiedIP(IConnection connection)
         {
             uint ip = BinaryPrimitives.ReadUInt32BigEndian(connection.ReceiveRequestWrap.Payload.Span);
-            if(ip > 0)
+            if (ip > 0)
             {
                 config.IP = new IPAddress(ip.ToBytes());
                 Task.Run(async () =>

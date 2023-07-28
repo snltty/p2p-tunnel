@@ -1,5 +1,6 @@
 ﻿using client.messengers.clients;
 using client.service.ui.api.clientServer;
+using common.libs;
 using common.libs.extends;
 using common.proxy;
 using System;
@@ -37,6 +38,7 @@ namespace client.service.vea
             }
             catch (Exception ex)
             {
+                Logger.Instance.Error(ex);
                 arg.SetCode(ClientServiceResponseCodes.Error, ex.Message);
             }
             return false;

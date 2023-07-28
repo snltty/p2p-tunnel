@@ -195,11 +195,11 @@ namespace client.service.vea
             Stop();
 
             byte oldIP = (byte)(BinaryPrimitives.ReadUInt32BigEndian(config.IP.GetAddressBytes()) & 0xff);
-            Logger.Instance.Info($"【{signInStateInfo.Connection.ConnectId}】开始从服务器分配组网IP，本地ip:{oldIP}");
+            Logger.Instance.Info($"【{signInStateInfo.Connection?.ConnectId ?? 0}】开始从服务器分配组网IP，本地ip:{oldIP}");
             uint ip = await veaMessengerSender.AssignIP(signInStateInfo.Connection, oldIP);
             if (ip > 0)
             {
-                Logger.Instance.Info($"【{signInStateInfo.Connection.ConnectId}】从服务器分配到组网IP:{ip & 0x000000ff}");
+                Logger.Instance.Info($"【{signInStateInfo.Connection?.ConnectId ?? 0}】从服务器分配到组网IP:{ip & 0x000000ff}");
                 config.IP = new IPAddress(BinaryPrimitives.ReverseEndianness(ip).ToBytes());
                 await config.SaveConfig();
             }
