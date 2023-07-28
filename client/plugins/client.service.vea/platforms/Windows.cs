@@ -31,42 +31,41 @@ namespace client.service.vea.platforms
             for (int i = 0; i < 10; i++)
             {
                 System.Threading.Thread.Sleep(1000);
-                if (GetWindowsHasInterface(veaName))
+                if (Tun2SocksProcess.HasExited)
                 {
-                    interfaceNumber = GetWindowsInterfaceNum();
-                    if (interfaceNumber > 0)
-                    {
-                        Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
-                        for (int k = 0; i < 5; k++)
-                        {
-                            System.Threading.Thread.Sleep(1000);
-                            if (GetWindowsHasIp(config.IP))
-                            {
-                                return true;
-                            }
-                            else
-                            {
-                                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
-                                {
-                                    Logger.Instance.Error($"vea windows ->set ip fail");
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
-                        {
-                            Logger.Instance.Warning($"vea windows ->interface num not dound");
-                        }
-                    }
+                    break;
                 }
-                else
+                if (GetWindowsHasInterface(veaName) == false)
                 {
                     if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
                     {
                         Logger.Instance.Warning($"vea windows ->interface not dound");
                     }
+                    continue;
+                }
+                interfaceNumber = GetWindowsInterfaceNum();
+                if (interfaceNumber == 0)
+                {
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    {
+                        Logger.Instance.Warning($"vea windows ->interface num not dound");
+                    }
+                    continue;
+                }
+
+                Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
+                for (int k = 0; k < 5; k++)
+                {
+                    System.Threading.Thread.Sleep(500);
+                    if (GetWindowsHasIp(config.IP) == false)
+                    {
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        {
+                            Logger.Instance.Error($"vea windows ->set ip fail");
+                        }
+                        continue;
+                    }
+                    return true;
                 }
             }
 
@@ -91,7 +90,7 @@ namespace client.service.vea.platforms
                 catch (Exception)
                 {
                 }
-               
+
                 Tun2SocksProcess = null;
             }
             foreach (var item in Process.GetProcesses().Where(c => c.ProcessName.Contains("tun2socks")))
