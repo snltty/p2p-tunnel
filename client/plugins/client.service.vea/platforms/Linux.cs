@@ -57,9 +57,14 @@ namespace client.service.vea.platforms
         {
             if (Tun2SocksProcess != null)
             {
-                Tun2SocksProcess.Kill();
-                Tun2SocksProcess.Close();
-                Tun2SocksProcess.Dispose();
+                try
+                {
+                    Tun2SocksProcess.Dispose();
+                    Tun2SocksProcess.Kill();
+                }
+                catch (Exception)
+                {
+                }
                 Tun2SocksProcess = null;
             }
 

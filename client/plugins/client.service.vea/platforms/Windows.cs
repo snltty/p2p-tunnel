@@ -27,31 +27,47 @@ namespace client.service.vea.platforms
             {
                 Logger.Instance.Warning($"vea windows ->exec:{command}");
             }
-            for (int i = 0; i < 2; i++)
+            Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", command);
+            for (int i = 0; i < 10; i++)
             {
-                Tun2SocksProcess = Command.Execute("tun2socks-windows.exe", command);
-                for (int k = 0; k < 4; k++)
+                System.Threading.Thread.Sleep(1000);
+                if (GetWindowsHasInterface(veaName))
                 {
-                    System.Threading.Thread.Sleep(1000);
-                    if (GetWindowsHasInterface(veaName))
+                    interfaceNumber = GetWindowsInterfaceNum();
+                    if (interfaceNumber > 0)
                     {
-                        interfaceNumber = GetWindowsInterfaceNum();
-                        if (interfaceNumber > 0)
+                        Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
+                        for (int k = 0; i < 5; k++)
                         {
-                            Command.Windows(string.Empty, new string[] { $"netsh interface ip set address name=\"{veaName}\" source=static addr={config.IP} mask=255.255.255.0 gateway=none" });
-                            System.Threading.Thread.Sleep(100);
+                            System.Threading.Thread.Sleep(1000);
                             if (GetWindowsHasIp(config.IP))
                             {
-                                if (config.ProxyAll) //代理所有
-                                {
-                                    //AddRoute(IPAddress.Any);
-                                }
                                 return true;
+                            }
+                            else
+                            {
+                                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                                {
+                                    Logger.Instance.Error($"vea windows ->set ip fail");
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        {
+                            Logger.Instance.Warning($"vea windows ->interface num not dound");
+                        }
+                    }
                 }
-                Kill();
+                else
+                {
+                    if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    {
+                        Logger.Instance.Warning($"vea windows ->interface not dound");
+                    }
+                }
             }
 
             if (interfaceNumber <= 0)
@@ -67,16 +83,27 @@ namespace client.service.vea.platforms
             interfaceNumber = 0;
             if (Tun2SocksProcess != null)
             {
-                Tun2SocksProcess.Kill();
-                Tun2SocksProcess.Close();
-                Tun2SocksProcess.Dispose();
+                try
+                {
+                    Tun2SocksProcess.Dispose();
+                    Tun2SocksProcess.Kill();
+                }
+                catch (Exception)
+                {
+                }
+               
                 Tun2SocksProcess = null;
             }
             foreach (var item in Process.GetProcesses().Where(c => c.ProcessName.Contains("tun2socks")))
             {
-                item.Kill();
-                item.Close();
-                item.Dispose();
+                try
+                {
+                    item.Dispose();
+                    item.Kill();
+                }
+                catch (Exception)
+                {
+                }
             };
         }
         public void AddRoute(VeaLanIPAddress[] ip)
