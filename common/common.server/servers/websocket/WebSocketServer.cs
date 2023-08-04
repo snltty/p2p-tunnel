@@ -124,14 +124,14 @@ namespace common.server.servers.websocket
             Socket listenSocket = ((Socket)acceptEventArg.UserToken);
             try
             {
-                if (!listenSocket.AcceptAsync(acceptEventArg))
+                if (listenSocket.AcceptAsync(acceptEventArg) == false)
                 {
                     ProcessAccept(acceptEventArg);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Logger.Instance.Error(ex);
             }
         }
         private void ProcessAccept(SocketAsyncEventArgs e)
@@ -196,8 +196,10 @@ namespace common.server.servers.websocket
                     CloseClientSocket(e);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                    Logger.Instance.Error(ex);
                 CloseClientSocket(e);
             }
         }
@@ -206,7 +208,7 @@ namespace common.server.servers.websocket
             if (e.SocketError == SocketError.Success)
             {
                 AsyncUserToken token = (AsyncUserToken)e.UserToken;
-                if (!token.Connectrion.Socket.ReceiveAsync(e))
+                if (token.Connectrion.Socket.ReceiveAsync(e) == false)
                 {
                     ProcessReceive(e);
                 }
