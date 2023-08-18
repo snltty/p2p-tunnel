@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using common.libs.extends;
+using System.Buffers.Binary;
 using System.Net;
 using System.Text;
 
@@ -10,7 +11,8 @@ namespace test
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<Test>();
+            Console.WriteLine(string.Join(",",BitConverter.GetBytes(BinaryPrimitives.ReverseEndianness((ushort)53))));
+           // BenchmarkRunner.Run<Test>();
         }
     }
 
