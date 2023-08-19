@@ -14,6 +14,15 @@ namespace test
         }
     }
 
+    class AAA
+    {
+        public int A1 { get; set; }
+        public int A2 { get; set; }
+        public int A3 { get; set; }
+        public int A4 { get; set; }
+        public int A5 { get; set; }
+    }
+
     [MemoryDiagnoser]
     public partial class Test
     {
@@ -22,30 +31,24 @@ namespace test
         {
         }
 
-        string a = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-        byte[] bytes = new byte[1024];
-
+        object aaa = new AAA();
         [Benchmark]
-        public void UTF8()
+        public void Test1()
         {
             for (int i = 0; i < 100; i++)
-                Encoding.UTF8.GetBytes(a).CopyTo(bytes, 0);
-        }
-
-
-        [Benchmark]
-        public void UTF8New()
-        {
-            for (int i = 0; i < 100; i++)
-                a.AsSpan().ToUTF8Bytes(bytes);
+            {
+                bool res = aaa.GetType() == typeof(AAA);
+            }
         }
 
         [Benchmark]
-        public void UTF16()
+        public void Test2()
         {
             for (int i = 0; i < 100; i++)
-                a.GetUTF16Bytes().CopyTo(bytes);
-
+            {
+                bool res = aaa is AAA;
+            }
         }
+
     }
 }
