@@ -9,47 +9,35 @@ namespace test
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static unsafe void Main(string[] args)
         {
-            Console.WriteLine(string.Join(",",BitConverter.GetBytes(BinaryPrimitives.ReverseEndianness((ushort)53))));
-           // BenchmarkRunner.Run<Test>();
+           BenchmarkRunner.Run<Test>();
         }
     }
 
-    class AAA
-    {
-        public int A1 { get; set; }
-        public int A2 { get; set; }
-        public int A3 { get; set; }
-        public int A4 { get; set; }
-        public int A5 { get; set; }
-    }
-
     [MemoryDiagnoser]
-    public partial class Test
+    public unsafe partial class Test
     {
         [GlobalSetup]
         public void Startup()
         {
         }
 
-        object aaa = new AAA();
+        byte[] bytes = new byte[] { 0, 0, 48, 57 };
+
         [Benchmark]
-        public void Test1()
+        public unsafe void Test1()
         {
-            for (int i = 0; i < 100; i++)
+            fixed (byte* p = &bytes[0])
             {
-                bool res = aaa.GetType() == typeof(AAA);
+                ushort port1 = (ushort)((*(p + 2) << 8 & 0xFF00) | *(p + 3));
             }
         }
 
         [Benchmark]
         public void Test2()
         {
-            for (int i = 0; i < 100; i++)
-            {
-                bool res = aaa is AAA;
-            }
+            ushort port = BinaryPrimitives.ReverseEndianness(bytes.AsSpan(2, 2).ToUInt16());
         }
 
     }
