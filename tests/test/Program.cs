@@ -11,7 +11,8 @@ namespace test
     {
         static unsafe void Main(string[] args)
         {
-           BenchmarkRunner.Run<Test>();
+            Console.WriteLine(string.Join(",",BitConverter.GetBytes((ushort)53)));
+           //BenchmarkRunner.Run<Test>();
         }
     }
 
