@@ -76,11 +76,10 @@ export default {
         let timer = 0;
         const getData = () => {
             getConnects().then((connects) => {
-
                 let _connects = [];
                 for (let j in connects) {
                     _connects.push({
-                        Id: +j,
+                        ConnectionId: +j,
                         Connects: connects[j]
                     })
                 }
@@ -99,11 +98,6 @@ export default {
 
                         let clients = clientsState.clients.reduce((json, current, index) => {
                             json[current.ConnectionId] = current;
-                            return json;
-                        }, {});
-
-                        let clients1 = clientsState.clients.reduce((json, current, index) => {
-                            json[current.ConnectionId] = current.Name;
                             return json;
                         }, {});
 
@@ -139,12 +133,12 @@ export default {
                     }
                     continue;
                 }
-
                 let _exclude = exclude.slice(0);
                 _exclude.push(starts[i].ConnectionId);
                 _path.push(starts[i].ConnectionId);
 
                 let lastIds = starts[i].Connects.filter(c => _exclude.indexOf(c) == -1);
+
                 let last = state.connects.filter(c => lastIds.indexOf(c.ConnectionId) >= 0);
                 if (last.length > 0) {
                     fun(last, _exclude, _path, result);
