@@ -89,7 +89,7 @@ import StatusMsg from '../../../../components/StatusMsg.vue'
 import plugin from './plugin'
 import { ElMessageBox } from 'element-plus';
 export default {
-    plugin: plugin,
+    // plugin: plugin,
     components: { AddForward, AddListen, StatusMsg, Setting },
     setup() {
 

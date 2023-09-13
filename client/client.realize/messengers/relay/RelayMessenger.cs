@@ -12,7 +12,6 @@ namespace client.realize.messengers.relay
     /// <summary>
     /// 中继
     /// </summary>
-
     [MessengerIdRange((ushort)RelayMessengerIds.Min, (ushort)RelayMessengerIds.Max)]
     public sealed class RelayMessenger : IMessenger
     {

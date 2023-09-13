@@ -19,6 +19,7 @@
                             </template>
                         </el-popover>
                         <span class="flex-1"></span>
+                        <span>当服务器作为目标端时</span>
                     </div>
                     <div class="body flex-1 relative">
                         <div>
