@@ -91,7 +91,7 @@ namespace common.proxy
                     RequestId = port
                 }
             };
-            clientsManager.TryAdd(token);
+            //clientsManager.TryAdd(token);
             acceptEventArg.UserToken = token;
             acceptEventArg.Completed += IO_Completed;
             StartAccept(acceptEventArg);
