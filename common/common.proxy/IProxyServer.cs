@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -267,7 +268,10 @@ namespace common.proxy
             catch (Exception ex)
             {
                 CloseClientSocket(e);
-                Logger.Instance.Error($"{token.Request.RequestId} {ex + ""}");
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                {
+                    Logger.Instance.Error($"{token.Request.RequestId} {ex + ""}");
+                }
             }
         }
 
@@ -337,7 +341,10 @@ namespace common.proxy
             }
             catch (Exception ex)
             {
-                Logger.Instance.Error(ex);
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                {
+                    Logger.Instance.Error(ex);
+                }
             }
             finally
             {

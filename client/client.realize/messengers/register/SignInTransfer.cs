@@ -67,6 +67,11 @@ namespace client.realize.messengers.singnin
             }
         }
 
+        private void SignInTask()
+        {
+
+        }
+
         public void Exit()
         {
             if (cancellationToken != null && cancellationToken.IsCancellationRequested == false)

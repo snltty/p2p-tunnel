@@ -222,6 +222,7 @@ namespace common.server
                     }
                     return;
                 }
+               
                 if (plugin.VoidMethod != null)
                 {
                     plugin.VoidMethod(connection);

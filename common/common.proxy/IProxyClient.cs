@@ -112,8 +112,12 @@ namespace common.proxy
                     {
                         await token.TargetSocket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        if(Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        {
+                            Logger.Instance.Error($"proxy forward tcp send :{ex}");
+                        }
                         CloseClientSocket(token);
                     }
                 }
@@ -174,8 +178,12 @@ namespace common.proxy
                     token.Data.Data = Helper.EmptyArray;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                {
+                    Logger.Instance.Error($"proxy forward udp send :{ex}");
+                }
                 if (udpConnections.TryRemove(key, out UdpToken _token))
                 {
                     _token.Clear();
@@ -220,13 +228,16 @@ namespace common.proxy
                 }
                 result = token.TargetSocket.BeginReceiveFrom(token.PoolBuffer, 0, token.PoolBuffer.Length, SocketFlags.None, ref token.TempRemoteEP, ReceiveCallbackUdp, token);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                {
+                    Logger.Instance.Error($"socks5 forward udp -> receive" + ex);
+                }
                 if (udpConnections.TryRemove(token.Key, out _))
                 {
                     token.Clear();
                 }
-                //Logger.Instance.DebugError($"socks5 forward udp -> receive" + ex);
             }
         }
 

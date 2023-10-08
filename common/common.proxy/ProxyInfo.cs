@@ -191,7 +191,9 @@ namespace common.proxy
                 index += 2;
             }
 
-            Data = bytes.Slice(index);
+            var data = bytes.Slice(index);
+            Data = new byte[data.Length];
+            data.CopyTo(Data);
         }
         public static ProxyInfo Debytes(Memory<byte> data)
         {

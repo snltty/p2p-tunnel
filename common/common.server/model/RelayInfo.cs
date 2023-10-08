@@ -81,20 +81,11 @@ namespace common.server.model
         /// </summary>
         public ulong[] Connects { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="memory"></param>
-        /// <returns></returns>
         public static ulong ReadToId(Memory<byte> memory)
         {
             return memory.Span.ToUInt64();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToBytes()
         {
             byte[] res = new byte[8 + 8 + 8 * Connects.Length];
@@ -113,10 +104,6 @@ namespace common.server.model
             return res;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="memory"></param>
         public void DeBytes(Memory<byte> memory)
         {
             var span = memory.Span;

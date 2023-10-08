@@ -211,6 +211,7 @@ namespace common.server.servers.iocp
         private async Task ReadPacket(AsyncUserToken token, byte[] data, int offset, int length)
         {
             //是一个完整的包
+            
             if (token.DataBuffer.Size == 0 && length > 4)
             {
                 Memory<byte> memory = data.AsMemory(offset, length);
@@ -222,7 +223,7 @@ namespace common.server.servers.iocp
                     return;
                 }
             }
-
+            
             //不是完整包
             token.DataBuffer.AddRange(data, offset, length);
             do

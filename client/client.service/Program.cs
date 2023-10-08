@@ -1,5 +1,6 @@
 ﻿using client.messengers.singnin;
 using client.realize.messengers.punchHole;
+using client.realize.messengers.singnin;
 using client.service.forward;
 using client.service.forward.server;
 //using client.service.httpProxy;
@@ -111,12 +112,10 @@ namespace client.service
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
             Config config = serviceProvider.GetService<Config>();
-            //自动注册
             if (config.Client.AutoReg)
             {
-                serviceProvider.GetService<ISignInTransfer>().SignIn(config.Client.AutoReg);
+                _ = serviceProvider.GetService<ISignInTransfer>().SignIn(config.Client.AutoReg);
             }
-
         }
 
         private static void LoggerConsole()

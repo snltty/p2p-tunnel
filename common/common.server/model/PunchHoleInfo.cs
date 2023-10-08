@@ -42,7 +42,7 @@ namespace common.server.model
         /// 携带的数
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
-        public ReadOnlyMemory<byte> Data { get; set; }
+        public Memory<byte> Data { get; set; }
         public byte[] ToBytes()
         {
             var bytes = new byte[
@@ -82,7 +82,7 @@ namespace common.server.model
             return bytes;
         }
 
-        public void DeBytes(ReadOnlyMemory<byte> data)
+        public void DeBytes(Memory<byte> data)
         {
             var span = data.Span;
             int index = 0;
@@ -105,7 +105,9 @@ namespace common.server.model
             RequestId = span.Slice(index, 8).ToUInt64();
             index += 8;
 
-            Data = data.Slice(index);
+            var dd = data.Slice(index);
+            Data =new byte[dd.Length];
+            dd.CopyTo(Data);
 
         }
     }

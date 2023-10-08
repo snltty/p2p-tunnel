@@ -28,8 +28,8 @@ namespace common.proxy
         public async Task Request(IConnection connection)
         {
             if (connection.FromConnection.SendDenied > 0) return;
-
             ProxyInfo info = ProxyInfo.Debytes(connection.ReceiveRequestWrap.Payload);
+           
             info.Connection = connection.FromConnection;
             info.Connection.SentBytes += (uint)info.Data.Length;
             await proxyClient.InputData(info);
