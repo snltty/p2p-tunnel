@@ -84,7 +84,7 @@ namespace client.service
                 typeof(ServerUsersClientService).Assembly,
                 typeof(common.user.UsersMessengerIds).Assembly,
 
-            }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
+            }.Concat(AppDomain.CurrentDomain.GetAssemblies()).Distinct().ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();
             ServiceProvider serviceProvider = null;
