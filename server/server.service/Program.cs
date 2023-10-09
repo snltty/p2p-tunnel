@@ -54,7 +54,7 @@ namespace server.service
 
                 typeof(SignInAccessValidator).Assembly,
 
-            }.Concat(AppDomain.CurrentDomain.GetAssemblies()).ToArray();
+            }.Concat(AppDomain.CurrentDomain.GetAssemblies()).Distinct().ToArray();
 
             ServiceCollection serviceCollection = new ServiceCollection();
             ServiceProvider serviceProvider = null;
