@@ -221,6 +221,7 @@ namespace common.proxy
             {
                 if (e.BytesTransferred == 0 || e.SocketError != SocketError.Success)
                 {
+
                     CloseClientSocket(e);
                     return;
                 }

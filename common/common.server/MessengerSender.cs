@@ -181,33 +181,14 @@ namespace common.server
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class MessageResponeInfo
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public MessageResponeCodes Code { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public ReadOnlyMemory<byte> Data { get; set; }
     }
-
-    /// <summary>
-    /// 
-    /// </summary>
     public sealed class TimeoutState
     {
-        /// <summary>
-        /// 
-        /// </summary>
         public uint RequestId { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         public TaskCompletionSource<MessageResponeInfo> Tcs { get; set; }
     }
 }

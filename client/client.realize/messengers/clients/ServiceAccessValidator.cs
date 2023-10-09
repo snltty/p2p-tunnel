@@ -1,5 +1,5 @@
 ﻿using client.messengers.clients;
-using client.messengers.singnin;
+using client.messengers.signin;
 
 namespace client.realize.messengers.clients
 {

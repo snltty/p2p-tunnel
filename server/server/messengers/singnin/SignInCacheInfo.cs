@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text.Json.Serialization;
 
-namespace server.messengers.singnin
+namespace server.messengers.signin
 {
     public sealed class SignInCacheInfo
     {

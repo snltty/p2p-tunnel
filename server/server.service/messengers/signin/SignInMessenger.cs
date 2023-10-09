@@ -2,12 +2,12 @@
 using common.server;
 using common.server.model;
 using server.messengers;
-using server.messengers.singnin;
+using server.messengers.signin;
 using server.service.validators;
 using System;
 using System.Threading.Tasks;
 
-namespace server.service.messengers.singnin
+namespace server.service.messengers.signin
 {
 
     /// <summary>

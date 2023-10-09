@@ -1,5 +1,5 @@
 ﻿using common.server.model;
-using server.messengers.singnin;
+using server.messengers.signin;
 using Microsoft.Extensions.DependencyInjection;
 using common.libs;
 using System.Reflection;

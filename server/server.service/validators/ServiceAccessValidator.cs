@@ -1,4 +1,4 @@
-﻿using server.messengers.singnin;
+﻿using server.messengers.signin;
 
 namespace server.service.validators
 {

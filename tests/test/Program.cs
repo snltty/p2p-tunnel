@@ -11,7 +11,8 @@ namespace test
     {
         static unsafe void Main(string[] args)
         {
-            BenchmarkRunner.Run<Test>();
+            RectangleTest rectangleTest = new RectangleTest();
+            //BenchmarkRunner.Run<Test>();
         }
     }
 
@@ -23,57 +24,73 @@ namespace test
         {
         }
 
-        byte[] bytes = new byte[24];
+        RectangleTest rectangleTest = new RectangleTest();
 
         [Benchmark]
-        public unsafe void Test1()
+        public void Test1()
         {
-            var span = bytes.AsSpan();
-            ushort addressFamily = BitConverter.ToUInt16(bytes, 0);
-            ushort port = BitConverter.ToUInt16(bytes, 2);
-            uint ipv4 = BitConverter.ToUInt16(bytes, 4);
-            ushort ipv61 = BitConverter.ToUInt16(bytes, 8);
-            ushort ipv62 = BitConverter.ToUInt16(bytes, 16);
-            TextStruct textStruct = new TextStruct(addressFamily, port, ipv4, ipv61, ipv62);
-            TestFunc2(textStruct);
+            rectangleTest.UnionRectangles(rectangleTest.rects);
         }
 
-        [Benchmark]
-        public void Test2()
-        {
-            byte[] res = new byte[bytes.Length];
-            bytes.AsSpan().CopyTo(res);
-            TestFunc(res);
-        }
 
-        private unsafe void TestFunc(byte[] arr)
+    }
+
+    public class RectangleTest
+    {
+       public Rectangle[] rects = new Rectangle[] {
+             new Rectangle(0,100,100,100),
+            new Rectangle(50,200,100,300),
+            new Rectangle(300,200,100,200),
+
+            new Rectangle(400,400,100,100),
+        };
+
+        public void UnionRectangles(Rectangle[] rects)
         {
-            fixed (void* p = arr)
+            for (int i = 0; i < rects.Length; i++)
             {
-                ushort port = *((byte*)p + 2);
+                for (int j = i; j < rects.Length; j++)
+                {
+                    if (rects[i].X > rects[j].X)
+                    {
+                        Rectangle temp = rects[i];
+                        rects[i] = rects[j];
+                        rects[j] = temp;
+                    }
+                }
             }
         }
-        private void TestFunc2(TextStruct s)
-        {
+    }
 
-            ushort port = s.Port;
+
+    public partial struct Rectangle
+    {
+        public Rectangle(int x, int y, int width, int height)
+        {
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
         }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
 
-        public readonly record struct TextStruct
+        public bool Remove { get; set; }
+
+        public readonly bool IntersectsWith(Rectangle rect) =>
+            (rect.X < X + Width) && (X < rect.X + rect.Width) &&
+            (rect.Y < Y + Height) && (Y < rect.Y + rect.Height);
+
+        public static Rectangle Union(Rectangle a, Rectangle b)
         {
-            public TextStruct(ushort addressFamily, ushort port, uint ipv4, ulong ipv61, ulong ipv62)
-            {
-                AddressFamily = addressFamily;
-                Port = port;
-                Ipv4 = ipv4;
-                Ipv61 = ipv61;
-                Ipv62 = ipv62;
-            }
-            public readonly ushort AddressFamily;
-            public readonly ushort Port;
-            public readonly uint Ipv4;
-            public readonly ulong Ipv61;
-            public readonly ulong Ipv62;
+            int x1 = Math.Min(a.X, b.X);
+            int x2 = Math.Max(a.X + a.Width, b.X + b.Width);
+            int y1 = Math.Min(a.Y, b.Y);
+            int y2 = Math.Max(a.Y + a.Height, b.Y + b.Height);
+
+            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
         }
     }
 }

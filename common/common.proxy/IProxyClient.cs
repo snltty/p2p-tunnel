@@ -289,6 +289,7 @@ namespace common.proxy
             {
                 if (e.SocketError == SocketError.Success)
                 {
+                    Console.WriteLine($"connect {token.TargetSocket.LocalEndPoint}->{token.TargetSocket.RemoteEndPoint}");
                     if (token.Data.Data.Length > 0 && token.Data.IsMagicData == false)
                     {
                         await token.TargetSocket.SendAsync(token.Data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
@@ -462,7 +463,6 @@ namespace common.proxy
                 token.IsClosed = true;
                 token.Clear();
                 connections.TryRemove(token.Key, out _);
-                // _ = socks5MessengerSender.ResponseClose(token.Data);
                 return true;
             }
             return false;

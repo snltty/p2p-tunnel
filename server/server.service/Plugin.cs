@@ -7,8 +7,8 @@ using common.server.servers.rudp;
 using System.Reflection;
 using common.libs.database;
 using server.service.validators;
-using server.messengers.singnin;
-using server.service.messengers.singnin;
+using server.messengers.signin;
+using server.service.messengers.signin;
 using common.proxy;
 
 namespace server.service

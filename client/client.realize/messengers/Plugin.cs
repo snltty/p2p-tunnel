@@ -2,14 +2,14 @@
 using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
 using client.messengers.punchHole.udp;
-using client.messengers.singnin;
+using client.messengers.signin;
 using client.realize.messengers.clients;
 using client.realize.messengers.crypto;
 using client.realize.messengers.heart;
 using client.realize.messengers.punchHole;
 using client.realize.messengers.punchHole.tcp.nutssb;
 using client.realize.messengers.punchHole.udp;
-using client.realize.messengers.singnin;
+using client.realize.messengers.signin;
 using common.libs;
 using Microsoft.Extensions.DependencyInjection;
 using common.server;

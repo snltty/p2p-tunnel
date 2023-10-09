@@ -4,14 +4,14 @@ using common.libs.rateLimit;
 using common.server;
 using common.server.model;
 using common.server.servers.rudp;
-using server.messengers.singnin;
+using server.messengers.signin;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace server.service.messengers.singnin
+namespace server.service.messengers.signin
 {
     public sealed class ClientSignInCaching : IClientSignInCaching
     {

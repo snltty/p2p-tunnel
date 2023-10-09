@@ -8,7 +8,7 @@ using System;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading.Tasks;
-using client.messengers.singnin;
+using client.messengers.signin;
 using common.libs.extends;
 
 namespace client.realize.messengers.clients

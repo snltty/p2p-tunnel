@@ -2,10 +2,10 @@
 using common.libs.extends;
 using common.server;
 using common.server.model;
-using server.messengers.singnin;
+using server.messengers.signin;
 using System.Threading.Tasks;
 
-namespace server.service.messengers.singnin
+namespace server.service.messengers.signin
 {
     /// <summary>
     /// 服务端配置

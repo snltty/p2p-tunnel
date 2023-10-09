@@ -1,6 +1,6 @@
-﻿using client.messengers.singnin;
+﻿using client.messengers.signin;
 using client.realize.messengers.punchHole;
-using client.realize.messengers.singnin;
+using client.realize.messengers.signin;
 using client.service.forward;
 using client.service.forward.server;
 //using client.service.httpProxy;

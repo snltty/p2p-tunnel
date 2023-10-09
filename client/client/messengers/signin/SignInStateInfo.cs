@@ -3,7 +3,7 @@ using common.server;
 using System;
 using System.Net;
 
-namespace client.messengers.singnin
+namespace client.messengers.signin
 {
     /// <summary>
     /// 本地注册状态

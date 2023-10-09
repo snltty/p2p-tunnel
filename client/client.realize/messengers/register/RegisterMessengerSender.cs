@@ -1,4 +1,4 @@
-﻿using client.messengers.singnin;
+﻿using client.messengers.signin;
 using common.libs;
 using common.server;
 using common.server.model;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace client.realize.messengers.singnin
+namespace client.realize.messengers.signin
 {
     public sealed class SignInMessengerSender
     {

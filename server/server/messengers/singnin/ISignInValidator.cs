@@ -3,7 +3,7 @@ using common.server.model;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace server.messengers.singnin
+namespace server.messengers.signin
 {
 
     public interface ISignInValidatorHandler

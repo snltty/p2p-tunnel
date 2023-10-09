@@ -1,7 +1,7 @@
 ﻿using client.messengers.clients;
 using client.messengers.punchHole;
 using client.messengers.punchHole.tcp;
-using client.messengers.singnin;
+using client.messengers.signin;
 using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;

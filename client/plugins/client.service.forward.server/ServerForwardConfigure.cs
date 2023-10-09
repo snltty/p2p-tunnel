@@ -1,4 +1,4 @@
-﻿using client.messengers.singnin;
+﻿using client.messengers.signin;
 using client.service.ui.api.clientServer;
 using common.forward;
 using common.libs;

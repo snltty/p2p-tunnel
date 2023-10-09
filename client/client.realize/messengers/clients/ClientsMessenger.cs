@@ -1,5 +1,5 @@
-﻿using client.messengers.singnin;
-using client.realize.messengers.singnin;
+﻿using client.messengers.signin;
+using client.realize.messengers.signin;
 using common.server;
 using common.server.model;
 

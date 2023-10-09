@@ -1,4 +1,4 @@
-﻿using client.messengers.singnin;
+﻿using client.messengers.signin;
 using client.realize.messengers.crypto;
 using common.libs;
 using common.libs.extends;
@@ -10,7 +10,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace client.realize.messengers.singnin
+namespace client.realize.messengers.signin
 {
     public sealed class SignInTransfer : ISignInTransfer
     {

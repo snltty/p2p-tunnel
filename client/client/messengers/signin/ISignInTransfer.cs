@@ -1,7 +1,7 @@
 ﻿using common.server.model;
 using System.Threading.Tasks;
 
-namespace client.messengers.singnin
+namespace client.messengers.signin
 {
     /// <summary>
     /// 注册接口
