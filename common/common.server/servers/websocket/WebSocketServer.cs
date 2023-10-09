@@ -90,6 +90,7 @@ namespace common.server.servers.websocket
 
             socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            socket.IPv6Only(localEndPoint.AddressFamily, false);
             socket.Bind(localEndPoint);
             socket.Listen(int.MaxValue);
 
