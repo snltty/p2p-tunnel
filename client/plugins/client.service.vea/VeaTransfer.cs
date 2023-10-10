@@ -140,7 +140,7 @@ namespace client.service.vea
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex + "");
+                Logger.Instance.Error(ex);
             }
             return EnumProxyCommandStatusMsg.Listen;
         }

@@ -299,7 +299,7 @@ namespace client.service.forward
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex + "");
+                Logger.Instance.Error(ex);
             }
             return EnumProxyCommandStatusMsg.Listen;
         }

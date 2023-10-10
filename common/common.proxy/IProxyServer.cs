@@ -180,6 +180,7 @@ namespace common.proxy
                 readEventArgs.SetBuffer(token.PoolBuffer, 0, (1 << (byte)acceptToken.Server.ProxyPlugin.BufferSize) * 1024);
                 readEventArgs.Completed += IO_Completed;
 
+                //Console.WriteLine($"accept-rid:{token.Request.RequestId}-{token.Socket.RemoteEndPoint}");
                 if (token.Socket.ReceiveAsync(readEventArgs) == false)
                 {
                     ProcessReceive(readEventArgs);
@@ -452,7 +453,10 @@ namespace common.proxy
                 }
                 else
                 {
-                    await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                    //Console.WriteLine($"answer-rid:{info.RequestId}-{token.Socket.RemoteEndPoint}-{string.Join(",", info.Data.ToArray())}");
+                    //Console.WriteLine($"answer-rid:{info.RequestId}-{token.Socket.RemoteEndPoint}-{Encoding.UTF8.GetString(info.Data.Span)}");
+                    int length = await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                    //Console.WriteLine($"answer-rid:{info.RequestId}-{length}");
                 }
             }
         }
@@ -471,6 +475,7 @@ namespace common.proxy
 
                 if (info.Data.Length == 0)
                 {
+                    //Console.WriteLine($"close-rid:{info.RequestId}");
                     clientsManager.TryRemove(info.RequestId, out _);
                     return;
                 }

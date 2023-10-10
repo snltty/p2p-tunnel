@@ -110,11 +110,12 @@ namespace common.proxy
                 {
                     try
                     {
+                        //Console.WriteLine($"forward-rid:{token.Data.RequestId}-{token.TargetSocket.LocalEndPoint}->{token.TargetSocket.RemoteEndPoint}-{Encoding.UTF8.GetString(token.Data.Data.Span)}");
                         await token.TargetSocket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                     }
                     catch (Exception ex)
                     {
-                        if(Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
+                        if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
                         {
                             Logger.Instance.Error($"proxy forward tcp send :{ex}");
                         }
@@ -289,9 +290,10 @@ namespace common.proxy
             {
                 if (e.SocketError == SocketError.Success)
                 {
-                    Console.WriteLine($"connect {token.TargetSocket.LocalEndPoint}->{token.TargetSocket.RemoteEndPoint}");
+                    //Console.WriteLine($"connect-rid:{token.Data.RequestId}-{token.TargetSocket.LocalEndPoint}->{token.TargetSocket.RemoteEndPoint}");
                     if (token.Data.Data.Length > 0 && token.Data.IsMagicData == false)
                     {
+                        //Console.WriteLine($"forward-rid:{token.Data.RequestId}-{token.TargetSocket.LocalEndPoint}->{token.TargetSocket.RemoteEndPoint}-{Encoding.UTF8.GetString(token.Data.Data.Span)}");
                         await token.TargetSocket.SendAsync(token.Data.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
                     }
                     await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess, EnumProxyCommandStatusMsg.Success);
@@ -442,6 +444,7 @@ namespace common.proxy
         }
         private async Task<bool> Receive(ProxyInfo info)
         {
+            //Console.WriteLine($"response-rid:{info.RequestId}-{Encoding.UTF8.GetString(info.Data.Span)}");
             await Semaphore.WaitAsync();
             bool res = await proxyMessengerSender.Response(info);
             Semaphore.Release();
@@ -462,6 +465,8 @@ namespace common.proxy
             {
                 token.IsClosed = true;
                 token.Clear();
+                token.Data.Data = Helper.TrueArray;
+                _ = Receive(token.Data);
                 connections.TryRemove(token.Key, out _);
                 return true;
             }
