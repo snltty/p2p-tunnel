@@ -110,8 +110,9 @@ namespace common.proxy
                 {
                     try
                     {
-                        //Console.WriteLine($"forward-rid:{token.Data.RequestId}-{token.TargetSocket.LocalEndPoint}->{token.TargetSocket.RemoteEndPoint}-{Encoding.UTF8.GetString(token.Data.Data.Span)}");
-                        await token.TargetSocket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                        //Console.WriteLine($"forward-rid:{token.Data.RequestId}-{token.TargetSocket.LocalEndPoint}->{token.TargetSocket.RemoteEndPoint}-{info.Data.Length}");
+                        int length = await token.TargetSocket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                        //Console.WriteLine($"forward-rid2:{token.Data.RequestId}-{token.TargetSocket.LocalEndPoint}->{token.TargetSocket.RemoteEndPoint}-{length}");
                     }
                     catch (Exception ex)
                     {
@@ -245,6 +246,7 @@ namespace common.proxy
         private void Connect(ProxyInfo info)
         {
             IPEndPoint remoteEndpoint = ReadRemoteEndPoint(info);
+            //Console.WriteLine($"connect {remoteEndpoint}");
             Socket socket = new Socket(remoteEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, true);
@@ -444,11 +446,20 @@ namespace common.proxy
         }
         private async Task<bool> Receive(ProxyInfo info)
         {
-            //Console.WriteLine($"response-rid:{info.RequestId}-{Encoding.UTF8.GetString(info.Data.Span)}");
             await Semaphore.WaitAsync();
-            bool res = await proxyMessengerSender.Response(info);
-            Semaphore.Release();
-            return res;
+            try
+            {
+                return await proxyMessengerSender.Response(info);
+            }
+            catch (Exception)
+            {
+
+            }
+            finally
+            {
+                Semaphore.Release();
+            }
+            return false;
         }
 
         private void CloseClientSocket(SocketAsyncEventArgs e)
