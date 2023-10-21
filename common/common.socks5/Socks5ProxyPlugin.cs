@@ -66,6 +66,7 @@ namespace common.socks5
                 info.Data = new byte[] { 0x00 };
                 info.Rsv++;
                 proxyServer.InputData(info);
+                // Console.WriteLine($"socks5 pass command");
                 return false;
             }
             //command 的
@@ -78,6 +79,7 @@ namespace common.socks5
                 {
                     info.Data = new byte[] { (byte)Socks5EnumResponseCommand.ConnecSuccess };
                     proxyServer.InputData(info);
+                    // Console.WriteLine($"socks5 pass any");
                     return false;
                 }
 
@@ -101,7 +103,11 @@ namespace common.socks5
                         Logger.Instance.Debug($"[DNS查询]:{string.Join(",", info.Data.ToArray())}:{Encoding.UTF8.GetString(info.Data.ToArray())}");
                 }
             }
-            if (info.TargetAddress.GetIsAnyAddress()) return false;
+            if (info.TargetAddress.GetIsAnyAddress())
+            {
+                // Console.WriteLine($"socks5 pass any1");
+                return false;
+            }
 
             return true;
         }

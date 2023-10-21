@@ -262,7 +262,8 @@ namespace common.proxy
                     CloseClientSocket(e);
                     return;
                 }
-                if (token.Socket.ReceiveAsync(e) == false)
+                bool res = token.Socket.ReceiveAsync(e);
+                if (res == false)
                 {
                     ProcessReceive(e);
                 }
@@ -324,7 +325,6 @@ namespace common.proxy
                 }
 
                 BuildHeaders(info);
-
                 bool res = await proxyMessengerSender.Request(info);
                 if (res == false)
                 {
@@ -453,10 +453,9 @@ namespace common.proxy
                 }
                 else
                 {
-                    //Console.WriteLine($"answer-rid:{info.RequestId}-{token.Socket.RemoteEndPoint}-{string.Join(",", info.Data.ToArray())}");
-                    //Console.WriteLine($"answer-rid:{info.RequestId}-{token.Socket.RemoteEndPoint}-{Encoding.UTF8.GetString(info.Data.Span)}");
+                  //  Console.WriteLine($"answer-rid:{info.RequestId}-{info.Data.Length}");
                     int length = await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
-                    //Console.WriteLine($"answer-rid:{info.RequestId}-{length}");
+                   // Console.WriteLine($"answer-rid:{info.RequestId}-{length}");
                 }
             }
         }

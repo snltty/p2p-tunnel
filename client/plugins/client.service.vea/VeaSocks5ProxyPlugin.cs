@@ -72,6 +72,7 @@ namespace client.service.vea
                     info.CommandStatus = (EnumProxyCommandStatus)Socks5EnumResponseCommand.AddressNotAllow;
                     info.CommandStatusMsg = EnumProxyCommandStatusMsg.Address;
                     proxyServer.InputData(info);
+                    //  Console.WriteLine($"vea pass ipv4");
                     return false;
                 }
                 GetConnection(info);
@@ -84,16 +85,22 @@ namespace client.service.vea
                     {
                         Logger.Instance.Warning($"{info.ProxyPlugin.Name}->target not exists or not connect");
                     }
+                    //Console.WriteLine($"vea pass connect");
                     return false;
                 }
             }
             else if (info.Step == EnumProxyStep.ForwardUdp)
             {
                 //组网支持IPV4
-                if (info.AddressType != EnumProxyAddressType.IPV4) return false;
+                if (info.AddressType != EnumProxyAddressType.IPV4)
+                {
+                    //Console.WriteLine($"vea pass udp ipv4");
+                    return false;
+                }
                 //组播数据包，直接分发
                 if (info.TargetAddress.GetIsBroadcastAddress())
                 {
+                    //Console.WriteLine($"vea pass udp broadcast");
                     return false;
                     //没开启组播
                     if (config.BroadcastEnable == false) return false;
@@ -115,6 +122,7 @@ namespace client.service.vea
             //组网支持IPV4
             if (info.AddressType != EnumProxyAddressType.IPV4)
             {
+                //Console.WriteLine($"vea pass ipv42");
                 return false;
             }
 
