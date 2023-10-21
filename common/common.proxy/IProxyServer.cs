@@ -419,78 +419,62 @@ namespace common.proxy
             }
         }
 
-        private async Task<bool> InputDataCommand(ProxyUserToken token, ProxyInfo info)
-        {
-            //command步骤的魔术数据，直接返回一个数据就好了，用于测试
-            if (ProxyHelper.GetIsMagicData(info.Data))
-            {
-                info.Data.Span[0] = (byte)info.CommandStatusMsg;
-                await token.Socket.SendAsync(info.Data, SocketFlags.None);
-                return false;
-            }
-
-            if (token.Receive == false)
-            {
-                token.Receive = true;
-                if (token.Socket.ReceiveAsync(token.Saea) == false)
-                {
-                    ProcessReceive(token.Saea);
-                }
-            }
-            return true;
-        }
-        private async Task InputDataAnswer(ProxyUserToken token, ProxyInfo info)
-        {
-            bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
-            token.Request.Step = info.Step;
-            token.Request.Command = info.Command;
-            token.Request.Rsv = info.Rsv;
-            if (res)
-            {
-                if (info.Step == EnumProxyStep.ForwardUdp)
-                {
-                    await token.Server.UdpClient.SendAsync(info.Data, info.SourceEP);
-                }
-                else
-                {
-                  //  Console.WriteLine($"answer-rid:{info.RequestId}-{info.Data.Length}");
-                    int length = await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
-                   // Console.WriteLine($"answer-rid:{info.RequestId}-{length}");
-                }
-            }
-        }
         public async Task InputData(ProxyInfo info)
         {
             try
             {
-                if (clientsManager.TryGetValue(info.RequestId, out ProxyUserToken token) == false)
-                {
-                    return;
-                }
-                token.Request.CommandStatusMsg = info.CommandStatusMsg;
-                token.Server.LastError = info.CommandStatusMsg;
-                EnumProxyStep step = info.Step;
-                bool commandAndFail = step == EnumProxyStep.Command && info.CommandStatus != EnumProxyCommandStatus.ConnecSuccess;
-
                 if (info.Data.Length == 0)
                 {
-                    //Console.WriteLine($"close-rid:{info.RequestId}");
                     clientsManager.TryRemove(info.RequestId, out _);
                     return;
                 }
 
-                if (step == EnumProxyStep.Command)
+                if (clientsManager.TryGetValue(info.RequestId, out ProxyUserToken token) == false)
                 {
-                    bool canNext = await InputDataCommand(token, info);
-                    if (canNext == false) return;
+                    return;
                 }
 
-                await InputDataAnswer(token, info);
+                //command步骤的魔术数据，直接返回一个数据就好了，用于测试
+                if (ProxyHelper.GetIsMagicData(info.Data))
+                {
+                    info.Data.Span[0] = (byte)info.CommandStatusMsg;
+                    await token.Socket.SendAsync(info.Data, SocketFlags.None);
+                    return;
+                }
+
+                token.Request.CommandStatusMsg = info.CommandStatusMsg;
+                token.Server.LastError = info.CommandStatusMsg;
+                bool commandAndFail = info.Step == EnumProxyStep.Command && info.CommandStatus != EnumProxyCommandStatus.ConnecSuccess;
+                
+                bool res = token.Request.ProxyPlugin.HandleAnswerData(info);
+                token.Request.Step = info.Step;
+                token.Request.Command = info.Command;
+                token.Request.Rsv = info.Rsv;
+                if (res)
+                {
+                    if (info.Step == EnumProxyStep.ForwardUdp)
+                    {
+                        await token.Server.UdpClient.SendAsync(info.Data, info.SourceEP);
+                    }
+                    else
+                    {
+                        int length = await token.Socket.SendAsync(info.Data, SocketFlags.None).AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+                    }
+                }
 
                 if (commandAndFail)
                 {
                     clientsManager.TryRemove(info.RequestId, out _);
                     return;
+                }
+
+                if (token.Receive == false)
+                {
+                    token.Receive = true;
+                    if (token.Socket.ReceiveAsync(token.Saea) == false)
+                    {
+                        ProcessReceive(token.Saea);
+                    }
                 }
             }
             catch (Exception ex)
