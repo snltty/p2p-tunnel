@@ -373,6 +373,7 @@ namespace common.proxy
             {
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
+                    //Console.WriteLine($"response-rid:{token.Data.RequestId}-{Encoding.UTF8.GetString(e.Buffer.AsMemory(e.Offset, e.BytesTransferred).Span)}");
                     if (token.Data.Step == EnumProxyStep.Command)
                     {
                         await ConnectReponse(token.Data, EnumProxyCommandStatus.ConnecSuccess, EnumProxyCommandStatusMsg.Success);
@@ -444,10 +445,11 @@ namespace common.proxy
         }
         private async Task<bool> Receive(ProxyInfo info)
         {
-            //Console.WriteLine($"response-rid:{info.RequestId}-{Encoding.UTF8.GetString(info.Data.Span)}");
+            //Console.WriteLine($"response1-rid:{info.RequestId}-{Encoding.UTF8.GetString(info.Data.Span)}");
             await Semaphore.WaitAsync();
             bool res = await proxyMessengerSender.Response(info);
             Semaphore.Release();
+
             return res;
         }
 
