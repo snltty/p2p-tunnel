@@ -1,5 +1,6 @@
 ﻿using client.messengers.signin;
 using client.realize.messengers.crypto;
+using client.realize.messengers.heart;
 using common.libs;
 using common.libs.extends;
 using common.server;
@@ -22,13 +23,13 @@ namespace client.realize.messengers.signin
         private readonly CryptoSwap cryptoSwap;
         private readonly IIPv6AddressRequest iPv6AddressRequest;
         private CancellationTokenSource cancellationToken = null;
-        private int lockObject = 0;
+        private readonly HeartMessengerSender heartMessengerSender;
 
         public SignInTransfer(
             SignInMessengerSender signinMessengerSender,
             ITcpServer tcpServer, IUdpServer udpServer,
             Config config, SignInStateInfo signInState,
-            CryptoSwap cryptoSwap, IIPv6AddressRequest iPv6AddressRequest
+            CryptoSwap cryptoSwap, IIPv6AddressRequest iPv6AddressRequest, HeartMessengerSender heartMessengerSender
         )
         {
             this.signinMessengerSender = signinMessengerSender;
@@ -38,38 +39,29 @@ namespace client.realize.messengers.signin
             this.signInState = signInState;
             this.cryptoSwap = cryptoSwap;
             this.iPv6AddressRequest = iPv6AddressRequest;
+            this.heartMessengerSender = heartMessengerSender;
 
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Exit();
             Console.CancelKeyPress += (s, e) => Exit();
 
-            tcpServer.OnDisconnect += (connection) => Disconnect(connection, signInState.Connection);
-        }
-        private void Disconnect(IConnection connection, IConnection regConnection)
-        {
-            if (IConnection.Equals(connection, regConnection) == false || signInState.LocalInfo.IsConnecting)
-            {
-                return;
-            }
-
-            Logger.Instance.Error($"{connection.ServerType} signin 断开~~~~${connection.Address}");
-            Exit();
-            if (Interlocked.CompareExchange(ref lockObject, 1, 0) == 0)
-            {
-                Logger.Instance.Warning($"{connection.ServerType} signin 触发重新登入");
-                SignIn(true).ContinueWith((result) =>
-                {
-                    Interlocked.Exchange(ref lockObject, 0);
-                });
-            }
-            else
-            {
-                Logger.Instance.Error($"{connection.ServerType} signin 触发重新登入失败");
-            }
+            SignInTask();
         }
 
         private void SignInTask()
         {
+            Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    bool alive = await heartMessengerSender.Alive(signInState.Connection);
+                    if (alive == false && signInState.LocalInfo.IsConnecting == false && config.Client.AutoReg)
+                    {
+                        await SignIn();
+                    }
+                    await Task.Delay(10000);
+                }
 
+            }, TaskCreationOptions.LongRunning);
         }
 
         public void Exit()
@@ -82,133 +74,74 @@ namespace client.realize.messengers.signin
         }
         private void Exit1()
         {
-            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
-            {
-                Logger.Instance.Debug($"开始登出");
-            }
             signInState.Offline();
-            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
-            {
-                Logger.Instance.Debug($"开始停止监听");
-            }
             udpServer.Stop();
-            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
-            {
-                Logger.Instance.Debug($"已停止UDP监听");
-            }
             tcpServer.Stop();
-            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
-            {
-                Logger.Instance.Debug($"已停止TCP监听");
-            }
             GCHelper.FlushMemory();
-            if (Logger.Instance.LoggerLevel <= LoggerTypes.DEBUG)
-            {
-                Logger.Instance.Debug($"已登出");
-            }
         }
 
-        /// <summary>
-        /// 注册
-        /// </summary>
-        /// <param name="autoReg">强行自动注册</param>
-        /// <returns></returns>
-        public async Task<CommonTaskResponseInfo<bool>> SignIn(bool autoReg = false)
+        public async Task<CommonTaskResponseInfo<bool>> SignIn()
         {
             cancellationToken = new CancellationTokenSource();
             CommonTaskResponseInfo<bool> success = new CommonTaskResponseInfo<bool> { Data = false, ErrorMsg = string.Empty };
-            if (signInState.LocalInfo.IsConnecting)
+
+            try
             {
-                success.ErrorMsg = "登入操作中...";
-                Logger.Instance.Error(success.ErrorMsg);
-                return success;
+                //先退出
+                Exit1();
+
+                Logger.Instance.Info($"开始登入");
+                signInState.LocalInfo.IsConnecting = true;
+
+                IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
+                signInState.LocalInfo.Port = NetworkHelper.GetRandomPort();
+                config.Client.UseIpv6 = NetworkHelper.IPv6Support;
+                signInState.LocalInfo.Ipv6s = iPv6AddressRequest.GetIPV6();
+
+
+                TcpBind(serverAddress);
+                //交换密钥
+                await SwapCryptoTcp();
+
+                //登入
+                SignInResult result = await signinMessengerSender.SignIn().ConfigureAwait(false);
+                if (result.NetState.Code != MessageResponeCodes.OK)
+                {
+                    throw new Exception($"登入失败，网络问题:{result.NetState.Code.GetDesc((byte)result.NetState.Code)}");
+                }
+                if (result.Data.Code != SignInResultInfo.SignInResultInfoCodes.OK)
+                {
+                    throw new Exception($"登入失败:{result.Data.Code.GetDesc((byte)result.Data.Code)}");
+                }
+
+
+                config.Client.ShortId = result.Data.ShortId;
+                config.Client.GroupId = result.Data.GroupId;
+                config.Client.ConnectId = result.Data.ConnectionId;
+                signInState.RemoteInfo.Access = result.Data.UserAccess;
+                signInState.Online(result.Data.ConnectionId, result.Data.Ip);
+
+                await config.SaveConfig(config);
+                await signinMessengerSender.Notify().ConfigureAwait(false);
+
+                success.ErrorMsg = "登入成功~";
+                success.Data = true;
+                Logger.Instance.Debug(success.ErrorMsg);
+            }
+            catch (TaskCanceledException tex)
+            {
+                success.ErrorMsg = tex.Message;
+                signInState.LocalInfo.IsConnecting = false;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Error(ex);
+                success.ErrorMsg = ex.Message;
+                signInState.LocalInfo.IsConnecting = false;
             }
 
-            return await Task.Run(async () =>
-            {
-                double interval = autoReg ? 5000 : 0;
-                int times = autoReg ? 10000 : 2;
-                for (int i = 0; i < times; i++)
-                {
-                    try
-                    {
-                        if (signInState.LocalInfo.IsConnecting)
-                        {
-                            success.ErrorMsg = "登入操作中...";
-                            Logger.Instance.Error(success.ErrorMsg);
-                            break;
-                        }
 
-                        //先退出
-                        Exit1();
-
-                        Logger.Instance.Info($"开始登入");
-                        signInState.LocalInfo.IsConnecting = true;
-
-                        IPAddress serverAddress = NetworkHelper.GetDomainIp(config.Server.Ip);
-                        signInState.LocalInfo.Port = NetworkHelper.GetRandomPort();
-                        config.Client.UseIpv6 = NetworkHelper.IPv6Support;
-                        signInState.LocalInfo.Ipv6s = iPv6AddressRequest.GetIPV6();
-
-
-                        TcpBind(serverAddress);
-                        //交换密钥
-                        await SwapCryptoTcp();
-
-
-                        //登入
-                        SignInResult result = await signinMessengerSender.SignIn().ConfigureAwait(false);
-                        if (result.NetState.Code != MessageResponeCodes.OK)
-                        {
-                            Logger.Instance.Error($"登入失败，网络问题:{result.NetState.Code.GetDesc((byte)result.NetState.Code)}");
-                            Logger.Instance.Error(success.ErrorMsg);
-                            signInState.LocalInfo.IsConnecting = false;
-                            await Task.Delay((int)interval, cancellationToken.Token);
-                            continue;
-                        }
-                        if (result.Data.Code != SignInResultInfo.SignInResultInfoCodes.OK)
-                        {
-                            success.ErrorMsg = $"登入失败:{result.Data.Code.GetDesc((byte)result.Data.Code)}";
-                            Logger.Instance.Error(success.ErrorMsg);
-                            signInState.LocalInfo.IsConnecting = false;
-                            break;
-                        }
-
-
-                        config.Client.ShortId = result.Data.ShortId;
-                        config.Client.GroupId = result.Data.GroupId;
-                        config.Client.ConnectId = result.Data.ConnectionId;
-                        signInState.RemoteInfo.Access = result.Data.UserAccess;
-                        signInState.Online(result.Data.ConnectionId, result.Data.Ip);
-
-                        await config.SaveConfig(config);
-                        await signinMessengerSender.Notify().ConfigureAwait(false);
-
-                        success.ErrorMsg = "登入成功~";
-                        success.Data = true;
-                        Logger.Instance.Debug(success.ErrorMsg);
-                        break;
-                    }
-                    catch (TaskCanceledException tex)
-                    {
-                        success.ErrorMsg = tex.Message;
-                        signInState.LocalInfo.IsConnecting = false;
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Instance.Error(ex);
-                        success.ErrorMsg = ex.Message;
-                        signInState.LocalInfo.IsConnecting = false;
-                        await Task.Delay((int)interval, cancellationToken.Token);
-                    }
-                }
-                if (success.Data == false)
-                {
-                    Exit1();
-                }
-                return success;
-            });
+            return success;
         }
         private void TcpBind(IPAddress serverAddress)
         {

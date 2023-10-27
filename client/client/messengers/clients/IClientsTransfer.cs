@@ -11,6 +11,7 @@ namespace client.messengers.clients
     public interface IClientsTransfer
     {
 
+        public Task Offline(ulong toid);
         public Task SendOffline(ulong toid);
         /// <summary>
         /// 连接
@@ -37,11 +38,6 @@ namespace client.messengers.clients
         /// </summary>
         /// <param name="id"></param>
         public void Reset(ulong id);
-        /// <summary>
-        /// 停止打洞
-        /// </summary>
-        /// <param name="id"></param>
-        public void ConnectStop(ulong id);
         /// <summary>
         /// ping
         /// </summary>

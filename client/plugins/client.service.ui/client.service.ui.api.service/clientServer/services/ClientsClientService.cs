@@ -84,18 +84,7 @@ namespace client.service.ui.api.service.clientServer.services
         /// <param name="arg"></param>
         public async Task<bool> Offline(ClientServiceParamsInfo arg)
         {
-            if (clientInfoCaching.Get(ulong.Parse(arg.Content), out ClientInfo client))
-            {
-                if (client.OnlineType == ClientOnlineTypes.Active)
-                {
-                    clientInfoCaching.Offline(client.ConnectionId);
-                }
-                else
-                {
-                    await clientsTransfer.SendOffline(client.ConnectionId);
-                }
-            }
-
+            await clientsTransfer.Offline(ulong.Parse(arg.Content));
             return true;
         }
 

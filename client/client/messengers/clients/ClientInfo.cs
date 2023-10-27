@@ -60,15 +60,11 @@ namespace client.messengers.clients
         /// <summary>
         /// 连接类型
         /// </summary>
-        public ClientConnectTypes ConnectType { get; private set; }
-        /// <summary>
-        /// 上线类型
-        /// </summary>
-        public ClientOnlineTypes OnlineType { get; private set; }
+        public ClientConnectTypes ConnectType { get; private set; } = ClientConnectTypes.Unknow;
         /// <summary>
         /// 离线类型
         /// </summary>
-        public ClientOfflineTypes OfflineType { get; private set; }
+        public ClientOfflineTypes OfflineType { get; private set; } = ClientOfflineTypes.Disconnect;
 
         /// <summary>
         /// tcp状态位
@@ -95,7 +91,7 @@ namespace client.messengers.clients
         /// </summary>
         [JsonIgnore]
         public byte TryReverseValue { get; set; }
-        
+
         /// <summary>
         /// 通道服务
         /// </summary>
@@ -107,12 +103,26 @@ namespace client.messengers.clients
         [JsonIgnore]
         public int TunnelPort { get; set; }
 
+
+        [JsonIgnore]
+        public int OfflineTimes { get; set; }
+
+        [JsonIgnore]
+        public int TryTimes { get; set; }
+
+
+        public bool GetConnect()
+        {
+            return OfflineType == ClientOfflineTypes.Disconnect && Connecting == false && TryTimes <= 5;
+        }
+
         /// <summary>
         /// 下线
         /// </summary>
         /// <param name="offlineType"></param>
         public void Offline(ClientOfflineTypes offlineType = ClientOfflineTypes.Manual)
         {
+            OfflineTimes++;
             Connecting = false;
             ConnectType = ClientConnectTypes.Unknow;
             OfflineType = offlineType;
@@ -128,18 +138,15 @@ namespace client.messengers.clients
         /// <param name="connection"></param>
         /// <param name="connectType"></param>
         /// <param name="onlineType"></param>
-        public void Online(IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType)
+        public void Online(IConnection connection, ClientConnectTypes connectType)
         {
+            OfflineType = ClientOfflineTypes.Disconnect;
+            OfflineTimes = 0;
+            TryTimes = 0;
             IConnection _connection = Connection;
             Connection = connection;
             ConnectType = connectType;
-            OnlineType = onlineType;
             Connecting = false;
-
-            if (onlineType == ClientOnlineTypes.Active)
-            {
-                _connection?.Disponse();
-            }
         }
         /// <summary>
         /// 设置连接中状态
@@ -174,26 +181,6 @@ namespace client.messengers.clients
         /// 服务器中继
         /// </summary>
         RelayServer = 4
-    }
-
-    /// <summary>
-    /// 上线类型
-    /// </summary>
-    [Flags]
-    public enum ClientOnlineTypes : byte
-    {
-        /// <summary>
-        /// 未知的
-        /// </summary>
-        Unknow = 0,
-        /// <summary>
-        /// 主动的
-        /// </summary>
-        Active = 1,
-        /// <summary>
-        /// 被动的
-        /// </summary>
-        Passive = 2,
     }
 
     /// <summary>

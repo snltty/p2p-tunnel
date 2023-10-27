@@ -74,7 +74,7 @@ namespace client.messengers.clients
         /// <param name="connection"></param>
         /// <param name="connectType"></param>
         /// <param name="onlineType"></param>
-        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType);
+        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType);
         /// <summary>
         /// 删除
         /// </summary>

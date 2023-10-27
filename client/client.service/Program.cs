@@ -111,11 +111,6 @@ namespace client.service
             Logger.Instance.Warning($"当前版本：{Helper.Version}，如果与服务器版本不一致，则可能无法连接");
             Logger.Instance.Warning(string.Empty.PadRight(Logger.Instance.PaddingWidth, '='));
 
-            Config config = serviceProvider.GetService<Config>();
-            if (config.Client.AutoReg)
-            {
-                _ = serviceProvider.GetService<ISignInTransfer>().SignIn(config.Client.AutoReg);
-            }
         }
 
         private static void LoggerConsole()

@@ -23,7 +23,7 @@ namespace client.realize.messengers.punchHole
 
         public async Task Execute(IConnection connection, PunchHoleRequestInfo info)
         {
-            clientInfoCaching.Offline(info.FromId);
+            clientInfoCaching.Offline(info.FromId, ClientOfflineTypes.Manual);
             await Task.CompletedTask;
         }
     }

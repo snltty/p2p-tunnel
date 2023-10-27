@@ -106,12 +106,13 @@ namespace client.realize.messengers.clients
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
-                if (client.ConnectType != ClientConnectTypes.Unknow)
+                bool notify = client.OfflineTimes <= 1;
+                if (notify)
                 {
                     OnOffline?.Invoke(client);
                 }
                 client.Offline(offlineType);
-                if (client.ConnectType != ClientConnectTypes.Unknow)
+                if (notify)
                 {
                     OnOfflineAfter?.Invoke(client);
                 }
@@ -140,12 +141,12 @@ namespace client.realize.messengers.clients
         /// <param name="connection"></param>
         /// <param name="connectType"></param>
         /// <param name="onlineType"></param>
-        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType, ClientOnlineTypes onlineType)
+        public void Online(ulong id, IConnection connection, ClientConnectTypes connectType)
         {
             if (clients.TryGetValue(id, out ClientInfo client))
             {
                 connection.ConnectId = id;
-                client.Online(connection, connectType, onlineType);
+                client.Online(connection, connectType);
                 OnOnline?.Invoke(client);
             }
         }
