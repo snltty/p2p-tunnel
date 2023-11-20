@@ -2,7 +2,7 @@
     <div class="forward-wrap">
         <el-tabs type="border-card">
             <el-tab-pane label="主页">
-                <div class="inner">
+                <!-- <div class="inner">
                     <div class="head flex">
                         <el-button type="primary" size="small" @click="handleAddListen">增加长连接端口</el-button>
                         <el-button size="small" @click="loadPorts">刷新列表</el-button>
@@ -67,7 +67,7 @@
                 </div>
                 <AddForward v-if="state.showAddForward" v-model="state.showAddForward" @success="loadPorts"></AddForward>
                 <AddListen v-if="state.showAddListen" v-model="state.showAddListen" @success="loadPorts"></AddListen>
-                <StatusMsg v-if="state.showStatusMsg" v-model="state.showStatusMsg" :msgCallback="state.statusMsgCallback"></StatusMsg>
+                <StatusMsg v-if="state.showStatusMsg" v-model="state.showStatusMsg" :msgCallback="state.statusMsgCallback"></StatusMsg> -->
             </el-tab-pane>
             <el-tab-pane label="配置">
                 <Setting></Setting>
@@ -89,7 +89,7 @@ import StatusMsg from '../../../../components/StatusMsg.vue'
 import plugin from './plugin'
 import { ElMessageBox } from 'element-plus';
 export default {
-    // plugin: plugin,
+    plugin: plugin,
     components: { AddForward, AddListen, StatusMsg, Setting },
     setup() {
 
