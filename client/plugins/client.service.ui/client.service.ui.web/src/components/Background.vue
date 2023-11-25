@@ -120,7 +120,7 @@ export default {
                 }
             );
         }
-        onMounted(render);
+        //onMounted(render);
 
         return {}
     }
